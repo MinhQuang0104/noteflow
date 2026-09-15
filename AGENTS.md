@@ -51,12 +51,28 @@ Execution policy:
 
 - COMPLEX:
   - Superpowers `writing-plans`
-  - Superpowers `test-driven-development`
-  - Superpowers `subagent-driven-development`
+  - focused `test-driven-development`
+  - direct Codex implementation by default
   - deterministic verification
-  - staged code review
+  - whole-change Codex review
+  - optional Antigravity review when risk justifies it
+  - `subagent-driven-development` only when the SDD Gate in `story-development` is satisfied
 
 Do not use a heavier workflow than the Story risk requires.
+
+## Superpowers Overhead Control
+
+Do not automatically use heavy Superpowers workflow components.
+
+For approved BMAD Stories:
+
+- do not regenerate Epic context unless required by a verified blocker
+- do not create implementation-plan commits by default
+- do not create git worktrees unless isolation materially helps
+- do not create SDD ledgers or conflict tables unless SDD is explicitly justified
+- do not invoke `subagent-driven-development` solely because a Story is COMPLEX
+
+Prefer the simplest execution workflow that safely satisfies the approved Story.
 
 ## Antigravity Reviews
 

@@ -1,0 +1,45 @@
+{
+  "generation_hash": "aa151f017016a16df833",
+  "inputs": {
+    "project_root": "D:\\Workspace\\Tu_Hoc\\New_Project_My_Note",
+    "renderer_sha256": "06d9f62116f929b5fa6ebe302c73eaabeba4b4ce7273124f5213e9900816279a",
+    "resolved_values": {},
+    "source_sha256": {
+      "compile-epic-context.md": "6793b15ae85766cee529e6b349e45f2c6ec9e3212019611c29e8c77b4dc4b924",
+      "references/claims-check.md": "50ea17cb89a78ef815286dde2dabfd09f1dc9841d07a10857f88b39ab7b9bd2a",
+      "references/deletion-check.md": "0f1f124e4e957147e89164a272b10bedc694ad0d9ad2618c8610ac74ee9cb0da",
+      "review-prompts/edge-case-hunter.md": "8fc046af1cbf4ecc928207cec75e29c3c260adb86cc7da77537ade3b3a3b9448",
+      "review-prompts/verification-gap.md": "45ab0b8c4c56c5c055c97a293a8591a67e256d0b1a2058ce1f093cd866be8d03",
+      "spec-template.md": "880133e2c55d8e2aee713ba99c82f5cdd871210053c42fe01181ea147ed9132d",
+      "step-01-clarify-and-route.md": "d7bbfbfcf5475fcacbe505f564e059b31fc1c6527ebf31744b9d19a65eddf2c9",
+      "step-02-plan.md": "2628a7b92a7362d254b83a68ac8f3bd3089ba4f5d0ec5dac8c369415e0e53dac",
+      "step-03-implement.md": "3c12e5e226cdeb0a2d1085c55e7cafac40d1437bc6916587059fd18578b5aef1",
+      "step-04-review.md": "b23cd1a6d9dc15dd6214c9a7d54e2b1ee75e528580b2cc7ae18b143ae6c46d8f",
+      "step-05-present.md": "d236088f33bf3e7e227389f88989343fbc538eacd396e6d01cd605d0f8e27225",
+      "step-oneshot.md": "3b4f5a8c5471448a345fe34828e6b59aa85549893cbf1d254c55df7b305599fa",
+      "sync-sprint-status.md": "7590316aae7bc9d5a1aec1fb94e078c1081189949466f68c2448a184f1729cfa",
+      "workflow.md": "8cf1f044829f164a7639fe51b4a8bcffcc2afc7046cfdb79efd9bfc843e78edc"
+    }
+  },
+  "outputs": {
+    "compile-epic-context.md": "6793b15ae85766cee529e6b349e45f2c6ec9e3212019611c29e8c77b4dc4b924",
+    "references/claims-check.md": "50ea17cb89a78ef815286dde2dabfd09f1dc9841d07a10857f88b39ab7b9bd2a",
+    "references/deletion-check.md": "0f1f124e4e957147e89164a272b10bedc694ad0d9ad2618c8610ac74ee9cb0da",
+    "review-prompts/edge-case-hunter.md": "8fc046af1cbf4ecc928207cec75e29c3c260adb86cc7da77537ade3b3a3b9448",
+    "review-prompts/verification-gap.md": "45ab0b8c4c56c5c055c97a293a8591a67e256d0b1a2058ce1f093cd866be8d03",
+    "spec-template.md": "880133e2c55d8e2aee713ba99c82f5cdd871210053c42fe01181ea147ed9132d",
+    "step-01-clarify-and-route.md": "d7bbfbfcf5475fcacbe505f564e059b31fc1c6527ebf31744b9d19a65eddf2c9",
+    "step-02-plan.md": "2628a7b92a7362d254b83a68ac8f3bd3089ba4f5d0ec5dac8c369415e0e53dac",
+    "step-03-implement.md": "3c12e5e226cdeb0a2d1085c55e7cafac40d1437bc6916587059fd18578b5aef1",
+    "step-04-review.md": "b23cd1a6d9dc15dd6214c9a7d54e2b1ee75e528580b2cc7ae18b143ae6c46d8f",
+    "step-05-present.md": "d236088f33bf3e7e227389f88989343fbc538eacd396e6d01cd605d0f8e27225",
+    "step-oneshot.md": "3b4f5a8c5471448a345fe34828e6b59aa85549893cbf1d254c55df7b305599fa",
+    "sync-sprint-status.md": "7590316aae7bc9d5a1aec1fb94e078c1081189949466f68c2448a184f1729cfa",
+    "workflow.md": "8cf1f044829f164a7639fe51b4a8bcffcc2afc7046cfdb79efd9bfc843e78edc"
+  },
+  "project_root": "D:\\Workspace\\Tu_Hoc\\New_Project_My_Note",
+  "project_slug": "new-project-my-note",
+  "root_hash": "dab11a55d843",
+  "schema_version": 1,
+  "skill": "bmad-build"
+}

@@ -184,21 +184,22 @@ Any of the following strongly indicates COMPLEX:
 
 Execution:
 
+1. Superpowers `writing-plans`
+2. Superpowers `test-driven-development` where appropriate
+3. Direct Codex implementation by default
+4. Deterministic verification
+5. Whole-change Codex code review
+6. Consider Antigravity independent review when risk justifies it
 
+`subagent-driven-development` is an optional escalation.
 
-1\. Superpowers writing-plans
+Use SDD only if the SDD Gate in `story-development/SKILL.md` is satisfied.
 
-2\. Superpowers test-driven-development
-
-3\. Superpowers subagent-driven-development
-
-4\. Per-task review
-
-5\. Deterministic verification
-
-6\. Whole-change code review
-
-7\. Consider Antigravity independent review
+COMPLEX does not automatically imply:
+- SDD
+- worktrees
+- parallel subagents
+- additional planning artifacts
 
 
 
