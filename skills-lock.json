@@ -47,13 +47,13 @@
       "source": "bmad-code-org/BMAD-METHOD",
       "sourceType": "github",
       "skillPath": "skills/bmad-build/SKILL.md",
-      "computedHash": "e534a71c705dd6af37caf31e3ff4d40c37852c5d9c2d5bdad0b6b8fd21a1a3e1"
+      "computedHash": "3d8b36c248e5f845d6b86d2993d0b7c160e614548a119d891c9025711a15fd87"
     },
     "bmad-code-review": {
       "source": "bmad-code-org/BMAD-METHOD",
       "sourceType": "github",
       "skillPath": "skills/bmad-code-review/SKILL.md",
-      "computedHash": "1510974982f4365555813a18276655bf48c7b5a3c29f80d87975b0d3c914a1e9"
+      "computedHash": "ddfdaab0fc3b8bf19e97cf79de4f01aa70e584b0df9013fe02d0a5304645f8f5"
     },
     "bmad-correct-course": {
       "source": "bmad-code-org/BMAD-METHOD",
@@ -72,6 +72,12 @@
       "sourceType": "github",
       "skillPath": "skills/bmad-deep-recon/SKILL.md",
       "computedHash": "ef9c5b1edebdbf61899f6370836c92331abbafcc3b10416073462acc03225359"
+    },
+    "bmad-sprint-planning": {
+      "source": "bmad-code-org/BMAD-METHOD",
+      "sourceType": "github",
+      "skillPath": "skills/bmad-sprint-planning/SKILL.md",
+      "computedHash": "ade34380eb17fb108f8b59cda80e440c7b761a8f680fbf5ad10edf3b2f4feae6"
     }
   }
 }
