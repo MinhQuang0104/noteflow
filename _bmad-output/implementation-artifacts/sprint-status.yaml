@@ -1,0 +1,86 @@
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created, ready for development
+#   - in-progress: Developer actively working on implementation
+#   - review: Implementation complete, ready for review
+#   - done: Story completed
+
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+
+# Action Item Status:
+#   - open: Committed during a retrospective, not yet addressed
+#   - in-progress: Actively being worked on
+#   - done: Completed
+
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when its first story starts (via build's sprint sync)
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates the next story after the previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+# - Retrospective appends its action items to action_items; the status view surfaces open ones
+generated: 09-14-2026 14:51
+last_updated: 09-14-2026 15:00
+project: NoteFlow
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output\implementation-artifacts
+development_status:
+  epic-1: in-progress
+  1-1-khởi-tạo-nền-tảng-noteflow-từ-starter-được-duyệt: ready-for-dev
+  1-2-đăng-nhập-và-bảo-vệ-dữ-liệu-owner: backlog
+  1-3-dùng-một-ngày-và-tuần-thống-nhất-trên-mọi-thiết-bị: backlog
+  1-4-nhận-dữ-liệu-mới-giữa-hai-thiết-bị: backlog
+  1-5-giữ-bản-đang-nhập-và-thử-lưu-lại-sau-gián-đoạn: backlog
+  1-6-giải-quyết-xung-đột-nội-dung-giữa-hai-thiết-bị: backlog
+  epic-1-retrospective: optional
+
+  epic-2: backlog
+  2-1-tạo-và-quản-lý-thông-tin-challenge: backlog
+  2-2-xem-challenge-và-done-nhanh-từ-hôm-nay: backlog
+  2-3-ghi-và-sửa-journal-tùy-chọn: backlog
+  2-4-ghi-bù-và-sửa-lần-done-sai: backlog
+  2-5-lưu-trữ-challenge: backlog
+  2-6-hội-tụ-và-giải-quyết-xung-đột-done: backlog
+  epic-2-retrospective: optional
+
+  epic-3: backlog
+  3-1-xem-tiến-độ-tuần-và-lịch-sử-theo-target: backlog
+  3-2-áp-dụng-tuần-khởi-động: backlog
+  3-3-tính-streak-theo-tuần-cho-target-1-6-7: backlog
+  3-4-tính-streak-theo-ngày-cho-target-7-7: backlog
+  3-5-lên-lịch-thay-đổi-target: backlog
+  3-6-tính-lại-và-chốt-streak-khi-archive: backlog
+  epic-3-retrospective: optional
+
+  epic-4: backlog
+  4-1-quản-lý-vở-và-vở-mặc-định: backlog
+  4-2-tạo-quick-note-với-title-tùy-chọn: backlog
+  4-3-chỉnh-sửa-tự-lưu-và-chuyển-note-không-gián-đoạn: backlog
+  4-4-chuyển-và-xóa-note-an-toàn: backlog
+  4-5-giải-quyết-conflict-note-và-remote-delete: backlog
+  4-6-tìm-và-mở-note-đã-lưu: backlog
+  epic-4-retrospective: optional
+
+  epic-5: backlog
+  5-1-tạo-và-quản-lý-event-có-giờ: backlog
+  5-2-xem-lịch-tháng-và-danh-sách-ngày: backlog
+  5-3-hiển-thị-challenge-done-trên-lịch: backlog
+  5-4-xem-event-trong-hôm-nay: backlog
+  epic-5-retrospective: optional
+
+  epic-6: backlog
+  6-1-xuất-backup-đầy-đủ-và-nhất-quán: backlog
+  6-2-kiểm-tra-backup-trước-xác-nhận-import: backlog
+  6-3-khôi-phục-toàn-bộ-dataset-nguyên-tử: backlog
+  6-4-khóa-ghi-và-phục-hồi-sau-kết-quả-import-chưa-rõ: backlog
+  epic-6-retrospective: optional

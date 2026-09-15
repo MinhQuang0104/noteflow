@@ -1,16 +1,17 @@
 # NoteFlow — Product Requirements Document
 
-- **Phiên bản:** 1.0.
+- **Phiên bản tài liệu:** 1.1.
 - **Ngày tạo:** 2026-09-11.
-- **Trạng thái:** PRD chính thức được lập theo yêu cầu của chủ sản phẩm; chờ chủ sản phẩm review, chưa được phê duyệt triển khai.
+- **Ngày cập nhật và chốt baseline:** 2026-09-12.
+- **Trạng thái:** Đã được chủ sản phẩm phê duyệt làm baseline chính thức cho MVP v1; ba phương án xử lý FAIL đã được duyệt, các WARNING còn lại được chấp nhận tại baseline này.
 - **Product Owner:** Chủ sản phẩm NoteFlow.
-- **Nguồn phạm vi:** [Project Brief v1.3](project-brief.md), bao gồm các khuyến nghị Q1–Q12 đã được duyệt.
+- **Nguồn phạm vi:** [Project Brief v1.3](project-brief.md), các khuyến nghị Q1–Q12 và ba phương án xử lý FAIL được chủ sản phẩm duyệt ngày 2026-09-12.
 - **Ngôn ngữ:** Tiếng Việt.
 - **Phạm vi tài liệu:** Yêu cầu sản phẩm và nghiệm thu MVP; không quyết định công nghệ, architecture, mô hình dữ liệu hoặc kế hoạch code.
 
-Yêu cầu mới nhất của chủ sản phẩm cho phép chuyển từ Project Brief sang PRD. Các ghi chú “chưa tạo PRD” trong brief mô tả điểm dừng của giai đoạn trước. Phạm vi sản phẩm trong brief vẫn là cơ sở của tài liệu này.
+PRD v1.1 là baseline chính thức của MVP v1. Project Brief v1.3 là tài liệu đầu vào; khi có khác biệt do các quyết định review mới được duyệt, PRD này là căn cứ áp dụng. Các ghi chú về điểm dừng trong brief thuộc giai đoạn trước. Việc phê duyệt baseline không phải yêu cầu bắt đầu code hoặc thiết kế architecture trong lần cập nhật này.
 
-Các FR, NFR và Epic dùng ID duy nhất, ổn định trong PRD. Mỗi FR có một Epic chịu trách nhiệm chính và được đối chiếu với tiêu chí nghiệm thu ở mục 11. Các chi tiết chưa xác định trong brief được giữ tại mục 13; việc lập PRD không tự biến chúng thành quyết định đã được duyệt.
+Các FR, NFR và Epic dùng ID duy nhất, ổn định trong PRD. Mỗi FR có một Epic chịu trách nhiệm chính và được đối chiếu với tiêu chí nghiệm thu ở mục 11. Các quyết định xử lý FAIL được ghi tại mục 13.3; các WARNING được chấp nhận tại mục 13.4, không chặn việc chốt baseline và không tự được diễn giải thành tính năng hoặc ngưỡng đã duyệt. Thay đổi baseline sau này phải được ghi nhận bằng quyết định sản phẩm và phiên bản tài liệu mới.
 
 ## 1. Product Overview
 
@@ -43,6 +44,7 @@ MVP phục vụ một tài khoản cá nhân của chủ sản phẩm, sử dụ
 | Giai đoạn mục tiêu | Khoảng thời gian một mục tiêu có hiệu lực; lịch sử phải được đánh giá theo đúng mục tiêu của giai đoạn. |
 | Cuốn vở | Đơn vị tổ chức ghi chú một cấp; mỗi ghi chú thuộc đúng một cuốn vở. |
 | Lưu trữ challenge | Ngừng theo dõi chủ động và giữ lịch sử; không phải tạm nghỉ hoặc streak freeze. |
+| Chuỗi khi kết thúc theo dõi | Streak đánh giá đến ngày lưu trữ theo FR-042; không tự giảm theo thời gian, được tính lại khi sửa lịch sử hợp lệ. |
 
 ## 2. Goals
 
@@ -90,15 +92,15 @@ Sinh viên, developer và người thường xuyên tự học là các nhóm gi
 | UJ-004 | Đổi mục tiêu → xem mục tiêu chờ → sửa/hủy nếu cần → sang tuần mới. | Chỉ một mục tiêu chờ; có hiệu lực đúng mốc; giữ hoặc bắt đầu lại streak đúng nhóm. | EPIC-003 |
 | UJ-005 | Ghi nhanh vào vở mặc định → tự lưu → chuyển vở → tìm từ khóa → mở ghi chú cũ. | Nội dung được giữ sau tải lại khi đã lưu; tìm được dù khác hoa/thường hoặc dấu tiếng Việt. | EPIC-004 |
 | UJ-006 | Tạo sự kiện → xem lịch tháng/ngày → sửa/xóa → xem các challenge đã Done. | Hỗ trợ sự kiện qua ngày, hover/chạm và danh sách +N; sự kiện không điều khiển Done. | EPIC-005 |
-| UJ-007 | Lưu dữ liệu trên laptop → mở điện thoại → tiếp tục sử dụng. | Cùng dữ liệu và ngày/tuần; báo lỗi khi chưa lưu; xung đột nội dung cho người dùng chọn bản giữ. | EPIC-001 |
-| UJ-008 | Lưu trữ challenge → xem lại lịch sử → sửa một ghi nhận sai. | Challenge không còn trong danh sách đang hoạt động; lịch sử còn truy cập được; không có thao tác mở lại trong MVP. | EPIC-002, EPIC-003 |
-| UJ-009 | Xuất sao lưu → nhập bản sao → đọc cảnh báo thay thế → xác nhận → kiểm tra dữ liệu. | Phục hồi đúng toàn bộ dữ liệu sản phẩm, gồm lịch sử mục tiêu và kỷ lục đúng đơn vị. | EPIC-006 |
+| UJ-007 | Lưu dữ liệu trên laptop → mở điện thoại → tiếp tục sử dụng. | Cùng dữ liệu và ngày/tuần; báo lỗi khi chưa lưu; người dùng chọn nội dung hoặc trạng thái Done/bỏ Done khi có xung đột tương ứng. | EPIC-001 |
+| UJ-008 | Lưu trữ challenge → xem chuỗi khi kết thúc theo dõi → sửa một ghi nhận sai trong khoảng ngày hợp lệ. | Rời danh sách đang hoạt động ngay; mục tiêu chờ bị hủy; lịch sử và kỷ lục còn được tính lại đến ngày lưu trữ; không mở lại trong MVP. | EPIC-002, EPIC-003 |
+| UJ-009 | Chọn sao lưu → kiểm tra bản sao → xem thông tin/cảnh báo → xác nhận thay thế → kiểm tra kết quả. | Thành công phục hồi toàn bộ; thất bại giữ nguyên dữ liệu trước nhập. Trong lúc nhập tạm ngăn sửa trên hai thiết bị; nếu mất kết nối phải xác định kết quả trước khi nhập lại hoặc sửa dữ liệu. | EPIC-006 |
 
 Khi mất mạng giữa lúc nhập, người dùng thấy trạng thái chưa lưu, nội dung đang nhập được giữ trong phiên để thử lại khi có mạng. Luồng này không cung cấp khả năng thao tác ngoại tuyến hoặc bảo đảm giữ bản chưa lưu sau khi đóng/tải lại trang.
 
 ## 6. Functional Requirements
 
-Tất cả FR dưới đây thuộc MVP. “Epic chính” là nơi chịu trách nhiệm về kết quả người dùng, không chỉ định cấu trúc triển khai. Dẫn chiếu “Brief §…” dùng phiên bản 1.3.
+Tất cả FR dưới đây thuộc MVP. “Epic chính” là nơi chịu trách nhiệm về kết quả người dùng, không chỉ định cấu trúc triển khai. Dẫn chiếu “Brief §…” dùng phiên bản 1.3; “Review FAIL-1/2/3” chỉ các quyết định đã duyệt tại mục 13.3.
 
 ### 6.1. Truy cập và dữ liệu trên hai thiết bị
 
@@ -117,11 +119,11 @@ Tất cả FR dưới đây thuộc MVP. “Epic chính” là nơi chịu trác
 |---|---|---|---|
 | FR-007 | Tạo challenge với tên, mô tả tùy chọn, ngày bắt đầu mặc định hôm nay và mục tiêu nguyên N từ 1 đến 7 ngày/tuần; không yêu cầu chọn thứ cố định. Phạm vi ngày bắt đầu khác hôm nay thuộc DEP-001. | EPIC-002 | Brief §8.1, Q3 |
 | FR-008 | Xem danh sách/chi tiết challenge và sửa tên, mô tả. Thay đổi mục tiêu tuân theo FR-020; quyền sửa ngày bắt đầu sau khi có hoạt động thuộc DEP-001. | EPIC-002 | Brief §6, §8.1 |
-| FR-009 | Done cho một ngày không bắt buộc nhật ký. Mỗi challenge chỉ được tính một lần/ngày; bấm lặp hoặc Done cùng ngày từ hai thiết bị không tạo thêm ngày hoàn thành. | EPIC-002 | Brief §8.1, §12 |
+| FR-009 | Done cho một ngày không bắt buộc nhật ký. Mỗi challenge chỉ được tính một lần/ngày; bấm lặp hoặc Done cùng ngày từ hai thiết bị không tạo thêm ngày hoàn thành. Xung đột Done/bỏ Done áp dụng FR-043. | EPIC-002 | Brief §8.1, §12; Review FAIL-2 |
 | FR-010 | Ghi và sửa nhật ký gắn với ngày của challenge; chỉ nhập nhật ký không tự đánh dấu Done. Nhật ký được giữ trong challenge, không tự chuyển thành ghi chú riêng. | EPIC-002 | Brief §8.1–2 |
-| FR-011 | Cho ghi bù ngày thực hiện từ ngày bắt đầu đến hôm nay; không cho Done trước ngày bắt đầu hoặc trong tương lai. Phạm vi sửa lịch sử sau lưu trữ được ghi tại DEP-003. | EPIC-002 | Brief §8.1, Q2 |
-| FR-012 | Cho bỏ Done khi đánh dấu nhầm; cập nhật trạng thái hoàn thành và yêu cầu tính lại các kết quả liên quan theo FR-023. | EPIC-002 | Brief §8.1 |
-| FR-013 | Cho lưu trữ challenge khi ngừng theo dõi, giữ khả năng xem/sửa lịch sử để sửa sai; loại khỏi danh sách đang hoạt động và không hỗ trợ mở lại trong MVP. Các quy tắc thời gian khi lưu trữ thuộc DEP-003. | EPIC-002 | Brief §8.1, Q6 |
+| FR-011 | Với challenge đang hoạt động, cho ghi bù từ ngày bắt đầu đến hôm nay. Với challenge đã lưu trữ, chỉ cho ghi bù từ ngày bắt đầu đến hết ngày lưu trữ theo múi giờ tài khoản. Không cho Done trước ngày bắt đầu, trong tương lai hoặc sau ngày lưu trữ. | EPIC-002 | Brief §8.1, Q2; Review FAIL-1 |
+| FR-012 | Cho bỏ Done khi đánh dấu nhầm và giữ nguyên nhật ký; tính lại các kết quả theo FR-023. Với challenge đã lưu trữ, ngày được sửa chỉ nằm từ ngày bắt đầu đến ngày lưu trữ; xung đột trạng thái áp dụng FR-043. | EPIC-002 | Brief §8.1; Review FAIL-1/2 |
+| FR-013 | Lưu trữ có hiệu lực ngay, loại challenge khỏi danh sách đang hoạt động; giữ lịch sử, nhật ký, các mục tiêu đã có hiệu lực và kỷ lục; hủy mục tiêu đang chờ. Cho xem lịch sử và sửa nhật ký/ghi nhận từ ngày bắt đầu đến ngày lưu trữ, không ghi nhận ngày sau đó. Không hỗ trợ mở lại. Streak sau lưu trữ áp dụng FR-042. | EPIC-002 | Brief §8.1, Q6; Review FAIL-1 |
 
 ### 6.3. Tiến độ, streak và thay đổi mục tiêu
 
@@ -130,13 +132,13 @@ Tất cả FR dưới đây thuộc MVP. “Epic chính” là nơi chịu trác
 | FR-014 | Hiển thị số ngày đã Done trên mục tiêu của tuần đó; cho tiếp tục ghi nhận sau khi đạt mục tiêu, ví dụ 4/3, tối đa bảy ngày trong tuần. | EPIC-003 | Brief §8.1 |
 | FR-015 | Hiển thị lịch sử hoàn thành theo ngày và kết quả theo tuần; dùng mục tiêu có hiệu lực tại thời điểm tương ứng để đánh giá lịch sử. | EPIC-003 | Brief §8.1 |
 | FR-016 | Lấy ngày bắt đầu làm mốc tuần khởi động: bắt đầu giữa tuần thì lưu hoạt động nhưng chưa cộng/ngắt streak, bắt đầu tính từ thứ Hai tiếp theo; bắt đầu thứ Hai thì tính ngay. Áp dụng cho cả 1–6/7 và 7/7. | EPIC-003 | Brief §8.1, Q3 |
-| FR-017 | Với 1–6/7, tính streak theo số tuần liên tiếp đạt mục tiêu. Tuần đang diễn ra chưa đạt không ngắt chuỗi; đạt mục tiêu thì cộng một tuần; hết tuần chưa đạt thì ngắt. Ghi thêm ngày sau khi đạt không cộng thêm tuần streak. | EPIC-003 | Brief §8.1, Q2 |
-| FR-018 | Với 7/7, tính streak theo ngày Done liên tiếp từ mốc tính streak; không đặt lại khi chuyển tuần. Hôm nay chưa Done vẫn giữ chuỗi từ hôm qua đến hết hôm nay; bỏ lỡ trọn ngày thì ngắt. Vẫn hiển thị tiến độ và kết quả tuần. | EPIC-003 | Brief §8.1, Q2 |
-| FR-019 | Hiển thị chuỗi hiện tại và dài nhất với đơn vị rõ ràng. Kỷ lục dài nhất xét toàn bộ lịch sử cùng đơn vị, giữ các kỷ lục ngày/tuần cũ; không quy đổi hoặc cộng ngày với tuần. | EPIC-003 | Brief §8.1, Q7 |
-| FR-020 | Thay đổi mục tiêu có hiệu lực từ thứ Hai tuần sau. Chỉ có một mục tiêu chờ; sửa tiếp thay thế mục tiêu chờ, cho hủy trước hiệu lực; hiển thị mục tiêu hiện tại, mục tiêu chờ và thời điểm áp dụng. | EPIC-003 | Brief §8.1, Q5 |
+| FR-017 | Với challenge 1–6/7 đang hoạt động, tính streak theo số tuần liên tiếp đạt mục tiêu. Tuần đang diễn ra chưa đạt không ngắt chuỗi; đạt mục tiêu thì cộng một tuần; hết tuần chưa đạt thì ngắt. Ghi thêm ngày sau khi đạt không cộng thêm tuần streak. Khi lưu trữ, áp dụng FR-042. | EPIC-003 | Brief §8.1, Q2; Review FAIL-1 |
+| FR-018 | Với challenge 7/7 đang hoạt động, tính streak theo ngày Done liên tiếp từ mốc tính streak; không đặt lại khi chuyển tuần. Hôm nay chưa Done vẫn giữ chuỗi từ hôm qua đến hết hôm nay; bỏ lỡ trọn ngày thì ngắt. Vẫn hiển thị tiến độ và kết quả tuần. Khi lưu trữ, áp dụng FR-042. | EPIC-003 | Brief §8.1, Q2; Review FAIL-1 |
+| FR-019 | Hiển thị chuỗi hiện tại và dài nhất với đơn vị rõ ràng; với challenge đã lưu trữ, thay nhãn chuỗi hiện tại bằng “Chuỗi khi kết thúc theo dõi” theo FR-042. Kỷ lục dài nhất xét toàn bộ lịch sử cùng đơn vị, giữ các kỷ lục ngày/tuần cũ; không quy đổi hoặc cộng ngày với tuần. | EPIC-003 | Brief §8.1, Q7; Review FAIL-1 |
+| FR-020 | Thay đổi mục tiêu có hiệu lực từ thứ Hai tuần sau. Chỉ có một mục tiêu chờ; sửa tiếp thay thế mục tiêu chờ, cho hủy trước hiệu lực; hiển thị mục tiêu hiện tại, mục tiêu chờ và thời điểm áp dụng. Lưu trữ challenge hủy mục tiêu còn đang chờ theo FR-013. | EPIC-003 | Brief §8.1, Q5; Review FAIL-1 |
 | FR-021 | Đổi trong nhóm 1–6/7 tiếp tục chuỗi tuần theo kết quả đạt mục tiêu; bản thân việc đổi không đặt lại hoặc khôi phục chuỗi đã ngắt, không đổi mục tiêu dùng để đánh giá tuần cũ. | EPIC-003 | Brief §8.1 |
 | FR-022 | Chuyển giữa 1–6/7 và 7/7 bắt đầu chuỗi hiện tại từ 0 khi mục tiêu mới có hiệu lực, sau đó tăng theo đơn vị mới; không thêm tuần khởi động, không nối với chuỗi trước kể cả khi quay lại nhóm cũ. | EPIC-003 | Brief §8.1 |
-| FR-023 | Khi ghi bù/bỏ Done, tính lại tiến độ, lịch sử, chuỗi hiện tại và kỷ lục bị ảnh hưởng theo mục tiêu từng giai đoạn; không nối streak qua mốc chuyển đơn vị. Lịch cá nhân phản ánh trạng thái Done đã sửa. | EPIC-003 | Brief §8.1, §8.3 |
+| FR-023 | Khi ghi bù/bỏ Done hoặc chốt kết quả xung đột trạng thái, tính lại tiến độ, lịch sử, chuỗi hiện tại hoặc chuỗi khi kết thúc theo dõi và kỷ lục bị ảnh hưởng theo mục tiêu từng giai đoạn; không nối streak qua mốc chuyển đơn vị. Lịch cá nhân phản ánh trạng thái Done đã sửa. | EPIC-003 | Brief §8.1, §8.3; Review FAIL-1/2 |
 
 ### 6.4. Cuốn vở và ghi chú
 
@@ -168,8 +170,18 @@ Tất cả FR dưới đây thuộc MVP. “Epic chính” là nơi chịu trác
 | FR-037 | Hôm nay hiển thị challenge đang hoạt động, tiến độ tuần và Done hôm nay; cho Done bằng một thao tác, không bắt buộc mở nhật ký. | EPIC-002 | Brief §8.4, §12 |
 | FR-038 | Hôm nay hiển thị sự kiện trong ngày theo múi giờ tài khoản, bao gồm sự kiện qua ngày đang diễn ra trong ngày đó. | EPIC-005 | Brief §8.4, Q11 |
 | FR-039 | Hôm nay cung cấp lối vào ghi chú nhanh, dùng vở mặc định khi chưa phân loại. | EPIC-004 | Brief §8.2, §8.4 |
-| FR-040 | Xuất bản sao lưu toàn bộ dữ liệu sản phẩm: vở, ghi chú, challenge/trạng thái lưu trữ, Done/nhật ký, mục tiêu từng giai đoạn và mục tiêu chờ, sự kiện, múi giờ và dữ liệu cần phục hồi lịch sử/kỷ lục. | EPIC-006 | Brief §8.4, Q10 |
-| FR-041 | Nhập bản sao lưu để thay thế toàn bộ dữ liệu sản phẩm hiện tại sau cảnh báo rõ và xác nhận của người dùng; không gộp. Phục hồi đúng các dữ liệu thuộc FR-040. | EPIC-006 | Brief §8.4, Q10 |
+| FR-040 | Xuất bản sao lưu toàn bộ dữ liệu sản phẩm: vở, ghi chú, challenge/trạng thái và ngày lưu trữ, Done/nhật ký, mục tiêu từng giai đoạn và mục tiêu còn đang chờ, sự kiện, múi giờ và dữ liệu cần phục hồi lịch sử/kỷ lục/chuỗi khi kết thúc theo dõi. | EPIC-006 | Brief §8.4, Q10; Review FAIL-1/3 |
+| FR-041 | Nhập bản sao lưu để thay thế toàn bộ dữ liệu sản phẩm hiện tại sau kiểm tra bản sao theo FR-044, cảnh báo rõ và xác nhận của người dùng; không gộp. Phục hồi đúng dữ liệu thuộc FR-040, bảo toàn dữ liệu khi thất bại theo FR-045 và kiểm soát thao tác trong lúc nhập theo FR-046. | EPIC-006 | Brief §8.4, Q10; Review FAIL-3 |
+
+### 6.7. Quy tắc bổ sung sau Quality Review đã được duyệt
+
+| ID | Requirement | Epic chính | Nguồn |
+|---|---|---|---|
+| FR-042 | Chốt streak theo ngày lưu trữ. Với 1–6/7, tuần lưu trữ đã đạt mục tiêu được tính một tuần; nếu chưa đạt thì đánh dấu “kết thúc theo dõi”, không cộng hoặc ngắt chuỗi trước đó. Những tuần đã kết thúc trước tuần lưu trữ vẫn đánh giá bình thường. Với 7/7, ngày lưu trữ đã Done được tính; nếu chưa Done thì giữ chuỗi đến hôm qua, những ngày bỏ lỡ trước ngày lưu trữ vẫn ngắt chuỗi bình thường. Lưu trữ trong tuần khởi động cho streak 0. Hiển thị “Chuỗi khi kết thúc theo dõi”, không tự giảm theo thời gian nhưng tính lại khi sửa lịch sử hợp lệ. Các mốc bắt đầu và chuyển nhóm mục tiêu vẫn áp dụng, không nối chuỗi qua mốc chuyển đơn vị. | EPIC-003 | Review FAIL-1 |
+| FR-043 | Hai thiết bị cùng yêu cầu Done cho một ngày thì giữ Done và chỉ tính một ngày; cùng yêu cầu bỏ Done thì giữ chưa Done, không báo xung đột cho hai trường hợp cùng kết quả. Khi yêu cầu Done và bỏ Done đối nghịch dựa trên trạng thái chưa cập nhật, thông báo để người dùng chọn “Đã hoàn thành” hoặc “Chưa hoàn thành”. Trong lúc chưa chọn, giữ trạng thái đã lưu thành công gần nhất và báo thao tác xung đột chưa áp dụng. Sau khi chọn, đồng bộ kết quả và tính lại theo FR-023; bỏ Done giữ nhật ký. Nếu đã thấy trạng thái mới rồi chủ động đổi lại, xử lý như thao tác bình thường. | EPIC-001 | Review FAIL-2 |
+| FR-044 | Trước khi cho xác nhận nhập, kiểm tra bản sao lưu đọc được, đầy đủ và thuộc phiên bản được hỗ trợ; hiển thị thông tin bản sao và cảnh báo thay thế toàn bộ. Bản sao hỏng, thiếu dữ liệu hoặc không được hỗ trợ phải bị từ chối với lý do rõ, không thay đổi dữ liệu hiện tại. Hủy trước xác nhận cũng giữ nguyên dữ liệu. | EPIC-006 | Review FAIL-3 |
+| FR-045 | Một lần nhập được xác định thành công khi toàn bộ dữ liệu bản sao được phục hồi đúng; nếu nhập thất bại, dữ liệu đã lưu trước khi nhập phải được giữ nguyên và người dùng có thể thử lại. Không để kết quả cuối là dữ liệu chỉ được thay thế một phần. Không kết luận thất bại chỉ vì thiết bị mất kết nối; trường hợp chưa rõ kết quả áp dụng FR-046. | EPIC-006 | Review FAIL-3 |
+| FR-046 | Sau xác nhận và trong lúc nhập, tạm ngăn thay đổi dữ liệu sản phẩm trên cả hai thiết bị. Nếu mất kết nối khi nhập, hiển thị “Chưa xác định được kết quả nhập”; khi kết nối lại phải xác định kết quả trước khi cho nhập lại hoặc sửa dữ liệu. Sau thành công, thiết bị còn lại phải cập nhật dữ liệu sau khôi phục trước khi tiếp tục ghi thay đổi. | EPIC-006 | Review FAIL-3 |
 
 ## 7. Non-Functional Requirements
 
@@ -180,9 +192,9 @@ Tất cả FR dưới đây thuộc MVP. “Epic chính” là nơi chịu trác
 | NFR-003 | Tính đúng đắn | Kết quả ngày, tuần, tiến độ và streak phải thỏa các tình huống mục 11, kể cả biên tuần, ghi bù, bỏ Done, đổi mục tiêu và Done từ hai thiết bị; không có lỗi đếm trùng trong bộ nghiệm thu. | Brief §8.1, §12 |
 | NFR-004 | Độ bền dữ liệu đã lưu | Nội dung được báo đã lưu vẫn đúng sau tải lại và khi mở trên thiết bị khác. Kiểm chứng cả ghi chú, nhật ký, Done, mục tiêu và sự kiện; không đánh đồng nội dung còn trong phiên với dữ liệu đã lưu. | Brief §2, §11–12 |
 | NFR-005 | Trung thực về trạng thái | Không hiển thị đã lưu khi lưu thất bại. Trong thử nghiệm mất mạng/lỗi lưu, người dùng nhận biết dữ liệu chưa lưu và có thể thử lại trong phiên theo FR-005. | Brief §8.4, §11 |
-| NFR-006 | Nhất quán đồng bộ | Hai thiết bị trực tuyến đạt cùng trạng thái dữ liệu sau đồng bộ hoặc sau khi người dùng giải quyết xung đột. Không âm thầm mất nội dung do sửa đồng thời. Ngưỡng độ trễ chưa chốt tại DEP-006. | Brief §8.4, §12 |
+| NFR-006 | Nhất quán đồng bộ | Hai thiết bị trực tuyến đạt cùng trạng thái dữ liệu sau đồng bộ hoặc sau khi người dùng giải quyết xung đột nội dung/trạng thái Done. Không âm thầm mất nội dung do sửa đồng thời; trạng thái đối nghịch từ dữ liệu chưa cập nhật tuân theo FR-043. Sau nhập sao lưu, cập nhật dữ liệu trước khi ghi tiếp theo FR-046. Ngưỡng độ trễ chưa chốt tại DEP-006, được chấp nhận là WARNING tại baseline. | Brief §8.4, §12; Review FAIL-2/3 |
 | NFR-007 | Riêng tư | Trong kiểm tra truy cập, người chưa được xác thực/không được phép không đọc hoặc sửa được dữ liệu cá nhân, kể cả khi truy cập trực tiếp nội dung thay vì qua điều hướng giao diện. Không bổ sung chia sẻ công khai. | Brief §9, §11 |
-| NFR-008 | Khả năng phục hồi | Một lượt xuất/nhập có kiểm soát phục hồi đầy đủ và đúng nội dung, quan hệ ghi chú–vở, mục tiêu từng giai đoạn, mục tiêu chờ, múi giờ, lịch sử và kỷ lục. Việc nhập không được coi là thành công khi dữ liệu phục hồi thiếu hoặc sai. | Brief §8.4, §12 |
+| NFR-008 | Khả năng phục hồi | Một lượt xuất/nhập có kiểm soát phục hồi đúng toàn bộ dữ liệu thuộc FR-040. Nhập thất bại giữ nguyên dữ liệu đã lưu trước nhập; không có kết quả cuối chỉ phục hồi một phần. Bản sao không hợp lệ và nhánh hủy không làm thay đổi dữ liệu. Mất kết nối khi chưa rõ kết quả phải được kiểm tra theo FR-046, không báo thành công hoặc thất bại khi chưa xác định. | Brief §8.4, §12; Review FAIL-3 |
 | NFR-009 | Hiệu năng tìm kiếm | Mục tiêu ban đầu: kết quả trong khoảng một giây với khoảng 1.000 ghi chú văn bản ngắn, ghi rõ thiết bị, trình duyệt, dữ liệu và điều kiện mạng. Đây là mục tiêu để review, chưa là SLA hoặc ngưỡng percentile đã chốt; cần cụ thể hóa phép đo tại DEP-006. | Brief §12 |
 | NFR-010 | Dễ hiểu tiến độ | Luôn phân biệt số ngày hoàn thành trong tuần với đơn vị streak; thể hiện rõ tuần khởi động và thời điểm mục tiêu mới có hiệu lực. Chủ sản phẩm giải thích được tiến độ, chuỗi hiện tại và kỷ lục mà không cần công cụ tính bên ngoài. | Brief §8.1, §11–12 |
 
@@ -198,7 +210,7 @@ Không tự đặt cam kết về uptime, tải nhiều người dùng, dung lư
 | Lịch | Sự kiện có giờ đơn lẻ, gồm qua ngày; lịch tháng/ngày; icon challenge và +N. | 3 |
 | Hôm nay | Challenge, Done nhanh, tiến độ tuần, sự kiện trong ngày và lối vào ghi chú nhanh. | Hỗ trợ luồng chính |
 | Sử dụng cá nhân | Web thích ứng màn hình, một tài khoản, trực tuyến, cùng dữ liệu và múi giờ trên hai thiết bị. | Xuyên suốt |
-| Bảo toàn dữ liệu | Trạng thái lưu/đồng bộ, xử lý xung đột nội dung, giữ bản đang nhập trong phiên khi mất mạng, xuất/nhập toàn bộ. | Xuyên suốt |
+| Bảo toàn dữ liệu | Trạng thái lưu/đồng bộ, giải quyết xung đột nội dung và Done/bỏ Done, giữ bản đang nhập trong phiên khi mất mạng; nhập sao lưu thay thế toàn bộ khi thành công, giữ nguyên dữ liệu khi thất bại và kiểm tra kết quả khi gián đoạn kết nối. | Xuyên suốt |
 
 Thứ tự ưu tiên hướng dẫn triển khai và trao đổi cắt giảm; không tự loại ghi chú, lịch hoặc sao lưu khỏi MVP. Thay đổi phạm vi cần được phản ánh trong quyết định sản phẩm trước khi sửa baseline của PRD.
 
@@ -225,12 +237,12 @@ Epic chia theo giá trị người dùng, không theo tầng kỹ thuật. Mỗi
 
 | ID | Tên và kết quả người dùng | FR chịu trách nhiệm chính | Điều kiện hoàn thành ở mức sản phẩm |
 |---|---|---|---|
-| EPIC-001 | **Truy cập và sử dụng dữ liệu cá nhân trên hai thiết bị.** Người dùng truy cập riêng tư, dùng cùng dữ liệu và hiểu trạng thái lưu/đồng bộ. | FR-001–006 | Truy cập được kiểm soát; dữ liệu nhất quán giữa hai thiết bị; lỗi lưu/mất mạng/xung đột nội dung được xử lý rõ; cùng ngày và tuần tài khoản. |
+| EPIC-001 | **Truy cập và sử dụng dữ liệu cá nhân trên hai thiết bị.** Người dùng truy cập riêng tư, dùng cùng dữ liệu và hiểu trạng thái lưu/đồng bộ. | FR-001–006, FR-043 | Truy cập được kiểm soát; dữ liệu nhất quán giữa hai thiết bị; lỗi lưu/mất mạng/xung đột nội dung và trạng thái Done được xử lý rõ; cùng ngày và tuần tài khoản. |
 | EPIC-002 | **Theo dõi challenge hằng ngày.** Người dùng tạo và quản lý challenge, Done nhanh, ghi nhật ký, sửa ghi nhận và lưu trữ. | FR-007–013, FR-037 | Luồng Hôm nay → Done hoạt động bằng một thao tác; không đếm trùng; ghi bù/bỏ Done và xem lại challenge lưu trữ đáp ứng các quy tắc được chốt. |
-| EPIC-003 | **Tiến độ, streak và điều chỉnh mục tiêu.** Người dùng hiểu và tin lịch sử, kỷ lục và tác động của thay đổi mục tiêu. | FR-014–023 | Các tình huống streak tuần/ngày, tuần khởi động, sửa lịch sử và chuyển mục tiêu đạt mục 11; đơn vị rõ và không nối chuỗi qua mốc chuyển nhóm. |
+| EPIC-003 | **Tiến độ, streak và điều chỉnh mục tiêu.** Người dùng hiểu và tin lịch sử, kỷ lục và tác động của thay đổi mục tiêu. | FR-014–023, FR-042 | Các tình huống streak tuần/ngày, tuần khởi động, sửa lịch sử, chuyển mục tiêu và chuỗi khi kết thúc theo dõi đạt mục 11; đơn vị rõ và không nối chuỗi qua mốc chuyển nhóm. |
 | EPIC-004 | **Lưu và tìm lại kiến thức.** Người dùng ghi nhanh, tổ chức trong vở, tự lưu và tìm lại ghi chú. | FR-024–030, FR-039 | CRUD ghi chú, quản lý/chuyển vở, bảo vệ vở mặc định, tự lưu và tìm kiếm không dấu hoạt động trên hai thiết bị. |
 | EPIC-005 | **Lịch cá nhân và hoạt động theo ngày.** Người dùng quản lý sự kiện và xem challenge đã hoàn thành trên lịch. | FR-031–036, FR-038 | CRUD sự kiện, sự kiện qua ngày, lịch tháng/ngày, Hôm nay và icon/+N hoạt động bằng hover/chạm; sự kiện độc lập với Done. |
-| EPIC-006 | **Sao lưu và khôi phục dữ liệu.** Người dùng chủ động giữ bản sao và phục hồi đầy đủ dữ liệu cá nhân. | FR-040–041 | Xuất/nhập có kiểm soát khôi phục đúng toàn bộ dữ liệu và kết quả lịch sử; nhập thay thế có cảnh báo/xác nhận, không gộp. |
+| EPIC-006 | **Sao lưu và khôi phục dữ liệu.** Người dùng chủ động giữ bản sao và phục hồi đầy đủ dữ liệu cá nhân. | FR-040–041, FR-044–046 | Kiểm tra bản sao trước xác nhận; thành công phục hồi toàn bộ, thất bại giữ nguyên dữ liệu trước nhập; tạm ngăn ghi trên hai thiết bị khi nhập và xác định kết quả sau mất kết nối; cảnh báo thay thế, không gộp. |
 
 ### 10.1. Ưu tiên và quan hệ phụ thuộc sản phẩm
 
@@ -264,8 +276,8 @@ Các tiêu chí dưới đây mô tả kết quả quan sát được, không ph
 | AC-007 | FR-009, FR-037; NFR-001, NFR-003 | Từ Hôm nay, bấm Done cho challenge chưa Done; bấm lặp và thử Done cùng ngày từ thiết bị thứ hai. | Một thao tác đủ ghi nhận, không bắt nhật ký; chỉ một ngày hoàn thành được tính; Hôm nay hiển thị Done và tiến độ cập nhật. |
 | AC-008 | FR-010 | Chỉ nhập nhật ký cho một ngày chưa Done; sửa nội dung; sau đó đánh dấu Done mà không nhập thêm nhật ký. | Nhật ký tự nó không làm tăng tiến độ; nội dung sửa được giữ; Done thành công không cần nội dung mới; nhật ký không tự xuất hiện thành ghi chú riêng. |
 | AC-009 | FR-011 | Với challenge đang hoạt động, chọn một ngày đã qua từ ngày bắt đầu trở đi để ghi bù; thử ngày trước ngày bắt đầu và ngày tương lai. | Ghi bù ngày hợp lệ được lưu, kể cả ngày cũ không nằm trong tuần hiện tại; hai loại ngày không hợp lệ bị từ chối. |
-| AC-010 | FR-012, FR-014, FR-023 | Challenge 3/7 đang có 3/3 ngày trong tuần hiện tại; bỏ Done một ngày trong tuần. | Tiến độ thành 2/3; trạng thái ngày, kết quả tuần, streak và icon lịch được tính lại; không giữ kết quả 3/3 cũ. |
-| AC-011 | FR-013, FR-037 | Lưu trữ challenge đang hoạt động, sau đó mở lại lịch sử để xem/sửa một nội dung nhật ký đã có. | Challenge không còn trong danh sách đang hoạt động trên Hôm nay; lịch sử vẫn còn và nội dung sửa được lưu; không có chức năng mở lại challenge. Cách dừng streak, phạm vi sửa Done và mục tiêu chờ sau lưu trữ được nghiệm thu sau khi DEP-003 được chốt. |
+| AC-010 | FR-012, FR-014, FR-023 | Challenge 3/7 đang có 3/3 ngày trong tuần hiện tại; bỏ Done một ngày trong tuần có nhật ký. | Tiến độ thành 2/3; trạng thái ngày, kết quả tuần, streak và icon lịch được tính lại; không giữ kết quả 3/3 cũ; nhật ký còn nguyên. |
+| AC-011 | FR-013, FR-020, FR-037 | Lưu trữ challenge đang hoạt động có mục tiêu chờ áp dụng; sau đó xem/sửa một nhật ký cũ và đi qua mốc mục tiêu chờ trước đây. | Rời danh sách đang hoạt động ngay; giữ lịch sử/nhật ký/mục tiêu đã có hiệu lực và kỷ lục; hủy mục tiêu chờ, mục tiêu đó không tự áp dụng sau lưu trữ; nhật ký trong khoảng hợp lệ sửa được; không mở lại challenge. Streak và giới hạn ngày được kiểm tra tại AC-035–038. |
 | AC-012 | FR-014, FR-015 | Challenge 3/7 có hai ngày Done trong tuần; tiếp tục Done ở ngày thứ ba, thứ tư và các ngày còn lại. | Tiến độ lần lượt 2/3, 3/3, 4/3 và tối đa 7/3; lịch sử thể hiện đúng từng ngày; kết quả đạt mục tiêu không yêu cầu dừng ở ba ngày. |
 
 ### 11.3. Streak và chuyển mục tiêu
@@ -305,17 +317,34 @@ Các tiêu chí dưới đây mô tả kết quả quan sát được, không ph
 
 | ID | Requirement liên quan | Điều kiện và hành động | Kết quả nghiệm thu |
 |---|---|---|---|
-| AC-031 | FR-040, FR-041; NFR-008 | Chuẩn bị dữ liệu gồm vở/ghi chú, challenge hoạt động/lưu trữ, Done/nhật ký, các giai đoạn mục tiêu, mục tiêu chờ, kỷ lục ngày/tuần, sự kiện và múi giờ; xuất rồi nhập trong lần thử có kiểm soát. | Phục hồi đúng toàn bộ dữ liệu và kết quả tính lịch sử, kỷ lục, quan hệ ghi chú–vở; mục tiêu chờ và trạng thái lưu trữ được giữ. |
+| AC-031 | FR-040, FR-041, FR-042; NFR-008 | Chuẩn bị dữ liệu gồm vở/ghi chú, challenge hoạt động/lưu trữ cùng ngày lưu trữ, Done/nhật ký, các giai đoạn mục tiêu, mục tiêu còn đang chờ của challenge hoạt động, kỷ lục ngày/tuần, sự kiện và múi giờ; xuất rồi nhập có kiểm soát. | Phục hồi đúng toàn bộ dữ liệu và kết quả lịch sử/kỷ lục/chuỗi khi kết thúc theo dõi, quan hệ ghi chú–vở; giữ mục tiêu còn đang chờ và ngày/trạng thái lưu trữ; không khôi phục lại mục tiêu đã bị hủy lúc lưu trữ thành mục tiêu chờ. |
 | AC-032 | FR-041 | Dữ liệu hiện tại có một mục không nằm trong bản sao lưu; bắt đầu nhập rồi hủy trước xác nhận. Lần khác xác nhận nhập cùng bản sao. | Trước khi nhập có cảnh báo thay thế toàn bộ. Hủy giữ nguyên dữ liệu hiện tại; xác nhận nhập thành công đưa dữ liệu về bản sao, không giữ mục mới theo cách gộp. |
 | AC-033 | NFR-001, NFR-002, NFR-010 | Chủ sản phẩm thực hiện UJ-001–009 trên laptop/điện thoại thực tế; giải thích ví dụ 4/3 ngày, streak tuần/ngày, tuần khởi động và mục tiêu chờ. | Hoàn thành không cần hướng dẫn trực tiếp; chức năng quan trọng dùng được bằng chạm; hiểu đúng các khái niệm mà không cần công cụ tính ngoài. Ghi lại lỗi và điểm gây khó hiểu. |
 | AC-034 | NFR-003, NFR-004, NFR-006, NFR-008; GOAL-001–006 | Thử nghiệm ba tuần đầy đủ với ít nhất một challenge 3/7 và một challenge 7/7. | Đạt các bằng chứng mục 2: ghi nhận cả ba tuần, có tuần dùng hai thiết bị, ít nhất ba lần dùng lại ghi chú và ba sự kiện thực tế, không ghi nhận mất dữ liệu, có đánh giá tiếp tục sử dụng và danh sách điều chỉnh. |
 
-### 11.7. Điều kiện review và nghiệm thu
+### 11.7. Nghiệm thu bổ sung cho ba quyết định Quality Review
 
-- Review PRD xác nhận phạm vi, quy tắc, Epic và tiêu chí sản phẩm; không đồng nghĩa phần mềm đã được nghiệm thu.
-- Các AC có kết quả cụ thể là cơ sở kiểm chứng khi triển khai được cho phép. NFR có ngưỡng chưa xác định phải được cụ thể hóa trước nghiệm thu phần liên quan, không tự coi là đạt.
-- Các tình huống được đánh dấu phụ thuộc DEP-001, DEP-003 hoặc DEP-004 cần quy tắc bổ sung trước khi đặc tả/triển khai phần đó; không ngăn việc chủ sản phẩm review PRD hiện tại.
-- Chưa có kết quả kiểm thử phần mềm hay dữ liệu dùng thử ở thời điểm lập PRD này.
+| ID | Requirement liên quan | Điều kiện và hành động | Kết quả nghiệm thu |
+|---|---|---|---|
+| AC-035 | FR-013, FR-017, FR-019, FR-023, FR-042 | Challenge 3/7 có chuỗi hai tuần trước tuần hiện tại, Done hai ngày trong tuần rồi lưu trữ thứ Năm; sau đó đi qua các tuần tiếp theo. Ghi bù một ngày hợp lệ trong tuần cuối để đủ ba ngày, rồi bỏ Done lại. | Ban đầu hiển thị “Chuỗi khi kết thúc theo dõi: 2 tuần”, tuần cuối chưa đạt mang trạng thái kết thúc theo dõi; không tự giảm theo thời gian. Ghi bù đủ mục tiêu cho 3 tuần; bỏ Done lại cho 2 tuần. Nếu đã đạt tuần cuối trước khi lưu trữ thì tuần đó được tính ngay. Tuần thất bại đã kết thúc trước tuần lưu trữ vẫn ngắt chuỗi bình thường. |
+| AC-036 | FR-013, FR-018, FR-019, FR-023, FR-042 | Challenge 7/7 có chuỗi năm ngày đến hôm trước ngày lưu trữ; lưu trữ khi ngày hiện tại chưa Done. Sau đó ghi bù chính ngày lưu trữ và bỏ Done lại; kiểm tra thêm lịch sử có một ngày bỏ lỡ trước ngày lưu trữ. | Chuỗi khi kết thúc theo dõi ban đầu là 5 ngày; ghi bù ngày lưu trữ cho 6 ngày; bỏ Done lại cho 5 ngày, không mất nhật ký. Thời gian trôi qua không làm giảm chuỗi; ngày bỏ lỡ trước ngày lưu trữ vẫn ngắt chuỗi theo lịch sử thực tế, không được bỏ qua. |
+| AC-037 | FR-016, FR-022, FR-042 | Lưu trữ challenge 3/7 và 7/7 trong tuần khởi động dù có Done. Trường hợp khác lưu trữ sau khi đã chuyển nhóm mục tiêu. | Trong tuần khởi động giữ hoạt động nhưng chuỗi khi kết thúc bằng 0. Sau chuyển nhóm, không lấy chuỗi ở nhóm cũ nối vào chuỗi kết thúc của nhóm mới; vẫn giữ kỷ lục đúng đơn vị. |
+| AC-038 | FR-010, FR-011, FR-012, FR-013, FR-023, FR-042 | Với challenge đã lưu trữ, ghi bù/bỏ Done và sửa nhật ký cho ngày từ ngày bắt đầu đến ngày lưu trữ; thử ngày trước ngày bắt đầu và ngày sau ngày lưu trữ, kể cả khi ngày sau đó đã thành quá khứ. | Chỉ khoảng ngày bắt đầu–ngày lưu trữ được chỉnh sửa; không nhận các ngày ngoài khoảng. Thay đổi hợp lệ cập nhật lịch sử, tiến độ, chuỗi kết thúc, kỷ lục và icon; bỏ Done giữ nhật ký. |
+| AC-039 | FR-009, FR-012, FR-043; NFR-003, NFR-006 | Hai thiết bị cùng yêu cầu Done cho một challenge/ngày; trong trường hợp riêng, cả hai cùng yêu cầu bỏ Done. | Cùng Done cho đúng một ngày hoàn thành; cùng bỏ Done cho chưa hoàn thành; không có yêu cầu giải quyết xung đột trong hai trường hợp cùng kết quả, nhật ký được giữ. |
+| AC-040 | FR-023, FR-043; NFR-006 | Một thiết bị đã lưu thay đổi trạng thái challenge/ngày, thiết bị kia gửi yêu cầu đối nghịch dựa trên trạng thái chưa cập nhật. Kiểm tra riêng lựa chọn giữ Done và lựa chọn giữ chưa Done. | Báo xung đột, cho chọn “Đã hoàn thành”/“Chưa hoàn thành”. Khi chưa chọn, giữ trạng thái đã lưu thành công gần nhất và báo thao tác xung đột chưa áp dụng. Sau chọn, hai thiết bị đồng bộ cùng kết quả; tiến độ, streak, kỷ lục và icon được tính lại, nhật ký không mất. |
+| AC-041 | FR-012, FR-043 | Người dùng đã nhìn thấy trạng thái cập nhật từ thiết bị kia rồi chủ động đổi lại. | Xử lý thay đổi bình thường, không yêu cầu giải quyết xung đột chỉ vì thao tác trước đó đến từ thiết bị khác; bỏ Done giữ nhật ký. |
+| AC-042 | FR-041, FR-044; NFR-008 | Chọn lần lượt bản sao hỏng, thiếu dữ liệu, phiên bản không được hỗ trợ và bản sao hợp lệ. Với bản hợp lệ, xem thông tin rồi hủy trước xác nhận. | Bản không hợp lệ bị từ chối với lý do, không thay đổi dữ liệu. Bản hợp lệ được kiểm tra trước khi cho xác nhận; có thông tin bản sao và cảnh báo thay thế toàn bộ. Hủy giữ nguyên dữ liệu hiện tại. |
+| AC-043 | FR-041, FR-045; NFR-008 | Sau khi xác nhận nhập, gây lỗi nhập trong lần thử có kiểm soát, gồm trường hợp lỗi phát sinh khi quá trình nhập đã bắt đầu xử lý dữ liệu. | Khi xác định nhập thất bại, toàn bộ dữ liệu đã lưu trước nhập vẫn nguyên vẹn, không có kết quả thay thế một phần; báo thất bại và cho thử lại. Khi thử lại thành công, phục hồi toàn bộ theo AC-031. |
+| AC-044 | FR-041, FR-046; NFR-006 | Trong lúc nhập sau xác nhận, thử sửa/Done/xóa dữ liệu từ cả hai thiết bị; sau nhập thành công, tiếp tục thao tác trên thiết bị còn lại đang có dữ liệu cũ. | Tạm ngăn thay đổi trong lúc nhập trên cả hai thiết bị. Thiết bị còn lại phải cập nhật dữ liệu sau khôi phục trước khi ghi tiếp; không ghi dữ liệu cũ đè lên kết quả khôi phục. |
+| AC-045 | FR-045, FR-046; NFR-008 | Mất kết nối trên thiết bị nhập sau xác nhận, trước khi nhận kết quả; kết nối lại. Thử riêng tình huống quá trình nhập đã thành công và tình huống đã thất bại. | Hiển thị “Chưa xác định được kết quả nhập”, không tự kết luận thành công/thất bại. Khi có mạng phải kiểm tra kết quả trước khi cho nhập lại hoặc sửa dữ liệu: thành công hiển thị dữ liệu phục hồi đầy đủ, thất bại giữ nguyên dữ liệu trước nhập và cho thử lại. |
+
+### 11.8. Điều kiện baseline và nghiệm thu
+
+- Chủ sản phẩm đã phê duyệt PRD v1.1 làm baseline chính thức của MVP v1 ngày 2026-09-12. Việc này không đồng nghĩa phần mềm đã được triển khai hoặc nghiệm thu.
+- Ba FAIL của Quality Review đã có phương án được duyệt và yêu cầu/AC tương ứng; DEP-003 và DEP-004 đã đóng ở mức quyết định sản phẩm.
+- Các WARNING còn lại được chấp nhận tại baseline theo mục 13.4. Không yêu cầu review lại chỉ để chốt baseline; không tự bổ sung scope hoặc ngưỡng chưa được cung cấp.
+- Các AC cụ thể là cơ sở nghiệm thu khi triển khai được cho phép. Với phép đo chưa có ngưỡng, ghi kết quả thực tế và trạng thái chưa định lượng; việc chấp nhận WARNING không biến phép đo đó thành kết quả PASS.
+- Chưa có kết quả kiểm thử phần mềm hay dữ liệu dùng thử trong lần cập nhật tài liệu này.
 
 ## 12. Risks
 
@@ -323,26 +352,27 @@ Các tiêu chí dưới đây mô tả kết quả quan sát được, không ph
 |---|---|---|---|
 | RISK-001 | Ba mảng tính năng làm MVP quá lớn hoặc mất trọng tâm. | Giữ thứ tự ưu tiên, phạm vi ghi chú/lịch cơ bản và đánh giá mọi đề xuất mới theo mục 8–9. | Toàn bộ Epic |
 | RISK-002 | Người dùng nhầm tiến độ tuần với streak ngày/tuần. | Luôn ghi đơn vị và mốc hiệu lực; kiểm chứng khả năng giải thích bằng AC-013–022, AC-033. | EPIC-003; NFR-010 |
-| RISK-003 | Ghi bù, chuyển mục tiêu, biên thời gian hoặc lưu trữ làm sai lịch sử/kỷ lục. | Đánh giá theo mục tiêu từng giai đoạn; kiểm tra tình huống biên; chốt DEP-001–003 trước phần liên quan. | EPIC-002, EPIC-003 |
-| RISK-004 | Hai thiết bị sửa đồng thời hoặc mất mạng gây ghi đè/mất nội dung. | Trạng thái lưu trung thực, chọn nội dung khi xung đột, giữ bản đang nhập trong phiên; chốt riêng xung đột Done/bỏ Done. | EPIC-001; DEP-004 |
+| RISK-003 | Ghi bù, chuyển mục tiêu, biên thời gian hoặc lưu trữ làm sai lịch sử/kỷ lục. | Đánh giá theo mục tiêu từng giai đoạn; kiểm chứng lưu trữ theo FR-042 và AC-035–038. DEP-001–002 còn được theo dõi; DEP-003 đã đóng. | EPIC-002, EPIC-003 |
+| RISK-004 | Hai thiết bị sửa đồng thời hoặc mất mạng gây ghi đè/mất nội dung. | Trạng thái lưu trung thực, chọn nội dung khi xung đột, giữ bản đang nhập trong phiên; áp dụng FR-043 và AC-039–041 cho Done/bỏ Done. | EPIC-001; DEP-004 đã đóng |
 | RISK-005 | Lộ dữ liệu hoặc sao lưu thiếu khiến không thể tin ứng dụng. | Kiểm chứng truy cập và xuất/nhập với toàn bộ loại dữ liệu, gồm các giai đoạn mục tiêu và kỷ lục. | EPIC-001, EPIC-006 |
 | RISK-006 | Người dùng hiểu nhầm nhập sao lưu là gộp, làm mất dữ liệu mới hơn. | Cảnh báo rõ thay thế toàn bộ và yêu cầu xác nhận; kiểm chứng cả nhánh hủy và xác nhận. | FR-041; AC-032 |
 | RISK-007 | Icon dày hoặc phụ thuộc hover làm lịch khó dùng trên điện thoại. | Giới hạn icon, +N, chạm để xem thông tin và thử trên thiết bị thực tế. | EPIC-005; NFR-002 |
 | RISK-008 | Một người dùng thử tạo kết luận quá sớm về thị trường. | Chỉ xác nhận giá trị cá nhân; nghiên cứu nhóm mở rộng trước quyết định phục vụ nhiều người. | GOAL-006; Future Scope |
 | RISK-009 | Mục tiêu hiệu năng chưa đủ điều kiện đo dẫn đến đánh giá không nhất quán. | Ghi dữ liệu, thiết bị, mạng, mốc bắt đầu/kết thúc phép đo và ngưỡng trước nghiệm thu hiệu năng. | NFR-009; DEP-005–006 |
+| RISK-010 | Nhập sao lưu lỗi hoặc mất kết nối gây dữ liệu thay thế một phần hoặc nhập lại khi kết quả chưa rõ. | Kiểm tra bản sao, giữ nguyên dữ liệu khi thất bại, ngăn thay đổi trong lúc nhập và xác định kết quả trước khi tiếp tục; kiểm chứng AC-042–045. | EPIC-006; FR-044–046 |
 
 ## 13. Dependencies
 
-### 13.1. Phụ thuộc và chi tiết chưa xác định
+### 13.1. Phụ thuộc và trạng thái quyết định
 
-Những điểm này được kế thừa từ Brief §10.2 hoặc là điều kiện để kiểm chứng yêu cầu đã có. Chúng không làm thay đổi phạm vi MVP đã duyệt và không được ghi thành cam kết kỹ thuật. Chủ sản phẩm đã cho phép tạo PRD; không cần mở lại các quyết định Q1–Q12 chỉ để lập tài liệu.
+Những điểm này được kế thừa từ Brief §10.2 hoặc là điều kiện để kiểm chứng yêu cầu đã có. DEP-003 và DEP-004 được giữ ID để truy vết nhưng đã đóng bởi quyết định review mới. Các thông tin chưa xác định còn lại và WARNING được chấp nhận khi chốt baseline; giữ nguyên trạng thái thực tế, không tự chọn thêm giá trị hoặc coi là lý do phải mở lại baseline.
 
 | ID | Nội dung cần xác định | Trạng thái hiện tại | Thời điểm cần / phần bị ảnh hưởng |
 |---|---|---|---|
 | DEP-001 | Phạm vi ngày bắt đầu khác hôm nay và quyền sửa ngày bắt đầu sau khi có hoạt động. | Chỉ đã chốt mặc định hôm nay và dùng ngày bắt đầu làm mốc tuần khởi động. | Trước đặc tả/triển khai khả năng chọn hoặc sửa ngày bắt đầu ngoài luồng mặc định; FR-007–008, FR-011, FR-016. |
 | DEP-002 | Múi giờ tài khoản cụ thể. | Đã chốt một múi giờ cố định, dùng chung thiết bị; giá trị chưa được cung cấp. Không tự lấy múi giờ của máy làm quyết định sản phẩm. | Trước cấu hình tài khoản và nghiệm thu ngày/tuần/lịch; FR-006 và các AC thời gian. |
-| DEP-003 | Mốc dừng đánh giá streak khi lưu trữ, phạm vi sửa lịch sử sau lưu trữ và xử lý mục tiêu đang chờ. | Đã chốt lưu trữ giữ lịch sử, cho sửa sai và không mở lại; chưa chốt chi tiết thời gian. | Trước triển khai/nghiệm thu đầy đủ lưu trữ; FR-011, FR-013, FR-017–023, AC-011. |
-| DEP-004 | Cách giải quyết Done và bỏ Done gần đồng thời từ hai thiết bị. | Đã chốt Done lặp không đếm trùng; chọn nội dung khi xung đột văn bản. Chưa xác định thao tác trạng thái nào thắng khi đối nghịch. | Trước triển khai/nghiệm thu xung đột trạng thái challenge; FR-002, FR-009, FR-012, NFR-006. |
+| DEP-003 | Mốc dừng đánh giá streak khi lưu trữ, phạm vi sửa lịch sử sau lưu trữ và xử lý mục tiêu đang chờ. | Đã đóng ngày 2026-09-12: chốt theo ngày lưu trữ, chỉ sửa từ ngày bắt đầu đến ngày lưu trữ, hủy mục tiêu chờ; FR-013, FR-042. | Áp dụng trực tiếp baseline; kiểm chứng AC-011, AC-035–038. |
+| DEP-004 | Cách giải quyết Done và bỏ Done gần đồng thời từ hai thiết bị. | Đã đóng ngày 2026-09-12: thao tác cùng kết quả không xung đột; thao tác đối nghịch từ trạng thái chưa cập nhật yêu cầu người dùng chọn, theo FR-043. | Áp dụng trực tiếp baseline; kiểm chứng AC-039–041. |
 | DEP-005 | Laptop/điện thoại, hệ điều hành và trình duyệt dùng thử. | Đã duyệt dùng thiết bị thực tế của chủ sản phẩm; danh sách chưa có. | Trước kiểm chứng tương thích và usability; NFR-001–002, AC-033. |
 | DEP-006 | Độ trễ đồng bộ chấp nhận được; cách đo và ngưỡng hiệu năng tìm kiếm. | Tìm kiếm có mục tiêu ban đầu khoảng một giây/1.000 ghi chú ngắn; chưa chốt độ dài ghi chú, mạng, số lần đo hoặc percentile. Chưa có ngưỡng đồng bộ. | Trước nghiệm thu NFR-006, NFR-009; không ghi thành SLA trong PRD hiện tại. |
 | DEP-007 | Ngân sách, ngày bắt đầu thử và hạn phát hành. | Chưa cung cấp; thời lượng thử ba tuần đầy đủ đã duyệt. | Trước cam kết lịch phát hành và kế hoạch thử có ngày cụ thể. |
@@ -355,6 +385,28 @@ Những điểm này được kế thừa từ Brief §10.2 hoặc là điều k
 - Tài khoản dùng cùng múi giờ và truy cập được dữ liệu sản phẩm trên cả hai thiết bị.
 - Người dùng giữ được bản sao lưu đã xuất để thực hiện khôi phục khi cần.
 - Khi bước thiết kế được cho phép, mọi lựa chọn triển khai phải đáp ứng FR/NFR và được đánh giá riêng; PRD không yêu cầu một framework, database, API hoặc nhà cung cấp cụ thể.
+
+### 13.3. Quyết định xử lý FAIL đã được duyệt
+
+| Quyết định | Nội dung baseline được duyệt ngày 2026-09-12 | Requirement / nghiệm thu |
+|---|---|---|
+| Review FAIL-1 | Lưu trữ ngay, giữ lịch sử và sửa sai đến ngày lưu trữ; hủy mục tiêu chờ; chốt chuỗi theo ngày lưu trữ, không tự giảm theo thời gian, tính lại khi sửa lịch sử; không mở lại. | FR-011–013, FR-019–020, FR-023, FR-042; AC-011, AC-035–038 |
+| Review FAIL-2 | Cùng Done hoặc cùng bỏ Done không xung đột; hai yêu cầu đối nghịch từ dữ liệu chưa cập nhật cần người dùng chọn; giữ trạng thái đã lưu gần nhất trong lúc chờ, đồng bộ và tính lại sau chọn; bỏ Done giữ nhật ký. | FR-009, FR-012, FR-023, FR-043; AC-010, AC-039–041 |
+| Review FAIL-3 | Kiểm tra bản sao trước xác nhận; thành công thay thế toàn bộ, thất bại giữ nguyên dữ liệu trước nhập; tạm ngăn ghi trên hai thiết bị; khi mất kết nối phải xác định kết quả trước khi nhập lại hoặc sửa. | FR-040–041, FR-044–046, NFR-008; AC-031–032, AC-042–045 |
+
+### 13.4. WARNING được chấp nhận tại baseline MVP v1
+
+Chủ sản phẩm quyết định giữ baseline hiện tại sau khi xử lý ba FAIL, chấp nhận các WARNING còn lại mà chưa yêu cầu điều chỉnh. Danh sách này ghi nhận giới hạn đã biết; không bổ sung requirement hoặc tự chốt chi tiết chưa có.
+
+- NFR về độ trễ đồng bộ, hiệu năng tìm kiếm và danh sách thiết bị kiểm thử còn thiếu mức đo/điều kiện cụ thể; DEP-005–006 tiếp tục được theo dõi.
+- Phạm vi ngày bắt đầu khác hôm nay và quyền sửa ngày bắt đầu vẫn chưa chốt tại DEP-001; múi giờ cụ thể vẫn chưa được cung cấp tại DEP-002.
+- Thời điểm tự lưu, hành vi rời màn hình khi đang lưu và quy tắc trường được để trống chưa được mở rộng trong lần cập nhật này. Riêng bỏ Done giữ nhật ký đã được chốt trong Review FAIL-2.
+- Định nghĩa chi tiết xung đột nội dung văn bản, phạm vi đối tượng và sửa đối nghịch với xóa vẫn giữ như bản trước; quy tắc xung đột Done/bỏ Done đã được chốt riêng.
+- Cách khớp truy vấn nhiều từ trong tìm kiếm chưa bổ sung; giữ yêu cầu không phân biệt hoa/thường và dấu đã có.
+- Nội dung lặp giữa FR/NFR/AC và phụ thuộc hai chiều EPIC-002/EPIC-003 được chấp nhận; giữ nguyên sáu Epic, đối chiếu khi phân rã công việc ở giai đoạn được cho phép.
+- Cách diễn đạt “nhắc lịch” trong Out of Scope và “nhắc thực hiện challenge” trong Future Scope giữ nguyên; Future Scope vẫn không phải cam kết MVP.
+
+Việc chấp nhận WARNING không có nghĩa các thuộc tính chưa đo đã đạt kiểm thử; không phát sinh yêu cầu code, architecture hoặc bổ sung tính năng trong lần chốt này.
 
 ## 14. Future Scope
 
@@ -374,4 +426,4 @@ Các hướng dưới đây chỉ được xem xét sau khi có bằng chứng t
 
 ---
 
-**Điểm dừng:** PRD v1.0 đã được lập từ Project Brief v1.3 để chủ sản phẩm review. Chưa phê duyệt triển khai; chưa viết code, tạo architecture hoặc chia implementation stories. Chờ phản hồi review của chủ sản phẩm.
+**Baseline chính thức:** PRD v1.1 đã được chủ sản phẩm phê duyệt làm baseline cho MVP v1 ngày 2026-09-12, bao gồm ba quyết định xử lý FAIL và việc chấp nhận các WARNING còn lại. Không còn chờ review để chốt baseline. Lần cập nhật này chỉ sửa PRD; chưa viết code, tạo architecture hoặc chia implementation stories.
