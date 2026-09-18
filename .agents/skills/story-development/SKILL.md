@@ -1,6 +1,6 @@
 ---
 name: story-development
-description: Use for implementing an approved or ready-for-dev BMAD Story. Routes focused context loading, readiness, risk, direct Codex implementation, deterministic evidence, and BMAD lifecycle handoff.
+description: Use for implementing an approved or ready-for-dev BMAD Story under the shared V3 Lead policy.
 ---
 
 # Story Development
@@ -8,6 +8,9 @@ description: Use for implementing an approved or ready-for-dev BMAD Story. Route
 This skill is the repository's execution router for an approved BMAD Story. It
 selects proportionate controls; it is not a second SDLC or implementation agent.
 Follow the authority and Done Gate in the repository root `AGENTS.md`.
+Follow `.agents/policies/orchestration-v3.md`: Codex and Claude first perform its
+shared bootstrap; active runs enter RESUME MODE before new planning. Phase 1
+enables no Orca dispatch or direct product implementation fallback.
 
 ## 1. Preflight
 
@@ -58,16 +61,20 @@ short `delta plan` only for missing implementation information:
 - high-risk failure modes; and
 - verification commands.
 
-Do not create a persistent plan for an ordinary Story or repeat its background,
-ACs, and approved decisions.
+In the durable run plan, retain Story task references and any needed delta only;
+do not repeat background, ACs, or approved decisions.
 
 ## 5. Implement
 
 
 
-Codex implements directly. No external model review is required. Do not add
-implementation subagents, per-task reviewers, or a second implementation
-orchestrator to the default path.
+The Lead checkpoints the plan and bounded worker contract under V3 ownership.
+Once Phase 2 is enabled, dispatch fixed Antigravity through Orca into an isolated
+worktree. Preserve task/session IDs and use same-task corrections. Worker DONE
+requires Lead review of actual diff, scope, ACs, tests and architecture before
+ACCEPTED. No external model review is required. No extra implementation subagents
+or per-task reviewer loops belong to the default path. Infrastructure failure
+requires diagnosis/escalation, never silent Lead coding or engine substitution.
 
 Use Superpowers selectively:
 
@@ -104,7 +111,7 @@ testable, and state why.
 - `LOW`: standard implementation, focused checks, full applicable gate.
 - `MEDIUM`: also inspect affected consumers, state transitions, integration
   boundaries, and unhappy paths.
-- `HIGH`: perform the deeper Codex adversarial review defined in `AGENTS.md`
+- `HIGH`: perform the deeper Lead adversarial review defined in `AGENTS.md`
   and add targeted negative, concurrency, contract, recovery, or security tests
   where executable.
 
@@ -120,6 +127,8 @@ final gate. After about three recurrences of the same underlying failure, stop
 patching and reassess assumptions, Story clarity, environment, and dependencies.
 Escalate if approved intent or architecture must change.
 
-Apply the Deterministic Done Gate in `AGENTS.md`. When it passes, synchronize the
-BMAD Story/status lifecycle and hand irreversible merge, deployment, or release
-authority to the human.
+Apply the Deterministic Done Gate in `AGENTS.md` and V3 state transitions. Record
+verification evidence and enter HUMAN_GATE. Keep BMAD lifecycle accurate without
+conflating worker DONE, Lead ACCEPTED and Human APPROVED. COMPLETE requires the
+human approval/integration record and synchronized lifecycle; preserve the gate
+across every handoff.

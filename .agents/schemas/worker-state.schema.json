@@ -1,0 +1,98 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "V3 worker state",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "runId",
+    "taskId",
+    "engine",
+    "attempt",
+    "leadGeneration",
+    "revision",
+    "status",
+    "reviewStatus",
+    "story",
+    "orca",
+    "worktreePath",
+    "branch",
+    "baseCommit",
+    "resultPath",
+    "reviewPath",
+    "verificationAttempted",
+    "nextAction",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "schemaVersion": {"const":1},
+    "runId": {"type":"string","pattern":"^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$"},
+    "taskId": {"type":"string","pattern":"^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$"},
+    "engine": {"const":"Antigravity"},
+    "attempt": {"type":"integer","minimum":1},
+    "leadGeneration": {"type":"integer","minimum":1},
+    "revision": {"type":"integer","minimum":1},
+    "status": {"enum":["TASK_READY","RUNNING","DONE","FAILED","CANCELLED"]},
+    "reviewStatus": {"enum":["PENDING","ACCEPTED","CHANGES_REQUESTED"]},
+    "story": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id","path","commit","ref"],
+      "properties": {
+        "id": {"type":"string","minLength":1},
+        "path": {"type":"string","pattern":"^(?!/|[A-Za-z]:)(?!.*(?:^|/)\\.\\.(?:/|$))[^\\\\]+$"},
+        "commit": {"type":"string","pattern":"^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
+        "ref": {"type":["string","null"],"minLength":1}
+      }
+    },
+    "orca": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runId","taskId","sessionId","dispatchKey"],
+      "properties": {
+        "runId": {"type":["string","null"],"minLength":1},
+        "taskId": {"type":["string","null"],"minLength":1},
+        "sessionId": {"type":["string","null"],"minLength":1},
+        "dispatchKey": {"type":["string","null"],"minLength":1}
+      }
+    },
+    "worktreePath": {"type":["string","null"],"minLength":1},
+    "branch": {"type":["string","null"],"minLength":1},
+    "baseCommit": {"anyOf":[{"type":"string","pattern":"^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},{"type":"null"}]},
+    "resultPath": {"type":["string","null"],"minLength":1},
+    "reviewPath": {"type":["string","null"],"minLength":1},
+    "verificationAttempted": {"type":"boolean"},
+    "nextAction": {"type":"string","minLength":1,"maxLength":500},
+    "createdAt": {"type":"string","format":"date-time"},
+    "updatedAt": {"type":"string","format":"date-time"}
+  },
+  "allOf": [
+    {
+      "if": {"properties":{"status":{"enum":["RUNNING","DONE"]}}},
+      "then": {
+        "properties": {
+          "worktreePath": {"type":"string","minLength":1},
+          "branch": {"type":"string","minLength":1},
+          "baseCommit": {"type":"string","pattern":"^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
+          "orca": {
+            "properties": {
+              "runId": {"type":"string","minLength":1},
+              "taskId": {"type":"string","minLength":1},
+              "sessionId": {"type":"string","minLength":1},
+              "dispatchKey": {"type":"string","minLength":1}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties":{"status":{"const":"DONE"}}},
+      "then": {"properties":{"verificationAttempted":{"const":true},"resultPath":{"type":"string","minLength":1}}}
+    },
+    {
+      "if": {"properties":{"reviewStatus":{"const":"ACCEPTED"}}},
+      "then": {"properties":{"status":{"const":"DONE"},"reviewPath":{"type":"string","minLength":1}}}
+    }
+  ]
+}

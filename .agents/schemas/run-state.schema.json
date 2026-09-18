@@ -1,0 +1,196 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "V3 run state",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "runId",
+    "story",
+    "status",
+    "phase",
+    "revision",
+    "lastEventSequence",
+    "leadEngine",
+    "leadGeneration",
+    "workerEnginePolicy",
+    "runtimeIntegration",
+    "currentTaskId",
+    "orca",
+    "nextAction",
+    "humanGateRequired",
+    "humanApproval",
+    "createdAt",
+    "updatedAt",
+    "leadLease"
+  ],
+  "properties": {
+    "schemaVersion": {"const":1},
+    "runId": {"type":"string","pattern":"^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$"},
+    "story": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id","path","commit","ref"],
+      "properties": {
+        "id": {"type":"string","minLength":1},
+        "path": {"type":"string","pattern":"^(?!/|[A-Za-z]:)(?!.*(?:^|/)\\.\\.(?:/|$))[^\\\\]+$"},
+        "commit": {"type":"string","pattern":"^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
+        "ref": {"type":["string","null"],"minLength":1}
+      }
+    },
+    "status": {
+      "enum": [
+        "IDLE",
+        "PREFLIGHT",
+        "PLANNING",
+        "TASK_READY",
+        "WORKER_RUNNING",
+        "LEAD_REVIEW",
+        "VERIFICATION",
+        "HUMAN_GATE",
+        "COMPLETE",
+        "BLOCKED",
+        "LEAD_UNAVAILABLE",
+        "WORKER_FAILED",
+        "NEEDS_HUMAN",
+        "CANCELLED",
+        "NEEDS_RECONSTRUCTION"
+      ]
+    },
+    "phase": {
+      "enum": ["IDLE","PREFLIGHT","PLANNING","TASK_READY","WORKER_RUNNING","LEAD_REVIEW","VERIFICATION","HUMAN_GATE","COMPLETE"]
+    },
+    "revision": {"type":"integer","minimum":1},
+    "lastEventSequence": {"type":"integer","minimum":1},
+    "leadEngine": {"enum":["codex","claude"]},
+    "leadGeneration": {"type":"integer","minimum":1},
+    "workerEnginePolicy": {"const":"Antigravity"},
+    "runtimeIntegration": {"enum":["DISABLED","ENABLED"]},
+    "currentTaskId": {"anyOf":[{"type":"string","pattern":"^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$"},{"type":"null"}]},
+    "orca": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runId","taskId","sessionId","dispatchKey"],
+      "properties": {
+        "runId": {"type":["string","null"],"minLength":1},
+        "taskId": {"type":["string","null"],"minLength":1},
+        "sessionId": {"type":["string","null"],"minLength":1},
+        "dispatchKey": {"type":["string","null"],"minLength":1}
+      }
+    },
+    "nextAction": {"type":"string","minLength":1,"maxLength":500},
+    "humanGateRequired": {"const":true},
+    "humanApproval": {
+      "anyOf": [
+        {"type":"null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status","approver","approvedAt","diffIdentity","scope","evidencePath"],
+          "properties": {
+            "status": {"const":"APPROVED"},
+            "approver": {"type":"string","minLength":1},
+            "approvedAt": {"type":"string","format":"date-time"},
+            "diffIdentity": {"type":"string","minLength":1},
+            "scope": {"type":"string","minLength":1},
+            "evidencePath": {"type":"string","minLength":1}
+          }
+        }
+      ]
+    },
+    "createdAt": {"type":"string","format":"date-time"},
+    "updatedAt": {"type":"string","format":"date-time"},
+    "leadLease": {
+      "anyOf": [
+        {"type":"null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["owner","generation","acquiredAt","heartbeatAt"],
+          "properties": {
+            "owner": {"type":"string","minLength":1},
+            "generation": {"type":"integer","minimum":1},
+            "acquiredAt": {"type":"string","format":"date-time"},
+            "heartbeatAt": {"type":"string","format":"date-time"}
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {"if":{"properties":{"status":{"const":"COMPLETE"}}},"then":{"properties":{"humanApproval":{"type":"object"}}}},
+    {
+      "if": {"properties":{"runtimeIntegration":{"const":"DISABLED"}}},
+      "then": {
+        "properties": {
+          "orca": {
+            "properties": {"runId":{"type":"null"},"taskId":{"type":"null"},"sessionId":{"type":"null"},"dispatchKey":{"type":"null"}}
+          }
+        },
+        "not": {"properties":{"status":{"enum":["WORKER_RUNNING","LEAD_REVIEW","VERIFICATION","HUMAN_GATE","COMPLETE"]}}}
+      }
+    }
+  ],
+  "definitions": {
+    "activeRun": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion","activeRunId","storyId","status","updatedAt"],
+      "properties": {
+        "schemaVersion": {"const":1},
+        "activeRunId": {"anyOf":[{"type":"string","pattern":"^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$"},{"type":"null"}]},
+        "storyId": {"type":["string","null"],"minLength":1},
+        "status": {
+          "enum": [
+            "IDLE",
+            "PREFLIGHT",
+            "PLANNING",
+            "TASK_READY",
+            "WORKER_RUNNING",
+            "LEAD_REVIEW",
+            "VERIFICATION",
+            "HUMAN_GATE",
+            "COMPLETE",
+            "BLOCKED",
+            "LEAD_UNAVAILABLE",
+            "WORKER_FAILED",
+            "NEEDS_HUMAN",
+            "CANCELLED",
+            "NEEDS_RECONSTRUCTION"
+          ]
+        },
+        "updatedAt": {"anyOf":[{"type":"string","format":"date-time"},{"type":"null"}]}
+      },
+      "allOf": [
+        {
+          "if": {"properties":{"activeRunId":{"type":"null"}}},
+          "then": {"properties":{"storyId":{"type":"null"},"status":{"const":"IDLE"}}},
+          "else": {
+            "properties": {
+              "storyId": {"type":"string","minLength":1},
+              "status": {
+                "enum": [
+                  "PREFLIGHT",
+                  "PLANNING",
+                  "TASK_READY",
+                  "WORKER_RUNNING",
+                  "LEAD_REVIEW",
+                  "VERIFICATION",
+                  "HUMAN_GATE",
+                  "COMPLETE",
+                  "BLOCKED",
+                  "LEAD_UNAVAILABLE",
+                  "WORKER_FAILED",
+                  "NEEDS_HUMAN",
+                  "CANCELLED",
+                  "NEEDS_RECONSTRUCTION"
+                ]
+              },
+              "updatedAt": {"type":"string","format":"date-time"}
+            }
+          }
+        }
+      ]
+    }
+  }
+}

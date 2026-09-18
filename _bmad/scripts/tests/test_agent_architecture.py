@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import re
+import json
+import subprocess
 import unittest
 from pathlib import Path
 
@@ -45,7 +47,7 @@ class AgentArchitectureTests(unittest.TestCase):
         self.assertIn("Approved or ready-for-dev Stories use `story-development`", hub_help)
         self.assertNotRegex(hub_help, r"(?i)bmad-build(?:-auto)?.{0,80}(?:once )?per story")
 
-    def test_active_story_path_has_no_antigravity_or_mandatory_reviewer(self):
+    def test_active_story_path_uses_v3_without_mandatory_reviewer(self):
         self.assertFalse((REPO / ".agents/skills/antigravity-review").exists())
 
         active_policy = "\n".join(
@@ -56,9 +58,56 @@ class AgentArchitectureTests(unittest.TestCase):
                 ".agents/skills/story-development/references/complexity-rubric.md",
             )
         )
-        self.assertNotRegex(active_policy, r"(?i)antigravity|\bAGY\b")
+        self.assertIn("orchestration-v3.md", active_policy)
+        self.assertNotIn("Codex implements directly", active_policy)
+        self.assertNotIn("Codex performs the implementation", active_policy)
         self.assertNotRegex(active_policy, r"(?i)mandatory (external )?reviewer")
         self.assertIn("No external model review is required", active_policy)
+
+    def test_both_leads_share_canonical_bootstrap(self):
+        for path in ("AGENTS.md", "CLAUDE.md"):
+            self.assertIn(".agents/policies/orchestration-v3.md", read(path))
+        policy = read(".agents/policies/orchestration-v3.md")
+        self.assertIn("Do NOT read `events.jsonl` during ordinary resume", policy)
+        self.assertIn("Antigravity", policy)
+        self.assertIn("NEEDS_RECONSTRUCTION", policy)
+        self.assertIn("HUMAN_GATE", policy)
+
+    def test_v3_schema_contracts_and_pointer_shape(self):
+        run = json.loads(read(".agents/schemas/run-state.schema.json"))
+        worker = json.loads(read(".agents/schemas/worker-state.schema.json"))
+        for schema in (run, worker):
+            self.assertEqual(schema["$schema"], "http://json-schema.org/draft-07/schema#")
+            self.assertFalse(schema["additionalProperties"])
+            self.assertEqual(set(schema["required"]), set(schema["properties"]))
+        self.assertEqual(run["properties"]["leadEngine"]["enum"], ["codex", "claude"])
+        self.assertEqual(run["properties"]["workerEnginePolicy"]["const"], "Antigravity")
+        self.assertTrue(run["properties"]["humanGateRequired"]["const"])
+        self.assertEqual(worker["properties"]["engine"]["const"], "Antigravity")
+        self.assertNotIn("APPROVED", worker["properties"]["reviewStatus"]["enum"])
+        self.assertEqual(set(run["definitions"]["activeRun"]["required"]),
+                         {"schemaVersion", "activeRunId", "storyId", "status", "updatedAt"})
+
+    def test_v3_policy_links_resolve_and_runtime_is_ignored(self):
+        for path in ("AGENTS.md", "CLAUDE.md", ".agents/policies/orchestration-v3.md"):
+            for target in re.findall(r"\]\(([^)]+)\)", read(path)):
+                self.assertTrue((REPO / path).parent.joinpath(target).is_file(), target)
+        result = subprocess.run(
+            ["git", "check-ignore", "--no-index", ".agent-state/active-run.json",
+             ".agent-state/runs/probe/run.json"], cwd=REPO, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(len(result.stdout.splitlines()), 2)
+
+    def test_v3_normal_transitions_cannot_bypass_human_gate(self):
+        policy = read(".agents/policies/orchestration-v3.md")
+        edges = re.findall(r"^\| ([A-Z_]+) \| ([A-Z_]+) \|", policy, re.MULTILINE)
+        self.assertEqual([source for source, target in edges if target == "COMPLETE"],
+                         ["HUMAN_GATE"])
+        self.assertIn(("WORKER_RUNNING", "LEAD_REVIEW"), edges)
+        self.assertIn(("LEAD_REVIEW", "VERIFICATION"), edges)
+        self.assertNotIn(("WORKER_RUNNING", "COMPLETE"), edges)
+        self.assertIn("Age alone never expires the lease", policy)
+        self.assertIn("Stale generations", policy)
 
     def test_policy_defines_story_as_plan_risk_escalation_and_done_gate(self):
         policy = read("AGENTS.md")

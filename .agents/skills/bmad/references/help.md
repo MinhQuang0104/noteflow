@@ -39,8 +39,8 @@ Shaping and planning:
 Implementation and quality:
 
 - Approved or ready-for-dev Stories use `story-development`, the project router
-  for direct Codex implementation, deterministic evidence, and BMAD lifecycle
-  handoff.
+  for V3 Lead routing, deterministic evidence, and BMAD lifecycle handoff.
+  Root `AGENTS.md` and `.agents/policies/orchestration-v3.md` govern all execution.
 - `bmad-build` — legacy/general delivery workflow, used only when explicitly
   requested for freeform work that is not an approved Story.
 - `bmad-code-review` — optional review used only when explicitly requested; it
@@ -94,12 +94,12 @@ review, and finish the change. Scope is only one signal: high risk, unclear
 requirements, architectural reach, or coordination between people pushes work
 up a tier even when it is small.
 
-- **Trivial.** The edit is obvious and low-risk: make it directly and use no
+- **Trivial.** The edit is obvious and low-risk: follow V3 execution controls and use no
   BMad skill at all — unless the user asks for BMad, or the change
   would still benefit from explicit planning and review.
 - **One session.** For an approved or ready Story, use `story-development`.
-  For freeform work, implement directly unless the user explicitly requests
-  `bmad-build`.
+  For freeform work, follow V3 execution policy; `bmad-build` remains explicit-only
+  and cannot bypass its worker or ownership constraints.
 - **Epic-sized.** One coherent outcome that needs several sessions: run
   `bmad-spec` to pin down the what, tell it to create architecture and/or UX
   companion files if the situation calls for it, have it break the spec into

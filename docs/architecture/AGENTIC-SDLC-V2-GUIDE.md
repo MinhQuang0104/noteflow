@@ -1,4 +1,11 @@
-# Agentic SDLC Architecture V2
+# Agentic SDLC Architecture V2 (historical)
+
+> Superseded for execution and Lead ownership by
+> [Agent Architecture V3](../../.agents/policies/orchestration-v3.md) and
+> [AGENTS.md](../../AGENTS.md). The V2 examples below are historical, not startup
+> instructions. Codex-only/direct implementation and Antigravity exclusion no
+> longer apply. Risk, evidence and BMAD principles remain in current policy.
+> Read V3 for current bootstrap, durable state, worker and human-gate semantics.
 
 ## 1. Mục đích của tài liệu
 

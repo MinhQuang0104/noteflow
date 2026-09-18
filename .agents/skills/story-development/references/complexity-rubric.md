@@ -46,7 +46,7 @@ Any of these signals is HIGH:
 - an ambiguous Story or Acceptance Criterion; or
 - incomplete, inconsistent, or failing verification.
 
-Review depth: architecture-and-adversarial Codex review, relevant caller and
+Review depth: architecture-and-adversarial Lead review, relevant caller and
 consumer inspection, unhappy and recovery paths, plus targeted executable
 negative, contract, concurrency, or security tests.
 
@@ -56,6 +56,6 @@ keeps the Story out of the Done Gate even if the implementation appears correct.
 ## Escalation Rule
 
 Choose the highest level triggered by a concrete signal. Escalation changes the
-depth of Codex review and deterministic evidence; it does not automatically add
+depth of Lead review and deterministic evidence; it does not automatically add
 an agent, worktree, plan document, or review ceremony.
 

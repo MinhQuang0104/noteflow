@@ -2,14 +2,15 @@
 
 ## Authority
 
-Codex is the primary technical orchestrator and implementation agent.
+The Lead role is replaceable between Codex accounts and Claude. Before planning
+or implementation, follow the shared bootstrap and ownership protocol in
+[Agent Architecture V3](.agents/policies/orchestration-v3.md).
+Execution state lives in canonical `.agent-state/`, never in conversation history.
 
-For product and implementation decisions, use this order:
-
-1. explicit user direction
-2. approved BMAD product, architecture, UX, Epic, Story, and Acceptance Criteria artifacts
-3. deterministic evidence about the implementation
-4. implementation-method guidance
+The V3 policy defines source-of-truth order, fixed future Antigravity execution,
+local lease, handoff, and human integration gate. It supersedes incompatible V2
+execution rules and generic skill/persona instructions. Nested policies may refine
+scope but cannot bypass these controls. Explicit human direction remains binding.
 
 BMAD owns product intent, architecture and UX decisions, Epics, Stories,
 Acceptance Criteria, readiness, traceability, sprint status, and the Done Gate
@@ -19,7 +20,7 @@ product or architecture decisions to BMAD or a human.
 ## Approved Story Routing
 
 `story-development` is the sole repository-level execution router for an
-approved or `ready-for-dev` BMAD Story. Codex performs the implementation.
+approved or `ready-for-dev` BMAD Story. The Lead routes execution under V3.
 BMAD is not a second implementation orchestrator.
 
 Load the Story plus only the architecture, UX, code, and tests relevant to the
@@ -29,9 +30,9 @@ non-obvious ordering, migration or rollback sequencing, contract consumers,
 high-risk failure modes, or verification commands. Do not restate the Story,
 its background, all ACs, or approved technical decisions.
 
-No external model review is required. Per-task implementers, per-task reviewers,
-whole-branch reviewer loops, and implementation subagents are not part of the
-default path.
+No external model review is required. Additional implementation subagents and
+reviewer loops are not part of the default path. Future worker execution uses
+fixed Antigravity through Orca; Phase 1 does not enable that runtime.
 
 ## Risk Routing
 
@@ -48,10 +49,10 @@ Classify each Story before implementation:
   Story/AC, or incomplete/failing verification.
 
 LOW uses standard implementation and evidence. MEDIUM adds consumer and unhappy-
-path checks. HIGH adds a deeper Codex adversarial review and targeted tests; it
+path checks. HIGH adds a deeper Lead adversarial review and targeted tests; it
 does not automatically add another agent.
 
-For HIGH risk, Codex must:
+For HIGH risk, the Lead must:
 
 1. identify affected architecture decisions and invariants;
 2. attempt to falsify each important invariant;
@@ -101,7 +102,8 @@ A Story is complete only when:
 6. relevant architecture decisions and domain invariants are respected;
 7. no unresolved HIGH or MEDIUM issue remains;
 8. the BMAD Story and sprint/status lifecycle are synchronized; and
-9. a human retains approval for irreversible deployment or release decisions.
+9. the V3 HUMAN_GATE records human approval for the exact final integration
+   scope; worker DONE and Lead ACCEPTED alone never complete a run.
 
 Prefer evidence in this order:
 
@@ -117,11 +119,9 @@ executable acceptance/integration tests
 > LLM judgment
 ```
 
-Use only checks that actually exist. At the time this policy was established,
-the main checkout contains control-plane/BMAD checks and a placeholder root
-`npm test`; the application CI, tests, lint, typecheck, build, contract, and smoke
-gates planned by Story 1.1 are not yet executable evidence. Do not report them as
-passing until Story 1.1 implements them.
+Use only checks that actually exist in the current checkout. Historical V2 notes
+about planned checks or a placeholder root `npm test` are not current evidence.
+Never report a planned or unexecuted check as passing.
 
 Keep the AC-to-evidence record short:
 
@@ -139,7 +139,7 @@ why deterministic verification is not practical.
 ## Checkout and Generated-Workflow Safety
 
 Before Story work, inspect `git status`, the branch, and `git worktree list`.
-When operating in a linked worktree, compare its `AGENTS.md` and
+When operating in a linked worktree, compare its `AGENTS.md`, V3 policy and
 `story-development` policy with the canonical main checkout and report stale
 policy before implementation. Never update ignored worktree copies as a proxy
 for changing canonical policy.

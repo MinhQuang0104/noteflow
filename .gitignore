@@ -41,3 +41,6 @@ backend/storage/logs/*
 # Operating system files
 .DS_Store
 Thumbs.db
+
+# Local agent execution state (canonical policies remain tracked)
+.agent-state/
