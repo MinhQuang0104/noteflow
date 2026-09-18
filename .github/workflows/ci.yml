@@ -41,7 +41,8 @@ jobs:
       - run: composer --working-dir=backend install --no-interaction --prefer-dist --no-progress
       - run: backend/vendor/bin/pint --test
       - run: composer --working-dir=backend analyse
-      - run: php backend/artisan test
+      - run: php artisan test
+        working-directory: backend
 
   frontend:
     runs-on: ubuntu-latest
