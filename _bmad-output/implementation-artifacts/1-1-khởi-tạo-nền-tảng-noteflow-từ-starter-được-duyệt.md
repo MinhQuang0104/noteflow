@@ -204,6 +204,7 @@ OpenAI Codex (GPT-5)
 - `composer validate --strict --no-interaction` — PASS; lock/manifest valid.
 - `vendor\bin\pint.bat --test` and `vendor\bin\phpstan.bat analyse --memory-limit=1G` — PASS.
 - `php artisan test` — PASS, 3 tests / 6 assertions; repeated on official `php:8.4-cli` with the repository layout mounted intact.
+- Clean-checkout regression — tracked `backend/tests/Unit/.gitkeep` so the PHPUnit Unit testsuite path exists before any unit test is added.
 - Node 24.12.0/npm 11.6.2 `npm ci` — PASS, 354 packages, 0 vulnerabilities.
 - `npm run contract:validate`, `contract:check`, and `contract:proof` — PASS; stale generated types were rejected and the canonical contract was restored.
 - `npm run lint`, `type-check`, `test:unit -- --run`, and `build-only` — PASS; 3 Vitest files / 6 tests.
@@ -248,7 +249,7 @@ OpenAI Codex (GPT-5)
 - `backend/database/factories/UserFactory.php`, `backend/database/seeders/DatabaseSeeder.php`, `backend/database/migrations/{0001_01_01_000000_create_users_table,2026_09_16_135722_create_personal_access_tokens_table}.php`
 - `backend/database/.gitignore`, `backend/public/{.htaccess,index.php,robots.txt}`, `backend/routes/{api,console,web}.php`
 - `backend/storage/**/.gitignore`
-- `backend/tests/Pest.php`, `backend/tests/TestCase.php`, `backend/tests/Feature/FoundationHealthTest.php`, `backend/tests/Contract/{FoundationResponseContractTest,OpenApiResponseValidator}.php`
+- `backend/tests/Pest.php`, `backend/tests/TestCase.php`, `backend/tests/Unit/.gitkeep`, `backend/tests/Feature/FoundationHealthTest.php`, `backend/tests/Contract/{FoundationResponseContractTest,OpenApiResponseValidator}.php`
 - `contracts/openapi.yaml`
 - `deploy/README.md`, `deploy/nginx/noteflow.conf`
 - `frontend/.editorconfig`, `frontend/.gitattributes`, `frontend/.gitignore`, `frontend/.oxlintrc.json`, `frontend/.prettierrc.json`, `frontend/env.d.ts`, `frontend/eslint.config.ts`, `frontend/index.html`, `frontend/package.json`, `frontend/package-lock.json`
@@ -266,6 +267,7 @@ OpenAI Codex (GPT-5)
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
+| 2026-09-18 | 1.4 | Fixed clean-checkout backend test discovery by tracking the configured empty Unit testsuite directory | Codex |
 | 2026-09-18 | 1.3 | Recorded human acceptance, reran the full Deterministic Done Gate and Architecture V2 regression suite, and moved the Story to done | Codex |
 | 2026-09-17 | 1.2 | Implemented the approved foundation, contract pipeline, same-origin routing, CI/quality gates, and deterministic completion evidence; moved to review | Codex |
 | 2026-09-15 | 1.1 | Đồng bộ F6 với Epics và AD-15: thêm foundation runtime response contract test cùng positive/negative CI evidence | Codex |
