@@ -22,6 +22,7 @@ Copy-Item .env.example .env
 composer install --no-interaction --prefer-dist --no-progress
 php artisan key:generate
 php artisan migrate
+php artisan noteflow:provision-owner owner@example.com
 
 Set-Location ..\frontend
 npm.cmd ci
@@ -34,6 +35,11 @@ npx.cmd playwright install chromium
 Create the PostgreSQL databases and credentials named in `backend/.env.example`
 before running migrations. Tests that access persistence must use PostgreSQL;
 SQLite is not accepted as substitute evidence.
+
+The owner provisioning command asks for the password twice using hidden prompts.
+Run it directly in a trusted terminal so the password is never placed in shell
+history. Production must use HTTPS and set `SESSION_SECURE_COOKIE=true`; public
+registration and password-reset routes are intentionally absent.
 
 The frontend keeps `@emnapi/wasi-threads` and `tslib` as explicit dev pins to
 work around the npm bundled-dependency lockfile defect tracked in

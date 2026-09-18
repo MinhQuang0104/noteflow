@@ -1,5 +1,31 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+import { ref } from 'vue'
+import { RouterLink, RouterView, useRouter } from 'vue-router'
+
+import { useAuthStore } from '../stores/auth'
+
+const auth = useAuthStore()
+const router = useRouter()
+const navigationOpen = ref(false)
+const loggingOut = ref(false)
+
+const navigation = [
+  { to: '/today', label: 'Hôm nay' },
+  { to: '/challenges', label: 'Challenge' },
+  { to: '/notes', label: 'Ghi chú' },
+  { to: '/calendar', label: 'Lịch' },
+]
+
+async function logOut(): Promise<void> {
+  loggingOut.value = true
+  try {
+    await auth.logOut()
+    navigationOpen.value = false
+    await router.replace('/sign-in')
+  } finally {
+    loggingOut.value = false
+  }
+}
 </script>
 
 <template>
@@ -13,20 +39,55 @@ import { RouterLink, RouterView } from 'vue-router'
   <div class="min-h-screen min-w-0 bg-slate-50 text-slate-950">
     <header class="border-b border-slate-200 bg-white">
       <div class="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-4 px-4 py-4 sm:px-6">
-        <RouterLink class="shrink-0 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4" to="/">
+        <RouterLink
+          class="shrink-0 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4"
+          :to="auth.status === 'authenticated' ? '/today' : '/sign-in'"
+        >
           <h1 class="text-xl font-semibold tracking-tight">NoteFlow</h1>
         </RouterLink>
 
-        <nav aria-label="Điều hướng chính" class="ml-auto flex flex-wrap items-center gap-2">
-          <RouterLink class="rounded-lg px-3 py-2 text-sm font-medium hover:bg-slate-100" to="/">
-            Nền tảng
+        <button
+          v-if="auth.status === 'authenticated'"
+          aria-controls="primary-navigation"
+          :aria-expanded="navigationOpen"
+          class="ml-auto rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium md:hidden"
+          type="button"
+          @click="navigationOpen = !navigationOpen"
+        >
+          Mở điều hướng
+        </button>
+
+        <nav
+          v-if="auth.status === 'authenticated'"
+          id="primary-navigation"
+          aria-label="Điều hướng chính"
+          class="w-full items-center gap-1 md:ml-auto md:flex md:w-auto"
+          :class="navigationOpen ? 'block' : 'hidden md:flex'"
+        >
+          <RouterLink
+            v-for="item in navigation"
+            :key="item.to"
+            class="block rounded-lg px-3 py-2 text-sm font-medium hover:bg-slate-100"
+            :to="item.to"
+            @click="navigationOpen = false"
+          >
+            {{ item.label }}
           </RouterLink>
           <RouterLink
-            class="rounded-lg px-3 py-2 text-sm font-medium hover:bg-slate-100"
-            to="/smoke/deep-link"
+            class="block rounded-lg px-3 py-2 text-sm font-medium hover:bg-slate-100 md:ml-3"
+            to="/settings"
+            @click="navigationOpen = false"
           >
-            Deep link
+            Cài đặt
           </RouterLink>
+          <button
+            class="mt-2 rounded-lg px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 md:mt-0"
+            :disabled="loggingOut"
+            type="button"
+            @click="logOut"
+          >
+            Đăng xuất
+          </button>
         </nav>
       </div>
     </header>

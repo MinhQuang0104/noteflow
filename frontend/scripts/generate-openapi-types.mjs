@@ -41,7 +41,11 @@ function objectType(schema, indent = '      ') {
   const required = new Set(schema.required ?? [])
   const properties = Object.entries(schema.properties ?? {})
 
-  if (properties.length === 0) return 'Record<string, never>'
+  if (properties.length === 0) {
+    return schema.additionalProperties && typeof schema.additionalProperties === 'object'
+      ? `Record<string, ${schemaType(schema.additionalProperties)}>`
+      : 'Record<string, never>'
+  }
 
   const lines = properties.map(([name, property]) => {
     const optional = required.has(name) ? '' : '?'
@@ -49,6 +53,16 @@ function objectType(schema, indent = '      ') {
   })
 
   return `{\n${lines.join('\n')}\n${indent.slice(0, -2)}}`
+}
+
+function resolveLocalReference(document, value) {
+  if (!value?.$ref?.startsWith('#/')) return value
+
+  return value.$ref
+    .slice(2)
+    .split('/')
+    .map((segment) => segment.replaceAll('~1', '/').replaceAll('~0', '~'))
+    .reduce((current, segment) => current?.[segment], document)
 }
 
 function generateComponents(document) {
@@ -74,9 +88,18 @@ function generateOperations(document) {
       if (!operation?.operationId) continue
 
       const responseLines = Object.entries(operation.responses ?? {}).map(([status, response]) => {
-        const contents = Object.entries(response.content ?? {}).map(([mediaType, media]) => {
+        const resolvedResponse = resolveLocalReference(document, response)
+        const contents = Object.entries(resolvedResponse.content ?? {}).map(([mediaType, media]) => {
           return `          ${quote(mediaType)}: ${schemaType(media.schema)}`
         })
+
+        if (contents.length === 0) {
+          return [
+            `      ${quote(status)}: {`,
+            '        content: Record<string, never>',
+            '      }',
+          ].join('\n')
+        }
 
         return [
           `      ${quote(status)}: {`,

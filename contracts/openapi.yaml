@@ -6,6 +6,83 @@ servers:
   - url: /
     description: Same-origin NoteFlow deployment
 paths:
+  /login:
+    post:
+      operationId: loginOwner
+      summary: Create a session for the provisioned NoteFlow owner
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Owner session created
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResult'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '419':
+          $ref: '#/components/responses/CsrfExpired'
+        '429':
+          description: Too many login attempts
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /logout:
+    post:
+      operationId: logoutOwner
+      summary: Invalidate the active owner session
+      security:
+        - sanctumCookie: []
+      responses:
+        '204':
+          description: Owner session invalidated
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '419':
+          $ref: '#/components/responses/CsrfExpired'
+  /api/v1/session:
+    get:
+      operationId: getOwnerSession
+      summary: Resolve the authenticated owner session
+      security:
+        - sanctumCookie: []
+      responses:
+        '200':
+          description: Authenticated owner session
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnerSession'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          description: Authenticated identity is not the provisioned owner
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /api/v1/foundation:
     get:
       operationId: foundationHealth
@@ -19,7 +96,131 @@ paths:
               schema:
                 $ref: '#/components/schemas/FoundationHealth'
 components:
+  securitySchemes:
+    sanctumCookie:
+      type: apiKey
+      in: cookie
+      name: noteflow-session
+      description: Laravel Sanctum first-party SPA session cookie. Unsafe requests also require XSRF protection.
+  headers:
+    PrivateNoStore:
+      description: Prevents private owner data from being cached.
+      schema:
+        type: string
+        pattern: '(^|, ?)(private|no-store)'
+  responses:
+    Unauthenticated:
+      description: No valid owner session
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/PrivateNoStore'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    ValidationError:
+      description: Request validation or credentials failed
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/PrivateNoStore'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+    CsrfExpired:
+      description: CSRF session expired or token mismatched
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/PrivateNoStore'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
   schemas:
+    Owner:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - email
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+    OwnerSession:
+      type: object
+      additionalProperties: false
+      required:
+        - owner
+      properties:
+        owner:
+          $ref: '#/components/schemas/Owner'
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        redirect_to:
+          type: string
+          nullable: true
+    LoginResult:
+      type: object
+      additionalProperties: false
+      required:
+        - owner
+        - redirect_to
+      properties:
+        owner:
+          $ref: '#/components/schemas/Owner'
+        redirect_to:
+          type: string
+          enum:
+            - /today
+            - /challenges
+            - /notes
+            - /calendar
+            - /settings
+    ApiError:
+      type: object
+      additionalProperties: false
+      required:
+        - message
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+          enum:
+            - csrf_expired
+    ValidationError:
+      type: object
+      additionalProperties: false
+      required:
+        - message
+        - errors
+      properties:
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
     FoundationHealth:
       type: object
       additionalProperties: false
