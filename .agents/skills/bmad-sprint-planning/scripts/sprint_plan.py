@@ -103,7 +103,7 @@ WORKFLOW NOTES:
 - Epic transitions to 'in-progress' automatically when its first story starts (via build's sprint sync)
 - Stories can be worked in parallel if team capacity allows
 - Developer typically creates the next story after the previous one is 'done' to incorporate learnings
-- Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+- Dev supplies deterministic Done Gate evidence; code-review is optional and explicitly requested
 - Retrospective appends its action items to action_items; the status view surfaces open ones
 """
 

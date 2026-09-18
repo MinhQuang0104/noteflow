@@ -1,6 +1,6 @@
 ---
 name: bmad-code-review
-description: 'Review code changes with several independent reviewers in parallel, then triage and present the findings. Use when the user says "run code review" or "review this code"'
+description: 'Optional explicit code-review workflow with independent reviewers and finding triage. Use only when the user explicitly asks to run bmad-code-review or review code; it is not a default Story gate.'
 ---
 
 Run the following command exactly once without changing the current working directory. Replace `{project-root}` with the absolute path to the project root and `{skill-root}` with the absolute path to this skill's directory:

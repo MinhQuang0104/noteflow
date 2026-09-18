@@ -1,221 +1,61 @@
-\# Story Complexity Rubric
+# Story Risk Rubric
 
+Classify by failure impact, uncertainty, and verification quality, not by lines
+of code. A larger localized change can be LOW; a tiny authorization change is
+HIGH.
 
+## LOW
 
-Classify implementation complexity using risk and uncertainty, not line count.
+All of the following normally apply:
 
+- localized, explicit change;
+- no public contract or shared architecture boundary;
+- no authentication, authorization, or security behavior;
+- no migration, destructive operation, or irreversible side effect;
+- no concurrency or consistency risk; and
+- straightforward deterministic verification.
 
+Review depth: standard implementation, focused checks, all applicable repository
+checks, AC evidence, and final diff/scope inspection.
 
-\## SIMPLE
+## MEDIUM
 
+Use MEDIUM for meaningful integration risk within approved boundaries, including:
 
+- multi-file or multi-module behavior;
+- state transitions or persistence behavior;
+- API consumer changes that do not alter a public contract;
+- several connected unhappy paths; or
+- a moderate regression surface with available verification.
 
-Typical characteristics:
+Review depth: LOW controls plus affected consumers, state transitions,
+integration boundaries, and unhappy paths.
 
+## HIGH
 
+Any of these signals is HIGH:
 
-\- isolated change
+- authentication, authorization, or security-sensitive behavior;
+- migration, backfill, destructive data operation, or difficult rollback;
+- concurrency, idempotency, caching, or state-consistency risk;
+- backup or restore;
+- a shared architecture boundary or public API/OpenAPI contract;
+- a time or search semantic invariant;
+- a cross-module write path or broad refactor;
+- an irreversible external side effect;
+- an ambiguous Story or Acceptance Criterion; or
+- incomplete, inconsistent, or failing verification.
 
-\- one module or narrow component
+Review depth: architecture-and-adversarial Codex review, relevant caller and
+consumer inspection, unhappy and recovery paths, plus targeted executable
+negative, contract, concurrency, or security tests.
 
-\- requirements are explicit
+Ambiguity is a blocker, not permission to invent behavior. Incomplete evidence
+keeps the Story out of the Done Gate even if the implementation appears correct.
 
-\- few acceptance criteria
+## Escalation Rule
 
-\- no architecture decision
-
-\- no database schema change
-
-\- no authentication/security boundary
-
-\- no concurrency or race-condition concern
-
-\- no migration
-
-\- no external integration
-
-\- low regression surface
-
-
-
-Examples:
-
-
-
-\- UI text or label change
-
-\- small deterministic validation rule
-
-\- isolated formatting behavior
-
-\- minor component behavior with obvious tests
-
-
-
-Execution:
-
-
-
-Direct implementation with proportionate verification.
-
-
-
-Use TDD when the change expresses meaningful behavior or fixes a reproducible bug,
-
-but do not force a heavyweight TDD workflow for trivial non-behavioral changes.
-
-
-
-\---
-
-
-
-\## MEDIUM
-
-
-
-Typical characteristics:
-
-
-
-\- multiple files or modules
-
-\- several acceptance criteria
-
-\- API/client interaction
-
-\- state management
-
-\- routing
-
-\- non-trivial validation
-
-\- multiple edge cases
-
-\- moderate regression surface
-
-\- implementation approach needs planning
-
-\- architecture already defines the relevant boundary
-
-
-
-Examples:
-
-
-
-\- search behavior
-
-\- keyboard navigation
-
-\- form flow
-
-\- CRUD feature across frontend/backend
-
-\- API integration
-
-\- state synchronization without complex concurrency
-
-
-
-Execution:
-
-
-
-1\. Superpowers writing-plans
-
-2\. Superpowers test-driven-development
-
-3\. Implementation
-
-4\. Deterministic verification
-
-5\. Codex review
-
-
-
-\---
-
-
-
-\## COMPLEX
-
-
-
-Any of the following strongly indicates COMPLEX:
-
-
-
-\- database schema or migration with meaningful risk
-
-\- authentication or authorization
-
-\- security-sensitive behavior
-
-\- concurrency
-
-\- race conditions
-
-\- background jobs
-
-\- transactions across multiple resources
-
-\- backup/restore
-
-\- destructive operations
-
-\- data consistency invariants
-
-\- architecture boundary changes
-
-\- external service integration with failure modes
-
-\- large cross-module impact
-
-\- many dependent acceptance criteria
-
-\- high uncertainty
-
-\- difficult rollback
-
-\- multiple independently implementable tasks
-
-
-
-Execution:
-
-1. Superpowers `writing-plans`
-2. Superpowers `test-driven-development` where appropriate
-3. Direct Codex implementation by default
-4. Deterministic verification
-5. Whole-change Codex code review
-6. Consider Antigravity independent review when risk justifies it
-
-`subagent-driven-development` is an optional escalation.
-
-Use SDD only if the SDD Gate in `story-development/SKILL.md` is satisfied.
-
-COMPLEX does not automatically imply:
-- SDD
-- worktrees
-- parallel subagents
-- additional planning artifacts
-
-
-
-\---
-
-
-
-\## Escalation Rule
-
-
-
-When classification falls between two levels, choose the higher level only when
-
-the additional risk justifies the extra process.
-
-
-
-Do not classify based primarily on estimated lines of code.
+Choose the highest level triggered by a concrete signal. Escalation changes the
+depth of Codex review and deterministic evidence; it does not automatically add
+an agent, worktree, plan document, or review ceremony.
 

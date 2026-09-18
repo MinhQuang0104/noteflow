@@ -38,13 +38,13 @@ Shaping and planning:
 
 Implementation and quality:
 
-- `bmad-build` — one session-sized unit of delivery: clarifies the intent,
-  plans as needed, implements, reviews, and presents. The implementation unit
-  every path shares.
-- `bmad-build-auto` — one unattended Build unit; the worker an orchestrated
-  loop dispatches. Do not choose it for attended work.
-- `bmad-code-review` — optional extra review of any change, on top of
-  Build's built-in review.
+- Approved or ready-for-dev Stories use `story-development`, the project router
+  for direct Codex implementation, deterministic evidence, and BMAD lifecycle
+  handoff.
+- `bmad-build` — legacy/general delivery workflow, used only when explicitly
+  requested for freeform work that is not an approved Story.
+- `bmad-code-review` — optional review used only when explicitly requested; it
+  is not a default Story gate.
 - `bmad-walkthrough` — guided human walkthrough of a change.
 - `bmad-qa-generate-e2e-tests` — generates API and end-to-end tests for
   implemented code.
@@ -97,15 +97,13 @@ up a tier even when it is small.
 - **Trivial.** The edit is obvious and low-risk: make it directly and use no
   BMad skill at all — unless the user asks for BMad, or the change
   would still benefit from explicit planning and review.
-- **One session.** One coherent intent that fits an implementation session:
-  hand it straight to `bmad-build`. No planning skill needs to run first.
+- **One session.** For an approved or ready Story, use `story-development`.
+  For freeform work, implement directly unless the user explicitly requests
+  `bmad-build`.
 - **Epic-sized.** One coherent outcome that needs several sessions: run
   `bmad-spec` to pin down the what, tell it to create architecture and/or UX
   companion files if the situation calls for it, have it break the spec into
-  stories, then run `bmad-build` or `bmad-build-auto` once per story. Risky
-  and foundational stories deserve human attention, therefore `bmad-build`;
-  once the decisions and patterns are stable, an orchestrated loop
-  dispatching `bmad-build-auto` sessions may also be used. Finish with
+  stories, then use `story-development` for each approved Story. Finish with
   `bmad-retrospective` against the spec.
 - **Project-sized.** 10-100 coding sessions: take the full planning route —
   `bmad-product-brief` or `bmad-prfaq`, then `bmad-prd`, then `bmad-ux` when
@@ -124,16 +122,10 @@ this does not prove completion. Then:
   restart.
 - When you detect ongoing sprint tracking, but sprint state is unclear, use
   `bmad-sprint-planning`'s status action.
-- After a Build: `bmad-code-review` is an optional extra gate; offer
-  `bmad-qa-generate-e2e-tests` when automated coverage is wanted and
-  `bmad-walkthrough` when a human wants a walkthrough. Recommend
-  repeated `bmad-code-review` after material fixes until remaining findings
-  no longer affect acceptance. Keep in mind that both build skills have a
-  review step, and each `bmad-code-review` run can take up to half an hour or
-  more — it pays for itself when it catches real defects, not when it
-  produces a long tail of minor issues. More than two iterations of agentic
-  review on the same change is often a symptom of problems outside the
-  change — bad planning, a messy codebase, etc.
+- After Story implementation, apply the repository Deterministic Done Gate and
+  synchronize BMAD lifecycle state. Use `bmad-code-review` only when the user
+  explicitly requests it. Offer `bmad-qa-generate-e2e-tests` when automated
+  coverage is wanted and `bmad-walkthrough` when a human wants a walkthrough.
 - When an epic completes, offer `bmad-retrospective`. When it — or anything
   midstream — exposes a significant planning change, route through
   `bmad-correct-course`, then resume at the earliest affected skill once the

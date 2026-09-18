@@ -1,6 +1,6 @@
 ---
 name: bmad-build
-description: 'Turns implementation work into working code, reviewed and verified. Use when the user delegates a feature, story, bug fix, or meaningful change; a bare story or issue link counts. Skip obvious, low-risk mechanical maintenance such as small ignore-file, typo-only, formatting-only, or configuration-hygiene edits. Explicit BMAD requests always qualify. Do not volunteer for user-directed interactive edits or version-control operations that only record existing work.'
+description: 'Legacy/general BMad Build workflow. Use only when the user explicitly invokes bmad-build for freeform work that is not an approved BMAD Story; approved or ready-for-dev Stories use story-development.'
 ---
 
 Run the following command exactly once without changing the current working directory. Replace `{project-root}` with the absolute path to the project root and `{skill-root}` with the absolute path to this skill's directory:

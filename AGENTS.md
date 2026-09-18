@@ -1,101 +1,150 @@
 # Project Agent Instructions
 
-## Development Authority
+## Authority
 
 Codex is the primary technical orchestrator and implementation agent.
 
-BMAD artifacts are the source of truth for:
-- product requirements
-- architecture
-- epics
-- stories
-- acceptance criteria
-- specification traceability
+For product and implementation decisions, use this order:
 
-Approved BMAD artifacts outrank implementation methodology preferences.
+1. explicit user direction
+2. approved BMAD product, architecture, UX, Epic, Story, and Acceptance Criteria artifacts
+3. deterministic evidence about the implementation
+4. implementation-method guidance
 
-## BMAD and Superpowers Boundary
+BMAD owns product intent, architecture and UX decisions, Epics, Stories,
+Acceptance Criteria, readiness, traceability, sprint status, and the Done Gate
+record. Do not silently reinterpret an approved requirement. Escalate unresolved
+product or architecture decisions to BMAD or a human.
 
-BMAD owns specification and product/architecture decisions.
+## Approved Story Routing
 
-For a BMAD Story that is already approved or `ready-for-dev`:
+`story-development` is the sole repository-level execution router for an
+approved or `ready-for-dev` BMAD Story. Codex performs the implementation.
+BMAD is not a second implementation orchestrator.
 
-- Treat the Story and approved upstream BMAD artifacts as the approved specification.
-- Do not rerun Superpowers brainstorming for the product requirement.
-- Do not redesign approved product scope through Superpowers.
-- Use Superpowers only as an implementation methodology.
-- If a genuine contradiction or blocker is discovered, stop and escalate it instead of silently redesigning the Story.
+Load the Story plus only the architecture, UX, code, and tests relevant to the
+change. Treat actionable Story Tasks/Subtasks as the implementation plan. Write
+a concise `delta plan` only when the Story lacks an implementation mapping,
+non-obvious ordering, migration or rollback sequencing, contract consumers,
+high-risk failure modes, or verification commands. Do not restate the Story,
+its background, all ACs, or approved technical decisions.
 
-## Story Execution Policy
+No external model review is required. Per-task implementers, per-task reviewers,
+whole-branch reviewer loops, and implementation subagents are not part of the
+default path.
 
-Before implementation, classify the Story as:
+## Risk Routing
 
-- SIMPLE
-- MEDIUM
-- COMPLEX
+Classify each Story before implementation:
 
-Use the project `story-development` skill to perform the classification and select the execution workflow.
+- **LOW** — localized change; no public contract, authentication/security,
+  migration, concurrency, destructive operation, or irreversible side effect.
+- **MEDIUM** — multi-file or multi-module behavior, state changes, API consumer
+  changes, or meaningful integration behavior within approved boundaries.
+- **HIGH** — authentication, authorization, security, migration, backfill,
+  destructive data change, concurrency, idempotency, backup/restore, shared
+  architecture boundary, public API/OpenAPI contract, time/search invariant,
+  cross-module write/refactor, irreversible external side effect, ambiguous
+  Story/AC, or incomplete/failing verification.
 
-Execution policy:
+LOW uses standard implementation and evidence. MEDIUM adds consumer and unhappy-
+path checks. HIGH adds a deeper Codex adversarial review and targeted tests; it
+does not automatically add another agent.
 
-- SIMPLE:
-  - direct implementation
-  - proportionate tests
-  - deterministic verification
+For HIGH risk, Codex must:
 
-- MEDIUM:
-  - Superpowers `writing-plans`
-  - Superpowers `test-driven-development`
-  - implementation
-  - deterministic verification
+1. identify affected architecture decisions and invariants;
+2. attempt to falsify each important invariant;
+3. inspect relevant callers and consumers;
+4. inspect unhappy paths and rollback/recovery where applicable;
+5. add executable negative, concurrency, or security tests when applicable; and
+6. support every finding with evidence.
 
-- COMPLEX:
-  - Superpowers `writing-plans`
-  - focused `test-driven-development`
-  - direct Codex implementation by default
-  - deterministic verification
-  - whole-change Codex review
-  - optional Antigravity review when risk justifies it
-  - `subagent-driven-development` only when the SDD Gate in `story-development` is satisfied
+Classify findings as `VALID`, `FALSE_POSITIVE`, `SPEC_AMBIGUITY`, or
+`NEEDS_HUMAN_DECISION`. Never resolve `SPEC_AMBIGUITY` by inventing product
+behavior.
 
-Do not use a heavier workflow than the Story risk requires.
+## Selective Techniques
 
-## Superpowers Overhead Control
+Superpowers provides techniques, not a second orchestration layer:
 
-Do not automatically use heavy Superpowers workflow components.
+- use `test-driven-development` for behavioral logic and regressions, not as
+  ceremony for pure scaffold or configuration;
+- use `systematic-debugging` only after an actual failure;
+- use `verification-before-completion` to require fresh evidence;
+- use `receiving-code-review` only when review feedback actually exists; and
+- use `writing-plans` only when Story Tasks/Subtasks are insufficient, producing
+  only the delta plan described above.
 
-For approved BMAD Stories:
+Do not put `requesting-code-review`, `subagent-driven-development`,
+`executing-plans`, `using-git-worktrees`, or reviewer loops on the default Story
+path. Use an optional review workflow only when the user explicitly requests it.
 
-- do not regenerate Epic context unless required by a verified blocker
-- do not create implementation-plan commits by default
-- do not create git worktrees unless isolation materially helps
-- do not create SDD ledgers or conflict tables unless SDD is explicitly justified
-- do not invoke `subagent-driven-development` solely because a Story is COMPLEX
+## Failure and Retry
 
-Prefer the simplest execution workflow that safely satisfies the approved Story.
+On verification failure: reproduce, identify the root cause, add a regression
+test where appropriate, make the smallest fix, rerun affected verification, and
+then rerun the final gate. If the same underlying failure recurs about three
+times, stop patching and reassess the architecture assumption, Story clarity,
+test environment, and dependency/configuration state. Escalate when approved
+intent or architecture would need to change; do not respond by adding reviewers.
 
-## Antigravity Reviews
+## Deterministic Done Gate
 
-For independent cross-model review, use:
+A Story is complete only when:
 
-`antigravity-review`
+1. every AC has evidence;
+2. applicable deterministic checks were run recently;
+3. those checks are green;
+4. the final diff was inspected;
+5. no unintended scope change remains;
+6. relevant architecture decisions and domain invariants are respected;
+7. no unresolved HIGH or MEDIUM issue remains;
+8. the BMAD Story and sprint/status lifecycle are synchronized; and
+9. a human retains approval for irreversible deployment or release decisions.
 
-Antigravity is optional and risk-based.
+Prefer evidence in this order:
 
-Codex remains the primary orchestrator and must independently verify and triage all Antigravity findings.
+```text
+executable acceptance/integration tests
+> contract tests
+> typecheck/static analysis
+> lint
+> build
+> smoke/E2E
+> runtime assertions
+> documented manual evidence
+> LLM judgment
+```
 
-Never use `--dangerously-skip-permissions`.
+Use only checks that actually exist. At the time this policy was established,
+the main checkout contains control-plane/BMAD checks and a placeholder root
+`npm test`; the application CI, tests, lint, typecheck, build, contract, and smoke
+gates planned by Story 1.1 are not yet executable evidence. Do not report them as
+passing until Story 1.1 implements them.
 
-If AGY workspace-aware headless review fails, use the context-in-memory fallback defined by the skill.
+Keep the AC-to-evidence record short:
 
-Approved BMAD artifacts and deterministic evidence outrank Antigravity recommendations.
+```text
+AC1
+Evidence:
+- test/check: <name>
+- command: <command>
+- result: PASS
+```
 
-## Completion Rule
+If an AC cannot be tested deterministically, record concise manual evidence and
+why deterministic verification is not practical.
 
-Never declare implementation complete without fresh deterministic verification appropriate to the change, including relevant:
+## Checkout and Generated-Workflow Safety
 
-- tests
-- lint
-- typecheck
-- build
-- git diff inspection
+Before Story work, inspect `git status`, the branch, and `git worktree list`.
+When operating in a linked worktree, compare its `AGENTS.md` and
+`story-development` policy with the canonical main checkout and report stale
+policy before implementation. Never update ignored worktree copies as a proxy
+for changing canonical policy.
+
+The legacy BMAD Build renderer currently leaves real spaced workflow placeholders
+unresolved. It is not on the approved Story execution path. Treat its rendered
+snapshot as follow-up technical debt, not executable Story instructions, until a
+separate renderer fix has deterministic coverage for the real placeholder syntax.
