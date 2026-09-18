@@ -1,0 +1,37 @@
+openapi: 3.0.3
+info:
+  title: NoteFlow API
+  version: 1.0.0
+servers:
+  - url: /
+    description: Same-origin NoteFlow deployment
+paths:
+  /api/v1/foundation:
+    get:
+      operationId: foundationHealth
+      summary: Verify that the NoteFlow API foundation is available
+      security: []
+      responses:
+        '200':
+          description: Foundation is available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoundationHealth'
+components:
+  schemas:
+    FoundationHealth:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - service
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+        service:
+          type: string
+          enum:
+            - noteflow-api

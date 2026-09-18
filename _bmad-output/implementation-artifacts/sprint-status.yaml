@@ -26,17 +26,17 @@
 # - Epic transitions to 'in-progress' automatically when its first story starts (via build's sprint sync)
 # - Stories can be worked in parallel if team capacity allows
 # - Developer typically creates the next story after the previous one is 'done' to incorporate learnings
-# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+# - Dev supplies deterministic Done Gate evidence; code-review is optional and explicitly requested
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 09-14-2026 14:51
-last_updated: 09-14-2026 15:00
+last_updated: 09-18-2026 09:19
 project: NoteFlow
 project_key: NOKEY
 tracking_system: file-system
 story_location: _bmad-output\implementation-artifacts
 development_status:
   epic-1: in-progress
-  1-1-khởi-tạo-nền-tảng-noteflow-từ-starter-được-duyệt: ready-for-dev
+  1-1-khởi-tạo-nền-tảng-noteflow-từ-starter-được-duyệt: done
   1-2-đăng-nhập-và-bảo-vệ-dữ-liệu-owner: backlog
   1-3-dùng-một-ngày-và-tuần-thống-nhất-trên-mọi-thiết-bị: backlog
   1-4-nhận-dữ-liệu-mới-giữa-hai-thiết-bị: backlog

@@ -1,13 +1,6 @@
 {
-  "name": "new_project_my_note",
+  "name": "noteflow-repository",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs"
+  "private": true,
+  "description": "Repository metadata only; application commands live in frontend/ and backend/."
 }

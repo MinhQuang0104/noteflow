@@ -1,6 +1,6 @@
 # Story 1.1: Khởi tạo nền tảng NoteFlow từ starter được duyệt
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
@@ -63,41 +63,41 @@ so that các capability MVP có thể được cung cấp an toàn trong cùng m
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1 — Scaffold repository theo structural seed** (AC: 1, 2, 6)
-  - [ ] Tạo `frontend/` bằng official create-vue với TypeScript, Vue Router, Pinia, Vitest và cấu hình Vue Test Utils; thêm Tailwind CSS theo release line đã duyệt.
-  - [ ] Tạo `backend/` bằng Laravel 13 API project; cấu hình PHP 8.4, PostgreSQL và test runner Pest/PHPUnit tương thích.
-  - [ ] Giữ application code trong `frontend/` và `backend/`; không biến `package.json` placeholder hiện có ở repository root thành manifest của Vue app. Nếu root manifest được giữ, ghi rõ mục đích repository-only và không duplicate application scripts.
-  - [ ] Review starter-generated code/dependencies; loại bỏ public registration, sample domain UI và plumbing cho các capability bị loại khỏi MVP baseline.
+- [x] **Task 1 — Scaffold repository theo structural seed** (AC: 1, 2, 6)
+  - [x] Tạo `frontend/` bằng official create-vue với TypeScript, Vue Router, Pinia, Vitest và cấu hình Vue Test Utils; thêm Tailwind CSS theo release line đã duyệt.
+  - [x] Tạo `backend/` bằng Laravel 13 API project; cấu hình PHP 8.4, PostgreSQL và test runner Pest/PHPUnit tương thích.
+  - [x] Giữ application code trong `frontend/` và `backend/`; không biến `package.json` placeholder hiện có ở repository root thành manifest của Vue app. Nếu root manifest được giữ, ghi rõ mục đích repository-only và không duplicate application scripts.
+  - [x] Review starter-generated code/dependencies; loại bỏ public registration, sample domain UI và plumbing cho các capability bị loại khỏi MVP baseline.
 
-- [ ] **Task 2 — Thiết lập cấu trúc module và composition tối thiểu** (AC: 1, 6)
-  - [ ] Tạo các thư mục seed được Architecture yêu cầu nhưng không tạo domain entity/use case giả: `backend/app/Modules/`, `frontend/src/modules/`, `frontend/src/api/`, `contracts/`, `tests/e2e/`, `deploy/`.
-  - [ ] Ghi ngắn quy tắc phụ thuộc `Vue UI → JSON API → Application → Domain`; Domain thuần PHP không phụ thuộc Laravel controller/facade, Eloquent, network hoặc system clock.
-  - [ ] Không dựng trước schema nghiệp vụ; chỉ giữ migration/config framework thực sự cần cho foundation và PostgreSQL.
+- [x] **Task 2 — Thiết lập cấu trúc module và composition tối thiểu** (AC: 1, 6)
+  - [x] Tạo các thư mục seed được Architecture yêu cầu nhưng không tạo domain entity/use case giả: `backend/app/Modules/`, `frontend/src/modules/`, `frontend/src/api/`, `contracts/`, `tests/e2e/`, `deploy/`.
+  - [x] Ghi ngắn quy tắc phụ thuộc `Vue UI → JSON API → Application → Domain`; Domain thuần PHP không phụ thuộc Laravel controller/facade, Eloquent, network hoặc system clock.
+  - [x] Không dựng trước schema nghiệp vụ; chỉ giữ migration/config framework thực sự cần cho foundation và PostgreSQL.
 
-- [ ] **Task 3 — Thiết lập routing cùng origin và local development** (AC: 3, 5)
-  - [ ] Cấu hình Vue Router history mode và một deep-link route smoke-test.
-  - [ ] Cấu hình local proxy/same-origin behavior để UI, Laravel API, Sanctum và auth routes có cùng semantics với production.
-  - [ ] Thêm cấu hình `deploy/` cho Nginx hoặc equivalent: Vue static assets, PHP-FPM routing và SPA fallback chỉ cho UI routes.
-  - [ ] Bảo đảm `.env`, Laravel source/private files và database credentials không được static server phục vụ hoặc đưa vào browser bundle.
+- [x] **Task 3 — Thiết lập routing cùng origin và local development** (AC: 3, 5)
+  - [x] Cấu hình Vue Router history mode và một deep-link route smoke-test.
+  - [x] Cấu hình local proxy/same-origin behavior để UI, Laravel API, Sanctum và auth routes có cùng semantics với production.
+  - [x] Thêm cấu hình `deploy/` cho Nginx hoặc equivalent: Vue static assets, PHP-FPM routing và SPA fallback chỉ cho UI routes.
+  - [x] Bảo đảm `.env`, Laravel source/private files và database credentials không được static server phục vụ hoặc đưa vào browser bundle.
 
-- [ ] **Task 4 — Đặt OpenAPI contract pipeline** (AC: 4)
-  - [ ] Tạo OpenAPI document tối thiểu dưới `contracts/`, khai báo foundation JSON health/smoke endpoint hoặc response mà không khai báo trước product/domain endpoints.
-  - [ ] Cấu hình generation của TypeScript types vào `frontend/src/api/` và lệnh kiểm tra generated drift.
-  - [ ] Thêm contract validation vào CI; Laravel tiếp tục là nơi runtime validation/serialization, không dùng PHP model làm browser DTO.
-  - [ ] Đặt automated runtime contract test dùng OpenAPI schema để kiểm tra response thực tế từ Laravel foundation endpoint.
+- [x] **Task 4 — Đặt OpenAPI contract pipeline** (AC: 4)
+  - [x] Tạo OpenAPI document tối thiểu dưới `contracts/`, khai báo foundation JSON health/smoke endpoint hoặc response mà không khai báo trước product/domain endpoints.
+  - [x] Cấu hình generation của TypeScript types vào `frontend/src/api/` và lệnh kiểm tra generated drift.
+  - [x] Thêm contract validation vào CI; Laravel tiếp tục là nơi runtime validation/serialization, không dùng PHP model làm browser DTO.
+  - [x] Đặt automated runtime contract test dùng OpenAPI schema để kiểm tra response thực tế từ Laravel foundation endpoint.
 
-- [ ] **Task 5 — Thiết lập quality gates và smoke tests** (AC: 2, 4, 5)
-  - [ ] Thêm backend format/static-analysis/test commands và ít nhất một Laravel routing/health smoke test trả foundation JSON response đã khai báo trong OpenAPI.
-  - [ ] Thêm positive contract case xác nhận Laravel runtime response đúng schema thì pass và negative control dùng response cố ý lệch schema qua cùng validator để chứng minh contract test từ chối; runtime response lệch contract phải làm CI fail.
-  - [ ] Thêm frontend lint/typecheck/Vitest/build commands và ít nhất một Vue app-shell render test.
-  - [ ] Thêm smoke test cho SPA deep link, backend-owned route không bị fallback, và hai viewport đại diện laptop/điện thoại.
-  - [ ] Tạo CI workflow chạy clean install từ lockfiles, OpenAPI validation, Laravel runtime response contract test, generated-types drift check, backend gates, frontend gates và production build.
-  - [ ] Ghi các lệnh local tương đương CI trong README/developer setup để một developer khác tái lập được.
+- [x] **Task 5 — Thiết lập quality gates và smoke tests** (AC: 2, 4, 5)
+  - [x] Thêm backend format/static-analysis/test commands và ít nhất một Laravel routing/health smoke test trả foundation JSON response đã khai báo trong OpenAPI.
+  - [x] Thêm positive contract case xác nhận Laravel runtime response đúng schema thì pass và negative control dùng response cố ý lệch schema qua cùng validator để chứng minh contract test từ chối; runtime response lệch contract phải làm CI fail.
+  - [x] Thêm frontend lint/typecheck/Vitest/build commands và ít nhất một Vue app-shell render test.
+  - [x] Thêm smoke test cho SPA deep link, backend-owned route không bị fallback, và hai viewport đại diện laptop/điện thoại.
+  - [x] Tạo CI workflow chạy clean install từ lockfiles, OpenAPI validation, Laravel runtime response contract test, generated-types drift check, backend gates, frontend gates và production build.
+  - [x] Ghi các lệnh local tương đương CI trong README/developer setup để một developer khác tái lập được.
 
-- [ ] **Task 6 — Kiểm tra scope và bàn giao foundation** (AC: 1–6)
-  - [ ] Chạy toàn bộ commands từ clean install và lưu kết quả trong Dev Agent Record.
-  - [ ] Review dependency/source tree để xác nhận không có capability hoặc infrastructure ngoài phạm vi.
-  - [ ] Cập nhật File List và Completion Notes; chỉ chuyển Story sang `review` khi mọi AC và Definition of Done đều đạt.
+- [x] **Task 6 — Kiểm tra scope và bàn giao foundation** (AC: 1–6)
+  - [x] Chạy toàn bộ commands từ clean install và lưu kết quả trong Dev Agent Record.
+  - [x] Review dependency/source tree để xác nhận không có capability hoặc infrastructure ngoài phạm vi.
+  - [x] Cập nhật File List và Completion Notes; chỉ chuyển Story sang `review` khi mọi AC và Definition of Done đều đạt.
 
 ## Dev Notes
 
@@ -166,15 +166,15 @@ deploy/                   # same-origin routing/runtime configuration
 
 ### Definition of Done
 
-- [ ] Mọi Acceptance Criteria 1–6 có test hoặc verification evidence tương ứng.
-- [ ] Mọi Task/Subtask hoàn tất; không còn placeholder/TODO ảnh hưởng foundation behavior.
-- [ ] Clean install từ `composer.lock` và frontend lockfile thành công trên toolchain đã ghi.
-- [ ] PHP format/static analysis/tests; Vue lint/typecheck/Vitest/build; OpenAPI validation, Laravel runtime response contract test và generated drift đều pass; positive/negative contract cases cung cấp evidence tương ứng.
-- [ ] Same-origin routing và SPA fallback smoke checks pass; mobile/laptop viewport smoke được ghi lại.
-- [ ] Không có secret/credential trong repository hoặc browser bundle; backend private files không được static serve.
-- [ ] Review xác nhận không có product entity/capability hoặc excluded infrastructure bị tạo trước.
-- [ ] README/developer setup mô tả prerequisites, install, run, test, contract generation và smoke commands đủ để tái lập.
-- [ ] Dev Agent Record, File List và Change Log được cập nhật; Story chỉ chuyển sang `review`, chưa tự đánh dấu `done` trước code review/acceptance.
+- [x] Mọi Acceptance Criteria 1–6 có test hoặc verification evidence tương ứng.
+- [x] Mọi Task/Subtask hoàn tất; không còn placeholder/TODO ảnh hưởng foundation behavior.
+- [x] Clean install từ `composer.lock` và frontend lockfile thành công trên toolchain đã ghi.
+- [x] PHP format/static analysis/tests; Vue lint/typecheck/Vitest/build; OpenAPI validation, Laravel runtime response contract test và generated drift đều pass; positive/negative contract cases cung cấp evidence tương ứng.
+- [x] Same-origin routing và SPA fallback smoke checks pass; mobile/laptop viewport smoke được ghi lại.
+- [x] Không có secret/credential trong repository hoặc browser bundle; backend private files không được static serve.
+- [x] Review xác nhận không có product entity/capability hoặc excluded infrastructure bị tạo trước.
+- [x] README/developer setup mô tả prerequisites, install, run, test, contract generation và smoke commands đủ để tái lập.
+- [x] Dev Agent Record, File List và Change Log được cập nhật; Story chỉ chuyển sang `review`, chưa tự đánh dấu `done` trước code review/acceptance.
 
 ### References
 
@@ -197,23 +197,76 @@ deploy/                   # same-origin routing/runtime configuration
 
 ### Agent Model Used
 
-<!-- Dev agent records model/version during implementation. -->
+OpenAI Codex (GPT-5)
 
 ### Debug Log References
 
-<!-- Dev agent records relevant command/test/debug references. -->
+- `composer validate --strict --no-interaction` — PASS; lock/manifest valid.
+- `vendor\bin\pint.bat --test` and `vendor\bin\phpstan.bat analyse --memory-limit=1G` — PASS.
+- `php artisan test` — PASS, 3 tests / 6 assertions; repeated on official `php:8.4-cli` with the repository layout mounted intact.
+- Node 24.12.0/npm 11.6.2 `npm ci` — PASS, 354 packages, 0 vulnerabilities.
+- `npm run contract:validate`, `contract:check`, and `contract:proof` — PASS; stale generated types were rejected and the canonical contract was restored.
+- `npm run lint`, `type-check`, `test:unit -- --run`, and `build-only` — PASS; 3 Vitest files / 6 tests.
+- `npm test` in `tests/e2e` — PASS, 18 Playwright checks across 1440x900 and 390x844.
+- `docker run ... nginx:1.27-alpine nginx -t` — PASS.
+- `uv --no-cache run --no-project python _bmad/scripts/tests/test_agent_architecture.py` — PASS, 5 architecture regression tests.
+- Scope and bundle secret scans with `rg` — PASS, no product capability seed or credential material found.
+
+### Done Gate Evidence (2026-09-18)
+
+- AC1 / AC6 — source tree, dependency, route, migration, secret, and final-diff inspection: PASS; foundation-only scope retained.
+- AC2 — clean `npm ci`, Composer validation, PHP format/static analysis, frontend typecheck, and production build: PASS.
+- AC3 — Nginx configuration test plus Playwright same-origin, backend-route, SPA fallback, and `/apiary` negative checks: PASS.
+- AC4 — OpenAPI validation, generated-types drift check/proof, and positive/negative Laravel runtime contract tests: PASS.
+- AC5 — backend 3 tests / 6 assertions, frontend 3 files / 6 tests, and Playwright 18/18 across laptop and phone: PASS.
+- Architecture V2 regression suite: 5/5 PASS.
+- Human review/acceptance: approved by the user on 2026-09-18; no unresolved HIGH or MEDIUM finding remains.
 
 ### Completion Notes List
 
-<!-- Dev agent records implementation outcomes and any approved deviations. -->
+- AC1: scaffolded the approved Vue 3/Vite/TypeScript frontend and Laravel 13 JSON API in one repository; removed sample UI, starter documentation, optional Vue devtools, and unused public assets.
+- AC2: locked the approved Node 24.12, PHP 8.4, Vue/Vite/TypeScript, Tailwind, Laravel/Sanctum, Pest/PHPUnit, Vitest, and Playwright release lines; proved a clean frozen frontend install and production build.
+- AC3: implemented matching Vite and Nginx route boundaries, relative same-origin API calls, Vue history fallback, and negative coverage proving `/apiary` is not captured by the `/api` backend prefix.
+- AC4: added canonical OpenAPI, deterministic TypeScript generation/drift proof, and positive plus negative Laravel runtime response validation through the same OpenAPI validator.
+- AC5: added backend, frontend, contract, CI, Nginx, and two-viewport Playwright gates; all applicable local gates are green.
+- AC6: retained only foundation/framework plumbing. Source, migration, dependency, and bundle scans found no premature product capability, public signup, Redis service, worker fleet, Reverb/WebSocket, external search, or secret exposure.
+- Added narrow compatibility workarounds for two upstream defects: explicit npm pins for bundled Tailwind WASM lock entries and a Windows-only bounded Playwright profile cleanup patch. Linux/CI Playwright remains unmodified.
+- No provider selection, production deployment, or release action was performed.
+- Human acceptance and the fresh Deterministic Done Gate were recorded; Story and sprint lifecycle were synchronized to `done`.
 
 ### File List
 
-<!-- Dev agent records every created, modified, or deleted implementation file. -->
+- `.github/workflows/ci.yml`
+- `.gitignore`
+- `README.md`
+- `package.json`
+- `redocly.yaml`
+- `backend/.editorconfig`, `backend/.env.example`, `backend/.gitattributes`, `backend/.gitignore`, `backend/artisan`, `backend/composer.json`, `backend/composer.lock`, `backend/phpunit.xml`, `backend/phpstan.neon`
+- `backend/app/Http/Controllers/{Controller,FoundationHealthController}.php`, `backend/app/Models/User.php`, `backend/app/Modules/README.md`, `backend/app/Providers/AppServiceProvider.php`
+- `backend/bootstrap/app.php`, `backend/bootstrap/providers.php`, `backend/bootstrap/cache/.gitignore`
+- `backend/config/{app,auth,cache,database,filesystems,logging,mail,queue,sanctum,services,session}.php`
+- `backend/database/factories/UserFactory.php`, `backend/database/seeders/DatabaseSeeder.php`, `backend/database/migrations/{0001_01_01_000000_create_users_table,2026_09_16_135722_create_personal_access_tokens_table}.php`
+- `backend/database/.gitignore`, `backend/public/{.htaccess,index.php,robots.txt}`, `backend/routes/{api,console,web}.php`
+- `backend/storage/**/.gitignore`
+- `backend/tests/Pest.php`, `backend/tests/TestCase.php`, `backend/tests/Feature/FoundationHealthTest.php`, `backend/tests/Contract/{FoundationResponseContractTest,OpenApiResponseValidator}.php`
+- `contracts/openapi.yaml`
+- `deploy/README.md`, `deploy/nginx/noteflow.conf`
+- `frontend/.editorconfig`, `frontend/.gitattributes`, `frontend/.gitignore`, `frontend/.oxlintrc.json`, `frontend/.prettierrc.json`, `frontend/env.d.ts`, `frontend/eslint.config.ts`, `frontend/index.html`, `frontend/package.json`, `frontend/package-lock.json`
+- `frontend/tsconfig.json`, `frontend/tsconfig.app.json`, `frontend/tsconfig.node.json`, `frontend/tsconfig.vitest.json`, `frontend/vite.config.ts`, `frontend/vitest.config.ts`
+- `frontend/scripts/{generate-openapi-types,prove-contract-drift}.mjs`
+- `frontend/src/App.vue`, `frontend/src/main.ts`, `frontend/src/assets/main.css`, `frontend/src/components/AppShell.vue`
+- `frontend/src/api/{http,schema.generated}.ts`, `frontend/src/api/__tests__/http.spec.ts`
+- `frontend/src/router/index.ts`, `frontend/src/router/__tests__/router.spec.ts`, `frontend/src/views/{DeepLinkView,FoundationView}.vue`, `frontend/src/__tests__/App.spec.ts`, `frontend/src/modules/.gitkeep`
+- `tests/e2e/package.json`, `tests/e2e/package-lock.json`, `tests/e2e/playwright.config.ts`
+- `tests/e2e/{foundation,responsive,routing}.spec.ts`, `tests/e2e/scripts/patch-playwright-windows-cleanup.mjs`
+- `_bmad-output/implementation-artifacts/1-1-khởi-tạo-nền-tảng-noteflow-từ-starter-được-duyệt.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
 
 ### Change Log
 
 | Date | Version | Description | Author |
 | --- | --- | --- | --- |
+| 2026-09-18 | 1.3 | Recorded human acceptance, reran the full Deterministic Done Gate and Architecture V2 regression suite, and moved the Story to done | Codex |
+| 2026-09-17 | 1.2 | Implemented the approved foundation, contract pipeline, same-origin routing, CI/quality gates, and deterministic completion evidence; moved to review | Codex |
 | 2026-09-15 | 1.1 | Đồng bộ F6 với Epics và AD-15: thêm foundation runtime response contract test cùng positive/negative CI evidence | Codex |
 | 2026-09-14 | 1.0 | Story drafted and marked ready-for-dev | Codex |

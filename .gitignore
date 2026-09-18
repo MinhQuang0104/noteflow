@@ -1,11 +1,16 @@
 # Dependencies
 node_modules/
+.npm/
+vendor/
 .worktrees/
 
 # Build and test output
 dist/
 build/
 coverage/
+test-results/
+playwright-report/
+blob-report/
 
 # Environment files
 .env
@@ -18,6 +23,15 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# Laravel runtime files
+backend/bootstrap/cache/*.php
+backend/storage/framework/cache/data/*
+backend/storage/framework/sessions/*
+backend/storage/framework/testing/*
+backend/storage/framework/views/*
+backend/storage/logs/*
+!backend/storage/**/.gitignore
 
 # Editor settings
 .idea/
