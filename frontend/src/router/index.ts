@@ -2,15 +2,18 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import { pinia } from '../pinia'
 import { useAuthStore } from '../stores/auth'
+import { useAccountStore } from '../stores/account'
+import AccountSettingsView from '../views/AccountSettingsView.vue'
 import LoginView from '../views/LoginView.vue'
 import PrivatePlaceholderView from '../views/PrivatePlaceholderView.vue'
+import TodayView from '../views/TodayView.vue'
 
 const privateRoutes = [
-  { path: '/today', name: 'today', title: 'Hôm nay' },
-  { path: '/challenges', name: 'challenges', title: 'Challenge' },
-  { path: '/notes', name: 'notes', title: 'Ghi chú' },
-  { path: '/calendar', name: 'calendar', title: 'Lịch' },
-  { path: '/settings', name: 'settings', title: 'Cài đặt tài khoản' },
+  { path: '/today', name: 'today', title: 'Hôm nay', component: TodayView },
+  { path: '/challenges', name: 'challenges', title: 'Challenge', component: PrivatePlaceholderView },
+  { path: '/notes', name: 'notes', title: 'Ghi chú', component: PrivatePlaceholderView },
+  { path: '/calendar', name: 'calendar', title: 'Lịch', component: PrivatePlaceholderView },
+  { path: '/settings', name: 'settings', title: 'Cài đặt tài khoản', component: AccountSettingsView },
 ] as const
 
 const router = createRouter({
@@ -21,7 +24,7 @@ const router = createRouter({
     ...privateRoutes.map((route) => ({
       path: route.path,
       name: route.name,
-      component: PrivatePlaceholderView,
+      component: route.component,
       props: { title: route.title },
     })),
   ],
@@ -40,6 +43,19 @@ router.beforeEach(async (to) => {
 
   if (to.meta.public) {
     return auth.status === 'authenticated' ? { name: 'today' } : true
+  }
+
+  if (auth.status !== 'authenticated') {
+    return { name: 'login', query: { redirect: to.fullPath } }
+  }
+
+  const account = useAccountStore(pinia)
+  if (account.status === 'unknown') {
+    try {
+      await account.refresh()
+    } catch {
+      // The destination renders an explicit account-context error without using device time.
+    }
   }
 
   if (auth.status !== 'authenticated') {

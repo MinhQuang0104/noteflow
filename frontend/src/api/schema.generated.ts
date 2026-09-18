@@ -2,6 +2,15 @@
 
 export interface components {
   schemas: {
+    "AccountContext": {
+      "timezone": "Asia/Ho_Chi_Minh"
+      "account_date": string
+      "week": components['schemas']["AccountWeek"]
+    }
+    "AccountWeek": {
+      "start_date": string
+      "end_date": string
+    }
     "Owner": {
       "id": number
       "name": string
@@ -100,6 +109,25 @@ export interface operations {
       "200": {
         content: {
           "application/json": components['schemas']["FoundationHealth"]
+        }
+      }
+    }
+  }
+  "getAccountContext": {
+    responses: {
+      "200": {
+        content: {
+          "application/json": components['schemas']["AccountContext"]
+        }
+      }
+      "401": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "403": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
         }
       }
     }

@@ -8,6 +8,17 @@ test('the authenticated shell is responsive without horizontal overflow', async 
       body: JSON.stringify({ owner: { id: 1, name: 'Owner', email: 'owner@example.test' } }),
     }),
   )
+  await page.route('**/api/v1/account', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        timezone: 'Asia/Ho_Chi_Minh',
+        account_date: '2026-09-21',
+        week: { start_date: '2026-09-21', end_date: '2026-09-27' },
+      }),
+    }),
+  )
   await page.goto('/today')
 
   const dimensions = await page.evaluate(() => ({
