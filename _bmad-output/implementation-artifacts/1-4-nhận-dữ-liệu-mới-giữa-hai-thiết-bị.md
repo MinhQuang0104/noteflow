@@ -13,14 +13,15 @@ tôi muốn thiết bị đang hoạt động nhận biết khi dữ liệu tài
 - Functional requirements: FR-002, FR-003
 - Non-functional requirements: NFR-004, NFR-006
 - UX decisions: UX-DR14, UX-DR18
-- Architecture decisions: AD-8; phần mutation/versioning còn phụ thuộc AD-6 hoặc quyết định tương đương được phê duyệt
+- Architecture decisions: AD-6, AD-8
 
 ## Dependencies and Readiness
 
 - Story 1.1, 1.2 và 1.3 đã hoàn tất.
 - AD-8 đã được chấp nhận và xác định cơ chế revision polling/refetch.
 - Repository hiện chưa có một business resource với persisted mutation và read model thực tế để tạo bằng chứng tích hợp hai thiết bị cho AC1.
-- AD-6 về mutation versioning/idempotency vẫn đang ở trạng thái `PROPOSED`; không được tự diễn giải thành quyết định sản phẩm hoặc kiến trúc đã duyệt.
+- AD-6 về mutation versioning/idempotency đã được Product Owner phê duyệt ngày 2026-09-19, gồm account-row lock, epoch/write-state checks, command ledger, resource/base version, typed conflict và quy tắc revision cho state change/retry/no-op.
+- Story 2.1 đã được chuẩn bị `ready-for-dev` để cung cấp persisted Challenge resource, create/update mutation và owner-scoped read model; blocker business-resource chỉ được tháo hoàn toàn sau khi Story 2.1 được triển khai và có bằng chứng tích hợp.
 - Ngưỡng đồng bộ D-09 vẫn còn mở. Có thể ghi nhận interval/latency thực tế trong kiểm thử, nhưng chưa được tuyên bố một SLA chưa được phê duyệt.
 
 ## Acceptance Criteria
@@ -90,8 +91,8 @@ tôi muốn thiết bị đang hoạt động nhận biết khi dữ liệu tài
 Story chỉ có thể chuyển sang `ready-for-dev` khi:
 
 1. Có một business resource thực tế với persisted mutation và read model để cung cấp bằng chứng end-to-end cho AC1.
-2. Mutation contract cần thiết từ AD-6, hoặc một quyết định kiến trúc thay thế tương đương, đã được phê duyệt rõ ràng.
-3. Phạm vi tích hợp với Story business-resource tương ứng được ghi nhận mà không thay đổi ngầm Acceptance Criteria.
+2. Story 2.1 đã triển khai AD-6 cho Challenge create/update và có bằng chứng `account_revision` tăng đúng một lần cho transaction thật sự thay đổi trạng thái, không tăng lại cho retry/no-op.
+3. Phạm vi tích hợp với Challenge read model và mutation consumers được xác nhận mà không thay đổi ngầm Acceptance Criteria.
 
 Cho đến khi các điều kiện này được đáp ứng, không được bắt đầu product implementation hoặc mở V3 execution run cho Story 1.4.
 
@@ -119,6 +120,7 @@ Cho đến khi các điều kiện này được đáp ứng, không được b�
 
 - 2026-09-19: Tạo Story artifact và đánh giá readiness theo Agent Architecture V3.
 - 2026-09-19: Xác định blocker là thiếu business mutation/read model thực tế và quyết định mutation contract đã được phê duyệt.
+- 2026-09-19: AD-6 đã được Product Owner phê duyệt; Story vẫn `BLOCKED` cho đến khi Story 2.1 triển khai Challenge mutation/read model và cung cấp bằng chứng tích hợp.
 
 ## Change Log
 

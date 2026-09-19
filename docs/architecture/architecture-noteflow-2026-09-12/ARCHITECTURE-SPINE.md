@@ -12,7 +12,7 @@ planning_adoption_evidence:
   - '../../product/epics.md'
   - 'reviews/review-vue-laravel-resolution.md'
 created: '2026-09-12'
-updated: '2026-09-15'
+updated: '2026-09-19'
 binds: [EPIC-001, EPIC-002, EPIC-003, EPIC-004, EPIC-005, EPIC-006]
 sources:
   - '../../product/prd.md'
@@ -25,7 +25,7 @@ companions:
 
 # Architecture Spine — NoteFlow MVP v1
 
-PRD v1.1 is authoritative when the brief or UX differs. On 2026-09-13 the owner approved the Vue/Laravel architecture direction. AD-1, AD-5, AD-8, AD-15 and the deployment topology in AD-12 are adopted. D-01–D-10 in the companion proposal were subsequently adopted as the approved planning baseline used to decompose Epics and Stories; that later handoff state is recorded in `docs/product/epics.md` and builds on the current Vue/Laravel resolution. The retained `[PROPOSED]` labels and Deferred table preserve the earlier authoring structure and do not reopen a D-01–D-10 decision adopted for planning. Only operational values or verification conditions that the adopted baseline itself leaves unspecified remain deferred, including provider/budget and production runtime capacity, session duration, the concrete device/browser acceptance matrix, measured search/sync thresholds, final tuned autosave cadence, and final limits derived from backup-size testing. This update changes metadata/handoff interpretation only and does not alter any Architecture Decision or technical rule.
+PRD v1.1 is authoritative when the brief or UX differs. On 2026-09-13 the owner approved the Vue/Laravel architecture direction. AD-1, AD-5, AD-8, AD-15 and the deployment topology in AD-12 are adopted. On 2026-09-19 the owner additionally adopted AD-6 for product mutations, explicitly including Challenge create/update and the revision semantics recorded below. D-01–D-10 in the companion proposal were subsequently adopted as the approved planning baseline used to decompose Epics and Stories; that later handoff state is recorded in `docs/product/epics.md` and builds on the current Vue/Laravel resolution. The retained `[PROPOSED]` labels and Deferred table preserve the earlier authoring structure and do not reopen a D-01–D-10 decision adopted for planning. Only operational values or verification conditions that the adopted baseline itself leaves unspecified remain deferred, including provider/budget and production runtime capacity, session duration, the concrete device/browser acceptance matrix, measured search/sync thresholds, final tuned autosave cadence, and final limits derived from backup-size testing.
 
 ## Design Paradigm
 
@@ -75,13 +75,13 @@ flowchart LR
 - **Rule:** All product reads/writes use Laravel API application services, protected by Sanctum's stateful SPA session authentication and owner authorization. Initialize CSRF via /sanctum/csrf-cookie; send the X-XSRF-TOKEN header on unsafe requests. The session cookie is Secure/HttpOnly; the XSRF token cookie must be readable by the client. Regenerate the session on login, invalidate it on logout. Users/password hashes and sessions are operational identity data outside product backup. Never expose database credentials or require bearer tokens in browser storage.
 - **Admission/privacy:** Only the pre-provisioned owner subject is admitted; signup and anonymous sign-in are disabled. Private API responses use no-store and cannot enter a shared response cache. Unsafe cookie-authenticated requests enforce same-origin/CSRF checks. User content and snippets render as text. Direct backup-byte transfer is the narrow AD-12 exception; only the API authorizes handles and live-data replacement.
 
-### AD-6 — Versioned, idempotent mutations [PROPOSED]
+### AD-6 — Versioned, idempotent mutations [ADOPTED]
 
-- **Binds:** FR-002–005, FR-009, FR-012, FR-023, FR-029, FR-043; NFR-003–006
+- **Binds:** FR-002–005, FR-007–009, FR-012, FR-023, FR-029, FR-043; NFR-003–006
 - **Prevents:** Duplicate creates/Done records, last-write-wins data loss, stale device writes, and late acknowledgements marking newer text as saved.
 - **Rule:** Client-generated UUID/idempotency key identifies each command; mutable resources carry a monotonically increasing row version; every mutation carries base version and account data epoch. Same-result Done/undo converges; stale opposite Done/undo or stale text returns a typed conflict and does not mutate saved state.
-- **Enforcement:** Every product write first locks the account_state row FOR UPDATE and checks owner, open write_state and data_epoch while holding it through commit. Resource identity differs from command identity. A command ledger keyed by owner/epoch/command ID stores request hash and replayable acknowledgement atomically with the mutation; replay cannot mutate twice, and a different payload with the same key is rejected. Successful command identities remain available for the lifetime of that epoch. Create has no prior row version; a previously absent daily component uses version 0.
-- **Daily components:** Completion and journal have separate logical version tokens. Completion writes only is_done and its version; journal writes only journal and its version. Same-result completion succeeds; stale opposing completion conflicts only against completion changes. Undo never deletes journal. Text conflict scope follows the proposed matrix in the companion proposal and requires D-05 review.
+- **Enforcement:** Every product write first locks the account_state row FOR UPDATE and checks owner, open write_state and data_epoch while holding it through commit. Resource identity differs from command identity. A command ledger keyed by owner/epoch/command ID stores request hash and replayable acknowledgement atomically with the mutation; replay cannot mutate twice, and a different payload with the same key is rejected. Successful command identities remain available for the lifetime of that epoch. Create has no prior row version; a previously absent daily component uses version 0. Only a transaction that actually changes persisted product state increments `account_revision`, exactly once; replaying the same command or accepting a no-op does not increment it again.
+- **Daily components:** Completion and journal have separate logical version tokens. Completion writes only is_done and its version; journal writes only journal and its version. Same-result completion succeeds; stale opposing completion conflicts only against completion changes. Undo never deletes journal. Text and aggregate conflict scope follows the D-05 matrix adopted in the planning baseline.
 
 ### AD-7 — Per-note in-session draft state machine [PROPOSED]
 

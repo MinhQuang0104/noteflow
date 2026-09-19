@@ -29,7 +29,7 @@
 # - Dev supplies deterministic Done Gate evidence; code-review is optional and explicitly requested
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 09-14-2026 14:51
-last_updated: 09-19-2026 15:40
+last_updated: 09-19-2026 16:06
 project: NoteFlow
 project_key: NOKEY
 tracking_system: file-system
@@ -45,7 +45,7 @@ development_status:
   epic-1-retrospective: optional
 
   epic-2: backlog
-  2-1-tạo-và-quản-lý-thông-tin-challenge: backlog
+  2-1-tạo-và-quản-lý-thông-tin-challenge: ready-for-dev
   2-2-xem-challenge-và-done-nhanh-từ-hôm-nay: backlog
   2-3-ghi-và-sửa-journal-tùy-chọn: backlog
   2-4-ghi-bù-và-sửa-lần-done-sai: backlog
