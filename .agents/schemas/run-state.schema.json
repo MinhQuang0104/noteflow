@@ -134,6 +134,66 @@
         },
         "not": {"properties":{"status":{"enum":["WORKER_RUNNING","LEAD_REVIEW","VERIFICATION","HUMAN_GATE","COMPLETE"]}}}
       }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"enum":["WORKER_RUNNING","LEAD_REVIEW","VERIFICATION","HUMAN_GATE","COMPLETE"]},
+          "orca": {"properties":{"executionMode":{"const":"supervised"}}}
+        }
+      },
+      "then": {
+        "properties": {
+          "orca": {
+            "properties": {
+              "runtimeId": {"type":"string","minLength":1},
+              "runId": {"type":"string","minLength":1},
+              "taskId": {"type":"string","minLength":1},
+              "dispatchId": {"type":"string","minLength":1},
+              "workerHandle": {"type":"string","minLength":1},
+              "worktreeId": {"type":"string","minLength":1}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"enum":["WORKER_RUNNING","LEAD_REVIEW","VERIFICATION","HUMAN_GATE","COMPLETE"]},
+          "orca": {"properties":{"executionMode":{"const":"compat-terminal"}}}
+        }
+      },
+      "then": {
+        "properties": {
+          "orca": {
+            "properties": {
+              "runtimeId": {"type":"string","minLength":1},
+              "runId": {"type":"string","minLength":1},
+              "taskId": {"type":"string","minLength":1},
+              "dispatchId": {"type":"null"},
+              "worktreeId": {"type":"string","minLength":1}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"const":"WORKER_RUNNING"},
+          "orca": {"properties":{"executionMode":{"const":"compat-terminal"}}}
+        }
+      },
+      "then": {
+        "properties": {
+          "orca": {
+            "properties": {
+              "terminalHandle": {"type":"string","minLength":1}
+            }
+          }
+        }
+      }
     }
   ],
   "definitions": {

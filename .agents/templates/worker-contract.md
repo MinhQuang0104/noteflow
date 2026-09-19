@@ -1,6 +1,7 @@
 # Worker execution contract
 
 - Task ID: <task-id>; Run ID: <run-id>; Attempt: <positive integer>
+- Logical identity: <durable Task ID and bounded scope; survives terminal/session replacement>
 - Worker: Antigravity (fixed); Lead generation: <generation>
 - Orca: <execution mode / runtime / Run / Task / Dispatch-if-any / worker-or-terminal / worktree IDs>
 - Objective: <bounded outcome>
@@ -20,3 +21,5 @@ This contract is not product truth. Follow root AGENTS.md and V3 policy. Do not
 copy full PRD, Architecture or Story documents. DONE reports attempted verification;
 it never grants Lead ACCEPTED, Human APPROVED or integration permission. Report
 failure honestly. Corrections retain Task ID/worktree/session where possible.
+Never create replacement work because the Lead/provider/terminal changed; the Lead
+must reconcile the durable Task against Orca and Git before any redispatch.

@@ -2,11 +2,12 @@
 
 ## Scope and authority
 
-Phase 2A connects the durable control plane to the installed Orca runtime.
+Phase 2B adds local Lead lease enforcement and deterministic runtime reconciliation
+to the Phase 2A Orca integration.
 Tracked implementation execution is enabled only through an Orca-owned Run and
 Task, with Antigravity as the fixed worker in an Orca-managed isolated Git worktree. Automatic
-model switching, failover testing, lease enforcement, runtime reconciliation and
-integration remain disabled. Missing infrastructure never implies direct Lead coding.
+model switching, quota detection, live failover testing and automatic integration
+remain disabled. Missing infrastructure never implies direct Lead coding.
 Authorized agent-infrastructure maintenance may be performed by the Lead.
 
 Human -> replaceable Lead (Codex account A, Codex account B, Claude) -> durable
@@ -64,7 +65,7 @@ alone will not carry ignored state. No state transfer mechanism is provided here
 ```text
 .agent-state/
   active-run.json
-  mutation.lock                 # transient exclusive local lock, future writer
+  mutation.lock                 # transient exclusive local mutation lock
   runs/<RUN-ID>/
     run.json
     plan.md                     # Story task references + delta only
@@ -99,7 +100,7 @@ optional human-readable ref; uncommitted requirements require resolution before
 dispatch. `phase` retains the last normal phase in exceptional states; otherwise
 it equals status. `revision` increases per checkpoint, `lastEventSequence` tracks
 the last committed event. `nextAction` is a concrete action, not reasoning.
-Schemas validate individual snapshots (JSON Schema draft-07); the future writer
+Schemas validate individual snapshots (JSON Schema draft-07); every writer
 must additionally check cross-file IDs, lease generation equality, monotonic
 revisions, phase/status agreement, allowed transitions and current Git evidence.
 Schema validity alone does not authorize a mutation or prove a lifecycle gate.
@@ -107,9 +108,10 @@ For an explicitly authorized non-product infrastructure smoke run, the `story`
 identity names the canonical agent policy under test and must not update BMAD
 Story or sprint state.
 
-`lead/state.md` is at most 40 lines: run/revision, phase, task, worker status,
-completed steps, important decisions, blocker, waiting-for, exact next action,
-minimal artifact paths. `current-session.json` contains only schemaVersion,
+`lead/state.md` is at most 40 lines: run/revision, phase, task, execution mode,
+worker status, Lead generation, lease owner/state, completed steps, important
+decisions, blocker, waiting-for, exact next action, and minimal artifact paths.
+`current-session.json` contains only schemaVersion,
 sessionId (opaque, no credentials), engine, generation, startedAt. It mirrors
 ownership; it cannot grant it. `handoff.md` uses the canonical template.
 Keep plans, decisions and summaries bounded; link older facts rather than copying.
@@ -124,18 +126,28 @@ verification and human approval for that diff.
 ## Shared Lead bootstrap
 
 Codex and Claude follow exactly this protocol before planning or implementation:
-1. Inspect canonical `.agent-state/active-run.json` (read-only, no lease needed).
+1. Read canonical `.agent-state/active-run.json` (read-only, no lease needed).
 2. With no active run and no contradictory evidence, enter NORMAL MODE. Initialize
-   the idle pointer if absent under the mutation protocol when a write is needed.
-3. With an active run, enter RESUME MODE. Read `run.json`, then `lead/state.md`;
-   read `decisions.md` and current worker state/contract only when needed.
-4. Do NOT read `events.jsonl` during ordinary resume. Do not load transcripts or
-   full BMAD documents. Use pinned Story sections relevant to the next action.
-5. Check identities, revision, source commit and relevant Git/worktree reality.
-   Query actual Orca Run/Task/Dispatch and worktree status before
-   dispatch/cancel/retry. Unknown status is not permission to create another task.
-6. Reconcile under the ownership protocol before mutations. Continue `nextAction`;
-   never duplicate a worker because the Lead session changed. Preserve human gate.
+   the idle pointer under the mutation protocol only when a write is needed.
+3. With an active run, enter RESUME MODE: read its `run.json` and concise
+   `lead/state.md` in that order.
+4. Read current worker/task state, contract, and decisions only as needed for the
+   recorded phase and `nextAction`.
+5. Perform read-only Orca Run/Task/Dispatch/worker queries. Do NOT read `events.jsonl` during ordinary resume or depend on a previous transcript.
+6. Inspect Git branch, HEAD, diff and the recorded worker worktree when the current
+   phase requires code evidence.
+7. Compare durable state with observed Orca and Git reality using the reconciliation
+   classes below; Orca facts never override BMAD product truth.
+8. Classify every discrepancy before correcting it.
+9. Reconcile only discrepancies whose outcome is proved by runtime/Git evidence.
+10. Escalate ambiguous or unsafe discrepancies without replaying mutations.
+11. Only after read-only reconciliation may a replacement Lead acquire mutating
+    ownership under the lease acquisition table.
+12. Continue the reconciled exact `nextAction`; never duplicate a worker because
+    the Lead session, account, provider, terminal focus or UI worktree changed.
+
+Normal resume does not read full BMAD documents or the entire event log. Use pinned
+Story sections and a bounded event tail only when a specific recovery fact requires it.
 
 ## Ownership and local mutation protocol
 
@@ -144,14 +156,38 @@ First ownership is generation 1; every takeover increments generation, even for
 the same engine/account. Lease generation equals run.leadGeneration. Null lease
 means released ownership; it does not reset generation. No account tokens in state.
 
-Phase 2B must implement a local exclusive-create lock at `mutation.lock` around
-every mutating transaction, including active-run creation, ownership acquisition,
-task creation, dispatch, cancellation, state transitions and integration actions.
+The invariant is: one active Run -> at most one mutating Lead. A local
+exclusive-create lock at `mutation.lock` surrounds every mutating transaction,
+including active-run creation, ownership acquisition, task creation, dispatch,
+cancellation, state transitions and integration actions.
 This is a short filesystem critical section, not a distributed locking service.
 All writers use the SAME canonical lock and reread run revision/lease inside it.
 Verify owner and generation immediately before a side effect and hold the lock
 through its durable result (or durable unknown-outcome marker). Stale generations
-are fenced: abort instead of writing. Read-only inspection remains available.
+are fenced: abort instead of writing. A previous-generation mutation is invalid,
+even if its session later resumes. Read-only inspection remains available.
+
+A valid current owner/generation lease is required before creating Tasks,
+dispatching workers, sending compatibility worker instructions, retrying, releasing or cancelling workers, mutating Task status, changing state-machine phase,
+declaring verification passed, or performing integration actions. Inspecting
+durable files, Orca, terminals, worktrees, Git, or BMAD artifacts is read-only and
+does not require a lease.
+
+Lease acquisition is deterministic:
+
+| Observed ownership | Required result |
+|---|---|
+| No active lease | Acquire under `mutation.lock`; first ownership uses generation 1, otherwise `generation + 1`; append LEAD_LEASE_ACQUIRED |
+| Healthy lease owned by this session and generation | Continue; refresh heartbeat only at a meaningful checkpoint or immediately before mutation |
+| Healthy lease owned by another session | Do not steal; remain read-only, classify NEEDS_HUMAN and append LEAD_CONFLICT_DETECTED only if a valid owner records it |
+| Explicitly released old lease | Reconcile first, acquire with `generation + 1`, record LEAD_TAKEOVER and LEAD_LEASE_ACQUIRED |
+| Old owner proved terminated/fenced or human directs fencing | Reconcile first, preserve fencing evidence, acquire with `generation + 1`, record LEAD_TAKEOVER and LEAD_LEASE_ACQUIRED |
+| Old owner liveness or fencing is ambiguous | Do not mutate; report NEEDS_HUMAN without stealing the lease |
+
+Takeover always sets `leadEngine`, `leadGeneration`, lease owner and lease generation
+in the same checkpoint. Generations are monotonically increasing and never reused.
+The takeover event references release/fencing evidence and the reconciliation
+result; timestamps support evidence but never prove unavailability alone.
 
 Heartbeat is renewed on a meaningful checkpoint or before a mutating operation,
 not on chat turns; no heartbeat event spam. Age alone never expires the lease.
@@ -160,10 +196,7 @@ the prior owner cannot mutate (terminated/fenced), or human-directed fencing.
 An unreachable session with uncertain liveness -> NEEDS_HUMAN, read-only.
 Never steal a lock just because its timestamp is old. A crashed lock requires the
 same fencing and reconciliation before removal. Two contenders cannot both win
-exclusive creation. Do not claim these policies enforce locking until Phase 2B
-implements and tests them. During Phase 2A, runtime mutation requires an idle V3
-pointer, one explicitly identified mutating Lead, generation 1, and serialized
-checkpoints. If ownership is uncertain, stop in NEEDS_HUMAN; do not dispatch.
+exclusive creation. If ownership is uncertain, stop in NEEDS_HUMAN; do not dispatch.
 
 Checkpoint protocol under that lock: validate schemas and allowed transition,
 assign revision/event sequence, write related projections via same-directory
@@ -174,6 +207,57 @@ partial JSON or ambiguous external side effects require reconciliation before
 further mutation. Never replay dispatch blindly. Recover projections from run.json
 and verified Git/Orca evidence; use a bounded event tail if necessary. Preserve
 corrupt files as recovery evidence rather than silently resetting them to IDLE.
+
+## Runtime reconciliation
+
+Reconciliation compares three independent layers in order. Durable V3 state owns
+workflow phase, the planned/current logical Task relationship, Lead generation and
+lease, recorded decisions, and `nextAction`. Orca owns observed Run, Task, Dispatch,
+worker/terminal and Orca worktree runtime facts. Git owns actual repository,
+branch, HEAD, worktree changes, commits and diffs. BMAD remains the product truth;
+neither Orca nor Git may rewrite requirements or architecture decisions.
+
+Perform observation read-only and record one of these deterministic classes before
+any takeover or other mutation:
+
+| Reconciliation class | Required action |
+|---|---|
+| RECORDED_MATCHES_RUNTIME | Make no correction; continue the recorded `nextAction` after lease validation/acquisition |
+| RECORDED_BEHIND_RUNTIME | Validate Orca completion plus worker report/worktree/Git evidence; advance only to the proved phase, normally LEAD_REVIEW; append STATE_RECONCILED; do not redispatch |
+| RECORDED_AHEAD_OF_RUNTIME | If state says dispatched but no matching Task/Dispatch/worker evidence exists, do not recreate work; distinguish never-dispatched, lost runtime, and corrupt state only from evidence; otherwise enter NEEDS_RECONSTRUCTION and append RECONCILIATION_BLOCKED |
+| TERMINAL_EXISTS_WITHOUT_SUPERVISED_DISPATCH | For recorded `compat-terminal`, a valid Task, explicit worker worktree and healthy Antigravity terminal is legitimate; null Dispatch is not corruption |
+| SUPERVISED_DISPATCH_FAILED_BUT_COMPAT_TASK_EXISTS | Respect the recorded `compat-terminal` mode and Phase 2A fallback evidence; do not create a supervised worker or switch modes automatically |
+| WORKTREE_MISSING | If runtime says a worker exists but its recorded worktree is missing, enter BLOCKED or NEEDS_RECONSTRUCTION; do not redispatch automatically |
+| GIT_DIRTY_AFTER_WORKER_COMPLETION | Preserve the diff and transition only to LEAD_REVIEW; never infer verification or completion |
+| TASK_COMPLETED_BUT_NO_VERIFIABLE_GIT_EVIDENCE | Transition to LEAD_REVIEW with evidence missing as the blocker; Task status alone never proves acceptance or COMPLETE |
+| DUPLICATE_WORKERS | Freeze mutation and enter NEEDS_HUMAN; do not select, cancel, merge or prefer a worker automatically; append DUPLICATE_WORKER_DETECTED |
+
+Safe correction requires a valid current lease. A replacement Lead completes the
+read-only comparison first, then acquires/takes over the lease, rereads all compared
+revision/identity facts inside `mutation.lock`, and commits the correction plus one
+STATE_RECONCILED event. If any fact changed, release the lock without mutation and
+restart observation. An owner conflict observed by a non-owner is reported without
+writing; only a valid owner may checkpoint an exceptional state.
+
+Execution mode is durable and never inferred from terminal focus. `supervised`
+expects a Task, Dispatch, worker identity and worktree. `compat-terminal` expects
+an Orca Run and Task, explicit isolated worktree, fixed Antigravity identity,
+coordinator-owned lifecycle, and independent Git evidence; a terminal handle is
+required while running but may be stale or unavailable after completion. Missing
+Dispatch is valid in `compat-terminal`. Resume never converts modes automatically;
+an explicit policy condition, current lease, and recorded decision are required.
+
+### Duplicate-dispatch gate
+
+Before creating or dispatching any worker, the lease owner rereads `run.json`, the
+current worker state/contract, and relevant Orca Run/Task status inside the lock.
+Match durable Task ID, Orca Task ID, bounded contract/scope, attempt, worker
+worktree, and any request/Dispatch identity. If an equivalent active or completed Task
+exists, do not dispatch; reconcile or enter review. If outcome is unknown, persist
+the unknown-outcome marker and use Orca request/status inspection. A new Lead,
+provider change, missing transcript, replaced terminal, or different UI focus is
+never evidence for a new Task. Multiple unexpected workers for one logical Task
+trigger DUPLICATE_WORKERS and NEEDS_HUMAN.
 
 ## State machine and gates
 
@@ -279,12 +363,18 @@ Checkpoint types: RUN_CREATED, PREFLIGHT_PASSED, PREFLIGHT_BLOCKED, PLAN_CREATED
 TASK_CREATED, TASK_DISPATCHED, WORKER_STARTED, WORKER_COMPLETED, WORKER_FAILED,
 REVIEW_STARTED, REVIEW_PASSED, REVIEW_FAILED, CORRECTION_DISPATCHED,
 VERIFICATION_STARTED, VERIFICATION_PASSED, VERIFICATION_FAILED, HUMAN_GATE_REACHED,
-LEAD_HANDOFF, STATE_RECONCILED, RUN_COMPLETED, RUN_CANCELLED. Exceptional condition
-changes may use STATE_RECONCILED with a concise reason. No per-message checkpoints.
+LEAD_LEASE_ACQUIRED, LEAD_LEASE_RELEASED, LEAD_TAKEOVER,
+LEAD_CONFLICT_DETECTED, LEAD_HANDOFF, STATE_RECONCILED,
+RECONCILIATION_BLOCKED, DUPLICATE_WORKER_DETECTED, RUN_COMPLETED and RUN_CANCELLED.
+Exceptional changes use the most specific type with one concise fact/evidence
+reference. Do not log every heartbeat, read-only query, repeated snapshot or
+terminal dump. No per-message checkpoints.
 
-Graceful handoff: checkpoint, update lead snapshot and handoff template, persist
-all current task/runtime identifiers, release lease under lock, then stop mutating.
-New owner reconciles and acquires the next generation. Emergency handoff uses
+Graceful handoff: checkpoint current state, update the concise Lead snapshot and
+handoff template, persist all current task/runtime identifiers and exact
+`nextAction`, stop initiating new mutations, release the lease under lock with
+LEAD_LEASE_RELEASED, and preserve healthy Orca workers. New owner reconciles and
+acquires the next generation. Emergency handoff uses
 run.json, lead snapshot, current worker, Git, Orca and events only if needed;
 handoff.md is optional and cannot override those facts.
 

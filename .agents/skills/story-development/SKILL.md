@@ -14,6 +14,11 @@ is superseded by Phase 2A: use the project-local `orca-cli` and `orchestration`
 skills for tracked Orca dispatch. Direct product implementation fallback remains
 disabled.
 
+Phase 2B requires read-only durable/Orca/Git reconciliation before a replacement
+Lead acquires the next generation. Every orchestration mutation requires the
+current owner/generation lease under the canonical `mutation.lock`. A new Lead,
+provider, transcript or terminal never authorizes duplicate Task dispatch.
+
 ## 1. Preflight
 
 Before editing:
@@ -71,6 +76,8 @@ do not repeat background, ACs, or approved decisions.
 
 
 The Lead checkpoints the plan and bounded worker contract under V3 ownership.
+Before Task creation or dispatch, enforce the duplicate-dispatch gate against
+durable and Orca Task identity while holding the current lease.
 Dispatch fixed Antigravity through Orca Orchestration into an Orca-managed isolated
 worktree. Before orchestration mutation, load the version-matched full guide as
 required by V3. Preserve Run/Task/Dispatch/worker/worktree IDs and use same-task

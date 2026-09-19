@@ -121,7 +121,23 @@
         "properties": {
           "orca": {
             "properties": {
-              "dispatchId": {"type":"null"},
+              "dispatchId": {"type":"null"}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"const":"RUNNING"},
+          "orca": {"properties":{"executionMode":{"const":"compat-terminal"}}}
+        }
+      },
+      "then": {
+        "properties": {
+          "orca": {
+            "properties": {
               "terminalHandle": {"type":"string","minLength":1}
             }
           }
