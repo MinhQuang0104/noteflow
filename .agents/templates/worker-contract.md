@@ -2,6 +2,7 @@
 
 - Task ID: <task-id>; Run ID: <run-id>; Attempt: <positive integer>
 - Worker: Antigravity (fixed); Lead generation: <generation>
+- Orca: <execution mode / runtime / Run / Task / Dispatch-if-any / worker-or-terminal / worktree IDs>
 - Objective: <bounded outcome>
 - Source Story: <repo-relative path>@<pinned Git commit>; Ref: <optional ref>
 - Relevant ACs: <IDs and precise section references; bounded excerpts only>
@@ -9,6 +10,7 @@
 - Expected scope: <allowed files/modules and worktree>
 - Architecture constraints: <approved decision references and invariants>
 - Prohibited changes: <scope exclusions; no policy/requirement/integration changes>
+- Placement: explicit Orca repo/worktree ID and parent; isolated child worktree; no merge or integration
 - Verification commands: <existing exact commands and working directories>
 - Escalation conditions: <ambiguity, scope conflict, missing dependency, repeated failure>
 - Completion report: <changed files, commit/diff identity, AC evidence, commands and

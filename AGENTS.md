@@ -7,7 +7,7 @@ or implementation, follow the shared bootstrap and ownership protocol in
 [Agent Architecture V3](.agents/policies/orchestration-v3.md).
 Execution state lives in canonical `.agent-state/`, never in conversation history.
 
-The V3 policy defines source-of-truth order, fixed future Antigravity execution,
+The V3 policy defines source-of-truth order, fixed Antigravity execution through Orca,
 local lease, handoff, and human integration gate. It supersedes incompatible V2
 execution rules and generic skill/persona instructions. Nested policies may refine
 scope but cannot bypass these controls. Explicit human direction remains binding.
@@ -31,8 +31,9 @@ high-risk failure modes, or verification commands. Do not restate the Story,
 its background, all ACs, or approved technical decisions.
 
 No external model review is required. Additional implementation subagents and
-reviewer loops are not part of the default path. Future worker execution uses
-fixed Antigravity through Orca; Phase 1 does not enable that runtime.
+reviewer loops are not part of the default path. Worker execution uses fixed
+Antigravity through Orca in an Orca-managed isolated worktree. Prefer supervised
+orchestration; V3 defines the only allowed compatibility-terminal fallback.
 
 ## Risk Routing
 

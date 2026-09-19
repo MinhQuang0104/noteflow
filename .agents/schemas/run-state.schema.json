@@ -70,12 +70,17 @@
     "orca": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["runId","taskId","sessionId","dispatchKey"],
+      "required": ["executionMode","runtimeId","runId","taskId","dispatchId","workerHandle","terminalHandle","requestId","worktreeId"],
       "properties": {
+        "executionMode": {"type":["string","null"],"enum":["supervised","compat-terminal",null]},
+        "runtimeId": {"type":["string","null"],"minLength":1},
         "runId": {"type":["string","null"],"minLength":1},
         "taskId": {"type":["string","null"],"minLength":1},
-        "sessionId": {"type":["string","null"],"minLength":1},
-        "dispatchKey": {"type":["string","null"],"minLength":1}
+        "dispatchId": {"type":["string","null"],"minLength":1},
+        "workerHandle": {"type":["string","null"],"minLength":1},
+        "terminalHandle": {"type":["string","null"],"minLength":1},
+        "requestId": {"type":["string","null"],"minLength":1},
+        "worktreeId": {"type":["string","null"],"minLength":1}
       }
     },
     "nextAction": {"type":"string","minLength":1,"maxLength":500},
@@ -124,7 +129,7 @@
       "then": {
         "properties": {
           "orca": {
-            "properties": {"runId":{"type":"null"},"taskId":{"type":"null"},"sessionId":{"type":"null"},"dispatchKey":{"type":"null"}}
+            "properties": {"executionMode":{"type":"null"},"runtimeId":{"type":"null"},"runId":{"type":"null"},"taskId":{"type":"null"},"dispatchId":{"type":"null"},"workerHandle":{"type":"null"},"terminalHandle":{"type":"null"},"requestId":{"type":"null"},"worktreeId":{"type":"null"}}
           }
         },
         "not": {"properties":{"status":{"enum":["WORKER_RUNNING","LEAD_REVIEW","VERIFICATION","HUMAN_GATE","COMPLETE"]}}}

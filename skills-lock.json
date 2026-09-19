@@ -78,6 +78,18 @@
       "sourceType": "github",
       "skillPath": "skills/bmad-sprint-planning/SKILL.md",
       "computedHash": "ade34380eb17fb108f8b59cda80e440c7b761a8f680fbf5ad10edf3b2f4feae6"
+    },
+    "orca-cli": {
+      "source": "stablyai/orca",
+      "sourceType": "github",
+      "skillPath": "skills/orca-cli/SKILL.md",
+      "computedHash": "7ad2f1fd9217ab275ae73ffbaf119306e67841b4babc4341ed42fe63e25a4c1b"
+    },
+    "orchestration": {
+      "source": "stablyai/orca",
+      "sourceType": "github",
+      "skillPath": "skills/orchestration/SKILL.md",
+      "computedHash": "247d274538eafa19d2fc622681dd7373d752e15e77b0efe41087e4790f062c50"
     }
   }
 }

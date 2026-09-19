@@ -2,14 +2,15 @@
 
 ## Scope and authority
 
-Phase 1 is a control-plane foundation. Orca and Antigravity are FUTURE
-integrations: no runtime adapter, dispatch, automatic model switch, or failover
-POC is enabled here. Product execution must wait for Phase 2 or an explicit
-human-authorized exception; missing infrastructure never implies direct Lead coding.
+Phase 2A connects the durable control plane to the installed Orca runtime.
+Tracked implementation execution is enabled only through an Orca-owned Run and
+Task, with Antigravity as the fixed worker in an Orca-managed isolated Git worktree. Automatic
+model switching, failover testing, lease enforcement, runtime reconciliation and
+integration remain disabled. Missing infrastructure never implies direct Lead coding.
 Authorized agent-infrastructure maintenance may be performed by the Lead.
 
 Human -> replaceable Lead (Codex account A, Codex account B, Claude) -> durable
-control plane (BMAD, canonical policies, `.agent-state`) -> future Orca -> fixed
+control plane (BMAD, canonical policies, `.agent-state`) -> Orca -> fixed
 Antigravity -> isolated Git worktree -> Lead review -> human integration gate.
 
 Subject to explicit human direction, resolve source conflicts in this order:
@@ -34,7 +35,7 @@ workflows cannot bypass bootstrap, ownership, fixed worker, or human approval.
 - R1: Product requirements live in approved BMAD artifacts.
 - R2: Execution state lives outside model conversation context.
 - R3: Codex and Claude are replaceable Lead engines; Lead is a role.
-- R4: Antigravity is the fixed implementation worker once integration is enabled.
+- R4: Antigravity is the fixed implementation worker for Orca dispatch.
 - R5: Workers operate in isolated Orca-managed Git worktrees.
 - R6: Lead does not implement product code by default when a healthy worker exists.
 - R7: Worker contracts specify execution; they are not product truth.
@@ -102,6 +103,9 @@ Schemas validate individual snapshots (JSON Schema draft-07); the future writer
 must additionally check cross-file IDs, lease generation equality, monotonic
 revisions, phase/status agreement, allowed transitions and current Git evidence.
 Schema validity alone does not authorize a mutation or prove a lifecycle gate.
+For an explicitly authorized non-product infrastructure smoke run, the `story`
+identity names the canonical agent policy under test and must not update BMAD
+Story or sprint state.
 
 `lead/state.md` is at most 40 lines: run/revision, phase, task, worker status,
 completed steps, important decisions, blocker, waiting-for, exact next action,
@@ -128,7 +132,7 @@ Codex and Claude follow exactly this protocol before planning or implementation:
 4. Do NOT read `events.jsonl` during ordinary resume. Do not load transcripts or
    full BMAD documents. Use pinned Story sections relevant to the next action.
 5. Check identities, revision, source commit and relevant Git/worktree reality.
-   Once Orca exists, query actual run/task/session and worktree status before
+   Query actual Orca Run/Task/Dispatch and worktree status before
    dispatch/cancel/retry. Unknown status is not permission to create another task.
 6. Reconcile under the ownership protocol before mutations. Continue `nextAction`;
    never duplicate a worker because the Lead session changed. Preserve human gate.
@@ -140,7 +144,7 @@ First ownership is generation 1; every takeover increments generation, even for
 the same engine/account. Lease generation equals run.leadGeneration. Null lease
 means released ownership; it does not reset generation. No account tokens in state.
 
-Phase 2 must implement a local exclusive-create lock at `mutation.lock` around
+Phase 2B must implement a local exclusive-create lock at `mutation.lock` around
 every mutating transaction, including active-run creation, ownership acquisition,
 task creation, dispatch, cancellation, state transitions and integration actions.
 This is a short filesystem critical section, not a distributed locking service.
@@ -156,8 +160,10 @@ the prior owner cannot mutate (terminated/fenced), or human-directed fencing.
 An unreachable session with uncertain liveness -> NEEDS_HUMAN, read-only.
 Never steal a lock just because its timestamp is old. A crashed lock requires the
 same fencing and reconciliation before removal. Two contenders cannot both win
-exclusive creation. Do not claim these policies enforce locking until Phase 2
-implements and tests them. Phase 1 performs no active orchestration mutations.
+exclusive creation. Do not claim these policies enforce locking until Phase 2B
+implements and tests them. During Phase 2A, runtime mutation requires an idle V3
+pointer, one explicitly identified mutating Lead, generation 1, and serialized
+checkpoints. If ownership is uncertain, stop in NEEDS_HUMAN; do not dispatch.
 
 Checkpoint protocol under that lock: validate schemas and allowed transition,
 assign revision/event sequence, write related projections via same-directory
@@ -178,7 +184,7 @@ Only these normal edges are allowed; conditions are mandatory:
 | IDLE | PREFLIGHT | New run, pinned Story, ownership acquired |
 | PREFLIGHT | PLANNING | Readiness and policy checks pass |
 | PLANNING | TASK_READY | Bounded contract and verification plan recorded |
-| TASK_READY | WORKER_RUNNING | Future Orca dispatch confirmed, IDs durable |
+| TASK_READY | WORKER_RUNNING | Supervised Dispatch or compatibility terminal ready; Run/Task/mode/worktree IDs durable |
 | WORKER_RUNNING | LEAD_REVIEW | Worker DONE, report and worktree available |
 | LEAD_REVIEW | VERIFICATION | Actual diff reviewed, Lead ACCEPTED |
 | LEAD_REVIEW | TASK_READY | Corrections required; same task, attempt +1 |
@@ -210,10 +216,41 @@ ACCEPTED/APPROVED from missing data. Recovery cannot skip review or verification
 
 ## Worker execution, review and correction
 
-Once enabled, engine is Antigravity, fixed by default. Orca owns worktree/runtime
-creation; Lead owns bounded contracts and review. Persist a dispatch intent keyed
-by run/task/attempt/generation before calling Orca; query/reconcile that key after
-unknown results. Actual Orca APIs/ID mapping are Phase 2 work, not invented here.
+Engine is Antigravity, fixed by default. Orca owns worktree/runtime creation;
+the Lead owns bounded contracts and review. Codex and Claude use the project-local
+`orca-cli` and `orchestration` skills; no global skill installation is required.
+At each Lead session, use the resolved `orca` executable throughout. Verify it with
+`orca status --json`, then load `orca skills get orchestration --full` before ANY
+Orca orchestration mutation. Follow that version-matched guide rather than frozen
+command assumptions in this policy.
+
+Preferred tracked dispatch uses Orca supervised orchestration when the installed
+Orca and Antigravity versions support it reliably: create/bind one Orca Run, create
+one Task from the bounded contract, and start fixed Antigravity in an isolated
+Orca-managed worktree. Record the CLI request, runtime, Run, Task, Dispatch,
+worker, optional terminal, execution mode, and full worktree IDs from receipts.
+Never reconstruct IDs. Persist dispatch intent before the call; after an unknown
+result use the guide's request/status inspection instead of replaying.
+
+Use `compat-terminal` only after supervised Antigravity dispatch fails because of
+an observed Orca/provider compatibility limitation. An Orca Run and Task must
+already exist and remain coordinator-owned. Create or identify an isolated
+Orca-managed child worktree with durable explicit repo/worktree identifiers and an
+explicit parent; never depend on UI focus or whichever workspace is visually active.
+Start or identify one healthy Antigravity terminal there, send the bounded contract
+with `orca terminal send`, and capture rendered completion evidence with
+`orca terminal read --screen`. Then independently inspect the worker Git status,
+diff, scope, and acceptance evidence before the coordinator uses
+`orca orchestration task-update`. Store `executionMode: "compat-terminal"`, the
+terminal and worktree IDs, and a null Dispatch ID when no Dispatch succeeded.
+
+This compatibility path is still Orca runtime execution, not a second orchestrator.
+It never authorizes Lead-checkout implementation, Codex/Claude worker substitution,
+shared-worktree execution, self-report-only completion, automatic merge, or bypass
+of Lead review and human approval. Outside this bounded compatibility path, raw
+terminal control and `dispatch --inject` remain diagnostic/recovery-only.
+Orca runtime status describes execution facts and never overrides BMAD requirements,
+the worker contract, Git evidence, Lead review, or the human integration gate.
 Worker reports are inputs to the Lead, never writes to canonical Lead ownership.
 
 DONE means implementation finished, local verification attempted, report available,
@@ -248,7 +285,7 @@ changes may use STATE_RECONCILED with a concise reason. No per-message checkpoin
 Graceful handoff: checkpoint, update lead snapshot and handoff template, persist
 all current task/runtime identifiers, release lease under lock, then stop mutating.
 New owner reconciles and acquires the next generation. Emergency handoff uses
-run.json, lead snapshot, current worker, Git, future Orca and events only if needed;
+run.json, lead snapshot, current worker, Git, Orca and events only if needed;
 handoff.md is optional and cannot override those facts.
 
 | Failure / switch | Required behavior |
@@ -258,7 +295,7 @@ handoff.md is optional and cannot override those facts.
 | Codex A -> Codex B | Same protocol, unique session owner, no new task by default |
 | Codex -> Claude / Claude -> Codex | Same role bootstrap, schema and generation; only tool syntax differs |
 | Worker failure | Diagnose and resume same task safely; otherwise NEEDS_HUMAN |
-| Future Orca unavailable | BLOCKED (or WORKER_FAILED if confirmed); retain IDs, reconcile on recovery, never direct-code fallback |
+| Orca unavailable | BLOCKED (or WORKER_FAILED if confirmed); retain IDs, reconcile on recovery, never direct-code fallback |
 | Stale filesystem snapshot | Compare revision and Git/Orca facts; repair projections under lease; do not trust timestamp alone |
 | Conflicting Leads | Losing/uncertain owner stays read-only; fence before takeover |
 | Missing/corrupt state | NEEDS_RECONSTRUCTION; preserve evidence, rebuild verified facts only; human resolves uncertainty |

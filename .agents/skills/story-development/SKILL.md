@@ -10,7 +10,9 @@ selects proportionate controls; it is not a second SDLC or implementation agent.
 Follow the authority and Done Gate in the repository root `AGENTS.md`.
 Follow `.agents/policies/orchestration-v3.md`: Codex and Claude first perform its
 shared bootstrap; active runs enter RESUME MODE before new planning. Phase 1
-enables no Orca dispatch or direct product implementation fallback.
+is superseded by Phase 2A: use the project-local `orca-cli` and `orchestration`
+skills for tracked Orca dispatch. Direct product implementation fallback remains
+disabled.
 
 ## 1. Preflight
 
@@ -69,8 +71,14 @@ do not repeat background, ACs, or approved decisions.
 
 
 The Lead checkpoints the plan and bounded worker contract under V3 ownership.
-Once Phase 2 is enabled, dispatch fixed Antigravity through Orca into an isolated
-worktree. Preserve task/session IDs and use same-task corrections. Worker DONE
+Dispatch fixed Antigravity through Orca Orchestration into an Orca-managed isolated
+worktree. Before orchestration mutation, load the version-matched full guide as
+required by V3. Preserve Run/Task/Dispatch/worker/worktree IDs and use same-task
+corrections. Prefer supervised dispatch. Use V3's `compat-terminal` path only for
+an observed Orca/Antigravity compatibility failure, with an existing coordinator-
+owned Run and Task, explicit isolated worktree identifiers, fixed Antigravity,
+rendered terminal evidence, independent Git verification, and coordinator Task
+update. Worker DONE
 requires Lead review of actual diff, scope, ACs, tests and architecture before
 ACCEPTED. No external model review is required. No extra implementation subagents
 or per-task reviewer loops belong to the default path. Infrastructure failure

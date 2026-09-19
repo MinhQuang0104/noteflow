@@ -49,12 +49,17 @@
     "orca": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["runId","taskId","sessionId","dispatchKey"],
+      "required": ["executionMode","runtimeId","runId","taskId","dispatchId","workerHandle","terminalHandle","requestId","worktreeId"],
       "properties": {
+        "executionMode": {"type":["string","null"],"enum":["supervised","compat-terminal",null]},
+        "runtimeId": {"type":["string","null"],"minLength":1},
         "runId": {"type":["string","null"],"minLength":1},
         "taskId": {"type":["string","null"],"minLength":1},
-        "sessionId": {"type":["string","null"],"minLength":1},
-        "dispatchKey": {"type":["string","null"],"minLength":1}
+        "dispatchId": {"type":["string","null"],"minLength":1},
+        "workerHandle": {"type":["string","null"],"minLength":1},
+        "terminalHandle": {"type":["string","null"],"minLength":1},
+        "requestId": {"type":["string","null"],"minLength":1},
+        "worktreeId": {"type":["string","null"],"minLength":1}
       }
     },
     "worktreePath": {"type":["string","null"],"minLength":1},
@@ -77,10 +82,47 @@
           "baseCommit": {"type":"string","pattern":"^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
           "orca": {
             "properties": {
+              "executionMode": {"enum":["supervised","compat-terminal"]},
+              "runtimeId": {"type":"string","minLength":1},
               "runId": {"type":"string","minLength":1},
               "taskId": {"type":"string","minLength":1},
-              "sessionId": {"type":"string","minLength":1},
-              "dispatchKey": {"type":"string","minLength":1}
+              "worktreeId": {"type":"string","minLength":1}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"enum":["RUNNING","DONE"]},
+          "orca": {"properties":{"executionMode":{"const":"supervised"}}}
+        }
+      },
+      "then": {
+        "properties": {
+          "orca": {
+            "properties": {
+              "dispatchId": {"type":"string","minLength":1},
+              "workerHandle": {"type":"string","minLength":1}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"enum":["RUNNING","DONE"]},
+          "orca": {"properties":{"executionMode":{"const":"compat-terminal"}}}
+        }
+      },
+      "then": {
+        "properties": {
+          "orca": {
+            "properties": {
+              "dispatchId": {"type":"null"},
+              "terminalHandle": {"type":"string","minLength":1}
             }
           }
         }

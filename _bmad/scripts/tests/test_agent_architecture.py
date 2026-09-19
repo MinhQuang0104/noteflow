@@ -109,6 +109,48 @@ class AgentArchitectureTests(unittest.TestCase):
         self.assertIn("Age alone never expires the lease", policy)
         self.assertIn("Stale generations", policy)
 
+    def test_phase_2a_uses_project_local_orca_orchestration(self):
+        policy = read(".agents/policies/orchestration-v3.md")
+        router = read(".agents/skills/story-development/SKILL.md")
+        self.assertIn("orca skills get orchestration --full", policy)
+        self.assertIn("Orca supervised orchestration", policy)
+        self.assertIn("compat-terminal", policy)
+        self.assertIn("orca terminal send", policy)
+        self.assertIn("orca terminal read --screen", policy)
+        self.assertIn("orca orchestration task-update", policy)
+        self.assertIn("durable explicit repo/worktree identifiers", policy)
+        self.assertIn("explicit parent", policy)
+        self.assertNotIn("--worktree new-child", policy)
+        self.assertIn("never depend on UI focus", policy)
+        self.assertRegex(policy, r"(?is)raw\s+terminal control.{0,120}diagnostic/recovery-only")
+        self.assertRegex(policy, r"(?s)project-local\s+`orca-cli` and `orchestration`")
+        self.assertNotIn("Phase 1 enables no Orca dispatch", router)
+        self.assertTrue((REPO / ".agents/skills/orca-cli/SKILL.md").is_file())
+        self.assertTrue((REPO / ".agents/skills/orchestration/SKILL.md").is_file())
+        self.assertEqual(read(".claude/skills/orca-cli/SKILL.md"),
+                         read(".agents/skills/orca-cli/SKILL.md"))
+        self.assertEqual(read(".claude/skills/orchestration/SKILL.md"),
+                         read(".agents/skills/orchestration/SKILL.md"))
+        skill_lock = json.loads(read("skills-lock.json"))["skills"]
+        self.assertEqual(skill_lock["orca-cli"]["source"], "stablyai/orca")
+        self.assertEqual(skill_lock["orchestration"]["source"], "stablyai/orca")
+
+    def test_phase_2a_schemas_store_real_orca_identifiers(self):
+        expected = {
+            "executionMode", "runtimeId", "runId", "taskId", "dispatchId", "workerHandle",
+            "terminalHandle", "requestId", "worktreeId",
+        }
+        for path in (".agents/schemas/run-state.schema.json",
+                     ".agents/schemas/worker-state.schema.json"):
+            schema = json.loads(read(path))
+            orca = schema["properties"]["orca"]
+            self.assertEqual(set(orca["required"]), expected)
+            self.assertEqual(set(orca["properties"]), expected)
+            self.assertEqual(orca["properties"]["executionMode"]["enum"],
+                             ["supervised", "compat-terminal", None])
+        worker = json.loads(read(".agents/schemas/worker-state.schema.json"))
+        self.assertEqual(worker["properties"]["engine"]["const"], "Antigravity")
+
     def test_policy_defines_story_as_plan_risk_escalation_and_done_gate(self):
         policy = read("AGENTS.md")
         router = read(".agents/skills/story-development/SKILL.md")
