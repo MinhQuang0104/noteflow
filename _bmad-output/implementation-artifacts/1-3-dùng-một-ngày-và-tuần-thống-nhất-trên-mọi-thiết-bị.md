@@ -1,6 +1,6 @@
 # Story 1.3: Dùng một ngày và tuần thống nhất trên mọi thiết bị
 
-Status: review
+Status: done
 
 ## Story
 
@@ -132,6 +132,7 @@ Additional gates:
 - Đã thêm private `/api/v1/account`, OpenAPI/generated types và fail-closed owner/no-store boundary.
 - Đã thêm account store, Today canonical date/week và Settings timezone chỉ đọc; logout/session expiry dọn private state.
 - HIGH-risk adversarial review và toàn bộ deterministic gate hiện có đã pass; Story sẵn sàng cho human review.
+- Human review đã approve; PR #1 được merge vào `main` tại `06e1c65301340f74757d51987bc8b1330406d7e1` và CI trên merge commit PASS.
 
 ### File List
 
@@ -166,3 +167,4 @@ Additional gates:
 - 2026-09-18: Readiness gate PASS; đồng bộ Story/sprint sang `ready-for-dev`, chưa triển khai product code.
 - 2026-09-18: Bắt đầu implementation theo `story-development`; áp dụng TDD và HIGH-risk controls.
 - 2026-09-18: Hoàn tất implementation, adversarial review và deterministic Done Gate; chuyển Story sang `review`.
+- 2026-09-19: Human approval, merge PR #1 và CI trên `main` được xác nhận; đồng bộ Story/sprint lifecycle sang `done`.
