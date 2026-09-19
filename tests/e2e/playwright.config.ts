@@ -13,11 +13,15 @@ export default defineConfig({
   projects: [
     {
       name: 'laptop',
-      use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1440, height: 900 },
+        timezoneId: 'America/Los_Angeles',
+      },
     },
     {
       name: 'phone',
-      use: { ...devices['Pixel 5'], viewport: { width: 390, height: 844 } },
+      use: { ...devices['Pixel 5'], viewport: { width: 390, height: 844 }, timezoneId: 'Asia/Tokyo' },
     },
   ],
   webServer: [

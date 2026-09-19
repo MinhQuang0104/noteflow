@@ -41,6 +41,17 @@ test('Back after logout cannot reveal a previously visited private view', async 
     }),
   )
   await page.route('**/logout', (route) => route.fulfill({ status: 204 }))
+  await page.route('**/api/v1/account', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        timezone: 'Asia/Ho_Chi_Minh',
+        account_date: '2026-09-21',
+        week: { start_date: '2026-09-21', end_date: '2026-09-27' },
+      }),
+    }),
+  )
 
   await page.goto('/today')
   const navigationButton = page.getByRole('button', { name: 'Mở điều hướng' })

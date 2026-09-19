@@ -95,6 +95,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FoundationHealth'
+  /api/v1/account:
+    get:
+      operationId: getAccountContext
+      summary: Resolve the owner account date and Monday-to-Sunday week
+      security:
+        - sanctumCookie: []
+      responses:
+        '200':
+          description: Server-authoritative account time context
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountContext'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          description: Authenticated identity is not the provisioned owner
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
 components:
   securitySchemes:
     sanctumCookie:
@@ -137,6 +164,36 @@ components:
           schema:
             $ref: '#/components/schemas/ApiError'
   schemas:
+    AccountContext:
+      type: object
+      additionalProperties: false
+      required:
+        - timezone
+        - account_date
+        - week
+      properties:
+        timezone:
+          type: string
+          enum:
+            - Asia/Ho_Chi_Minh
+        account_date:
+          type: string
+          format: date
+        week:
+          $ref: '#/components/schemas/AccountWeek'
+    AccountWeek:
+      type: object
+      additionalProperties: false
+      required:
+        - start_date
+        - end_date
+      properties:
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
     Owner:
       type: object
       additionalProperties: false

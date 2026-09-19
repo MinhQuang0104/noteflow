@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 
 final class ProvisionOwner extends Command
 {
+    private const ACCOUNT_TIMEZONE = 'Asia/Ho_Chi_Minh';
+
     protected $signature = 'noteflow:provision-owner {email} {--name=Owner}';
 
     protected $description = 'Provision the single NoteFlow owner account';
@@ -40,6 +42,12 @@ final class ProvisionOwner extends Command
                     'password' => $password,
                     'is_owner' => true,
                 ],
+            );
+
+            DB::table('account_states')->where('owner_id', '<>', $owner->id)->delete();
+            DB::table('account_states')->updateOrInsert(
+                ['owner_id' => $owner->id],
+                ['timezone' => self::ACCOUNT_TIMEZONE],
             );
 
             DB::table('sessions')
