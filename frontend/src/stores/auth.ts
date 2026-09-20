@@ -3,6 +3,7 @@ import { ref } from 'vue'
 
 import * as authApi from '../api/auth'
 import type { LoginInput, Owner } from '../api/auth'
+import { queryClient } from '../queryClient'
 
 export type AuthStatus = 'unknown' | 'loading' | 'authenticated' | 'guest'
 
@@ -14,6 +15,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   function clearPrivateState(): void {
     for (const reset of privateStateResets) reset()
+    queryClient.clear()
     owner.value = null
   }
 

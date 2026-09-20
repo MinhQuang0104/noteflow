@@ -122,6 +122,168 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
+  /api/v1/challenges:
+    get:
+      operationId: getChallenges
+      summary: List challenges for the authenticated owner
+      security:
+        - sanctumCookie: []
+      responses:
+        '200':
+          description: List of challenges
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeListResult'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          description: Authenticated identity is not the provisioned owner
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    post:
+      operationId: createChallenge
+      summary: Create a new challenge
+      security:
+        - sanctumCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateChallengeRequest'
+      responses:
+        '201':
+          description: Challenge created successfully
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeMutationResult'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          description: Authenticated identity is not the provisioned owner
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          $ref: '#/components/responses/ProblemDetails'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '423':
+          $ref: '#/components/responses/ProblemDetails'
+  /api/v1/challenges/{id}:
+    get:
+      operationId: getChallenge
+      summary: Get challenge details
+      security:
+        - sanctumCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Challenge detail
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeDetailResult'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          description: Authenticated identity is not the provisioned owner
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Challenge not found
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    patch:
+      operationId: updateChallengeMetadata
+      summary: Update challenge name and description
+      security:
+        - sanctumCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateChallengeMetadataRequest'
+      responses:
+        '200':
+          description: Challenge metadata updated successfully
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeMutationResult'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          description: Authenticated identity is not the provisioned owner
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Challenge not found
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          $ref: '#/components/responses/ProblemDetails'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '423':
+          $ref: '#/components/responses/ProblemDetails'
 components:
   securitySchemes:
     sanctumCookie:
@@ -154,6 +316,15 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ValidationError'
+    ProblemDetails:
+      description: Domain or state conflict, fence or key reuse
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/PrivateNoStore'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
     CsrfExpired:
       description: CSRF session expired or token mismatched
       headers:
@@ -171,6 +342,9 @@ components:
         - timezone
         - account_date
         - week
+        - account_revision
+        - data_epoch
+        - write_state
       properties:
         timezone:
           type: string
@@ -181,6 +355,17 @@ components:
           format: date
         week:
           $ref: '#/components/schemas/AccountWeek'
+        account_revision:
+          type: integer
+          minimum: 0
+        data_epoch:
+          type: integer
+          minimum: 1
+        write_state:
+          type: string
+          enum:
+            - open
+            - locked_for_import
     AccountWeek:
       type: object
       additionalProperties: false
@@ -293,3 +478,173 @@ components:
           type: string
           enum:
             - noteflow-api
+    Challenge:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - description
+        - start_date
+        - target_days
+        - row_version
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        start_date:
+          type: string
+          format: date
+        target_days:
+          type: integer
+          minimum: 1
+          maximum: 7
+        row_version:
+          type: integer
+          minimum: 1
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    ChallengeSnapshot:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - description
+        - start_date
+        - target_days
+        - row_version
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        start_date:
+          type: string
+          format: date
+        target_days:
+          type: integer
+          minimum: 1
+          maximum: 7
+        row_version:
+          type: integer
+          minimum: 1
+    ChallengeListResult:
+      type: object
+      additionalProperties: false
+      required:
+        - challenges
+      properties:
+        challenges:
+          type: array
+          items:
+            $ref: '#/components/schemas/Challenge'
+    ChallengeDetailResult:
+      type: object
+      additionalProperties: false
+      required:
+        - challenge
+      properties:
+        challenge:
+          $ref: '#/components/schemas/Challenge'
+    ChallengeMutationResult:
+      type: object
+      additionalProperties: false
+      required:
+        - challenge
+        - account_revision
+        - data_epoch
+      properties:
+        challenge:
+          $ref: '#/components/schemas/Challenge'
+        account_revision:
+          type: integer
+          minimum: 0
+        data_epoch:
+          type: integer
+          minimum: 1
+    CreateChallengeRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - command_id
+        - data_epoch
+        - name
+        - target_days
+      properties:
+        command_id:
+          type: string
+          format: uuid
+        data_epoch:
+          type: integer
+          minimum: 1
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        target_days:
+          type: integer
+          minimum: 1
+          maximum: 7
+    UpdateChallengeMetadataRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - command_id
+        - data_epoch
+        - base_version
+        - name
+      properties:
+        command_id:
+          type: string
+          format: uuid
+        data_epoch:
+          type: integer
+          minimum: 1
+        base_version:
+          type: integer
+          minimum: 1
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+    ProblemDetails:
+      type: object
+      additionalProperties: false
+      required:
+        - message
+        - code
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+          enum:
+            - version_conflict
+            - stale_data_epoch
+            - idempotency_key_reused
+            - write_fence_active
+        resource_id:
+          type: string
+          format: uuid
+        current_version:
+          type: integer
+        current_snapshot:
+          $ref: '#/components/schemas/ChallengeSnapshot'

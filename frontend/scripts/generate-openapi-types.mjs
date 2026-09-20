@@ -29,12 +29,14 @@ function schemaType(schema) {
     return objectType(schema)
   }
 
-  return {
+  const base = {
     boolean: 'boolean',
     integer: 'number',
     number: 'number',
     string: 'string',
   }[schema.type] ?? 'unknown'
+
+  return schema.nullable ? `${base} | null` : base
 }
 
 function objectType(schema, indent = '      ') {

@@ -15,14 +15,21 @@ final class AccountContextController extends Controller
     {
         /** @var User $owner */
         $owner = $request->user();
-        $timezone = DB::table('account_states')
+        $state = DB::table('account_states')
             ->where('owner_id', $owner->id)
-            ->value('timezone');
+            ->first();
 
-        if (! is_string($timezone)) {
+        if ($state === null) {
             throw new LogicException('The provisioned owner is missing account state.');
         }
 
-        return response()->json($factory->capture($timezone)->toArray());
+        $timeContext = $factory->capture((string) $state->timezone);
+
+        return response()->json([
+            ...$timeContext->toArray(),
+            'account_revision' => (int) $state->account_revision,
+            'data_epoch' => (int) $state->data_epoch,
+            'write_state' => (string) $state->write_state,
+        ]);
     }
 }

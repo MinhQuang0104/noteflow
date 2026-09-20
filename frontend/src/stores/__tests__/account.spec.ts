@@ -29,6 +29,9 @@ test('a late account response cannot restore context after logout', async () => 
     timezone: 'Asia/Ho_Chi_Minh',
     account_date: '2026-09-21',
     week: { start_date: '2026-09-21', end_date: '2026-09-27' },
+    account_revision: 1,
+    data_epoch: 1,
+    write_state: 'open',
   })
   await pending
 
@@ -61,6 +64,9 @@ test('an expired account request reconciles auth and clears private context', as
     timezone: 'Asia/Ho_Chi_Minh',
     account_date: '2026-09-21',
     week: { start_date: '2026-09-21', end_date: '2026-09-27' },
+    account_revision: 1,
+    data_epoch: 1,
+    write_state: 'open',
   }
   account.status = 'ready'
 

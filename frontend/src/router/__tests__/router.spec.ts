@@ -38,6 +38,9 @@ test('an authenticated owner cannot return to the login view', async () => {
     timezone: 'Asia/Ho_Chi_Minh',
     account_date: '2026-09-21',
     week: { start_date: '2026-09-21', end_date: '2026-09-27' },
+    account_revision: 1,
+    data_epoch: 1,
+    write_state: 'open',
   }
 
   await router.push('/notes')

@@ -4,13 +4,15 @@ import { pinia } from '../pinia'
 import { useAuthStore } from '../stores/auth'
 import { useAccountStore } from '../stores/account'
 import AccountSettingsView from '../views/AccountSettingsView.vue'
+import ChallengesView from '../views/ChallengesView.vue'
 import LoginView from '../views/LoginView.vue'
 import PrivatePlaceholderView from '../views/PrivatePlaceholderView.vue'
 import TodayView from '../views/TodayView.vue'
 
 const privateRoutes = [
   { path: '/today', name: 'today', title: 'Hôm nay', component: TodayView },
-  { path: '/challenges', name: 'challenges', title: 'Challenge', component: PrivatePlaceholderView },
+  { path: '/challenges', name: 'challenges', title: 'Challenge', component: ChallengesView },
+  { path: '/challenges/:id', name: 'challenge-detail', title: 'Chi tiết Challenge', component: ChallengesView },
   { path: '/notes', name: 'notes', title: 'Ghi chú', component: PrivatePlaceholderView },
   { path: '/calendar', name: 'calendar', title: 'Lịch', component: PrivatePlaceholderView },
   { path: '/settings', name: 'settings', title: 'Cài đặt tài khoản', component: AccountSettingsView },

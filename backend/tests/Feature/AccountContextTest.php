@@ -55,6 +55,9 @@ test('the owner receives one server-authoritative account date and Monday to Sun
             'start_date' => '2026-09-14',
             'end_date' => '2026-09-20',
         ],
+        'account_revision' => 0,
+        'data_epoch' => 1,
+        'write_state' => 'open',
     ]);
     expect($clock->calls)->toBe(1);
     expect($response->headers->get('cache-control'))
