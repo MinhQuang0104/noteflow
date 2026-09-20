@@ -79,8 +79,14 @@ The Lead checkpoints the plan and bounded worker contract under V3 ownership.
 Before Task creation or dispatch, enforce the duplicate-dispatch gate against
 durable and Orca Task identity while holding the current lease.
 Dispatch fixed Antigravity through Orca Orchestration into an Orca-managed isolated
-worktree. Before orchestration mutation, load the version-matched full guide as
-required by V3. Preserve Run/Task/Dispatch/worker/worktree IDs and use same-task
+worktree. Load canonical V3 and the version-matched compact guide first, before
+Orca observation or mutation; classify the current action using V3's
+"Orca action reference gates" and load required named references through current
+discovery. Apply all matching gates, including recovery before any uncertain
+replay. If compact retrieval, discovery or required references are unavailable,
+or action/interface mapping is unsafe, load the full guide and record the fallback
+reason; if still insufficient, stop without mutation. Never guess runtime commands from memory.
+Preserve Run/Task/Dispatch/worker/worktree IDs and use same-task
 corrections. Prefer supervised dispatch. Use V3's `compat-terminal` path only for
 an observed Orca/Antigravity compatibility failure, with an existing coordinator-
 owned Run and Task, explicit isolated worktree identifiers, fixed Antigravity,

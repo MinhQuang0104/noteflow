@@ -124,6 +124,97 @@ findings. `review.md` records PENDING/ACCEPTED/CHANGES_REQUESTED, inspected revi
 scope/diff, AC and architecture evidence. Any code change invalidates prior review,
 verification and human approval for that diff.
 
+## Orca context loading (A2)
+
+Always read this canonical policy and the compact, version-matched Orca guide at
+Lead session entry, before Orca observation or mutation: resolve the executable
+through the project-local discovery skills, then `orca skills get orchestration`.
+Here `orca` means that selected executable throughout; never switch binaries on
+failure. Verify runtime identity with `orca status --json`. Healthy actions require no full guide.
+The compact guide is mandatory; if unsupported, use the full-guide fallback below
+to obtain its safety guidance. Lazy loading never skips canonical V3 rules.
+
+Classify the current action using the gates below before acting. Load only its
+required capabilities, plus any conditional reference required by the live guide
+or receipt. Already loaded, applicable guidance in the current context need not
+be read again for every action. Unknown outcome requires read-only reconciliation
+before any replay; loading a reference never grants mutation authority.
+V3 retains authority, state-machine gates, isolation, ownership/generation,
+duplicate-dispatch prevention, independent review/verification and Human Gate.
+Orca examples using other agents, shared/current workspaces or folder workspaces
+do not override fixed Antigravity and isolated Git worktrees in NoteFlow.
+
+## Orca capability discovery
+
+Use `orca skills get orchestration --references` to discover available names and
+`orca skills get orchestration --reference <discovered-reference>` to read one.
+Resolve categories from current discovery and the compact guide's action gates;
+the names below are observed mappings, not version pins or text/hash contracts.
+Rediscover when the installed interface differs; never guess renamed commands or
+silently omit a required category. Keep runtime-specific procedures in Orca.
+
+| Capability | Observed reference | Required semantics |
+|---|---|---|
+| placement | `references/placement-and-remote.md` | New worktree or exact workspace selection and isolation binding |
+| reuse | `references/coordinator-loop.md` | Same-terminal reuse and settlement ownership |
+| recovery | `references/recovery-and-cleanup.md` | Failed/stopped/unknown attempts, request inspection, retry and uncertain cleanup |
+| legacy | `references/legacy-contract-migration.md` | Compatibility labels/receipts, adopted Run and takeover authority |
+| topology | `references/low-level-topology.md` | Operator-created terminals and limits of unsupervised lifecycle ownership |
+| terminal | `orca-cli` | Load the compact `orca skills get orca-cli` guide for terminal/worktree commands; follow its own action references |
+
+There is no separate restart or V3 lease reference in the observed Orca guide.
+Use recovery for runtime facts and the canonical ownership/reconciliation sections
+for V3 lease decisions. `legacy` does not authorize legacy takeover commands for
+an ordinary current Run. NoteFlow compat-terminal is not itself a legacy label:
+use topology plus terminal guidance and V3's existing compatibility procedure;
+add legacy only for an actual label, adopted Run or compatibility receipt.
+
+## Orca action reference gates
+
+All rows require canonical V3 plus compact Orca guidance. Additional capabilities
+must be loaded before the action. Apply every matching row (union of requirements);
+recovery/uncertainty overrides healthy classification. Past recovery alone does not trigger a load.
+
+| Action | Current condition | Additional capabilities | Guard before proceeding |
+|---|---|---|---|
+| healthy | Existing Run/Task identities clear; lease valid; generation matches; isolated worker/worktree bound; runtime observation matches durable state; no unknown effect, takeover or restart requiring recovery; no specialized action | none | Observe first, validate ownership before mutation; continue exact nextAction |
+| new-worker | Create worker/worktree or select exact isolated placement | placement | Bind exact Run/Task/worktree; enforce duplicate-dispatch gate; no shared mutable workspace |
+| continue | Continue same active Task/attempt with healthy matching observations | none | Do not start a new Dispatch; use other gates if action requires reuse, messaging or recovery |
+| correction | Correction after Lead review on same logical Task | reuse | Preserve same Task and worktree, reuse session when possible, attempt +1, pin previous report/evidence identity; apply retry gate if failed/stopped |
+| retry | Explicit retry of proven failed/stopped attempt | recovery, placement | Reconcile first; reuse Task and verified worktree, explicit placement, increment attempt under V3; never substitute new scope |
+| compat-terminal | V3-authorized compatibility execution after observed supervised provider failure | topology, terminal | Reconcile failed/unknown dispatch via recovery gate first; preserve coordinator Run/Task and exact isolated worktree; add placement for creation/selection |
+| runtime-restart | Orca runtime restarted or restored session facts need recovery | recovery | Reconcile runtime identity and observations against durable state/Git before mutation; no automatic redispatch |
+| takeover | Replacement Lead acquiring ownership | recovery, legacy | Read-only reconciliation before lease acquisition; fence/release old owner and increment generation under canonical protocol |
+| reconcile | ownership/generation mismatch, runtime IDs mismatch, stale/missing projection, settlement ambiguity, worker/worktree ambiguity, pending reconciliation, or corrupt/missing observation required for next action | recovery | Preserve evidence; classify discrepancy; mutate only proven correction under valid lease; otherwise escalate |
+| unknown-outcome | Unknown dispatch result, side effect or Task outcome | recovery | Inspect request/Task/Dispatch and reconcile before any replay; never blind replay; absence is not proof of no effect |
+| legacy-contract | Actual legacy label, adopted Run or compatibility/recovery receipt | legacy | Read exact attested guidance; no inferred authority or automatic mode switch |
+
+For same-terminal correction, reuse semantics do not authorize retry of an unknown
+attempt. If the live guide cannot safely express V3 same-task correction, use the
+fallback; do not invent a new Task to route around the constraint. A follow-up
+message/inbox replay or another specialized action loads the additional reference
+named by the compact guide, even if no row above names that runtime capability.
+
+## Orca context fallback
+
+Fallback means load `orca skills get orchestration --full` from the same selected
+executable, including the compact safety guidance and relevant bundled procedures.
+Record the reason and actual loads in the existing A0 measurement record. A full
+guide supplies context, not permission to bypass any V3 gate.
+
+| Condition | Required context/result | Evidence/action |
+|---|---|---|
+| compact-unsupported | full guide | Record reason: compact retrieval unsupported or incomplete |
+| reference-unsupported | full guide | Record reason: reference discovery/loading mechanism unsupported |
+| reference-missing | full guide | Record reason: required category missing, reference not found or content insufficient |
+| interface-drift | full guide | Record reason: installed interface differs and current discovery cannot safely resolve it |
+| unmapped-action | full guide | Record reason: action cannot be safely classified using canonical/live guide gates |
+| full-insufficient | BLOCKED / NEEDS_HUMAN | If full retrieval fails or guidance remains insufficient, no mutation; report exact error/gap, use help only for read-only discovery |
+
+Do not fail open on an empty/error/truncated reference response. If full guidance
+still cannot resolve runtime semantics, stop rather than guess. Runtime restart,
+takeover and unknown outcomes still require reconciliation after fallback.
+
 ## Shared Lead bootstrap
 
 Codex and Claude follow exactly this protocol before planning or implementation:
@@ -304,10 +395,9 @@ ACCEPTED/APPROVED from missing data. Recovery cannot skip review or verification
 Engine is Antigravity, fixed by default. Orca owns worktree/runtime creation;
 the Lead owns bounded contracts and review. Codex and Claude use the project-local
 `orca-cli` and `orchestration` skills; no global skill installation is required.
-At each Lead session, use the resolved `orca` executable throughout. Verify it with
-`orca status --json`, then load `orca skills get orchestration --full` before ANY
-Orca orchestration mutation. Follow that version-matched guide rather than frozen
-command assumptions in this policy.
+Use the Orca context loading (A2), capability discovery, action reference gates
+and fallback sections above before observation or mutation. Follow the selected
+executable's current guidance rather than frozen command assumptions in this policy.
 
 Preferred tracked dispatch uses Orca supervised orchestration when the installed
 Orca and Antigravity versions support it reliably: create/bind one Orca Run, create

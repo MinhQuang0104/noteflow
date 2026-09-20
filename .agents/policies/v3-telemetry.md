@@ -31,6 +31,25 @@ Telemetry is observational; it cannot change run authority or gate outcomes.
 | leadActiveDuration | Seconds in the union of observed Lead working intervals per Story, including model/tool execution and review; exclude idle worker-wait, human approval wait, downtime and inactive sessions. Stop an interval when yielding to such waits. Unknown without sufficient timestamps; never substitute Story elapsed time. |
 | leadSessionCount | Unique Lead session IDs participating in that Story across resume/account/provider changes; no new session per request or turn. |
 
+A2 breakdown of `policyReferenceLoads` (same record/export, no new subsystem):
+
+- Label each delivery canonical-policy, compact-guide, named-reference or
+  full-guide-fallback, with selected Orca identity/version, action category and
+  resolved reference name. Derive `compactGuideLoads`, `namedReferenceLoads` and
+  `fullGuideFallbackCount` from those deliveries; attach `fallbackReason` to each
+  fallback. Failed retrieval is a tool call, not a successful content load.
+- Tag recovery-triggered reference deliveries to derive `recoveryReferenceLoads`
+  (a subset, not an additional total). Count full fallback separately even when it
+  contains recovery text. Record `policyReferenceBytesLoaded` from actual UTF-8
+  content delivered, including repeats and partial reads; unavailable is unknown.
+  Token-equivalents need a named tokenizer or explicit estimate label, never an
+  invented provider-token saving.
+- Record `healthyActionsWithoutFullGuide` once per observed healthy action and
+  its action ID/window, only if no full fallback supplied that action's context.
+  This is an action count, not a load count; missing action coverage is unknown.
+  Future Story benchmarks compare these counts and actual bytes/tokens. A2 alone
+  makes no measured savings claim.
+
 Attribution and aggregation:
 
 - Prefer unique leaf request/event IDs. A parent export containing child traffic

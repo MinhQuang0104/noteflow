@@ -235,7 +235,7 @@ class AgentArchitectureTests(unittest.TestCase):
     def test_phase_2a_uses_project_local_orca_orchestration(self):
         policy = read(".agents/policies/orchestration-v3.md")
         router = read(".agents/skills/story-development/SKILL.md")
-        self.assertIn("orca skills get orchestration --full", policy)
+        self.assertIn("orca skills get orchestration", policy)
         self.assertIn("Orca supervised orchestration", policy)
         self.assertIn("compat-terminal", policy)
         self.assertIn("orca terminal send", policy)
@@ -309,6 +309,148 @@ class AgentArchitectureTests(unittest.TestCase):
         for path in lifecycle_files:
             content = read(path)
             self.assertNotRegex(content, r"(?i)different LLM|runs code-review", path)
+
+
+class LazyPolicyLoadingTests(unittest.TestCase):
+    """Check the documented decision tables, not Orca-owned reference spellings.
+
+    These are policy contract checks, not a simulator of agent/runtime behavior.
+    Dropping a gate, weakening its prerequisite, or orphaning a capability must fail.
+    """
+
+    def setUp(self):
+        self.policy = read(".agents/policies/orchestration-v3.md")
+        self.router = read(".agents/skills/story-development/SKILL.md")
+
+    def section(self, heading):
+        marker = "## " + heading + "\n"
+        self.assertTrue(marker in self.policy, f"Missing policy section: {heading}")
+        return self.policy.split(marker, 1)[1].split("\n## ", 1)[0]
+
+    def table(self, heading):
+        rows = [tuple(cell.strip() for cell in line.strip("|").split("|"))
+                for line in self.section(heading).splitlines() if line.startswith("| ")]
+        self.assertTrue(rows, heading)
+        rows = rows[1:]  # Header; separator has no space after its first pipe.
+        self.assertEqual(len(rows), len({row[0] for row in rows}))
+        return {row[0]: row[1:] for row in rows}
+
+    def test_healthy_requires_compact_and_no_specialized_context(self):
+        gates = self.table("Orca action reference gates")
+        self.assertEqual(gates["healthy"][1], "none")
+        for condition in ("Run", "Task", "lease", "generation", "worktree",
+                          "runtime", "unknown", "takeover", "restart"):
+            self.assertIn(condition, gates["healthy"][0])
+        entry = self.section("Orca context loading (A2)")
+        self.assertRegex(entry, r"(?s)Always read.*compact.*`orca skills get orchestration`")
+        self.assertIn("Healthy actions require no full guide", entry)
+        for text in (self.policy, self.router):
+            self.assertNotRegex(text, r"(?is)(?:full guide|--full).{0,60}before (?:ANY|every)")
+
+    def test_specialized_actions_require_capabilities_before_action(self):
+        gates = self.table("Orca action reference gates")
+        expected = {
+            "new-worker": {"placement"},
+            "continue": set(),
+            "correction": {"reuse"},
+            "retry": {"recovery", "placement"},
+            "compat-terminal": {"topology", "terminal"},
+            "runtime-restart": {"recovery"},
+            "takeover": {"recovery", "legacy"},
+            "reconcile": {"recovery"},
+            "unknown-outcome": {"recovery"},
+            "legacy-contract": {"legacy"},
+        }
+        capabilities = self.table("Orca capability discovery")
+        for action, required in expected.items():
+            with self.subTest(action=action):
+                actual = set(gates[action][1].split(", ")) - {"none"}
+                self.assertEqual(actual, required)
+                self.assertTrue(actual <= capabilities.keys())
+                self.assertTrue(gates[action][0])
+                self.assertTrue(gates[action][2])
+        self.assertIn("before the action", self.section("Orca action reference gates"))
+        for category, (reference, purpose) in capabilities.items():
+            self.assertTrue(purpose, category)
+            self.assertRegex(reference, r"`(?:references/[a-z-]+\.md|orca-cli)`")
+
+    def test_correction_preserves_attempt_and_report_identity(self):
+        correction = self.table("Orca action reference gates")["correction"]
+        for invariant in ("same Task", "worktree", "attempt +1", "previous report"):
+            self.assertIn(invariant, correction[2])
+        retry = self.table("Orca action reference gates")["retry"]
+        self.assertIn("proven failed/stopped", retry[0])
+
+    def test_recovery_is_current_condition_not_history(self):
+        section = self.section("Orca action reference gates")
+        self.assertIn("Past recovery alone does not trigger a load", section)
+        reconcile = self.table("Orca action reference gates")["reconcile"][0]
+        for trigger in ("ownership", "generation", "runtime IDs", "projection",
+                        "settlement", "worker/worktree", "pending reconciliation",
+                        "corrupt/missing observation"):
+            self.assertIn(trigger, reconcile)
+        unknown = self.table("Orca action reference gates")["unknown-outcome"][2]
+        self.assertRegex(unknown, r"reconcile.*before.*replay")
+        self.assertIn("never blind replay", unknown)
+
+    def test_takeover_and_compat_context_does_not_grant_authority(self):
+        gates = self.table("Orca action reference gates")
+        for invariant in ("Read-only reconciliation before lease acquisition",
+                          "fence/release old owner", "increment generation"):
+            self.assertIn(invariant, gates["takeover"][2])
+        for invariant in ("Reconcile failed/unknown dispatch", "coordinator Run/Task",
+                          "exact isolated worktree", "placement"):
+            self.assertIn(invariant, gates["compat-terminal"][2])
+        discovery = self.section("Orca capability discovery")
+        self.assertIn("compat-terminal is not itself a legacy label", discovery)
+        self.assertIn("does not authorize legacy takeover commands", discovery)
+        entry = self.section("Orca context loading (A2)")
+        self.assertIn("never grants mutation authority", entry)
+        self.assertIn("do not override fixed Antigravity and isolated Git worktrees", entry)
+
+    def test_fallback_is_closed_for_each_discovery_failure(self):
+        fallback = self.table("Orca context fallback")
+        for condition in ("compact-unsupported", "reference-unsupported",
+                          "reference-missing", "interface-drift", "unmapped-action"):
+            with self.subTest(condition=condition):
+                self.assertEqual(fallback[condition][0], "full guide")
+                self.assertIn("reason", fallback[condition][1])
+        section = self.section("Orca context fallback")
+        self.assertIn("orca skills get orchestration --full", section)
+        self.assertIn("BLOCKED", fallback["full-insufficient"][0])
+        self.assertIn("no mutation", fallback["full-insufficient"][1])
+
+    def test_router_uses_canonical_gates_and_live_discovery(self):
+        for phrase in ("compact guide", "classify the current action", "named references",
+                       "Orca action reference gates", "full guide", "unavailable",
+                       "Never guess runtime commands from memory"):
+            self.assertIn(phrase, self.router)
+        discovery = self.section("Orca capability discovery")
+        for phrase in ("--references", "--reference", "current discovery",
+                       "not version pins"):
+            self.assertIn(phrase, discovery)
+
+    def test_safety_floor_remains_in_canonical_core(self):
+        for heading, invariants in {
+            "Scope and authority": ("BMAD authority", "source of truth for code"),
+            "Core rules": ("isolated Orca-managed Git worktrees", "one mutating Lead",
+                           "Worker DONE, Lead ACCEPTED and Human APPROVED"),
+            "Ownership and local mutation protocol": ("monotonically increasing",
+                "Stale generations", "Age alone never expires the lease"),
+            "Shared Lead bootstrap": ("read-only", "without replaying mutations"),
+            "State machine and gates": ("Human APPROVED exact diff/integration scope",
+                "Actual diff reviewed, Lead ACCEPTED", "All ACs evidenced"),
+        }.items():
+            section = self.section(heading)
+            for invariant in invariants:
+                self.assertIn(invariant, section)
+
+    def test_measurement_categories_extend_existing_contract(self):
+        telemetry = read(".agents/policies/v3-telemetry.md")
+        for field in ("compactGuideLoads", "namedReferenceLoads", "fullGuideFallbackCount",
+                      "fallbackReason", "policyReferenceBytesLoaded", "recoveryReferenceLoads",
+                      "healthyActionsWithoutFullGuide"):
+            self.assertIn(field, telemetry)
 
 
 class WorkerReportTests(unittest.TestCase):
