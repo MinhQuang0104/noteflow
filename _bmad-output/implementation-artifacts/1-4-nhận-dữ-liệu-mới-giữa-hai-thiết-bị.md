@@ -1,6 +1,6 @@
 # Story 1.4: Nhận dữ liệu mới giữa hai thiết bị
 
-Status: draft
+Status: ready-for-dev
 
 ## Story
 
@@ -86,7 +86,18 @@ tôi muốn thiết bị đang hoạt động nhận biết khi dữ liệu tài
 
 ## Readiness Gate
 
-**BLOCKED / NOT READY FOR DEV**
+**PASS / READY FOR DEV — refreshed 2026-09-20**
+
+Readiness evidence at canonical `main`, commit `81a78a96b9a0fa6a4ba108cf403faba40655cbcd`:
+
+- Story 2.1 implementation `428cc671bd95a1ac9962812f1ffbd0bd39eff8bd` is an ancestor of HEAD; no subsequent product-code changes. Its completed V3 run records human approval and integration.
+- Real Challenge persistence, owner-scoped list/detail, create/update, account-state API, AD-6 account lock and command ledger exist. This refresh supersedes the historical missing-resource statements above.
+- From `backend`, with PowerShell `$env:DB_PORT='55414'`: `php artisan test tests/Feature/Story14IntegrationSeamTest.php tests/Feature/ChallengeConcurrencyTest.php tests/Feature/AccountContextTest.php tests/Contract/ChallengeContractTest.php` — PASS, 12 tests / 81 assertions on dedicated PostgreSQL 17.
+- Same environment: `php artisan test tests/Feature/ChallengeUseCasesTest.php tests/Feature/ChallengePersistenceTest.php tests/Feature/ChallengeApiTest.php` — PASS, 25 tests / 177 assertions; covers owner isolation, revision, replay/no-op, epoch/write-state and migration rollback/remigrate.
+- Initial port-5432 attempt failed before assertions because PostgreSQL was unavailable; the dedicated test database resolved that environment issue.
+- Reuse existing Tasks 1–2 implementation from Story 2.1. Remaining Tasks supply coordinator, lifecycle/cache/draft safety and two-browser integration. AC1–AC4 are unchanged; backend HTTP seam tests alone do not complete AC1. D-09 remains open.
+
+The historical gate conditions below are now satisfied:
 
 Story chỉ có thể chuyển sang `ready-for-dev` khi:
 
@@ -114,7 +125,7 @@ Cho đến khi các điều kiện này được đáp ứng, không được b�
 
 ### Implementation
 
-- Chưa bắt đầu; Story chưa đạt `ready-for-dev`.
+- Product implementation chưa bắt đầu; readiness được xác minh PASS ngày 2026-09-20.
 
 ### Completion Notes
 
