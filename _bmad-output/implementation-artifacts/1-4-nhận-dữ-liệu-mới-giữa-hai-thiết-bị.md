@@ -1,6 +1,6 @@
 # Story 1.4: Nhận dữ liệu mới giữa hai thiết bị
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -55,30 +55,35 @@ tôi muốn thiết bị đang hoạt động nhận biết khi dữ liệu tài
 
 ## Tasks / Subtasks
 
-- [ ] Xác lập contract trạng thái đồng bộ của tài khoản.
-  - [ ] Bổ sung `account_revision`, `data_epoch` và `write_state` vào persistence theo architecture đã duyệt.
-  - [ ] Trả các trường này từ `GET /api/v1/account` và cập nhật OpenAPI/contract types liên quan.
-  - [ ] Có migration, backfill/default an toàn và phương án rollback phù hợp.
-- [ ] Tích hợp revision vào mutation thực tế đầu tiên.
-  - [ ] Dùng account-row locking và kiểm tra epoch/write-state theo quyết định kiến trúc được duyệt.
-  - [ ] Mỗi transaction thật sự thay đổi trạng thái chỉ tăng `account_revision` đúng một lần.
-  - [ ] Không tạo mutation minh họa hoặc resource giả chỉ để hoàn thành Story này.
-- [ ] Xây dựng SPA sync coordinator theo AD-8.
-  - [ ] Dùng TanStack Vue Query theo approved stack.
-  - [ ] Poll ban đầu mỗi 5 giây khi visible và online, bảo đảm không có request chồng lấn.
-  - [ ] Reconcile khi focus/reconnect; tạm dừng khi hidden/offline; dừng khi logout hoặc nhận `401`.
-  - [ ] Chặn late response bằng auth-generation/request-generation fence.
-- [ ] Xử lý cache, refetch và lỗi đồng bộ.
-  - [ ] Invalidate/refetch các owner-scoped query khi revision thay đổi.
-  - [ ] Không ghi đè dirty draft và không chuyển dữ liệu hợp lệ thành empty state khi refetch lỗi.
-  - [ ] Hiển thị lỗi đồng bộ có hành động phục hồi rõ ràng.
-- [ ] Tạo bằng chứng tích hợp với business resource thực tế.
-  - [ ] Kiểm thử hai browser context cùng tài khoản trên PostgreSQL.
-  - [ ] Chứng minh mutation ở thiết bị A làm thiết bị B hội tụ về read model mới.
-  - [ ] Bao phủ hidden/offline, focus/reconnect, session expiry, polling/refetch failure và late response.
-- [ ] Thực hiện HIGH-risk adversarial review trước Done Gate.
-  - [ ] Kiểm tra các invariant revision, epoch, auth isolation, concurrency và dirty-draft safety.
-  - [ ] Kiểm tra callers/consumers và các unhappy path có liên quan.
+- [x] Xác lập contract trạng thái đồng bộ của tài khoản.
+  - [x] Bổ sung `account_revision`, `data_epoch` và `write_state` vào persistence theo architecture đã duyệt (Story 2.1 baseline).
+  - [x] Trả các trường này từ `GET /api/v1/account` và cập nhật OpenAPI/contract types liên quan (Story 2.1 baseline).
+  - [x] Có migration, backfill/default an toàn và phương án rollback phù hợp (Story 2.1 baseline).
+- [x] Tích hợp revision vào mutation thực tế đầu tiên.
+  - [x] Dùng account-row locking và kiểm tra epoch/write-state theo quyết định kiến trúc được duyệt (Story 2.1 baseline).
+  - [x] Mỗi transaction thật sự thay đổi trạng thái chỉ tăng `account_revision` đúng một lần (Story 2.1 baseline).
+  - [x] Không tạo mutation minh họa hoặc resource giả chỉ để hoàn thành Story này (Sử dụng Challenge resource thực tế).
+- [x] Xây dựng SPA sync coordinator theo AD-8 (`frontend/src/stores/sync.ts`).
+  - [x] Dùng TanStack Vue Query theo approved stack.
+  - [x] Poll ban đầu mỗi 5 giây khi visible và online, bảo đảm không có request chồng lấn (`inFlight` fence).
+  - [x] Reconcile khi focus/reconnect; tạm dừng khi hidden/offline; dừng khi logout hoặc nhận `401`.
+  - [x] Chặn late response bằng auth-generation/request-generation fence.
+  - [x] Bounded backoff khi thất bại (5s -> 10s -> 20s -> 30s) và cho phép bấm "Thử lại".
+- [x] Xử lý cache, refetch và lỗi đồng bộ (`frontend/src/components/AppShell.vue`, `frontend/src/views/ChallengesView.vue`).
+  - [x] Invalidate/refetch các owner-scoped query (`queryKey: ['challenges']`) khi revision thay đổi; clear cache khi `data_epoch` thay đổi.
+  - [x] Không ghi đè dirty draft khi background refetch thành công (cảnh báo non-destructive nếu remote version tăng).
+  - [x] Không chuyển dữ liệu hợp lệ thành empty state khi refetch lỗi; hiển thị actionable retry banner.
+  - [x] Hiển thị lỗi đồng bộ với trạng thái chi tiết (Đã đồng bộ, Đang đồng bộ..., Ngoại tuyến, Lỗi đồng bộ).
+- [x] Tạo bằng chứng tích hợp với business resource thực tế (`tests/e2e/cross-device-sync.spec.ts`).
+  - [x] Kiểm thử hai browser context cùng tài khoản trên PostgreSQL 17 (`DB_PORT=55414`).
+  - [x] Chứng minh mutation ở thiết bị A làm thiết bị B tự động hội tụ về read model mới qua 5s polling (AC1).
+  - [x] Bao phủ hidden/offline, focus/reconnect, session expiry, polling/refetch failure và late response (AC2, AC3, AC4).
+- [x] Thực hiện HIGH-risk adversarial review trước Done Gate.
+  - [x] Invariant 1: `account_revision` strictly monotonic per state change, never increments on replay/no-op/error. (PASS - `ChallengeUseCasesTest`, `Story14IntegrationSeamTest`)
+  - [x] Invariant 2: `data_epoch` bump clears client query cache and cancels stale inflight drafts. (PASS - `sync.ts` & `ChallengesView.vue`)
+  - [x] Invariant 3: Auth isolation & generation fencing discards responses after logout or user switch. (PASS - `sync.spec.ts`)
+  - [x] Invariant 4: Non-open `write_state` blocks local mutations via `reconcileBeforeWrite()`. (PASS - `cross-device-sync.spec.ts` AC3)
+  - [x] Invariant 5: Preserves dirty drafts across background refetch without data loss. (PASS - `challenges.spec.ts`, `cross-device-sync.spec.ts`)
 
 ## Risk Classification
 
@@ -125,14 +130,49 @@ Cho đến khi các điều kiện này được đáp ứng, không được b�
 
 ### Implementation
 
-- Product implementation chưa bắt đầu; readiness được xác minh PASS ngày 2026-09-20.
+- Triển khai Pinia Sync Store `frontend/src/stores/sync.ts` điều phối chu kỳ polling 5s không chồng lấn (`inFlight`), tích hợp TanStack Vue Query, backoff lũy thừa khi lỗi mạng (5s->10s->20s->30s), auth-generation & monotonic request-generation fencing, lắng nghe visibilitychange/online/offline để tạm dừng và tự động reconcile khi focus/reconnect, và dừng khi logout/401.
+- Cập nhật `frontend/src/components/AppShell.vue` với chỉ báo đồng bộ trực quan, cảnh báo `write_state`, và khởi động sync store.
+- Cập nhật `frontend/src/views/ChallengesView.vue` bảo vệ dirty draft khi background refetch diễn ra, thông báo non-destructive khi phiên bản trên server thay đổi, hiển thị retry banner khi refetch lỗi mà không xóa danh sách Challenge hiện hữu (AC4), kích hoạt `reconcileBeforeWrite()` để chặn ghi khi tài khoản bị khóa ghi (AC3).
+- Bổ sung lệnh Artisan `backend/app/Console/Commands/SetAccountWriteState.php` hỗ trợ kiểm thử chuyển đổi trạng thái `write_state`.
+- Xây dựng bộ kiểm thử End-to-End `tests/e2e/cross-device-sync.spec.ts` gồm 5 kịch bản tương tác với 2 browser context độc lập chạy trên PostgreSQL 17 thực tế.
+
+### AC Evidence
+
+```text
+AC1 — Thiết bị thứ hai nhận và hiển thị dữ liệu mới
+Evidence:
+- test/check: AC1 — two real browser contexts converge on Challenge mutation via 5s polling against PostgreSQL
+- command: npx playwright test cross-device-sync.spec.ts -g "AC1"
+- result: PASS (exit code 0)
+
+AC2 — Polling dừng hoặc tạm dừng đúng điều kiện
+Evidence:
+- test/check: AC2 — polling pauses when hidden or offline, stops on logout, does not falsely claim synced
+- command: npx playwright test cross-device-sync.spec.ts -g "AC2"
+- result: PASS (exit code 0)
+
+AC3 — Reconcile trước khi ghi sau focus hoặc reconnect
+Evidence:
+- test/check: AC3 & AD-8 — reconcile before write respects write_state
+- command: npx playwright test cross-device-sync.spec.ts -g "AC3"
+- result: PASS (exit code 0)
+
+AC4 — Lỗi đồng bộ không phá hủy dữ liệu đang hiển thị
+Evidence:
+- test/check: AC4 — sync error does not destroy existing challenge list (non-destructive)
+- command: npx playwright test cross-device-sync.spec.ts -g "AC4"
+- result: PASS (exit code 0)
+```
 
 ### Completion Notes
 
 - 2026-09-19: Tạo Story artifact và đánh giá readiness theo Agent Architecture V3.
 - 2026-09-19: Xác định blocker là thiếu business mutation/read model thực tế và quyết định mutation contract đã được phê duyệt.
 - 2026-09-19: AD-6 đã được Product Owner phê duyệt; Story vẫn `BLOCKED` cho đến khi Story 2.1 triển khai Challenge mutation/read model và cung cấp bằng chứng tích hợp.
+- 2026-09-21: Hoàn thành triển khai Tasks 3–6 trên worktree `MinhQuang0104/story-1-4-sync`. Tất cả các deterministic check (backend pint, phpstan, phpunit; frontend contract, lint, typecheck, vitest; e2e playwright; architecture unittest) đều đạt 100% PASS. Chuyển trạng thái Story sang `review`.
 
 ## Change Log
 
 - 2026-09-19: Tạo bản draft; giữ sprint status ở `backlog`; chưa triển khai product code.
+- 2026-09-20: Refresh readiness gate PASS; phê duyệt Story 1.4 sẵn sàng triển khai.
+- 2026-09-21: Hoàn thành triển khai sync coordinator, cache/draft safety, 2-context E2E test suite và adversarial review; chuyển trạng thái sang `review`.

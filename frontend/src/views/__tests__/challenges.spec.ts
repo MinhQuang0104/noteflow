@@ -451,3 +451,103 @@ test('finding 5: fail-closed and disable mutation when account context is not re
   expect(createSpy).not.toHaveBeenCalled()
   expect(wrapper.text()).toContain('tạm khóa ghi (locked_for_import)')
 })
+
+test('AC4 — failed background refetch does not destroy existing challenge list and shows actionable retry banner', async () => {
+  const existingChallenge = {
+    id: 'c1000000-0000-4000-8000-000000000001',
+    name: 'Chạy bộ 5km',
+    description: 'Chạy bộ buổi sáng',
+    start_date: '2026-09-19',
+    target_days: 3,
+    row_version: 1,
+    created_at: '2026-09-19T08:00:00Z',
+    updated_at: '2026-09-19T08:00:00Z',
+  }
+
+  // Initial load succeeds
+  const getSpy = vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({
+    challenges: [existingChallenge],
+  })
+
+  const router = createTestRouter()
+  await router.push('/challenges')
+
+  const wrapper = mount(ChallengesView, {
+    global: {
+      plugins: [[VueQueryPlugin, { queryClient }], router],
+    },
+  })
+
+  await flushPromises()
+
+  // Challenge is visible
+  expect(wrapper.text()).toContain('Chạy bộ 5km')
+
+  // Background refetch fails
+  getSpy.mockRejectedValue(new Error('Network sync failure'))
+  await queryClient.refetchQueries({ queryKey: ['challenges'] })
+  await flushPromises()
+
+  // Existing challenge is STILL VISIBLE (not replaced with empty state or full error!)
+  expect(wrapper.text()).toContain('Chạy bộ 5km')
+  // Actionable error banner with retry is shown
+  expect(wrapper.text()).toContain('Không thể đồng bộ danh sách mới nhất')
+  expect(wrapper.text()).toContain('Thử lại')
+})
+
+test('preserves dirty edit draft during background query refetches and alerts on remote version change', async () => {
+  const originalChallenge = {
+    id: 'c1000000-0000-4000-8000-000000000001',
+    name: 'Đọc sách 20 trang',
+    description: 'Đọc sách trước khi ngủ',
+    start_date: '2026-09-19',
+    target_days: 5,
+    row_version: 1,
+    created_at: '2026-09-19T08:00:00Z',
+    updated_at: '2026-09-19T08:00:00Z',
+  }
+
+  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({
+    challenges: [originalChallenge],
+  })
+
+  const router = createTestRouter()
+  await router.push('/challenges/c1000000-0000-4000-8000-000000000001')
+
+  const wrapper = mount(ChallengesView, {
+    global: {
+      plugins: [[VueQueryPlugin, { queryClient }], router],
+    },
+  })
+
+  await flushPromises()
+
+  // Enter edit mode
+  await wrapper.get('#edit-challenge-btn').trigger('click')
+  await flushPromises()
+
+  // User types dirty edit draft
+  await wrapper.get('#edit-name').setValue('Đọc sách 50 trang chuyên sâu')
+  expect((wrapper.get('#edit-name').element as HTMLInputElement).value).toBe('Đọc sách 50 trang chuyên sâu')
+
+  // Another device updates this challenge on the server (row_version 2)
+  const updatedRemotely = {
+    ...originalChallenge,
+    name: 'Đọc sách 30 trang (cập nhật từ máy khác)',
+    row_version: 2,
+  }
+  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({
+    challenges: [updatedRemotely],
+  })
+
+  // Vue Query refetches in background
+  await queryClient.refetchQueries({ queryKey: ['challenges'] })
+  await flushPromises()
+
+  // The dirty draft in the form is PRESERVED
+  expect((wrapper.get('#edit-name').element as HTMLInputElement).value).toBe('Đọc sách 50 trang chuyên sâu')
+
+  // Remote version change notice is displayed
+  expect(wrapper.text()).toContain('phiên bản 2')
+  expect(wrapper.text()).toContain('Nội dung bạn đang soạn thảo vẫn được giữ nguyên')
+})

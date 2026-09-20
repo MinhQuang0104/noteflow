@@ -13,11 +13,13 @@ import {
   type ChallengeSnapshot,
 } from '../api/challenges'
 import { useAccountStore } from '../stores/account'
+import { useSyncStore } from '../stores/sync'
 
 const route = useRoute()
 const router = useRouter()
 const queryClient = useQueryClient()
 const account = useAccountStore()
+const sync = useSyncStore()
 
 // State
 const mode = ref<'list' | 'detail' | 'create' | 'edit'>('list')
@@ -107,10 +109,25 @@ watch(
   },
 )
 
+// Watch data_epoch changes to clear stale drafts/commands and prevent old retries
+watch(
+  () => account.context?.data_epoch,
+  (newEpoch, oldEpoch) => {
+    if (oldEpoch !== undefined && newEpoch !== oldEpoch) {
+      activeCreateCommandId.value = null
+      lastCreateCanonicalPayload.value = null
+      activeEditCommandId.value = null
+      lastEditCanonicalPayload.value = null
+      editConflictSnapshot.value = null
+    }
+  },
+)
+
 // Mutations
 const createMutation = useMutation({
   mutationFn: createChallenge,
   onSuccess: async (result) => {
+    sync.recordMutationAck(result.account_revision, result.data_epoch)
     await queryClient.invalidateQueries({ queryKey: ['challenges'] })
     activeCreateCommandId.value = null
     lastCreateCanonicalPayload.value = null
@@ -124,7 +141,8 @@ const createMutation = useMutation({
 const updateMutation = useMutation({
   mutationFn: ({ id, payload }: { id: string; payload: Parameters<typeof updateChallengeMetadata>[1] }) =>
     updateChallengeMetadata(id, payload),
-  onSuccess: async () => {
+  onSuccess: async (result) => {
+    sync.recordMutationAck(result.account_revision, result.data_epoch)
     await queryClient.invalidateQueries({ queryKey: ['challenges'] })
     activeEditCommandId.value = null
     lastEditCanonicalPayload.value = null
@@ -191,7 +209,13 @@ async function submitCreate() {
   createErrors.value = {}
   createGeneralError.value = null
 
-  // Finding 5: Fail closed if account context is not ready or write_state not open
+  // Reconcile account revision, epoch, and write_state before write (AC3, AD-8)
+  const writeCheck = await sync.reconcileBeforeWrite()
+  if (!writeCheck.allowed) {
+    createGeneralError.value = writeCheck.reason ?? 'Chưa thể tạo challenge: Ngữ cảnh tài khoản chưa sẵn sàng. Vui lòng thử lại sau.'
+    return
+  }
+
   if (account.status !== 'ready' || !account.context) {
     createGeneralError.value = 'Chưa thể tạo challenge: Ngữ cảnh tài khoản chưa sẵn sàng. Vui lòng thử lại sau.'
     return
@@ -266,7 +290,13 @@ async function submitEdit() {
     return
   }
 
-  // Finding 5: Fail closed if account context is not ready or write_state not open
+  // Reconcile account revision, epoch, and write_state before write (AC3, AD-8)
+  const writeCheck = await sync.reconcileBeforeWrite()
+  if (!writeCheck.allowed) {
+    editGeneralError.value = writeCheck.reason ?? 'Chưa thể lưu thay đổi: Ngữ cảnh tài khoản chưa sẵn sàng. Vui lòng thử lại sau.'
+    return
+  }
+
   if (account.status !== 'ready' || !account.context) {
     editGeneralError.value = 'Chưa thể lưu thay đổi: Ngữ cảnh tài khoản chưa sẵn sàng. Vui lòng thử lại sau.'
     return
@@ -377,7 +407,7 @@ async function submitEdit() {
           Đang tải danh sách challenge…
         </div>
 
-        <div v-else-if="isError" class="py-8 text-center text-sm text-rose-700" role="alert">
+        <div v-else-if="isError && challenges.length === 0" class="py-8 text-center text-sm text-rose-700" role="alert">
           <p>Không thể tải danh sách challenge.</p>
           <button
             type="button"
@@ -392,7 +422,24 @@ async function submitEdit() {
           Chưa có challenge nào. Hãy tạo challenge đầu tiên!
         </div>
 
-        <ul v-else class="mt-3 divide-y divide-slate-100" role="list">
+        <div v-else>
+          <!-- Actionable error banner when background refetch fails but existing data is preserved (AC4) -->
+          <div
+            v-if="isError"
+            role="alert"
+            class="mt-2 mb-3 flex items-center justify-between rounded-lg border border-rose-200 bg-rose-50 p-2.5 text-xs text-rose-800"
+          >
+            <span>Không thể đồng bộ danh sách mới nhất. Dữ liệu hiển thị có thể chưa cập nhật.</span>
+            <button
+              type="button"
+              class="ml-2 shrink-0 font-semibold text-rose-900 underline hover:text-rose-950"
+              @click="() => refetch()"
+            >
+              Thử lại
+            </button>
+          </div>
+
+          <ul class="mt-3 divide-y divide-slate-100" role="list">
           <li
             v-for="challenge in challenges"
             :key="challenge.id"
@@ -418,6 +465,7 @@ async function submitEdit() {
             </div>
           </li>
         </ul>
+      </div>
       </section>
 
       <!-- Detail / Form Pane -->
@@ -573,6 +621,15 @@ async function submitEdit() {
                 Hủy và xem bản mới nhất
               </button>
             </div>
+          </div>
+
+          <!-- Non-destructive remote update notice: preserves dirty draft while informing user -->
+          <div
+            v-if="selectedChallenge && selectedChallenge.row_version > editBaseVersion && !editConflictSnapshot"
+            role="status"
+            class="rounded-xl border border-sky-300 bg-sky-50 p-3 text-xs text-sky-900"
+          >
+            Thông báo: Dữ liệu của challenge này vừa được cập nhật ở thiết bị khác (phiên bản {{ selectedChallenge.row_version }}). Nội dung bạn đang soạn thảo vẫn được giữ nguyên.
           </div>
 
           <div

@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { RouterLink, RouterView, useRouter } from 'vue-router'
 
+import { useAccountStore } from '../stores/account'
 import { useAuthStore } from '../stores/auth'
+import { useSyncStore } from '../stores/sync'
 
 const auth = useAuthStore()
+const account = useAccountStore()
+const sync = useSyncStore()
 const router = useRouter()
 const navigationOpen = ref(false)
 const loggingOut = ref(false)
@@ -16,9 +20,14 @@ const navigation = [
   { to: '/calendar', label: 'Lịch' },
 ]
 
+onMounted(() => {
+  void sync.start()
+})
+
 async function logOut(): Promise<void> {
   loggingOut.value = true
   try {
+    sync.stop()
     await auth.logOut()
     navigationOpen.value = false
     await router.replace('/sign-in')
@@ -45,6 +54,52 @@ async function logOut(): Promise<void> {
         >
           <h1 class="text-xl font-semibold tracking-tight">NoteFlow</h1>
         </RouterLink>
+
+        <!-- Sync Status Indicator -->
+        <div
+          v-if="auth.status === 'authenticated'"
+          id="sync-status"
+          data-testid="sync-status"
+          class="flex items-center gap-2 text-xs"
+          role="status"
+          aria-live="polite"
+        >
+          <span
+            v-if="!sync.isOnline"
+            class="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-0.5 font-medium text-amber-800"
+          >
+            <span class="h-1.5 w-1.5 rounded-full bg-amber-500" />
+            Ngoại tuyến
+          </span>
+          <span
+            v-else-if="sync.syncStatus === 'error'"
+            class="inline-flex items-center gap-1.5 rounded-full bg-rose-100 px-2.5 py-0.5 font-medium text-rose-800"
+          >
+            <span class="h-1.5 w-1.5 rounded-full bg-rose-500" />
+            Lỗi đồng bộ
+            <button
+              type="button"
+              class="ml-1 font-semibold text-indigo-700 underline hover:text-indigo-900"
+              @click="sync.reconcile(true)"
+            >
+              Thử lại
+            </button>
+          </span>
+          <span
+            v-else-if="sync.syncStatus === 'syncing'"
+            class="inline-flex items-center gap-1.5 text-slate-500"
+          >
+            <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-indigo-500" />
+            Đang đồng bộ...
+          </span>
+          <span
+            v-else-if="sync.syncStatus === 'synced'"
+            class="inline-flex items-center gap-1.5 text-slate-500"
+          >
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            Đã đồng bộ
+          </span>
+        </div>
 
         <button
           v-if="auth.status === 'authenticated'"
@@ -91,6 +146,15 @@ async function logOut(): Promise<void> {
         </nav>
       </div>
     </header>
+
+    <!-- Write State Warning Banner -->
+    <div
+      v-if="auth.status === 'authenticated' && account.context?.write_state && account.context.write_state !== 'open'"
+      role="alert"
+      class="border-b border-amber-300 bg-amber-50 px-4 py-2.5 text-center text-xs font-medium text-amber-900 sm:px-6"
+    >
+      Tài khoản đang trong trạng thái tạm khóa ghi ({{ account.context.write_state }}). Các thao tác thêm mới hoặc chỉnh sửa tạm thời bị khóa.
+    </div>
 
     <main id="main-content" class="mx-auto w-full min-w-0 max-w-6xl px-4 py-10 sm:px-6" tabindex="-1">
       <RouterView />
