@@ -1,6 +1,6 @@
 # Story 2.1: Tạo và quản lý thông tin challenge
 
-Status: in-progress
+Status: done
 
 ## Story
 
@@ -120,12 +120,14 @@ Kết quả kiểm tra:
 - Xây dựng giao diện Vue 3 (ChallengesView.vue) dùng TanStack Vue Query, hỗ trợ list/detail/create/edit với validation và conflict banner giữ nguyên input.
 - Bổ sung unit tests cho Vue components và E2E Playwright tests trên desktop và mobile viewports.
 - Bổ sung kiểm chứng integration seam cho Story 1.4 (`Story14IntegrationSeamTest.php`).
-- Giữ nguyên trạng thái Story 2.1 `in-progress` và Story 1.4 `backlog`.
+- Story 2.1 đã được human approve và tích hợp local vào `main`; Story 1.4 vẫn `backlog` để chờ đánh giá readiness riêng.
 
 ### Completion Notes
 
 - 2026-09-19: Triển khai hoàn tất mọi task kỹ thuật của Story 2.1. Đầy đủ bằng chứng kiểm thử AC1–AC3, contract validation, unit/feature/contract tests, Playwright E2E tests, và migration rollback/remigrate.
+- 2026-09-20: Human phê duyệt exact implementation diff; local `main` tích hợp commit `428cc671bd95a1ac9962812f1ffbd0bd39eff8bd`. Done Gate 1–9 hoàn tất; không push remote trong run này.
 
 ## Change Log
 
 - 2026-09-19: Chuyển sang `in-progress` và hoàn tất toàn bộ implementation Tasks 1–7.
+- 2026-09-20: Human approval, local integration và lifecycle synchronization hoàn tất; chuyển Story sang `done`.
