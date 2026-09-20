@@ -1,0 +1,112 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "V3.1 worker report v1 (evidence, not state authority)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "kind", "status", "runId", "taskId", "attempt", "contractIdentity", "scope", "checks"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {"enum": ["completion", "correction", "blocked"]},
+    "status": {"enum": ["DONE", "BLOCKED"]},
+    "runId": {"$ref": "#/definitions/id"},
+    "taskId": {"$ref": "#/definitions/id"},
+    "attempt": {"type": "integer", "minimum": 1},
+    "contractIdentity": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "scope": {"$ref": "#/definitions/scope"},
+    "changedFilesRef": {"$ref": "#/definitions/ref"},
+    "checks": {"type": "array", "items": {"$ref": "#/definitions/check"}},
+    "acEvidence": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["acId", "checkIds", "artifactRefs"],
+        "properties": {
+          "acId": {"$ref": "#/definitions/id"},
+          "checkIds": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/definitions/id"}},
+          "artifactRefs": {"$ref": "#/definitions/refs"}
+        },
+        "anyOf": [{"properties": {"checkIds": {"minItems": 1}}}, {"properties": {"artifactRefs": {"minItems": 1}}}]
+      }
+    },
+    "unresolvedIssues": {"type": "array", "items": {"$ref": "#/definitions/issue"}},
+    "previousReport": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "sha256", "diffIdentity"],
+      "properties": {
+        "path": {"$ref": "#/definitions/ref"},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "diffIdentity": {"$ref": "#/definitions/text"}
+      }
+    },
+    "changedSincePreviousRef": {"$ref": "#/definitions/ref"},
+    "findings": {
+      "type": "object", "additionalProperties": false, "required": ["resolved", "remaining"],
+      "properties": {
+        "resolved": {
+          "type": "array", "items": {
+            "type": "object", "additionalProperties": false, "required": ["id", "evidenceRefs"],
+            "properties": {"id": {"$ref": "#/definitions/id"}, "evidenceRefs": {"$ref": "#/definitions/refs"}},
+            "allOf": [{"properties": {"evidenceRefs": {"minItems": 1}}}]
+          }
+        },
+        "remaining": {"type": "array", "items": {"$ref": "#/definitions/issue"}}
+      }
+    },
+    "blocker": {
+      "type": "object", "additionalProperties": false, "required": ["category", "fact", "evidenceRefs"],
+      "properties": {"category": {"$ref": "#/definitions/id"}, "fact": {"$ref": "#/definitions/text"}, "evidenceRefs": {"$ref": "#/definitions/refs"}}
+    },
+    "worktreePath": {"$ref": "#/definitions/text"},
+    "lastCompletedStep": {"$ref": "#/definitions/text"},
+    "verificationState": {"$ref": "#/definitions/text"},
+    "requiredDecisionOrDependency": {"$ref": "#/definitions/text"},
+    "workerActivity": {"enum": ["active", "stopped", "unknown"]}
+  },
+  "oneOf": [
+    {
+      "properties": {"kind": {"const": "completion"}, "status": {"const": "DONE"}},
+      "required": ["changedFilesRef", "acEvidence", "unresolvedIssues"],
+      "not": {"anyOf": [{"required": ["previousReport"]}, {"required": ["changedSincePreviousRef"]}, {"required": ["findings"]}, {"required": ["blocker"]}, {"required": ["worktreePath"]}, {"required": ["lastCompletedStep"]}, {"required": ["verificationState"]}, {"required": ["requiredDecisionOrDependency"]}, {"required": ["workerActivity"]}]}
+    },
+    {
+      "properties": {"kind": {"const": "correction"}, "status": {"const": "DONE"}, "attempt": {"minimum": 2}},
+      "required": ["previousReport", "changedSincePreviousRef", "findings", "acEvidence", "unresolvedIssues"],
+      "not": {"anyOf": [{"required": ["changedFilesRef"]}, {"required": ["blocker"]}, {"required": ["worktreePath"]}, {"required": ["lastCompletedStep"]}, {"required": ["verificationState"]}, {"required": ["requiredDecisionOrDependency"]}, {"required": ["workerActivity"]}]}
+    },
+    {
+      "properties": {"kind": {"const": "blocked"}, "status": {"const": "BLOCKED"}},
+      "required": ["blocker", "worktreePath", "lastCompletedStep", "verificationState", "requiredDecisionOrDependency", "workerActivity"],
+      "not": {"anyOf": [{"required": ["changedFilesRef"]}, {"required": ["previousReport"]}, {"required": ["changedSincePreviousRef"]}, {"required": ["findings"]}, {"required": ["acEvidence"]}, {"required": ["unresolvedIssues"]}]}
+    }
+  ],
+  "definitions": {
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$"},
+    "text": {"type": "string", "minLength": 1, "maxLength": 1000},
+    "ref": {"type": "string", "minLength": 1, "maxLength": 500, "pattern": "^(?!/|[A-Za-z]:)(?!.*(?:^|/)\\.\\.(?:/|$))[^\\\\\\r\\n]+$"},
+    "refs": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/definitions/ref"}},
+    "commit": {"type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
+    "scope": {
+      "type": "object", "additionalProperties": false, "required": ["baseCommit", "head", "diffIdentity"],
+      "properties": {"baseCommit": {"$ref": "#/definitions/commit"}, "head": {"$ref": "#/definitions/commit"}, "diffIdentity": {"$ref": "#/definitions/text"}}
+    },
+    "issue": {
+      "type": "object", "additionalProperties": false, "required": ["id", "reason"],
+      "properties": {"id": {"$ref": "#/definitions/id"}, "reason": {"$ref": "#/definitions/text"}}
+    },
+    "check": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "cwd", "command", "exitCode", "result", "checkedScope", "logRef"],
+      "properties": {
+        "id": {"$ref": "#/definitions/id"}, "cwd": {"$ref": "#/definitions/text"},
+        "command": {"$ref": "#/definitions/text"}, "exitCode": {"type": ["integer", "null"]},
+        "result": {"enum": ["PASS", "FAIL", "NOT_RUN", "UNKNOWN"]},
+        "checkedScope": {"$ref": "#/definitions/text"},
+        "logRef": {"anyOf": [{"$ref": "#/definitions/ref"}, {"type": "null"}]}
+      },
+      "allOf": [
+        {"if": {"properties": {"result": {"const": "PASS"}}}, "then": {"properties": {"exitCode": {"const": 0}}}},
+        {"if": {"properties": {"result": {"const": "NOT_RUN"}}}, "then": {"properties": {"exitCode": {"type": "null"}, "logRef": {"type": "null"}}}}
+      ]
+    }
+  }
+}

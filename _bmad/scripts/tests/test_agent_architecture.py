@@ -6,7 +6,10 @@ import re
 import json
 import subprocess
 import unittest
+from copy import deepcopy
 from pathlib import Path
+
+from jsonschema import Draft7Validator, ValidationError
 
 
 REPO = Path(__file__).resolve().parents[3]
@@ -306,6 +309,163 @@ class AgentArchitectureTests(unittest.TestCase):
         for path in lifecycle_files:
             content = read(path)
             self.assertNotRegex(content, r"(?i)different LLM|runs code-review", path)
+
+
+class WorkerReportTests(unittest.TestCase):
+    """Exercise draft-07 and the policy's per-dispatch const binding recipe."""
+
+    def setUp(self):
+        schema_path = REPO / ".agents/schemas/worker-report.schema.json"
+        self.assertTrue(schema_path.is_file(), "structured report schema is required")
+        self.schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        Draft7Validator.check_schema(self.schema)
+        self.scope = {"baseCommit": "a" * 40, "head": "b" * 40,
+                      "diffIdentity": "scope-sha256:" + "c" * 64}
+        self.previous = {"path": "workers/task/report-attempt-1.json",
+                         "sha256": "d" * 64, "diffIdentity": "scope-sha256:" + "e" * 64}
+        self.report = {
+            "schemaVersion": 1, "kind": "completion", "status": "DONE",
+            "runId": "run", "taskId": "task", "attempt": 1,
+            "contractIdentity": "sha256:" + "f" * 64,
+            "scope": self.scope, "changedFilesRef": "workers/task/files-1.txt",
+            "checks": [{"id": "unit", "cwd": "backend", "command": "php artisan test",
+                        "exitCode": 0, "result": "PASS", "checkedScope": self.scope["diffIdentity"],
+                        "logRef": "workers/task/unit-1.log"}],
+            "acEvidence": [{"acId": "AC1", "checkIds": ["unit"], "artifactRefs": []}],
+            "unresolvedIssues": [],
+        }
+
+    def validate_bound(self, report, *, attempt=1, previous=None, kind=None):
+        # Bind only independently obtained expectations, never values from report.
+        schema = deepcopy(self.schema)
+        expected = {"runId": "run", "taskId": "task", "attempt": attempt,
+                    "contractIdentity": "sha256:" + "f" * 64, "scope": self.scope}
+        expected["kind"] = kind or ("correction" if previous is not None else "completion")
+        if previous is not None:
+            expected["previousReport"] = previous
+        schema.setdefault("allOf", []).append({
+            "properties": {key: {"const": value} for key, value in expected.items()}})
+        Draft7Validator(schema).validate(report)
+
+    def correction(self):
+        report = deepcopy(self.report)
+        report.update(kind="correction", attempt=2, previousReport=self.previous,
+                      changedSincePreviousRef="workers/task/delta-2.txt",
+                      findings={"resolved": [{"id": "F1", "evidenceRefs": ["check:unit"]}],
+                                "remaining": [{"id": "F2", "reason": "dependency unavailable"}]})
+        del report["changedFilesRef"]
+        return report
+
+    def test_valid_completion(self):
+        self.validate_bound(self.report)
+
+    def test_missing_identity(self):
+        for field in ("runId", "taskId", "attempt", "contractIdentity", "scope", "schemaVersion"):
+            with self.subTest(field=field), self.assertRaises(ValidationError):
+                report = deepcopy(self.report)
+                del report[field]
+                self.validate_bound(report)
+
+    def test_wrong_run_task_attempt_contract_or_scope(self):
+        for field, value in (("runId", "other"), ("taskId", "other"), ("attempt", 2),
+                             ("contractIdentity", "sha256:" + "0" * 64),
+                             ("scope", dict(self.scope, head="0" * 40))):
+            with self.subTest(field=field), self.assertRaises(ValidationError):
+                self.validate_bound(dict(self.report, **{field: value}))
+
+    def test_valid_correction_delta(self):
+        self.validate_bound(self.correction(), attempt=2, previous=self.previous)
+
+    def test_correction_requires_previous_reference(self):
+        report = self.correction()
+        del report["previousReport"]
+        with self.assertRaises(ValidationError):
+            self.validate_bound(report, attempt=2, previous=self.previous)
+
+    def test_stale_correction_baseline(self):
+        for field, value in (("path", "workers/task/report-attempt-0.json"),
+                             ("sha256", "0" * 64), ("diffIdentity", "old-scope")):
+            report = self.correction()
+            report["previousReport"] = dict(self.previous, **{field: value})
+            with self.subTest(field=field), self.assertRaises(ValidationError):
+                self.validate_bound(report, attempt=2, previous=self.previous)
+
+    def test_blocked_is_evidence_not_done(self):
+        report = {key: deepcopy(self.report[key]) for key in
+                  ("schemaVersion", "runId", "taskId", "attempt", "contractIdentity", "scope", "checks")}
+        report.update(kind="blocked", status="BLOCKED", blocker={
+            "category": "dependency", "fact": "database unavailable", "evidenceRefs": ["db.log"]},
+            worktreePath="D:/verified-orca-worktree", lastCompletedStep="implementation",
+            verificationState="database checks not run", requiredDecisionOrDependency="restore database",
+            workerActivity="stopped")
+        self.validate_bound(report, kind="blocked")
+        report["status"] = "DONE"
+        with self.assertRaises(ValidationError):
+            self.validate_bound(report, kind="blocked")
+
+    def test_correction_dispatch_cannot_submit_full_completion(self):
+        report = dict(self.report, attempt=2)
+        with self.assertRaises(ValidationError):
+            self.validate_bound(report, attempt=2, previous=self.previous)
+
+    def test_check_results_and_nullable_exit_codes(self):
+        for result, code in (("PASS", 0), ("FAIL", 1), ("FAIL", None),
+                             ("NOT_RUN", None), ("UNKNOWN", None)):
+            report = deepcopy(self.report)
+            report["checks"][0].update(result=result, exitCode=code)
+            if result == "NOT_RUN":
+                report["checks"][0]["logRef"] = None
+            self.validate_bound(report)  # DONE may contain failed/unfinished checks.
+        for result, code in (("GREEN", 0), ("PASS", None), ("PASS", 1), ("NOT_RUN", 0)):
+            report = deepcopy(self.report)
+            report["checks"][0].update(result=result, exitCode=code)
+            with self.subTest(result=result, code=code), self.assertRaises(ValidationError):
+                self.validate_bound(report)
+
+    def test_transcript_not_required_or_allowed_as_payload(self):
+        self.validate_bound(self.report)
+        for field in ("terminalTranscript", "previousReportBody", "reasoning", "stdout"):
+            with self.subTest(field=field), self.assertRaises(ValidationError):
+                self.validate_bound(dict(self.report, **{field: "screen redraw\n" * 10000}))
+        report = deepcopy(self.report)
+        report["checks"][0]["command"] = "screen redraw\n" * 10000
+        with self.assertRaises(ValidationError):
+            self.validate_bound(report)
+
+    def test_unknown_version_and_mixed_kind_rejected(self):
+        for change in ({"schemaVersion": 2}, {"status": "ACCEPTED"},
+                       {"previousReport": self.previous}, {"kind": "other"}):
+            with self.subTest(change=change), self.assertRaises(ValidationError):
+                self.validate_bound(dict(self.report, **change))
+
+    def test_report_references_reject_traversal_and_absolute_paths(self):
+        for path in ("../foreign.json", "/tmp/foreign.json", "C:/foreign.json",
+                     "workers/../../foreign.json", "workers\\foreign.json"):
+            with self.subTest(path=path), self.assertRaises(ValidationError):
+                self.validate_bound(dict(self.report, changedFilesRef=path))
+
+    def test_telemetry_contract_defines_measurement_not_state(self):
+        telemetry = read(".agents/policies/v3-telemetry.md")
+        for metric in ("uncachedInputTokens", "cachedInputTokens", "outputTokens",
+                       "reasoningTokens", "leadTurns", "subagentTurns", "modelRequestCount",
+                       "toolCalls", "workerReportBytesProduced", "workerReportBytesLoaded",
+                       "policyReferenceLoads", "contextCompactions", "correctionCycles",
+                       "leadActiveDuration", "leadSessionCount"):
+            self.assertIn(metric, telemetry)
+        for rule in ("TokenTracer", "null/unknown", "Never sum inclusive parent and child",
+                     "Disk size is not a proxy", "not a semantic worker report payload"):
+            self.assertIn(rule, telemetry)
+
+    def test_legacy_and_ingestion_policy(self):
+        policy = read(".agents/policies/orchestration-v3.md")
+        for rule in ("LEGACY_UNSTRUCTURED", "Never downgrade malformed", "raw capture",
+                     "const", "previousReport", "DONE is not ACCEPTED", "lazy-load",
+                     "report-attempt-", "sha256", "stable finding IDs"):
+            self.assertIn(rule, policy)
+        with self.assertRaises(ValidationError):
+            Draft7Validator(self.schema).validate("DONE\nlegacy terminal history")
+        self.assertIn("worker-report.schema.json", read(".agents/templates/worker-contract.md"))
+        self.assertIn("structured report", read(".agents/skills/story-development/SKILL.md"))
 
 
 if __name__ == "__main__":

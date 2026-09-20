@@ -85,7 +85,15 @@ corrections. Prefer supervised dispatch. Use V3's `compat-terminal` path only fo
 an observed Orca/Antigravity compatibility failure, with an existing coordinator-
 owned Run and Task, explicit isolated worktree identifiers, fixed Antigravity,
 rendered terminal evidence, independent Git verification, and coordinator Task
-update. Worker DONE
+update. New dispatches require the V3.1 structured report contract in
+`.agents/schemas/worker-report.schema.json`. Worker writes the artifact before a
+compact completion reference; terminal capture stays separate from `resultPath`.
+Apply V3's ingestion boundary: validate schema and independent run/task/attempt,
+contract, scope and correction-baseline bindings, inspect Git, then lazy-load logs
+only when needed. Corrections report deltas using stable finding IDs; BLOCKED is
+worker evidence for the existing Lead transition, not DONE. Legacy reports remain
+unstructured evidence without migration. Use `.agents/policies/v3-telemetry.md`
+for per-Story measurement; unknown metrics stay unknown. Worker DONE
 requires Lead review of actual diff, scope, ACs, tests and architecture before
 ACCEPTED. No external model review is required. No extra implementation subagents
 or per-task reviewer loops belong to the default path. Infrastructure failure

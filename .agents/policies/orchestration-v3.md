@@ -76,7 +76,8 @@ alone will not carry ignored state. No state transfer mechanism is provided here
     lead/handoff.md             # optional optimization, never truth
     workers/<TASK-ID>/contract.md
     workers/<TASK-ID>/state.json
-    workers/<TASK-ID>/result.md
+    workers/<TASK-ID>/report-attempt-<N>.json # semantic worker evidence (v1)
+    workers/<TASK-ID>/capture-attempt-<N>.log # optional raw capture, not resultPath
     workers/<TASK-ID>/review.md
     verification/status.json
     verification/summary.md
@@ -322,8 +323,10 @@ already exist and remain coordinator-owned. Create or identify an isolated
 Orca-managed child worktree with durable explicit repo/worktree identifiers and an
 explicit parent; never depend on UI focus or whichever workspace is visually active.
 Start or identify one healthy Antigravity terminal there, send the bounded contract
-with `orca terminal send`, and capture rendered completion evidence with
-`orca terminal read --screen`. Then independently inspect the worker Git status,
+with `orca terminal send`, and observe the compact completion reference with
+`orca terminal read --screen`. Store any raw capture separately from the structured
+report; never redirect terminal output into `resultPath`. Apply the report ingestion
+boundary below. Then independently inspect the worker Git status,
 diff, scope, and acceptance evidence before the coordinator uses
 `orca orchestration task-update`. Store `executionMode: "compat-terminal"`, the
 terminal and worktree IDs, and a null Dispatch ID when no Dispatch succeeded.
@@ -349,6 +352,126 @@ logically distinct scope. Follow root retry/reassessment rules. Antigravity fail
 -> WORKER_FAILED -> diagnosis -> safe resume, otherwise NEEDS_HUMAN. Only a human
 may authorize a worker-engine exception; stop and record its scope/authority before
 changing the fixed schema/policy. No silent Codex/Claude worker fallback.
+
+### V3.1 structured worker evidence (A1)
+
+New contracts use the single draft-07 [worker report schema](../schemas/worker-report.schema.json),
+`schemaVersion: 1`, with `kind: completion | correction | blocked`. This version is
+independent of run/worker-state versions. Reports are evidence, never state authority.
+There is no new run-state enum or transition. `blocked` has `status: BLOCKED`, not
+DONE; the current Lead decides the existing exceptional transition under its lease.
+The worker reports preserved `worktreePath`, `scope`, blocker facts, last completed
+step, verification state, required decision/dependency and worker activity; activity
+is an assertion to reconcile with Orca, not proof the worker stopped.
+
+Producer boundary (both supervised and compat-terminal):
+
+1. Pin the exact attempt contract bytes; `contractIdentity` is `sha256:<hex>` of
+   that dispatched contract (including its correction instructions). Record the
+   digest outside those bytes in existing dispatch evidence, avoiding self-hashing.
+2. The contract assigns a report location in the verified worker worktree and its
+   canonical destination `workers/<TASK-ID>/report-attempt-<N>.json`, relative to
+   the canonical run directory. Worker writes UTF-8 JSON there, finishes the file
+   before notification, and preserves it. If the worker cannot write the canonical
+   destination, Lead copies the artifact byte-for-byte from the assigned worktree
+   location and verifies SHA-256 equality; no transcription from terminal history.
+   Only the Lead updates existing `resultPath` under the usual mutation protocol.
+   The contract maps a worker artifact directory to the canonical run directory:
+   preserve referenced manifests/logs there with the same relative paths. Copy
+   manifests when reviewing scope; retrieve logs/captures only when needed. Missing
+   references are evidence gaps, not implicit PASS. Published reports are immutable;
+   if resuming a blocked worker in the same attempt, assign a new contracted report
+   filename and retain the earlier artifact/digest. Do not overwrite evidence.
+3. Emit only a compact notification, for example
+   `DONE report=workers/<TASK-ID>/report-attempt-<N>.json attempt=<N> sha256=<hex>`;
+   blocked uses `BLOCKED` with the same reference fields. Supervised completion
+   payloads carry this reference too. Notifications never grant acceptance.
+4. Keep terminal capture at `capture-attempt-<N>.log` and check stdout at referenced
+   log paths. Neither is the canonical report. Missing/incomplete report is missing
+   evidence; preserve runtime/Git facts and investigate, never synthesize DONE.
+
+All report artifact references are relative to the canonical run directory, except
+`check:<id>` references to checks within the same report. `cwd` is resolved against
+the recorded worktree unless an explicit verified absolute directory was contracted.
+Resolve paths and symlinks before access: reject traversal, foreign repository paths
+and targets outside the canonical run or explicitly verified worker worktree.
+
+`scope` reuses V3 `baseCommit`, observed Git `head`, and the existing `diffIdentity`
+used in review/verification. A clean commit may identify scope by commit; a dirty
+scope must use existing exact-scope/patch evidence including untracked file content
+and deletions, not HEAD alone. `changedFilesRef` points to that attempt's changed-file
+manifest. No new fingerprint authority is introduced. For a blocked worker unable
+to inspect Git, retain the last known scope and say it is unverified in
+`verificationState`; Lead must reconcile it before any further gate.
+
+Ingestion boundary (default Lead path):
+
+1. Resolve only the contracted report path for the current run, Task and attempt.
+   Verify notification digest against actual file bytes; do not trust a marker's
+   path, attempt or old DONE text in a screen redraw as authority.
+2. Validate the actual JSON against the report schema. Unsupported versions and
+   malformed v1 are evidence errors. Schema validity alone is insufficient.
+3. Bind validation to independent expectations: extend the schema with an `allOf`
+   `properties` object containing `const` constraints for `runId`, `taskId`,
+   `attempt`, `contractIdentity` from current state/dispatch evidence and `scope`
+   from independently inspected Git/manifest evidence. For correction also bind
+   the entire `previousReport` object to the baseline pinned by the correction
+   contract. Never derive expected constants from the candidate report. Confirm
+   the baseline path and SHA-256 against preserved bytes and its `diffIdentity`
+   against the reviewed scope. Reject wrong attempt, reused report, mismatched scope
+   or stale baseline; timestamp is not authority. This binding recipe is exercised
+   by the architecture tests; it is a Lead protocol, not a new runtime service.
+   Bind `kind` to completion or correction as required by the dispatched contract;
+   a correction cannot submit a full completion to bypass delta rules. A blocked
+   notification may select only the blocked schema branch, never a DONE branch.
+4. Read the structured report as worker assertions. Check IDs must be unique;
+   `acEvidence.checkIds` and `check:<id>` must resolve within this attempt. Inspect
+   manifest and actual Git diff independently, assess all relevant ACs, architecture
+   and unresolved issues. Check `checkedScope` against the scope actually tested;
+   code changes invalidate prior verification. Only then perform independent Lead
+   review and verification, preserving HIGH-risk adversarial review and Human Gate.
+5. Only lazy-load referenced logs/raw capture for a specific failure, ambiguous
+   completion, recovery or review question. Record actual loaded bytes separately
+   from produced report bytes; do not load every artifact by default.
+
+Check semantics: PASS means completed successfully with exitCode 0; FAIL means an
+observed failure (exitCode may be null if interrupted); NOT_RUN means no execution
+(null exitCode/logRef); UNKNOWN means execution/outcome cannot be established.
+UNKNOWN may retain an observed exitCode without asserting success. Empty checks
+or AC mappings cannot prove acceptance. DONE is not ACCEPTED even with all PASS.
+Commands identify execution, not evidence that it occurred; Lead assesses logs and
+independent checks where needed.
+
+Correction reports are deltas: `previousReport` contains the exact baseline path,
+SHA-256 and previous `diffIdentity`; `scope` is the current identity.
+`changedSincePreviousRef` lists only changes since that baseline. Use stable finding IDs
+from Lead review (assign once in `review.md` if needed), with `findings.resolved`
+evidence references and `findings.remaining` reasons. `checks` contains only checks
+executed/attempted in this attempt (the rerun list); `acEvidence` contains only new
+or changed mappings, and `unresolvedIssues` only newly discovered issues. Retained
+issues belong in `findings.remaining`. Old applicable evidence is referenced by
+baseline artifact path, never copied into current checks or presented as fresh.
+Lead decides applicability; do not recursively load all previous report bodies.
+Before correction dispatch, pin the actual last reviewed report, even if its
+attempt is not N-1 (e.g. an intervening failed attempt produced no valid report).
+
+Reports must not contain terminal transcripts, prompt/history copies, screen
+redraws, full Story/architecture documents, full test stdout, previous report
+bodies, reasoning transcripts, generic proof claims without evidence, or old DONE
+markers. Use compact facts, bounded failure descriptions and artifact references.
+Schema rejects extra fields and bounds text; semantic review still checks misuse
+of allowed fields. Large logs stay external; no terminal transcript is required.
+
+Legacy: only artifacts from contracts predating this protocol may be classified
+`LEGACY_UNSTRUCTURED` in the current review record. Read bounded excerpts only when
+needed and treat them as unverified evidence; never infer fresh checks/ACCEPTED.
+Never downgrade malformed or unknown-version structured reports to legacy.
+Do not rewrite historical result.md, correction reports, events, receipts or state.
+For a new correction of legacy work, pin the legacy file digest plus independently
+reviewed diffIdentity as the baseline and produce a v1 delta. No automatic migration.
+
+A0 measurement follows the [telemetry contract](v3-telemetry.md). It is an external
+measurement/reference contract, not a new control-plane authority or subsystem.
 
 ## Checkpoints, handoff and recovery
 
