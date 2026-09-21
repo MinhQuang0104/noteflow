@@ -1,4 +1,4 @@
-import { QueryClient } from '@tanstack/vue-query'
+import { QueryClient, QueryObserver } from '@tanstack/vue-query'
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -87,7 +87,7 @@ describe('useSyncStore', () => {
     await vi.advanceTimersByTimeAsync(5000)
 
     expect(sync.lastRevision).toBe(2)
-    expect(refetchSpy).toHaveBeenCalledWith({ queryKey: ['challenges'] })
+    expect(refetchSpy).toHaveBeenCalledWith({ queryKey: ['challenges'] }, { throwOnError: true })
 
     // Third poll returns revision 2 (same): does not refetch again
     refetchSpy.mockClear()
@@ -131,7 +131,7 @@ describe('useSyncStore', () => {
     await vi.advanceTimersByTimeAsync(5000)
 
     expect(sync.lastEpoch).toBe(2)
-    expect(resetSpy).toHaveBeenCalledWith({ queryKey: ['challenges'] })
+    expect(resetSpy).toHaveBeenCalledWith({ queryKey: ['challenges'] }, { throwOnError: true })
 
     sync.stop()
   })
@@ -460,7 +460,7 @@ describe('useSyncStore', () => {
     // Advance through backoff delay
     await vi.advanceTimersByTimeAsync(10000)
 
-    expect(refetchSpy).toHaveBeenCalledWith({ queryKey: ['challenges'] })
+    expect(refetchSpy).toHaveBeenCalledWith({ queryKey: ['challenges'] }, { throwOnError: true })
     expect(sync.pendingConvergence).toBe(false)
     expect(sync.syncStatus).toBe('synced')
 
@@ -587,6 +587,153 @@ describe('useSyncStore', () => {
     expect(sync.syncError).toBeNull()
     expect(sync.lastRevision).toBe(3)
 
+    sync.stop()
+  })
+
+  it('S14-F04 real QueryClient refetch failure must remain observable', async () => {
+    const sync = useSyncStore()
+    const auth = useAuthStore()
+    auth.status = 'authenticated'
+    sync.setQueryClient(queryClient)
+
+    const observer = new QueryObserver(queryClient, {
+      queryKey: ['challenges'],
+      queryFn: async () => {
+        throw new Error('server down')
+      },
+      initialData: { challenges: [{ id: 'existing' }] },
+      retry: false,
+    })
+    const unsubscribe = observer.subscribe(() => {})
+
+    try {
+      await sync.start()
+      vi.mocked(accountApi.getAccountContext).mockResolvedValueOnce({
+        timezone: 'Asia/Ho_Chi_Minh',
+        account_date: '2026-09-19',
+        week: { start_date: '2026-09-15', end_date: '2026-09-21' },
+        account_revision: 2,
+        data_epoch: 1,
+        write_state: 'open',
+      })
+      const result = await sync.reconcile()
+
+      expect(result).toBe(false)
+      expect(sync.syncStatus).toBe('error')
+      expect(sync.pendingConvergence).toBe(true)
+      expect(queryClient.getQueryData(['challenges'])).toEqual({ challenges: [{ id: 'existing' }] })
+    } finally {
+      unsubscribe()
+      sync.stop()
+    }
+  })
+
+  it('S14-F05 hidden transition must not start Challenge refetch after account response', async () => {
+    const sync = useSyncStore()
+    const auth = useAuthStore()
+    auth.status = 'authenticated'
+    sync.setQueryClient(queryClient)
+
+    let resolveAccount!: (value: accountApi.AccountContext) => void
+    vi.mocked(accountApi.getAccountContext).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveAccount = resolve
+        }),
+    )
+    const refetch = vi.spyOn(queryClient, 'refetchQueries')
+
+    sync.lastRevision = 1
+    sync.lastEpoch = 1
+    const pending = sync.start()
+    sync.handleVisibilityChange(false)
+    resolveAccount({
+      timezone: 'Asia/Ho_Chi_Minh',
+      account_date: '2026-09-19',
+      week: { start_date: '2026-09-15', end_date: '2026-09-21' },
+      account_revision: 2,
+      data_epoch: 1,
+      write_state: 'open',
+    })
+    await pending
+
+    expect(refetch).not.toHaveBeenCalled()
+    expect(sync.syncStatus).toBe('paused')
+    sync.stop()
+  })
+
+  it('S14-F01 reconcile-before-write fails closed if connection drops mid-reconcile', async () => {
+    const sync = useSyncStore()
+    const auth = useAuthStore()
+    const account = useAccountStore()
+    auth.status = 'authenticated'
+    sync.setQueryClient(queryClient)
+    account.context = {
+      timezone: 'Asia/Ho_Chi_Minh',
+      account_date: '2026-09-19',
+      week: { start_date: '2026-09-15', end_date: '2026-09-21' },
+      account_revision: 1,
+      data_epoch: 1,
+      write_state: 'open',
+    }
+    account.status = 'ready'
+
+    let resolveAccount!: (value: accountApi.AccountContext) => void
+    vi.mocked(accountApi.getAccountContext).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveAccount = resolve
+        }),
+    )
+
+    const pending = sync.reconcileBeforeWrite()
+    sync.handleOnlineStatusChange(false)
+    resolveAccount({
+      timezone: 'Asia/Ho_Chi_Minh',
+      account_date: '2026-09-19',
+      week: { start_date: '2026-09-15', end_date: '2026-09-21' },
+      account_revision: 1,
+      data_epoch: 1,
+      write_state: 'open',
+    })
+
+    expect((await pending).allowed).toBe(false)
+    sync.stop()
+  })
+
+  it('S14-F05 stop and relogin never overlap account requests', async () => {
+    const sync = useSyncStore()
+    const auth = useAuthStore()
+    auth.status = 'authenticated'
+    sync.setQueryClient(queryClient)
+
+    let resolveFirst!: (value: accountApi.AccountContext) => void
+    vi.mocked(accountApi.getAccountContext).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveFirst = resolve
+        }),
+    )
+
+    const first = sync.start()
+    sync.stop()
+    auth.generation += 1
+    auth.status = 'guest'
+    auth.generation += 1
+    auth.status = 'authenticated'
+    const second = sync.start()
+
+    expect(accountApi.getAccountContext).toHaveBeenCalledTimes(1)
+    resolveFirst({
+      timezone: 'Asia/Ho_Chi_Minh',
+      account_date: '2026-09-19',
+      week: { start_date: '2026-09-15', end_date: '2026-09-21' },
+      account_revision: 1,
+      data_epoch: 1,
+      write_state: 'open',
+    })
+    await first
+    await second
     sync.stop()
   })
 })

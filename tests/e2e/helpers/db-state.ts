@@ -10,6 +10,9 @@ const dbHelperScript = path.resolve(currentDir, 'db-helper.php')
 const testEnv = {
   ...process.env,
   APP_ENV: process.env.APP_ENV || 'testing',
+  CACHE_STORE: process.env.CACHE_STORE || 'array',
+  CACHE_DRIVER: process.env.CACHE_DRIVER || 'array',
+  DB_CONNECTION: process.env.DB_CONNECTION || 'pgsql',
   DB_HOST: process.env.DB_HOST || '127.0.0.1',
   DB_PORT: process.env.DB_PORT || '55414',
   DB_DATABASE: process.env.DB_DATABASE || 'noteflow_test',

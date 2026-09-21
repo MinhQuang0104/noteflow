@@ -630,3 +630,103 @@ test('S14-F03 — blocks dirty draft submission on epoch change until explicit r
   expect(wrapper.find('#create-epoch-alert').exists()).toBe(false)
   expect((wrapper.get('#create-submit-btn').element as HTMLButtonElement).disabled).toBe(false)
 })
+
+test('S14-F02 — deferred Challenge mutation response crossing logout/re-login performs no new-session UI/cache/draft side effects', async () => {
+  const auth = useAuthStore()
+  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: [] })
+
+  let resolveCreate!: (val: Awaited<ReturnType<typeof challengesApi.createChallenge>>) => void
+  vi.spyOn(challengesApi, 'createChallenge').mockImplementation(
+    () =>
+      new Promise((resolve) => {
+        resolveCreate = resolve
+      }),
+  )
+
+  const router = createTestRouter()
+  await router.push('/challenges')
+
+  const wrapper = mount(ChallengesView, {
+    global: {
+      plugins: [[VueQueryPlugin, { queryClient }], router],
+    },
+  })
+
+  await flushPromises()
+
+  // Start create in session 1 (auth generation 1)
+  await wrapper.get('#create-challenge-btn').trigger('click')
+  await wrapper.get('#create-name').setValue('Thói quen phiên cũ')
+  await wrapper.get('form').trigger('submit.prevent')
+  await flushPromises()
+
+  // While mutation is pending on network, user logs out and logs in as new session (auth generation 2)
+  auth.generation = 2
+  auth.status = 'authenticated'
+
+  // User starts typing a new draft in the new session
+  await wrapper.get('#create-name').setValue('Thói quen phiên mới')
+
+  // Now the deferred mutation response from session 1 arrives
+  resolveCreate({
+    challenge: {
+      id: 'old-chal-id',
+      name: 'Thói quen phiên cũ',
+      description: null,
+      start_date: '2026-09-19',
+      target_days: 1,
+      row_version: 1,
+      created_at: '2026-09-19T00:00:00Z',
+      updated_at: '2026-09-19T00:00:00Z',
+    },
+    account_revision: 2,
+    data_epoch: 1,
+  })
+
+  await flushPromises()
+
+  // The new session draft MUST NOT be wiped, mode MUST stay create (not changed to detail of old-chal-id), and router must not navigate
+  expect((wrapper.get('#create-name').element as HTMLInputElement).value).toBe('Thói quen phiên mới')
+  expect(wrapper.find('#challenge-detail-name').exists()).toBe(false)
+  expect(router.currentRoute.value.path).toBe('/challenges')
+})
+
+test('S14-F04 & S14-F07 — renders actionable sync error text with retry when coordinator syncError occurs', async () => {
+  const sync = useSyncStore()
+  const existingChallenge: challengesApi.Challenge = {
+    id: 'c1',
+    name: 'Đang tập yoga',
+    description: null,
+    start_date: '2026-09-19',
+    target_days: 3,
+    row_version: 1,
+    created_at: '2026-09-19T00:00:00Z',
+    updated_at: '2026-09-19T00:00:00Z',
+  }
+  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({
+    challenges: [existingChallenge],
+  })
+
+  const router = createTestRouter()
+  await router.push('/challenges')
+
+  const wrapper = mount(ChallengesView, {
+    global: {
+      plugins: [[VueQueryPlugin, { queryClient }], router],
+    },
+  })
+
+  await flushPromises()
+  expect(wrapper.text()).toContain('Đang tập yoga')
+
+  // Trigger sync error on coordinator
+  sync.syncStatus = 'error'
+  sync.syncError = 'Không thể đồng bộ danh sách challenge mới nhất. Đang thử lại...'
+  await flushPromises()
+
+  // Error alert must be visible with actionable message and retry button
+  expect(wrapper.find('[role="alert"]').exists()).toBe(true)
+  expect(wrapper.text()).toContain('Không thể đồng bộ danh sách mới nhất')
+  expect(wrapper.text()).toContain('Không thể đồng bộ danh sách challenge mới nhất. Đang thử lại...')
+  expect(wrapper.text()).toContain('Thử lại')
+})

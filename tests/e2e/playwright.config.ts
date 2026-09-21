@@ -33,6 +33,8 @@ export default defineConfig({
       timeout: 120_000,
       env: {
         APP_ENV: 'testing',
+        CACHE_STORE: 'array',
+        CACHE_DRIVER: 'array',
         DB_CONNECTION: 'pgsql',
         DB_HOST: process.env.DB_HOST || '127.0.0.1',
         DB_PORT: process.env.DB_PORT || '55414',

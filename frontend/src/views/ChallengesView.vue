@@ -142,12 +142,24 @@ async function rebaseOnEpochChange() {
   epochChangeBlocked.value = false
 }
 
+async function handleSyncRetry() {
+  await Promise.allSettled([
+    refetch(),
+    sync.reconcile(true),
+  ])
+}
+
 // Mutations
 const createMutation = useMutation({
   mutationFn: createChallenge,
   onSuccess: async (result) => {
-    sync.recordMutationAck(result.account_revision, result.data_epoch, activeCreateAuthGen.value)
-    await queryClient.invalidateQueries({ queryKey: ['challenges'] })
+    const accepted = await sync.recordMutationAck(result.account_revision, result.data_epoch, activeCreateAuthGen.value)
+    if (!accepted) {
+      return
+    }
+    if (auth.status !== 'authenticated' || (activeCreateAuthGen.value !== undefined && auth.generation !== activeCreateAuthGen.value)) {
+      return
+    }
     activeCreateCommandId.value = null
     lastCreateCanonicalPayload.value = null
     selectedId.value = result.challenge.id
@@ -161,8 +173,13 @@ const updateMutation = useMutation({
   mutationFn: ({ id, payload }: { id: string; payload: Parameters<typeof updateChallengeMetadata>[1] }) =>
     updateChallengeMetadata(id, payload),
   onSuccess: async (result) => {
-    sync.recordMutationAck(result.account_revision, result.data_epoch, activeEditAuthGen.value)
-    await queryClient.invalidateQueries({ queryKey: ['challenges'] })
+    const accepted = await sync.recordMutationAck(result.account_revision, result.data_epoch, activeEditAuthGen.value)
+    if (!accepted) {
+      return
+    }
+    if (auth.status !== 'authenticated' || (activeEditAuthGen.value !== undefined && auth.generation !== activeEditAuthGen.value)) {
+      return
+    }
     activeEditCommandId.value = null
     lastEditCanonicalPayload.value = null
     mode.value = 'detail'
@@ -448,12 +465,13 @@ async function submitEdit() {
           Đang tải danh sách challenge…
         </div>
 
-        <div v-else-if="isError && challenges.length === 0" class="py-8 text-center text-sm text-rose-700" role="alert">
+        <div v-else-if="(isError || sync.syncStatus === 'error') && challenges.length === 0" class="py-8 text-center text-sm text-rose-700" role="alert">
           <p>Không thể tải danh sách challenge.</p>
+          <p v-if="sync.syncError" class="mt-1 text-xs text-rose-600">{{ sync.syncError }}</p>
           <button
             type="button"
             class="mt-2 text-xs font-semibold text-indigo-700 underline hover:text-indigo-900"
-            @click="() => refetch()"
+            @click="handleSyncRetry"
           >
             Thử lại
           </button>
@@ -466,15 +484,18 @@ async function submitEdit() {
         <div v-else>
           <!-- Actionable error banner when background refetch fails but existing data is preserved (AC4) -->
           <div
-            v-if="isError"
+            v-if="isError || sync.syncStatus === 'error' || sync.syncError"
             role="alert"
             class="mt-2 mb-3 flex items-center justify-between rounded-lg border border-rose-200 bg-rose-50 p-2.5 text-xs text-rose-800"
           >
-            <span>Không thể đồng bộ danh sách mới nhất. Dữ liệu hiển thị có thể chưa cập nhật.</span>
+            <div>
+              <span>Không thể đồng bộ danh sách mới nhất. Dữ liệu hiển thị có thể chưa cập nhật.</span>
+              <p v-if="sync.syncError" class="mt-0.5 text-[11px] text-rose-700">{{ sync.syncError }}</p>
+            </div>
             <button
               type="button"
               class="ml-2 shrink-0 font-semibold text-rose-900 underline hover:text-rose-950"
-              @click="() => refetch()"
+              @click="handleSyncRetry"
             >
               Thử lại
             </button>

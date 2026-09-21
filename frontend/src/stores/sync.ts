@@ -102,6 +102,12 @@ export const useSyncStore = defineStore('sync', () => {
       }
       latestCompletedRequestGeneration.value = currentReqGen
 
+      // Lifecycle check (S14-F01, S14-F05): If hidden or offline while /account was pending, pause and do not start downstream refetch!
+      if (!isVisible.value || !isOnline.value) {
+        syncStatus.value = 'paused'
+        return false
+      }
+
       // Cache invalidation & epoch change handling (S14-F02, S14-F03, S14-F04)
       const prevRevision = lastRevision.value
       const prevEpoch = lastEpoch.value
@@ -136,14 +142,21 @@ export const useSyncStore = defineStore('sync', () => {
       if (needsConvergence) {
         try {
           if (epochChanged) {
-            // S14-F03: resetQueries preserves active query listeners while resetting server cache
-            await currentQueryClient.resetQueries({ queryKey: ['challenges'] })
+            // S14-F03, S14-F04: resetQueries preserves active query listeners; throwOnError ensures failures reject
+            await currentQueryClient.resetQueries({ queryKey: ['challenges'] }, { throwOnError: true })
           } else {
-            await currentQueryClient.refetchQueries({ queryKey: ['challenges'] })
+            // S14-F04: throwOnError ensures refetch rejection is not swallowed by TanStack Query
+            await currentQueryClient.refetchQueries({ queryKey: ['challenges'] }, { throwOnError: true })
           }
 
           // Boundary check after async refetch (S14-F02)
           if (auth.generation !== capturedAuthGen || auth.status !== 'authenticated') {
+            return false
+          }
+
+          // Lifecycle check after refetch (S14-F01, S14-F05)
+          if (!isVisible.value || !isOnline.value) {
+            syncStatus.value = 'paused'
             return false
           }
 
@@ -162,13 +175,7 @@ export const useSyncStore = defineStore('sync', () => {
 
       consecutiveFailures.value = 0
       syncError.value = null
-
-      // S14-F05: If visibility/online changed mid-flight, preserve 'paused' state
-      if (!isVisible.value || !isOnline.value) {
-        syncStatus.value = 'paused'
-      } else {
-        syncStatus.value = 'synced'
-      }
+      syncStatus.value = 'synced'
 
       return true
     } catch (error: unknown) {
@@ -266,18 +273,22 @@ export const useSyncStore = defineStore('sync', () => {
     return success
   }
 
-  function recordMutationAck(revision: number, epoch: number, originatingAuthGen?: number): void {
+  async function recordMutationAck(
+    revision: number,
+    epoch: number,
+    originatingAuthGen?: number,
+  ): Promise<boolean> {
     // S14-F02: Auth generation fencing for mutation ACKs
     if (originatingAuthGen !== undefined && originatingAuthGen !== auth.generation) {
-      return
+      return false
     }
     if (auth.status !== 'authenticated') {
-      return
+      return false
     }
 
     // S14-F02: Epoch check to discard stale ACKs from previous epochs
     if (lastEpoch.value !== null && epoch < lastEpoch.value) {
-      return
+      return false
     }
 
     if (lastEpoch.value === null || epoch === lastEpoch.value) {
@@ -295,12 +306,21 @@ export const useSyncStore = defineStore('sync', () => {
       }
     }
 
-    consecutiveFailures.value = 0
-    syncError.value = null
-    pendingConvergence.value = false
-    syncStatus.value = 'synced'
-
-    void currentQueryClient.invalidateQueries({ queryKey: ['challenges'] })
+    // Await query invalidation / refetch with throwOnError: true (S14-F02, S14-F04)
+    try {
+      await currentQueryClient.invalidateQueries({ queryKey: ['challenges'] }, { throwOnError: true })
+      consecutiveFailures.value = 0
+      syncError.value = null
+      pendingConvergence.value = false
+      syncStatus.value = 'synced'
+      return true
+    } catch {
+      pendingConvergence.value = true
+      consecutiveFailures.value++
+      syncError.value = 'Không thể đồng bộ danh sách challenge mới nhất. Đang thử lại...'
+      syncStatus.value = 'error'
+      return false
+    }
   }
 
   async function reconcileBeforeWrite(): Promise<{ allowed: boolean; reason?: string }> {
@@ -332,8 +352,16 @@ export const useSyncStore = defineStore('sync', () => {
       ok = false
     }
 
-    // S14-F01: Fail closed if reconcile returned false or auth changed
-    if (!ok || auth.generation !== startAuthGen || auth.status !== 'authenticated') {
+    // S14-F01: Fail closed if reconcile returned false, auth changed, or connection/visibility dropped mid-flight
+    if (
+      !ok ||
+      auth.generation !== startAuthGen ||
+      auth.status !== 'authenticated' ||
+      !isOnline.value ||
+      !isVisible.value ||
+      syncStatus.value === 'paused' ||
+      syncStatus.value === 'error'
+    ) {
       return {
         allowed: false,
         reason: 'Không thể đồng bộ trạng thái mới nhất trước khi ghi. Vui lòng thử lại.',
@@ -456,7 +484,6 @@ export const useSyncStore = defineStore('sync', () => {
     consecutiveFailures.value = 0
     requestGeneration.value++
     latestCompletedRequestGeneration.value = 0
-    activeReconcilePromise = null
   }
 
   auth.registerPrivateStateReset(reset)
@@ -480,7 +507,6 @@ export const useSyncStore = defineStore('sync', () => {
   function stop(): void {
     isStarted = false
     requestGeneration.value++
-    activeReconcilePromise = null
     clearTimer()
     detachListeners()
     syncStatus.value = 'idle'
