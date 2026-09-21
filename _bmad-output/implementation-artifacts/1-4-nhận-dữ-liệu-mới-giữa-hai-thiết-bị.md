@@ -133,7 +133,7 @@ Cho đến khi các điều kiện này được đáp ứng, không được b�
 - Triển khai Pinia Sync Store `frontend/src/stores/sync.ts` điều phối chu kỳ polling 5s không chồng lấn (`inFlight`), tích hợp TanStack Vue Query, backoff lũy thừa khi lỗi mạng (5s->10s->20s->30s), auth-generation & monotonic request-generation fencing, lắng nghe visibilitychange/online/offline để tạm dừng và tự động reconcile khi focus/reconnect, và dừng khi logout/401.
 - Cập nhật `frontend/src/components/AppShell.vue` với chỉ báo đồng bộ trực quan, cảnh báo `write_state`, và khởi động sync store.
 - Cập nhật `frontend/src/views/ChallengesView.vue` bảo vệ dirty draft khi background refetch diễn ra, thông báo non-destructive khi phiên bản trên server thay đổi, hiển thị retry banner khi refetch lỗi mà không xóa danh sách Challenge hiện hữu (AC4), kích hoạt `reconcileBeforeWrite()` để chặn ghi khi tài khoản bị khóa ghi (AC3).
-- Bổ sung lệnh Artisan `backend/app/Console/Commands/SetAccountWriteState.php` hỗ trợ kiểm thử chuyển đổi trạng thái `write_state`.
+- Bổ sung test helper độc lập `tests/e2e/helpers/db-helper.php` và `tests/e2e/helpers/db-state.ts` thao tác trực tiếp với PostgreSQL qua PDO fail-closed cho môi trường testing, loại bỏ hoàn toàn các test fixture khỏi mã nguồn production (command `SetAccountWriteState.php` đã được xóa bỏ theo review S14-F06).
 - Xây dựng bộ kiểm thử End-to-End `tests/e2e/cross-device-sync.spec.ts` gồm 5 kịch bản tương tác với 2 browser context độc lập chạy trên PostgreSQL 17 thực tế.
 
 ### AC Evidence
@@ -170,9 +170,10 @@ Evidence:
 - 2026-09-19: Xác định blocker là thiếu business mutation/read model thực tế và quyết định mutation contract đã được phê duyệt.
 - 2026-09-19: AD-6 đã được Product Owner phê duyệt; Story vẫn `BLOCKED` cho đến khi Story 2.1 triển khai Challenge mutation/read model và cung cấp bằng chứng tích hợp.
 - 2026-09-21: Hoàn thành triển khai Tasks 3–6 trên worktree `MinhQuang0104/story-1-4-sync`. Tất cả các deterministic check (backend pint, phpstan, phpunit; frontend contract, lint, typecheck, vitest; e2e playwright; architecture unittest) đều đạt 100% PASS. Chuyển trạng thái Story sang `review`.
+- 2026-09-21: Tiếp thu kết quả Independent Lead review: loại bỏ test fixture khỏi production code (xóa `SetAccountWriteState.php`, khôi phục `DatabaseSeeder.php`, gỡ bỏ `window.__queryClient`), cấu hình PostgreSQL service và array cache trong CI browser-smoke, hoàn thiện sync coordinator (reconcile fail-closed khi rớt mạng/ẩn tab, observable refetch error với throwOnError, fence mutation ACK sau await invalidation, tránh trùng lặp transport và tự động reconcile khi re-login), bổ sung đầy đủ unit/E2E regression test. Trạng thái Story duy trì `review`.
 
 ## Change Log
 
 - 2026-09-19: Tạo bản draft; giữ sprint status ở `backlog`; chưa triển khai product code.
 - 2026-09-20: Refresh readiness gate PASS; phê duyệt Story 1.4 sẵn sàng triển khai.
-- 2026-09-21: Hoàn thành triển khai sync coordinator, cache/draft safety, 2-context E2E test suite và adversarial review; chuyển trạng thái sang `review`.
+- 2026-09-21: Hoàn thành triển khai sync coordinator, cache/draft safety, 2-context E2E test suite trên PostgreSQL; hoàn thành xử lý các phát hiện từ Independent Lead review (S14-F01..F09) bao gồm loại bỏ production test command; duy trì trạng thái `review`.
