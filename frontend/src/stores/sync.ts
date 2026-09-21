@@ -38,7 +38,7 @@ export const useSyncStore = defineStore('sync', () => {
   let isStarted = false
   const requestGeneration = ref<number>(0)
   const latestCompletedRequestGeneration = ref<number>(0)
-  let activeReconcilePromise: Promise<boolean> | null = null
+  let activeReconcileInfo: { promise: Promise<boolean>; authGen: number } | null = null
 
   function setQueryClient(qc: QueryClient): void {
     currentQueryClient = qc
@@ -244,9 +244,23 @@ export const useSyncStore = defineStore('sync', () => {
       return false
     }
 
-    // S14-F01: Join active in-flight reconcile promise if already running
-    if (activeReconcilePromise) {
-      return await activeReconcilePromise
+    // S14-F05: If transport is in flight, await it without overlapping requests
+    while (activeReconcileInfo) {
+      const { promise: inFlightPromise, authGen: inFlightAuthGen } = activeReconcileInfo
+      const priorResult = await inFlightPromise
+      // If the in-flight request was started for the CURRENT auth generation, return its result
+      if (inFlightAuthGen === auth.generation && auth.status === 'authenticated') {
+        return priorResult
+      }
+      // Otherwise (old transport belonged to a prior session/generation), recheck lifecycle
+      if (!isStarted || auth.status !== 'authenticated') {
+        return false
+      }
+      if (!isOnline.value || !isVisible.value) {
+        syncStatus.value = 'paused'
+        return false
+      }
+      // If another caller already created a new activeReconcileInfo for current generation, loop will await it!
     }
 
     const capturedAuthGen = auth.generation
@@ -255,13 +269,13 @@ export const useSyncStore = defineStore('sync', () => {
       try {
         return await reconcileInternal()
       } finally {
-        if (activeReconcilePromise === currentPromise) {
-          activeReconcilePromise = null
+        if ((activeReconcileInfo as { promise: Promise<boolean>; authGen: number } | null)?.promise === currentPromise) {
+          activeReconcileInfo = null
         }
       }
     })()
 
-    activeReconcilePromise = currentPromise
+    activeReconcileInfo = { promise: currentPromise, authGen: capturedAuthGen }
     const success = await currentPromise
 
     if (auth.generation !== capturedAuthGen || auth.status !== 'authenticated') return false
@@ -309,12 +323,30 @@ export const useSyncStore = defineStore('sync', () => {
     // Await query invalidation / refetch with throwOnError: true (S14-F02, S14-F04)
     try {
       await currentQueryClient.invalidateQueries({ queryKey: ['challenges'] }, { throwOnError: true })
+
+      // S14-F02: Re-fence originating auth generation/status and epoch AFTER awaited invalidation!
+      if (
+        (originatingAuthGen !== undefined && originatingAuthGen !== auth.generation) ||
+        auth.status !== 'authenticated' ||
+        (lastEpoch.value !== null && epoch < lastEpoch.value)
+      ) {
+        return false
+      }
+
       consecutiveFailures.value = 0
       syncError.value = null
       pendingConvergence.value = false
       syncStatus.value = 'synced'
       return true
     } catch {
+      // S14-F02: If auth changed while invalidation failed, do not mutate new session state
+      if (
+        (originatingAuthGen !== undefined && originatingAuthGen !== auth.generation) ||
+        auth.status !== 'authenticated'
+      ) {
+        return false
+      }
+
       pendingConvergence.value = true
       consecutiveFailures.value++
       syncError.value = 'Không thể đồng bộ danh sách challenge mới nhất. Đang thử lại...'

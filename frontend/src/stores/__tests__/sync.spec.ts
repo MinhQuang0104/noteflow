@@ -736,4 +736,97 @@ describe('useSyncStore', () => {
     await second
     sync.stop()
   })
+
+  it('S14-F05 relogin waits for old transport then starts a fresh reconcile without overlap', async () => {
+    const sync = useSyncStore()
+    const auth = useAuthStore()
+    auth.status = 'authenticated'
+    sync.setQueryClient(queryClient)
+
+    let resolveFirst!: (value: accountApi.AccountContext) => void
+    vi.spyOn(accountApi, 'getAccountContext')
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveFirst = resolve
+          }),
+      )
+      .mockResolvedValueOnce({
+        timezone: 'Asia/Ho_Chi_Minh',
+        account_date: '2026-09-19',
+        week: { start_date: '2026-09-15', end_date: '2026-09-21' },
+        account_revision: 2,
+        data_epoch: 1,
+        write_state: 'open',
+      })
+
+    const first = sync.start()
+    sync.stop()
+    auth.generation += 1
+    auth.status = 'guest'
+    auth.generation += 1
+    auth.status = 'authenticated'
+    const restarted = sync.start()
+
+    expect(accountApi.getAccountContext).toHaveBeenCalledTimes(1)
+    resolveFirst({
+      timezone: 'Asia/Ho_Chi_Minh',
+      account_date: '2026-09-19',
+      week: { start_date: '2026-09-15', end_date: '2026-09-21' },
+      account_revision: 1,
+      data_epoch: 1,
+      write_state: 'open',
+    })
+    await first
+    await restarted
+
+    expect(accountApi.getAccountContext).toHaveBeenCalledTimes(2)
+    expect(sync.syncStatus).toBe('synced')
+    sync.stop()
+  })
+
+  it('S14-F02 mutation ACK is fenced again after awaited invalidation', async () => {
+    const sync = useSyncStore()
+    const auth = useAuthStore()
+    const account = useAccountStore()
+    sync.setQueryClient(queryClient)
+    auth.generation = 1
+    auth.status = 'authenticated'
+    account.context = {
+      timezone: 'Asia/Ho_Chi_Minh',
+      account_date: '2026-09-19',
+      week: { start_date: '2026-09-15', end_date: '2026-09-21' },
+      account_revision: 1,
+      data_epoch: 1,
+      write_state: 'open',
+    }
+    account.status = 'ready'
+    sync.lastEpoch = 1
+    sync.lastRevision = 1
+
+    let finishInvalidation!: () => void
+    vi.spyOn(queryClient, 'invalidateQueries').mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          finishInvalidation = resolve
+        }),
+    )
+
+    const staleAck = sync.recordMutationAck(2, 1, 1)
+    await Promise.resolve()
+    auth.generation = 2
+    auth.status = 'guest'
+    account.context = null
+    account.status = 'unknown'
+    sync.reset()
+    auth.generation = 3
+    auth.status = 'authenticated'
+
+    finishInvalidation()
+
+    expect(await staleAck).toBe(false)
+    expect(sync.syncStatus).not.toBe('synced')
+    expect(account.context).toBeNull()
+    sync.stop()
+  })
 })
