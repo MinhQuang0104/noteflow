@@ -31,12 +31,14 @@ export const useSyncStore = defineStore('sync', () => {
   const lastWriteState = ref<string | null>(null)
   const inFlight = ref<boolean>(false)
   const consecutiveFailures = ref<number>(0)
+  const pendingConvergence = ref<boolean>(false)
 
   // Internal concurrency & generation tracking
   let pollTimer: ReturnType<typeof setTimeout> | null = null
   let isStarted = false
   const requestGeneration = ref<number>(0)
   const latestCompletedRequestGeneration = ref<number>(0)
+  let activeReconcilePromise: Promise<boolean> | null = null
 
   function setQueryClient(qc: QueryClient): void {
     currentQueryClient = qc
@@ -70,9 +72,13 @@ export const useSyncStore = defineStore('sync', () => {
   }
 
   async function reconcileInternal(): Promise<boolean> {
-    if (inFlight.value) return false
     if (auth.status !== 'authenticated') {
       syncStatus.value = 'idle'
+      return false
+    }
+
+    if (!isVisible.value || !isOnline.value) {
+      syncStatus.value = 'paused'
       return false
     }
 
@@ -85,8 +91,8 @@ export const useSyncStore = defineStore('sync', () => {
     try {
       const nextContext: AccountContext = await accountApi.getAccountContext()
 
-      // Fencing check 1: Auth generation rotated while request was in flight
-      if (auth.generation !== capturedAuthGen) {
+      // Fencing check 1: Auth generation rotated or status changed while request was in flight (S14-F02)
+      if (auth.generation !== capturedAuthGen || auth.status !== 'authenticated') {
         return false
       }
 
@@ -96,22 +102,21 @@ export const useSyncStore = defineStore('sync', () => {
       }
       latestCompletedRequestGeneration.value = currentReqGen
 
-      // Cache invalidation & epoch change handling
+      // Cache invalidation & epoch change handling (S14-F02, S14-F03, S14-F04)
       const prevRevision = lastRevision.value
       const prevEpoch = lastEpoch.value
+      const epochChanged = prevEpoch !== null && nextContext.data_epoch !== prevEpoch
+      const revisionAdvanced = prevRevision !== null && nextContext.account_revision > prevRevision
+      const needsConvergence = epochChanged || revisionAdvanced || pendingConvergence.value
 
-      // Monotonic revision check: if same epoch, do not regress revision
+      // Monotonic revision check: if same epoch, do NOT regress revision on late responses
       if (prevEpoch === null || nextContext.data_epoch === prevEpoch) {
-        if (prevRevision !== null && nextContext.account_revision > prevRevision) {
-          // Higher revision detected: invalidate owner query caches
-          await currentQueryClient.invalidateQueries({ queryKey: ['challenges'] })
+        if (prevRevision !== null && nextContext.account_revision < prevRevision) {
+          // Keep prevRevision, do not regress
+        } else {
+          lastRevision.value = nextContext.account_revision
         }
-        lastRevision.value = prevRevision !== null ? Math.max(prevRevision, nextContext.account_revision) : nextContext.account_revision
       } else {
-        // Epoch changed (e.g., restore or epoch bump)
-        // Clear server state cache and stop old retries
-        currentQueryClient.clear()
-        await currentQueryClient.invalidateQueries({ queryKey: ['challenges'] })
         lastRevision.value = nextContext.account_revision
       }
 
@@ -119,18 +124,56 @@ export const useSyncStore = defineStore('sync', () => {
       lastWriteState.value = nextContext.write_state
       lastSyncedAt.value = new Date()
 
-      // Update account store context without clearing valid state on future failure
-      account.context = nextContext
+      // Update account store context with preserved monotonic revision
+      account.context = {
+        ...nextContext,
+        account_revision: lastRevision.value ?? nextContext.account_revision,
+        data_epoch: nextContext.data_epoch,
+      }
       account.status = 'ready'
+
+      // Observable query convergence (S14-F03, S14-F04)
+      if (needsConvergence) {
+        try {
+          if (epochChanged) {
+            // S14-F03: resetQueries preserves active query listeners while resetting server cache
+            await currentQueryClient.resetQueries({ queryKey: ['challenges'] })
+          } else {
+            await currentQueryClient.refetchQueries({ queryKey: ['challenges'] })
+          }
+
+          // Boundary check after async refetch (S14-F02)
+          if (auth.generation !== capturedAuthGen || auth.status !== 'authenticated') {
+            return false
+          }
+
+          pendingConvergence.value = false
+        } catch {
+          // S14-F04: Invalidation failure leaves coordinator in error state and retries on equal revision
+          pendingConvergence.value = true
+          consecutiveFailures.value++
+          syncError.value = 'Không thể đồng bộ danh sách challenge mới nhất. Đang thử lại...'
+          syncStatus.value = 'error'
+          return false
+        }
+      } else {
+        pendingConvergence.value = false
+      }
 
       consecutiveFailures.value = 0
       syncError.value = null
-      syncStatus.value = 'synced'
+
+      // S14-F05: If visibility/online changed mid-flight, preserve 'paused' state
+      if (!isVisible.value || !isOnline.value) {
+        syncStatus.value = 'paused'
+      } else {
+        syncStatus.value = 'synced'
+      }
 
       return true
     } catch (error: unknown) {
       // Fencing check: auth changed during flight
-      if (auth.generation !== capturedAuthGen) {
+      if (auth.generation !== capturedAuthGen || auth.status !== 'authenticated') {
         return false
       }
 
@@ -170,9 +213,9 @@ export const useSyncStore = defineStore('sync', () => {
     const capturedAuthGen = auth.generation
     const success = await reconcileInternal()
 
-    if (auth.generation !== capturedAuthGen) return
+    if (auth.generation !== capturedAuthGen || !isStarted || auth.status !== 'authenticated') return
 
-    if (isStarted && auth.status === 'authenticated' && isVisible.value && isOnline.value) {
+    if (isVisible.value && isOnline.value) {
       scheduleNextPoll(success ? BASE_POLL_INTERVAL_MS : getBackoffDelay())
     }
   }
@@ -184,35 +227,118 @@ export const useSyncStore = defineStore('sync', () => {
       syncError.value = null
     }
 
+    if (!isOnline.value || !isVisible.value) {
+      syncStatus.value = 'paused'
+      return false
+    }
+
+    if (auth.status !== 'authenticated') {
+      syncStatus.value = 'idle'
+      return false
+    }
+
+    // S14-F01: Join active in-flight reconcile promise if already running
+    if (activeReconcilePromise) {
+      return await activeReconcilePromise
+    }
+
     const capturedAuthGen = auth.generation
-    const success = await reconcileInternal()
+    let currentPromise: Promise<boolean> | null = null
+    currentPromise = (async () => {
+      try {
+        return await reconcileInternal()
+      } finally {
+        if (activeReconcilePromise === currentPromise) {
+          activeReconcilePromise = null
+        }
+      }
+    })()
 
-    if (auth.generation !== capturedAuthGen) return false
+    activeReconcilePromise = currentPromise
+    const success = await currentPromise
 
-    if (isStarted && auth.status === 'authenticated' && isVisible.value && isOnline.value) {
+    if (auth.generation !== capturedAuthGen || auth.status !== 'authenticated') return false
+
+    if (isStarted && isVisible.value && isOnline.value) {
       scheduleNextPoll(success ? BASE_POLL_INTERVAL_MS : getBackoffDelay())
     }
 
     return success
   }
 
-  function recordMutationAck(revision: number, epoch: number): void {
+  function recordMutationAck(revision: number, epoch: number, originatingAuthGen?: number): void {
+    // S14-F02: Auth generation fencing for mutation ACKs
+    if (originatingAuthGen !== undefined && originatingAuthGen !== auth.generation) {
+      return
+    }
+    if (auth.status !== 'authenticated') {
+      return
+    }
+
+    // S14-F02: Epoch check to discard stale ACKs from previous epochs
+    if (lastEpoch.value !== null && epoch < lastEpoch.value) {
+      return
+    }
+
     if (lastEpoch.value === null || epoch === lastEpoch.value) {
       lastRevision.value = lastRevision.value !== null ? Math.max(lastRevision.value, revision) : revision
     } else {
       lastRevision.value = revision
     }
     lastEpoch.value = epoch
+
+    if (account.context) {
+      account.context = {
+        ...account.context,
+        account_revision: lastRevision.value,
+        data_epoch: epoch,
+      }
+    }
+
     consecutiveFailures.value = 0
     syncError.value = null
+    pendingConvergence.value = false
     syncStatus.value = 'synced'
 
     void currentQueryClient.invalidateQueries({ queryKey: ['challenges'] })
   }
 
   async function reconcileBeforeWrite(): Promise<{ allowed: boolean; reason?: string }> {
-    // If not currently fresh, run reconcile
-    await reconcile()
+    // S14-F01: Guard connectivity & visibility before attempting write
+    if (!isOnline.value) {
+      return {
+        allowed: false,
+        reason: 'Không thể kết nối mạng. Vui lòng kiểm tra đường truyền và thử lại.',
+      }
+    }
+    if (!isVisible.value) {
+      return {
+        allowed: false,
+        reason: 'Ứng dụng đang ở trạng thái ẩn. Vui lòng quay lại ứng dụng để đồng bộ trước khi ghi.',
+      }
+    }
+    if (auth.status !== 'authenticated') {
+      return {
+        allowed: false,
+        reason: 'Phiên làm việc chưa được xác thực. Vui lòng đăng nhập lại.',
+      }
+    }
+
+    const startAuthGen = auth.generation
+    let ok = false
+    try {
+      ok = await reconcile(true)
+    } catch {
+      ok = false
+    }
+
+    // S14-F01: Fail closed if reconcile returned false or auth changed
+    if (!ok || auth.generation !== startAuthGen || auth.status !== 'authenticated') {
+      return {
+        allowed: false,
+        reason: 'Không thể đồng bộ trạng thái mới nhất trước khi ghi. Vui lòng thử lại.',
+      }
+    }
 
     if (account.status !== 'ready' || !account.context) {
       return {
@@ -261,9 +387,8 @@ export const useSyncStore = defineStore('sync', () => {
 
   function handleAuthStatusChange(status: AuthStatus): void {
     if (status === 'authenticated') {
-      if (isStarted && isVisible.value && isOnline.value) {
-        void reconcile(true)
-      }
+      // S14-F05: Ensure coordinator starts/resumes on re-login even without page remount
+      void start()
     } else if (status === 'guest') {
       stop()
     }
@@ -297,6 +422,9 @@ export const useSyncStore = defineStore('sync', () => {
   function attachListeners(): void {
     if (typeof window !== 'undefined') {
       window.addEventListener('visibilitychange', onVisibilityChange)
+      if (typeof document !== 'undefined') {
+        document.addEventListener('visibilitychange', onVisibilityChange)
+      }
       window.addEventListener('focus', onWindowFocus)
       window.addEventListener('online', onOnline)
       window.addEventListener('offline', onOffline)
@@ -306,6 +434,9 @@ export const useSyncStore = defineStore('sync', () => {
   function detachListeners(): void {
     if (typeof window !== 'undefined') {
       window.removeEventListener('visibilitychange', onVisibilityChange)
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', onVisibilityChange)
+      }
       window.removeEventListener('focus', onWindowFocus)
       window.removeEventListener('online', onOnline)
       window.removeEventListener('offline', onOffline)
@@ -321,16 +452,18 @@ export const useSyncStore = defineStore('sync', () => {
     lastEpoch.value = null
     lastWriteState.value = null
     inFlight.value = false
+    pendingConvergence.value = false
     consecutiveFailures.value = 0
-    requestGeneration.value = 0
+    requestGeneration.value++
     latestCompletedRequestGeneration.value = 0
+    activeReconcilePromise = null
   }
 
   auth.registerPrivateStateReset(reset)
 
   async function start(): Promise<boolean> {
     if (isStarted) {
-      if (auth.status === 'authenticated' && isVisible.value && isOnline.value && syncStatus.value === 'idle') {
+      if (auth.status === 'authenticated' && isVisible.value && isOnline.value && (syncStatus.value === 'idle' || syncStatus.value === 'paused')) {
         return await reconcile(true)
       }
       return false
@@ -346,6 +479,8 @@ export const useSyncStore = defineStore('sync', () => {
 
   function stop(): void {
     isStarted = false
+    requestGeneration.value++
+    activeReconcilePromise = null
     clearTimer()
     detachListeners()
     syncStatus.value = 'idle'
@@ -362,6 +497,7 @@ export const useSyncStore = defineStore('sync', () => {
     lastWriteState,
     inFlight,
     consecutiveFailures,
+    pendingConvergence,
     start,
     stop,
     poll,

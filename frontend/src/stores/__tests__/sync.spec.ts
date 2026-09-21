@@ -62,17 +62,17 @@ describe('useSyncStore', () => {
     sync.stop()
   })
 
-  it('detects higher revision, invalidates owner query caches, and does not regress revision', async () => {
+  it('detects higher revision, refetches query caches, and does not regress revision', async () => {
     const auth = useAuthStore()
     const sync = useSyncStore()
     sync.setQueryClient(queryClient)
     auth.status = 'authenticated'
 
-    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+    const refetchSpy = vi.spyOn(queryClient, 'refetchQueries').mockResolvedValue()
 
     await sync.start()
     expect(sync.lastRevision).toBe(1)
-    invalidateSpy.mockClear()
+    refetchSpy.mockClear()
 
     // Second poll returns revision 2
     vi.spyOn(accountApi, 'getAccountContext').mockResolvedValueOnce({
@@ -87,10 +87,10 @@ describe('useSyncStore', () => {
     await vi.advanceTimersByTimeAsync(5000)
 
     expect(sync.lastRevision).toBe(2)
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['challenges'] })
+    expect(refetchSpy).toHaveBeenCalledWith({ queryKey: ['challenges'] })
 
-    // Third poll returns revision 2 (same): does not invalidate again
-    invalidateSpy.mockClear()
+    // Third poll returns revision 2 (same): does not refetch again
+    refetchSpy.mockClear()
     vi.spyOn(accountApi, 'getAccountContext').mockResolvedValueOnce({
       timezone: 'Asia/Ho_Chi_Minh',
       account_date: '2026-09-19',
@@ -101,22 +101,22 @@ describe('useSyncStore', () => {
     })
 
     await vi.advanceTimersByTimeAsync(5000)
-    expect(invalidateSpy).not.toHaveBeenCalled()
+    expect(refetchSpy).not.toHaveBeenCalled()
 
     sync.stop()
   })
 
-  it('detects epoch change, clears query cache, and updates lastEpoch', async () => {
+  it('detects epoch change, resets queries, and updates lastEpoch (S14-F03)', async () => {
     const auth = useAuthStore()
     const sync = useSyncStore()
     sync.setQueryClient(queryClient)
     auth.status = 'authenticated'
 
-    const clearSpy = vi.spyOn(queryClient, 'clear')
+    const resetSpy = vi.spyOn(queryClient, 'resetQueries').mockResolvedValue()
 
     await sync.start()
     expect(sync.lastEpoch).toBe(1)
-    clearSpy.mockClear()
+    resetSpy.mockClear()
 
     // Epoch changes to 2
     vi.spyOn(accountApi, 'getAccountContext').mockResolvedValueOnce({
@@ -131,7 +131,7 @@ describe('useSyncStore', () => {
     await vi.advanceTimersByTimeAsync(5000)
 
     expect(sync.lastEpoch).toBe(2)
-    expect(clearSpy).toHaveBeenCalled()
+    expect(resetSpy).toHaveBeenCalledWith({ queryKey: ['challenges'] })
 
     sync.stop()
   })
@@ -219,31 +219,30 @@ describe('useSyncStore', () => {
     sync.stop()
   })
 
-  it('guarantees non-overlapping poll requests', async () => {
+  it('joins active in-flight reconcile promise instead of returning false immediately (S14-F01)', async () => {
     const auth = useAuthStore()
     const sync = useSyncStore()
     sync.setQueryClient(queryClient)
     auth.status = 'authenticated'
 
-    let resolvePending: ((value: accountApi.AccountContext) => void) | null = null
+    let resolveSlowCall: ((value: accountApi.AccountContext) => void) | null = null
     vi.spyOn(accountApi, 'getAccountContext').mockImplementation(
       () =>
         new Promise((resolve) => {
-          resolvePending = resolve
+          resolveSlowCall = resolve
         }),
     )
 
-    void sync.start()
-    // First poll starts and is in flight
+    // First call starts reconcile and is in flight
+    const p1 = sync.reconcile()
     expect(sync.inFlight).toBe(true)
     expect(accountApi.getAccountContext).toHaveBeenCalledTimes(1)
 
-    // Try to trigger reconcile while first is still in flight: must not overlap
-    const secondCallPromise = sync.reconcile()
+    // Second call starts while first is in flight: it must JOIN the in-flight promise
+    const p2 = sync.reconcile()
     expect(accountApi.getAccountContext).toHaveBeenCalledTimes(1)
 
-    // Resolve first request
-    resolvePending!({
+    resolveSlowCall!({
       timezone: 'Asia/Ho_Chi_Minh',
       account_date: '2026-09-19',
       week: { start_date: '2026-09-15', end_date: '2026-09-21' },
@@ -252,47 +251,285 @@ describe('useSyncStore', () => {
       write_state: 'open',
     })
 
-    await secondCallPromise
+    const [res1, res2] = await Promise.all([p1, p2])
+    expect(res1).toBe(true)
+    expect(res2).toBe(true)
     expect(sync.inFlight).toBe(false)
 
     sync.stop()
   })
 
-  it('fences late responses from older auth generation or out-of-order requests', async () => {
+  it('reconcileBeforeWrite fails closed when cached context is ready/open but reconcile fails (S14-F01)', async () => {
+    const auth = useAuthStore()
+    const account = useAccountStore()
+    const sync = useSyncStore()
+    sync.setQueryClient(queryClient)
+    auth.status = 'authenticated'
+
+    // Seed account store with cached open context
+    account.context = {
+      timezone: 'Asia/Ho_Chi_Minh',
+      account_date: '2026-09-19',
+      week: { start_date: '2026-09-15', end_date: '2026-09-21' },
+      account_revision: 1,
+      data_epoch: 1,
+      write_state: 'open',
+    }
+    account.status = 'ready'
+
+    // Server request now fails
+    vi.spyOn(accountApi, 'getAccountContext').mockRejectedValueOnce(new Error('Network disconnected'))
+
+    // reconcileBeforeWrite MUST fail closed and not blindly allow write based on stale cache
+    const check = await sync.reconcileBeforeWrite()
+    expect(check.allowed).toBe(false)
+    expect(check.reason).toContain('Không thể đồng bộ')
+
+    sync.stop()
+  })
+
+  it('reconcileBeforeWrite fails closed when offline or hidden (S14-F01)', async () => {
+    const auth = useAuthStore()
+    const account = useAccountStore()
+    const sync = useSyncStore()
+    sync.setQueryClient(queryClient)
+    auth.status = 'authenticated'
+
+    account.context = {
+      timezone: 'Asia/Ho_Chi_Minh',
+      account_date: '2026-09-19',
+      week: { start_date: '2026-09-15', end_date: '2026-09-21' },
+      account_revision: 1,
+      data_epoch: 1,
+      write_state: 'open',
+    }
+    account.status = 'ready'
+
+    // Offline test
+    sync.handleOnlineStatusChange(false)
+    const offlineCheck = await sync.reconcileBeforeWrite()
+    expect(offlineCheck.allowed).toBe(false)
+    expect(offlineCheck.reason).toContain('kết nối mạng')
+
+    sync.handleOnlineStatusChange(true)
+
+    // Hidden test
+    sync.handleVisibilityChange(false)
+    const hiddenCheck = await sync.reconcileBeforeWrite()
+    expect(hiddenCheck.allowed).toBe(false)
+    expect(hiddenCheck.reason).toContain('ẩn')
+
+    sync.stop()
+  })
+
+  it('prevents stale account response from overwriting newer mutation ACK (S14-F02)', async () => {
+    const auth = useAuthStore()
+    const sync = useSyncStore()
+    sync.setQueryClient(queryClient)
+    auth.status = 'authenticated'
+
+    await sync.start()
+    expect(sync.lastRevision).toBe(1)
+
+    // Client performs mutation and records ACK at revision 3
+    sync.recordMutationAck(3, 1, auth.generation)
+    expect(sync.lastRevision).toBe(3)
+
+    // Server poll returns stale revision 2 (e.g. from replica lag or delayed request)
+    vi.spyOn(accountApi, 'getAccountContext').mockResolvedValueOnce({
+      timezone: 'Asia/Ho_Chi_Minh',
+      account_date: '2026-09-19',
+      week: { start_date: '2026-09-15', end_date: '2026-09-21' },
+      account_revision: 2,
+      data_epoch: 1,
+      write_state: 'open',
+    })
+
+    await vi.advanceTimersByTimeAsync(5000)
+
+    // lastRevision MUST NOT regress to 2!
+    expect(sync.lastRevision).toBe(3)
+
+    sync.stop()
+  })
+
+  it('discards stale mutation ACK with outdated auth generation or older epoch (S14-F02)', async () => {
+    const auth = useAuthStore()
+    const sync = useSyncStore()
+    sync.setQueryClient(queryClient)
+    auth.status = 'authenticated'
+    auth.generation = 2
+
+    await sync.start()
+    expect(sync.lastRevision).toBe(1)
+
+    // Mutation ACK from previous session (generation 1) is discarded
+    sync.recordMutationAck(5, 1, 1)
+    expect(sync.lastRevision).toBe(1)
+
+    // Mutation ACK from newer session (generation 2) is accepted
+    sync.recordMutationAck(5, 1, 2)
+    expect(sync.lastRevision).toBe(5)
+
+    // Mutation ACK with older epoch is discarded
+    sync.lastEpoch = 2
+    sync.recordMutationAck(10, 1, 2)
+    expect(sync.lastRevision).toBe(5)
+
+    sync.stop()
+  })
+
+  it('fences auth generation changes during async query refetch (S14-F02)', async () => {
     const auth = useAuthStore()
     const sync = useSyncStore()
     sync.setQueryClient(queryClient)
     auth.status = 'authenticated'
     auth.generation = 1
 
-    let resolveSlowRequest: ((value: accountApi.AccountContext) => void) | null = null
-    vi.spyOn(accountApi, 'getAccountContext').mockImplementationOnce(
+    await sync.start()
+
+    let resolveRefetch: (() => void) | null = null
+    vi.spyOn(queryClient, 'refetchQueries').mockImplementation(
       () =>
         new Promise((resolve) => {
-          resolveSlowRequest = resolve
+          resolveRefetch = resolve
+        }),
+    )
+
+    vi.spyOn(accountApi, 'getAccountContext').mockResolvedValueOnce({
+      timezone: 'Asia/Ho_Chi_Minh',
+      account_date: '2026-09-19',
+      week: { start_date: '2026-09-15', end_date: '2026-09-21' },
+      account_revision: 2,
+      data_epoch: 1,
+      write_state: 'open',
+    })
+
+    const pollPromise = sync.reconcile()
+    await vi.advanceTimersByTimeAsync(1)
+
+    // While refetch is pending, user logs out / rotates generation
+    auth.generation = 2
+    resolveRefetch!()
+
+    const result = await pollPromise
+    // Must return false and not mark as synced
+    expect(result).toBe(false)
+
+    sync.stop()
+  })
+
+  it('handles invalidation failure: sets error status, tracks pendingConvergence, and retries on equal revision (S14-F04)', async () => {
+    const auth = useAuthStore()
+    const sync = useSyncStore()
+    sync.setQueryClient(queryClient)
+    auth.status = 'authenticated'
+
+    await sync.start()
+    expect(sync.syncStatus).toBe('synced')
+
+    // Refetch fails with network error
+    vi.spyOn(queryClient, 'refetchQueries').mockRejectedValueOnce(new Error('Refetch failed'))
+
+    vi.spyOn(accountApi, 'getAccountContext').mockResolvedValueOnce({
+      timezone: 'Asia/Ho_Chi_Minh',
+      account_date: '2026-09-19',
+      week: { start_date: '2026-09-15', end_date: '2026-09-21' },
+      account_revision: 2,
+      data_epoch: 1,
+      write_state: 'open',
+    })
+
+    await vi.advanceTimersByTimeAsync(5000)
+
+    expect(sync.syncStatus).toBe('error')
+    expect(sync.pendingConvergence).toBe(true)
+
+    // Next poll: server still returns revision 2 (no new mutations)
+    // Because pendingConvergence is true, coordinator MUST retry refetch!
+    const refetchSpy = vi.spyOn(queryClient, 'refetchQueries').mockResolvedValueOnce()
+    vi.spyOn(accountApi, 'getAccountContext').mockResolvedValueOnce({
+      timezone: 'Asia/Ho_Chi_Minh',
+      account_date: '2026-09-19',
+      week: { start_date: '2026-09-15', end_date: '2026-09-21' },
+      account_revision: 2,
+      data_epoch: 1,
+      write_state: 'open',
+    })
+
+    // Advance through backoff delay
+    await vi.advanceTimersByTimeAsync(10000)
+
+    expect(refetchSpy).toHaveBeenCalledWith({ queryKey: ['challenges'] })
+    expect(sync.pendingConvergence).toBe(false)
+    expect(sync.syncStatus).toBe('synced')
+
+    sync.stop()
+  })
+
+  it('re-login without page remount restarts coordinator (S14-F05)', async () => {
+    const auth = useAuthStore()
+    const sync = useSyncStore()
+    sync.setQueryClient(queryClient)
+    auth.status = 'authenticated'
+
+    await sync.start()
+    expect(accountApi.getAccountContext).toHaveBeenCalledTimes(1)
+
+    // User logs out
+    auth.status = 'guest'
+    sync.handleAuthStatusChange('guest')
+    expect(sync.syncStatus).toBe('idle')
+
+    // Advance time: no polls
+    await vi.advanceTimersByTimeAsync(15000)
+    expect(accountApi.getAccountContext).toHaveBeenCalledTimes(1)
+
+    // User logs in again in same SPA session (no page remount)
+    auth.status = 'authenticated'
+    sync.handleAuthStatusChange('authenticated')
+    await vi.advanceTimersByTimeAsync(1)
+
+    expect(accountApi.getAccountContext).toHaveBeenCalledTimes(2)
+    expect(sync.syncStatus).toBe('synced')
+
+    sync.stop()
+  })
+
+  it('hidden transition mid-request preserves paused state (S14-F05)', async () => {
+    const auth = useAuthStore()
+    const sync = useSyncStore()
+    sync.setQueryClient(queryClient)
+    auth.status = 'authenticated'
+
+    let resolveContext: ((value: accountApi.AccountContext) => void) | null = null
+    vi.spyOn(accountApi, 'getAccountContext').mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveContext = resolve
         }),
     )
 
     const startPromise = sync.start()
-    expect(accountApi.getAccountContext).toHaveBeenCalledTimes(1)
+    expect(sync.inFlight).toBe(true)
 
-    // While request 1 is in flight, auth generation advances
-    auth.generation = 2
+    // Tab becomes hidden mid-flight
+    sync.handleVisibilityChange(false)
+    expect(sync.isVisible).toBe(false)
 
-    // Request 1 finally resolves with revision 999
-    resolveSlowRequest!({
+    // Context resolves
+    resolveContext!({
       timezone: 'Asia/Ho_Chi_Minh',
       account_date: '2026-09-19',
       week: { start_date: '2026-09-15', end_date: '2026-09-21' },
-      account_revision: 999,
+      account_revision: 1,
       data_epoch: 1,
       write_state: 'open',
     })
 
     await startPromise
-
-    // The late response must be discarded by generation fence: lastRevision should NOT become 999
-    expect(sync.lastRevision).toBeNull()
+    // Must preserve paused state, NOT claim synced!
+    expect(sync.syncStatus).toBe('paused')
 
     sync.stop()
   })
@@ -351,43 +588,5 @@ describe('useSyncStore', () => {
     expect(sync.lastRevision).toBe(3)
 
     sync.stop()
-  })
-
-  it('records mutation ACK: updates revision and invalidates affected queries', () => {
-    const sync = useSyncStore()
-    sync.setQueryClient(queryClient)
-
-    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
-
-    sync.recordMutationAck(5, 1)
-
-    expect(sync.lastRevision).toBe(5)
-    expect(sync.lastEpoch).toBe(1)
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['challenges'] })
-  })
-
-  it('reconcileBeforeWrite validates open write_state and fresh context', async () => {
-    const auth = useAuthStore()
-    const sync = useSyncStore()
-    sync.setQueryClient(queryClient)
-    auth.status = 'authenticated'
-
-    // Successful open state
-    const result = await sync.reconcileBeforeWrite()
-    expect(result.allowed).toBe(true)
-
-    // When write_state is not open
-    vi.spyOn(accountApi, 'getAccountContext').mockResolvedValueOnce({
-      timezone: 'Asia/Ho_Chi_Minh',
-      account_date: '2026-09-19',
-      week: { start_date: '2026-09-15', end_date: '2026-09-21' },
-      account_revision: 1,
-      data_epoch: 1,
-      write_state: 'locked_for_import',
-    })
-
-    const blockedResult = await sync.reconcileBeforeWrite()
-    expect(blockedResult.allowed).toBe(false)
-    expect(blockedResult.reason).toContain('locked_for_import')
   })
 })

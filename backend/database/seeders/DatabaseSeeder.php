@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -16,29 +15,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Clean previous data
-        DB::table('mutation_commands')->delete();
-        DB::table('challenge_target_periods')->delete();
-        DB::table('challenges')->delete();
-        DB::table('sessions')->delete();
+        // User::factory(10)->create();
 
-        $owner = User::updateOrCreate(
-            ['email' => 'owner@example.test'],
-            [
-                'name' => 'NoteFlow Owner',
-                'password' => 'secret123',
-                'is_owner' => true,
-            ]
-        );
-
-        DB::table('account_states')->updateOrInsert(
-            ['owner_id' => $owner->id],
-            [
-                'timezone' => 'Asia/Ho_Chi_Minh',
-                'account_revision' => 0,
-                'data_epoch' => 1,
-                'write_state' => 'open',
-            ]
-        );
+        User::factory()->create([
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+        ]);
     }
 }

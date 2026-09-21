@@ -14,7 +14,3 @@ app.use(router)
 app.use(VueQueryPlugin, { queryClient })
 
 app.mount('#app')
-
-if (typeof window !== 'undefined') {
-  ;(window as unknown as { __queryClient: typeof queryClient }).__queryClient = queryClient
-}

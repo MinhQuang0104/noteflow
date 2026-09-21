@@ -1,15 +1,11 @@
-import { execSync } from 'node:child_process'
-import { fileURLToPath } from 'node:url'
-import path from 'node:path'
 import { expect, test, type Page } from '@playwright/test'
 
-const currentDir = path.dirname(fileURLToPath(import.meta.url))
-const backendDir = path.resolve(currentDir, '../../backend')
-
-function resetDatabase() {
-  execSync('php artisan db:seed', { cwd: backendDir, env: { ...process.env, DB_PORT: '55414' } })
-  execSync('php artisan cache:clear', { cwd: backendDir, env: { ...process.env, DB_PORT: '55414' } })
-}
+import {
+  bumpTestAccountRevision,
+  getTestAccountRevision,
+  resetTestDatabase,
+  setTestAccountWriteState,
+} from './helpers/db-state'
 
 async function loginAsOwner(page: Page) {
   await page.goto('/sign-in')
@@ -28,12 +24,15 @@ test.describe('Story 1.4 — Cross-Device Synchronization with PostgreSQL', () =
 
   test.beforeEach(({ isMobile }) => {
     if (isMobile) return
-    resetDatabase()
+    resetTestDatabase()
   })
 
   test('AC1 — two real browser contexts converge on Challenge mutation via 5s polling against PostgreSQL', async ({
     browser,
   }) => {
+    // Assert initial baseline revision in isolated test database (S14-F06/F07)
+    expect(getTestAccountRevision()).toBe(0)
+
     // Context A represents Device A
     const contextA = await browser.newContext()
     const pageA = await contextA.newPage()
@@ -69,8 +68,10 @@ test.describe('Story 1.4 — Cross-Device Synchronization with PostgreSQL', () =
       await expect(pageA.locator('#challenge-detail-name')).toHaveText('Chạy bộ buổi sáng')
       await expect(pageA.getByText('5 ngày/tuần').first()).toBeVisible()
 
+      // Database revision is exactly 1 after create (S14-F06/F07)
+      expect(getTestAccountRevision()).toBe(1)
+
       // 4. Device B automatically detects new revision via 5s polling and converges!
-      // (Wait for polling cycle to detect revision change and refetch challenges)
       await expect(pageB.getByText('Chạy bộ buổi sáng')).toBeVisible({
         timeout: 10_000,
       })
@@ -86,6 +87,9 @@ test.describe('Story 1.4 — Cross-Device Synchronization with PostgreSQL', () =
       await pageA.locator('#edit-submit-btn').click()
 
       await expect(pageA.locator('#challenge-detail-name')).toHaveText('Chạy bộ 10km mỗi sáng')
+
+      // Database revision is exactly 2 after update (S14-F06/F07)
+      expect(getTestAccountRevision()).toBe(2)
 
       // 6. Device B automatically detects update and converges to the new name!
       await expect(pageB.locator('#challenge-detail-name')).toHaveText('Chạy bộ 10km mỗi sáng', {
@@ -108,29 +112,34 @@ test.describe('Story 1.4 — Cross-Device Synchronization with PostgreSQL', () =
       await page.goto('/challenges')
       await expect(page.locator('#sync-status')).toContainText('Đã đồng bộ')
 
-      // Track account poll requests
-      let pollCount = 0
-      page.on('request', (req) => {
+      // Track poll requests while hidden
+      let hiddenPollCount = 0
+      const hiddenHandler = (req: { url: () => string; method: () => string }) => {
         if (req.url().includes('/api/v1/account') && req.method() === 'GET') {
-          pollCount++
+          hiddenPollCount++
         }
-      })
+      }
 
       // Simulate tab hidden via visibilitychange
       await page.evaluate(() => {
         Object.defineProperty(document, 'visibilityState', { value: 'hidden', writable: true })
-        document.dispatchEvent(new Event('visibilitychange'))
+        document.dispatchEvent(new Event('visibilitychange', { bubbles: true }))
+        window.dispatchEvent(new Event('visibilitychange'))
       })
 
-      const countBeforeWait = pollCount
-      // Wait 7 seconds (more than one 5s poll period): no new polls should occur while hidden
+      // Attach listener after hidden transition is processed
+      page.on('request', hiddenHandler)
+
+      // Wait 7 seconds (more than one 5s poll period): EXACTLY 0 polls occur while hidden (S14-F06/F07)
       await page.waitForTimeout(7000)
-      expect(pollCount - countBeforeWait).toBeLessThanOrEqual(1)
+      page.off('request', hiddenHandler)
+      expect(hiddenPollCount).toBe(0)
 
       // Restore visibility: immediate reconcile triggered
       await page.evaluate(() => {
         Object.defineProperty(document, 'visibilityState', { value: 'visible', writable: true })
-        document.dispatchEvent(new Event('visibilitychange'))
+        document.dispatchEvent(new Event('visibilitychange', { bubbles: true }))
+        window.dispatchEvent(new Event('visibilitychange'))
       })
       await expect(page.locator('#sync-status')).toContainText('Đã đồng bộ')
 
@@ -151,9 +160,23 @@ test.describe('Story 1.4 — Cross-Device Synchronization with PostgreSQL', () =
       })
       await expect(page.locator('#sync-status')).toContainText('Đã đồng bộ')
 
-      // Logout: stops polling completely
+      // Track poll requests after logout
+      let logoutPollCount = 0
+      const logoutHandler = (req: { url: () => string; method: () => string }) => {
+        if (req.url().includes('/api/v1/account') && req.method() === 'GET') {
+          logoutPollCount++
+        }
+      }
+      page.on('request', logoutHandler)
+
+      // Logout: stops polling completely and returns to sign-in (S14-F06/F07)
       await page.getByRole('button', { name: 'Đăng xuất' }).click()
       await expect(page).toHaveURL(/\/sign-in$/)
+
+      // Wait 6 seconds: 0 polls must occur after logout
+      await page.waitForTimeout(6000)
+      page.off('request', logoutHandler)
+      expect(logoutPollCount).toBe(0)
     } finally {
       await context.close()
     }
@@ -167,29 +190,28 @@ test.describe('Story 1.4 — Cross-Device Synchronization with PostgreSQL', () =
       await loginAsOwner(page)
       await page.goto('/challenges')
 
-      // Lock write state in PostgreSQL
-      execSync('php artisan noteflow:set-write-state locked_for_import', {
-        cwd: backendDir,
-        env: { ...process.env, DB_PORT: '55414' },
-      })
+      // Lock write state in PostgreSQL via isolated test fixture helper (S14-F06/F07)
+      setTestAccountWriteState('locked_for_import')
 
       // Click create
       await page.locator('#create-challenge-btn').click()
       await page.locator('#create-name').fill('Thử nghiệm ghi khi khóa')
       await page.locator('#create-target').fill('3')
 
-      // Trigger submit: reconcileBeforeWrite verifies server write_state and blocks write
-      await page.locator('#create-submit-btn').click()
+      // Trigger submit or verify reactive disabled state from write_state
+      const submitBtn = page.locator('#create-submit-btn')
+      if (await submitBtn.isDisabled()) {
+        await expect(submitBtn).toBeDisabled()
+      } else {
+        await submitBtn.click()
+      }
 
       // Error message indicates write is locked
       await expect(
         page.locator('[role="alert"]').filter({ hasText: 'locked_for_import' }).first(),
       ).toBeVisible()
     } finally {
-      execSync('php artisan noteflow:set-write-state open', {
-        cwd: backendDir,
-        env: { ...process.env, DB_PORT: '55414' },
-      })
+      setTestAccountWriteState('open')
       await context.close()
     }
   })
@@ -217,15 +239,13 @@ test.describe('Story 1.4 — Cross-Device Synchronization with PostgreSQL', () =
         return route.continue()
       })
 
-      // Trigger a refetch
+      // Trigger observable refetch by bumping revision in test database (S14-F06/F07, no window.__queryClient)
+      bumpTestAccountRevision()
+
+      // Trigger visibility event so coordinator immediately reconciles and attempts refetch
       await page.evaluate(() => {
-        return (
-          window as unknown as {
-            __queryClient: { invalidateQueries: (arg: unknown) => Promise<void> }
-          }
-        ).__queryClient?.invalidateQueries({
-          queryKey: ['challenges'],
-        })
+        Object.defineProperty(document, 'visibilityState', { value: 'visible', writable: true })
+        document.dispatchEvent(new Event('visibilitychange'))
       })
 
       // The existing challenge MUST REMAIN VISIBLE on screen (AC4)!
@@ -234,7 +254,9 @@ test.describe('Story 1.4 — Cross-Device Synchronization with PostgreSQL', () =
       ).toBeVisible()
 
       // An actionable error banner with retry button must be shown
-      await expect(page.getByText('Không thể đồng bộ danh sách mới nhất')).toBeVisible()
+      await expect(page.getByText('Không thể đồng bộ danh sách mới nhất')).toBeVisible({
+        timeout: 10_000,
+      })
       await expect(page.getByRole('button', { name: 'Thử lại' }).first()).toBeVisible()
 
       // Unroute and click retry: restores clean state

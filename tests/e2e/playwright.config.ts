@@ -31,6 +31,16 @@ export default defineConfig({
       port: 8000,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
+      env: {
+        APP_ENV: 'testing',
+        DB_CONNECTION: 'pgsql',
+        DB_HOST: process.env.DB_HOST || '127.0.0.1',
+        DB_PORT: process.env.DB_PORT || '55414',
+        DB_DATABASE: process.env.DB_DATABASE || 'noteflow_test',
+        DB_USERNAME: process.env.DB_USERNAME || 'noteflow',
+        DB_PASSWORD: process.env.DB_PASSWORD || 'noteflow',
+        ...process.env,
+      },
     },
     {
       command: 'npm run build && npm run preview -- --host 127.0.0.1 --port 4173',

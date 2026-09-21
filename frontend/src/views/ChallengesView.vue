@@ -13,17 +13,22 @@ import {
   type ChallengeSnapshot,
 } from '../api/challenges'
 import { useAccountStore } from '../stores/account'
+import { useAuthStore } from '../stores/auth'
 import { useSyncStore } from '../stores/sync'
 
 const route = useRoute()
 const router = useRouter()
 const queryClient = useQueryClient()
 const account = useAccountStore()
+const auth = useAuthStore()
 const sync = useSyncStore()
 
 // State
 const mode = ref<'list' | 'detail' | 'create' | 'edit'>('list')
 const selectedId = ref<string | null>(null)
+const epochChangeBlocked = ref<boolean>(false)
+const activeCreateAuthGen = ref<number | undefined>(undefined)
+const activeEditAuthGen = ref<number | undefined>(undefined)
 
 // Command idempotency tracking (Finding 3)
 const activeCreateCommandId = ref<string | null>(null)
@@ -109,7 +114,7 @@ watch(
   },
 )
 
-// Watch data_epoch changes to clear stale drafts/commands and prevent old retries
+// Watch data_epoch changes to clear stale drafts/commands and prevent old retries (S14-F03)
 watch(
   () => account.context?.data_epoch,
   (newEpoch, oldEpoch) => {
@@ -119,15 +124,29 @@ watch(
       activeEditCommandId.value = null
       lastEditCanonicalPayload.value = null
       editConflictSnapshot.value = null
+
+      const isCreateDirty = createForm.value.name.trim() !== '' || (createForm.value.description?.trim() ?? '') !== ''
+      const isEditDirty = mode.value === 'edit'
+      if (isCreateDirty || isEditDirty) {
+        epochChangeBlocked.value = true
+      }
     }
   },
 )
+
+async function rebaseOnEpochChange() {
+  await queryClient.refetchQueries({ queryKey: ['challenges'] })
+  if (mode.value === 'edit' && selectedChallenge.value) {
+    editBaseVersion.value = selectedChallenge.value.row_version
+  }
+  epochChangeBlocked.value = false
+}
 
 // Mutations
 const createMutation = useMutation({
   mutationFn: createChallenge,
   onSuccess: async (result) => {
-    sync.recordMutationAck(result.account_revision, result.data_epoch)
+    sync.recordMutationAck(result.account_revision, result.data_epoch, activeCreateAuthGen.value)
     await queryClient.invalidateQueries({ queryKey: ['challenges'] })
     activeCreateCommandId.value = null
     lastCreateCanonicalPayload.value = null
@@ -142,7 +161,7 @@ const updateMutation = useMutation({
   mutationFn: ({ id, payload }: { id: string; payload: Parameters<typeof updateChallengeMetadata>[1] }) =>
     updateChallengeMetadata(id, payload),
   onSuccess: async (result) => {
-    sync.recordMutationAck(result.account_revision, result.data_epoch)
+    sync.recordMutationAck(result.account_revision, result.data_epoch, activeEditAuthGen.value)
     await queryClient.invalidateQueries({ queryKey: ['challenges'] })
     activeEditCommandId.value = null
     lastEditCanonicalPayload.value = null
@@ -162,6 +181,7 @@ function resetCreateForm() {
   createGeneralError.value = null
   activeCreateCommandId.value = null
   lastCreateCanonicalPayload.value = null
+  epochChangeBlocked.value = false
 }
 
 function startCreate() {
@@ -178,6 +198,7 @@ function selectChallenge(challenge: Challenge) {
   selectedId.value = challenge.id
   mode.value = 'detail'
   editConflictSnapshot.value = null
+  epochChangeBlocked.value = false
   router.replace({ path: `/challenges/${challenge.id}` }).catch(() => {})
 }
 
@@ -193,6 +214,7 @@ function startEdit() {
   editConflictSnapshot.value = null
   activeEditCommandId.value = null
   lastEditCanonicalPayload.value = null
+  epochChangeBlocked.value = false
   mode.value = 'edit'
 }
 
@@ -203,25 +225,16 @@ function cancelEdit() {
   editConflictSnapshot.value = null
   activeEditCommandId.value = null
   lastEditCanonicalPayload.value = null
+  epochChangeBlocked.value = false
 }
 
 async function submitCreate() {
   createErrors.value = {}
   createGeneralError.value = null
 
-  // Reconcile account revision, epoch, and write_state before write (AC3, AD-8)
-  const writeCheck = await sync.reconcileBeforeWrite()
-  if (!writeCheck.allowed) {
-    createGeneralError.value = writeCheck.reason ?? 'Chưa thể tạo challenge: Ngữ cảnh tài khoản chưa sẵn sàng. Vui lòng thử lại sau.'
-    return
-  }
-
-  if (account.status !== 'ready' || !account.context) {
-    createGeneralError.value = 'Chưa thể tạo challenge: Ngữ cảnh tài khoản chưa sẵn sàng. Vui lòng thử lại sau.'
-    return
-  }
-  if (account.context.write_state !== 'open') {
-    createGeneralError.value = `Chưa thể tạo challenge: Tài khoản đang tạm khóa ghi (${account.context.write_state}).`
+  // S14-F03: Block submit if epoch changed on dirty draft until rebase
+  if (epochChangeBlocked.value) {
+    createGeneralError.value = 'Dữ liệu máy chủ đã chuyển chu kỳ mới (epoch). Vui lòng bấm Tải lại dữ liệu mới nhất trước khi tiếp tục.'
     return
   }
 
@@ -236,6 +249,22 @@ async function submitCreate() {
   }
 
   if (Object.keys(createErrors.value).length > 0) {
+    return
+  }
+
+  // Reconcile account revision, epoch, and write_state before write (AC3, AD-8)
+  const writeCheck = await sync.reconcileBeforeWrite()
+  if (!writeCheck.allowed) {
+    createGeneralError.value = writeCheck.reason ?? 'Chưa thể tạo challenge: Ngữ cảnh tài khoản chưa sẵn sàng. Vui lòng thử lại sau.'
+    return
+  }
+
+  if (account.status !== 'ready' || !account.context) {
+    createGeneralError.value = 'Chưa thể tạo challenge: Ngữ cảnh tài khoản chưa sẵn sàng. Vui lòng thử lại sau.'
+    return
+  }
+  if (account.context.write_state !== 'open') {
+    createGeneralError.value = `Chưa thể tạo challenge: Tài khoản đang tạm khóa ghi (${account.context.write_state}).`
     return
   }
 
@@ -255,6 +284,9 @@ async function submitCreate() {
     activeCreateCommandId.value = commandId
     lastCreateCanonicalPayload.value = canonicalPayload
   }
+
+  // S14-F02: Capture auth generation at mutation dispatch
+  activeCreateAuthGen.value = auth.generation
 
   try {
     await createMutation.mutateAsync({
@@ -284,9 +316,21 @@ async function submitEdit() {
   editErrors.value = {}
   editGeneralError.value = null
 
+  // S14-F03: Block submit if epoch changed on dirty draft until rebase
+  if (epochChangeBlocked.value) {
+    editGeneralError.value = 'Dữ liệu máy chủ đã chuyển chu kỳ mới (epoch). Vui lòng bấm Tải lại dữ liệu mới nhất trước khi tiếp tục.'
+    return
+  }
+
   // Finding 4: If a conflict was already detected, do not blindly resubmit
   if (editConflictSnapshot.value) {
     editGeneralError.value = 'Dữ liệu đã có xung đột phiên bản. Vui lòng làm mới trang hoặc tải lại dữ liệu mới nhất.'
+    return
+  }
+
+  const trimmedName = editForm.value.name.trim()
+  if (!trimmedName) {
+    editErrors.value.name = 'Tên challenge không được để trống.'
     return
   }
 
@@ -303,12 +347,6 @@ async function submitEdit() {
   }
   if (account.context.write_state !== 'open') {
     editGeneralError.value = `Chưa thể lưu thay đổi: Tài khoản đang tạm khóa ghi (${account.context.write_state}).`
-    return
-  }
-
-  const trimmedName = editForm.value.name.trim()
-  if (!trimmedName) {
-    editErrors.value.name = 'Tên challenge không được để trống.'
     return
   }
 
@@ -329,6 +367,9 @@ async function submitEdit() {
     activeEditCommandId.value = commandId
     lastEditCanonicalPayload.value = canonicalPayload
   }
+
+  // S14-F02: Capture auth generation at mutation dispatch
+  activeEditAuthGen.value = auth.generation
 
   try {
     await updateMutation.mutateAsync({
@@ -490,6 +531,29 @@ async function submitEdit() {
             {{ createGeneralError }}
           </div>
 
+          <!-- Epoch change warning banner (S14-F03) -->
+          <div
+            v-if="epochChangeBlocked"
+            role="alert"
+            id="create-epoch-alert"
+            class="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
+          >
+            <div class="font-semibold">⚠️ Chu kỳ dữ liệu đã được cập nhật từ máy chủ (Epoch mới)</div>
+            <p class="mt-1 text-xs leading-relaxed text-amber-800">
+              Nội dung bạn đang soạn thảo vẫn được giữ nguyên. Để bảo đảm tính nhất quán dữ liệu, vui lòng bấm Tải lại dữ liệu mới nhất trước khi tiếp tục.
+            </p>
+            <div class="mt-3">
+              <button
+                type="button"
+                id="create-epoch-rebase-btn"
+                class="rounded-lg border border-amber-400 bg-white px-3 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-100"
+                @click="rebaseOnEpochChange"
+              >
+                Tải lại dữ liệu mới nhất
+              </button>
+            </div>
+          </div>
+
           <form novalidate class="space-y-4" @submit.prevent="submitCreate">
             <div>
               <label for="create-name" class="block text-sm font-medium text-slate-700">
@@ -580,7 +644,7 @@ async function submitEdit() {
               <button
                 type="submit"
                 id="create-submit-btn"
-                :disabled="createMutation.isPending.value || isMutationBlocked"
+                :disabled="createMutation.isPending.value || isMutationBlocked || epochChangeBlocked"
                 class="inline-flex items-center rounded-lg bg-indigo-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-indigo-600"
               >
                 {{ createMutation.isPending.value ? 'Đang tạo…' : 'Tạo challenge' }}
@@ -596,6 +660,29 @@ async function submitEdit() {
             <p class="text-sm text-slate-500">
               Bạn có thể sửa tên và mô tả. Ngày bắt đầu và mục tiêu không thể thay đổi sau khi tạo.
             </p>
+          </div>
+
+          <!-- Epoch change warning banner (S14-F03) -->
+          <div
+            v-if="epochChangeBlocked"
+            role="alert"
+            id="edit-epoch-alert"
+            class="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
+          >
+            <div class="font-semibold">⚠️ Chu kỳ dữ liệu đã được cập nhật từ máy chủ (Epoch mới)</div>
+            <p class="mt-1 text-xs leading-relaxed text-amber-800">
+              Nội dung bạn đang soạn thảo vẫn được giữ nguyên. Để tránh xung đột phiên bản, vui lòng bấm Tải lại dữ liệu mới nhất để cập nhật phiên bản cơ sở.
+            </p>
+            <div class="mt-3">
+              <button
+                type="button"
+                id="edit-epoch-rebase-btn"
+                class="rounded-lg border border-amber-400 bg-white px-3 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-100"
+                @click="rebaseOnEpochChange"
+              >
+                Tải lại dữ liệu mới nhất
+              </button>
+            </div>
           </div>
 
           <!-- Conflict Warning Banner (Finding 4: Preserves dirty inputs, does not invite blind resubmit) -->
@@ -708,7 +795,7 @@ async function submitEdit() {
               <button
                 type="submit"
                 id="edit-submit-btn"
-                :disabled="updateMutation.isPending.value || isMutationBlocked || !!editConflictSnapshot"
+                :disabled="updateMutation.isPending.value || isMutationBlocked || !!editConflictSnapshot || epochChangeBlocked"
                 class="inline-flex items-center rounded-lg bg-indigo-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-indigo-600"
               >
                 {{ updateMutation.isPending.value ? 'Đang lưu…' : 'Lưu thay đổi' }}

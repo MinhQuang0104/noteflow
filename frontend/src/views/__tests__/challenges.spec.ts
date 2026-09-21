@@ -4,8 +4,11 @@ import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, expect, test, vi } from 'vitest'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
+import * as accountApi from '../../api/account'
 import * as challengesApi from '../../api/challenges'
 import { useAccountStore } from '../../stores/account'
+import { useAuthStore } from '../../stores/auth'
+import { useSyncStore } from '../../stores/sync'
 import ChallengesView from '../ChallengesView.vue'
 
 let queryClient: QueryClient
@@ -20,6 +23,22 @@ beforeEach(() => {
     },
   })
   vi.restoreAllMocks()
+
+  const auth = useAuthStore()
+  auth.status = 'authenticated'
+  auth.generation = 1
+
+  vi.spyOn(accountApi, 'getAccountContext').mockResolvedValue({
+    timezone: 'Asia/Ho_Chi_Minh',
+    account_date: '2026-09-19',
+    week: { start_date: '2026-09-14', end_date: '2026-09-20' },
+    account_revision: 1,
+    data_epoch: 1,
+    write_state: 'open',
+  })
+
+  const sync = useSyncStore()
+  sync.setQueryClient(queryClient)
 
   const account = useAccountStore()
   account.context = {
@@ -397,6 +416,7 @@ test('finding 5: fail-closed and disable mutation when account context is not re
   const account = useAccountStore()
   account.status = 'loading'
   account.context = null
+  vi.spyOn(accountApi, 'getAccountContext').mockRejectedValue(new Error('Context not ready'))
 
   vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: [] })
   const createSpy = vi.spyOn(challengesApi, 'createChallenge')
@@ -441,6 +461,14 @@ test('finding 5: fail-closed and disable mutation when account context is not re
     data_epoch: 1,
     write_state: 'locked_for_import',
   }
+  vi.spyOn(accountApi, 'getAccountContext').mockResolvedValue({
+    timezone: 'Asia/Ho_Chi_Minh',
+    account_date: '2026-09-19',
+    week: { start_date: '2026-09-14', end_date: '2026-09-20' },
+    account_revision: 1,
+    data_epoch: 1,
+    write_state: 'locked_for_import',
+  })
   await flushPromises()
 
   expect(wrapper.get('#account-status-alert').text()).toContain('tạm khóa ghi (locked_for_import)')
@@ -550,4 +578,55 @@ test('preserves dirty edit draft during background query refetches and alerts on
   // Remote version change notice is displayed
   expect(wrapper.text()).toContain('phiên bản 2')
   expect(wrapper.text()).toContain('Nội dung bạn đang soạn thảo vẫn được giữ nguyên')
+})
+
+test('S14-F03 — blocks dirty draft submission on epoch change until explicit rebase', async () => {
+  const account = useAccountStore()
+  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: [] })
+  const createSpy = vi.spyOn(challengesApi, 'createChallenge')
+
+  const router = createTestRouter()
+  await router.push('/challenges')
+
+  const wrapper = mount(ChallengesView, {
+    global: {
+      plugins: [[VueQueryPlugin, { queryClient }], router],
+    },
+  })
+
+  await flushPromises()
+  await wrapper.get('#create-challenge-btn').trigger('click')
+
+  // Type a dirty draft
+  await wrapper.get('#create-name').setValue('Thiền định 15 phút')
+  expect((wrapper.get('#create-submit-btn').element as HTMLButtonElement).disabled).toBe(false)
+
+  // Remote server bumps data_epoch (e.g. restore or epoch rotation)
+  account.context = {
+    ...account.context!,
+    data_epoch: 2,
+    account_revision: 0,
+  }
+  await flushPromises()
+
+  // Epoch change alert must be visible and submit button must be disabled
+  expect(wrapper.find('#create-epoch-alert').exists()).toBe(true)
+  expect((wrapper.get('#create-submit-btn').element as HTMLButtonElement).disabled).toBe(true)
+
+  // Attempt to submit form anyway: must be blocked
+  await wrapper.get('form').trigger('submit.prevent')
+  await flushPromises()
+  expect(createSpy).not.toHaveBeenCalled()
+  expect(wrapper.text()).toContain('Dữ liệu máy chủ đã chuyển chu kỳ mới')
+
+  // Draft input is PRESERVED
+  expect((wrapper.get('#create-name').element as HTMLInputElement).value).toBe('Thiền định 15 phút')
+
+  // User clicks "Tải lại dữ liệu mới nhất" (rebase)
+  await wrapper.get('#create-epoch-rebase-btn').trigger('click')
+  await flushPromises()
+
+  // Alert disappears and submit button is enabled again
+  expect(wrapper.find('#create-epoch-alert').exists()).toBe(false)
+  expect((wrapper.get('#create-submit-btn').element as HTMLButtonElement).disabled).toBe(false)
 })
