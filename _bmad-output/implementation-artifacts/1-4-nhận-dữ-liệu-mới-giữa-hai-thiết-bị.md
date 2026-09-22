@@ -1,6 +1,6 @@
 # Story 1.4: Nhận dữ liệu mới giữa hai thiết bị
 
-Status: review
+Status: done
 
 ## Story
 
@@ -171,9 +171,11 @@ Evidence:
 - 2026-09-19: AD-6 đã được Product Owner phê duyệt; Story vẫn `BLOCKED` cho đến khi Story 2.1 triển khai Challenge mutation/read model và cung cấp bằng chứng tích hợp.
 - 2026-09-21: Hoàn thành triển khai Tasks 3–6 trên worktree `MinhQuang0104/story-1-4-sync`. Tất cả các deterministic check (backend pint, phpstan, phpunit; frontend contract, lint, typecheck, vitest; e2e playwright; architecture unittest) đều đạt 100% PASS. Chuyển trạng thái Story sang `review`.
 - 2026-09-21: Tiếp thu kết quả Independent Lead review: loại bỏ test fixture khỏi production code (xóa `SetAccountWriteState.php`, khôi phục `DatabaseSeeder.php`, gỡ bỏ `window.__queryClient`), cấu hình PostgreSQL service và array cache trong CI browser-smoke, hoàn thiện sync coordinator (reconcile fail-closed khi rớt mạng/ẩn tab, observable refetch error với throwOnError, fence mutation ACK sau await invalidation, tránh trùng lặp transport và tự động reconcile khi re-login), bổ sung đầy đủ unit/E2E regression test. Trạng thái Story duy trì `review`.
+- 2026-09-22: Human phê duyệt exact scope `7b8b97b..f9ff613`; local `main` được fast-forward tới implementation đã verify. Story chuyển sang `done`; không push remote.
 
 ## Change Log
 
 - 2026-09-19: Tạo bản draft; giữ sprint status ở `backlog`; chưa triển khai product code.
 - 2026-09-20: Refresh readiness gate PASS; phê duyệt Story 1.4 sẵn sàng triển khai.
 - 2026-09-21: Hoàn thành triển khai sync coordinator, cache/draft safety, 2-context E2E test suite trên PostgreSQL; hoàn thành xử lý các phát hiện từ Independent Lead review (S14-F01..F09) bao gồm loại bỏ production test command; duy trì trạng thái `review`.
+- 2026-09-22: Human Gate APPROVED; tích hợp exact implementation commit `f9ff613e2039436b57cb05355bba34c88381354a` vào local `main` và đồng bộ lifecycle sang `done`.
