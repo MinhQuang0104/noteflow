@@ -1,0 +1,21 @@
+{
+  "featureId": "challenge-list",
+  "featureMap": ".agents/features/challenge-list.json",
+  "cwd": "frontend",
+  "checks": [
+    {
+      "id": "map",
+      "cwd": ".",
+      "argv": ["node", ".agents/scripts/check-feature-map.mjs", "check", ".agents/features/challenge-list.json"]
+    },
+    {
+      "id": "type-check",
+      "argv": ["npm", "run", "type-check"]
+    },
+    {
+      "id": "mapped-tests",
+      "argv": ["npm", "run", "test:unit", "--", "--run", "src/views/__tests__/challenges.spec.ts", "src/api/__tests__/challenges.spec.ts"]
+    }
+  ],
+  "unresolved": ["Changes outside the exact mapped anchors require separate scope judgment."]
+}
