@@ -33,7 +33,7 @@ The reviewer must not discover its own diff or scope; search the repository or G
 }
 ```
 
-Escalation and verification are exact tool outputs. The caller supplies provenance and hunks; the reviewer is independent of comparison method. `changeEvidence.paths` must be nonempty and exactly match `verification.changedPaths`. Duplicate, inconsistent, empty, or ambiguous paths/hunks invalidate input and require clarification before review. Never infer the delta from current files. `evidenceRefs` is the file allowlist, including changed files. Open nothing outside it; request exact missing pointers.
+Escalation and verification are exact tool outputs. The caller supplies provenance and hunks; the reviewer is independent of comparison method. For ordinary evidence, `changeEvidence.paths` must be nonempty and exactly match `verification.changedPaths`; for a chunked evidence set, use its validated `requestedPaths` and complete path coverage. Duplicate, inconsistent, empty, or ambiguous paths/hunks invalidate input and require clarification before review. Never infer the delta from current files. `evidenceRefs` is the file allowlist, including changed files. Open nothing outside it; request exact missing pointers.
 
 ## Reason routing
 
@@ -50,9 +50,9 @@ Focus only on the reason's affected boundary: `MEDIUM_COVERAGE_JUDGMENT` covers 
 
 ## Hard budgets and oversize input
 
-Maximum 4 changed paths; 6 hunks per path; 240 total diff lines, including context; 3 initial additional L2 files beyond changed paths; 1 additional evidence round of at most 2 files; 3 findings; 250 words in reviewer output.
+Maximum 4 changed paths; 6 hunks per path; 240 diff lines per review unit, including context; 3 initial additional L2 files beyond changed paths; 1 additional evidence round of at most 2 files; 3 findings; 250 words in reviewer output.
 
-Before review, input exceeding any path or diff budget is `SPLIT_REQUIRED`. This is a pre-review input condition, not a reviewer judgment. The caller splits by explicit affected boundary. Never truncate, choose an arbitrary subset, or expand a budget. Insufficient evidence within budget yields `NEED_MORE_EVIDENCE`.
+Before review, path/hunk grouping beyond budget is `SPLIT_REQUIRED`. A producer-generated, validated evidence set may represent one oversized text path as ordered units of at most 240 diff lines each. Each unit is partial evidence: never `APPROVE` the complete path from one unit. Every unit must receive review coverage; missing, reordered, duplicate, or stale units invalidate final reconciliation. Make a final path/set judgment only after complete coverage. Blocking findings still trace to the supplied delta. Never truncate, choose ranges, or fall back to whole-file review. An unresolved cross-unit question under bounded context yields `NEED_MORE_EVIDENCE`.
 
 ## Output
 

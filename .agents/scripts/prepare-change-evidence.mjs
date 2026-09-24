@@ -1,6 +1,8 @@
 import { spawnSync } from 'node:child_process'
 import { lstatSync, realpathSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const EXIT = { OK: 0, NO_CHANGE: 1, SPLIT_REQUIRED: 2, UNSUPPORTED: 3, INVALID_INPUT: 4, ERROR: 5 }
 const MAX_OUTPUT = 64 * 1024 * 1024
@@ -8,6 +10,7 @@ const MAX_PATHS = 4
 const MAX_HUNKS = 6
 const MAX_LINES = 240
 const decoder = new TextDecoder('utf-8', { fatal: true })
+const SET_SCHEMA = 'change-evidence-set-v1'
 
 class ProducerFailure extends Error {
   constructor(status, reason) {
@@ -203,6 +206,131 @@ function parsePatch(patch, file, allowEmptyAddition = false) {
   return hunks
 }
 
+function digest(source) {
+  return createHash('sha256').update(JSON.stringify(source), 'utf8').digest('hex')
+}
+
+function recordsFor(hunk) {
+  const [header, ...lines] = hunk.diffText.split('\n')
+  const records = []
+  for (const line of lines) {
+    if (line === '\\ No newline at end of file') {
+      if (!records.length || records.at(-1).length !== 1) fail('ERROR', 'orphan newline marker')
+      records.at(-1).push(line)
+    } else records.push([line])
+  }
+  return { header, records }
+}
+
+function consumption(records) {
+  let oldLines = 0
+  let newLines = 0
+  for (const record of records) {
+    const prefix = record[0][0]
+    if (prefix === ' ' || prefix === '-') oldLines++
+    if (prefix === ' ' || prefix === '+') newLines++
+  }
+  return { oldLines, newLines }
+}
+
+function partition(records) {
+  const chunks = []
+  let chunk = []
+  let lineCount = 0
+  for (const record of records) {
+    if (lineCount + record.length > MAX_LINES - 1 && chunk.length) {
+      chunks.push(chunk)
+      chunk = []
+      lineCount = 0
+    }
+    if (record.length > MAX_LINES - 1) fail('ERROR', 'diff record exceeds unit budget')
+    chunk.push(record)
+    lineCount += record.length
+  }
+  if (chunk.length) chunks.push(chunk)
+  return chunks
+}
+
+function makeEvidenceSet(provenance, requestedPaths, paths) {
+  const source = { schema: SET_SCHEMA, provenance, requestedPaths, paths }
+  const sourceDigest = digest(source)
+  const metadata = []
+  const units = []
+  for (const entry of paths) {
+    const pathMeta = { path: entry.path, ...(entry.changeType ? { changeType: entry.changeType } : {}), hunks: [] }
+    entry.hunks.forEach((hunk, hunkIndex) => {
+      const { header, records } = recordsFor(hunk)
+      pathMeta.hunks.push({ header, oldStart: hunk.oldStart, oldLines: hunk.oldLines,
+        newStart: hunk.newStart, newLines: hunk.newLines, bodyLineCount: records.flat().length })
+      const chunks = partition(records)
+      let start = 0
+      chunks.forEach((chunk, hunkUnitIndex) => {
+        const body = chunk.flat()
+        units.push({ evidenceSetDigest: sourceDigest, path: entry.path,
+          ...(entry.changeType ? { changeType: entry.changeType } : {}), hunkIndex,
+          originalOldStart: hunk.oldStart, originalOldLines: hunk.oldLines,
+          originalNewStart: hunk.newStart, originalNewLines: hunk.newLines,
+          unitIndex: units.length, hunkUnitIndex, hunkUnitCount: chunks.length,
+          bodyStart: start, bodyEnd: start + body.length, ...consumption(chunk),
+          diffLineCount: 1 + body.length, bodyText: body.join('\n') })
+        start += body.length
+      })
+    })
+    metadata.push(pathMeta)
+  }
+  const set = { schema: SET_SCHEMA, provenance, requestedPaths, sourceDigest,
+    unitCount: units.length, paths: metadata, units }
+  validateEvidenceSet(set)
+  return set
+}
+
+export function validateEvidenceSet(set) {
+  const invalid = () => { throw new Error('invalid or incomplete evidence set') }
+  if (set?.schema !== SET_SCHEMA || !Array.isArray(set.requestedPaths) ||
+      !Array.isArray(set.paths) || !Array.isArray(set.units) ||
+      set.unitCount !== set.units.length || !/^[0-9a-f]{64}$/.test(set.sourceDigest ?? '') ||
+      JSON.stringify(set.requestedPaths) !== JSON.stringify(set.paths.map(p => p.path))) invalid()
+  const reconstructed = []
+  let nextUnit = 0
+  for (const entry of set.paths) {
+    const hunks = []
+    for (const [hunkIndex, meta] of entry.hunks.entries()) {
+      const related = []
+      while (nextUnit < set.units.length && set.units[nextUnit].path === entry.path &&
+             set.units[nextUnit].hunkIndex === hunkIndex) related.push(set.units[nextUnit++])
+      if (!related.length) invalid()
+      const lines = []
+      for (const [hunkUnitIndex, unit] of related.entries()) {
+        const body = unit.bodyText.split('\n')
+        if (unit.evidenceSetDigest !== set.sourceDigest || unit.unitIndex !== nextUnit - related.length + hunkUnitIndex ||
+            unit.hunkUnitIndex !== hunkUnitIndex || unit.hunkUnitCount !== related.length ||
+            unit.changeType !== entry.changeType || unit.bodyStart !== lines.length ||
+            unit.bodyEnd !== lines.length + body.length || unit.diffLineCount !== body.length + 1 ||
+            unit.diffLineCount > MAX_LINES || unit.originalOldStart !== meta.oldStart ||
+            unit.originalOldLines !== meta.oldLines || unit.originalNewStart !== meta.newStart ||
+            unit.originalNewLines !== meta.newLines) invalid()
+        const observed = consumption(body.filter(line => line !== '\\ No newline at end of file').map(line => [line]))
+        if (unit.oldLines !== observed.oldLines || unit.newLines !== observed.newLines) invalid()
+        lines.push(...body)
+      }
+      if (lines.length !== meta.bodyLineCount) invalid()
+      const hunk = { oldStart: meta.oldStart, oldLines: meta.oldLines,
+        newStart: meta.newStart, newLines: meta.newLines,
+        diffText: [meta.header, ...lines].join('\n') }
+      const parsed = parsePatch(`diff --git a/${entry.path} b/${entry.path}\n--- a/${entry.path}\n+++ b/${entry.path}\n${hunk.diffText}`, entry.path)
+      if (parsed.length !== 1 || JSON.stringify(parsed[0]) !== JSON.stringify(hunk)) invalid()
+      const canonicalChunks = partition(recordsFor(hunk).records)
+      if (canonicalChunks.length !== related.length || canonicalChunks.some((chunk, i) =>
+          chunk.flat().join('\n') !== related[i].bodyText)) invalid()
+      hunks.push(hunk)
+    }
+    reconstructed.push(entry.changeType ? { path: entry.path, changeType: entry.changeType, hunks } : { path: entry.path, hunks })
+  }
+  if (nextUnit !== set.units.length || digest({ schema: SET_SCHEMA, provenance: set.provenance,
+    requestedPaths: set.requestedPaths, paths: reconstructed }) !== set.sourceDigest) invalid()
+  return true
+}
+
 function main() {
   const options = parseArgs(process.argv.slice(2))
   const paths = [...new Set(options.paths.map(canonical))].sort()
@@ -228,21 +356,27 @@ function main() {
     const hunks = parsePatch(result.stdout, file, addedFile?.empty)
     if (hunks.length > MAX_HUNKS) fail('SPLIT_REQUIRED', `more than 6 hunks: ${file}`)
     totalLines += hunks.reduce((sum, hunk) => sum + hunk.diffText.split('\n').length, 0)
-    if (totalLines > MAX_LINES) fail('SPLIT_REQUIRED', 'more than 240 diff lines')
     evidencePaths.push(added ? { path: file, changeType: 'added', hunks } : { path: file, hunks })
+  }
+  const provenance = { producer: 'prepare-change-evidence-v1', comparison: options.comparison, base, head }
+  if (totalLines > MAX_LINES) {
+    if (paths.length !== 1) fail('SPLIT_REQUIRED', 'more than 240 diff lines across paths')
+    return { status: 'OK', changeEvidence: { evidenceSet: makeEvidenceSet(provenance, paths, evidencePaths) } }
   }
   return {
     status: 'OK',
     changeEvidence: {
-      provenance: { producer: 'prepare-change-evidence-v1', comparison: options.comparison, base, head },
+      provenance,
       paths: evidencePaths,
     },
   }
 }
 
-try {
-  emit(main())
-} catch (error) {
-  if (error instanceof ProducerFailure) emit({ status: error.status, reason: error.message })
-  else emit({ status: 'ERROR', reason: 'unexpected producer failure' })
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  try {
+    emit(main())
+  } catch (error) {
+    if (error instanceof ProducerFailure) emit({ status: error.status, reason: error.message })
+    else emit({ status: 'ERROR', reason: 'unexpected producer failure' })
+  }
 }

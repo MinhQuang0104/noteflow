@@ -16,7 +16,7 @@ Use deterministic tools, then risk-based escalation, then targeted reasoning. Pl
 
 ## Change evidence and review
 
-Run `node .agents/scripts/prepare-change-evidence.mjs --comparison <working-tree-vs-HEAD|explicit-pair> --path <path>`. Repeat explicit `--path`; `explicit-pair` requires `--base <ref> --head <ref>`. No scope discovery. Budgets: paths <=4; hunks/path <=6; total diff lines <=240. Outcomes: `OK` 0; `NO_CHANGE` 1; `SPLIT_REQUIRED` 2; `UNSUPPORTED` 3; `INVALID_INPUT` 4; `ERROR` 5.
+Run `node .agents/scripts/prepare-change-evidence.mjs --comparison <working-tree-vs-HEAD|explicit-pair> --path <path>`. Repeat explicit `--path`; `explicit-pair` requires `--base <ref> --head <ref>`. No scope discovery. Budgets: paths <=4; hunks/path <=6; diff lines <=240 per review unit. One oversized text path may use producer-generated bounded evidence units; the caller does not choose line ranges. Complete mechanically validated coverage is required. `SPLIT_REQUIRED` remains for path/hunk grouping conditions. Outcomes: `OK` 0; `NO_CHANGE` 1; `SPLIT_REQUIRED` 2; `UNSUPPORTED` 3; `INVALID_INPUT` 4; `ERROR` 5.
 
 Review only when escalated, using the same Lead in v1. Pass unchanged deterministic verification output and the producer's structured Change Evidence. Review this actual delta without manual Git patch reconstruction or whole-state review. Attribute blocking findings to supplied hunks or directly affected behavior. See `.agents/review/targeted-reviewer-contract.md`.
 
