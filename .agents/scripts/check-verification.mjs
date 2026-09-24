@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url'
 const STATUS_CODE = { PASS: 0, FAIL: 1, INCOMPLETE: 2, ERROR: 3 }
 const FEATURE = 'challenge-list'
 const RECIPE = '.agents/verification/challenge-list.json'
+const RECIPES = [{ featureId: FEATURE, path: RECIPE, checkIds: 'map,type-check,mapped-tests' }]
 const MAX_OUTPUT = 4 * 1024 * 1024
 
 function emit(evidence) {
@@ -13,9 +14,9 @@ function emit(evidence) {
   process.exitCode = STATUS_CODE[evidence.status]
 }
 
-function errorEvidence(reason, changedPaths = []) {
+function errorEvidence(reason, changedPaths = [], featureId = FEATURE) {
   return {
-    featureId: FEATURE, changedPaths, matchedPaths: [], status: 'ERROR', complete: false,
+    featureId, changedPaths, matchedPaths: [], status: 'ERROR', complete: false,
     map: { status: 'ERROR', expectedChangedAnchors: [], unexplainedDrift: [], missingAnchors: [] },
     checks: [], escalationReasons: [reason],
   }
@@ -100,9 +101,25 @@ export function classifyMapResult(exitCode, output, changedPaths, anchors) {
   return result
 }
 
+function loadRecipe(root, entry) {
+  const recipe = JSON.parse(readFileSync(repoPath(root, entry.path), 'utf8'))
+  if (recipe.featureId !== entry.featureId || !Array.isArray(recipe.checks) ||
+      recipe.checks.map(check => check.id).join(',') !== entry.checkIds ||
+      !recipe.checks.every(check => Array.isArray(check.argv) && check.argv.every(arg => typeof arg === 'string' && arg))) {
+    throw new Error('INVALID_RECIPE')
+  }
+  const map = JSON.parse(readFileSync(repoPath(root, recipe.featureMap), 'utf8'))
+  if (map.id !== entry.featureId || !map.anchor_blobs || typeof map.anchor_blobs !== 'object' ||
+      Array.isArray(map.anchor_blobs) || !Object.keys(map.anchor_blobs).length) throw new Error('INVALID_MAP')
+  for (const anchor of Object.keys(map.anchor_blobs)) {
+    if (canonical(anchor) !== anchor) throw new Error('INVALID_MAP')
+  }
+  return { recipe, map }
+}
+
 function main() {
   const args = process.argv.slice(2)
-  if (args.length < 4 || args[0] !== 'check' || args[1] !== FEATURE ||
+  if (args.length < 4 || args[0] !== 'check' || ![FEATURE, 'auto'].includes(args[1]) ||
       args.length % 2 !== 0 || args.slice(2).some((value, index) =>
         index % 2 === 0 ? value !== '--changed' : value === '--changed')) {
     return errorEvidence('USAGE: check challenge-list --changed <path> [--changed <path> ...]')
@@ -121,23 +138,31 @@ function main() {
   } catch {
     return errorEvidence('GIT_ROOT_UNAVAILABLE', changedPaths)
   }
-  let recipe, map, mapPath
+  let recipe, map
   try {
-    recipe = JSON.parse(readFileSync(repoPath(root, RECIPE), 'utf8'))
-    if (recipe.featureId !== FEATURE || !Array.isArray(recipe.checks) || recipe.checks.length !== 3 ||
-        recipe.checks.map(check => check.id).join(',') !== 'map,type-check,mapped-tests' ||
-        !recipe.checks.every(check => Array.isArray(check.argv) && check.argv.every(arg => typeof arg === 'string' && arg))) {
-      throw new Error('INVALID_RECIPE')
-    }
-    mapPath = repoPath(root, recipe.featureMap)
-    map = JSON.parse(readFileSync(mapPath, 'utf8'))
-    if (map.id !== FEATURE || !map.anchor_blobs || typeof map.anchor_blobs !== 'object' ||
-        Array.isArray(map.anchor_blobs) || !Object.keys(map.anchor_blobs).length) throw new Error('INVALID_MAP')
-    for (const anchor of Object.keys(map.anchor_blobs)) {
-      if (canonical(anchor) !== anchor) throw new Error('INVALID_MAP')
+    if (args[1] === 'auto') {
+      const applicable = RECIPES.map(entry => loadRecipe(root, entry))
+        .filter(({ map: featureMap }) => changedPaths.some(changed =>
+          Object.hasOwn(featureMap.anchor_blobs, changed)))
+      if (!applicable.length) {
+        return {
+          featureId: null, changedPaths, matchedPaths: [], applicability: 'NOT_APPLICABLE',
+          status: 'INCOMPLETE', complete: false, checks: [],
+          escalationReasons: ['NO_APPLICABLE_RECIPE'],
+        }
+      }
+      if (applicable.length > 1) {
+        return errorEvidence('MULTIPLE_APPLICABLE_RECIPES', changedPaths, null)
+      }
+      recipe = applicable[0].recipe
+      map = applicable[0].map
+    } else {
+      const selected = loadRecipe(root, RECIPES[0])
+      recipe = selected.recipe
+      map = selected.map
     }
   } catch {
-    return errorEvidence('INVALID_RECIPE_OR_MAP', changedPaths)
+    return errorEvidence('INVALID_RECIPE_OR_MAP', changedPaths, args[1] === 'auto' ? null : FEATURE)
   }
   const anchors = Object.keys(map.anchor_blobs)
   const mapped = new Set(anchors)
