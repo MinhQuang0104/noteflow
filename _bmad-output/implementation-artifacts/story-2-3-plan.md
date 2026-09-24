@@ -16,9 +16,8 @@ ux_refs:
   - docs/ux/ux-spec.md#52-challenge-và-hôm-nay
   - docs/ux/ux-spec.md#84-challenge-biểu-mẫu-và-hành-động-có-hậu-quả
 execution_status: in-progress
-lifecycle_snapshot: backlog
+lifecycle_snapshot: in-progress
 current_slice: A
-consistency_note: Slice A đã checkpoint nhưng lifecycle snapshot vẫn backlog.
 risk:
   level: HIGH
   flags: [security, concurrency, public_contract]
@@ -75,17 +74,13 @@ resolved_decisions:
   - Reject whitespace-only journal text.
   - Do not invent journal clear or delete behavior.
   - Do not impose an arbitrary journal length limit.
-blockers:
-  - id: lifecycle-backlog-conflict
-    reason: Slice A is checkpointed while sprint-status still records Story 2.3 as backlog.
+blockers: []
 unresolved_questions: []
 checkpoints:
   slice_a_commit: e67a2f0dc852e9f2a0333644ce3c1b12a8e641db
   integration_commit: null
   completion_commit: null
 next_action:
-  kind: reconcile_lifecycle
-  target: story
-  precondition: Confirm and synchronize Story lifecycle under current authority before Slice B.
-  reference: lifecycle-backlog-conflict
+  kind: verify_slice
+  target: A
 ---
