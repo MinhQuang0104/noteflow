@@ -1,7 +1,23 @@
 # V4 Lite verification context
 
-Use for authorized V4 verification infrastructure and evidence architecture work. Treat observed checks and artifacts as evidence; agent prose alone does not prove a result. Prefer applicable deterministic checks before expensive model review. Keep evidence bounded to the claim, scope, command or check, result, and relevant artifact reference.
+Use deterministic tools, then risk-based escalation, then targeted reasoning. Planned checks and prose are not evidence.
 
-Escalate review only for high risk, conflicting facts, or insufficient evidence. Do not infer a pass from a planned check, a missing artifact, or an unverified assertion. Identify the precise evidence gap and the affected boundary.
+## Verification
 
-The root `AGENTS.md` Done Gate remains authoritative where applicable. Open relevant sections of `.agents/policies/orchestration-v3.md` as L2 only when the verification design directly touches an existing V3 gate, report, or lifecycle boundary. Do not duplicate V3 procedures or load recovery details on a healthy path.
+- Explicit: `node .agents/scripts/check-verification.mjs check <feature> --changed <path>`
+- Auto: `node .agents/scripts/check-verification.mjs check auto --changed <path>`
+- Repeat `--changed` for multiple explicit paths: `--changed <path-a> --changed <path-b>`. No Git change discovery.
+- Exit codes: `PASS` 0; `FAIL` 1; `INCOMPLETE` 2; `ERROR` 3. Never claim skipped checks ran.
+- Auto routes mapped scope to its deterministic recipe. No applicable recipe returns applicability `NOT_APPLICABLE`, status `INCOMPLETE`, no checks. Mixed mapped/unmapped scope remains `INCOMPLETE` with unmatched paths preserved. Invalid input returns `ERROR`.
+
+## Escalation
+
+`.agents/scripts/check-escalation.mjs` is authoritative. Clean, complete LOW `PASS` without judgment flags yields `NO_REVIEW`. MEDIUM, HIGH, `FAIL`, `INCOMPLETE`, `ERROR`, or supported judgment flags require `REVIEW_REQUIRED`. Do not reinterpret its decision.
+
+## Change evidence and review
+
+Run `node .agents/scripts/prepare-change-evidence.mjs --comparison <working-tree-vs-HEAD|explicit-pair> --path <path>`. Repeat explicit `--path`; `explicit-pair` requires `--base <ref> --head <ref>`. No scope discovery. Budgets: paths <=4; hunks/path <=6; total diff lines <=240. Outcomes: `OK` 0; `NO_CHANGE` 1; `SPLIT_REQUIRED` 2; `UNSUPPORTED` 3; `INVALID_INPUT` 4; `ERROR` 5.
+
+Review only when escalated, using the same Lead in v1. Pass unchanged deterministic verification output and the producer's structured Change Evidence. Review this actual delta without manual Git patch reconstruction or whole-state review. Attribute blocking findings to supplied hunks or directly affected behavior. See `.agents/review/targeted-reviewer-contract.md`.
+
+Root `AGENTS.md` governs the Done Gate. Load V3 policy only for an affected V3 gate or lifecycle boundary.
