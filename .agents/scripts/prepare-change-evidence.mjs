@@ -1,4 +1,5 @@
 import { spawnSync } from 'node:child_process'
+import { lstatSync, realpathSync } from 'node:fs'
 import path from 'node:path'
 
 const EXIT = { OK: 0, NO_CHANGE: 1, SPLIT_REQUIRED: 2, UNSUPPORTED: 3, INVALID_INPUT: 4, ERROR: 5 }
@@ -96,7 +97,25 @@ function trackedInWorkingComparison(root, oid, file) {
   fail('ERROR', 'git object check failed')
 }
 
-function parsePatch(patch, file) {
+function untrackedFile(root, file) {
+  const absolute = path.resolve(root, file)
+  let stat
+  let real
+  try {
+    stat = lstatSync(absolute)
+    real = realpathSync(absolute)
+  } catch (error) {
+    if (error.code === 'ENOENT') fail('UNSUPPORTED', `untracked path: ${file}`)
+    fail('ERROR', `working-tree file check failed: ${file}`)
+  }
+  const relative = path.relative(root, real)
+  if (!stat.isFile() || relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
+    fail('UNSUPPORTED', `unsupported working-tree path: ${file}`)
+  }
+  return { absolute, empty: stat.size === 0 }
+}
+
+function parsePatch(patch, file, allowEmptyAddition = false) {
   if (!patch) fail('NO_CHANGE', `no reviewable hunk: ${file}`)
   const lines = patch.endsWith('\n') ? patch.slice(0, -1).split('\n') : patch.split('\n')
   const hunks = []
@@ -107,6 +126,7 @@ function parsePatch(patch, file) {
   let sawOldName = false
   let sawNewName = false
   let sawHunk = false
+  let sawNewFileMode = false
 
   function finishHunk() {
     if (!current) return
@@ -158,8 +178,11 @@ function parsePatch(patch, file) {
       current.diffText.push(line)
       continue
     }
-    if (line.startsWith('index ') || /^new file mode 100(?:644|755)$/.test(line) ||
-        /^deleted file mode 100(?:644|755)$/.test(line)) continue
+    if (/^new file mode 100(?:644|755)$/.test(line)) {
+      sawNewFileMode = true
+      continue
+    }
+    if (line.startsWith('index ') || /^deleted file mode 100(?:644|755)$/.test(line)) continue
     if (line.startsWith('--- ')) {
       if (sawOldName || sawNewName) fail('UNSUPPORTED', `invalid file headers: ${file}`)
       sawOldName = true
@@ -173,6 +196,9 @@ function parsePatch(patch, file) {
     fail('UNSUPPORTED', `non-reviewable patch: ${file}`)
   }
   finishHunk()
+  if (!hunks.length && allowEmptyAddition && sawFileHeader && sawNewFileMode && !sawOldName && !sawNewName) {
+    return hunks
+  }
   if (!hunks.length) fail('UNSUPPORTED', `non-reviewable patch: ${file}`)
   return hunks
 }
@@ -190,21 +216,20 @@ function main() {
   const evidencePaths = []
   let totalLines = 0
   for (const file of paths) {
-    if (options.comparison === 'working-tree-vs-HEAD' && !trackedInWorkingComparison(root, base, file)) {
-      fail('UNSUPPORTED', `untracked path: ${file}`)
-    }
+    const added = options.comparison === 'working-tree-vs-HEAD' && !trackedInWorkingComparison(root, base, file)
+    const addedFile = added ? untrackedFile(root, file) : null
     const result = git([
       '--literal-pathspecs', 'diff', '--no-ext-diff', '--no-textconv', '--no-renames',
       '--no-color', '--no-relative', '--no-indent-heuristic', '--diff-algorithm=myers',
       '--unified=3', '--src-prefix=a/', '--dst-prefix=b/',
-      ...comparisonArgs, '--', file,
+      ...(added ? ['--no-index', '--', '/dev/null', addedFile.absolute] : [...comparisonArgs, '--', file]),
     ], root)
-    if (result.status !== 0) fail('ERROR', `git diff failed: ${file}`)
-    const hunks = parsePatch(result.stdout, file)
+    if (result.status !== (added ? 1 : 0)) fail('ERROR', `git diff failed: ${file}`)
+    const hunks = parsePatch(result.stdout, file, addedFile?.empty)
     if (hunks.length > MAX_HUNKS) fail('SPLIT_REQUIRED', `more than 6 hunks: ${file}`)
     totalLines += hunks.reduce((sum, hunk) => sum + hunk.diffText.split('\n').length, 0)
     if (totalLines > MAX_LINES) fail('SPLIT_REQUIRED', 'more than 240 diff lines')
-    evidencePaths.push({ path: file, hunks })
+    evidencePaths.push(added ? { path: file, changeType: 'added', hunks } : { path: file, hunks })
   }
   return {
     status: 'OK',
