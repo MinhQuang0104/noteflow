@@ -2,6 +2,7 @@ import { readFileSync, existsSync } from 'node:fs'
 import path from 'node:path'
 import { createHash } from 'node:crypto'
 import { spawnSync } from 'node:child_process'
+import { pathToFileURL } from 'node:url'
 
 // Exit codes: READY=0, RECONCILIATION_REQUIRED=1, STALE=2, INVALID=3, ERROR=4.
 const CODES = { READY: 0, RECONCILIATION_REQUIRED: 1, STALE: 2, INVALID: 3, ERROR: 4 }
@@ -70,7 +71,7 @@ function parseYaml(source) {
   return parsed
 }
 
-function frontmatter(text) {
+export function frontmatter(text) {
   const match = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/.exec(text)
   if (!match) throw new Error('INVALID_FRONTMATTER')
   return parseYaml(match[1])
@@ -109,7 +110,7 @@ function hasForbidden(value) {
   return Object.entries(value).some(([key, child]) => V3_KEYS.has(key) || hasForbidden(child))
 }
 
-function validate(root, id) {
+export function validate(root, id) {
   const planPath = `_bmad-output/implementation-artifacts/story-${id.replace('.', '-')}-plan.md`
   const result = { storyId: id, planPath, valid: false, status: 'INVALID', executionStatus: null,
     lifecycleSnapshot: null, actualLifecycle: null, currentSlice: null, nextAction: null,
@@ -187,7 +188,7 @@ function validate(root, id) {
         (slices.some(slice => slice.status !== 'complete' ||
           (slice.verification?.gate_status && slice.verification.gate_status !== 'PASS') ||
           (slice.review?.required && slice.review.verdict !== 'APPROVE')) || (plan.blockers?.length ?? 0) ||
-         plan.next_action?.kind !== 'finalize_story')) invalid('INCOMPLETE_CLAIM')
+          !['finalize_story', ...(plan.lifecycle_snapshot === 'review' ? ['reconcile_lifecycle'] : [])].includes(plan.next_action?.kind))) invalid('INCOMPLETE_CLAIM')
   }
   if (!ACTIONS.has(plan.next_action?.kind)) invalid('UNKNOWN_ACTION')
   else {
@@ -239,11 +240,13 @@ function main() {
   return validate(path.resolve(rootResult.stdout.trim()), id)
 }
 
-try {
-  const result = main()
-  process.stdout.write(`${JSON.stringify(result)}\n`)
-  process.exitCode = CODES[result.status]
-} catch (error) {
-  process.stdout.write(`${JSON.stringify({ valid: false, status: 'ERROR', reasons: [error.message] })}\n`)
-  process.exitCode = CODES.ERROR
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  try {
+    const result = main()
+    process.stdout.write(`${JSON.stringify(result)}\n`)
+    process.exitCode = CODES[result.status]
+  } catch (error) {
+    process.stdout.write(`${JSON.stringify({ valid: false, status: 'ERROR', reasons: [error.message] })}\n`)
+    process.exitCode = CODES.ERROR
+  }
 }

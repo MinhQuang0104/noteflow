@@ -123,6 +123,16 @@ test('checkpoint not ancestor of HEAD', () => withFixture(f => {
   } finally { rmSync(other, { recursive: true, force: true }) }
 }, 'STALE', 2, 'CHECKPOINT_NOT_ANCESTOR'))
 test('complete with pending slice', () => withFixture(f => editPlan(f, 'execution_status: in-progress', 'execution_status: complete'), 'INVALID', 3, 'INCOMPLETE_CLAIM'))
+test('complete execution may await review lifecycle reconciliation', () => withFixture(f => {
+  editPlan(f, 'execution_status: in-progress', 'execution_status: complete')
+  const file = path.join(f.root, '_bmad-output/implementation-artifacts/story-9-1-plan.md')
+  let text = readFileSync(file, 'utf8').replace('status: in-progress\n    depends_on:', 'status: complete\n    depends_on:')
+    .replace('lifecycle_snapshot: in-progress', 'lifecycle_snapshot: review')
+    .replace('kind: implement_slice\n  target: A', 'kind: reconcile_lifecycle\n  target: story')
+  writeFileSync(file, text)
+  const sprint = path.join(f.root, '_bmad-output/implementation-artifacts/sprint-status.yaml')
+  writeFileSync(sprint, readFileSync(sprint, 'utf8').replace('9-1-fixture: in-progress', '9-1-fixture: review'))
+}, 'READY', 0))
 test('forbidden V3 runtime state', () => withFixture(f => editPlan(f, 'risk:\n', 'run_id: forbidden\nrisk:\n'), 'INVALID', 3, 'FORBIDDEN_V3_STATE'))
 for (const kind of ['plan_slice','implement_slice','verify_slice','review_slice','resolve_blocker','reconcile_lifecycle','request_gate','finalize_story']) {
   test(`supported action ${kind}`, () => withFixture(f => {

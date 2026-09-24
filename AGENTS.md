@@ -12,7 +12,7 @@ Before migration work, read only the canonical `.agent-state/active-run.json` po
 
 ## Normal V3 / Story entry
 
-An explicit human request to implement or continue a named Story **by V4 Lite** may enter `.agents/skills/v4-story-runner/SKILL.md` after the canonical `.agent-state/active-run.json` pointer is read-only checked as clearly IDLE. The V4 Story Runner foundation currently authorizes routing, Plan validation, and read-only readiness reporting only. It does not authorize Story, lifecycle, product-code, Git index, or commit mutation. If the pointer is active, ambiguous, or contradicted, stop; do not take over a V3 run. This opt-in is separate from the V4 Lite migration lane above.
+An explicit human request to implement or continue a named Story **by V4 Lite** may enter `.agents/skills/v4-story-runner/SKILL.md` after the canonical `.agent-state/active-run.json` pointer is read-only checked as clearly IDLE. The V4 Story Runner foundation authorizes routing, Plan validation, read-only readiness, and the bounded `reconcile_lifecycle` action only through `.agents/scripts/reconcile-story-lifecycle.mjs` after its check succeeds. No other Story, product-code, Git index, or commit mutation is enabled. If the pointer is active, ambiguous, or contradicted, stop; do not take over a V3 run. This opt-in is separate from the V4 Lite migration lane above.
 
 Explicit V3.1/Orca requests and Story execution without an explicit V4 Lite lane continue through `.agents/policies/orchestration-v3.md` and its shared Lead bootstrap. Approved or `ready-for-dev` BMAD Stories in that lane use `story-development` as the sole repository execution router. V3.1 remains the fallback. Do not invoke Orca or AGY from the V4 readiness path.
 
