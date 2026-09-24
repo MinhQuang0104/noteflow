@@ -132,14 +132,54 @@ test('mutation_commands enforces unique (owner_id, data_epoch, command_id)', fun
     ]))->toThrow(QueryException::class);
 });
 
+test('daily records keep journal and completion versions separate with owner-scoped challenge and day uniqueness', function () {
+    $owner = User::factory()->owner()->create();
+    $other = User::factory()->create(['is_owner' => false]);
+    $challengeId = (string) Str::uuid();
+    DB::table('challenges')->insert([
+        'id' => $challengeId,
+        'owner_id' => $owner->id,
+        'name' => 'Daily record',
+        'start_date' => '2026-09-19',
+        'row_version' => 1,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $record = [
+        'owner_id' => $owner->id,
+        'challenge_id' => $challengeId,
+        'local_date' => '2026-09-19',
+        'journal' => 'Today',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ];
+    DB::table('challenge_daily_records')->insert($record);
+    $saved = DB::table('challenge_daily_records')->where('challenge_id', $challengeId)->first();
+    expect((bool) $saved->is_done)->toBeFalse()
+        ->and((int) $saved->completion_version)->toBe(0)
+        ->and((int) $saved->journal_version)->toBe(0)
+        ->and((int) $saved->row_version)->toBe(1);
+
+    expect(fn () => DB::table('challenge_daily_records')->insert($record))->toThrow(QueryException::class);
+    expect(fn () => DB::table('challenge_daily_records')->insert(array_replace($record, [
+        'owner_id' => $other->id,
+        'local_date' => '2026-09-20',
+    ])))->toThrow(QueryException::class);
+});
+
 test('migrations roll back and remigrate cleanly', function () {
     $owner = User::factory()->owner()->create();
 
+    $m4 = require database_path('migrations/2026_09_24_010000_create_challenge_daily_records_table.php');
     $m3 = require database_path('migrations/2026_09_19_030000_create_mutation_commands_table.php');
     $m2 = require database_path('migrations/2026_09_19_020000_create_challenges_and_target_periods_tables.php');
     $m1 = require database_path('migrations/2026_09_19_010000_add_revision_fields_to_account_states_table.php');
 
     // Rollback
+    $m4->down();
+    expect(Schema::hasTable('challenge_daily_records'))->toBeFalse();
+
     $m3->down();
     expect(Schema::hasTable('mutation_commands'))->toBeFalse();
 
@@ -162,4 +202,7 @@ test('migrations roll back and remigrate cleanly', function () {
 
     $m3->up();
     expect(Schema::hasTable('mutation_commands'))->toBeTrue();
+
+    $m4->up();
+    expect(Schema::hasTable('challenge_daily_records'))->toBeTrue();
 });
