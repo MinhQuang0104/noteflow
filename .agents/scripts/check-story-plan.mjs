@@ -7,7 +7,9 @@ import { pathToFileURL } from 'node:url'
 // Exit codes: READY=0, RECONCILIATION_REQUIRED=1, STALE=2, INVALID=3, ERROR=4.
 const CODES = { READY: 0, RECONCILIATION_REQUIRED: 1, STALE: 2, INVALID: 3, ERROR: 4 }
 const ACTIONS = new Set(['plan_slice', 'implement_slice', 'verify_slice', 'review_slice', 'resolve_blocker', 'reconcile_lifecycle', 'request_gate', 'finalize_story'])
+const SLICE_STATUSES = new Set(['pending', 'active', 'checkpointed', 'verified', 'reviewed', 'blocked'])
 const V3_KEYS = new Set(['run_id', 'runId', 'activeRunId', 'task_id', 'taskId', 'taskIds', 'workerId', 'lease', 'generation', 'humanGateRequired', 'dispatchId'])
+const SHA256 = /^sha256:[0-9a-f]{64}$/
 
 function scalar(raw) {
   const value = raw.trim()
@@ -110,11 +112,33 @@ function hasForbidden(value) {
   return Object.entries(value).some(([key, child]) => V3_KEYS.has(key) || hasForbidden(child))
 }
 
+function isObject(value) { return value !== null && typeof value === 'object' && !Array.isArray(value) }
+
+function validVerificationSchema(slice) {
+  const verification = slice.verification
+  if (verification !== undefined && !isObject(verification)) return false
+  if (verification) {
+    if (verification.subject !== undefined && !isObject(verification.subject)) return false
+    if (verification.changed_paths !== undefined &&
+        (!Array.isArray(verification.changed_paths) || verification.changed_paths.some(item => typeof item !== 'string' || !item))) return false
+    if (verification.changed_paths_sha256 !== undefined && !SHA256.test(verification.changed_paths_sha256)) return false
+    if (verification.focused_checks !== undefined &&
+        (!Array.isArray(verification.focused_checks) || verification.focused_checks.some(item => !isObject(item)))) return false
+    if (verification.canonical !== undefined && !isObject(verification.canonical)) return false
+    if (verification.escalation !== undefined && !isObject(verification.escalation)) return false
+    if (verification.progression_eligible !== undefined && typeof verification.progression_eligible !== 'boolean') return false
+  }
+  if (slice.verification_obligations !== undefined && !Array.isArray(slice.verification_obligations)) return false
+  if (slice.review?.freshness !== undefined &&
+      typeof slice.review.freshness !== 'string' && !isObject(slice.review.freshness)) return false
+  return true
+}
+
 export function validate(root, id) {
   const planPath = `_bmad-output/implementation-artifacts/story-${id.replace('.', '-')}-plan.md`
   const result = { storyId: id, planPath, valid: false, status: 'INVALID', executionStatus: null,
     lifecycleSnapshot: null, actualLifecycle: null, currentSlice: null, nextAction: null,
-    sourceDigest: null, checkpointState: 'NONE', reasons: [] }
+    sourceDigest: null, checkpointState: 'NONE', warnings: [], legacy: { sliceStatusDrift: false }, reasons: [] }
   const invalid = reason => result.reasons.push(reason)
   const stale = reason => result.reasons.push(reason)
   const file = safePath(root, planPath)
@@ -172,6 +196,17 @@ export function validate(root, id) {
     if (!ids.includes(plan.current_slice)) invalid('INVALID_CURRENT_SLICE')
     const graph = new Map()
     for (const slice of slices) {
+      const legacyInProgress = slice.status === 'in-progress' && plan.schema_version === 1 &&
+        Boolean(slice.checkpoint_commit) && slice.id === plan.current_slice &&
+        plan.next_action?.kind === 'verify_slice' && plan.next_action?.target === slice.id &&
+        plan.execution_status === 'in-progress'
+      if (!SLICE_STATUSES.has(slice.status)) {
+        if (legacyInProgress) {
+          result.legacy.sliceStatusDrift = true
+          if (!result.warnings.includes('LEGACY_SLICE_STATUS_IN_PROGRESS')) result.warnings.push('LEGACY_SLICE_STATUS_IN_PROGRESS')
+        } else invalid('INVALID_SLICE_STATUS')
+      }
+      if (!validVerificationSchema(slice)) invalid('INVALID_VERIFICATION_SCHEMA')
       if (!Array.isArray(slice.depends_on) || slice.depends_on.some(dep => !ids.includes(dep))) invalid('INVALID_DEPENDENCY')
       graph.set(slice.id, slice.depends_on ?? [])
     }
@@ -185,7 +220,7 @@ export function validate(root, id) {
     }
     if (ids.some(visit)) invalid('CYCLIC_DEPENDENCY')
     if (plan.execution_status === 'complete' &&
-        (slices.some(slice => slice.status !== 'complete' ||
+        (slices.some(slice => !((slice.status === 'reviewed') || (slice.status === 'verified' && !slice.review?.required)) ||
           (slice.verification?.gate_status && slice.verification.gate_status !== 'PASS') ||
           (slice.review?.required && slice.review.verdict !== 'APPROVE')) || (plan.blockers?.length ?? 0) ||
           !['finalize_story', ...(plan.lifecycle_snapshot === 'review' ? ['reconcile_lifecycle'] : [])].includes(plan.next_action?.kind))) invalid('INCOMPLETE_CLAIM')

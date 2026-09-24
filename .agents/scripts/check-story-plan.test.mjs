@@ -45,7 +45,7 @@ risk:
   level: LOW
 slices:
   - id: A
-    status: in-progress
+    status: active
     depends_on: []
     checkpoint_commit: ${sha}
     review:
@@ -74,6 +74,11 @@ function withFixture(change, expectedStatus, expectedCode, reason) {
     assert.equal(result.json.status, expectedStatus)
     if (reason) assert.ok(result.json.reasons.includes(reason), JSON.stringify(result.json))
   } finally { rmSync(f.root, { recursive: true, force: true }) }
+}
+
+function inspectFixture(run) {
+  const f = fixture()
+  try { run(f) } finally { rmSync(f.root, { recursive: true, force: true }) }
 }
 
 function editPlan(f, from, to) {
@@ -127,7 +132,7 @@ test('complete with pending slice', () => withFixture(f => editPlan(f, 'executio
 test('complete execution may await review lifecycle reconciliation', () => withFixture(f => {
   editPlan(f, 'execution_status: in-progress', 'execution_status: complete')
   const file = path.join(f.root, '_bmad-output/implementation-artifacts/story-9-1-plan.md')
-  let text = readFileSync(file, 'utf8').replace('status: in-progress\n    depends_on:', 'status: complete\n    depends_on:')
+  let text = readFileSync(file, 'utf8').replace('status: active\n    depends_on:', 'status: reviewed\n    depends_on:')
     .replace('lifecycle_snapshot: in-progress', 'lifecycle_snapshot: review')
     .replace('kind: implement_slice\n  target: A', 'kind: reconcile_lifecycle\n  target: story')
   writeFileSync(file, text)
@@ -145,3 +150,43 @@ for (const kind of ['plan_slice','implement_slice','verify_slice','review_slice'
   }, kind === 'reconcile_lifecycle' ? 'INVALID' : 'READY', kind === 'reconcile_lifecycle' ? 3 : 0))
 }
 test('unknown action', () => withFixture(f => editPlan(f, 'kind: implement_slice', 'kind: unknown'), 'INVALID', 3, 'UNKNOWN_ACTION'))
+
+test('canonical slice statuses are accepted', () => {
+  for (const status of ['pending', 'active', 'checkpointed', 'verified', 'reviewed', 'blocked']) {
+    withFixture(f => editPlan(f, 'status: active', `status: ${status}`), 'READY', 0)
+  }
+})
+
+test('legacy in-progress slice status is accepted only by the schema-v1 verification bridge', () => inspectFixture(f => {
+  const file = path.join(f.root, '_bmad-output/implementation-artifacts/story-9-1-plan.md')
+  let text = readFileSync(file, 'utf8').replace('status: active', 'status: in-progress')
+    .replace('kind: implement_slice', 'kind: verify_slice')
+  writeFileSync(file, text)
+  const result = check(f.root)
+  assert.equal(result.code, 0)
+  assert.equal(result.json.valid, true)
+  assert.equal(result.json.legacy.sliceStatusDrift, true)
+  assert.ok(result.json.warnings.includes('LEGACY_SLICE_STATUS_IN_PROGRESS'))
+}))
+
+test('legacy in-progress slice status is rejected outside the exact bridge', () => withFixture(f => {
+  editPlan(f, 'status: active', 'status: in-progress')
+}, 'INVALID', 3, 'INVALID_SLICE_STATUS'))
+
+test('unknown slice status is rejected', () => withFixture(f => editPlan(f, 'status: active', 'status: invented'), 'INVALID', 3, 'INVALID_SLICE_STATUS'))
+
+test('structured verification fields remain schema-v1 compatible', () => inspectFixture(f => {
+  const digest = 'sha256:' + 'a'.repeat(64)
+  const file = path.join(f.root, '_bmad-output/implementation-artifacts/story-9-1-plan.md')
+  let text = readFileSync(file, 'utf8').replace('    review:', `    verification:\n      subject:\n        commit: ${f.sha}\n      changed_paths: [src/a.php]\n      changed_paths_sha256: ${digest}\n      focused_checks: []\n      canonical:\n        status: INCOMPLETE\n      escalation:\n        decision: REVIEW_REQUIRED\n      progression_eligible: false\n    verification_obligations: []\n    review:`)
+    .replace(`reviewed_commit: ${f.sha}`, `reviewed_commit: ${f.sha}\n      freshness:\n        status: PENDING`)
+  writeFileSync(file, text)
+  const result = check(f.root)
+  assert.equal(result.code, 0)
+  assert.equal(result.json.status, 'READY')
+}))
+
+test('malformed structured verification fields are rejected', () => withFixture(f => {
+  const file = path.join(f.root, '_bmad-output/implementation-artifacts/story-9-1-plan.md')
+  writeFileSync(file, readFileSync(file, 'utf8').replace('    review:', '    verification:\n      changed_paths: invalid\n      progression_eligible: maybe\n    review:'))
+}, 'INVALID', 3, 'INVALID_VERIFICATION_SCHEMA'))

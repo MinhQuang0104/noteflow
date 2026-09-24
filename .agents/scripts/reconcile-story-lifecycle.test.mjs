@@ -36,10 +36,11 @@ function fixture({ storyId = '9.1', sprint = 'backlog', snapshot = sprint, execu
   git(root, 'commit', '-qm', 'seed')
   const checkpoint = git(root, 'rev-parse', 'HEAD')
   const plan = `---\nschema_version: 1\nstory_id: "${storyId}"\nsource:\n  path: docs/product/epics.md\n  anchor: "#story-${storyId.replace('.', '')}-fixture"\n  section_digest: "sha256:${digest(section)}"\nsprint_key: ${sprintKey}\nexecution_status: ${execution}\nlifecycle_snapshot: ${snapshot}\ncurrent_slice: A\nconsistency_note: lifecycle pending\nrisk:\n  level: LOW\nslices:\n  - id: A\n    status: in-progress\n    depends_on: []\n    checkpoint_commit: ${checkpoint}\n    verification:\n      gate_status: PASS\n    review:\n      required: true\n      verdict: APPROVE\n      reviewed_commit: ${checkpoint}\nblockers:${blocker ? '\n  - id: lifecycle-backlog-conflict\n    reason: Lifecycle pending.' : ' []'}\nunresolved_questions: []\ncheckpoints:\n  slice_a_commit: ${checkpoint}\nnext_action:\n  kind: reconcile_lifecycle\n  target: story\n${blocker?'  reference: lifecycle-backlog-conflict\n':''}---\n`
-  writeFileSync(path.join(root, fixturePlanRel), plan)
+  const canonicalPlan = plan.replace('\n    status: in-progress\n', '\n    status: checkpointed\n')
+  writeFileSync(path.join(root, fixturePlanRel), canonicalPlan)
   git(root, 'add', '.')
   git(root, 'commit', '-qm', 'fixture')
-  return {root, storyId, planRel:fixturePlanRel, sprintRel, head:git(root, 'rev-parse', 'HEAD'), plan, checkpoint}
+  return {root, storyId, planRel:fixturePlanRel, sprintRel, head:git(root, 'rev-parse', 'HEAD'), plan:canonicalPlan, checkpoint}
 }
 function run(f, verb, from, to, extra = [], env = {}) {
   const args = [script, verb, f.storyId, '--from', from, '--to', to, '--expected-head', f.head, ...extra]
@@ -69,11 +70,11 @@ test('ready-for-dev to in-progress allowed',()=>withFixture({sprint:'ready-for-d
   assert.equal(run(f,'check','ready-for-dev','in-progress',['--next-action','verify_slice:A']).code,0)
 }))
 test('in-progress to review with complete gates',()=>withFixture({sprint:'in-progress',blocker:false,execution:'review'},f=>{
-  edit(f,planRel,'status: in-progress','status: complete');recommit(f)
+  edit(f,planRel,'status: checkpointed','status: reviewed');recommit(f)
   const r=run(f,'check','in-progress','review',['--next-action','request_gate:story']);assert.equal(r.code,0,JSON.stringify(r.json))
 }))
 test('review to done requires human approval',()=>withFixture({sprint:'review',blocker:false,execution:'complete'},f=>{
-  edit(f,planRel,'status: in-progress','status: complete');recommit(f)
+  edit(f,planRel,'status: checkpointed','status: reviewed');recommit(f)
   let r=run(f,'check','review','done',['--next-action','finalize_story:story']);assert.equal(r.code,4,JSON.stringify(r.json))
   edit(f,planRel,'next_action:\n','human_approval:\n  approved_by: Person\n  approved_at: 2026-09-24\n  approved_commit: '+f.checkpoint+'\nnext_action:\n');recommit(f)
   r=run(f,'check','review','done',['--next-action','finalize_story:story']);assert.equal(r.code,0,JSON.stringify(r.json))
@@ -138,7 +139,7 @@ test('backlog to in-progress uses the exact canonical commit message',()=>withFi
   assert.equal(git(f.root,'log','-1','--format=%s'),'chore(lifecycle): move story 9.1 backlog to in-progress')
 }))
 test('in-progress to review uses the exact canonical commit message',()=>withFixture({sprint:'in-progress',blocker:false,execution:'review'},f=>{
-  edit(f,planRel,'status: in-progress','status: complete');recommit(f)
+  edit(f,planRel,'status: checkpointed','status: reviewed');recommit(f)
   const r=apply(f,'in-progress','review',[],{},'request_gate:story');assert.equal(r.code,0,JSON.stringify(r.json))
   assert.equal(git(f.root,'log','-1','--format=%s'),'chore(lifecycle): move story 9.1 in-progress to review')
 }))

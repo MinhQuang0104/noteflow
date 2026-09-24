@@ -4,11 +4,14 @@ Use deterministic tools, then risk-based escalation, then targeted reasoning. Pl
 
 ## Verification
 
+- `node .agents/scripts/check-slice-verification.mjs check <story-id> <slice-id>` is a read-only checkpoint scope and freshness helper. It resolves baseline/checkpoint identity, derives exact changed paths, detects relevant drift, and classifies persisted focused evidence and prior review freshness. It never runs checks, reviews, escalation, or progression.
+- Helper status `RERUN_REQUIRED` is not a verification failure; it means scope/freshness is established but required checks lack reusable structured evidence.
 - Explicit: `node .agents/scripts/check-verification.mjs check <feature> --changed <path>`
 - Auto: `node .agents/scripts/check-verification.mjs check auto --changed <path>`
 - Repeat `--changed` for multiple explicit paths: `--changed <path-a> --changed <path-b>`. No Git change discovery.
 - Exit codes: `PASS` 0; `FAIL` 1; `INCOMPLETE` 2; `ERROR` 3. Never claim skipped checks ran.
 - Auto routes mapped scope to its deterministic recipe. No applicable recipe returns applicability `NOT_APPLICABLE`, status `INCOMPLETE`, no checks. Mixed mapped/unmapped scope remains `INCOMPLETE` with unmatched paths preserved. Invalid input returns `ERROR`.
+- Canonical verification still comes only from `check-verification.mjs`; preserve its output exactly. `NOT_APPLICABLE`/`INCOMPLETE` remains non-`PASS`, and progression eligibility is a separate persisted decision that cannot reinterpret canonical status.
 
 ## Escalation
 

@@ -125,7 +125,7 @@ function inspect(root,o) {
   if((blockers.length&&!lifecycleBlocker)||questions.length) return {out:fail(out,'PRECONDITION_FAILED','PRODUCT_BLOCKER_OR_QUESTION')}
   const evidence=plan.slices?.some(s=>s.checkpoint_commit&&s.review?.reviewed_commit)
   if(to==='in-progress'&&!evidence) return {out:fail(out,'PRECONDITION_FAILED','CHECKPOINT_REVIEW_REQUIRED')}
-  if(to==='review' && (!plan.slices?.every(s=>s.status==='complete'&&s.verification?.gate_status==='PASS'&&(!s.review?.required||s.review.verdict==='APPROVE')))) return {out:fail(out,'PRECONDITION_FAILED','REVIEW_GATES_INCOMPLETE')}
+  if(to==='review' && (!plan.slices?.every(s=>(s.status==='reviewed'||(s.status==='verified'&&!s.review?.required))&&s.verification?.gate_status==='PASS'&&(!s.review?.required||s.review.verdict==='APPROVE')))) return {out:fail(out,'PRECONDITION_FAILED','REVIEW_GATES_INCOMPLETE')}
   if(to==='done') {
     const approval=plan.human_approval
     if(!(approval?.approved_by&&/^\d{4}-\d{2}-\d{2}/.test(approval?.approved_at??'')&&/^[0-9a-f]{40,64}$/.test(approval?.approved_commit??'')&&git(root,'merge-base','--is-ancestor',approval.approved_commit,'HEAD').status===0)) return {out:fail(out,'HUMAN_REQUIRED','HUMAN_APPROVAL_REQUIRED')}
