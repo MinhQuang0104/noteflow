@@ -83,13 +83,14 @@ function editPlan(f, from, to) {
 }
 
 test('valid READY fixture', () => withFixture(() => {}, 'READY', 0))
-test('real Story 2.3 needs lifecycle reconciliation', () => {
+test('real Story 2.3 is ready after lifecycle reconciliation', () => {
   const result = check(realRoot, '2.3')
-  assert.equal(result.code, 1)
+  assert.equal(result.code, 0)
   assert.equal(result.json.valid, true)
-  assert.equal(result.json.status, 'RECONCILIATION_REQUIRED')
-  assert.equal(result.json.lifecycleSnapshot, 'backlog')
-  assert.equal(result.json.actualLifecycle, 'backlog')
+  assert.equal(result.json.status, 'READY')
+  assert.equal(result.json.lifecycleSnapshot, 'in-progress')
+  assert.equal(result.json.actualLifecycle, 'in-progress')
+  assert.deepEqual(result.json.nextAction, {kind:'verify_slice', target:'A'})
 })
 test('unsupported schema', () => withFixture(f => editPlan(f, 'schema_version: 1', 'schema_version: 2'), 'INVALID', 3, 'UNSUPPORTED_SCHEMA'))
 test('story ID mismatch', () => withFixture(f => editPlan(f, 'story_id: "9.1"', 'story_id: "9.2"'), 'INVALID', 3, 'STORY_ID_MISMATCH'))

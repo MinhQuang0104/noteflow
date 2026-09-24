@@ -16,15 +16,18 @@ function git(root, ...args) {
   assert.equal(p.status, 0, p.stderr)
   return p.stdout.trim()
 }
-function fixture({ sprint = 'backlog', snapshot = sprint, execution = 'in-progress', parent = 'in-progress', blocker = true } = {}) {
+function fixture({ storyId = '9.1', sprint = 'backlog', snapshot = sprint, execution = 'in-progress', parent = 'in-progress', blocker = true } = {}) {
   const root = mkdtempSync(path.join(tmpdir(), 'lifecycle-'))
+  const fixturePlanRel = `_bmad-output/implementation-artifacts/story-${storyId.replace('.', '-')}-plan.md`
+  const sprintKey = `${storyId.replace('.', '-')}-fixture`
+  const epicId = storyId.split('.')[0]
   mkdirSync(path.join(root, '_bmad-output/implementation-artifacts'), { recursive: true })
   mkdirSync(path.join(root, '.agent-state'), { recursive: true })
   mkdirSync(path.join(root, 'docs/product'), { recursive: true })
-  const section = '### Story 9.1: Fixture\n\nDone.\n\n'
-  writeFileSync(path.join(root, 'docs/product/epics.md'), `# Epic\n\n${section}### Story 9.2: Next\n`)
+  const section = `### Story ${storyId}: Fixture\n\nDone.\n\n`
+  writeFileSync(path.join(root, 'docs/product/epics.md'), `# Epic\n\n${section}### Story ${epicId}.999: Next\n`)
   writeFileSync(path.join(root, '.agent-state/active-run.json'), JSON.stringify({schemaVersion:1, activeRunId:null, storyId:null, status:'IDLE'}))
-  writeFileSync(path.join(root, sprintRel), `development_status:\n  epic-9: ${parent}\n  9-1-fixture: ${sprint}\n`)
+  writeFileSync(path.join(root, sprintRel), `development_status:\n  epic-${epicId}: ${parent}\n  ${sprintKey}: ${sprint}\n`)
   git(root, 'init', '-q')
   git(root, 'config', 'user.email', 'test@example.com')
   git(root, 'config', 'user.name', 'Test')
@@ -32,14 +35,14 @@ function fixture({ sprint = 'backlog', snapshot = sprint, execution = 'in-progre
   git(root, 'add', 'seed.txt')
   git(root, 'commit', '-qm', 'seed')
   const checkpoint = git(root, 'rev-parse', 'HEAD')
-  const plan = `---\nschema_version: 1\nstory_id: "9.1"\nsource:\n  path: docs/product/epics.md\n  anchor: "#story-91-fixture"\n  section_digest: "sha256:${digest(section)}"\nsprint_key: 9-1-fixture\nexecution_status: ${execution}\nlifecycle_snapshot: ${snapshot}\ncurrent_slice: A\nconsistency_note: lifecycle pending\nrisk:\n  level: LOW\nslices:\n  - id: A\n    status: in-progress\n    depends_on: []\n    checkpoint_commit: ${checkpoint}\n    verification:\n      gate_status: PASS\n    review:\n      required: true\n      verdict: APPROVE\n      reviewed_commit: ${checkpoint}\nblockers:${blocker ? '\n  - id: lifecycle-backlog-conflict\n    reason: Lifecycle pending.' : ' []'}\nunresolved_questions: []\ncheckpoints:\n  slice_a_commit: ${checkpoint}\nnext_action:\n  kind: reconcile_lifecycle\n  target: story\n${blocker?'  reference: lifecycle-backlog-conflict\n':''}---\n`
-  writeFileSync(path.join(root, planRel), plan)
+  const plan = `---\nschema_version: 1\nstory_id: "${storyId}"\nsource:\n  path: docs/product/epics.md\n  anchor: "#story-${storyId.replace('.', '')}-fixture"\n  section_digest: "sha256:${digest(section)}"\nsprint_key: ${sprintKey}\nexecution_status: ${execution}\nlifecycle_snapshot: ${snapshot}\ncurrent_slice: A\nconsistency_note: lifecycle pending\nrisk:\n  level: LOW\nslices:\n  - id: A\n    status: in-progress\n    depends_on: []\n    checkpoint_commit: ${checkpoint}\n    verification:\n      gate_status: PASS\n    review:\n      required: true\n      verdict: APPROVE\n      reviewed_commit: ${checkpoint}\nblockers:${blocker ? '\n  - id: lifecycle-backlog-conflict\n    reason: Lifecycle pending.' : ' []'}\nunresolved_questions: []\ncheckpoints:\n  slice_a_commit: ${checkpoint}\nnext_action:\n  kind: reconcile_lifecycle\n  target: story\n${blocker?'  reference: lifecycle-backlog-conflict\n':''}---\n`
+  writeFileSync(path.join(root, fixturePlanRel), plan)
   git(root, 'add', '.')
   git(root, 'commit', '-qm', 'fixture')
-  return {root, planRel, sprintRel, head:git(root, 'rev-parse', 'HEAD'), plan, checkpoint}
+  return {root, storyId, planRel:fixturePlanRel, sprintRel, head:git(root, 'rev-parse', 'HEAD'), plan, checkpoint}
 }
 function run(f, verb, from, to, extra = [], env = {}) {
-  const args = [script, verb, '9.1', '--from', from, '--to', to, '--expected-head', f.head, ...extra]
+  const args = [script, verb, f.storyId, '--from', from, '--to', to, '--expected-head', f.head, ...extra]
   const p = spawnSync(process.execPath, args, {cwd:f.root, encoding:'utf8',env:{...process.env,...env}})
   return {code:p.status, json:JSON.parse(p.stdout), stderr:p.stderr}
 }
@@ -49,8 +52,8 @@ function edit(f, rel, from, to) {
   assert.ok(old.includes(from)); writeFileSync(file,old.replace(from,to))
 }
 function recommit(f) { git(f.root,'add','.');git(f.root,'commit','-qm','setup');f.head=git(f.root,'rev-parse','HEAD') }
-function apply(f,from='backlog',to='in-progress',extra=[],env={}) {
-  return run(f,'apply',from,to,['--expected-plan-sha256',digest(readFileSync(path.join(f.root,planRel))),'--expected-sprint-sha256',digest(readFileSync(path.join(f.root,sprintRel))),'--next-action','verify_slice:A',...extra],env)
+function apply(f,from='backlog',to='in-progress',extra=[],env={},nextAction='verify_slice:A') {
+  return run(f,'apply',from,to,['--expected-plan-sha256',digest(readFileSync(path.join(f.root,f.planRel))),'--expected-sprint-sha256',digest(readFileSync(path.join(f.root,f.sprintRel))),'--next-action',nextAction,...extra],env)
 }
 
 test('backlog to in-progress preview is read only', () => withFixture({}, f => {
@@ -76,6 +79,11 @@ test('review to done requires human approval',()=>withFixture({sprint:'review',b
   r=run(f,'check','review','done',['--next-action','finalize_story:story']);assert.equal(r.code,0,JSON.stringify(r.json))
 }))
 test('same state no change',()=>withFixture({},f=>{const r=run(f,'check','backlog','backlog');assert.equal(r.code,0);assert.equal(r.json.status,'NO_CHANGE')}))
+test('same-state apply creates no lifecycle commit',()=>withFixture({},f=>{
+  const before=f.head
+  const r=apply(f,'backlog','backlog')
+  assert.equal(r.code,0,JSON.stringify(r.json));assert.equal(r.json.status,'NO_CHANGE');assert.equal(git(f.root,'rev-parse','HEAD'),before)
+}))
 test('reverse transition needs human',()=>withFixture({sprint:'in-progress'},f=>assert.equal(run(f,'check','in-progress','backlog').code,4)))
 test('done cannot advance',()=>withFixture({sprint:'done'},f=>assert.equal(run(f,'check','done','review').code,5)))
 test('unknown state invalid',()=>withFixture({},f=>assert.equal(run(f,'check','nonsense','review').code,5)))
@@ -124,6 +132,19 @@ test('apply commits exactly two files and preserves other semantic fields',()=>w
   for(const key of ['lifecycle_snapshot','consistency_note','blockers','next_action']) {delete beforeFields[key];delete afterFields[key]}
   assert.deepEqual(afterFields,beforeFields)
   assert.match(readFileSync(path.join(f.root,sprintRel),'utf8'),/epic-9: in-progress/)
+}))
+test('backlog to in-progress uses the exact canonical commit message',()=>withFixture({},f=>{
+  const r=apply(f);assert.equal(r.code,0,JSON.stringify(r.json))
+  assert.equal(git(f.root,'log','-1','--format=%s'),'chore(lifecycle): move story 9.1 backlog to in-progress')
+}))
+test('in-progress to review uses the exact canonical commit message',()=>withFixture({sprint:'in-progress',blocker:false,execution:'review'},f=>{
+  edit(f,planRel,'status: in-progress','status: complete');recommit(f)
+  const r=apply(f,'in-progress','review',[],{},'request_gate:story');assert.equal(r.code,0,JSON.stringify(r.json))
+  assert.equal(git(f.root,'log','-1','--format=%s'),'chore(lifecycle): move story 9.1 in-progress to review')
+}))
+test('arbitrary validated Story ID formats deterministically',()=>withFixture({storyId:'12.34'},f=>{
+  const r=apply(f);assert.equal(r.code,0,JSON.stringify(r.json))
+  assert.equal(git(f.root,'log','-1','--format=%s'),'chore(lifecycle): move story 12.34 backlog to in-progress')
 }))
 test('failure before write changes nothing',()=>withFixture({},f=>{
   const old=readFileSync(path.join(f.root,sprintRel),'utf8');const r=apply(f,'backlog','in-progress',[],{LIFECYCLE_TEST_FAULT:'before-write'});assert.equal(r.code,3);assert.equal(readFileSync(path.join(f.root,sprintRel),'utf8'),old)

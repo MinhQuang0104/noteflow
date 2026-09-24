@@ -9,6 +9,7 @@ const STATES = ['backlog','ready-for-dev','in-progress','review','done']
 const EDGES = new Set(['backlog:ready-for-dev','backlog:in-progress','ready-for-dev:in-progress','in-progress:review','review:done'])
 const REL_SPRINT = '_bmad-output/implementation-artifacts/sprint-status.yaml'
 const sha = bytes => createHash('sha256').update(bytes).digest('hex')
+const lifecycleCommitMessage = (storyId, from, to) => `chore(lifecycle): move story ${storyId} ${from} to ${to}`
 function git(root, ...args) {
   const p=spawnSync('git',args,{cwd:root,encoding:'utf8',windowsHide:true,timeout:10000})
   if (p.error || p.status === null) throw new Error('GIT_UNAVAILABLE')
@@ -175,7 +176,7 @@ function apply(root,o,checked) {
     if(add.status!==0) throw new Error('STAGE_FAILED')
     const staged=git(root,'diff','--cached','--name-only').stdout.trim().split(/\r?\n/).filter(Boolean).sort()
     if(JSON.stringify(staged)!==JSON.stringify([REL_SPRINT,relPlan].sort())) throw new Error('STAGED_SCOPE_MISMATCH')
-    const commit=git(root,'commit','-m',`Reconcile Story ${o.id} lifecycle ${o['--from']} to ${o['--to']}`,'--only','--',REL_SPRINT,relPlan)
+    const commit=git(root,'commit','-m',lifecycleCommitMessage(reread.storyId,o['--from'],o['--to']),'--only','--',REL_SPRINT,relPlan)
     if(commit.status!==0) throw new Error('COMMIT_FAILED')
     out.status='APPLIED';out.lifecycleCommit=git(root,'rev-parse','HEAD').stdout.trim();return out
   } catch(error) {
