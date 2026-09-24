@@ -95,7 +95,7 @@ test('real Story 2.3 is ready after lifecycle reconciliation', () => {
   assert.equal(result.json.status, 'READY')
   assert.equal(result.json.lifecycleSnapshot, 'in-progress')
   assert.equal(result.json.actualLifecycle, 'in-progress')
-  assert.deepEqual(result.json.nextAction, {kind:'verify_slice', target:'A'})
+  assert.deepEqual(result.json.nextAction, {kind:'implement_slice', target:'B'})
 })
 test('unsupported schema', () => withFixture(f => editPlan(f, 'schema_version: 1', 'schema_version: 2'), 'INVALID', 3, 'UNSUPPORTED_SCHEMA'))
 test('story ID mismatch', () => withFixture(f => editPlan(f, 'story_id: "9.1"', 'story_id: "9.2"'), 'INVALID', 3, 'STORY_ID_MISMATCH'))

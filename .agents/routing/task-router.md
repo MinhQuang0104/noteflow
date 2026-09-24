@@ -2,7 +2,7 @@
 
 Root `AGENTS.md` decides authority. This file is routing guidance, not runtime state.
 
-For an explicit request to implement or continue Story `<epic>.<story>` **by V4 Lite**, and only after the canonical active-run pointer is clearly IDLE, route to `.agents/skills/v4-story-runner/SKILL.md`. This foundation permits read-only validation/readiness plus bounded `reconcile_lifecycle` and `verify_slice` execution under that skill's guards. `implement_slice`, `review_slice`, and `finalize_story` execution remain disabled. An explicit V3.1/Orca request follows V3.1. A Story request without a named lane retains the existing V3.1/`story-development` route. If a request names both lanes, stop for clarification.
+For an explicit request to implement or continue Story `<epic>.<story>` **by V4 Lite**, and only after the canonical active-run pointer is clearly IDLE, route to `.agents/skills/v4-story-runner/SKILL.md`. This foundation permits read-only validation/readiness plus one bounded `reconcile_lifecycle`, `implement_slice`, or `verify_slice` action per invocation under that skill's guards. `review_slice`, `finalize_story`, automatic Human Gate, and automatic V3 fallback remain disabled. An explicit V3.1/Orca request follows V3.1. A Story request without a named lane retains the existing V3.1/`story-development` route. If a request names both lanes, stop for clarification.
 
 For explicitly human-authorized V4 Lite migration work, apply the L1 routing below only after the pointer is clearly IDLE.
 
