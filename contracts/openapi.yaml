@@ -284,6 +284,104 @@ paths:
           $ref: '#/components/responses/ValidationError'
         '423':
           $ref: '#/components/responses/ProblemDetails'
+  /api/v1/challenges/{id}/journals/{date}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: date
+        in: path
+        required: true
+        schema:
+          type: string
+          format: date
+    get:
+      operationId: getChallengeJournal
+      summary: Read the optional journal for one challenge day
+      security:
+        - sanctumCookie: []
+      responses:
+        '200':
+          description: Journal state, including version zero when absent
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JournalReadResult'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          description: Authenticated identity is not the provisioned owner
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Challenge not found
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    put:
+      operationId: saveChallengeJournal
+      summary: Save or edit a journal without changing completion
+      security:
+        - sanctumCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveJournalRequest'
+      responses:
+        '200':
+          description: Journal saved or prior command acknowledgement replayed
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JournalMutationResult'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          description: Authenticated identity is not the provisioned owner
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Challenge not found
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          $ref: '#/components/responses/ProblemDetails'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '423':
+          $ref: '#/components/responses/ProblemDetails'
 components:
   securitySchemes:
     sanctumCookie:
@@ -335,6 +433,71 @@ components:
           schema:
             $ref: '#/components/schemas/ApiError'
   schemas:
+    JournalSnapshot:
+      type: object
+      additionalProperties: false
+      required:
+        - challenge_id
+        - local_date
+        - journal
+        - journal_version
+      properties:
+        challenge_id:
+          type: string
+          format: uuid
+        local_date:
+          type: string
+          format: date
+        journal:
+          type: string
+          nullable: true
+        journal_version:
+          type: integer
+          minimum: 0
+    JournalReadResult:
+      type: object
+      additionalProperties: false
+      required:
+        - journal
+      properties:
+        journal:
+          $ref: '#/components/schemas/JournalSnapshot'
+    JournalMutationResult:
+      type: object
+      additionalProperties: false
+      required:
+        - journal
+        - account_revision
+        - data_epoch
+      properties:
+        journal:
+          $ref: '#/components/schemas/JournalSnapshot'
+        account_revision:
+          type: integer
+          minimum: 0
+        data_epoch:
+          type: integer
+          minimum: 1
+    SaveJournalRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - command_id
+        - data_epoch
+        - base_version
+        - journal
+      properties:
+        command_id:
+          type: string
+          format: uuid
+        data_epoch:
+          type: integer
+          minimum: 1
+        base_version:
+          type: integer
+          minimum: 0
+        journal:
+          type: string
     AccountContext:
       type: object
       additionalProperties: false
@@ -647,4 +810,6 @@ components:
         current_version:
           type: integer
         current_snapshot:
-          $ref: '#/components/schemas/ChallengeSnapshot'
+          oneOf:
+            - $ref: '#/components/schemas/ChallengeSnapshot'
+            - $ref: '#/components/schemas/JournalSnapshot'

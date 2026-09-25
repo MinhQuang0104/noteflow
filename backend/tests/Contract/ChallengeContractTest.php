@@ -122,3 +122,61 @@ test('challenge update, conflict, and validation responses satisfy OpenAPI contr
 
     expect(true)->toBeTrue();
 });
+
+test('journal read, write, conflict, validation, and write fence satisfy OpenAPI contract', function () {
+    $owner = createContractOwner();
+    $id = (string) Str::uuid();
+    DB::table('challenges')->insert([
+        'id' => $id,
+        'owner_id' => $owner->id,
+        'name' => 'Journal contract',
+        'start_date' => '2026-09-19',
+        'row_version' => 1,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    $path = '/api/v1/challenges/{id}/journals/{date}';
+    $url = "/api/v1/challenges/{$id}/journals/2026-09-19";
+    $validator = challengeContractValidator();
+
+    $read = $this->actingAs($owner)->getJson($url);
+    $read->assertOk();
+    $validator->validate('GET', $path, challengePsrResponse($read));
+
+    $write = $this->actingAs($owner)->putJson($url, [
+        'command_id' => (string) Str::uuid(),
+        'data_epoch' => 1,
+        'base_version' => 0,
+        'journal' => 'Saved text',
+    ]);
+    $write->assertOk();
+    $validator->validate('PUT', $path, challengePsrResponse($write));
+
+    $conflict = $this->actingAs($owner)->putJson($url, [
+        'command_id' => (string) Str::uuid(),
+        'data_epoch' => 1,
+        'base_version' => 0,
+        'journal' => 'Stale text',
+    ]);
+    $conflict->assertStatus(409);
+    $validator->validate('PUT', $path, challengePsrResponse($conflict));
+
+    $invalid = $this->actingAs($owner)->putJson($url, [
+        'command_id' => (string) Str::uuid(),
+        'data_epoch' => 1,
+        'base_version' => 1,
+        'journal' => ' ',
+    ]);
+    $invalid->assertStatus(422);
+    $validator->validate('PUT', $path, challengePsrResponse($invalid));
+
+    DB::table('account_states')->where('owner_id', $owner->id)->update(['write_state' => 'locked_for_import']);
+    $locked = $this->actingAs($owner)->putJson($url, [
+        'command_id' => (string) Str::uuid(),
+        'data_epoch' => 1,
+        'base_version' => 1,
+        'journal' => 'Blocked',
+    ]);
+    $locked->assertStatus(423);
+    $validator->validate('PUT', $path, challengePsrResponse($locked));
+});
