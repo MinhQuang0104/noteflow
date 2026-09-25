@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "story_id": "2.3",
+  "slice_id": "C",
+  "kind": "review",
+  "checkpoint_commit": "51a867f6871517438e8c761787d5edfeb73aaabd",
+  "baseline_commit": "6bdd9aeb8f067ba65d0572bf7d87b51d9666bd78",
+  "subject_digest": "sha256:f8ae42bfb0848b9cb2157cad084b474bbed4cc446b037ab2c1b2923059a26046",
+  "created_from_head": "51a867f6871517438e8c761787d5edfeb73aaabd",
+  "changed_paths_sha256": "sha256:f8ae42bfb0848b9cb2157cad084b474bbed4cc446b037ab2c1b2923059a26046",
+  "commands": [
+    {
+      "command": "node .agents/scripts/check-escalation.mjs < exact wrapper with canonical verification, risk HIGH, judgmentFlags PUBLIC_CONTRACT/SECURITY_AUTH/CONCURRENCY_STATE",
+      "exit_code": 1,
+      "tool": "check-escalation.mjs",
+      "environment": "Windows; repository root; exact canonical JSON forwarded unchanged"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6bdd9aeb8f067ba65d0572bf7d87b51d9666bd78 --head 51a867f6871517438e8c761787d5edfeb73aaabd --path frontend/scripts/generate-openapi-types.mjs",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows; repository root; bounded one-path evidence"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6bdd9aeb8f067ba65d0572bf7d87b51d9666bd78 --head 51a867f6871517438e8c761787d5edfeb73aaabd --path frontend/src/api/__tests__/challenges.spec.ts",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows; repository root; bounded one-path evidence"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6bdd9aeb8f067ba65d0572bf7d87b51d9666bd78 --head 51a867f6871517438e8c761787d5edfeb73aaabd --path frontend/src/api/challenges.ts",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows; repository root; bounded one-path evidence"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6bdd9aeb8f067ba65d0572bf7d87b51d9666bd78 --head 51a867f6871517438e8c761787d5edfeb73aaabd --path frontend/src/api/schema.generated.ts",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows; repository root; bounded one-path evidence"
+    }
+  ],
+  "reviewed_commit": "51a867f6871517438e8c761787d5edfeb73aaabd",
+  "reviewed_from_head": "1a7df2b33576f382a68b55a4d6ffe9ad46cfaace",
+  "risk": "HIGH",
+  "judgment_flags": ["PUBLIC_CONTRACT", "SECURITY_AUTH", "CONCURRENCY_STATE"],
+  "risk_context_digest": "sha256:ce0a172d5ac363143289305293f15134bc509213d4cee12eb1df950e38530a32",
+  "review_context_digest": "sha256:5c4107b1a479e02fd3ee08b992644c7383136aee131f2f01da5ebfaecad81322",
+  "verification_receipt_digest": "sha256:5dc6cdf711eacce1aad3bcd4b3a803d1b6be4aec34a10c10d45b69a64fd26367",
+  "evidence_groups": [
+    {
+      "paths": ["frontend/scripts/generate-openapi-types.mjs"],
+      "diff_lines": 11,
+      "producer": "prepare-change-evidence-v1",
+      "comparison": "explicit-pair",
+      "evidence_digest": "sha256:bd8b9ad026a67d6e9df773b9fa825348fc94d938f9eb57dfb8ba6e9534c46f61"
+    },
+    {
+      "paths": ["frontend/src/api/__tests__/challenges.spec.ts"],
+      "diff_lines": 113,
+      "producer": "prepare-change-evidence-v1",
+      "comparison": "explicit-pair",
+      "evidence_digest": "sha256:a6132a34c87d32ec601ee715a20d6a136c5c3ac9e9dbd58b874fde9dce8086bd"
+    },
+    {
+      "paths": ["frontend/src/api/challenges.ts"],
+      "diff_lines": 89,
+      "producer": "prepare-change-evidence-v1",
+      "comparison": "explicit-pair",
+      "evidence_digest": "sha256:2050376a3d87b7266db25cd70353ea489efbac8c605f8216f517eeb0d9bbf976"
+    },
+    {
+      "paths": ["frontend/src/api/schema.generated.ts"],
+      "diff_lines": 109,
+      "producer": "prepare-change-evidence-v1",
+      "comparison": "explicit-pair",
+      "evidence_digest": "sha256:e5f98866c8bbb03a5d4d3feff8b2aeb1716e5b1bccd229232aafa4a51881aeea"
+    }
+  ],
+  "verdict": "APPROVE",
+  "findings": [],
+  "findings_total": 0,
+  "findings_blocking": 0,
+  "satisfied_questions": [
+    "PUBLIC_CONTRACT: generator, generated types, and typed journal client match reviewed Slice B OpenAPI for exact journal GET/PUT payload, response, and conflict snapshot typing without unrelated generated churn.",
+    "SECURITY_AUTH: changed client preserves the existing authenticated same-origin/XSRF path and does not add bearer tokens, local owner identity, or journal text logging.",
+    "CONCURRENCY_STATE: typed client preserves base_version, data_epoch, command_id, and journal-specific conflict snapshots without collapsing journal and completion version models.",
+    "CONSUMER_COMPATIBILITY: existing challenge consumer remains coherent and no Slice D journal UI behavior is introduced."
+  ],
+  "freshness": {
+    "status": "FRESH_CANDIDATE",
+    "review_rerun": true,
+    "checkpoint_fresh": true,
+    "source_fresh": true,
+    "references_fresh": true,
+    "focused_checks_fresh": true
+  }
+}

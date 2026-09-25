@@ -1,0 +1,253 @@
+{
+  "schema_version": 1,
+  "story_id": "2.3",
+  "slice_id": "C",
+  "kind": "verification",
+  "checkpoint_commit": "51a867f6871517438e8c761787d5edfeb73aaabd",
+  "baseline_commit": "6bdd9aeb8f067ba65d0572bf7d87b51d9666bd78",
+  "subject_digest": "sha256:f8ae42bfb0848b9cb2157cad084b474bbed4cc446b037ab2c1b2923059a26046",
+  "created_from_head": "51a867f6871517438e8c761787d5edfeb73aaabd",
+  "changed_paths_sha256": "sha256:f8ae42bfb0848b9cb2157cad084b474bbed4cc446b037ab2c1b2923059a26046",
+  "commands": [
+    {
+      "command": "npm.cmd run test:unit -- --run src/api/__tests__/challenges.spec.ts -t journal",
+      "exit_code": 0,
+      "tool": "Vitest",
+      "environment": "Windows; Node v22.15.0; frontend; 2 journal tests passed"
+    },
+    {
+      "command": "npm.cmd run test:unit -- --run src/api/__tests__/challenges.spec.ts",
+      "exit_code": 0,
+      "tool": "Vitest",
+      "environment": "Windows; Node v22.15.0; frontend; 9 API tests passed"
+    },
+    {
+      "command": "npm.cmd run test:unit -- --run src/views/__tests__/challenges.spec.ts",
+      "exit_code": 0,
+      "tool": "Vitest",
+      "environment": "Windows; Node v22.15.0; frontend; 13 consumer tests passed"
+    },
+    {
+      "command": "npm.cmd run contract:check",
+      "exit_code": 0,
+      "tool": "OpenAPI type generator",
+      "environment": "Windows; frontend; generated output matches contracts/openapi.yaml"
+    },
+    {
+      "command": "npm.cmd run contract:validate",
+      "exit_code": 0,
+      "tool": "Redocly CLI",
+      "environment": "Windows; frontend; contracts/openapi.yaml valid"
+    },
+    {
+      "command": "npm.cmd run type-check",
+      "exit_code": 0,
+      "tool": "vue-tsc",
+      "environment": "Windows; Node v22.15.0; frontend"
+    },
+    {
+      "command": "npx.cmd eslint src/api/challenges.ts src/api/__tests__/challenges.spec.ts scripts/generate-openapi-types.mjs",
+      "exit_code": 0,
+      "tool": "ESLint",
+      "environment": "Windows; frontend; exact handwritten changed paths"
+    },
+    {
+      "command": "npx.cmd oxlint src/api/challenges.ts src/api/__tests__/challenges.spec.ts scripts/generate-openapi-types.mjs",
+      "exit_code": 0,
+      "tool": "Oxlint",
+      "environment": "Windows; frontend; exact handwritten changed paths"
+    },
+    {
+      "command": "git diff --check 6bdd9aeb8f067ba65d0572bf7d87b51d9666bd78 51a867f6871517438e8c761787d5edfeb73aaabd -- frontend/scripts/generate-openapi-types.mjs frontend/src/api/__tests__/challenges.spec.ts frontend/src/api/challenges.ts frontend/src/api/schema.generated.ts",
+      "exit_code": 0,
+      "tool": "Git",
+      "environment": "Windows; repository root; exact four-path checkpoint diff"
+    },
+    {
+      "command": "node .agents/scripts/check-verification.mjs check auto --changed frontend/scripts/generate-openapi-types.mjs --changed frontend/src/api/__tests__/challenges.spec.ts --changed frontend/src/api/challenges.ts --changed frontend/src/api/schema.generated.ts",
+      "exit_code": 1,
+      "tool": "check-verification.mjs",
+      "environment": "Windows; repository root; canonical output preserved unchanged"
+    },
+    {
+      "command": "node .agents/scripts/check-escalation.mjs < exact wrapper with canonical verification, risk HIGH, judgmentFlags PUBLIC_CONTRACT/SECURITY_AUTH/CONCURRENCY_STATE",
+      "exit_code": 1,
+      "tool": "check-escalation.mjs",
+      "environment": "Windows; repository root; canonical output forwarded unchanged"
+    }
+  ],
+  "verified_from_head": "1a7df2b33576f382a68b55a4d6ffe9ad46cfaace",
+  "checkpoint_tree": "85f5a5fb72735ee192fec2a9ff77c5deb64c14d7",
+  "changed_paths": [
+    "frontend/scripts/generate-openapi-types.mjs",
+    "frontend/src/api/__tests__/challenges.spec.ts",
+    "frontend/src/api/challenges.ts",
+    "frontend/src/api/schema.generated.ts"
+  ],
+  "story_normative_digest": "sha256:fe927e1350c46899794f6896245f491e8595ff4127edfbe976d101d835724b02",
+  "source_freshness": "FRESH",
+  "reference_freshness": "FILE_LEVEL_FRESH",
+  "checkpoint_freshness": "FRESH",
+  "post_checkpoint_drift": [],
+  "working_drift": [],
+  "focused_checks": [
+    {
+      "id": "journal-api-unit",
+      "command": "npm.cmd run test:unit -- --run src/api/__tests__/challenges.spec.ts -t journal",
+      "command_input": {"command": "npm.cmd run test:unit -- --run src/api/__tests__/challenges.spec.ts -t journal", "cwd": "frontend", "checkpoint": "51a867f6871517438e8c761787d5edfeb73aaabd", "changed_paths_sha256": "sha256:f8ae42bfb0848b9cb2157cad084b474bbed4cc446b037ab2c1b2923059a26046"},
+      "command_digest": "sha256:77ae3b536fd9efcddb1f34efa87152b9485c7299d77fdbfbbb3d12b774ef8475",
+      "subject": {"commit": "51a867f6871517438e8c761787d5edfeb73aaabd", "tree": "85f5a5fb72735ee192fec2a9ff77c5deb64c14d7"},
+      "changed_paths_sha256": "sha256:f8ae42bfb0848b9cb2157cad084b474bbed4cc446b037ab2c1b2923059a26046",
+      "toolchain": {"os": "Windows", "node": "v22.15.0", "npm": "11.6.4", "vitest": "5.0.1"},
+      "toolchain_digest": "sha256:e13d9cdce4f34fac671e299dd17000c72352b5ee1cf411410e74b593e76ae58a",
+      "result": "PASS",
+      "exit_code": 0,
+      "summary": "2 passed | 7 skipped (9)",
+      "environment_sensitive": false
+    },
+    {
+      "id": "challenge-api-regression",
+      "command": "npm.cmd run test:unit -- --run src/api/__tests__/challenges.spec.ts",
+      "command_input": {"command": "npm.cmd run test:unit -- --run src/api/__tests__/challenges.spec.ts", "cwd": "frontend", "checkpoint": "51a867f6871517438e8c761787d5edfeb73aaabd", "changed_paths_sha256": "sha256:f8ae42bfb0848b9cb2157cad084b474bbed4cc446b037ab2c1b2923059a26046"},
+      "command_digest": "sha256:0b4a41bcc72727316f667fbd07f8b2ca716e56251056701981bc5565d4a6f53b",
+      "subject": {"commit": "51a867f6871517438e8c761787d5edfeb73aaabd", "tree": "85f5a5fb72735ee192fec2a9ff77c5deb64c14d7"},
+      "changed_paths_sha256": "sha256:f8ae42bfb0848b9cb2157cad084b474bbed4cc446b037ab2c1b2923059a26046",
+      "toolchain": {"os": "Windows", "node": "v22.15.0", "npm": "11.6.4", "vitest": "5.0.1"},
+      "toolchain_digest": "sha256:e13d9cdce4f34fac671e299dd17000c72352b5ee1cf411410e74b593e76ae58a",
+      "result": "PASS",
+      "exit_code": 0,
+      "summary": "9 passed (1 test file)",
+      "environment_sensitive": false
+    },
+    {
+      "id": "consumer-regression",
+      "command": "npm.cmd run test:unit -- --run src/views/__tests__/challenges.spec.ts",
+      "command_input": {"command": "npm.cmd run test:unit -- --run src/views/__tests__/challenges.spec.ts", "cwd": "frontend", "checkpoint": "51a867f6871517438e8c761787d5edfeb73aaabd", "changed_paths_sha256": "sha256:f8ae42bfb0848b9cb2157cad084b474bbed4cc446b037ab2c1b2923059a26046"},
+      "command_digest": "sha256:6ef178036f2de57616d05617698afba06cc1d2188a28f83a80574e937e9438cb4",
+      "subject": {"commit": "51a867f6871517438e8c761787d5edfeb73aaabd", "tree": "85f5a5fb72735ee192fec2a9ff77c5deb64c14d7"},
+      "changed_paths_sha256": "sha256:f8ae42bfb0848b9cb2157cad084b474bbed4cc446b037ab2c1b2923059a26046",
+      "toolchain": {"os": "Windows", "node": "v22.15.0", "npm": "11.6.4", "vitest": "5.0.1"},
+      "toolchain_digest": "sha256:e13d9cdce4f34fac671e299dd17000c72352b5ee1cf411410e74b593e76ae58a",
+      "result": "PASS",
+      "exit_code": 0,
+      "summary": "13 passed (1 test file)",
+      "environment_sensitive": false
+    },
+    {
+      "id": "contract-check",
+      "command": "npm.cmd run contract:check",
+      "command_input": {"command": "npm.cmd run contract:check", "cwd": "frontend", "checkpoint": "51a867f6871517438e8c761787d5edfeb73aaabd", "changed_paths_sha256": "sha256:f8ae42bfb0848b9cb2157cad084b474bbed4cc446b037ab2c1b2923059a26046"},
+      "command_digest": "sha256:cf3c8fa80316c480a8e4192c26880f3ff622b166d07f2579e476753928c62ab2",
+      "subject": {"commit": "51a867f6871517438e8c761787d5edfeb73aaabd", "tree": "85f5a5fb72735ee192fec2a9ff77c5deb64c14d7"},
+      "changed_paths_sha256": "sha256:f8ae42bfb0848b9cb2157cad084b474bbed4cc446b037ab2c1b2923059a26046",
+      "toolchain": {"os": "Windows", "node": "v22.15.0", "npm": "11.6.4", "generator": "frontend/scripts/generate-openapi-types.mjs"},
+      "toolchain_digest": "sha256:e13d9cdce4f34fac671e299dd17000c72352b5ee1cf411410e74b593e76ae58a",
+      "result": "PASS",
+      "exit_code": 0,
+      "summary": "Generated types match reviewed OpenAPI",
+      "environment_sensitive": false
+    },
+    {
+      "id": "contract-validate",
+      "command": "npm.cmd run contract:validate",
+      "command_input": {"command": "npm.cmd run contract:validate", "cwd": "frontend", "checkpoint": "51a867f6871517438e8c761787d5edfeb73aaabd", "changed_paths_sha256": "sha256:f8ae42bfb0848b9cb2157cad084b474bbed4cc446b037ab2c1b2923059a26046"},
+      "command_digest": "sha256:9c02d5edc01ec68824470c3391011cf9571d9ffae2441e93a0117e1f4db4ddf6",
+      "subject": {"commit": "51a867f6871517438e8c761787d5edfeb73aaabd", "tree": "85f5a5fb72735ee192fec2a9ff77c5deb64c14d7"},
+      "changed_paths_sha256": "sha256:f8ae42bfb0848b9cb2157cad084b474bbed4cc446b037ab2c1b2923059a26046",
+      "toolchain": {"os": "Windows", "node": "v22.15.0", "npm": "11.6.4", "redocly": "2.53.2"},
+      "toolchain_digest": "sha256:e13d9cdce4f34fac671e299dd17000c72352b5ee1cf411410e74b593e76ae58a",
+      "result": "PASS",
+      "exit_code": 0,
+      "summary": "contracts/openapi.yaml validated",
+      "environment_sensitive": false
+    },
+    {
+      "id": "type-check",
+      "command": "npm.cmd run type-check",
+      "command_input": {"command": "npm.cmd run type-check", "cwd": "frontend", "checkpoint": "51a867f6871517438e8c761787d5edfeb73aaabd", "changed_paths_sha256": "sha256:f8ae42bfb0848b9cb2157cad084b474bbed4cc446b037ab2c1b2923059a26046"},
+      "command_digest": "sha256:38f75012562f846a3218bc52ebc16d07e76f3cd190ffe4d1083107e4e64d34a2",
+      "subject": {"commit": "51a867f6871517438e8c761787d5edfeb73aaabd", "tree": "85f5a5fb72735ee192fec2a9ff77c5deb64c14d7"},
+      "changed_paths_sha256": "sha256:f8ae42bfb0848b9cb2157cad084b474bbed4cc446b037ab2c1b2923059a26046",
+      "toolchain": {"os": "Windows", "node": "v22.15.0", "npm": "11.6.4", "vue_tsc": "3.3.11"},
+      "toolchain_digest": "sha256:e13d9cdce4f34fac671e299dd17000c72352b5ee1cf411410e74b593e76ae58a",
+      "result": "PASS",
+      "exit_code": 0,
+      "summary": "vue-tsc --build passed",
+      "environment_sensitive": false
+    },
+    {
+      "id": "eslint-focused",
+      "command": "npx.cmd eslint src/api/challenges.ts src/api/__tests__/challenges.spec.ts scripts/generate-openapi-types.mjs",
+      "command_input": {"command": "npx.cmd eslint src/api/challenges.ts src/api/__tests__/challenges.spec.ts scripts/generate-openapi-types.mjs", "cwd": "frontend", "checkpoint": "51a867f6871517438e8c761787d5edfeb73aaabd", "changed_paths_sha256": "sha256:f8ae42bfb0848b9cb2157cad084b474bbed4cc446b037ab2c1b2923059a26046"},
+      "command_digest": "sha256:240016c0d9634900901faeee515f153812768fc1ddbd13bfb0b121bda086c8e8",
+      "subject": {"commit": "51a867f6871517438e8c761787d5edfeb73aaabd", "tree": "85f5a5fb72735ee192fec2a9ff77c5deb64c14d7"},
+      "changed_paths_sha256": "sha256:f8ae42bfb0848b9cb2157cad084b474bbed4cc446b037ab2c1b2923059a26046",
+      "toolchain": {"os": "Windows", "node": "v22.15.0", "npm": "11.6.4", "eslint": "10.10.0"},
+      "toolchain_digest": "sha256:e13d9cdce4f34fac671e299dd17000c72352b5ee1cf411410e74b593e76ae58a",
+      "result": "PASS",
+      "exit_code": 0,
+      "summary": "Focused handwritten paths lint clean",
+      "environment_sensitive": false
+    },
+    {
+      "id": "oxlint-focused",
+      "command": "npx.cmd oxlint src/api/challenges.ts src/api/__tests__/challenges.spec.ts scripts/generate-openapi-types.mjs",
+      "command_input": {"command": "npx.cmd oxlint src/api/challenges.ts src/api/__tests__/challenges.spec.ts scripts/generate-openapi-types.mjs", "cwd": "frontend", "checkpoint": "51a867f6871517438e8c761787d5edfeb73aaabd", "changed_paths_sha256": "sha256:f8ae42bfb0848b9cb2157cad084b474bbed4cc446b037ab2c1b2923059a26046"},
+      "command_digest": "sha256:066c70079cdf791dd532ce32159095609a28b7a0ab8e6ec3867393f13d9a51e0",
+      "subject": {"commit": "51a867f6871517438e8c761787d5edfeb73aaabd", "tree": "85f5a5fb72735ee192fec2a9ff77c5deb64c14d7"},
+      "changed_paths_sha256": "sha256:f8ae42bfb0848b9cb2157cad084b474bbed4cc446b037ab2c1b2923059a26046",
+      "toolchain": {"os": "Windows", "node": "v22.15.0", "npm": "11.6.4", "oxlint": "1.82.0"},
+      "toolchain_digest": "sha256:e13d9cdce4f34fac671e299dd17000c72352b5ee1cf411410e74b593e76ae58a",
+      "result": "PASS",
+      "exit_code": 0,
+      "summary": "Focused handwritten paths oxlint clean",
+      "environment_sensitive": false
+    },
+    {
+      "id": "checkpoint-diff-check",
+      "command": "git diff --check 6bdd9aeb8f067ba65d0572bf7d87b51d9666bd78 51a867f6871517438e8c761787d5edfeb73aaabd -- frontend/scripts/generate-openapi-types.mjs frontend/src/api/__tests__/challenges.spec.ts frontend/src/api/challenges.ts frontend/src/api/schema.generated.ts",
+      "command_input": {"command": "git diff --check 6bdd9aeb8f067ba65d0572bf7d87b51d9666bd78 51a867f6871517438e8c761787d5edfeb73aaabd -- frontend/scripts/generate-openapi-types.mjs frontend/src/api/__tests__/challenges.spec.ts frontend/src/api/challenges.ts frontend/src/api/schema.generated.ts", "cwd": ".", "checkpoint": "51a867f6871517438e8c761787d5edfeb73aaabd", "changed_paths_sha256": "sha256:f8ae42bfb0848b9cb2157cad084b474bbed4cc446b037ab2c1b2923059a26046"},
+      "command_digest": "sha256:f3ad7627466322c03a430d38fa9e6cac7a51835477dafe6588405933fc8008b4",
+      "subject": {"commit": "51a867f6871517438e8c761787d5edfeb73aaabd", "tree": "85f5a5fb72735ee192fec2a9ff77c5deb64c14d7"},
+      "changed_paths_sha256": "sha256:f8ae42bfb0848b9cb2157cad084b474bbed4cc446b037ab2c1b2923059a26046",
+      "toolchain": {"os": "Windows", "git": "2.49.0.windows.1", "cwd": "."},
+      "toolchain_digest": "sha256:5c5b5ec81915a7b31eaf429c2c20f71d3d05c01c194dd4aa59bb36494134e559",
+      "result": "PASS",
+      "exit_code": 0,
+      "summary": "No whitespace errors in exact four-path checkpoint diff",
+      "environment_sensitive": false
+    }
+  ],
+  "canonical": {
+    "featureId": "challenge-list",
+    "changedPaths": ["frontend/scripts/generate-openapi-types.mjs", "frontend/src/api/__tests__/challenges.spec.ts", "frontend/src/api/challenges.ts", "frontend/src/api/schema.generated.ts"],
+    "matchedPaths": ["frontend/src/api/__tests__/challenges.spec.ts", "frontend/src/api/challenges.ts"],
+    "status": "INCOMPLETE",
+    "complete": false,
+    "map": {"status": "STALE", "expectedChangedAnchors": ["frontend/src/api/__tests__/challenges.spec.ts", "frontend/src/api/challenges.ts"], "unexplainedDrift": [], "missingAnchors": []},
+    "checks": [{"id": "map", "status": "PASS", "exitCode": 1, "summary": "STALE"}, {"id": "type-check", "status": "PASS", "exitCode": 0, "summary": "> vue-tsc --build"}, {"id": "mapped-tests", "status": "PASS", "exitCode": 0, "summary": "Test Files  2 passed (2)"}],
+    "escalationReasons": ["UNMAPPED_CHANGED_PATH"]
+  },
+  "canonical_process_exit": 1,
+  "escalation": {
+    "decision": "REVIEW_REQUIRED",
+    "risk": "HIGH",
+    "reasons": ["HIGH_RISK_REVIEW", "JUDGMENT_CONCURRENCY_STATE", "JUDGMENT_PUBLIC_CONTRACT", "JUDGMENT_SECURITY_AUTH", "VERIFICATION_INCOMPLETE", "VERIFICATION_UNMAPPED_CHANGED_PATH"],
+    "judgment_flags": ["PUBLIC_CONTRACT", "SECURITY_AUTH", "CONCURRENCY_STATE"],
+    "process_exit": 1
+  },
+  "progression_eligible": true,
+  "progression_basis": [
+    "Exact C checkpoint, Story and references are fresh with no relevant drift.",
+    "Nine fresh focused frontend checks passed, including journal API, challenge API, consumer regression, contract validation, type-check, focused lint, and exact diff whitespace checks.",
+    "Canonical INCOMPLETE disposition is preserved because the selected challenge-list recipe cannot explain the generator and generated-schema paths; it is not reclassified as PASS.",
+    "HIGH-risk same-Lead review approved the exact four-path bounded evidence with no material findings.",
+    "No blockers, ambiguity, or relevant drift exists."
+  ],
+  "done_gate_disclosure": {
+    "required": true,
+    "canonical_disposition": "INCOMPLETE",
+    "reason": "UNMAPPED_CHANGED_PATH",
+    "coverage_authority": "fresh focused checks"
+  }
+}

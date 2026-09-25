@@ -10,7 +10,7 @@ upstream_epic:
 sprint_key: 2-3-ghi-và-sửa-journal-tùy-chọn
 lifecycle_snapshot: in-progress
 execution_status: in-progress
-current_slice: C
+current_slice: D
 risk:
   level: HIGH
   flags: [security, concurrency, public_contract]
@@ -71,7 +71,7 @@ slices:
       review_context_digest: sha256:585d5d297bc847087ec9583d9c42cea736e8964e3a29737ffa9f3e48e4fed3c9
       freshness: FRESH_CANDIDATE
   - id: C
-    status: checkpointed
+    status: reviewed
     depends_on: [B]
     task_refs: [T-4]
     baseline_commit: 6bdd9aeb8f067ba65d0572bf7d87b51d9666bd78
@@ -82,6 +82,26 @@ slices:
       implementation:
         path: _bmad-output/implementation-artifacts/receipts/story-2-3/C-implementation.json
         digest: sha256:ce3164275260021eaca1d3b2251f5414dde175f39b281f40d219aa795e459207
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-2-3/C-verification.json
+        digest: sha256:5dc6cdf711eacce1aad3bcd4b3a803d1b6be4aec34a10c10d45b69a64fd26367
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-2-3/C-review.json
+        digest: sha256:967dd256045e11f93d82c0a6f99860df5c7bc6e370d2cf760f63547ae7248638
+    verification:
+      checkpoint_commit: 51a867f6871517438e8c761787d5edfeb73aaabd
+      canonical_applicability: APPLICABLE
+      canonical_status: INCOMPLETE
+      progression_eligible: true
+      done_gate_disclosure_required: true
+      outstanding_obligation: canonical verification remains INCOMPLETE due UNMAPPED_CHANGED_PATH; fresh focused checks are the coverage authority
+    review:
+      required: true
+      verdict: APPROVE
+      reviewed_commit: 51a867f6871517438e8c761787d5edfeb73aaabd
+      risk_context_digest: sha256:ce0a172d5ac363143289305293f15134bc509213d4cee12eb1df950e38530a32
+      review_context_digest: sha256:5c4107b1a479e02fd3ee08b992644c7383136aee131f2f01da5ebfaecad81322
+      freshness: FRESH_CANDIDATE
   - id: D
     status: pending
     depends_on: [C]
@@ -89,6 +109,6 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: verify_slice
-  target: C
+  kind: implement_slice
+  target: D
 ---
