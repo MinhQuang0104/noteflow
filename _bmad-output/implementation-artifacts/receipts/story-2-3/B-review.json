@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "story_id": "2.3",
+  "slice_id": "B",
+  "kind": "review",
+  "checkpoint_commit": "2a17c8f00adccb66351385775a57db13ea386d86",
+  "baseline_commit": "d1cbd72ca0baa03dfa9430fc6a7446f1cab9122e",
+  "subject_digest": "sha256:7c3ee0bbf6d02d2eac75984aef5d9dd741712064fe3587887551557a185d47cf",
+  "created_from_head": "2a17c8f00adccb66351385775a57db13ea386d86",
+  "changed_paths_sha256": "sha256:7c3ee0bbf6d02d2eac75984aef5d9dd741712064fe3587887551557a185d47cf",
+  "commands": [
+    {
+      "command": "node .agents/scripts/check-escalation.mjs < exact canonical verification JSON",
+      "exit_code": 1,
+      "tool": "check-escalation.mjs",
+      "environment": "Windows; repository root"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base d1cbd72ca0baa03dfa9430fc6a7446f1cab9122e --head 2a17c8f00adccb66351385775a57db13ea386d86 --path backend/app/Http/Controllers/ChallengeJournalController.php --path backend/app/Modules/Challenges/Application/UseCases/GetJournalQuery.php --path backend/routes/api.php",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows; repository root"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base d1cbd72ca0baa03dfa9430fc6a7446f1cab9122e --head 2a17c8f00adccb66351385775a57db13ea386d86 --path backend/tests/Contract/ChallengeContractTest.php --path backend/tests/Feature/ChallengeJournalApiTest.php",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows; repository root"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base d1cbd72ca0baa03dfa9430fc6a7446f1cab9122e --head 2a17c8f00adccb66351385775a57db13ea386d86 --path contracts/openapi.yaml",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows; repository root"
+    }
+  ],
+  "reviewed_commit": "2a17c8f00adccb66351385775a57db13ea386d86",
+  "reviewed_from_head": "bbdff5b8706363fbdf71a3ef21002141d6bdc5c5",
+  "risk": "HIGH",
+  "judgment_flags": [
+    "SECURITY_AUTH",
+    "CONCURRENCY_STATE",
+    "PUBLIC_CONTRACT"
+  ],
+  "risk_context_digest": "sha256:ce0a172d5ac363143289305293f15134bc509213d4cee12eb1df950e38530a32",
+  "review_context_digest": "sha256:585d5d297bc847087ec9583d9c42cea736e8964e3a29737ffa9f3e48e4fed3c9",
+  "verification_receipt_digest": "sha256:91de0a9d59dbe1d3425588bd50e6ba99620d947afe8b9c09ee41c12d6e2d84e1",
+  "evidence_groups": [
+    {
+      "paths": [
+        "backend/app/Http/Controllers/ChallengeJournalController.php",
+        "backend/app/Modules/Challenges/Application/UseCases/GetJournalQuery.php",
+        "backend/routes/api.php"
+      ],
+      "diff_lines": 175,
+      "producer": "prepare-change-evidence-v1",
+      "comparison": "explicit-pair",
+      "evidence_digest": "sha256:d05d5227eae40131ea3072fdd91bd000c9a3d14307810df443ec334b2ea40156"
+    },
+    {
+      "paths": [
+        "backend/tests/Contract/ChallengeContractTest.php",
+        "backend/tests/Feature/ChallengeJournalApiTest.php"
+      ],
+      "diff_lines": 213,
+      "producer": "prepare-change-evidence-v1",
+      "comparison": "explicit-pair",
+      "evidence_digest": "sha256:a997504e44e6842f78cb5107fd1539f58a4272a2a9c72561992ee496d3a4763d"
+    },
+    {
+      "paths": [
+        "contracts/openapi.yaml"
+      ],
+      "diff_lines": 185,
+      "producer": "prepare-change-evidence-v1",
+      "comparison": "explicit-pair",
+      "evidence_digest": "sha256:91a218fa4e800aaeba743bda4570c6a85fe1d5adacf51090376ceee24c25ee08"
+    }
+  ],
+  "verdict": "APPROVE",
+  "findings": [],
+  "findings_total": 0,
+  "findings_blocking": 0,
+  "satisfied_questions": [
+    "SECURITY_AUTH: owner and auth middleware, private response, and rejected draft isolation for changed API boundary.",
+    "CONCURRENCY_STATE: independent journal/completion versions, stale conflict, replay, epoch and write fence.",
+    "PUBLIC_CONTRACT: exact GET/PUT path, request/response and applicable status semantics agree with OpenAPI and contract tests."
+  ],
+  "freshness": {
+    "status": "FRESH_CANDIDATE",
+    "review_rerun": true,
+    "checkpoint_fresh": true,
+    "source_fresh": true,
+    "references_fresh": true,
+    "focused_checks_fresh": true
+  }
+}

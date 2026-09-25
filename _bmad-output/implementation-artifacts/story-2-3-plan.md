@@ -10,7 +10,7 @@ upstream_epic:
 sprint_key: 2-3-ghi-và-sửa-journal-tùy-chọn
 lifecycle_snapshot: in-progress
 execution_status: in-progress
-current_slice: B
+current_slice: C
 risk:
   level: HIGH
   flags: [security, concurrency, public_contract]
@@ -41,7 +41,7 @@ slices:
       required: true
       verdict: APPROVE
   - id: B
-    status: checkpointed
+    status: reviewed
     depends_on: [A]
     task_refs: [T-2, T-3]
     baseline_commit: d1cbd72ca0baa03dfa9430fc6a7446f1cab9122e
@@ -52,6 +52,24 @@ slices:
       implementation:
         path: _bmad-output/implementation-artifacts/receipts/story-2-3/B-implementation.json
         digest: sha256:9df63087de440f1a28288fb36b9e80dbceb6a29f5026e062e051b04743deb3c6
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-2-3/B-verification.json
+        digest: sha256:91de0a9d59dbe1d3425588bd50e6ba99620d947afe8b9c09ee41c12d6e2d84e1
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-2-3/B-review.json
+        digest: sha256:d3c67c0a092ffa7b37d955fcf614828927c2ac092633f0930cdc5180f2804c4f
+    verification:
+      canonical_applicability: NOT_APPLICABLE
+      canonical_status: INCOMPLETE
+      progression_eligible: true
+      done_gate_disclosure_required: true
+    review:
+      required: true
+      verdict: APPROVE
+      reviewed_commit: 2a17c8f00adccb66351385775a57db13ea386d86
+      risk_context_digest: sha256:ce0a172d5ac363143289305293f15134bc509213d4cee12eb1df950e38530a32
+      review_context_digest: sha256:585d5d297bc847087ec9583d9c42cea736e8964e3a29737ffa9f3e48e4fed3c9
+      freshness: FRESH_CANDIDATE
   - id: C
     status: pending
     depends_on: [B]
@@ -63,6 +81,6 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: verify_slice
-  target: B
+  kind: implement_slice
+  target: C
 ---
