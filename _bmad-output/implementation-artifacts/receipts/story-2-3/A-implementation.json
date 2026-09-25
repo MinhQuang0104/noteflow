@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "story_id": "2.3",
+  "slice_id": "A",
+  "kind": "implementation",
+  "checkpoint_commit": "e67a2f0dc852e9f2a0333644ce3c1b12a8e641db",
+  "baseline_commit": "815915710aefcf07bfe89394e9816da591d72248",
+  "subject_digest": "sha256:db7ce9a9cd6fe329d30e8ba01dd429cb3d374f8435b3d4258619880f9a2cf36c",
+  "created_from_head": "e67a2f0dc852e9f2a0333644ce3c1b12a8e641db",
+  "changed_paths_sha256": "sha256:db7ce9a9cd6fe329d30e8ba01dd429cb3d374f8435b3d4258619880f9a2cf36c",
+  "commands": [
+    {
+      "command": "git diff --name-only --diff-filter=ACDMRTUXB 815915710aefcf07bfe89394e9816da591d72248..e67a2f0dc852e9f2a0333644ce3c1b12a8e641db --",
+      "exit_code": 0,
+      "tool": "Git",
+      "environment": "Read-only Step 101 migration on main"
+    }
+  ],
+  "changed_paths": [
+    "backend/app/Modules/Challenges/Application/Commands/SaveJournalCommand.php",
+    "backend/app/Modules/Challenges/Application/UseCases/SaveJournalUseCase.php",
+    "backend/app/Modules/Challenges/Domain/Exceptions/InvalidJournalDayException.php",
+    "backend/app/Modules/Challenges/Domain/Exceptions/InvalidJournalTextException.php",
+    "backend/database/migrations/2026_09_24_010000_create_challenge_daily_records_table.php",
+    "backend/tests/Feature/ChallengeJournalTest.php",
+    "backend/tests/Feature/ChallengePersistenceTest.php"
+  ],
+  "legacy_scope": {
+    "purpose": "persistence/application",
+    "scope": "backend challenge daily-record persistence and SaveJournal application use case",
+    "status_transition": {
+      "from": "in-progress",
+      "to": "reviewed",
+      "marker": "LEGACY_SLICE_STATUS_MIGRATED_AFTER_VERIFICATION",
+      "reason": "Fresh focused verification and a fresh reused HIGH-risk approval satisfy Slice A progression."
+    }
+  },
+  "legacy_plan_blob": "89dd5a49b6608112454a59c6069ae59949da927a"
+}

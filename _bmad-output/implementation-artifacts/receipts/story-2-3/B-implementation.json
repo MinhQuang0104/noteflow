@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "story_id": "2.3",
+  "slice_id": "B",
+  "kind": "implementation",
+  "checkpoint_commit": "2a17c8f00adccb66351385775a57db13ea386d86",
+  "baseline_commit": "d1cbd72ca0baa03dfa9430fc6a7446f1cab9122e",
+  "subject_digest": "sha256:7c3ee0bbf6d02d2eac75984aef5d9dd741712064fe3587887551557a185d47cf",
+  "created_from_head": "2a17c8f00adccb66351385775a57db13ea386d86",
+  "changed_paths_sha256": "sha256:7c3ee0bbf6d02d2eac75984aef5d9dd741712064fe3587887551557a185d47cf",
+  "commands": [
+    {
+      "command": "php artisan test tests/Feature/ChallengeJournalApiTest.php tests/Feature/ChallengeJournalTest.php tests/Feature/ChallengePersistenceTest.php tests/Feature/ChallengeApiTest.php tests/Contract/ChallengeContractTest.php --compact",
+      "exit_code": 0,
+      "tool": "Laravel/Pest",
+      "environment": "Not recorded in legacy Plan"
+    },
+    {
+      "command": "php -l on five exact changed PHP paths",
+      "exit_code": 0,
+      "tool": "PHP",
+      "environment": "Not recorded in legacy Plan"
+    },
+    {
+      "command": "vendor/bin/pint --test on five exact changed PHP paths",
+      "exit_code": 0,
+      "tool": "Pint",
+      "environment": "Not recorded in legacy Plan"
+    },
+    {
+      "command": "vendor/bin/phpstan analyse --memory-limit=1G --no-progress app/Http/Controllers/ChallengeJournalController.php app/Modules/Challenges/Application/UseCases/GetJournalQuery.php routes/api.php",
+      "exit_code": 0,
+      "tool": "PHPStan",
+      "environment": "Not recorded in legacy Plan"
+    },
+    {
+      "command": "git diff --cached --check on exact six staged implementation paths",
+      "exit_code": 0,
+      "tool": "Git",
+      "environment": "Not recorded in legacy Plan"
+    }
+  ],
+  "changed_paths": [
+    "backend/app/Http/Controllers/ChallengeJournalController.php",
+    "backend/app/Modules/Challenges/Application/UseCases/GetJournalQuery.php",
+    "backend/routes/api.php",
+    "backend/tests/Contract/ChallengeContractTest.php",
+    "backend/tests/Feature/ChallengeJournalApiTest.php",
+    "contracts/openapi.yaml"
+  ],
+  "focused_checks": [
+    {
+      "command": "php artisan test tests/Feature/ChallengeJournalApiTest.php tests/Feature/ChallengeJournalTest.php tests/Feature/ChallengePersistenceTest.php tests/Feature/ChallengeApiTest.php tests/Contract/ChallengeContractTest.php --compact",
+      "result": "PASS; 33 tests, 242 assertions",
+      "exit_code": 0
+    },
+    {
+      "command": "php -l on five exact changed PHP paths",
+      "result": "PASS; no syntax errors",
+      "exit_code": 0
+    },
+    {
+      "command": "vendor/bin/pint --test on five exact changed PHP paths",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "command": "vendor/bin/phpstan analyse --memory-limit=1G --no-progress app/Http/Controllers/ChallengeJournalController.php app/Modules/Challenges/Application/UseCases/GetJournalQuery.php routes/api.php",
+      "result": "PASS; no errors",
+      "exit_code": 0
+    },
+    {
+      "command": "git diff --cached --check on exact six staged implementation paths",
+      "result": "PASS; no whitespace errors",
+      "exit_code": 0
+    }
+  ],
+  "red_green": {
+    "api": "RED 404 at journal GET before route; GREEN 4 HTTP tests, 52 assertions after bounded implementation.",
+    "contract": "RED NoPath for journal route in OpenAPI; GREEN journal contract response test after schema update."
+  },
+  "feature_map": "NOT_APPLICABLE",
+  "feature_map_reason": "Existing challenge-list map covers read-only frontend list, not journal API.",
+  "legacy_scope": {
+    "purpose": "API/public contract",
+    "scope": "backend challenge API boundary and versioned OpenAPI contract"
+  },
+  "legacy_plan_blob": "89dd5a49b6608112454a59c6069ae59949da927a"
+}

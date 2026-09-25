@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "story_id": "2.3",
+  "slice_id": "A",
+  "kind": "review",
+  "checkpoint_commit": "e67a2f0dc852e9f2a0333644ce3c1b12a8e641db",
+  "baseline_commit": "815915710aefcf07bfe89394e9816da591d72248",
+  "subject_digest": "sha256:db7ce9a9cd6fe329d30e8ba01dd429cb3d374f8435b3d4258619880f9a2cf36c",
+  "created_from_head": "e67a2f0dc852e9f2a0333644ce3c1b12a8e641db",
+  "changed_paths_sha256": "sha256:db7ce9a9cd6fe329d30e8ba01dd429cb3d374f8435b3d4258619880f9a2cf36c",
+  "commands": [
+    {
+      "command": ".agents/scripts/check-escalation.mjs with canonical verification forwarded unchanged",
+      "exit_code": 1,
+      "tool": "check-escalation.mjs",
+      "environment": "Historical legacy Plan evidence"
+    }
+  ],
+  "required": true,
+  "verdict": "APPROVE",
+  "findings_total": 0,
+  "findings_blocking": 0,
+  "reviewed_commit": "e67a2f0dc852e9f2a0333644ce3c1b12a8e641db",
+  "freshness": {
+    "status": "FRESH_REUSED",
+    "review_rerun": false,
+    "reasons": [
+      "reviewed_commit equals checkpoint_commit and the checkpoint is an ancestor of verified_from_head.",
+      "Exact seven implementation paths have no checkpoint-to-HEAD or working-tree drift.",
+      "Story source and architecture/UX references are fresh.",
+      "HIGH risk and security, concurrency, and public-contract judgment flags are unchanged.",
+      "All fresh focused checks passed and canonical disposition remains NOT_APPLICABLE/INCOMPLETE.",
+      "No new blocker, ambiguity, or blocking finding exists."
+    ]
+  },
+  "legacy_plan_blob": "89dd5a49b6608112454a59c6069ae59949da927a"
+}
