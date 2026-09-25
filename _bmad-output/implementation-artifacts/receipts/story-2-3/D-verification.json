@@ -1,0 +1,476 @@
+{
+  "schema_version": 1,
+  "story_id": "2.3",
+  "slice_id": "D",
+  "kind": "verification",
+  "checkpoint_commit": "0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8",
+  "baseline_commit": "d78e9185a23846a11b932559e0592d27856cd57e",
+  "subject_digest": "sha256:581ee2319f4ead3c51be3af9e24f511128dcc38a99d6a210507754b3b2c56dbf",
+  "created_from_head": "0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8",
+  "changed_paths_sha256": "sha256:581ee2319f4ead3c51be3af9e24f511128dcc38a99d6a210507754b3b2c56dbf",
+  "commands": [
+    {
+      "command": "npm.cmd run test:unit -- --run src/views/__tests__/journal.spec.ts src/views/__tests__/today.spec.ts src/views/__tests__/account-time.spec.ts src/__tests__/App.spec.ts",
+      "exit_code": 0,
+      "tool": "Vitest",
+      "environment": "Windows; Node v22.15.0; frontend; 4 test files, 10 tests"
+    },
+    {
+      "command": "npm.cmd run test:unit -- --run",
+      "exit_code": 0,
+      "tool": "Vitest",
+      "environment": "Windows; Node v22.15.0; frontend; 13 test files, 72 tests"
+    },
+    {
+      "command": "npm.cmd run type-check",
+      "exit_code": 0,
+      "tool": "vue-tsc",
+      "environment": "Windows; Node v22.15.0; frontend"
+    },
+    {
+      "command": "npm.cmd run build",
+      "exit_code": 0,
+      "tool": "Vite",
+      "environment": "Windows; Node v22.15.0; frontend production build"
+    },
+    {
+      "command": "npm.cmd run contract:check",
+      "exit_code": 0,
+      "tool": "OpenAPI type generator",
+      "environment": "Windows; frontend; generated types match reviewed OpenAPI"
+    },
+    {
+      "command": "npm.cmd run contract:validate",
+      "exit_code": 0,
+      "tool": "Redocly CLI",
+      "environment": "Windows; repository root; contracts/openapi.yaml"
+    },
+    {
+      "command": "npx.cmd eslint src/components/ChallengeJournalEditor.vue src/views/TodayView.vue src/views/ChallengesView.vue src/views/__tests__/journal.spec.ts src/views/__tests__/today.spec.ts src/views/__tests__/account-time.spec.ts src/__tests__/App.spec.ts",
+      "exit_code": 0,
+      "tool": "ESLint",
+      "environment": "Windows; frontend; exact seven Slice D paths"
+    },
+    {
+      "command": "npx.cmd oxlint src/components/ChallengeJournalEditor.vue src/views/TodayView.vue src/views/ChallengesView.vue src/views/__tests__/journal.spec.ts src/views/__tests__/today.spec.ts src/views/__tests__/account-time.spec.ts src/__tests__/App.spec.ts",
+      "exit_code": 0,
+      "tool": "Oxlint",
+      "environment": "Windows; frontend; exact seven Slice D paths"
+    },
+    {
+      "command": "git diff --check d78e9185a23846a11b932559e0592d27856cd57e 0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8 -- frontend/src/__tests__/App.spec.ts frontend/src/components/ChallengeJournalEditor.vue frontend/src/views/ChallengesView.vue frontend/src/views/TodayView.vue frontend/src/views/__tests__/account-time.spec.ts frontend/src/views/__tests__/journal.spec.ts frontend/src/views/__tests__/today.spec.ts",
+      "exit_code": 0,
+      "tool": "Git",
+      "environment": "Windows; repository root; exact checkpoint diff"
+    },
+    {
+      "command": "node .agents/scripts/check-verification.mjs check auto --changed <exact seven Slice D paths>",
+      "exit_code": 1,
+      "tool": "check-verification.mjs",
+      "environment": "Windows; repository root; canonical output preserved unchanged"
+    },
+    {
+      "command": "node .agents/scripts/check-escalation.mjs < exact canonical verification JSON, risk HIGH, judgmentFlags SECURITY_AUTH/CONCURRENCY_STATE/PUBLIC_CONTRACT",
+      "exit_code": 1,
+      "tool": "check-escalation.mjs",
+      "environment": "Windows; repository root; exact canonical output forwarded unchanged"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base d78e9185a23846a11b932559e0592d27856cd57e --head 0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8 --path <exact seven Slice D paths>",
+      "exit_code": 1,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows; repository root; SPLIT_REQUIRED for seven paths"
+    }
+  ],
+  "verified_from_head": "d17ab04304569122c543f66f94d9f180d2cc0d94",
+  "checkpoint_tree": "d4c19dae92523d46f460e8ce471a1eb2a7d6c825",
+  "changed_paths": [
+    "frontend/src/__tests__/App.spec.ts",
+    "frontend/src/components/ChallengeJournalEditor.vue",
+    "frontend/src/views/ChallengesView.vue",
+    "frontend/src/views/TodayView.vue",
+    "frontend/src/views/__tests__/account-time.spec.ts",
+    "frontend/src/views/__tests__/journal.spec.ts",
+    "frontend/src/views/__tests__/today.spec.ts"
+  ],
+  "story_normative_digest": "sha256:fe927e1350c46899794f6896245f491e8595ff4127edfbe976d101d835724b02",
+  "source_freshness": "FRESH",
+  "reference_freshness": "FILE_LEVEL_FRESH",
+  "checkpoint_freshness": "FRESH",
+  "post_checkpoint_drift": [],
+  "working_drift": [],
+  "focused_checks": [
+    {
+      "id": "ui-acceptance",
+      "command": "npm.cmd run test:unit -- --run src/views/__tests__/journal.spec.ts src/views/__tests__/today.spec.ts src/views/__tests__/account-time.spec.ts src/__tests__/App.spec.ts",
+      "command_input": {
+        "command": "npm.cmd run test:unit -- --run src/views/__tests__/journal.spec.ts src/views/__tests__/today.spec.ts src/views/__tests__/account-time.spec.ts src/__tests__/App.spec.ts",
+        "cwd": "frontend",
+        "checkpoint": "0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8",
+        "changed_paths_sha256": "sha256:581ee2319f4ead3c51be3af9e24f511128dcc38a99d6a210507754b3b2c56dbf"
+      },
+      "command_digest": "sha256:9fcb34b7d468b287bff523c9986b430a5f133723fa21865bd3bd39f8e435b3c7",
+      "subject": {
+        "commit": "0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8",
+        "tree": "d4c19dae92523d46f460e8ce471a1eb2a7d6c825"
+      },
+      "changed_paths_sha256": "sha256:581ee2319f4ead3c51be3af9e24f511128dcc38a99d6a210507754b3b2c56dbf",
+      "toolchain": {
+        "os": "Windows",
+        "node": "v22.15.0",
+        "npm": "11.6.4",
+        "vitest": "5.0.1"
+      },
+      "toolchain_digest": "sha256:75af6ef40a2cb45b0bae493c97c26244b854095b5e179d9c1e186adfc402312e",
+      "result": "PASS",
+      "exit_code": 0,
+      "summary": "4 passed (4); 10 passed (10)",
+      "environment_sensitive": false
+    },
+    {
+      "id": "frontend-regression",
+      "command": "npm.cmd run test:unit -- --run",
+      "command_input": {
+        "command": "npm.cmd run test:unit -- --run",
+        "cwd": "frontend",
+        "checkpoint": "0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8",
+        "changed_paths_sha256": "sha256:581ee2319f4ead3c51be3af9e24f511128dcc38a99d6a210507754b3b2c56dbf"
+      },
+      "command_digest": "sha256:2bec14290fa0b8c9e89ef4b867e853b77db8aa72b08ad8d1ad8b2ce161ee041b",
+      "subject": {
+        "commit": "0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8",
+        "tree": "d4c19dae92523d46f460e8ce471a1eb2a7d6c825"
+      },
+      "changed_paths_sha256": "sha256:581ee2319f4ead3c51be3af9e24f511128dcc38a99d6a210507754b3b2c56dbf",
+      "toolchain": {
+        "os": "Windows",
+        "node": "v22.15.0",
+        "npm": "11.6.4",
+        "vitest": "5.0.1"
+      },
+      "toolchain_digest": "sha256:75af6ef40a2cb45b0bae493c97c26244b854095b5e179d9c1e186adfc402312e",
+      "result": "PASS",
+      "exit_code": 0,
+      "summary": "13 passed (13); 72 passed (72)",
+      "environment_sensitive": false
+    },
+    {
+      "id": "type-check",
+      "command": "npm.cmd run type-check",
+      "command_input": {
+        "command": "npm.cmd run type-check",
+        "cwd": "frontend",
+        "checkpoint": "0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8",
+        "changed_paths_sha256": "sha256:581ee2319f4ead3c51be3af9e24f511128dcc38a99d6a210507754b3b2c56dbf"
+      },
+      "command_digest": "sha256:d9818bbe37c08875544912707cb836459fe6a087016976e5f49469e66bb9ad31",
+      "subject": {
+        "commit": "0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8",
+        "tree": "d4c19dae92523d46f460e8ce471a1eb2a7d6c825"
+      },
+      "changed_paths_sha256": "sha256:581ee2319f4ead3c51be3af9e24f511128dcc38a99d6a210507754b3b2c56dbf",
+      "toolchain": {
+        "os": "Windows",
+        "node": "v22.15.0",
+        "npm": "11.6.4",
+        "vue_tsc": "3.3.11"
+      },
+      "toolchain_digest": "sha256:fd8e6038921c71fc516300701d07c63e3cb653f5f7fa657143d664b52949db0c",
+      "result": "PASS",
+      "exit_code": 0,
+      "summary": "vue-tsc --build passed",
+      "environment_sensitive": false
+    },
+    {
+      "id": "frontend-build",
+      "command": "npm.cmd run build",
+      "command_input": {
+        "command": "npm.cmd run build",
+        "cwd": "frontend",
+        "checkpoint": "0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8",
+        "changed_paths_sha256": "sha256:581ee2319f4ead3c51be3af9e24f511128dcc38a99d6a210507754b3b2c56dbf"
+      },
+      "command_digest": "sha256:8271f738a2b80b0abddf35632e3f919037788da52cbf0a482d15f88ac19ce238",
+      "subject": {
+        "commit": "0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8",
+        "tree": "d4c19dae92523d46f460e8ce471a1eb2a7d6c825"
+      },
+      "changed_paths_sha256": "sha256:581ee2319f4ead3c51be3af9e24f511128dcc38a99d6a210507754b3b2c56dbf",
+      "toolchain": {
+        "os": "Windows",
+        "node": "v22.15.0",
+        "npm": "11.6.4",
+        "vite": "8.3.0",
+        "vue_tsc": "3.3.11"
+      },
+      "toolchain_digest": "sha256:00afb6b7b048b2d820dffd5cddb8291a697f78b3211d799f6ef581fc922cbf14",
+      "result": "PASS",
+      "exit_code": 0,
+      "summary": "Production bundle generated",
+      "environment_sensitive": false
+    },
+    {
+      "id": "contract-check",
+      "command": "npm.cmd run contract:check",
+      "command_input": {
+        "command": "npm.cmd run contract:check",
+        "cwd": "frontend",
+        "checkpoint": "0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8",
+        "changed_paths_sha256": "sha256:581ee2319f4ead3c51be3af9e24f511128dcc38a99d6a210507754b3b2c56dbf"
+      },
+      "command_digest": "sha256:d7af0f7a0f35543c321f50ed47fdbc1237f876a825dfc6e932d707814b876432",
+      "subject": {
+        "commit": "0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8",
+        "tree": "d4c19dae92523d46f460e8ce471a1eb2a7d6c825"
+      },
+      "changed_paths_sha256": "sha256:581ee2319f4ead3c51be3af9e24f511128dcc38a99d6a210507754b3b2c56dbf",
+      "toolchain": {
+        "os": "Windows",
+        "node": "v22.15.0",
+        "npm": "11.6.4",
+        "generator": "frontend/scripts/generate-openapi-types.mjs"
+      },
+      "toolchain_digest": "sha256:cd5d2f03e3d886d782f1750e8a13686aa9b7c03a49d17be3c92b10e219d03f42",
+      "result": "PASS",
+      "exit_code": 0,
+      "summary": "Generated types match reviewed OpenAPI",
+      "environment_sensitive": false
+    },
+    {
+      "id": "contract-validate",
+      "command": "npm.cmd run contract:validate",
+      "command_input": {
+        "command": "npm.cmd run contract:validate",
+        "cwd": "frontend",
+        "checkpoint": "0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8",
+        "changed_paths_sha256": "sha256:581ee2319f4ead3c51be3af9e24f511128dcc38a99d6a210507754b3b2c56dbf"
+      },
+      "command_digest": "sha256:8f1cd10b9c00d07f96580367a1ceabd6e7f9de2dcb33755cab54a5b095cd1280",
+      "subject": {
+        "commit": "0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8",
+        "tree": "d4c19dae92523d46f460e8ce471a1eb2a7d6c825"
+      },
+      "changed_paths_sha256": "sha256:581ee2319f4ead3c51be3af9e24f511128dcc38a99d6a210507754b3b2c56dbf",
+      "toolchain": {
+        "os": "Windows",
+        "node": "v22.15.0",
+        "npm": "11.6.4",
+        "redocly": "2.53.2"
+      },
+      "toolchain_digest": "sha256:3bcd28c5adae830070b53a02ca734e6bac4ab823b8d5caf5552f85682ed74246",
+      "result": "PASS",
+      "exit_code": 0,
+      "summary": "contracts/openapi.yaml validated",
+      "environment_sensitive": false
+    },
+    {
+      "id": "eslint-focused",
+      "command": "npx.cmd eslint src/components/ChallengeJournalEditor.vue src/views/TodayView.vue src/views/ChallengesView.vue src/views/__tests__/journal.spec.ts src/views/__tests__/today.spec.ts src/views/__tests__/account-time.spec.ts src/__tests__/App.spec.ts",
+      "command_input": {
+        "command": "npx.cmd eslint src/components/ChallengeJournalEditor.vue src/views/TodayView.vue src/views/ChallengesView.vue src/views/__tests__/journal.spec.ts src/views/__tests__/today.spec.ts src/views/__tests__/account-time.spec.ts src/__tests__/App.spec.ts",
+        "cwd": "frontend",
+        "checkpoint": "0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8",
+        "changed_paths_sha256": "sha256:581ee2319f4ead3c51be3af9e24f511128dcc38a99d6a210507754b3b2c56dbf"
+      },
+      "command_digest": "sha256:1cffcfdd0b431c3b445a5b6b5d77c7286f2a3aa7564ca87ea3f038c394171b4f",
+      "subject": {
+        "commit": "0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8",
+        "tree": "d4c19dae92523d46f460e8ce471a1eb2a7d6c825"
+      },
+      "changed_paths_sha256": "sha256:581ee2319f4ead3c51be3af9e24f511128dcc38a99d6a210507754b3b2c56dbf",
+      "toolchain": {
+        "os": "Windows",
+        "node": "v22.15.0",
+        "npm": "11.6.4",
+        "eslint": "10.10.0"
+      },
+      "toolchain_digest": "sha256:74a6a2273cf16e6f26cbb307452fe467c91de61fe3da4c99bfb131759d26757c",
+      "result": "PASS",
+      "exit_code": 0,
+      "summary": "Exact seven Slice D paths lint clean",
+      "environment_sensitive": false
+    },
+    {
+      "id": "oxlint-focused",
+      "command": "npx.cmd oxlint src/components/ChallengeJournalEditor.vue src/views/TodayView.vue src/views/ChallengesView.vue src/views/__tests__/journal.spec.ts src/views/__tests__/today.spec.ts src/views/__tests__/account-time.spec.ts src/__tests__/App.spec.ts",
+      "command_input": {
+        "command": "npx.cmd oxlint src/components/ChallengeJournalEditor.vue src/views/TodayView.vue src/views/ChallengesView.vue src/views/__tests__/journal.spec.ts src/views/__tests__/today.spec.ts src/views/__tests__/account-time.spec.ts src/__tests__/App.spec.ts",
+        "cwd": "frontend",
+        "checkpoint": "0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8",
+        "changed_paths_sha256": "sha256:581ee2319f4ead3c51be3af9e24f511128dcc38a99d6a210507754b3b2c56dbf"
+      },
+      "command_digest": "sha256:8d9d3be3be57bd6a8b18a2e7b468e4af1418df51beeaad2925c2897e17a51cf8",
+      "subject": {
+        "commit": "0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8",
+        "tree": "d4c19dae92523d46f460e8ce471a1eb2a7d6c825"
+      },
+      "changed_paths_sha256": "sha256:581ee2319f4ead3c51be3af9e24f511128dcc38a99d6a210507754b3b2c56dbf",
+      "toolchain": {
+        "os": "Windows",
+        "node": "v22.15.0",
+        "npm": "11.6.4",
+        "oxlint": "1.82.0"
+      },
+      "toolchain_digest": "sha256:f10f6a8fdca7ff1eb9f965ae7737eccd893583609c123325b320d7b4c2992982",
+      "result": "PASS",
+      "exit_code": 0,
+      "summary": "Exact seven Slice D paths oxlint clean",
+      "environment_sensitive": false
+    },
+    {
+      "id": "checkpoint-diff-check",
+      "command": "git diff --check d78e9185a23846a11b932559e0592d27856cd57e 0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8 -- frontend/src/__tests__/App.spec.ts frontend/src/components/ChallengeJournalEditor.vue frontend/src/views/ChallengesView.vue frontend/src/views/TodayView.vue frontend/src/views/__tests__/account-time.spec.ts frontend/src/views/__tests__/journal.spec.ts frontend/src/views/__tests__/today.spec.ts",
+      "command_input": {
+        "command": "git diff --check d78e9185a23846a11b932559e0592d27856cd57e 0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8 -- frontend/src/__tests__/App.spec.ts frontend/src/components/ChallengeJournalEditor.vue frontend/src/views/ChallengesView.vue frontend/src/views/TodayView.vue frontend/src/views/__tests__/account-time.spec.ts frontend/src/views/__tests__/journal.spec.ts frontend/src/views/__tests__/today.spec.ts",
+        "cwd": ".",
+        "checkpoint": "0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8",
+        "changed_paths_sha256": "sha256:581ee2319f4ead3c51be3af9e24f511128dcc38a99d6a210507754b3b2c56dbf"
+      },
+      "command_digest": "sha256:45d52a1e527ecf963c108a779f3b6ad32e933373bbcee066e625c9c534ca7b2a",
+      "subject": {
+        "commit": "0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8",
+        "tree": "d4c19dae92523d46f460e8ce471a1eb2a7d6c825"
+      },
+      "changed_paths_sha256": "sha256:581ee2319f4ead3c51be3af9e24f511128dcc38a99d6a210507754b3b2c56dbf",
+      "toolchain": {
+        "os": "Windows",
+        "git": "2.49.0.windows.1"
+      },
+      "toolchain_digest": "sha256:ce620490f82c69922cdc038b5d8fca0f97f3487363d9a8955e15277bde1e275d",
+      "result": "PASS",
+      "exit_code": 0,
+      "summary": "No whitespace errors in exact seven-path checkpoint diff",
+      "environment_sensitive": false
+    }
+  ],
+  "browser_evidence": {
+    "required": false,
+    "decision": "NOT_REQUIRED",
+    "playwright_tests_read": [
+      "tests/e2e/challenges.spec.ts",
+      "tests/e2e/account-time.spec.ts",
+      "tests/e2e/responsive.spec.ts"
+    ],
+    "playwright_tests_run": [],
+    "basis": [
+      "AC-1 through AC-3 are directly exercised by fresh Vue Test Utils tests that observe the rendered journal editor, account-date identity, typed save payload, independent completion fields, and stale-conflict DOM state.",
+      "UX-DR8/UX-DR9 require the optional journal entry point, separate save/status behavior, and independence from Done; the changed surface uses native textarea/form/button controls and the component tests observe those outputs.",
+      "The existing Playwright suite has no journal scenario; the available challenge journey would not add D-specific journal, conflict, or draft evidence, so a broad browser run would be ceremonial for this slice.",
+      "No browser-only implementation contract is introduced in D; browser-specific device matrix claims remain outside this focused slice verification."
+    ]
+  },
+  "ac_evidence": [
+    {
+      "ac": "AC-1",
+      "contribution": "Challenge detail mounts the typed optional journal editor for the selected challenge and account-local date; Today exposes the detail/journal entry point.",
+      "fresh_evidence": [
+        "ui-acceptance: journal.spec.ts renders the editor, calls getChallengeJournal(challenge.id, account_date), and saves the typed challenge/date/version payload.",
+        "ui-acceptance: today.spec.ts renders the account-day challenge and the detail/journal link."
+      ],
+      "status": "PASS"
+    },
+    {
+      "ac": "AC-2",
+      "contribution": "Journal has its own editor/save status and does not submit completion or progress fields; it is explicitly presented as independent from Done and progress.",
+      "fresh_evidence": [
+        "ui-acceptance: journal.spec.ts asserts the save payload has no completion or is_done property and rejects whitespace-only input before mutation.",
+        "checkpoint diff and typed boundary show no D completion mutation; backend ownership remains Slice B."
+      ],
+      "status": "PASS"
+    },
+    {
+      "ac": "AC-3",
+      "contribution": "Journal version/conflict state is independent; stale save keeps the draft, exposes the server snapshot, and disables blind resubmission.",
+      "fresh_evidence": [
+        "ui-acceptance: journal.spec.ts observes the preserved draft, conflict alert/server snapshot, disabled save action, and explicit use-server action.",
+        "focused source review: base_version, data_epoch, command_id, journal_version, and journal-only payload remain distinct from completion."
+      ],
+      "status": "PASS"
+    }
+  ],
+  "high_risk": {
+    "SECURITY_AUTH": {
+      "status": "PASS",
+      "evidence": "Private router/AppShell auth gating remains in force; the component enables its query only for authenticated state, uses the existing typed same-origin API path, and introduces no content logging or owner identity input."
+    },
+    "CONCURRENCY_STATE": {
+      "status": "PASS",
+      "evidence": "The journal sends base_version, data_epoch, and command_id; sync reconciliation/ACK fencing is retained; 409 version conflict displays current_snapshot, keeps the draft, and disables blind save; completion is not in the journal payload."
+    },
+    "PUBLIC_CONTRACT": {
+      "status": "PASS",
+      "evidence": "D consumes the typed Slice C journal client/types; contract:check and contract:validate pass; no OpenAPI or generated-type path changed."
+    }
+  },
+  "accessibility": {
+    "status": "PASS",
+    "evidence": [
+      "The journal textarea has a visible label, date-specific aria-label, aria-invalid and conditional aria-describedby.",
+      "Save, server-snapshot, retry, and rebase actions are native labelled buttons; loading and disabled state are represented by button/textarea attributes.",
+      "Validation/error/conflict/status surfaces use role=alert/status with aria-live polite/assertive as applicable; focused tests observe the label and disabled conflict action.",
+      "The layout uses normal form controls and flex-wrap/full-width behavior; no custom keyboard trap or hover-only interaction is introduced."
+    ],
+    "browser_level_claim": "not claimed; no D-specific Playwright journal scenario exists"
+  },
+  "canonical_applicability": "APPLICABLE",
+  "canonical": {
+    "featureId": "challenge-list",
+    "changedPaths": [
+      "frontend/src/__tests__/App.spec.ts",
+      "frontend/src/components/ChallengeJournalEditor.vue",
+      "frontend/src/views/ChallengesView.vue",
+      "frontend/src/views/TodayView.vue",
+      "frontend/src/views/__tests__/account-time.spec.ts",
+      "frontend/src/views/__tests__/journal.spec.ts",
+      "frontend/src/views/__tests__/today.spec.ts"
+    ],
+    "matchedPaths": ["frontend/src/views/ChallengesView.vue"],
+    "status": "INCOMPLETE",
+    "complete": false,
+    "map": {
+      "status": "STALE",
+      "expectedChangedAnchors": ["frontend/src/views/ChallengesView.vue"],
+      "unexplainedDrift": [
+        "frontend/src/api/__tests__/challenges.spec.ts",
+        "frontend/src/api/challenges.ts"
+      ],
+      "missingAnchors": []
+    },
+    "checks": [
+      {"id": "map", "status": "FAIL", "exitCode": 1, "summary": "STALE"},
+      {"id": "type-check", "status": "PASS", "exitCode": 0, "summary": "> vue-tsc --build"},
+      {"id": "mapped-tests", "status": "PASS", "exitCode": 0, "summary": "Test Files  2 passed (2)"}
+    ],
+    "escalationReasons": ["UNMAPPED_CHANGED_PATH", "UNEXPLAINED_DRIFT"]
+  },
+  "canonical_process_exit": 1,
+  "escalation": {
+    "decision": "REVIEW_REQUIRED",
+    "risk": "HIGH",
+    "reasons": [
+      "HIGH_RISK_REVIEW",
+      "JUDGMENT_CONCURRENCY_STATE",
+      "JUDGMENT_PUBLIC_CONTRACT",
+      "JUDGMENT_SECURITY_AUTH",
+      "VERIFICATION_INCOMPLETE",
+      "VERIFICATION_UNEXPLAINED_DRIFT",
+      "VERIFICATION_UNMAPPED_CHANGED_PATH"
+    ],
+    "judgment_flags": ["SECURITY_AUTH", "CONCURRENCY_STATE", "PUBLIC_CONTRACT"],
+    "process_exit": 1
+  },
+  "progression_eligible": true,
+  "progression_basis": [
+    "Exact D checkpoint, Story normative digest, UX/reference files, and changed-path digest are fresh with no post-checkpoint or working implementation drift.",
+    "Nine fresh focused checks passed, including journal/Today/account-time/auth acceptance, full frontend regression, type-check, build, contract consistency/validation, exact-path lint, and exact checkpoint whitespace.",
+    "Canonical APPLICABLE/INCOMPLETE disposition is preserved because the challenge-list recipe cannot explain the other six D paths; focused checks remain the D coverage authority and this is disclosed for the Done Gate.",
+    "HIGH-risk same-Lead targeted review approved complete bounded evidence coverage with no material findings.",
+    "No blockers, unresolved questions, implementation drift, or ambiguity exists."
+  ],
+  "done_gate_disclosure": {
+    "required": true,
+    "canonical_disposition": "INCOMPLETE",
+    "reason": ["UNMAPPED_CHANGED_PATH", "UNEXPLAINED_DRIFT"],
+    "coverage_authority": "fresh focused checks"
+  }
+}

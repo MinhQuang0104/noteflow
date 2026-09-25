@@ -103,7 +103,7 @@ slices:
       review_context_digest: sha256:5c4107b1a479e02fd3ee08b992644c7383136aee131f2f01da5ebfaecad81322
       freshness: FRESH_CANDIDATE
   - id: D
-    status: checkpointed
+    status: reviewed
     depends_on: [C]
     task_refs: [T-4, T-5]
     baseline_commit: d78e9185a23846a11b932559e0592d27856cd57e
@@ -114,9 +114,32 @@ slices:
       implementation:
         path: _bmad-output/implementation-artifacts/receipts/story-2-3/D-implementation.json
         digest: sha256:4d4447d591ef2e0755af65a8480df6f33a23f15a8c306ac335ff50a037b1e55d
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-2-3/D-verification.json
+        digest: sha256:7b847e7165ffd94e84be10a299bb7db7104e84d1305d962d7ca61832f73d16c9
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-2-3/D-review.json
+        digest: sha256:8ee2629f23c43355a688543bd20a397eb0aab29680faeb1d9a2a366ca22fe3bf
+    verification:
+      subject:
+        commit: 0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8
+        tree: d4c19dae92523d46f460e8ce471a1eb2a7d6c825
+      changed_paths_sha256: sha256:581ee2319f4ead3c51be3af9e24f511128dcc38a99d6a210507754b3b2c56dbf
+      canonical_applicability: APPLICABLE
+      canonical_status: INCOMPLETE
+      progression_eligible: true
+      done_gate_disclosure_required: true
+      outstanding_obligation: canonical verification remains INCOMPLETE due UNMAPPED_CHANGED_PATH and UNEXPLAINED_DRIFT; fresh focused checks are the D coverage authority
+    review:
+      required: true
+      verdict: APPROVE
+      reviewed_commit: 0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8
+      risk_context_digest: sha256:ce0a172d5ac363143289305293f15134bc509213d4cee12eb1df950e38530a32
+      review_context_digest: sha256:5b00cb36758e0a2e395cb11c047089f84e89d0d832c9fb0c60a51b1e4556627c
+      freshness: FRESH_CANDIDATE
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: verify_slice
-  target: D
+  kind: finalize_story
+  target: story
 ---
