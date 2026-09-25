@@ -1,13 +1,16 @@
+import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query'
 import { createPinia, setActivePinia } from 'pinia'
 import { mount } from '@vue/test-utils'
-import { beforeEach, expect, test } from 'vitest'
+import { beforeEach, expect, test, vi } from 'vitest'
 
+import * as challengesApi from '../../api/challenges'
 import { useAccountStore } from '../../stores/account'
 import AccountSettingsView from '../AccountSettingsView.vue'
 import TodayView from '../TodayView.vue'
 
 beforeEach(() => {
   setActivePinia(createPinia())
+  vi.restoreAllMocks()
 })
 
 function seedContext(): void {
@@ -25,8 +28,14 @@ function seedContext(): void {
 
 test('Today renders the canonical account date and Monday to Sunday week verbatim', () => {
   seedContext()
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: [] })
 
-  const wrapper = mount(TodayView)
+  const wrapper = mount(TodayView, {
+    global: {
+      plugins: [[VueQueryPlugin, { queryClient }]],
+    },
+  })
 
   expect(wrapper.text()).toContain('2026-09-21')
   expect(wrapper.text()).toContain('2026-09-21 – 2026-09-27')

@@ -12,6 +12,7 @@ import {
   type Challenge,
   type ChallengeSnapshot,
 } from '../api/challenges'
+import ChallengeJournalEditor from '../components/ChallengeJournalEditor.vue'
 import { useAccountStore } from '../stores/account'
 import { useAuthStore } from '../stores/auth'
 import { useSyncStore } from '../stores/sync'
@@ -873,6 +874,12 @@ async function submitEdit() {
               </dd>
             </div>
           </dl>
+
+          <ChallengeJournalEditor
+            v-if="account.context"
+            :challenge-id="selectedChallenge.id"
+            :local-date="account.context.account_date"
+          />
         </div>
 
         <!-- EMPTY STATE (Nothing selected) -->

@@ -1,12 +1,18 @@
+import { VueQueryPlugin } from '@tanstack/vue-query'
 import { beforeEach, expect, test, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
+
+import * as challengesApi from '../api/challenges'
 import App from '../App.vue'
 import { pinia } from '../pinia'
+import { queryClient } from '../queryClient'
 import router from '../router'
 import { useAuthStore } from '../stores/auth'
 
 beforeEach(async () => {
   vi.restoreAllMocks()
+  queryClient.clear()
+  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: [] })
   const auth = useAuthStore(pinia)
   auth.owner = null
   auth.status = 'guest'
@@ -14,7 +20,9 @@ beforeEach(async () => {
 })
 
 test('guests see the owner login without public registration', () => {
-  const wrapper = mount(App, { global: { plugins: [pinia, router] } })
+  const wrapper = mount(App, {
+    global: { plugins: [pinia, router, [VueQueryPlugin, { queryClient }]] },
+  })
 
   expect(wrapper.get('h2').text()).toBe('Đăng nhập NoteFlow')
   expect(wrapper.find('form').exists()).toBe(true)
@@ -29,7 +37,9 @@ test('authenticated navigation has the approved order and a clear mobile trigger
   auth.status = 'authenticated'
   await router.push('/today')
 
-  const wrapper = mount(App, { global: { plugins: [pinia, router] } })
+  const wrapper = mount(App, {
+    global: { plugins: [pinia, router, [VueQueryPlugin, { queryClient }]] },
+  })
   const links = wrapper.get('nav[aria-label="Điều hướng chính"]').findAll('a')
 
   expect(links.map((link) => link.text())).toEqual([
