@@ -1,0 +1,12 @@
+{
+  "schema_version": 2,
+  "story_id": "9.1",
+  "story": { "path": ".agents/scripts/fixtures/artifact-contract/story-9-1.md", "normative_digest": "sha256:b0ad517727c930859117bfebef86cb030e654b1010bcbd0c5e3bd466ada93a7d" },
+  "execution_status": "in-progress",
+  "current_slice": "A",
+  "slices": [
+    { "id": "A", "status": "checkpointed", "task_refs": ["T-1", "T-1.1"], "depends_on": [], "baseline_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "checkpoint_commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "subject_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111", "changed_paths_sha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222", "receipt_refs": { "implementation": { "path": "receipt.json", "digest": "sha256:0aaaa2e0f61337f83941919897ce18acf719212582093178bd4bb68b5bcb9459" } } },
+    { "id": "B", "status": "pending", "task_refs": ["T-2"], "depends_on": ["A"] }
+  ],
+  "next_action": { "kind": "verify_slice", "target": "A" }
+}

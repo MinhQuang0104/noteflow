@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "story_id": "9.1",
+  "slice_id": "A",
+  "kind": "implementation",
+  "checkpoint_commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "baseline_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "subject_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "created_from_head": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "changed_paths_sha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "commands": [
+    { "command": "node --check example.mjs", "exit_code": 0, "tool": "Node.js", "environment": "fixture" }
+  ]
+}
