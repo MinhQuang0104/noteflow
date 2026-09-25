@@ -174,9 +174,41 @@ slices:
           - No new blocker, ambiguity, or blocking finding exists.
   - id: B
     purpose: API/public contract
-    status: pending
+    status: checkpointed
     scope: backend challenge API boundary and versioned OpenAPI contract
     depends_on: [A]
+    baseline_commit: d1cbd72ca0baa03dfa9430fc6a7446f1cab9122e
+    checkpoint_commit: 2a17c8f00adccb66351385775a57db13ea386d86
+    implementation:
+      changed_paths:
+        - backend/app/Http/Controllers/ChallengeJournalController.php
+        - backend/app/Modules/Challenges/Application/UseCases/GetJournalQuery.php
+        - backend/routes/api.php
+        - backend/tests/Contract/ChallengeContractTest.php
+        - backend/tests/Feature/ChallengeJournalApiTest.php
+        - contracts/openapi.yaml
+      changed_paths_sha256: sha256:7c3ee0bbf6d02d2eac75984aef5d9dd741712064fe3587887551557a185d47cf
+      feature_map: NOT_APPLICABLE
+      feature_map_reason: Existing challenge-list map covers read-only frontend list, not journal API.
+      focused_checks:
+        - command: php artisan test tests/Feature/ChallengeJournalApiTest.php tests/Feature/ChallengeJournalTest.php tests/Feature/ChallengePersistenceTest.php tests/Feature/ChallengeApiTest.php tests/Contract/ChallengeContractTest.php --compact
+          result: PASS; 33 tests, 242 assertions
+          exit_code: 0
+        - command: php -l on five exact changed PHP paths
+          result: PASS; no syntax errors
+          exit_code: 0
+        - command: vendor/bin/pint --test on five exact changed PHP paths
+          result: PASS
+          exit_code: 0
+        - command: vendor/bin/phpstan analyse --memory-limit=1G --no-progress app/Http/Controllers/ChallengeJournalController.php app/Modules/Challenges/Application/UseCases/GetJournalQuery.php routes/api.php
+          result: PASS; no errors
+          exit_code: 0
+        - command: git diff --cached --check on exact six staged implementation paths
+          result: PASS; no whitespace errors
+          exit_code: 0
+      red_green:
+        api: RED 404 at journal GET before route; GREEN 4 HTTP tests, 52 assertions after bounded implementation.
+        contract: RED NoPath for journal route in OpenAPI; GREEN journal contract response test after schema update.
   - id: C
     purpose: typed frontend client
     status: pending
@@ -208,6 +240,6 @@ checkpoints:
   integration_commit: null
   completion_commit: null
 next_action:
-  kind: implement_slice
+  kind: verify_slice
   target: B
 ---
