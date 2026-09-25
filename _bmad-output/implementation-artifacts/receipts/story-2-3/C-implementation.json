@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "story_id": "2.3",
+  "slice_id": "C",
+  "kind": "implementation",
+  "baseline_commit": "6bdd9aeb8f067ba65d0572bf7d87b51d9666bd78",
+  "checkpoint_commit": "51a867f6871517438e8c761787d5edfeb73aaabd",
+  "created_from_head": "51a867f6871517438e8c761787d5edfeb73aaabd",
+  "subject_digest": "sha256:f8ae42bfb0848b9cb2157cad084b474bbed4cc446b037ab2c1b2923059a26046",
+  "changed_paths_sha256": "sha256:f8ae42bfb0848b9cb2157cad084b474bbed4cc446b037ab2c1b2923059a26046",
+  "changed_paths": [
+    "frontend/scripts/generate-openapi-types.mjs",
+    "frontend/src/api/__tests__/challenges.spec.ts",
+    "frontend/src/api/challenges.ts",
+    "frontend/src/api/schema.generated.ts"
+  ],
+  "commands": [
+    {
+      "command": "npm.cmd run contract:generate",
+      "exit_code": 0,
+      "tool": "OpenAPI type generator",
+      "environment": "Windows; frontend; reviewed contracts/openapi.yaml"
+    },
+    {
+      "command": "npm.cmd run test:unit -- --run src/api/__tests__/challenges.spec.ts src/views/__tests__/challenges.spec.ts",
+      "exit_code": 0,
+      "tool": "Vitest",
+      "environment": "Windows; frontend"
+    },
+    {
+      "command": "npm.cmd run contract:check",
+      "exit_code": 0,
+      "tool": "OpenAPI type generator",
+      "environment": "Windows; frontend"
+    },
+    {
+      "command": "npm.cmd run type-check",
+      "exit_code": 0,
+      "tool": "vue-tsc",
+      "environment": "Windows; frontend"
+    },
+    {
+      "command": "npx.cmd eslint src/api/challenges.ts src/api/__tests__/challenges.spec.ts scripts/generate-openapi-types.mjs",
+      "exit_code": 0,
+      "tool": "ESLint",
+      "environment": "Windows; frontend"
+    },
+    {
+      "command": "npx.cmd oxlint src/api/challenges.ts src/api/__tests__/challenges.spec.ts scripts/generate-openapi-types.mjs",
+      "exit_code": 0,
+      "tool": "Oxlint",
+      "environment": "Windows; frontend"
+    },
+    {
+      "command": "git diff --cached --check",
+      "exit_code": 0,
+      "tool": "Git",
+      "environment": "Windows; repository root; exact four staged implementation paths"
+    }
+  ],
+  "focused_checks": [
+    {
+      "command": "npm.cmd run test:unit -- --run src/api/__tests__/challenges.spec.ts src/views/__tests__/challenges.spec.ts",
+      "result": "PASS; 22 tests in two files",
+      "exit_code": 0
+    },
+    {
+      "command": "npm.cmd run contract:check",
+      "result": "PASS; generated types match reviewed OpenAPI",
+      "exit_code": 0
+    },
+    {
+      "command": "npm.cmd run type-check",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "command": "npx.cmd eslint src/api/challenges.ts src/api/__tests__/challenges.spec.ts scripts/generate-openapi-types.mjs",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "command": "npx.cmd oxlint src/api/challenges.ts src/api/__tests__/challenges.spec.ts scripts/generate-openapi-types.mjs",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "command": "git diff --cached --check",
+      "result": "PASS; exact four-path staged diff",
+      "exit_code": 0
+    }
+  ],
+  "red_green": {
+    "client": "RED: three journal client tests failed because getChallengeJournal/saveChallengeJournal were absent; GREEN: all nine API client tests passed after implementation.",
+    "types": "Generated output was inspected: only journal schemas and operations plus the contract's ChallengeSnapshot | JournalSnapshot union. An initial type-check exposed the existing challenge-view consumer mismatch; typed endpoint-specific problem aliases resolved it, and fresh type-check passed."
+  },
+  "contract_evidence": "Canonical npm.cmd run contract:generate; generated diff inspected; npm.cmd run contract:check and contract:validate passed; contracts/openapi.yaml unchanged.",
+  "risk_evidence": "409 test preserves typed journal current_snapshot/current_version while error message does not echo submitted journal text; request body contains only command_id, data_epoch, base_version, and journal; existing challenge-view tests remain green."
+}
