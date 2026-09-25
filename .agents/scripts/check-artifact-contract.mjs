@@ -97,9 +97,9 @@ export function validateTaskSlices(story, plan) {
   const graph = new Map()
   for (const slice of plan.slices) {
     if (!Array.isArray(slice.task_refs) || !slice.task_refs.length) errors.push('MISSING_TASK_REFS')
-    for (const ref of slice.task_refs ?? []) { if (!tasks.has(ref)) errors.push('UNKNOWN_TASK_REF'); else covered.add(ref) }
+    for (const ref of Array.isArray(slice.task_refs) ? slice.task_refs : []) { if (!tasks.has(ref)) errors.push('UNKNOWN_TASK_REF'); else covered.add(ref) }
     if (!Array.isArray(slice.depends_on) || slice.depends_on.some(dep => !ids.includes(dep))) errors.push('INVALID_SLICE_DEPENDENCY')
-    graph.set(slice.id, slice.depends_on ?? [])
+    graph.set(slice.id, Array.isArray(slice.depends_on) ? slice.depends_on : [])
   }
   if ([...tasks].some(id => !covered.has(id))) errors.push('UNCOVERED_TASK')
   const visiting = new Set(), visited = new Set()
@@ -114,18 +114,19 @@ export function validateTaskSlices(story, plan) {
   return [...new Set(errors)]
 }
 
-export function validateReceipt(root, plan, sliceId, kind) {
+export function readReceipt(root, plan, sliceId, kind) {
   const errors = []
   const slice = plan.slices?.find(item => item.id === sliceId)
   const ref = slice?.receipt_refs?.[kind]
-  if (kind !== 'implementation' || !slice || !ref || typeof ref.path !== 'string' ||
+  if (!['implementation', 'verification', 'review'].includes(kind) || !slice || !ref || typeof ref.path !== 'string' ||
       !ref.path || path.isAbsolute(ref.path) || path.win32.isAbsolute(ref.path) ||
-      ref.path.includes('\\') || ref.path.split('/').some(part => !part || part === '.' || part === '..') || !DIGEST.test(ref.digest ?? '')) return ['INVALID_RECEIPT_REF']
+      ref.path.includes('\\') || ref.path.split('/').some(part => !part || part === '.' || part === '..') || !DIGEST.test(ref.digest ?? '')) return { receipt: null, errors: ['INVALID_RECEIPT_REF'] }
   let bytes, receipt
   try {
     bytes = readFileSync(path.resolve(root, ref.path))
     receipt = JSON.parse(bytes.toString('utf8'))
-  } catch { return ['INVALID_RECEIPT_FILE'] }
+  } catch { return { receipt: null, errors: ['INVALID_RECEIPT_FILE'] } }
+  if (!receipt || typeof receipt !== 'object' || Array.isArray(receipt)) return { receipt: null, errors: ['INVALID_RECEIPT_FILE'] }
   if (receiptDigest(receipt) !== ref.digest) errors.push('RECEIPT_DIGEST_MISMATCH')
   if (receipt.story_id !== plan.story_id) errors.push('STORY_ID_MISMATCH')
   if (receipt.slice_id !== sliceId) errors.push('SLICE_ID_MISMATCH')
@@ -138,7 +139,12 @@ export function validateReceipt(root, plan, sliceId, kind) {
       receipt.created_from_head !== receipt.checkpoint_commit || !DIGEST.test(receipt.subject_digest ?? '') ||
       !DIGEST.test(receipt.changed_paths_sha256 ?? '')) errors.push('INVALID_RECEIPT_IDENTITY')
   if (!Array.isArray(receipt.commands) || !receipt.commands.length || receipt.commands.some(item =>
+    !item || typeof item !== 'object' || Array.isArray(item) ||
     typeof item.command !== 'string' || !item.command || !Number.isInteger(item.exit_code) ||
     typeof item.tool !== 'string' || !item.tool || typeof item.environment !== 'string' || !item.environment)) errors.push('INVALID_RECEIPT_PAYLOAD')
-  return [...new Set(errors)]
+  return { receipt, errors: [...new Set(errors)] }
+}
+
+export function validateReceipt(root, plan, sliceId, kind) {
+  return readReceipt(root, plan, sliceId, kind).errors
 }

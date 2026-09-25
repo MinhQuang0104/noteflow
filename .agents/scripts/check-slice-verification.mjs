@@ -5,6 +5,8 @@ import { spawnSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
 
 import { frontmatter, validate as validateStoryPlan } from './check-story-plan.mjs'
+import { readReceipt } from './check-artifact-contract.mjs'
+import { separatedStory } from './v4-separated-plan.mjs'
 
 const CODES = { READY: 0, RERUN_REQUIRED: 0, STALE: 2, BLOCKED: 3, INVALID: 4, ERROR: 5 }
 const SHA = /^[0-9a-f]{40,64}$/
@@ -215,9 +217,9 @@ export function inspect(root, storyId, sliceId) {
 
   manifest.changedPaths = gitPaths(root, ['diff', '--name-only', '--diff-filter=ACDMRT', `${manifest.baselineCommit}..${manifest.checkpointCommit}`])
   manifest.changedPathsSha256 = pathListDigest(manifest.changedPaths)
-  const persistedPaths = slice.verification?.changed_paths
+  const persistedPaths = plan.schema_version === 2 ? undefined : slice.verification?.changed_paths
   if (persistedPaths !== undefined && !equalPaths(persistedPaths, manifest.changedPaths)) reason('CHANGED_PATHS_ALLOWLIST_MISMATCH', 'blocked')
-  const persistedPathDigest = slice.verification?.changed_paths_sha256
+  const persistedPathDigest = plan.schema_version === 2 ? slice.changed_paths_sha256 : slice.verification?.changed_paths_sha256
   if (persistedPathDigest !== undefined && persistedPathDigest !== manifest.changedPathsSha256) reason('CHANGED_PATHS_DIGEST_MISMATCH', 'blocked')
 
   manifest.postCheckpointDrift = intersect(
@@ -236,13 +238,17 @@ export function inspect(root, storyId, sliceId) {
   ]
   if (manifest.workingDrift.length) reason('WORKING_IMPLEMENTATION_DRIFT', 'blocked')
 
-  manifest.sourceFreshness = validation.reasons.includes('SOURCE_DIGEST_MISMATCH') ? 'STALE' : 'FRESH'
-  if (manifest.sourceFreshness === 'STALE') reason('SOURCE_DIGEST_MISMATCH', 'stale')
-  for (const item of validation.reasons.filter(item => item !== 'SOURCE_DIGEST_MISMATCH')) {
-    if (['SNAPSHOT_MISMATCH', 'CHECKPOINT_MISSING', 'CHECKPOINT_NOT_ANCESTOR', 'REVIEW_COMMIT_MISSING', 'REVIEW_COMMIT_NOT_ANCESTOR'].includes(item)) reason(item, 'stale')
+  const sourceMismatch = plan.schema_version === 2 ? 'STORY_NORMATIVE_DIGEST_MISMATCH' : 'SOURCE_DIGEST_MISMATCH'
+  manifest.sourceFreshness = validation.reasons.includes(sourceMismatch) ? 'STALE' : 'FRESH'
+  if (manifest.sourceFreshness === 'STALE') reason(sourceMismatch, 'stale')
+  for (const item of validation.reasons.filter(item => item !== sourceMismatch)) {
+    if (['SNAPSHOT_MISMATCH', 'CHECKPOINT_MISSING', 'CHECKPOINT_NOT_ANCESTOR', 'REVIEW_COMMIT_MISSING',
+      'REVIEW_COMMIT_NOT_ANCESTOR', 'SUBJECT_DIGEST_MISMATCH', 'RECEIPT_DIGEST_MISMATCH'].includes(item)) reason(item, 'stale')
   }
 
-  const referenceItems = referenceEntries(plan, slice)
+  const referenceItems = plan.schema_version === 2
+    ? (separatedStory(root, plan).story?.references ?? []).map(item => ({ path: item.ref.split('#')[0], digest: null }))
+    : referenceEntries(plan, slice)
   const refs = canonicalPaths(referenceItems.map(item => item.path))
   if (refs.length) {
     const committedRefDrift = intersect(gitPaths(root, ['diff', '--name-only', '--diff-filter=ACDMRT', `${manifest.checkpointCommit}..${manifest.head}`]), refs)
@@ -277,13 +283,26 @@ export function inspect(root, storyId, sliceId) {
 
   const treeResult = git(root, ['rev-parse', `${manifest.checkpointCommit}^{tree}`])
   if (treeResult.status !== 0) throw new Error('CHECKPOINT_TREE_UNAVAILABLE')
-  manifest.evidence = classifyEvidence(slice.verification, manifest.checkpointCommit, treeResult.stdout.trim(),
+  let verificationEvidence = slice.verification
+  if (plan.schema_version === 2 && slice.receipt_refs?.verification) {
+    const loaded = readReceipt(root, plan, sliceId, 'verification')
+    for (const error of loaded.errors) reason(error, error === 'RECEIPT_DIGEST_MISMATCH' || error.endsWith('_MISMATCH') ? 'stale' : 'invalid')
+    if (loaded.errors.length) return finish(manifest, flags)
+    verificationEvidence = loaded.receipt
+  }
+  manifest.evidence = classifyEvidence(verificationEvidence, manifest.checkpointCommit, treeResult.stdout.trim(),
     manifest.changedPaths, manifest.changedPathsSha256)
   if (manifest.evidence.some(item => item.status === 'BLOCKED')) reason('FOCUSED_EVIDENCE_BLOCKED', 'blocked')
   else if (manifest.evidence.some(item => item.status !== 'REUSABLE')) reason('FOCUSED_EVIDENCE_RERUN_REQUIRED', 'rerun')
 
   const reviewReasons = []
-  const review = slice.review
+  let review = slice.review
+  if (plan.schema_version === 2 && slice.receipt_refs?.review && manifest.evidence.every(item => item.status === 'REUSABLE')) {
+    const loaded = readReceipt(root, plan, sliceId, 'review')
+    for (const error of loaded.errors) reason(error, error === 'RECEIPT_DIGEST_MISMATCH' || error.endsWith('_MISMATCH') ? 'stale' : 'invalid')
+    if (loaded.errors.length) return finish(manifest, flags)
+    review = { ...loaded.receipt, reviewed_commit: loaded.receipt.checkpoint_commit }
+  }
   if (!review?.reviewed_commit) reviewReasons.push('REVIEW_IDENTITY_MISSING')
   else if (review.reviewed_commit !== manifest.checkpointCommit) reviewReasons.push('REVIEWED_COMMIT_MISMATCH')
   if (manifest.postCheckpointDrift.length) reviewReasons.push('IMPLEMENTATION_DRIFT')

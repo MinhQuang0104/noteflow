@@ -97,7 +97,7 @@ test('real schema-v1 Story 2.3 remains readable after Slice B checkpoint', () =>
   assert.equal(result.json.actualLifecycle, 'in-progress')
   assert.deepEqual(result.json.nextAction, {kind:'verify_slice', target:'B'})
 })
-test('unsupported schema', () => withFixture(f => editPlan(f, 'schema_version: 1', 'schema_version: 2'), 'INVALID', 3, 'UNSUPPORTED_SCHEMA'))
+test('unsupported schema', () => withFixture(f => editPlan(f, 'schema_version: 1', 'schema_version: 3'), 'INVALID', 3, 'UNSUPPORTED_SCHEMA'))
 test('story ID mismatch', () => withFixture(f => editPlan(f, 'story_id: "9.1"', 'story_id: "9.2"'), 'INVALID', 3, 'STORY_ID_MISMATCH'))
 test('missing Plan', () => { const f = fixture(); try { assert.equal(check(f.root, '9.2').json.status, 'INVALID') } finally { rmSync(f.root, { recursive: true, force: true }) } })
 test('missing source', () => withFixture(f => rmSync(path.join(f.root, 'docs/product/epics.md')), 'INVALID', 3, 'SOURCE_MISSING'))

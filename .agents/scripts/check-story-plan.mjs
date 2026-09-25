@@ -3,6 +3,7 @@ import path from 'node:path'
 import { createHash } from 'node:crypto'
 import { spawnSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
+import { validateSeparatedPlan } from './v4-separated-plan.mjs'
 
 // Exit codes: READY=0, RECONCILIATION_REQUIRED=1, STALE=2, INVALID=3, ERROR=4.
 const CODES = { READY: 0, RECONCILIATION_REQUIRED: 1, STALE: 2, INVALID: 3, ERROR: 4 }
@@ -151,6 +152,7 @@ export function validate(root, id) {
   result.currentSlice = plan.current_slice ?? null
   result.nextAction = plan.next_action ?? null
   result.sourceDigest = plan.source?.section_digest ?? null
+  if (plan.schema_version === 2) return validateSeparatedPlan(root, id, plan, result)
   if (plan.schema_version !== 1) invalid('UNSUPPORTED_SCHEMA')
   if (plan.story_id !== id) invalid('STORY_ID_MISMATCH')
   if (hasForbidden(plan)) invalid('FORBIDDEN_V3_STATE')

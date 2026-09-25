@@ -5,6 +5,7 @@ import { spawnSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
 
 import { frontmatter, validate as validateStoryPlan } from './check-story-plan.mjs'
+import { validateReceipt } from './check-artifact-contract.mjs'
 
 const CODES = { READY: 0, RECONCILIATION_REQUIRED: 1, STALE: 2, BLOCKED: 3, INVALID: 4, ERROR: 5 }
 const SHA = /^[0-9a-f]{40,64}$/
@@ -136,7 +137,7 @@ function dependencyEntry(plan, dependencyId) {
   return { id: dependencyId, status: dependency.status, eligible: true, reason: 'VERIFIED_PROGRESSION_ELIGIBLE' }
 }
 
-function inspectImplementationMetadata(root, result, slice, planPath) {
+function inspectImplementationMetadata(root, result, slice, planPath, plan) {
   const implementation = slice.implementation
   const baseline = slice.baseline_commit
   const checkpoint = slice.checkpoint_commit
@@ -150,7 +151,10 @@ function inspectImplementationMetadata(root, result, slice, planPath) {
     'GIT_CHECKPOINT_DIFF_FAILED')
   if (!changedPaths.length) result.reasons.push('EMPTY_IMPLEMENTATION_CHECKPOINT')
   if (changedPaths.includes(planPath)) result.reasons.push('IMPLEMENTATION_CHECKPOINT_CONTAINS_PLAN')
-  if (!implementation || typeof implementation !== 'object' || Array.isArray(implementation)) {
+  if (plan.schema_version === 2) {
+    if (slice.changed_paths_sha256 !== pathDigest(changedPaths)) result.reasons.push('IMPLEMENTATION_CHANGED_PATH_DIGEST_MISMATCH')
+    for (const error of validateReceipt(root, plan, slice.id, 'implementation')) result.reasons.push(error)
+  } else if (!implementation || typeof implementation !== 'object' || Array.isArray(implementation)) {
     result.reasons.push('IMPLEMENTATION_METADATA_REQUIRED')
   } else {
     if (!Array.isArray(implementation.changed_paths) || !samePaths(implementation.changed_paths, changedPaths)) {
@@ -177,7 +181,10 @@ function inspectImplementationMetadata(root, result, slice, planPath) {
     'BASELINE_NOT_ANCESTOR_OF_CHECKPOINT', 'CHECKPOINT_NOT_ANCESTOR', 'EMPTY_IMPLEMENTATION_CHECKPOINT',
     'IMPLEMENTATION_CHECKPOINT_CONTAINS_PLAN', 'IMPLEMENTATION_METADATA_REQUIRED',
     'IMPLEMENTATION_CHANGED_PATHS_MISMATCH', 'IMPLEMENTATION_CHANGED_PATH_DIGEST_MISMATCH',
-    'IMPLEMENTATION_FOCUSED_CHECKS_INVALID', 'IMPLEMENTATION_RED_GREEN_EVIDENCE_INVALID'
+    'IMPLEMENTATION_FOCUSED_CHECKS_INVALID', 'IMPLEMENTATION_RED_GREEN_EVIDENCE_INVALID',
+    'INVALID_RECEIPT_REF', 'INVALID_RECEIPT_FILE', 'RECEIPT_DIGEST_MISMATCH', 'STORY_ID_MISMATCH',
+    'SLICE_ID_MISMATCH', 'CHECKPOINT_MISMATCH', 'BASELINE_MISMATCH', 'SUBJECT_MISMATCH',
+    'CHANGED_PATHS_MISMATCH', 'INVALID_RECEIPT_IDENTITY', 'INVALID_RECEIPT_PAYLOAD'
   ].includes(reason))
 }
 
@@ -304,7 +311,7 @@ export function inspect(root, storyId, sliceId, options = {}) {
 
   if (checkpointed) {
     let metadataValid
-    try { metadataValid = inspectImplementationMetadata(root, result, slice, planPath) }
+    try { metadataValid = inspectImplementationMetadata(root, result, slice, planPath, plan) }
     catch (error) {
       result.reasons.push(error.message)
       return finish(result, 'ERROR')
@@ -312,7 +319,8 @@ export function inspect(root, storyId, sliceId, options = {}) {
     if (!metadataValid) return finish(result, 'BLOCKED')
     const planStaged = result.stagedPaths.includes(planPath)
     const planUnstaged = result.unstagedPaths.includes(planPath)
-    const otherDirty = result.relevantDirtyPaths.filter(item => item !== planPath)
+    const receiptPath = plan.schema_version === 2 ? slice.receipt_refs?.implementation?.path : null
+    const otherDirty = result.relevantDirtyPaths.filter(item => item !== planPath && item !== receiptPath)
     if (planStaged || planUnstaged) {
       if (planStaged && planUnstaged) result.reasons.push('PLAN_UPDATE_PARTIALLY_STAGED')
       if (otherDirty.length) result.reasons.push('PLAN_UPDATE_NOT_PLAN_ONLY')
