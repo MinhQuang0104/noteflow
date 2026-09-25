@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "story_id": "2.3",
+  "slice_id": "D",
+  "kind": "implementation",
+  "baseline_commit": "d78e9185a23846a11b932559e0592d27856cd57e",
+  "checkpoint_commit": "0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8",
+  "created_from_head": "0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8",
+  "subject_digest": "sha256:581ee2319f4ead3c51be3af9e24f511128dcc38a99d6a210507754b3b2c56dbf",
+  "changed_paths_sha256": "sha256:581ee2319f4ead3c51be3af9e24f511128dcc38a99d6a210507754b3b2c56dbf",
+  "changed_paths": [
+    "frontend/src/__tests__/App.spec.ts",
+    "frontend/src/components/ChallengeJournalEditor.vue",
+    "frontend/src/views/ChallengesView.vue",
+    "frontend/src/views/TodayView.vue",
+    "frontend/src/views/__tests__/account-time.spec.ts",
+    "frontend/src/views/__tests__/journal.spec.ts",
+    "frontend/src/views/__tests__/today.spec.ts"
+  ],
+  "task_refs": ["T-4", "T-5"],
+  "ac_refs": ["AC-1", "AC-2", "AC-3"],
+  "commands": [
+    {
+      "command": "npm.cmd run test:unit -- --run",
+      "exit_code": 0,
+      "tool": "Vitest",
+      "environment": "Windows; frontend; 13 test files, 72 tests"
+    },
+    {
+      "command": "npm.cmd run test:unit -- --run src/views/__tests__/journal.spec.ts src/views/__tests__/today.spec.ts",
+      "exit_code": 0,
+      "tool": "Vitest",
+      "environment": "Windows; frontend; focused Slice D acceptance tests"
+    },
+    {
+      "command": "npm.cmd run type-check",
+      "exit_code": 0,
+      "tool": "vue-tsc",
+      "environment": "Windows; frontend"
+    },
+    {
+      "command": "npm.cmd run build",
+      "exit_code": 0,
+      "tool": "Vite",
+      "environment": "Windows; frontend production build"
+    },
+    {
+      "command": "npm.cmd run contract:check",
+      "exit_code": 0,
+      "tool": "OpenAPI type generator",
+      "environment": "Windows; frontend; reviewed OpenAPI unchanged"
+    },
+    {
+      "command": "npx.cmd eslint src/components/ChallengeJournalEditor.vue src/views/TodayView.vue src/views/ChallengesView.vue src/views/__tests__/journal.spec.ts src/views/__tests__/today.spec.ts src/views/__tests__/account-time.spec.ts src/__tests__/App.spec.ts",
+      "exit_code": 0,
+      "tool": "ESLint",
+      "environment": "Windows; frontend; exact handwritten Slice D paths"
+    },
+    {
+      "command": "npx.cmd oxlint src/components/ChallengeJournalEditor.vue src/views/TodayView.vue src/views/ChallengesView.vue src/views/__tests__/journal.spec.ts src/views/__tests__/today.spec.ts src/views/__tests__/account-time.spec.ts src/__tests__/App.spec.ts",
+      "exit_code": 0,
+      "tool": "Oxlint",
+      "environment": "Windows; frontend; exact handwritten Slice D paths"
+    },
+    {
+      "command": "git diff --check d78e9185a23846a11b932559e0592d27856cd57e 0caa6cbbadc4a68c83765fb9adc85d4fdd232ea8 -- exact seven Slice D paths",
+      "exit_code": 0,
+      "tool": "Git",
+      "environment": "Windows; repository root; implementation checkpoint"
+    }
+  ],
+  "focused_checks": [
+    {
+      "command": "npm.cmd run test:unit -- --run src/views/__tests__/journal.spec.ts src/views/__tests__/today.spec.ts",
+      "result": "PASS; 2 test files, 6 tests",
+      "exit_code": 0
+    },
+    {
+      "command": "npm.cmd run test:unit -- --run",
+      "result": "PASS; 13 test files, 72 tests",
+      "exit_code": 0
+    },
+    {
+      "command": "npm.cmd run type-check",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "command": "npm.cmd run build",
+      "result": "PASS; production bundle generated",
+      "exit_code": 0
+    },
+    {
+      "command": "npm.cmd run contract:check",
+      "result": "PASS; generated types match reviewed OpenAPI",
+      "exit_code": 0
+    },
+    {
+      "command": "npx.cmd eslint ... exact Slice D paths",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "command": "npx.cmd oxlint ... exact Slice D paths",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "command": "git diff --check ... exact seven Slice D paths",
+      "result": "PASS; no whitespace errors",
+      "exit_code": 0
+    }
+  ],
+  "red_green": {
+    "journal_ui": "RED: four journal acceptance tests failed because the optional editor was absent; GREEN: journal UI tests passed after typed-client wiring, versioned save, validation, and conflict state were implemented.",
+    "today_entry": "RED: two Today acceptance tests failed because the challenge list and journal entry point were absent; GREEN: Today acceptance tests passed after the account-day challenge list and detail link were added.",
+    "regression": "RED: the first full frontend run exposed missing Vue Query injection in two legacy Today/App mounts; GREEN: the two direct test harnesses now install the runtime plugin and full suite passes."
+  },
+  "acceptance_evidence": [
+    {
+      "ac": "AC-1",
+      "evidence": "Challenge detail reads the typed journal for the authenticated account date and saves it with challenge/date identity and journal base_version."
+    },
+    {
+      "ac": "AC-2",
+      "evidence": "Journal editor is separate from completion/progress controls; save payload contains only journal command fields and whitespace-only input is rejected before mutation."
+    },
+    {
+      "ac": "AC-3",
+      "evidence": "Journal uses its own query/version state; stale conflict preserves the draft, displays the server snapshot, and disables blind resubmission."
+    }
+  ],
+  "scope_evidence": "Slice D changed only frontend Today/Challenge UI, the journal-specific component, and direct frontend acceptance/test harness paths. Backend, contracts/openapi.yaml, and generated contract types were unchanged."
+}
