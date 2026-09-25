@@ -5,16 +5,26 @@ export type ChallengeSnapshot = components['schemas']['ChallengeSnapshot']
 export type ChallengeListResult = components['schemas']['ChallengeListResult']
 export type ChallengeDetailResult = components['schemas']['ChallengeDetailResult']
 export type ChallengeMutationResult = components['schemas']['ChallengeMutationResult']
+export type JournalSnapshot = components['schemas']['JournalSnapshot']
+export type JournalReadResult = components['schemas']['JournalReadResult']
+export type JournalMutationResult = components['schemas']['JournalMutationResult']
+export type SaveJournalRequest = components['schemas']['SaveJournalRequest']
 export type CreateChallengeRequest = components['schemas']['CreateChallengeRequest']
 export type UpdateChallengeMetadataRequest = components['schemas']['UpdateChallengeMetadataRequest']
 export type ProblemDetails = components['schemas']['ProblemDetails']
 export type ValidationError = components['schemas']['ValidationError']
+export type ChallengeProblemDetails = Omit<ProblemDetails, 'current_snapshot'> & {
+  current_snapshot?: ChallengeSnapshot
+}
+export type JournalProblemDetails = Omit<ProblemDetails, 'current_snapshot'> & {
+  current_snapshot?: JournalSnapshot
+}
 
-export class ChallengeApiError extends Error {
+export class ChallengeApiError<TProblem extends ProblemDetails = ChallengeProblemDetails> extends Error {
   constructor(
     message: string,
     readonly status: number,
-    readonly problem?: ProblemDetails,
+    readonly problem?: TProblem,
     readonly validation?: ValidationError,
   ) {
     super(message)
@@ -43,7 +53,10 @@ export function generateCommandId(): string {
   })
 }
 
-async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
+async function requestJson<T, TProblem extends ProblemDetails = ChallengeProblemDetails>(
+  path: string,
+  init?: RequestInit,
+): Promise<T> {
   const token = xsrfToken()
   const headers: Record<string, string> = {
     Accept: 'application/json, application/problem+json',
@@ -68,7 +81,7 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
     return (await response.json()) as T
   }
 
-  let problem: ProblemDetails | undefined
+  let problem: TProblem | undefined
   let validation: ValidationError | undefined
   let message = `Challenge request failed with status ${response.status}`
 
@@ -78,7 +91,7 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
       validation = errorBody as ValidationError
       message = validation.message || 'Dữ liệu không hợp lệ.'
     } else if (response.status === 409 || response.status === 423) {
-      problem = errorBody as ProblemDetails
+      problem = errorBody as TProblem
       message = problem.message || 'Xung đột phiên bản dữ liệu.'
     } else if (errorBody?.message) {
       message = errorBody.message
@@ -87,7 +100,7 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
     // Non-JSON response
   }
 
-  throw new ChallengeApiError(message, response.status, problem, validation)
+  throw new ChallengeApiError<TProblem>(message, response.status, problem, validation)
 }
 
 export async function getChallenges(): Promise<ChallengeListResult> {
@@ -113,4 +126,21 @@ export async function updateChallengeMetadata(
     method: 'PATCH',
     body: JSON.stringify(payload),
   })
+}
+
+export async function getChallengeJournal(id: string, date: string): Promise<JournalReadResult> {
+  return requestJson<JournalReadResult, JournalProblemDetails>(
+    `/api/v1/challenges/${encodeURIComponent(id)}/journals/${encodeURIComponent(date)}`,
+  )
+}
+
+export async function saveChallengeJournal(
+  id: string,
+  date: string,
+  payload: SaveJournalRequest,
+): Promise<JournalMutationResult> {
+  return requestJson<JournalMutationResult, JournalProblemDetails>(
+    `/api/v1/challenges/${encodeURIComponent(id)}/journals/${encodeURIComponent(date)}`,
+    { method: 'PUT', body: JSON.stringify(payload) },
+  )
 }

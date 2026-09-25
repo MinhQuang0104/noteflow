@@ -17,6 +17,10 @@ function schemaType(schema) {
     return `components['schemas'][${quote(name)}]`
   }
 
+  if (schema.oneOf) {
+    return schema.oneOf.map(schemaType).join(' | ')
+  }
+
   if (schema.enum) {
     return schema.enum.map(quote).join(' | ')
   }

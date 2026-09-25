@@ -4,8 +4,12 @@ import {
   createChallenge,
   getChallenge,
   getChallenges,
+  getChallengeJournal,
+  saveChallengeJournal,
   updateChallengeMetadata,
   ChallengeApiError,
+  type JournalSnapshot,
+  type JournalProblemDetails,
 } from '../challenges'
 
 beforeEach(() => {
@@ -241,4 +245,100 @@ test('updateChallengeMetadata throws ChallengeApiError with problem details on 4
       current_version: 3,
     },
   })
+})
+
+test('getChallengeJournal reads an absent journal and version zero for the requested day', async () => {
+  const journal = {
+    challenge_id: 'challenge-1',
+    local_date: '2026-09-19',
+    journal: null,
+    journal_version: 0,
+  }
+  const fetchSpy = vi.fn<typeof fetch>().mockResolvedValue(
+    new Response(JSON.stringify({ journal }), { status: 200 }),
+  )
+  vi.stubGlobal('fetch', fetchSpy)
+
+  await expect(getChallengeJournal('challenge-1', '2026-09-19')).resolves.toEqual({ journal })
+  expect(fetchSpy).toHaveBeenCalledWith(
+    '/api/v1/challenges/challenge-1/journals/2026-09-19',
+    expect.objectContaining({
+      credentials: 'same-origin',
+      headers: expect.objectContaining({ Accept: 'application/json, application/problem+json' }),
+    }),
+  )
+})
+
+test('saveChallengeJournal sends the supplied version, epoch, command and text without completion fields', async () => {
+  const payload = {
+    command_id: 'command-1',
+    data_epoch: 4,
+    base_version: 0,
+    journal: 'A private note',
+  }
+  const result = {
+    journal: {
+      challenge_id: 'challenge-1',
+      local_date: '2026-09-19',
+      journal: 'A private note',
+      journal_version: 1,
+    },
+    account_revision: 8,
+    data_epoch: 4,
+  }
+  const fetchSpy = vi.fn<typeof fetch>().mockResolvedValue(
+    new Response(JSON.stringify(result), { status: 200 }),
+  )
+  vi.stubGlobal('fetch', fetchSpy)
+
+  await expect(saveChallengeJournal('challenge-1', '2026-09-19', payload)).resolves.toEqual(result)
+  expect(fetchSpy).toHaveBeenCalledWith(
+    '/api/v1/challenges/challenge-1/journals/2026-09-19',
+    expect.objectContaining({
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: expect.objectContaining({
+        'Content-Type': 'application/json',
+        'X-XSRF-TOKEN': 'test-csrf-token',
+      }),
+      body: JSON.stringify(payload),
+    }),
+  )
+})
+
+test('saveChallengeJournal exposes stale journal version and snapshot without echoing submitted text in the error', async () => {
+  const snapshot = {
+    challenge_id: 'challenge-1',
+    local_date: '2026-09-19',
+    journal: 'Saved text',
+    journal_version: 2,
+  }
+  vi.stubGlobal('fetch', vi.fn<typeof fetch>().mockResolvedValue(
+    new Response(JSON.stringify({
+      message: 'Version conflict',
+      code: 'version_conflict',
+      resource_id: 'challenge-1',
+      current_version: 2,
+      current_snapshot: snapshot,
+    }), { status: 409, headers: { 'Content-Type': 'application/problem+json' } }),
+  ))
+
+  const error = await saveChallengeJournal('challenge-1', '2026-09-19', {
+    command_id: 'command-2',
+    data_epoch: 4,
+    base_version: 1,
+    journal: 'Unsubmitted text',
+  }).then(() => null, (reason: ChallengeApiError<JournalProblemDetails>) => reason)
+
+  expect(error).toMatchObject({
+    name: 'ChallengeApiError',
+    status: 409,
+    message: 'Version conflict',
+    problem: { code: 'version_conflict', current_version: 2, current_snapshot: snapshot },
+  })
+  expect(error?.message).not.toContain('Unsubmitted text')
+  const current = error?.problem?.current_snapshot
+  if (!current || !('journal_version' in current)) throw new Error('Journal conflict snapshot missing')
+  const journalSnapshot: JournalSnapshot = current
+  expect(journalSnapshot.journal_version).toBe(2)
 })

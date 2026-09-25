@@ -2,6 +2,26 @@
 
 export interface components {
   schemas: {
+    "JournalSnapshot": {
+      "challenge_id": string
+      "local_date": string
+      "journal": string | null
+      "journal_version": number
+    }
+    "JournalReadResult": {
+      "journal": components['schemas']["JournalSnapshot"]
+    }
+    "JournalMutationResult": {
+      "journal": components['schemas']["JournalSnapshot"]
+      "account_revision": number
+      "data_epoch": number
+    }
+    "SaveJournalRequest": {
+      "command_id": string
+      "data_epoch": number
+      "base_version": number
+      "journal": string
+    }
     "AccountContext": {
       "timezone": "Asia/Ho_Chi_Minh"
       "account_date": string
@@ -91,7 +111,7 @@ export interface components {
       "code": "version_conflict" | "stale_data_epoch" | "idempotency_key_reused" | "write_fence_active"
       "resource_id"?: string
       "current_version"?: number
-      "current_snapshot"?: components['schemas']["ChallengeSnapshot"]
+      "current_snapshot"?: components['schemas']["ChallengeSnapshot"] | components['schemas']["JournalSnapshot"]
     }
   }
 }
@@ -267,6 +287,74 @@ export interface operations {
       "200": {
         content: {
           "application/json": components['schemas']["ChallengeMutationResult"]
+        }
+      }
+      "401": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "403": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "404": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "409": {
+        content: {
+          "application/problem+json": components['schemas']["ProblemDetails"]
+        }
+      }
+      "422": {
+        content: {
+          "application/json": components['schemas']["ValidationError"]
+        }
+      }
+      "423": {
+        content: {
+          "application/problem+json": components['schemas']["ProblemDetails"]
+        }
+      }
+    }
+  }
+  "getChallengeJournal": {
+    responses: {
+      "200": {
+        content: {
+          "application/json": components['schemas']["JournalReadResult"]
+        }
+      }
+      "401": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "403": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "404": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "422": {
+        content: {
+          "application/json": components['schemas']["ValidationError"]
+        }
+      }
+    }
+  }
+  "saveChallengeJournal": {
+    responses: {
+      "200": {
+        content: {
+          "application/json": components['schemas']["JournalMutationResult"]
         }
       }
       "401": {
