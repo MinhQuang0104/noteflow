@@ -8,7 +8,7 @@ upstream_epic:
   path: docs/product/epics.md
   section_digest: sha256:9f84d9a7345bcdef32ba331badce7e424564e4094bb34414c3eaa9a28e0d2514
 sprint_key: 2-3-ghi-và-sửa-journal-tùy-chọn
-lifecycle_snapshot: review
+lifecycle_snapshot: done
 execution_status: complete
 current_slice: D
 risk:
@@ -164,7 +164,5 @@ human_approval:
   approved_commit: "c56ad3be86501ec09fcf42accd4c7ef019099ba4"
   approved_action: "complete_story"
   disclosures_acknowledged: true
-next_action:
-  kind: complete_story
-  target: story
+next_action: null
 ---

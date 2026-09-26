@@ -1,7 +1,7 @@
 ---
 story_id: "2.3"
 title: Ghi và sửa journal tùy chọn
-status: review
+status: done
 ---
 
 # Story 2.3: Ghi và sửa journal tùy chọn
@@ -117,4 +117,5 @@ As a chủ tài khoản, I want ghi journal cho một ngày challenge, So that t
 ### Change Log
 
 - Finalization recorded for Human Gate: in-progress -> review; next action complete_story.
+- Human approval recorded for the exact review scope: review -> done; next action terminal.
 <!-- v4:completion:end -->
