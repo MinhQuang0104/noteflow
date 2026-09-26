@@ -1,19 +1,20 @@
-import { existsSync, readFileSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
 
-import { inspectStory, receiptDigest } from './check-artifact-contract.mjs'
 import { frontmatter, validate as validateStoryPlan } from './check-story-plan.mjs'
 import { inspectFinalization } from './check-story-finalization.mjs'
 import { applyFinalization } from './finalize-story.mjs'
-import { validateFinalizationReceipt } from './finalization-contract.mjs'
+import { explicitApprovalInput, inspectCompletion } from './check-story-completion.mjs'
+import { applyCompletion, recordHumanApproval } from './complete-story.mjs'
 
 export const V4_AUTHORIZED_ACTIONS = new Set([
   'reconcile_lifecycle',
   'implement_slice',
   'verify_slice',
-  'finalize_story'
+  'finalize_story',
+  'complete_story'
 ])
 
 const STORY_ACTIONS = new Set([
@@ -23,7 +24,6 @@ const STORY_ACTIONS = new Set([
   'complete_story'
 ])
 const SHA = /^[0-9a-f]{40,64}$/
-const DIGEST = /^sha256:[0-9a-f]{64}$/
 const CODES = {
   HUMAN_GATE_REQUIRED: 0,
   AUTHORIZED: 0,
@@ -36,14 +36,6 @@ const CODES = {
 
 function planRelative(storyId) {
   return '_bmad-output/implementation-artifacts/story-' + storyId.replace('.', '-') + '-plan.md'
-}
-
-function safePath(root, relative) {
-  if (typeof relative !== 'string' || !relative || relative.includes('\0') ||
-      relative.includes('\\') || path.isAbsolute(relative) || path.win32.isAbsolute(relative) ||
-      relative.split('/').some(part => !part || part === '.' || part === '..')) return null
-  const absolute = path.resolve(root, relative)
-  return absolute.startsWith(root + path.sep) ? absolute : null
 }
 
 function git(root, args) {
@@ -75,17 +67,7 @@ function invalidResult(reason) {
 }
 
 export function humanApprovalIntent(value) {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
-  if (value.decision !== 'APPROVE') return false
-  if (typeof value.intent !== 'string' ||
-      !/^approve\s+(?:the\s+)?exact\s+scope\b/i.test(value.intent.trim())) return false
-  return DIGEST.test(value.story_normative_digest ?? '') &&
-    DIGEST.test(value.finalization_receipt_digest ?? '') &&
-    DIGEST.test(value.scope_paths_digest ?? '') &&
-    DIGEST.test(value.implementation_commit_set_digest ?? '') &&
-    DIGEST.test(value.final_scoped_tree_digest ?? '') &&
-    SHA.test(value.approved_head ?? '') &&
-    /^\d+\.\d+$/.test(value.story_id ?? '')
+  return explicitApprovalInput(value)
 }
 
 export function routeAction(input = {}) {
@@ -118,12 +100,19 @@ export function routeAction(input = {}) {
     }
   }
   if (action === 'complete_story') {
+    if (target !== 'story') return invalidResult('INVALID_ACTION_TARGET')
+    if (input.lifecycle !== 'review') return { status: 'BLOCKED', authorized: false, action, reasons: ['LIFECYCLE_NOT_REVIEW'] }
+    if (input.executionStatus !== 'complete') return { status: 'BLOCKED', authorized: false, action, reasons: ['EXECUTION_STATUS_NOT_COMPLETE'] }
+    if (input.humanApprovalPresent !== true) return { status: 'BLOCKED', authorized: false, action, reasons: ['HUMAN_APPROVAL_REQUIRED'] }
+    if (input.completionStatus !== 'READY' || input.humanApprovalFresh !== true) {
+      return { status: input.completionStatus ?? 'STALE', authorized: false, action, reasons: ['HUMAN_APPROVAL_STALE'] }
+    }
     return {
-      status: 'HUMAN_GATE_REQUIRED',
-      authorized: false,
+      status: 'READY',
+      authorized: true,
       action,
-      reason: 'COMPLETE_STORY_EXECUTION_DISABLED',
-      instruction: 'Human must approve the exact displayed scope; generic continuation is insufficient.'
+      stopCondition: 'TERMINAL_DONE',
+      durableActionCount: 1
     }
   }
   if (action === 'review_slice') {
@@ -135,38 +124,6 @@ export function routeAction(input = {}) {
   return { status: 'UNAUTHORIZED_ACTION', authorized: false, action, reasons: ['ACTION_NOT_AUTHORIZED'] }
 }
 
-function reviewSnapshot(root, storyId, plan) {
-  const receiptPath = plan.finalization?.receipt_ref
-  const receiptFile = safePath(root, receiptPath)
-  const storyFile = safePath(root, plan.story?.path)
-  if (!receiptFile || !storyFile || !existsSync(receiptFile) || !existsSync(storyFile)) {
-    return { status: 'HUMAN_GATE_REQUIRED', reasons: ['FINALIZATION_RECEIPT_MISSING'] }
-  }
-  const receipt = JSON.parse(readFileSync(receiptFile, 'utf8'))
-  const checked = validateFinalizationReceipt(root, plan, receiptPath, receipt)
-  const story = inspectStory(readFileSync(storyFile, 'utf8'))
-  if (checked.errors.length) return { status: 'INVALID', reasons: checked.errors }
-  return {
-    status: 'HUMAN_GATE_REQUIRED',
-    authorized: false,
-    snapshot: {
-      story_id: storyId,
-      story_title: story.title,
-      story_normative_digest: receipt.story_normative_digest,
-      finalization_receipt_digest: receiptDigest(receipt),
-      final_scope_path_count: receipt.scope_path_count,
-      scope_paths_digest: receipt.scope_paths_digest,
-      implementation_commit_set_digest: receipt.implementation_commit_set_digest,
-      final_scoped_tree_digest: receipt.final_scoped_tree_digest,
-      ac_coverage_digest: receipt.ac_coverage_digest,
-      canonical_disclosures_digest: receipt.canonical_disclosures_digest,
-      lifecycle: 'review',
-      requested_next_action: { kind: 'complete_story', target: 'story' }
-    },
-    instruction: 'Approve the exact displayed scope to authorize the future complete_story phase.'
-  }
-}
-
 export function runV4Story(root, storyId, options = {}) {
   try {
     if (!/^\d+\.\d+$/.test(storyId ?? '')) return invalidResult('INVALID_STORY_ID')
@@ -175,23 +132,43 @@ export function runV4Story(root, storyId, options = {}) {
     const expectedHead = options.expectedHead ?? head
     if (!SHA.test(expectedHead)) return invalidResult('INVALID_EXPECTED_HEAD')
     if (head !== expectedHead) return { status: 'STALE', authorized: false, reasons: ['EXPECTED_HEAD_MISMATCH'] }
+    const planPath = planRelative(storyId)
+    const plan = frontmatter(readFileSync(path.join(root, planPath), 'utf8'))
     const planCheck = validateStoryPlan(root, storyId)
-    if (!planCheck.valid) {
+    const completionApprovalBlock = plan.next_action?.kind === 'complete_story' &&
+      planCheck.reasons.length > 0 && planCheck.reasons.every(reason => reason === 'DISCLOSURES_NOT_ACKNOWLEDGED')
+    if (!planCheck.valid && !completionApprovalBlock) {
       return {
         status: planCheck.status,
         authorized: false,
         reasons: planCheck.reasons
       }
     }
-    const planPath = planRelative(storyId)
-    const plan = frontmatter(readFileSync(path.join(root, planPath), 'utf8'))
+    const approvalInput = options.approval ?? (options.approveExactScope
+      ? { action: 'approve_exact_scope', disclosures_acknowledged: true }
+      : null)
+    if (approvalInput) {
+      return recordHumanApproval(root, storyId, expectedHead, approvalInput)
+    }
+    if (plan.lifecycle_snapshot === 'done') {
+      return inspectCompletion(root, storyId, expectedHead)
+    }
     const decisionInput = {
       nextAction: plan.next_action,
       lifecycle: plan.lifecycle_snapshot,
       executionStatus: plan.execution_status,
       humanApprovalPresent: plan.human_approval !== undefined && plan.human_approval !== null
     }
-    if (plan.next_action?.kind === 'complete_story') return reviewSnapshot(root, storyId, plan)
+    if (plan.next_action?.kind === 'complete_story') {
+      const helper = inspectCompletion(root, storyId, expectedHead)
+      const route = routeAction({
+        ...decisionInput,
+        humanApprovalFresh: helper.approval_fresh,
+        completionStatus: helper.status
+      })
+      if (!route.authorized) return { ...route, helper, snapshot: helper.preview }
+      return applyCompletion(root, storyId, expectedHead)
+    }
     if (plan.next_action?.kind === 'finalize_story') {
       const helper = inspectFinalization(root, storyId, expectedHead)
       const route = routeAction({
@@ -230,31 +207,46 @@ export function authorizeAction(root, storyId, action, expectedHead) {
         doneGateDisposition: helper.done_gate_disposition
       }), helper }
     }
+    if (action === 'complete_story') {
+      const helper = inspectCompletion(root, storyId, expectedHead)
+      return {
+        ...routeAction({
+          ...input,
+          humanApprovalFresh: helper.approval_fresh,
+          completionStatus: helper.status
+        }),
+        helper,
+        snapshot: helper.preview
+      }
+    }
     return routeAction(input)
   } catch (error) {
     return { status: 'ERROR', authorized: false, reasons: [error.message] }
   }
 }
 
-export function runAction(root, storyId, expectedHead) {
-  return runV4Story(root, storyId, { expectedHead })
+export function runAction(root, storyId, expectedHead, options = {}) {
+  return runV4Story(root, storyId, { expectedHead, ...options })
 }
 
 function parseArguments(argv) {
-  const [verb, storyId, flag, expectedHead, ...rest] = argv
-  if (!['run', 'execute'].includes(verb) || !/^\d+\.\d+$/.test(storyId ?? '') ||
-      rest.length || (flag !== undefined && flag !== '--expected-head') ||
-      (flag === '--expected-head' && !SHA.test(expectedHead ?? ''))) {
-    return { error: 'USAGE: run <epic.story> [--expected-head <sha>]' }
+  const [verb, storyId, ...tail] = argv
+  if (!['run', 'execute'].includes(verb) || !/^\d+\.\d+$/.test(storyId ?? '')) return { error: 'USAGE: run <epic.story> [--expected-head <sha>] [--approve-exact-scope]' }
+  let expectedHead
+  let approveExactScope = false
+  for (let index = 0; index < tail.length; index += 1) {
+    if (tail[index] === '--approve-exact-scope') approveExactScope = true
+    else if (tail[index] === '--expected-head' && SHA.test(tail[index + 1] ?? '')) { expectedHead = tail[++index] }
+    else return { error: 'USAGE: run <epic.story> [--expected-head <sha>] [--approve-exact-scope]' }
   }
-  return { storyId, expectedHead: flag === '--expected-head' ? expectedHead : undefined }
+  return { storyId, expectedHead, approveExactScope }
 }
 
 function main() {
   const parsed = parseArguments(process.argv.slice(2))
   if (parsed.error) return invalidResult(parsed.error)
   const root = path.resolve(gitOutput(process.cwd(), ['rev-parse', '--show-toplevel'], 'GIT_ROOT_UNAVAILABLE'))
-  return runV4Story(root, parsed.storyId, { expectedHead: parsed.expectedHead })
+  return runV4Story(root, parsed.storyId, { expectedHead: parsed.expectedHead, approveExactScope: parsed.approveExactScope })
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {

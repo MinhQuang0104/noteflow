@@ -83,6 +83,38 @@ function commitState(f) {
   f.head = git(f.root, 'rev-parse', 'HEAD')
 }
 
+function approvalBlock(f) {
+  const receipt = JSON.parse(readFileSync(path.join(f.root, RECEIPT), 'utf8'))
+  const receiptDigest = stableFinalizationDigest(receipt)
+  return [
+    'human_approval:',
+    '  schema_version: 1',
+    '  story_id: "9.1"',
+    '  approver_type: human',
+    '  decision: APPROVED',
+    '  approved_at: "2026-09-26T12:00:00.000Z"',
+    '  story_normative_digest: sha256:' + 'a'.repeat(64),
+    '  finalization_receipt_digest: ' + receiptDigest,
+    '  done_gate_summary_digest: sha256:' + '1'.repeat(64),
+    '  scope_paths_digest: ' + receipt.scope_paths_digest,
+    '  implementation_commit_set_digest: ' + receipt.implementation_commit_set_digest,
+    '  final_scope_digest: ' + receipt.final_scoped_tree_digest,
+    '  final_scoped_tree_digest: ' + receipt.final_scoped_tree_digest,
+    '  approved_review_head: ' + f.head,
+    '  approved_commit: ' + f.head,
+    '  approved_action: complete_story',
+    '  disclosures_acknowledged: true',
+    ''
+  ].join('\n')
+}
+
+function addApproval(f, commit = true, stale = false) {
+  const block = approvalBlock(f)
+  const text = f.staleApproval ? block.replace(/^  finalization_receipt_digest: .*$/m, '  finalization_receipt_digest: sha256:' + 'f'.repeat(64)) : block
+  write(f.root, PLAN, readFileSync(path.join(f.root, PLAN), 'utf8').replace('next_action:\n', text + 'next_action:\n'))
+  if (commit) commitState(f)
+}
+
 test('healthy committed review without approval is HUMAN_GATE_PENDING', () => {
   const f = fixture()
   try {
@@ -150,6 +182,84 @@ test('committed receipt tamper is detected', () => {
     f.head = git(f.root, 'rev-parse', 'HEAD')
     const result = classifyFinalizationRecovery(f.root, '9.1', f.head)
     assert.equal(result.classification, 'TAMPERED_FINALIZATION_RECEIPT', JSON.stringify(result))
+  } finally {
+    f.cleanup()
+  }
+})
+
+test('uncommitted durable approval bytes are APPROVAL_PREVIEW_ONLY', () => {
+  const f = fixture()
+  try {
+    setState(f, { storyReview: true, planReview: true, sprintReview: true, receipt: true })
+    commitState(f)
+    addApproval(f, false)
+    const result = classifyFinalizationRecovery(f.root, '9.1', f.head)
+    assert.equal(result.classification, 'APPROVAL_PREVIEW_ONLY', JSON.stringify(result))
+  } finally {
+    f.cleanup()
+  }
+})
+
+test('durable approval with review projections is APPROVAL_DURABLE_PENDING_COMPLETION', () => {
+  const f = fixture()
+  try {
+    setState(f, { storyReview: true, planReview: true, sprintReview: true, receipt: true })
+    commitState(f)
+    addApproval(f)
+    const result = classifyFinalizationRecovery(f.root, '9.1', f.head)
+    assert.equal(result.classification, 'APPROVAL_DURABLE_PENDING_COMPLETION', JSON.stringify(result))
+  } finally {
+    f.cleanup()
+  }
+})
+
+for (const [label, field] of [
+  ['Story', 'story'],
+  ['Plan', 'plan'],
+  ['sprint', 'sprint']
+]) test(`${label}-only done projection is PARTIAL_${field.toUpperCase()}_ONLY`, () => {
+  const f = fixture()
+  try {
+    setState(f, { storyReview: true, planReview: true, sprintReview: true, receipt: true })
+    commitState(f)
+    if (field === 'story') write(f.root, STORY, readFileSync(path.join(f.root, STORY), 'utf8').replace('status: review', 'status: done'))
+    if (field === 'plan') write(f.root, PLAN, readFileSync(path.join(f.root, PLAN), 'utf8').replace('lifecycle_snapshot: review', 'lifecycle_snapshot: done').replace('next_action:\n  kind: complete_story\n  target: story', 'next_action: null'))
+    if (field === 'sprint') write(f.root, SPRINT, readFileSync(path.join(f.root, SPRINT), 'utf8').replace('review', 'done'))
+    commitState(f)
+    const result = classifyFinalizationRecovery(f.root, '9.1', f.head)
+    assert.equal(result.classification, `PARTIAL_${field.toUpperCase()}_ONLY`, JSON.stringify(result))
+  } finally {
+    f.cleanup()
+  }
+})
+
+test('stale approval is classified without repair', () => {
+  const f = fixture()
+  try {
+    setState(f, { storyReview: true, planReview: true, sprintReview: true, receipt: true })
+    commitState(f)
+    f.staleApproval = true
+    addApproval(f)
+    const result = classifyFinalizationRecovery(f.root, '9.1', f.head)
+    assert.equal(result.classification, 'STALE_APPROVAL', JSON.stringify(result))
+  } finally {
+    f.cleanup()
+  }
+})
+
+test('fully consistent done projections are terminal healthy', () => {
+  const f = fixture()
+  try {
+    setState(f, { storyReview: true, planReview: true, sprintReview: true, receipt: true })
+    commitState(f)
+    addApproval(f)
+    write(f.root, STORY, readFileSync(path.join(f.root, STORY), 'utf8').replace('status: review', 'status: done'))
+    write(f.root, PLAN, readFileSync(path.join(f.root, PLAN), 'utf8').replace('lifecycle_snapshot: review', 'lifecycle_snapshot: done').replace('next_action:\n  kind: complete_story\n  target: story', 'next_action: null'))
+    write(f.root, SPRINT, readFileSync(path.join(f.root, SPRINT), 'utf8').replace('review', 'done'))
+    commitState(f)
+    const result = classifyFinalizationRecovery(f.root, '9.1', f.head)
+    assert.equal(result.classification, 'TERMINAL_HEALTHY', JSON.stringify(result))
+    assert.equal(result.healthy, true)
   } finally {
     f.cleanup()
   }

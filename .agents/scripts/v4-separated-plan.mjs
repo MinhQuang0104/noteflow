@@ -30,6 +30,43 @@ function commitState(root, sha) {
   return ancestor.status === 0 ? 'FRESH' : 'NOT_ANCESTOR'
 }
 
+function validateHumanApproval(root, plan, result, finalization) {
+  const approval = plan.human_approval
+  if (approval === undefined || approval === null) return
+  if (!approval || typeof approval !== 'object' || Array.isArray(approval)) {
+    result.reasons.push('INVALID_HUMAN_APPROVAL')
+    return
+  }
+  if (Object.keys(approval).some(key => ['account_id', 'approver_id', 'email', 'transcript'].includes(key))) {
+    result.reasons.push('HUMAN_APPROVAL_SENSITIVE_FIELD')
+  }
+  if (approval.schema_version !== 1) result.reasons.push('INVALID_HUMAN_APPROVAL_SCHEMA_VERSION')
+  if (approval.approver_type !== 'human') result.reasons.push('INVALID_HUMAN_APPROVER_TYPE')
+  if (approval.decision !== 'APPROVED') result.reasons.push('HUMAN_APPROVAL_DECISION_NOT_APPROVED')
+  if (approval.approved_action !== 'complete_story') result.reasons.push('HUMAN_APPROVAL_ACTION_MISMATCH')
+  if (approval.disclosures_acknowledged !== true) result.reasons.push('DISCLOSURES_NOT_ACKNOWLEDGED')
+  if (typeof approval.approved_at !== 'string' || Number.isNaN(Date.parse(approval.approved_at))) result.reasons.push('INVALID_HUMAN_APPROVAL_TIMESTAMP')
+  if (!SHA.test(approval.approved_commit ?? '')) result.reasons.push('INVALID_HUMAN_APPROVAL_COMMIT')
+  else if (commitState(root, approval.approved_commit) !== 'FRESH') result.reasons.push('HUMAN_APPROVAL_COMMIT_STALE')
+  if (!SHA.test(approval.approved_review_head ?? '')) result.reasons.push('INVALID_HUMAN_APPROVAL_REVIEW_HEAD')
+  else if (approval.approved_review_head !== approval.approved_commit) result.reasons.push('HUMAN_APPROVAL_COMMIT_REVIEW_HEAD_MISMATCH')
+  const bindings = [
+    ['story_id', plan.story_id, 'HUMAN_APPROVAL_STORY_ID_MISMATCH'],
+    ['story_normative_digest', plan.story?.normative_digest, 'HUMAN_APPROVAL_STORY_DIGEST_MISMATCH'],
+    ['finalization_receipt_digest', finalization?.receipt_digest, 'HUMAN_APPROVAL_RECEIPT_DIGEST_MISMATCH'],
+    ['scope_paths_digest', finalization?.scope_paths_digest, 'HUMAN_APPROVAL_SCOPE_DIGEST_MISMATCH'],
+    ['implementation_commit_set_digest', finalization?.implementation_commit_set_digest, 'HUMAN_APPROVAL_COMMIT_SET_DIGEST_MISMATCH'],
+    ['final_scope_digest', finalization?.final_scoped_tree_digest, 'HUMAN_APPROVAL_FINAL_SCOPE_DIGEST_MISMATCH'],
+    ['final_scoped_tree_digest', finalization?.final_scoped_tree_digest, 'HUMAN_APPROVAL_TREE_DIGEST_MISMATCH']
+  ]
+  for (const [field, expected, reason] of bindings) {
+    const valid = field === 'story_id' ? approval[field] === expected : DIGEST.test(approval[field] ?? '')
+    if (!valid) result.reasons.push('INVALID_HUMAN_APPROVAL_' + field.toUpperCase())
+    else if (approval[field] !== expected) result.reasons.push(reason)
+  }
+  if (!DIGEST.test(approval.done_gate_summary_digest ?? '')) result.reasons.push('INVALID_HUMAN_APPROVAL_DONE_GATE_SUMMARY_DIGEST')
+}
+
 export function separatedStory(root, plan) {
   const file = safePath(root, plan.story?.path)
   if (!file || !existsSync(file)) return { story: null, error: 'STORY_MISSING' }
@@ -123,7 +160,10 @@ export function validateSeparatedPlan(root, id, plan, result) {
     if (slice.verification !== undefined && (!slice.verification || typeof slice.verification !== 'object' || Array.isArray(slice.verification) ||
         (slice.verification.progression_eligible !== undefined && typeof slice.verification.progression_eligible !== 'boolean'))) invalid('INVALID_VERIFICATION_SCHEMA')
   }
-  if (!ACTIONS.has(plan.next_action?.kind)) invalid('UNKNOWN_ACTION')
+  const terminalState = plan.lifecycle_snapshot === 'done' && plan.execution_status === 'complete'
+  if (plan.next_action === null) {
+    if (!terminalState) invalid('INVALID_TERMINAL_NEXT_ACTION')
+  } else if (!plan.next_action || !ACTIONS.has(plan.next_action.kind)) invalid('UNKNOWN_ACTION')
   else {
     const storyAction = ['reconcile_lifecycle', 'request_gate', 'finalize_story', 'complete_story'].includes(plan.next_action.kind)
     if (storyAction ? plan.next_action.target !== 'story' : plan.next_action.target !== plan.current_slice) invalid('INVALID_ACTION_TARGET')
@@ -139,8 +179,14 @@ export function validateSeparatedPlan(root, id, plan, result) {
   if (plan.next_action?.kind === 'complete_story' && !reviewState) invalid('COMPLETE_STORY_REQUIRES_REVIEW')
   if (reviewState && result.storyStatus !== 'review') invalid('STORY_STATUS_MISMATCH')
   if (reviewState && !slices.every(slice => slice?.status === 'reviewed')) invalid('REVIEW_SLICES_INCOMPLETE')
-  if (reviewState && plan.human_approval !== undefined && plan.human_approval !== null) invalid('HUMAN_APPROVAL_MUST_BE_ABSENT')
-  if (reviewState) {
+  if (terminalState && result.storyStatus !== 'done') invalid('STORY_STATUS_MISMATCH')
+  if ((reviewState || terminalState) && plan.human_approval !== undefined && plan.human_approval !== null) {
+    validateHumanApproval(root, plan, result, plan.finalization)
+  }
+  const terminalProjection = terminalState && result.storyStatus === 'done' && result.actualLifecycle === 'done'
+  if (terminalProjection && (plan.human_approval === undefined || plan.human_approval === null)) invalid('HUMAN_APPROVAL_REQUIRED')
+  if (plan.lifecycle_snapshot !== 'review' && plan.lifecycle_snapshot !== 'done' && plan.human_approval !== undefined && plan.human_approval !== null) invalid('HUMAN_APPROVAL_OUTSIDE_COMPLETION')
+  if (reviewState || terminalProjection) {
     const finalization = plan.finalization
     if (!finalization || typeof finalization !== 'object' || Array.isArray(finalization)) {
       invalid('FINALIZATION_REQUIRED')
@@ -150,22 +196,27 @@ export function validateSeparatedPlan(root, id, plan, result) {
       else {
         const finalizationResult = validateFinalizationReceipt(root, plan, ref)
         for (const error of finalizationResult.errors) {
-          const staleError = error.includes('DIGEST_MISMATCH') || error === 'FINALIZATION_STORY_DIGEST_MISMATCH'
-          (staleError ? stale : invalid)(error)
+          const isStaleFinalizationError = error.includes('DIGEST_MISMATCH') || error === 'FINALIZATION_STORY_DIGEST_MISMATCH'
+          if (isStaleFinalizationError) stale(error)
+          else invalid(error)
         }
       }
     }
   }
   if (plan.execution_status === 'complete' && (slices.some(slice => !['verified', 'reviewed'].includes(slice?.status)) ||
-      (Array.isArray(plan.blockers) ? plan.blockers.length : 0) ||
-      !['finalize_story', 'reconcile_lifecycle', 'complete_story'].includes(plan.next_action?.kind))) invalid('INCOMPLETE_CLAIM')
+       (Array.isArray(plan.blockers) ? plan.blockers.length : 0) ||
+       !(terminalState || ['finalize_story', 'reconcile_lifecycle', 'complete_story'].includes(plan.next_action?.kind)))) invalid('INCOMPLETE_CLAIM')
   const reconcile = result.actualLifecycle && ['backlog', 'ready-for-dev'].includes(result.actualLifecycle) &&
     (plan.execution_status === 'in-progress' || slices.some(slice => slice?.checkpoint_commit))
   if (reconcile && plan.next_action?.kind !== 'reconcile_lifecycle') invalid('RECONCILIATION_ACTION_REQUIRED')
   if (reconcile) result.reasons.push('EXECUTION_AHEAD_OF_LIFECYCLE')
   const staleReasons = new Set(['STORY_NORMATIVE_DIGEST_MISMATCH', 'SNAPSHOT_MISMATCH',
     'CHECKPOINT_MISSING', 'CHECKPOINT_NOT_ANCESTOR', 'BASELINE_COMMIT_INVALID', 'RECEIPT_DIGEST_MISMATCH',
-    'CHECKPOINT_MISMATCH', 'BASELINE_MISMATCH', 'SUBJECT_MISMATCH', 'CHANGED_PATHS_MISMATCH'])
+    'CHECKPOINT_MISMATCH', 'BASELINE_MISMATCH', 'SUBJECT_MISMATCH', 'CHANGED_PATHS_MISMATCH',
+    'HUMAN_APPROVAL_COMMIT_STALE', 'HUMAN_APPROVAL_STORY_ID_MISMATCH', 'HUMAN_APPROVAL_STORY_DIGEST_MISMATCH',
+    'HUMAN_APPROVAL_RECEIPT_DIGEST_MISMATCH', 'HUMAN_APPROVAL_SCOPE_DIGEST_MISMATCH',
+    'HUMAN_APPROVAL_COMMIT_SET_DIGEST_MISMATCH', 'HUMAN_APPROVAL_FINAL_SCOPE_DIGEST_MISMATCH',
+    'HUMAN_APPROVAL_TREE_DIGEST_MISMATCH', 'HUMAN_APPROVAL_OUTSIDE_COMPLETION'])
   result.status = result.reasons.some(reason => !staleReasons.has(reason) && reason !== 'EXECUTION_AHEAD_OF_LIFECYCLE') ? 'INVALID'
     : result.reasons.some(reason => staleReasons.has(reason)) ? 'STALE' : reconcile ? 'RECONCILIATION_REQUIRED' : 'READY'
   result.valid = ['READY', 'RECONCILIATION_REQUIRED'].includes(result.status)

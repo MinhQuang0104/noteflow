@@ -77,7 +77,8 @@ test('review to done requires human approval',()=>withFixture({sprint:'review',b
   edit(f,planRel,'status: checkpointed','status: reviewed');recommit(f)
   let r=run(f,'check','review','done',['--next-action','finalize_story:story']);assert.equal(r.code,4,JSON.stringify(r.json))
   edit(f,planRel,'next_action:\n','human_approval:\n  approved_by: Person\n  approved_at: 2026-09-24\n  approved_commit: '+f.checkpoint+'\nnext_action:\n');recommit(f)
-  r=run(f,'check','review','done',['--next-action','finalize_story:story']);assert.equal(r.code,0,JSON.stringify(r.json))
+  r=run(f,'check','review','done',['--next-action','finalize_story:story']);assert.equal(r.code,4,JSON.stringify(r.json))
+  assert.ok(r.json.reasons.includes('COMPLETE_STORY_REQUIRES_EXPLICIT_APPROVAL'))
 }))
 test('same state no change',()=>withFixture({},f=>{const r=run(f,'check','backlog','backlog');assert.equal(r.code,0);assert.equal(r.json.status,'NO_CHANGE')}))
 test('same-state apply creates no lifecycle commit',()=>withFixture({},f=>{

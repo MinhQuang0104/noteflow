@@ -11,13 +11,14 @@ import {
   readReceipt,
   validateTaskSlices
 } from './check-artifact-contract.mjs'
-import { validateFinalizationReceipt } from './finalization-contract.mjs'
+import { stableFinalizationDigest, validateFinalizationReceipt } from './finalization-contract.mjs'
 
 const CODES = { READY: 0, RECONCILIATION_REQUIRED: 1, STALE: 2, BLOCKED: 3, INVALID: 4, ERROR: 5 }
 const SHA = /^[0-9a-f]{40,64}$/
 const DIGEST = /^sha256:[0-9a-f]{64}$/
 const FINALIZATION_ACTION = 'finalize_story'
 const LIFECYCLES = new Set(['backlog', 'ready-for-dev', 'in-progress', 'review', 'done'])
+const SPRINT_STATUS = '_bmad-output/implementation-artifacts/sprint-status.yaml'
 const KNOWN_NOISE = new Set(['_bmad/scripts/tests/__pycache__/test_agent_architecture.cpython-314.pyc'])
 const RECEIPT_KINDS = ['implementation', 'verification', 'review']
 
@@ -217,22 +218,65 @@ export function classifyFinalizationRecovery(root, storyId, expectedHead) {
     const receiptPath = receiptPrefix(storyId) + 'finalization.json'
     const receiptExists = existsSync(path.join(root, receiptPath))
     const dirty = recoveryDirtyPaths(root, storyId, storyPath)
-    if (dirty.length) return recoveryOutcome('UNCOMMITTED_FINALIZATION', dirty)
 
     const storyReview = story.status === 'review'
     const planReview = plan.lifecycle_snapshot === 'review' && plan.execution_status === 'complete'
     const sprintReview = sprintLifecycle === 'review'
     const allReview = storyReview && planReview && sprintReview && plan.next_action?.kind === 'complete_story'
+    const storyDone = story.status === 'done'
+    const planDone = plan.lifecycle_snapshot === 'done' && plan.execution_status === 'complete'
+    const sprintDone = sprintLifecycle === 'done'
+    const allDone = storyDone && planDone && sprintDone && plan.next_action === null
     const allInProgress = story.status === 'in-progress' &&
       plan.lifecycle_snapshot === 'in-progress' &&
       plan.execution_status === 'in-progress' &&
       sprintLifecycle === 'in-progress' &&
       plan.next_action?.kind === 'finalize_story'
 
-    if (allReview && receiptExists && (plan.human_approval === undefined || plan.human_approval === null)) {
-      const receipt = validateFinalizationReceipt(root, plan, receiptPath)
-      if (!receipt.errors.length) return recoveryOutcome('HUMAN_GATE_PENDING', ['HUMAN_GATE_PENDING'], true)
-      return recoveryOutcome('TAMPERED_FINALIZATION_RECEIPT', receipt.errors)
+    if (dirty.length) {
+      if (allReview && dirty.length === 1 && dirty[0] === planPath && plan.human_approval && typeof plan.human_approval === 'object') {
+        return recoveryOutcome('APPROVAL_PREVIEW_ONLY', dirty)
+      }
+      return recoveryOutcome('UNCOMMITTED_FINALIZATION', dirty)
+    }
+
+    const receiptCheck = receiptExists ? validateFinalizationReceipt(root, plan, receiptPath) : { receipt: null, errors: [] }
+    const approval = plan.human_approval
+    const approvalAllowedPaths = new Set(allDone ? [planPath, storyPath, SPRINT_STATUS] : [planPath])
+    const durableApprovalCommit = approval && (allReview || allDone)
+      ? allDone ? gitOutput(root, ['rev-parse', `${head}^`], 'APPROVAL_COMMIT_MISSING') : head
+      : null
+    const reviewHead = approval && (allReview || allDone)
+      ? gitOutput(root, ['rev-parse', `${durableApprovalCommit}^`], 'APPROVAL_REVIEW_HEAD_UNAVAILABLE')
+      : null
+    const approvalStaticValid = Boolean(allReview || allDone) && approval && typeof approval === 'object' &&
+      approval.schema_version === 1 && approval.approver_type === 'human' && approval.decision === 'APPROVED' &&
+      approval.approved_action === 'complete_story' && approval.disclosures_acknowledged === true &&
+      approval.story_id === storyId && approval.story_normative_digest === plan.story?.normative_digest &&
+      receiptCheck.receipt && approval.finalization_receipt_digest === stableFinalizationDigest(receiptCheck.receipt) &&
+      approval.scope_paths_digest === receiptCheck.receipt.scope_paths_digest &&
+      approval.implementation_commit_set_digest === receiptCheck.receipt.implementation_commit_set_digest &&
+      approval.final_scope_digest === receiptCheck.receipt.final_scoped_tree_digest &&
+      approval.final_scoped_tree_digest === receiptCheck.receipt.final_scoped_tree_digest &&
+      SHA.test(approval.approved_review_head ?? '') && approval.approved_review_head === approval.approved_commit &&
+      reviewHead === approval.approved_review_head &&
+      SHA.test(approval.approved_commit ?? '') && git(root, ['merge-base', '--is-ancestor', approval.approved_commit, head]).status === 0 &&
+      gitPaths(root, ['diff', '--name-only', '--diff-filter=ACDMRTUXB', `${approval.approved_commit}..${head}`, '--'], 'GIT_APPROVAL_DIFF_FAILED')
+        .every(item => approvalAllowedPaths.has(item))
+
+    if (allDone && receiptExists && approvalStaticValid && !receiptCheck.errors.length) {
+      return recoveryOutcome('TERMINAL_HEALTHY', ['TERMINAL_HEALTHY'], true)
+    }
+    if (storyDone && !planDone && !sprintDone) return recoveryOutcome('PARTIAL_STORY_ONLY', ['PARTIAL_STORY_ONLY'])
+    if (planDone && !storyDone && !sprintDone) return recoveryOutcome('PARTIAL_PLAN_ONLY', ['PARTIAL_PLAN_ONLY'])
+    if (sprintDone && !storyDone && !planDone) return recoveryOutcome('PARTIAL_SPRINT_ONLY', ['PARTIAL_SPRINT_ONLY'])
+    if (allReview && receiptExists) {
+      if (!receiptCheck.errors.length && (plan.human_approval === undefined || plan.human_approval === null)) {
+        return recoveryOutcome('HUMAN_GATE_PENDING', ['HUMAN_GATE_PENDING'], true)
+      }
+      if (!receiptCheck.errors.length && approvalStaticValid) return recoveryOutcome('APPROVAL_DURABLE_PENDING_COMPLETION', ['APPROVAL_DURABLE_PENDING_COMPLETION'], true)
+      if (plan.human_approval !== undefined && plan.human_approval !== null) return recoveryOutcome('STALE_APPROVAL', ['STALE_APPROVAL'])
+      return recoveryOutcome('TAMPERED_FINALIZATION_RECEIPT', receiptCheck.errors)
     }
     if (receiptExists && allInProgress) return recoveryOutcome('ORPHAN_FINALIZATION_RECEIPT', ['ORPHAN_FINALIZATION_RECEIPT'])
     if (storyReview && !planReview && !sprintReview) return recoveryOutcome('PARTIAL_STORY_ONLY', ['PARTIAL_STORY_ONLY'])
@@ -353,7 +397,8 @@ function classifyPlanValidation(result, validation) {
     'REVIEW_RECEIPT_REQUIRED', 'INVALID_RECEIPT_FILE'])
   const stale = new Set(['STORY_NORMATIVE_DIGEST_MISMATCH', 'CHECKPOINT_MISSING', 'CHECKPOINT_NOT_ANCESTOR',
     'BASELINE_COMMIT_INVALID', 'RECEIPT_DIGEST_MISMATCH', 'CHECKPOINT_MISMATCH', 'BASELINE_MISMATCH',
-    'SUBJECT_MISMATCH', 'CHANGED_PATHS_MISMATCH', 'REVIEW_COMMIT_MISSING', 'REVIEW_COMMIT_NOT_ANCESTOR'])
+    'SUBJECT_MISMATCH', 'CHANGED_PATHS_MISMATCH', 'REVIEW_COMMIT_MISSING', 'REVIEW_COMMIT_NOT_ANCESTOR',
+    'HUMAN_APPROVAL_OUTSIDE_COMPLETION'])
   for (const reason of validation.reasons ?? []) {
     if (reason === 'SNAPSHOT_MISMATCH' || reason === 'EXECUTION_AHEAD_OF_LIFECYCLE') continue
     if (reason === 'INVALID_PLAN_STORY_BINDING' && result.reasons.includes('STORY_NORMATIVE_DIGEST_STALE')) continue
@@ -562,6 +607,8 @@ function checkHumanApproval(plan, result) {
   const approval = plan.human_approval
   if (!approval || typeof approval !== 'object' || Array.isArray(approval)) return
   result.human_approval_present = true
+  if ((plan.lifecycle_snapshot === 'review' && plan.execution_status === 'complete' && plan.next_action?.kind === 'complete_story') ||
+      (plan.lifecycle_snapshot === 'done' && plan.execution_status === 'complete' && plan.next_action === null)) return
   const expected = {
     story_id: result.story_id,
     story_normative_digest: result.story_normative_digest,

@@ -149,6 +149,7 @@ for (const kind of ['plan_slice','implement_slice','verify_slice','review_slice'
     }
   }, kind === 'reconcile_lifecycle' ? 'INVALID' : 'READY', kind === 'reconcile_lifecycle' ? 3 : 0))
 }
+test('schema-v1 complete_story remains unsupported', () => withFixture(f => editPlan(f, 'kind: implement_slice', 'kind: complete_story'), 'INVALID', 3, 'UNKNOWN_ACTION'))
 test('unknown action', () => withFixture(f => editPlan(f, 'kind: implement_slice', 'kind: unknown'), 'INVALID', 3, 'UNKNOWN_ACTION'))
 
 test('canonical slice statuses are accepted', () => {

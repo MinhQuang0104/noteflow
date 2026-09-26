@@ -90,6 +90,7 @@ function inspect(root,o) {
   const out={storyId:o.id,from:o['--from'],to:o['--to'],valid:false,applicable:false,status:'INVALID',currentSprintState:null,currentPlanSnapshot:null,parentEpicState:null,expectedHead:o['--expected-head'],planSha256:null,sprintSha256:null,plannedChanges:[],successorNextAction:null,recoveryClassification:null,reasons:[]}
   const from=out.from,to=out.to
   if(!STATES.includes(from)||!STATES.includes(to)) return {out:fail(out,'INVALID','UNKNOWN_STATE')}
+  if(from==='review'&&to==='done') return {out:fail(out,'HUMAN_REQUIRED','COMPLETE_STORY_REQUIRES_EXPLICIT_APPROVAL')}
   if(from!==to&&!EDGES.has(`${from}:${to}`)) return {out:fail(out,from==='done'?'INVALID':'HUMAN_REQUIRED','UNSUPPORTED_TRANSITION')}
   if(git(root,'rev-parse','HEAD').stdout.trim()!==out.expectedHead) return {out:fail(out,'CONFLICT','EXPECTED_HEAD_MISMATCH')}
   if(!pointer(root)) return {out:fail(out,'PRECONDITION_FAILED','V3_POINTER_NOT_IDLE')}
