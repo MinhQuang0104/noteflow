@@ -459,15 +459,15 @@ test('sprint review with Plan in-progress requires reconciliation', () => withFi
   expectStatus(run(f), 'RECONCILIATION_REQUIRED', 1, 'LIFECYCLE_PROJECTION_MISMATCH')
 }))
 
-test('review state without Human approval is not pre-finalize READY', () => withFixture({ lifecycle: 'review', executionStatus: 'complete' }, f => {
+test('review state without a finalization receipt is invalid', () => withFixture({ lifecycle: 'review', executionStatus: 'complete' }, f => {
   const file = path.join(f.root, SPRINT)
   writeFileSync(file, readFileSync(file, 'utf8').replace('9-1-fixture: in-progress', '9-1-fixture: review'))
   const story = path.join(f.root, STORY)
   writeFileSync(story, readFileSync(story, 'utf8').replace('status: in-progress', 'status: review'))
   const result = run(f)
-  assert.equal(result.code, 1)
-  assert.equal(result.json.status, 'RECONCILIATION_REQUIRED')
-  assert.ok(result.json.reasons.includes('HUMAN_GATE_PENDING'))
+  assert.equal(result.code, 4)
+  assert.equal(result.json.status, 'INVALID')
+  assert.ok(result.json.reasons.includes('FINALIZATION_REQUIRED'))
 }))
 
 test('stale Human approval is rejected by scope binding', () => withFixture({ humanApproval: {} }, f => {

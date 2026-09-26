@@ -88,14 +88,14 @@ function editPlan(f, from, to) {
 }
 
 test('valid READY fixture', () => withFixture(() => {}, 'READY', 0))
-test('real schema-v1 Story 2.3 remains readable after Slice B checkpoint', () => {
+test('canonical schema-v2 Story 2.3 remains readable before finalization', () => {
   const result = check(realRoot, '2.3')
   assert.equal(result.code, 0)
   assert.equal(result.json.valid, true)
   assert.equal(result.json.status, 'READY')
   assert.equal(result.json.lifecycleSnapshot, 'in-progress')
   assert.equal(result.json.actualLifecycle, 'in-progress')
-  assert.deepEqual(result.json.nextAction, {kind:'verify_slice', target:'B'})
+  assert.deepEqual(result.json.nextAction, {kind:'finalize_story', target:'story'})
 })
 test('unsupported schema', () => withFixture(f => editPlan(f, 'schema_version: 1', 'schema_version: 3'), 'INVALID', 3, 'UNSUPPORTED_SCHEMA'))
 test('story ID mismatch', () => withFixture(f => editPlan(f, 'story_id: "9.1"', 'story_id: "9.2"'), 'INVALID', 3, 'STORY_ID_MISMATCH'))

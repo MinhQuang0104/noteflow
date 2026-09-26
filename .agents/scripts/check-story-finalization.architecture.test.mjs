@@ -10,7 +10,7 @@ test('finalization helper is present and read-only', () => {
   assert.match(helper, /const CODES = \{ READY: 0, RECONCILIATION_REQUIRED: 1, STALE: 2, BLOCKED: 3, INVALID: 4, ERROR: 5 \}/)
   assert.doesNotMatch(helper, /writeFileSync|appendFileSync/)
   assert.doesNotMatch(helper, /git['"]\s*,\s*\[\s*['"](?:add|commit)/)
-  assert.doesNotMatch(helper, /complete_story/)
+  assert.match(helper, /complete_story/)
 })
 
 test('Human Gate remains explicit and bound to immutable scope evidence', () => {
@@ -22,15 +22,14 @@ test('Human Gate remains explicit and bound to immutable scope evidence', () => 
   assert.match(helper, /final_scoped_tree_digest/)
 })
 
-test('V4 runner still leaves finalization and automatic done disabled', () => {
+test('V4 runner enables finalization only through the Human Gate', () => {
   const runner = read('.agents/skills/v4-story-runner/SKILL.md')
   const router = read('.agents/routing/task-router.md')
   for (const text of [runner, router]) {
-    assert.match(text, /finalize_story[\s\S]{0,160}disabled/i)
-    assert.match(text, /automatic Human Gate[\s\S]{0,160}disabled/i)
+    assert.match(text, /finalize_story[\s\S]{0,220}(review|Human Gate)/i)
+    assert.match(text, /complete_story[\s\S]{0,220}disabled/i)
   }
   assert.match(runner, /automatic[\s\S]{0,160}review[\s\S]{0,160}done[\s\S]{0,160}disabled/i)
-  assert.doesNotMatch(runner, /complete_story/)
 })
 
 test('artifact contract records disclosure and lifecycle authority', () => {

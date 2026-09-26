@@ -2,10 +2,11 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { inspectStory, normativeDigest, validateTaskSlices, validateReceipt } from './check-artifact-contract.mjs'
+import { validateFinalizationReceipt } from './finalization-contract.mjs'
 
 const DIGEST = /^sha256:[0-9a-f]{64}$/
 const SHA = /^[0-9a-f]{40,64}$/
-const ACTIONS = new Set(['plan_slice', 'implement_slice', 'verify_slice', 'review_slice', 'resolve_blocker', 'reconcile_lifecycle', 'request_gate', 'finalize_story'])
+const ACTIONS = new Set(['plan_slice', 'implement_slice', 'verify_slice', 'review_slice', 'resolve_blocker', 'reconcile_lifecycle', 'request_gate', 'finalize_story', 'complete_story'])
 const STATUSES = new Set(['pending', 'active', 'checkpointed', 'verified', 'reviewed', 'blocked'])
 const V3_KEYS = new Set(['run_id', 'runId', 'activeRunId', 'task_id', 'taskId', 'taskIds', 'workerId', 'lease', 'generation', 'humanGateRequired', 'dispatchId'])
 
@@ -50,6 +51,7 @@ export function validateSeparatedPlan(root, id, plan, result) {
     const { story, error } = separatedStory(root, plan)
     if (error) invalid(error)
     else {
+      result.storyStatus = story.status
       if (story.story_id !== plan.story_id) invalid('STORY_ID_MISMATCH')
       else if (normativeDigest(story) !== plan.story.normative_digest) stale('STORY_NORMATIVE_DIGEST_MISMATCH')
       if (Array.isArray(plan.slices) && plan.slices.every(slice => slice && typeof slice === 'object' && !Array.isArray(slice))) {
@@ -123,7 +125,7 @@ export function validateSeparatedPlan(root, id, plan, result) {
   }
   if (!ACTIONS.has(plan.next_action?.kind)) invalid('UNKNOWN_ACTION')
   else {
-    const storyAction = ['reconcile_lifecycle', 'request_gate', 'finalize_story'].includes(plan.next_action.kind)
+    const storyAction = ['reconcile_lifecycle', 'request_gate', 'finalize_story', 'complete_story'].includes(plan.next_action.kind)
     if (storyAction ? plan.next_action.target !== 'story' : plan.next_action.target !== plan.current_slice) invalid('INVALID_ACTION_TARGET')
     const references = [...(Array.isArray(plan.blockers) ? plan.blockers : []),
       ...(Array.isArray(plan.unresolved_questions) ? plan.unresolved_questions : [])].map(item => item?.id)
@@ -133,8 +135,30 @@ export function validateSeparatedPlan(root, id, plan, result) {
     if (entries !== undefined && (!Array.isArray(entries) || entries.some(item => !item || typeof item.id !== 'string' || !item.id ||
         typeof item[name === 'blockers' ? 'reason' : 'question'] !== 'string'))) invalid(`INVALID_${name.toUpperCase()}`)
   }
+  const reviewState = plan.lifecycle_snapshot === 'review' && plan.execution_status === 'complete'
+  if (plan.next_action?.kind === 'complete_story' && !reviewState) invalid('COMPLETE_STORY_REQUIRES_REVIEW')
+  if (reviewState && result.storyStatus !== 'review') invalid('STORY_STATUS_MISMATCH')
+  if (reviewState && !slices.every(slice => slice?.status === 'reviewed')) invalid('REVIEW_SLICES_INCOMPLETE')
+  if (reviewState && plan.human_approval !== undefined && plan.human_approval !== null) invalid('HUMAN_APPROVAL_MUST_BE_ABSENT')
+  if (reviewState) {
+    const finalization = plan.finalization
+    if (!finalization || typeof finalization !== 'object' || Array.isArray(finalization)) {
+      invalid('FINALIZATION_REQUIRED')
+    } else {
+      const ref = finalization.receipt_ref
+      if (typeof ref !== 'string' || !safePath(root, ref)) invalid('INVALID_FINALIZATION_RECEIPT_REF')
+      else {
+        const finalizationResult = validateFinalizationReceipt(root, plan, ref)
+        for (const error of finalizationResult.errors) {
+          const staleError = error.includes('DIGEST_MISMATCH') || error === 'FINALIZATION_STORY_DIGEST_MISMATCH'
+          (staleError ? stale : invalid)(error)
+        }
+      }
+    }
+  }
   if (plan.execution_status === 'complete' && (slices.some(slice => !['verified', 'reviewed'].includes(slice?.status)) ||
-      (Array.isArray(plan.blockers) ? plan.blockers.length : 0) || !['finalize_story', 'reconcile_lifecycle'].includes(plan.next_action?.kind))) invalid('INCOMPLETE_CLAIM')
+      (Array.isArray(plan.blockers) ? plan.blockers.length : 0) ||
+      !['finalize_story', 'reconcile_lifecycle', 'complete_story'].includes(plan.next_action?.kind))) invalid('INCOMPLETE_CLAIM')
   const reconcile = result.actualLifecycle && ['backlog', 'ready-for-dev'].includes(result.actualLifecycle) &&
     (plan.execution_status === 'in-progress' || slices.some(slice => slice?.checkpoint_commit))
   if (reconcile && plan.next_action?.kind !== 'reconcile_lifecycle') invalid('RECONCILIATION_ACTION_REQUIRED')

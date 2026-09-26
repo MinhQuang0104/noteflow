@@ -11,6 +11,7 @@ import {
   readReceipt,
   validateTaskSlices
 } from './check-artifact-contract.mjs'
+import { validateFinalizationReceipt } from './finalization-contract.mjs'
 
 const CODES = { READY: 0, RECONCILIATION_REQUIRED: 1, STALE: 2, BLOCKED: 3, INVALID: 4, ERROR: 5 }
 const SHA = /^[0-9a-f]{40,64}$/
@@ -108,6 +109,7 @@ function defaultResult(storyId, expectedHead) {
     lifecycle_target: 'review',
     human_gate_required: true,
     human_approval_present: false,
+    recovery_classification: null,
     reasons: [],
     warnings: []
   }
@@ -180,6 +182,67 @@ function completionHasMaterialContent(source) {
 
 function finalizationCandidateExists(root, storyId) {
   return existsSync(path.join(root, receiptPrefix(storyId), 'finalization.json'))
+}
+
+function recoveryOutcome(classification, reasons = [], healthy = false) {
+  return { classification, reasons: [...new Set(reasons)], healthy }
+}
+
+function recoveryDirtyPaths(root, storyId, storyPath) {
+  const protectedPaths = new Set([
+    planRelative(storyId),
+    storyPath,
+    '_bmad-output/implementation-artifacts/sprint-status.yaml',
+    receiptPrefix(storyId) + 'finalization.json'
+  ])
+  const staged = gitPaths(root, ['diff', '--cached', '--name-only', '--diff-filter=ACDMRTUXB', 'HEAD', '--'], 'GIT_STAGED_PATHS_FAILED')
+  const unstaged = gitPaths(root, ['diff', '--name-only', '--diff-filter=ACDMRTUXB', 'HEAD', '--'], 'GIT_UNSTAGED_PATHS_FAILED')
+  const untracked = gitPaths(root, ['ls-files', '--others', '--exclude-standard', '--'], 'GIT_UNTRACKED_PATHS_FAILED')
+  return canonicalPaths([...staged, ...unstaged, ...untracked]).filter(item => protectedPaths.has(item))
+}
+
+export function classifyFinalizationRecovery(root, storyId, expectedHead) {
+  try {
+    const head = gitOutput(root, ['rev-parse', 'HEAD'], 'HEAD_UNAVAILABLE')
+    if (expectedHead && head !== expectedHead) return recoveryOutcome('STALE', ['EXPECTED_HEAD_MISMATCH'])
+    const planPath = planRelative(storyId)
+    const planFile = safePath(root, planPath)
+    if (!planFile || !existsSync(planFile)) return recoveryOutcome('INVALID', ['PLAN_MISSING'])
+    const plan = frontmatter(readFileSync(planFile, 'utf8'))
+    const storyPath = plan.story?.path
+    const storyFile = safePath(root, storyPath)
+    if (!storyFile || !existsSync(storyFile)) return recoveryOutcome('INVALID', ['STORY_MISSING'])
+    const story = inspectStory(readFileSync(storyFile, 'utf8'))
+    const sprintLifecycle = readLifecycle(root, plan.sprint_key)
+    const receiptPath = receiptPrefix(storyId) + 'finalization.json'
+    const receiptExists = existsSync(path.join(root, receiptPath))
+    const dirty = recoveryDirtyPaths(root, storyId, storyPath)
+    if (dirty.length) return recoveryOutcome('UNCOMMITTED_FINALIZATION', dirty)
+
+    const storyReview = story.status === 'review'
+    const planReview = plan.lifecycle_snapshot === 'review' && plan.execution_status === 'complete'
+    const sprintReview = sprintLifecycle === 'review'
+    const allReview = storyReview && planReview && sprintReview && plan.next_action?.kind === 'complete_story'
+    const allInProgress = story.status === 'in-progress' &&
+      plan.lifecycle_snapshot === 'in-progress' &&
+      plan.execution_status === 'in-progress' &&
+      sprintLifecycle === 'in-progress' &&
+      plan.next_action?.kind === 'finalize_story'
+
+    if (allReview && receiptExists && (plan.human_approval === undefined || plan.human_approval === null)) {
+      const receipt = validateFinalizationReceipt(root, plan, receiptPath)
+      if (!receipt.errors.length) return recoveryOutcome('HUMAN_GATE_PENDING', ['HUMAN_GATE_PENDING'], true)
+      return recoveryOutcome('TAMPERED_FINALIZATION_RECEIPT', receipt.errors)
+    }
+    if (receiptExists && allInProgress) return recoveryOutcome('ORPHAN_FINALIZATION_RECEIPT', ['ORPHAN_FINALIZATION_RECEIPT'])
+    if (storyReview && !planReview && !sprintReview) return recoveryOutcome('PARTIAL_STORY_ONLY', ['PARTIAL_STORY_ONLY'])
+    if (planReview && !storyReview && !sprintReview) return recoveryOutcome('PARTIAL_PLAN_ONLY', ['PARTIAL_PLAN_ONLY'])
+    if (sprintReview && !storyReview && !planReview) return recoveryOutcome('PARTIAL_SPRINT_ONLY', ['PARTIAL_SPRINT_ONLY'])
+    if (allInProgress && !receiptExists) return recoveryOutcome('CLEAN_BASE', [], true)
+    return recoveryOutcome('CONFLICTING_FINALIZATION_STATE', ['CONFLICTING_FINALIZATION_STATE'])
+  } catch (error) {
+    return recoveryOutcome('ERROR', [error.message])
+  }
 }
 
 function scopeExcluded(relative, storyId, storyPath) {
@@ -280,7 +343,8 @@ function inspectWorkingTree(root, result, scopePaths, metadataPaths = []) {
   const relevant = dirty.filter(item => scope.has(item))
   if (relevant.length) issue(result, 'WORKING_SCOPE_DRIFT', 'stale')
   const unexpected = dirty.filter(item => !scope.has(item) && !allowedMetadata.has(item) &&
-    !item.startsWith('.agents/') && !item.startsWith('_bmad-output/implementation-artifacts/receipts/'))
+    item !== 'AGENTS.md' && !item.startsWith('.agents/') && !item.startsWith('docs/superpowers/') &&
+    !item.startsWith('_bmad-output/implementation-artifacts/receipts/'))
   if (unexpected.length) issue(result, `UNRELATED_WORKTREE_DRIFT:${unexpected[0]}`, 'blocked')
 }
 
@@ -555,6 +619,10 @@ export function inspectFinalization(root, storyId, expectedHead) {
   const storyFile = safePath(root, plan.story.path)
   try { story = inspectStory(readFileSync(storyFile, 'utf8')) } catch { issue(result, 'INVALID_STORY_CONTRACT', 'invalid'); return classify(result) }
   if (story.errors.length) issue(result, `INVALID_STORY_CONTRACT:${story.errors.join(',')}`, 'invalid')
+  const postFinalization = plan.lifecycle_snapshot === 'review' &&
+    plan.execution_status === 'complete' &&
+    plan.next_action?.kind === 'complete_story' &&
+    plan.next_action?.target === 'story'
   let actualStoryDigest = null
   try { actualStoryDigest = normativeDigest(story) } catch { issue(result, 'INVALID_STORY_CONTRACT', 'invalid') }
   result.story_normative_digest = actualStoryDigest
@@ -579,8 +647,8 @@ export function inspectFinalization(root, storyId, expectedHead) {
   else if (plan.blockers.length) issue(result, 'BLOCKERS_PRESENT', 'blocked')
   if (!Array.isArray(plan.unresolved_questions)) issue(result, 'INVALID_UNRESOLVED_QUESTIONS', 'invalid')
   else if (plan.unresolved_questions.length) issue(result, 'UNRESOLVED_QUESTIONS_PRESENT', 'blocked')
-  if (plan.next_action?.kind !== FINALIZATION_ACTION || plan.next_action?.target !== 'story') issue(result, 'FINALIZE_STORY_ACTION_REQUIRED', 'blocked')
-  if (plan.execution_status !== 'in-progress') issue(result, 'EXECUTION_STATUS_NOT_IN_PROGRESS', 'blocked')
+  if (!postFinalization && (plan.next_action?.kind !== FINALIZATION_ACTION || plan.next_action?.target !== 'story')) issue(result, 'FINALIZE_STORY_ACTION_REQUIRED', 'blocked')
+  if (!postFinalization && plan.execution_status !== 'in-progress') issue(result, 'EXECUTION_STATUS_NOT_IN_PROGRESS', 'blocked')
 
   const taskErrors = validateTaskSlices(story, plan)
   for (const error of taskErrors) {
@@ -636,6 +704,15 @@ export function inspectFinalization(root, storyId, expectedHead) {
   const scope = deriveScope(root, storyId, plan.story.path, details, expectedHead, result)
   inspectWorkingTree(root, result, scope.paths.map(item => item.path), [planPath, plan.story.path])
   checkHumanApproval(plan, result)
+  const recovery = classifyFinalizationRecovery(root, storyId, expectedHead)
+  result.recovery_classification = recovery.classification
+  if (recovery.classification === 'HUMAN_GATE_PENDING' && !result.reasons.includes('HUMAN_GATE_PENDING')) {
+    issue(result, 'HUMAN_GATE_PENDING', 'reconciliation')
+  }
+  if (['UNCOMMITTED_FINALIZATION', 'ORPHAN_FINALIZATION_RECEIPT', 'PARTIAL_PLAN_ONLY',
+    'PARTIAL_SPRINT_ONLY', 'PARTIAL_STORY_ONLY', 'TAMPERED_FINALIZATION_RECEIPT'].includes(recovery.classification)) {
+    issue(result, recovery.classification, 'reconciliation')
+  }
 
   result.human_gate_required = true
   if (!result.canonical_disclosures.length) issue(result, 'CANONICAL_DISCLOSURE_MISSING', 'blocked')

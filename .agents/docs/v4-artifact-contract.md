@@ -1,6 +1,6 @@
-# V4 Story artifact contract (future schema v2)
+# V4 Story artifact contract (schema v2)
 
-This contract is implemented by [`check-artifact-contract.mjs`](../scripts/check-artifact-contract.mjs) and its [fixtures](../scripts/fixtures/artifact-contract). Read-only helpers accept schema-v1 Plans and separated schema-v2 Plans. Schema v1 remains supported during migration. Schema v2 is available for fixtures and a future explicit migration; no existing Story changes schema automatically. A Plan uses one schema only.
+This contract is implemented by [`check-artifact-contract.mjs`](../scripts/check-artifact-contract.mjs) and its [fixtures](../scripts/fixtures/artifact-contract). Read-only helpers accept schema-v1 Plans and separated schema-v2 Plans. Schema v1 remains supported during migration, while schema v2 carries the V4 Lite finalization/Human-Gate state. A Plan uses one schema only.
 
 ## Authority
 
@@ -44,3 +44,9 @@ The helper uses the existing top-level statuses `READY`, `RECONCILIATION_REQUIRE
 The final implementation scope is bound by three stable SHA-256 digests: the sorted path set, the canonical slice checkpoint set, and the sorted final path-to-blob identities. Plan, Story completion metadata, sprint status, receipts, `.agents/**`, verification metadata, and explicitly known unrelated noise are excluded from product scope. A blob change after the latest legitimate Story checkpoint is stale, including a working-tree/index change on a scoped path.
 
 `human_gate_required: true` and `human_approval_present: false` are normal for a pre-finalization `READY` result. Approval is a later explicit lifecycle authority bound to the Story normative digest, approved HEAD, implementation checkpoint set, scoped paths, and scoped tree; any binding change invalidates that approval.
+
+## Finalization and Human Gate
+
+The V4 Runner may execute `finalize_story` only from a validated schema-v2 Plan whose next action targets the Story, whose lifecycle and execution status are both `in-progress`, and whose finalization helper is `READY` with either `READY` or `READY_WITH_DISCLOSURES`. Finalization writes only completion metadata, an immutable `story_finalization` receipt, the Story status, the Plan lifecycle projection, and the sprint Story entry. These four paths are staged exactly and committed together.
+
+The transaction ends at `review`: Plan execution becomes `complete`, `next_action.kind` becomes `complete_story`, and Human approval remains absent/null. The completion receipt binds the Story normative digest, upstream Epic digest, reviewed slice/receipt set, AC coverage, canonical disclosures, final implementation scope, and source HEAD. A committed review projection without approval is healthy `HUMAN_GATE_PENDING`. `complete_story` is a recognized Human-Gate successor, not an executable action in this phase; generic `continue` cannot authorize it, and no automatic `review → done` edge is enabled.
