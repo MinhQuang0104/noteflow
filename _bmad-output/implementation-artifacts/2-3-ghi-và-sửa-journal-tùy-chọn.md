@@ -1,7 +1,7 @@
 ---
 story_id: "2.3"
 title: Ghi và sửa journal tùy chọn
-status: in-progress
+status: review
 ---
 
 # Story 2.3: Ghi và sửa journal tùy chọn
@@ -66,11 +66,55 @@ As a chủ tài khoản, I want ghi journal cho một ngày challenge, So that t
 ## Dev Agent Record
 
 <!-- v4:completion:start -->
+- Finalization receipt: _bmad-output/implementation-artifacts/receipts/story-2-3/finalization.json
+- Done Gate disposition: SATISFIED_WITH_DISCLOSURES
+
 ### AC Evidence / Results
+
+- AC-1: evidence=COVERED; mode=fallback, structured; structured: Challenge detail mounts the typed optional journal editor for the selected challenge and account-local date; Today exposes the detail/journal entry point.
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-2-3/A-verification.json (sha256:bb32c47fcfe515d0e5834db7e806a23984e914f0f177062598d8b79fd3bcdf6c); _bmad-output/implementation-artifacts/receipts/story-2-3/B-verification.json (sha256:91de0a9d59dbe1d3425588bd50e6ba99620d947afe8b9c09ee41c12d6e2d84e1); _bmad-output/implementation-artifacts/receipts/story-2-3/C-verification.json (sha256:5dc6cdf711eacce1aad3bcd4b3a803d1b6be4aec34a10c10d45b69a64fd26367); _bmad-output/implementation-artifacts/receipts/story-2-3/D-verification.json (sha256:7b847e7165ffd94e84be10a299bb7db7104e84d1305d962d7ca61832f73d16c9)
+  Canonical disposition: NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required; NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required; APPLICABLE/INCOMPLETE; complete=false; disclosure=required; APPLICABLE/INCOMPLETE; complete=false; disclosure=required
+- AC-2: evidence=COVERED; mode=fallback, structured; structured: Journal has its own editor/save status and does not submit completion or progress fields; it is explicitly presented as independent from Done and progress.
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-2-3/A-verification.json (sha256:bb32c47fcfe515d0e5834db7e806a23984e914f0f177062598d8b79fd3bcdf6c); _bmad-output/implementation-artifacts/receipts/story-2-3/B-verification.json (sha256:91de0a9d59dbe1d3425588bd50e6ba99620d947afe8b9c09ee41c12d6e2d84e1); _bmad-output/implementation-artifacts/receipts/story-2-3/C-verification.json (sha256:5dc6cdf711eacce1aad3bcd4b3a803d1b6be4aec34a10c10d45b69a64fd26367); _bmad-output/implementation-artifacts/receipts/story-2-3/D-verification.json (sha256:7b847e7165ffd94e84be10a299bb7db7104e84d1305d962d7ca61832f73d16c9)
+  Canonical disposition: NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required; NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required; APPLICABLE/INCOMPLETE; complete=false; disclosure=required; APPLICABLE/INCOMPLETE; complete=false; disclosure=required
+- AC-3: evidence=COVERED; mode=fallback, structured; structured: Journal version/conflict state is independent; stale save keeps the draft, exposes the server snapshot, and disables blind resubmission.
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-2-3/A-verification.json (sha256:bb32c47fcfe515d0e5834db7e806a23984e914f0f177062598d8b79fd3bcdf6c); _bmad-output/implementation-artifacts/receipts/story-2-3/B-verification.json (sha256:91de0a9d59dbe1d3425588bd50e6ba99620d947afe8b9c09ee41c12d6e2d84e1); _bmad-output/implementation-artifacts/receipts/story-2-3/C-verification.json (sha256:5dc6cdf711eacce1aad3bcd4b3a803d1b6be4aec34a10c10d45b69a64fd26367); _bmad-output/implementation-artifacts/receipts/story-2-3/D-verification.json (sha256:7b847e7165ffd94e84be10a299bb7db7104e84d1305d962d7ca61832f73d16c9)
+  Canonical disposition: NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required; NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required; APPLICABLE/INCOMPLETE; complete=false; disclosure=required; APPLICABLE/INCOMPLETE; complete=false; disclosure=required
 
 ### Completion Notes
 
+- Evidenced behavior: **Given** ngày hợp lệ **When** lưu/sửa journal **Then** journal gắn đúng challenge/ngày.
+- Evidenced behavior: **Given** ngày chưa Done **When** chỉ lưu journal **Then** trạng thái và tiến độ không đổi.
+- Evidenced behavior: **Given** completion và journal đổi độc lập **When** lưu một component **Then** component còn lại không bị sửa hoặc conflict giả.
+
 ### File List
 
+- backend/app/Http/Controllers/ChallengeJournalController.php
+- backend/app/Modules/Challenges/Application/Commands/SaveJournalCommand.php
+- backend/app/Modules/Challenges/Application/UseCases/GetJournalQuery.php
+- backend/app/Modules/Challenges/Application/UseCases/SaveJournalUseCase.php
+- backend/app/Modules/Challenges/Domain/Exceptions/InvalidJournalDayException.php
+- backend/app/Modules/Challenges/Domain/Exceptions/InvalidJournalTextException.php
+- backend/database/migrations/2026_09_24_010000_create_challenge_daily_records_table.php
+- backend/routes/api.php
+- backend/tests/Contract/ChallengeContractTest.php
+- backend/tests/Feature/ChallengeJournalApiTest.php
+- backend/tests/Feature/ChallengeJournalTest.php
+- backend/tests/Feature/ChallengePersistenceTest.php
+- contracts/openapi.yaml
+- frontend/scripts/generate-openapi-types.mjs
+- frontend/src/__tests__/App.spec.ts
+- frontend/src/api/__tests__/challenges.spec.ts
+- frontend/src/api/challenges.ts
+- frontend/src/api/schema.generated.ts
+- frontend/src/components/ChallengeJournalEditor.vue
+- frontend/src/views/ChallengesView.vue
+- frontend/src/views/TodayView.vue
+- frontend/src/views/__tests__/account-time.spec.ts
+- frontend/src/views/__tests__/journal.spec.ts
+- frontend/src/views/__tests__/today.spec.ts
+
 ### Change Log
+
+- Finalization recorded for Human Gate: in-progress -> review; next action complete_story.
 <!-- v4:completion:end -->

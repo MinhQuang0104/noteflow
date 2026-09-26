@@ -8,8 +8,8 @@ upstream_epic:
   path: docs/product/epics.md
   section_digest: sha256:9f84d9a7345bcdef32ba331badce7e424564e4094bb34414c3eaa9a28e0d2514
 sprint_key: 2-3-ghi-và-sửa-journal-tùy-chọn
-lifecycle_snapshot: in-progress
-execution_status: in-progress
+lifecycle_snapshot: review
+execution_status: complete
 current_slice: D
 risk:
   level: HIGH
@@ -139,7 +139,16 @@ slices:
       freshness: FRESH_CANDIDATE
 blockers: []
 unresolved_questions: []
+finalization:
+  receipt_ref: _bmad-output/implementation-artifacts/receipts/story-2-3/finalization.json
+  receipt_digest: sha256:742915682e8c82ac79939b2594b10d0823880659c99ff5a8197d3e8fb9034847
+  done_gate_disposition: SATISFIED_WITH_DISCLOSURES
+  scope_paths_digest: sha256:f6fcd2cf9f059e773ef891224d854aedacd3ff599a75ac4f05997f5d0b3ad1c4
+  implementation_commit_set_digest: sha256:1213bc7a4106b022738a45c517d3d84e126501f37e33ef8006ecf57c3011e48d
+  final_scoped_tree_digest: sha256:daa50f075c028ac67a1b00bca28e938fdef1603b974d4459a30f29d2318cc1ae
+  prepared_from_head: 1cd87a4394f51e07b44e7c2725430d2908ccd196
+human_approval: null
 next_action:
-  kind: finalize_story
+  kind: complete_story
   target: story
 ---
