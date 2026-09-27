@@ -150,6 +150,18 @@ test('only exact unrelated untracked noise can be excluded and it stays uncommit
   assert.match(git(f.root, 'status', '--porcelain'), /\?\? noise.tmp/)
 })
 
+test('excluded unrelated noise is content-bound across the start transaction', t => {
+  const f = fixture(t)
+  f.write('noise.tmp', 'user work')
+  const options = { excludeUnrelated: ['noise.tmp'] }
+  const preview = inspectStart(f.root, '9.1', f.head, options)
+  f.write('.git/hooks/pre-commit', '#!/bin/sh\nprintf changed > noise.tmp\n')
+  const result = applyStart(f.root, '9.1', f.head, preview.fingerprint, options)
+  assert.equal(result.status, 'RECOVERY_REQUIRED', JSON.stringify(result))
+  assert.ok(result.reasons.includes('EXCLUDED_SCOPE_CHANGED'), JSON.stringify(result))
+  assert.ok(existsSync(path.join(f.root, '.git/v4-start-story.lock')))
+})
+
 test('failed commit preserves partial transaction and lock; retry cannot overwrite it', t => {
   const f = fixture(t)
   f.write('.git/hooks/pre-commit', '#!/bin/sh\nexit 1\n')

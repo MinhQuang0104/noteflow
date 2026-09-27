@@ -32,6 +32,12 @@ function safeFile(root, relative) {
   }
   return file
 }
+function snapshotFiles(root, files) {
+  return Object.fromEntries([...files].sort().map(file => {
+    try { return [file, hash(readFileSync(safeFile(root, file)))] }
+    catch { throw new Error('EXCLUDED_SCOPE_CHANGED') }
+  }))
+}
 function identity(root) {
   const common = path.resolve(root, git(root, ['rev-parse', '--git-common-dir']).stdout.trim())
   const canonical = /^worktree (.+)$/m.exec(git(root, ['worktree', 'list', '--porcelain']).stdout)?.[1]?.trim()
@@ -100,6 +106,7 @@ function inspect(root, id, expectedHead, options, ownedToken) {
     const tracked = inventory(root, ['ls-files', '-z'])
     const excludes = options.excludeUnrelated ?? []
     if (!Array.isArray(excludes) || new Set(excludes).size !== excludes.length || excludes.some(p => typeof p !== 'string' || !untracked.includes(p) || p.startsWith('_bmad-output/implementation-artifacts/') || p.startsWith('.agent-state/') || paths.includes(p) || p === EPIC)) reasons.push('INVALID_EXCLUSION')
+    const excludedUntracked = reasons.includes('INVALID_EXCLUSION') ? {} : snapshotFiles(root, excludes)
     if (staged.length) reasons.push('DIRTY_INDEX')
     if (dirty.length || untracked.some(p => !excludes.includes(p))) reasons.push('DIRTY_WORKTREE')
     const artifacts = [[storyPath, storyText], [planPath, planText], [SPRINT, sprintText], [EPIC, epicText]]
@@ -110,10 +117,10 @@ function inspect(root, id, expectedHead, options, ownedToken) {
       }
     }
     if (reasons.length) return result('BLOCKED', [...new Set(reasons)], { head, paths, dirty, untracked })
-    const fingerprint = hash(JSON.stringify({ head, paths, story: hash(storyText), plan: hash(planText), sprint: hash(sprintText), epic: hash(epicText), pointer: hash(pointerBytes), excludes: [...excludes].sort() }))
+    const fingerprint = hash(JSON.stringify({ head, paths, story: hash(storyText), plan: hash(planText), sprint: hash(sprintText), epic: hash(epicText), pointer: hash(pointerBytes), excludes: excludedUntracked }))
     return result('READY', [], { head, fingerprint, paths, lifecycle, current_slice: plan.current_slice,
       next_action: { kind: 'implement_slice', target: plan.current_slice },
-      preview: { storyPath, planPath, sprintKey: plan.sprint_key, epicKey, epicState: state(epicKey), storyText, planText, sprintText, pointerBytes, storyDigest: plan.story.normative_digest } })
+      preview: { storyPath, planPath, sprintKey: plan.sprint_key, epicKey, epicState: state(epicKey), storyText, planText, sprintText, pointerBytes, storyDigest: plan.story.normative_digest, excludedUntracked } })
   } catch (error) { return result('ERROR', [error.message]) }
 }
 
@@ -180,6 +187,8 @@ export function applyStart(root, id, expectedHead, fingerprint, options = {}) {
     const postStaged = inventory(root, ['diff', '--cached', '--name-only', '-z', 'HEAD', '--'])
     const postDirty = inventory(root, ['diff', '--name-only', '-z', 'HEAD', '--'])
     const postUntracked = inventory(root, ['ls-files', '--others', '--exclude-standard', '-z'])
+    const currentExcluded = snapshotFiles(root, Object.keys(p.excludedUntracked ?? {}))
+    if (JSON.stringify(currentExcluded) !== JSON.stringify(p.excludedUntracked ?? {})) throw new Error('EXCLUDED_SCOPE_CHANGED')
     if (postStaged.length || postDirty.length || postUntracked.some(file => !options.excludeUnrelated?.includes(file))) throw new Error('WORKTREE_SCOPE_MISMATCH')
     if (readFileSync(identity(root).pointer, 'utf8') !== p.pointerBytes) throw new Error('V3_POINTER_CHANGED_DURING_START')
     if (validate(root, id).status !== 'READY') throw new Error('POST_COMMIT_VALIDATION_FAILED')
