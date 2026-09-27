@@ -5,10 +5,9 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
+import { inspectStory, normativeDigest, receiptDigest } from './check-artifact-contract.mjs'
 
 const script = path.resolve('.agents/scripts/check-story-plan.mjs')
-const realRoot = process.cwd()
-const real = readFileSync('_bmad-output/implementation-artifacts/story-2-3-plan.md', 'utf8')
 
 function git(root, ...args) {
   const p = spawnSync('git', args, { cwd: root, encoding: 'utf8' })
@@ -87,15 +86,149 @@ function editPlan(f, from, to) {
   writeFileSync(file, f.plan.replace(from, to))
 }
 
+function schemaV2Fixture() {
+  const root = mkdtempSync(path.join(tmpdir(), 'story-plan-v2-'))
+  const storyPath = 'docs/story-9-1.md'
+  const storyText = `---
+story_id: "9.1"
+title: Fixture finalization story
+status: in-progress
+---
+
+# Story 9.1: Fixture finalization story
+
+<!-- v4:story:start -->
+As a user, I want a bounded fixture story.
+<!-- v4:story:end -->
+
+<!-- v4:ac:start -->
+- AC-1: the fixture behavior is evidenced.
+<!-- v4:ac:end -->
+
+<!-- v4:tasks:start -->
+- [x] T-1 [AC-1]: implement the fixture behavior.
+<!-- v4:tasks:end -->
+
+<!-- v4:readiness:start -->
+- result: READY
+- dependencies: none
+<!-- v4:readiness:end -->
+
+<!-- v4:references:start -->
+- product: docs/product/epics.md#story-91-fixture-finalization-story
+<!-- v4:references:end -->
+
+<!-- v4:risk:start -->
+- classification: MEDIUM
+- invariant: fixture scope remains bounded.
+<!-- v4:risk:end -->
+`
+  const story = inspectStory(storyText)
+  const storyDigest = normativeDigest(story)
+  const changedPaths = ['src/a.txt']
+  const changedPathsDigest = `sha256:${createHash('sha256').update(`${changedPaths.join('\n')}\n`, 'utf8').digest('hex')}`
+
+  mkdirSync(path.dirname(path.join(root, storyPath)), { recursive: true })
+  mkdirSync(path.join(root, '_bmad-output/implementation-artifacts'), { recursive: true })
+  writeFileSync(path.join(root, storyPath), storyText)
+  writeFileSync(path.join(root, '_bmad-output/implementation-artifacts/sprint-status.yaml'),
+    'development_status:\n  epic-9: in-progress\n  9-1-fixture: in-progress\n')
+  git(root, 'init', '-q')
+  git(root, 'config', 'user.email', 'test@example.com')
+  git(root, 'config', 'user.name', 'Test')
+  git(root, 'add', '.')
+  git(root, 'commit', '-qm', 'fixture baseline')
+  const baseline = git(root, 'rev-parse', 'HEAD')
+
+  mkdirSync(path.dirname(path.join(root, 'src/a.txt')), { recursive: true })
+  writeFileSync(path.join(root, 'src/a.txt'), 'fixture\n')
+  git(root, 'add', 'src/a.txt')
+  git(root, 'commit', '-qm', 'fixture slice')
+  const checkpoint = git(root, 'rev-parse', 'HEAD')
+  const receiptDir = '_bmad-output/implementation-artifacts/receipts/story-9-1'
+  const refs = {}
+  for (const kind of ['implementation', 'verification', 'review']) {
+    const receipt = {
+      schema_version: 1,
+      story_id: '9.1',
+      slice_id: 'A',
+      kind,
+      checkpoint_commit: checkpoint,
+      baseline_commit: baseline,
+      subject_digest: changedPathsDigest,
+      created_from_head: checkpoint,
+      changed_paths_sha256: changedPathsDigest,
+      commands: [{ command: `fixture ${kind}`, exit_code: 0, tool: 'fixture', environment: 'node-test' }]
+    }
+    const relative = `${receiptDir}/A-${kind}.json`
+    mkdirSync(path.dirname(path.join(root, relative)), { recursive: true })
+    writeFileSync(path.join(root, relative), `${JSON.stringify(receipt, null, 2)}\n`)
+    refs[kind] = { path: relative, digest: receiptDigest(receipt) }
+  }
+
+  const plan = `---
+schema_version: 2
+story_id: "9.1"
+story:
+  path: ${storyPath}
+  normative_digest: ${storyDigest}
+sprint_key: 9-1-fixture
+lifecycle_snapshot: in-progress
+execution_status: in-progress
+current_slice: A
+risk:
+  level: MEDIUM
+slices:
+  - id: A
+    status: reviewed
+    depends_on: []
+    task_refs: [T-1]
+    baseline_commit: ${baseline}
+    checkpoint_commit: ${checkpoint}
+    subject_digest: ${changedPathsDigest}
+    changed_paths_sha256: ${changedPathsDigest}
+    receipt_refs:
+      implementation:
+        path: ${refs.implementation.path}
+        digest: ${refs.implementation.digest}
+      verification:
+        path: ${refs.verification.path}
+        digest: ${refs.verification.digest}
+      review:
+        path: ${refs.review.path}
+        digest: ${refs.review.digest}
+    review:
+      required: true
+      verdict: APPROVE
+blockers: []
+unresolved_questions: []
+next_action:
+  kind: finalize_story
+  target: story
+---
+`
+  const planPath = path.join(root, '_bmad-output/implementation-artifacts/story-9-1-plan.md')
+  writeFileSync(planPath, plan)
+  git(root, 'add', '.')
+  git(root, 'commit', '-qm', 'fixture metadata')
+  return { root }
+}
+
 test('valid READY fixture', () => withFixture(() => {}, 'READY', 0))
-test('canonical schema-v2 Story 2.3 remains readable before finalization', () => {
-  const result = check(realRoot, '2.3')
-  assert.equal(result.code, 0)
-  assert.equal(result.json.valid, true)
-  assert.equal(result.json.status, 'READY')
-  assert.equal(result.json.lifecycleSnapshot, 'in-progress')
-  assert.equal(result.json.actualLifecycle, 'in-progress')
-  assert.deepEqual(result.json.nextAction, {kind:'finalize_story', target:'story'})
+test('schema-v2 fixture remains readable before finalization', () => {
+  const f = schemaV2Fixture()
+  try {
+    const result = check(f.root, '9.1')
+    assert.equal(result.code, 0, JSON.stringify(result.json))
+    assert.equal(result.json.valid, true)
+    assert.equal(result.json.status, 'READY')
+    assert.equal(result.json.storyStatus, 'in-progress')
+    assert.equal(result.json.lifecycleSnapshot, 'in-progress')
+    assert.equal(result.json.actualLifecycle, 'in-progress')
+    assert.deepEqual(result.json.nextAction, { kind: 'finalize_story', target: 'story' })
+  } finally {
+    rmSync(f.root, { recursive: true, force: true })
+  }
 })
 test('unsupported schema', () => withFixture(f => editPlan(f, 'schema_version: 1', 'schema_version: 3'), 'INVALID', 3, 'UNSUPPORTED_SCHEMA'))
 test('story ID mismatch', () => withFixture(f => editPlan(f, 'story_id: "9.1"', 'story_id: "9.2"'), 'INVALID', 3, 'STORY_ID_MISMATCH'))

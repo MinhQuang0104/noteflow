@@ -12,6 +12,10 @@ test-results/
 playwright-report/
 blob-report/
 
+# Generated Python test caches
+/_bmad/scripts/.pytest_cache/
+/_bmad/scripts/tests/__pycache__/
+
 # Environment files
 .env
 .env.*

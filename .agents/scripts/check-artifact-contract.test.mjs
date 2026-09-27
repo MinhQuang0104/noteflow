@@ -6,7 +6,7 @@ import path from 'node:path'
 import { inspectStory, normativeDigest, receiptDigest, validateTaskSlices, validateReceipt } from './check-artifact-contract.mjs'
 
 const fixture = path.resolve('.agents/scripts/fixtures/artifact-contract')
-const source = readFileSync(path.join(fixture, 'story-9-1.md'), 'utf8')
+const source = readFileSync(path.join(fixture, 'story-9-1.md'), 'utf8').replaceAll('\r\n', '\n')
 const basePlan = JSON.parse(readFileSync(path.join(fixture, 'plan.json'), 'utf8'))
 const baseReceipt = JSON.parse(readFileSync(path.join(fixture, 'receipt.json'), 'utf8'))
 const story = () => inspectStory(source)

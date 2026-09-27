@@ -502,21 +502,17 @@ test('scope digests are stable across repeated read-only checks', () => withFixt
   assert.equal(first.json.final_scoped_tree_digest, second.json.final_scoped_tree_digest)
 }))
 
-test('actual Story 2.3 is READY with disclosures at the current entry state', () => {
-  const expectedHead = git(process.cwd(), 'rev-parse', 'HEAD')
-  const result = spawnSync(process.execPath, [script, 'check', '2.3', '--expected-head', expectedHead], {
-    cwd: process.cwd(), encoding: 'utf8', windowsHide: true
-  })
-  assert.ok(result.stdout, result.stderr)
-  const json = JSON.parse(result.stdout)
-  assert.equal(result.status, 0, JSON.stringify(json))
-  assert.equal(json.status, 'READY')
-  assert.equal(json.done_gate_disposition, 'READY_WITH_DISCLOSURES')
-  assert.deepEqual(json.slices.map(slice => `${slice.id}:${slice.status}`), ['A:reviewed', 'B:reviewed', 'C:reviewed', 'D:reviewed'])
-  assert.deepEqual(json.ac_coverage.map(item => `${item.id}:${item.covered}`), ['AC-1:true', 'AC-2:true', 'AC-3:true'])
-  assert.equal(json.human_gate_required, true)
-  assert.equal(json.human_approval_present, false)
-  assert.equal(json.lifecycle_from, 'in-progress')
-  assert.equal(json.lifecycle_target, 'review')
-  assert.equal(json.scope.path_count, 24)
-})
+test('schema-v2 fixture is READY with disclosures at finalization entry state', () => withFixture({
+  slices: [{ id: 'A', path: 'src/a.txt', canonical: { applicability: 'NOT_APPLICABLE', status: 'INCOMPLETE', complete: false } }]
+}, f => {
+  const result = run(f)
+  expectStatus(result, 'READY', 0)
+  assert.equal(result.json.done_gate_disposition, 'READY_WITH_DISCLOSURES')
+  assert.deepEqual(result.json.slices.map(slice => `${slice.id}:${slice.status}`), ['A:reviewed'])
+  assert.deepEqual(result.json.ac_coverage.map(item => `${item.id}:${item.covered}`), ['AC-1:true', 'AC-2:true'])
+  assert.equal(result.json.human_gate_required, true)
+  assert.equal(result.json.human_approval_present, false)
+  assert.equal(result.json.lifecycle_from, 'in-progress')
+  assert.equal(result.json.lifecycle_target, 'review')
+  assert.equal(result.json.scope.path_count, 1)
+}))
