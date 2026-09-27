@@ -354,13 +354,18 @@ function main() {
     ], root)
     if (result.status !== (added ? 1 : 0)) fail('ERROR', `git diff failed: ${file}`)
     const hunks = parsePatch(result.stdout, file, addedFile?.empty)
-    if (hunks.length > MAX_HUNKS) fail('SPLIT_REQUIRED', `more than 6 hunks: ${file}`)
     totalLines += hunks.reduce((sum, hunk) => sum + hunk.diffText.split('\n').length, 0)
     evidencePaths.push(added ? { path: file, changeType: 'added', hunks } : { path: file, hunks })
   }
   const provenance = { producer: 'prepare-change-evidence-v1', comparison: options.comparison, base, head }
-  if (totalLines > MAX_LINES) {
-    if (paths.length !== 1) fail('SPLIT_REQUIRED', 'more than 240 diff lines across paths')
+  const hasOversizedHunkGroup = evidencePaths.some(entry => entry.hunks.length > MAX_HUNKS)
+  if (totalLines > MAX_LINES || hasOversizedHunkGroup) {
+    if (paths.length !== 1) {
+      const reason = hasOversizedHunkGroup
+        ? 'more than 6 hunks in a multi-path group'
+        : 'more than 240 diff lines across paths'
+      fail('SPLIT_REQUIRED', reason)
+    }
     return { status: 'OK', changeEvidence: { evidenceSet: makeEvidenceSet(provenance, paths, evidencePaths) } }
   }
   return {

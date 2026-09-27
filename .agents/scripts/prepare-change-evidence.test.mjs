@@ -129,14 +129,30 @@ test('multiple hunks on one oversized path retain complete ordered coverage', t 
   assert.doesNotThrow(() => validateEvidenceSet(set))
 })
 
-test('more than six hunks and oversized multi-path group still require path split', t => {
+test('more than six hunks yield complete ordered evidence units while oversized multi-path groups require a path split', t => {
   const { root, evidence } = fixture(t)
   const original = Array.from({ length: 140 }, (_, i) => `line ${i}`)
   writeFileSync(path.join(root, 'tracked.txt'), `${original.join('\n')}\n`)
   assert.equal(run('git', ['add', 'tracked.txt'], root).status, 0)
   assert.equal(run('git', ['-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', 'commit', '-qm', 'hunk base'], root).status, 0)
   writeFileSync(path.join(root, 'tracked.txt'), `${original.map((v, i) => i % 20 === 0 ? `changed ${i}` : v).join('\n')}\n`)
-  assert.equal(evidence('working-tree-vs-HEAD', 'tracked.txt').body.status, 'SPLIT_REQUIRED')
+  const manyHunks = evidence('working-tree-vs-HEAD', 'tracked.txt')
+  assert.equal(manyHunks.code, 0, JSON.stringify(manyHunks.body))
+  assert.equal(manyHunks.body.status, 'OK')
+  const set = manyHunks.body.changeEvidence.evidenceSet
+  assert.equal(set.paths[0].hunks.length, 7)
+  assert.deepEqual([...new Set(set.units.map(unit => unit.hunkIndex))], [0, 1, 2, 3, 4, 5, 6])
+  assert.ok(set.units.every(unit => unit.diffLineCount <= 240))
+  assert.doesNotThrow(() => validateEvidenceSet(set))
+  const incomplete = structuredClone(set)
+  incomplete.units.splice(3, 1)
+  assert.throws(() => validateEvidenceSet(incomplete))
+
+  writeFileSync(path.join(root, 'small.txt'), 'small change\n')
+  const multiPathHunkGroup = evidence('working-tree-vs-HEAD', 'tracked.txt', ['--path', 'small.txt'])
+  assert.equal(multiPathHunkGroup.code, 2)
+  assert.equal(multiPathHunkGroup.body.status, 'SPLIT_REQUIRED')
+
   writeFileSync(path.join(root, 'a.txt'), Array.from({length: 130}, (_, i) => `a ${i}\n`).join(''))
   writeFileSync(path.join(root, 'b.txt'), Array.from({length: 130}, (_, i) => `b ${i}\n`).join(''))
   const group = evidence('working-tree-vs-HEAD', 'a.txt', ['--path', 'b.txt'])
