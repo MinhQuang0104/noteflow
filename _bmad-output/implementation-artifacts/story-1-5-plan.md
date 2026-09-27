@@ -77,6 +77,29 @@ slices:
       implementation:
         path: _bmad-output/implementation-artifacts/receipts/story-1-5/B-implementation.json
         digest: sha256:a9280ca7f36f7b1b08afd71604950090c55b692aa292cf7f496e5a046238841a
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-5/B-verification.json
+        digest: sha256:d6d154643d9fa31617a729f8aea56823643a0d71e09a4981f0fee9320ff41187
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-5/B-review.json
+        digest: sha256:e9defe9332a189040f0e4f2c954532e1b0aa382f953a428502ecb7def58b83dd
+    verification:
+      subject:
+        commit: ad5be8df6bf6ac7278f92464bc0751e7209d0cd0
+        tree: ffd8a7fa81fe337db0713466d0ebb93e81d8bdcb
+      changed_paths_sha256: sha256:045d6d9871f86125a270cbd27aace95a7d505ceda2b7edd6ee547ac5a34f88bc
+      canonical_applicability: NOT_APPLICABLE
+      canonical_status: INCOMPLETE
+      progression_eligible: false
+      done_gate_disclosure_required: true
+      outstanding_obligation: "targeted HIGH-risk review found a blocking same-epoch convergence callback race"
+    review:
+      required: true
+      verdict: CHANGES_REQUIRED
+      reviewed_commit: ad5be8df6bf6ac7278f92464bc0751e7209d0cd0
+      risk_context_digest: sha256:5c3e1b7db251e727a044146d7de6dfdca55a28add41d20e71b865ee6be958196
+      review_context_digest: sha256:bfbc83b9525ddc022b821ea5810f5d3609953cb15fbcba47e8a616ea84c93706
+      freshness: FRESH_CANDIDATE
   - id: C
     status: pending
     depends_on: [B]
@@ -85,9 +108,12 @@ slices:
     status: pending
     depends_on: [C]
     task_refs: [T-7]
-blockers: []
+blockers:
+  - id: same-epoch-convergence-callback-race
+    reason: "Older same-epoch mutation ACK convergence callbacks can overwrite syncStatus, syncError, and pendingConvergence after a newer ACK."
 unresolved_questions: []
 next_action:
-  kind: verify_slice
+  kind: resolve_blocker
   target: B
+  reference: same-epoch-convergence-callback-race
 ---

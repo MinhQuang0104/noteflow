@@ -1,0 +1,267 @@
+{
+  "schema_version": 1,
+  "story_id": "1.5",
+  "slice_id": "B",
+  "kind": "verification",
+  "checkpoint_commit": "ad5be8df6bf6ac7278f92464bc0751e7209d0cd0",
+  "baseline_commit": "d529b8329ce495f82e085b7c678f869cf898a1fa",
+  "subject_digest": "sha256:045d6d9871f86125a270cbd27aace95a7d505ceda2b7edd6ee547ac5a34f88bc",
+  "created_from_head": "ad5be8df6bf6ac7278f92464bc0751e7209d0cd0",
+  "changed_paths_sha256": "sha256:045d6d9871f86125a270cbd27aace95a7d505ceda2b7edd6ee547ac5a34f88bc",
+  "commands": [
+    {
+      "command": "npm.cmd run test:unit -- --run src/views/__tests__/journal.spec.ts src/stores/__tests__/journalDrafts.spec.ts src/stores/__tests__/sync.spec.ts src/api/__tests__/challenges.spec.ts",
+      "result": "PASS: 4 files, 56 tests",
+      "exit_code": 0,
+      "tool": "npm/Vitest 5.0.1",
+      "environment": "Windows (win32); Node.js v24.21.0; frontend dependencies via a linked node_modules junction"
+    },
+    {
+      "command": "npm.cmd run test:unit -- --run src/views/__tests__/challenges.spec.ts",
+      "result": "PASS: 1 file, 13 tests",
+      "exit_code": 0,
+      "tool": "npm/Vitest 5.0.1",
+      "environment": "Windows (win32); Node.js v24.21.0; frontend dependencies via a linked node_modules junction"
+    },
+    {
+      "command": "npm.cmd run type-check",
+      "result": "PASS: vue-tsc --build",
+      "exit_code": 0,
+      "tool": "npm/vue-tsc",
+      "environment": "Windows (win32); Node.js v24.21.0; frontend dependencies via a linked node_modules junction"
+    },
+    {
+      "command": ".\\node_modules\\.bin\\eslint.cmd src/components/ChallengeJournalEditor.vue src/stores/__tests__/journalDrafts.spec.ts src/stores/__tests__/sync.spec.ts src/stores/journalDrafts.ts src/stores/sync.ts src/views/__tests__/journal.spec.ts --no-cache",
+      "result": "PASS: no diagnostics",
+      "exit_code": 0,
+      "tool": "ESLint",
+      "environment": "Windows (win32); Node.js v24.21.0; frontend dependencies via a linked node_modules junction"
+    },
+    {
+      "command": ".\\node_modules\\.bin\\oxlint.cmd src/components/ChallengeJournalEditor.vue src/stores/__tests__/journalDrafts.spec.ts src/stores/__tests__/sync.spec.ts src/stores/journalDrafts.ts src/stores/sync.ts src/views/__tests__/journal.spec.ts",
+      "result": "PASS: no diagnostics",
+      "exit_code": 0,
+      "tool": "oxlint",
+      "environment": "Windows (win32); Node.js v24.21.0; frontend dependencies via a linked node_modules junction"
+    },
+    {
+      "command": "node .agents/scripts/check-verification.mjs check auto --changed frontend/src/components/ChallengeJournalEditor.vue --changed frontend/src/stores/__tests__/journalDrafts.spec.ts --changed frontend/src/stores/__tests__/sync.spec.ts --changed frontend/src/stores/journalDrafts.ts --changed frontend/src/stores/sync.ts --changed frontend/src/views/__tests__/journal.spec.ts",
+      "result": "INCOMPLETE: NOT_APPLICABLE; NO_APPLICABLE_RECIPE",
+      "exit_code": 2,
+      "tool": "check-verification.mjs",
+      "environment": "Windows (win32); Node.js v24.21.0"
+    },
+    {
+      "command": "check-escalation.mjs with canonical Verification Router JSON forwarded unchanged; risk HIGH; flags CONCURRENCY_STATE, SECURITY_AUTH",
+      "result": "REVIEW_REQUIRED",
+      "exit_code": 1,
+      "tool": "check-escalation.mjs",
+      "environment": "Windows (win32); Node.js v24.21.0"
+    }
+  ],
+  "evidence_status": "fresh",
+  "subject": {
+    "mode": "checkpoint",
+    "baseline_commit": "d529b8329ce495f82e085b7c678f869cf898a1fa",
+    "checkpoint_commit": "ad5be8df6bf6ac7278f92464bc0751e7209d0cd0",
+    "verified_from_head": "aff293410ccbfec1113895ecf017ff2fa67adcd9",
+    "changed_paths_sha256": "sha256:045d6d9871f86125a270cbd27aace95a7d505ceda2b7edd6ee547ac5a34f88bc",
+    "checkpoint_freshness": "FRESH",
+    "source_freshness": "FRESH",
+    "reference_freshness": "FILE_LEVEL_FRESH",
+    "post_checkpoint_drift": [],
+    "working_drift": []
+  },
+  "changed_paths": [
+    "frontend/src/components/ChallengeJournalEditor.vue",
+    "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+    "frontend/src/stores/__tests__/sync.spec.ts",
+    "frontend/src/stores/journalDrafts.ts",
+    "frontend/src/stores/sync.ts",
+    "frontend/src/views/__tests__/journal.spec.ts"
+  ],
+  "focused_checks": [
+    {
+      "id": "slice-b-journal-unit",
+      "kind": "behavioral",
+      "command": "npm.cmd run test:unit -- --run src/views/__tests__/journal.spec.ts src/stores/__tests__/journalDrafts.spec.ts src/stores/__tests__/sync.spec.ts src/api/__tests__/challenges.spec.ts",
+      "tool": "npm/Vitest 5.0.1",
+      "summary": "4 test files passed; 56 tests passed",
+      "result": "PASS",
+      "exit_code": 0,
+      "subject_digest": "sha256:045d6d9871f86125a270cbd27aace95a7d505ceda2b7edd6ee547ac5a34f88bc",
+      "subject": {
+        "commit": "ad5be8df6bf6ac7278f92464bc0751e7209d0cd0",
+        "tree": "ffd8a7fa81fe337db0713466d0ebb93e81d8bdcb"
+      },
+      "changed_paths_sha256": "sha256:045d6d9871f86125a270cbd27aace95a7d505ceda2b7edd6ee547ac5a34f88bc",
+      "command_digest": "sha256:cdad3b100126ea5db571032b09d68922c33a94e0ec2a97be8e408099d9a416b1",
+      "command_digest_method": "sha256-utf8-exact-command-string-v1",
+      "toolchain_digest": "sha256:93597db795ab5b0250630d0ee0722a49ca809aba2437d294c773152e48132f7b",
+      "environment_sensitive": true,
+      "environment": {
+        "platform": "Windows (win32)",
+        "node": "v24.21.0",
+        "frontend_dependencies": "frontend/node_modules junction to the main workspace frontend/node_modules",
+        "lockfile_sha256": "1829336936c40e0ef070a8a18628ecb2183f0a27f0e2e5c922b004a20fa8e9e7"
+      }
+    },
+    {
+      "id": "challenges-view-consumer",
+      "kind": "consumer",
+      "command": "npm.cmd run test:unit -- --run src/views/__tests__/challenges.spec.ts",
+      "tool": "npm/Vitest 5.0.1",
+      "summary": "1 test file passed; 13 tests passed",
+      "result": "PASS",
+      "exit_code": 0,
+      "subject_digest": "sha256:045d6d9871f86125a270cbd27aace95a7d505ceda2b7edd6ee547ac5a34f88bc",
+      "subject": {
+        "commit": "ad5be8df6bf6ac7278f92464bc0751e7209d0cd0",
+        "tree": "ffd8a7fa81fe337db0713466d0ebb93e81d8bdcb"
+      },
+      "changed_paths_sha256": "sha256:045d6d9871f86125a270cbd27aace95a7d505ceda2b7edd6ee547ac5a34f88bc",
+      "command_digest": "sha256:eefa1f0d47ebad00e4593fafb27601c118793cd5d4cacde8228b29be585068fa",
+      "command_digest_method": "sha256-utf8-exact-command-string-v1",
+      "toolchain_digest": "sha256:93597db795ab5b0250630d0ee0722a49ca809aba2437d294c773152e48132f7b",
+      "environment_sensitive": true,
+      "environment": {
+        "platform": "Windows (win32)",
+        "node": "v24.21.0",
+        "frontend_dependencies": "frontend/node_modules junction to the main workspace frontend/node_modules",
+        "lockfile_sha256": "1829336936c40e0ef070a8a18628ecb2183f0a27f0e2e5c922b004a20fa8e9e7"
+      }
+    },
+    {
+      "id": "frontend-type-check",
+      "kind": "type-check",
+      "command": "npm.cmd run type-check",
+      "tool": "npm/vue-tsc",
+      "summary": "vue-tsc --build passed",
+      "result": "PASS",
+      "exit_code": 0,
+      "subject_digest": "sha256:045d6d9871f86125a270cbd27aace95a7d505ceda2b7edd6ee547ac5a34f88bc",
+      "subject": {
+        "commit": "ad5be8df6bf6ac7278f92464bc0751e7209d0cd0",
+        "tree": "ffd8a7fa81fe337db0713466d0ebb93e81d8bdcb"
+      },
+      "changed_paths_sha256": "sha256:045d6d9871f86125a270cbd27aace95a7d505ceda2b7edd6ee547ac5a34f88bc",
+      "command_digest": "sha256:63967bbe0152ee8307abf6bb589cecbf872996998500336e28f28fb07d9b6f01",
+      "command_digest_method": "sha256-utf8-exact-command-string-v1",
+      "toolchain_digest": "sha256:93597db795ab5b0250630d0ee0722a49ca809aba2437d294c773152e48132f7b",
+      "environment_sensitive": true,
+      "environment": {
+        "platform": "Windows (win32)",
+        "node": "v24.21.0",
+        "frontend_dependencies": "frontend/node_modules junction to the main workspace frontend/node_modules",
+        "lockfile_sha256": "1829336936c40e0ef070a8a18628ecb2183f0a27f0e2e5c922b004a20fa8e9e7"
+      }
+    },
+    {
+      "id": "slice-b-eslint",
+      "kind": "lint",
+      "command": ".\\node_modules\\.bin\\eslint.cmd src/components/ChallengeJournalEditor.vue src/stores/__tests__/journalDrafts.spec.ts src/stores/__tests__/sync.spec.ts src/stores/journalDrafts.ts src/stores/sync.ts src/views/__tests__/journal.spec.ts --no-cache",
+      "tool": "ESLint",
+      "summary": "Passed with exit code 0; no diagnostics emitted",
+      "result": "PASS",
+      "exit_code": 0,
+      "subject_digest": "sha256:045d6d9871f86125a270cbd27aace95a7d505ceda2b7edd6ee547ac5a34f88bc",
+      "subject": {
+        "commit": "ad5be8df6bf6ac7278f92464bc0751e7209d0cd0",
+        "tree": "ffd8a7fa81fe337db0713466d0ebb93e81d8bdcb"
+      },
+      "changed_paths_sha256": "sha256:045d6d9871f86125a270cbd27aace95a7d505ceda2b7edd6ee547ac5a34f88bc",
+      "command_digest": "sha256:01dde852b38709917b97d606504e99a05a4fad29263c0b21f313b8c637695108",
+      "command_digest_method": "sha256-utf8-exact-command-string-v1",
+      "toolchain_digest": "sha256:93597db795ab5b0250630d0ee0722a49ca809aba2437d294c773152e48132f7b",
+      "environment_sensitive": true,
+      "environment": {
+        "platform": "Windows (win32)",
+        "node": "v24.21.0",
+        "frontend_dependencies": "frontend/node_modules junction to the main workspace frontend/node_modules",
+        "lockfile_sha256": "1829336936c40e0ef070a8a18628ecb2183f0a27f0e2e5c922b004a20fa8e9e7"
+      }
+    },
+    {
+      "id": "slice-b-oxlint",
+      "kind": "lint",
+      "command": ".\\node_modules\\.bin\\oxlint.cmd src/components/ChallengeJournalEditor.vue src/stores/__tests__/journalDrafts.spec.ts src/stores/__tests__/sync.spec.ts src/stores/journalDrafts.ts src/stores/sync.ts src/views/__tests__/journal.spec.ts",
+      "tool": "oxlint",
+      "summary": "Passed with exit code 0; no diagnostics emitted",
+      "result": "PASS",
+      "exit_code": 0,
+      "subject_digest": "sha256:045d6d9871f86125a270cbd27aace95a7d505ceda2b7edd6ee547ac5a34f88bc",
+      "subject": {
+        "commit": "ad5be8df6bf6ac7278f92464bc0751e7209d0cd0",
+        "tree": "ffd8a7fa81fe337db0713466d0ebb93e81d8bdcb"
+      },
+      "changed_paths_sha256": "sha256:045d6d9871f86125a270cbd27aace95a7d505ceda2b7edd6ee547ac5a34f88bc",
+      "command_digest": "sha256:d6bb90173bd937a82783f7ce37fa4920c27beaaa9dfa91579127279eaa57b057",
+      "command_digest_method": "sha256-utf8-exact-command-string-v1",
+      "toolchain_digest": "sha256:93597db795ab5b0250630d0ee0722a49ca809aba2437d294c773152e48132f7b",
+      "environment_sensitive": true,
+      "environment": {
+        "platform": "Windows (win32)",
+        "node": "v24.21.0",
+        "frontend_dependencies": "frontend/node_modules junction to the main workspace frontend/node_modules",
+        "lockfile_sha256": "1829336936c40e0ef070a8a18628ecb2183f0a27f0e2e5c922b004a20fa8e9e7"
+      }
+    }
+  ],
+  "canonical": {
+    "command": "node .agents/scripts/check-verification.mjs check auto --changed frontend/src/components/ChallengeJournalEditor.vue --changed frontend/src/stores/__tests__/journalDrafts.spec.ts --changed frontend/src/stores/__tests__/sync.spec.ts --changed frontend/src/stores/journalDrafts.ts --changed frontend/src/stores/sync.ts --changed frontend/src/views/__tests__/journal.spec.ts",
+    "process_exit": 2,
+    "featureId": null,
+    "changedPaths": [
+      "frontend/src/components/ChallengeJournalEditor.vue",
+      "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+      "frontend/src/stores/__tests__/sync.spec.ts",
+      "frontend/src/stores/journalDrafts.ts",
+      "frontend/src/stores/sync.ts",
+      "frontend/src/views/__tests__/journal.spec.ts"
+    ],
+    "matchedPaths": [],
+    "applicability": "NOT_APPLICABLE",
+    "status": "INCOMPLETE",
+    "complete": false,
+    "checks": [],
+    "escalationReasons": [
+      "NO_APPLICABLE_RECIPE"
+    ]
+  },
+  "escalation": {
+    "command": "check-escalation.mjs with canonical verification forwarded unchanged",
+    "process_exit": 1,
+    "risk": "HIGH",
+    "judgment_flags": [
+      "CONCURRENCY_STATE",
+      "SECURITY_AUTH"
+    ],
+    "decision": "REVIEW_REQUIRED",
+    "reasons": [
+      "HIGH_RISK_REVIEW",
+      "JUDGMENT_CONCURRENCY_STATE",
+      "JUDGMENT_SECURITY_AUTH",
+      "VERIFICATION_INCOMPLETE",
+      "VERIFICATION_NO_APPLICABLE_RECIPE"
+    ]
+  },
+  "progression_eligible": false,
+  "progression_reasons": [
+    "Targeted HIGH-risk review found one blocking same-epoch convergence callback race in frontend/src/stores/sync.ts.",
+    "Focused checks passed, but the review finding must be corrected and re-verified before Slice B can progress.",
+    "Canonical verification remains INCOMPLETE/NOT_APPLICABLE because NO_APPLICABLE_RECIPE; it is preserved verbatim and requires Done Gate disclosure."
+  ],
+  "verification_obligations": [
+    {
+      "canonical_verification_disposition": "NOT_APPLICABLE/INCOMPLETE",
+      "done_gate_disclosure_required": true,
+      "coverage_authority": "focused_checks",
+      "reason": "NO_APPLICABLE_RECIPE"
+    },
+    {
+      "obligation": "Resolve the blocking targeted-review finding and re-run Slice B verification.",
+      "status": "BLOCKED",
+      "finding_id": "same-epoch-convergence-callback-race"
+    }
+  ]
+}
