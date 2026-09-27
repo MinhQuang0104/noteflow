@@ -1,7 +1,7 @@
 ---
 story_id: "1.5"
 title: Giữ bản đang nhập và thử lưu lại sau gián đoạn
-status: backlog
+status: in-progress
 ---
 
 # Story 1.5: Giữ bản đang nhập và thử lưu lại sau gián đoạn
