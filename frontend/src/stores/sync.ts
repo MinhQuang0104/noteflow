@@ -38,6 +38,7 @@ export const useSyncStore = defineStore('sync', () => {
   let isStarted = false
   const requestGeneration = ref<number>(0)
   const latestCompletedRequestGeneration = ref<number>(0)
+  let ackConvergenceGeneration = 0
   let activeReconcileInfo: { promise: Promise<boolean>; authGen: number } | null = null
 
   function setQueryClient(qc: QueryClient): void {
@@ -310,6 +311,9 @@ export const useSyncStore = defineStore('sync', () => {
       return false
     }
 
+    const isLatestRevisionForEpoch = lastEpoch.value === null || epoch > lastEpoch.value ||
+      lastRevision.value === null || revision >= lastRevision.value
+
     if (lastEpoch.value === null || epoch === lastEpoch.value) {
       lastRevision.value = lastRevision.value !== null ? Math.max(lastRevision.value, revision) : revision
     } else {
@@ -325,14 +329,18 @@ export const useSyncStore = defineStore('sync', () => {
       }
     }
 
+    if (isLatestRevisionForEpoch) ackConvergenceGeneration++
+    const capturedAckConvergenceGeneration = ackConvergenceGeneration
+
     // The server ACK commits the journal independently from query convergence. Start
     // invalidation in the background so the editor can show Saved from this ACK.
-    // Re-fence both convergence callbacks after their await to avoid mutating a newer
-    // auth generation or data epoch.
+    // Re-fence both callbacks against newer ACKs, revisions, auth, and data epochs.
     const isCurrentAck = () =>
+      capturedAckConvergenceGeneration === ackConvergenceGeneration &&
       (originatingAuthGen === undefined || originatingAuthGen === auth.generation) &&
       auth.status === 'authenticated' &&
       (lastEpoch.value === null || epoch >= lastEpoch.value) &&
+      (lastRevision.value === null || revision >= lastRevision.value) &&
       (!account.context || account.context.data_epoch === epoch)
 
     void Promise.resolve()
@@ -507,6 +515,7 @@ export const useSyncStore = defineStore('sync', () => {
 
   function reset(): void {
     clearTimer()
+    ackConvergenceGeneration++
     syncStatus.value = 'idle'
     syncError.value = null
     lastSyncedAt.value = null
