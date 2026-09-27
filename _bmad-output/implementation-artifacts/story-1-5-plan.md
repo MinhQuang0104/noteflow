@@ -31,9 +31,17 @@ risk:
   flags: [security, concurrency, idempotency, shared_boundary]
 slices:
   - id: A
-    status: pending
+    status: checkpointed
     depends_on: []
     task_refs: [T-1, T-2]
+    baseline_commit: a81dc668720ab846d2d14986d93dfe140968deab
+    checkpoint_commit: 319e9bc83c43efb22e863d8c2886d8225be40d0b
+    subject_digest: sha256:66fbbb930ddd445d6973c54795f73cb436db493d2c06cd20a35d92c571e6de85
+    changed_paths_sha256: sha256:66fbbb930ddd445d6973c54795f73cb436db493d2c06cd20a35d92c571e6de85
+    receipt_refs:
+      implementation:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-5/A-implementation.json
+        digest: sha256:4c3ff7cb31a890f77d964d4b4e52f3ffbd2b963c7896545c5ba665d4afbbe5a8
   - id: B
     status: pending
     depends_on: [A]
@@ -49,6 +57,6 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: implement_slice
+  kind: verify_slice
   target: A
 ---

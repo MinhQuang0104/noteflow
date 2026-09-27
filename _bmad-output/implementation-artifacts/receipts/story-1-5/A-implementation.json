@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "story_id": "1.5",
+  "slice_id": "A",
+  "kind": "implementation",
+  "checkpoint_commit": "319e9bc83c43efb22e863d8c2886d8225be40d0b",
+  "baseline_commit": "a81dc668720ab846d2d14986d93dfe140968deab",
+  "subject_digest": "sha256:66fbbb930ddd445d6973c54795f73cb436db493d2c06cd20a35d92c571e6de85",
+  "created_from_head": "319e9bc83c43efb22e863d8c2886d8225be40d0b",
+  "changed_paths_sha256": "sha256:66fbbb930ddd445d6973c54795f73cb436db493d2c06cd20a35d92c571e6de85",
+  "commands": [
+    {
+      "command": "npm.cmd run test:unit -- --run src/stores/__tests__/journalDrafts.spec.ts",
+      "result": "PASS: 11 tests",
+      "exit_code": 0,
+      "tool": "npm/Vitest",
+      "environment": "Windows; Node.js v24.21.0; frontend dependencies via a worktree junction to main frontend/node_modules"
+    },
+    {
+      "command": "npm.cmd run type-check",
+      "result": "PASS: vue-tsc --build",
+      "exit_code": 0,
+      "tool": "npm/vue-tsc",
+      "environment": "Windows; Node.js v24.21.0; frontend dependencies via a worktree junction to main frontend/node_modules"
+    },
+    {
+      "command": ".\\node_modules\\.bin\\eslint.cmd src/stores/journalDrafts.ts src/stores/__tests__/journalDrafts.spec.ts --no-cache",
+      "result": "PASS: focused ESLint",
+      "exit_code": 0,
+      "tool": "ESLint",
+      "environment": "Windows; Node.js v24.21.0; frontend dependencies via a worktree junction to main frontend/node_modules"
+    }
+  ],
+  "changed_paths": [
+    "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+    "frontend/src/stores/journalDrafts.ts"
+  ],
+  "red_green": {
+    "applicable": true,
+    "red": {
+      "command": "npm.cmd run test:unit -- --run src/stores/__tests__/journalDrafts.spec.ts",
+      "exit_code": 1,
+      "result": "2 expected failures exposed late transport errors crossing auth-generation and data-epoch fences"
+    },
+    "green": {
+      "command": "npm.cmd run test:unit -- --run src/stores/__tests__/journalDrafts.spec.ts",
+      "exit_code": 0,
+      "result": "PASS: 11 tests after adding stale-context quarantine and generation guards"
+    }
+  }
+}
