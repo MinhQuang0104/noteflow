@@ -6,7 +6,7 @@ import { validateFinalizationReceipt } from './finalization-contract.mjs'
 
 const DIGEST = /^sha256:[0-9a-f]{64}$/
 const SHA = /^[0-9a-f]{40,64}$/
-const ACTIONS = new Set(['plan_slice', 'implement_slice', 'verify_slice', 'review_slice', 'resolve_blocker', 'reconcile_lifecycle', 'request_gate', 'finalize_story', 'complete_story'])
+const ACTIONS = new Set(['plan_slice', 'implement_slice', 'verify_slice', 'review_slice', 'resolve_blocker', 'reconcile_lifecycle', 'request_gate', 'finalize_story', 'complete_story', 'start_story'])
 const STATUSES = new Set(['pending', 'active', 'checkpointed', 'verified', 'reviewed', 'blocked'])
 const V3_KEYS = new Set(['run_id', 'runId', 'activeRunId', 'task_id', 'taskId', 'taskIds', 'workerId', 'lease', 'generation', 'humanGateRequired', 'dispatchId'])
 
@@ -165,7 +165,7 @@ export function validateSeparatedPlan(root, id, plan, result) {
     if (!terminalState) invalid('INVALID_TERMINAL_NEXT_ACTION')
   } else if (!plan.next_action || !ACTIONS.has(plan.next_action.kind)) invalid('UNKNOWN_ACTION')
   else {
-    const storyAction = ['reconcile_lifecycle', 'request_gate', 'finalize_story', 'complete_story'].includes(plan.next_action.kind)
+    const storyAction = ['reconcile_lifecycle', 'request_gate', 'finalize_story', 'complete_story', 'start_story'].includes(plan.next_action.kind)
     if (storyAction ? plan.next_action.target !== 'story' : plan.next_action.target !== plan.current_slice) invalid('INVALID_ACTION_TARGET')
     const references = [...(Array.isArray(plan.blockers) ? plan.blockers : []),
       ...(Array.isArray(plan.unresolved_questions) ? plan.unresolved_questions : [])].map(item => item?.id)

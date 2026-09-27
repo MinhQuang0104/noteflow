@@ -8,8 +8,10 @@ import { inspectFinalization } from './check-story-finalization.mjs'
 import { applyFinalization } from './finalize-story.mjs'
 import { explicitApprovalInput, inspectCompletion } from './check-story-completion.mjs'
 import { applyCompletion, recordHumanApproval } from './complete-story.mjs'
+import { inspectStart, applyStart } from './start-story.mjs'
 
 export const V4_AUTHORIZED_ACTIONS = new Set([
+  'start_story',
   'reconcile_lifecycle',
   'implement_slice',
   'verify_slice',
@@ -18,6 +20,7 @@ export const V4_AUTHORIZED_ACTIONS = new Set([
 ])
 
 const STORY_ACTIONS = new Set([
+  'start_story',
   'reconcile_lifecycle',
   'request_gate',
   'finalize_story',
@@ -25,6 +28,8 @@ const STORY_ACTIONS = new Set([
 ])
 const SHA = /^[0-9a-f]{40,64}$/
 const CODES = {
+  STARTED: 0,
+  RECOVERY_REQUIRED: 6,
   HUMAN_GATE_REQUIRED: 0,
   AUTHORIZED: 0,
   READY: 0,
@@ -52,7 +57,9 @@ function gitOutput(root, args, failure) {
 
 function pointerIdle(root) {
   try {
-    const pointer = JSON.parse(readFileSync(path.join(root, '.agent-state/active-run.json'), 'utf8'))
+    const canonical = /^worktree (.+)$/m.exec(gitOutput(root, ['worktree', 'list', '--porcelain'], 'CANONICAL_WORKTREE_UNAVAILABLE'))?.[1]?.trim()
+    if (!canonical) return false
+    const pointer = JSON.parse(readFileSync(path.join(canonical, '.agent-state/active-run.json'), 'utf8'))
     return pointer.schemaVersion === 1 &&
       pointer.status === 'IDLE' &&
       pointer.activeRunId === null &&
@@ -77,6 +84,10 @@ export function routeAction(input = {}) {
   if ((STORY_ACTIONS.has(action) && target !== 'story') ||
       (!STORY_ACTIONS.has(action) && typeof target !== 'string')) {
     return { status: 'INVALID', authorized: false, reasons: ['INVALID_ACTION_TARGET'] }
+  }
+  if (action === 'start_story') {
+    if (input.helperStatus !== 'READY') return { status: input.helperStatus ?? 'BLOCKED', authorized: false, reasons: ['START_HELPER_NOT_READY'] }
+    return { status: 'READY', authorized: true, action, stopCondition: 'STORY_STARTED', durableActionCount: 1 }
   }
   if (action === 'finalize_story') {
     if (target !== 'story') return invalidResult('INVALID_ACTION_TARGET')
@@ -159,6 +170,15 @@ export function runV4Story(root, storyId, options = {}) {
       executionStatus: plan.execution_status,
       humanApprovalPresent: plan.human_approval !== undefined && plan.human_approval !== null
     }
+    if (plan.next_action?.kind === 'start_story') {
+      if (!options.expectedHead) return { status: 'BLOCKED', authorized: false, reasons: ['EXPLICIT_EXPECTED_HEAD_REQUIRED'] }
+      const startOptions = { excludeUnrelated: options.excludeUnrelated ?? [] }
+      const helper = inspectStart(root, storyId, expectedHead, startOptions)
+      const route = routeAction({ ...decisionInput, helperStatus: helper.status })
+      if (!route.authorized) return { ...route, helper }
+      if (!options.startFingerprint) return { status: 'BLOCKED', authorized: false, reasons: ['START_PREVIEW_FINGERPRINT_REQUIRED'], helper }
+      return applyStart(root, storyId, expectedHead, options.startFingerprint, startOptions)
+    }
     if (plan.next_action?.kind === 'complete_story') {
       const helper = inspectCompletion(root, storyId, expectedHead)
       const route = routeAction({
@@ -185,7 +205,7 @@ export function runV4Story(root, storyId, options = {}) {
   }
 }
 
-export function authorizeAction(root, storyId, action, expectedHead) {
+export function authorizeAction(root, storyId, action, expectedHead, options = {}) {
   try {
     if (!pointerIdle(root)) return { status: 'BLOCKED', authorized: false, reasons: ['V3_POINTER_NOT_IDLE'] }
     const planPath = planRelative(storyId)
@@ -198,6 +218,10 @@ export function authorizeAction(root, storyId, action, expectedHead) {
       lifecycle: plan.lifecycle_snapshot,
       executionStatus: plan.execution_status,
       humanApprovalPresent: plan.human_approval !== undefined && plan.human_approval !== null
+    }
+    if (action === 'start_story') {
+      const helper = inspectStart(root, storyId, expectedHead, options)
+      return { ...routeAction({ ...input, helperStatus: helper.status }), helper }
     }
     if (action === 'finalize_story') {
       const helper = inspectFinalization(root, storyId, expectedHead)
@@ -233,20 +257,24 @@ function parseArguments(argv) {
   const [verb, storyId, ...tail] = argv
   if (!['run', 'execute'].includes(verb) || !/^\d+\.\d+$/.test(storyId ?? '')) return { error: 'USAGE: run <epic.story> [--expected-head <sha>] [--approve-exact-scope]' }
   let expectedHead
+  let startFingerprint
+  const excludeUnrelated = []
   let approveExactScope = false
   for (let index = 0; index < tail.length; index += 1) {
     if (tail[index] === '--approve-exact-scope') approveExactScope = true
     else if (tail[index] === '--expected-head' && SHA.test(tail[index + 1] ?? '')) { expectedHead = tail[++index] }
+    else if (tail[index] === '--start-fingerprint' && /^sha256:[0-9a-f]{64}$/.test(tail[index + 1] ?? '') && !startFingerprint) { startFingerprint = tail[++index] }
+    else if (tail[index] === '--exclude-unrelated' && tail[index + 1]) { excludeUnrelated.push(tail[++index]) }
     else return { error: 'USAGE: run <epic.story> [--expected-head <sha>] [--approve-exact-scope]' }
   }
-  return { storyId, expectedHead, approveExactScope }
+  return { storyId, expectedHead, approveExactScope, startFingerprint, excludeUnrelated }
 }
 
 function main() {
   const parsed = parseArguments(process.argv.slice(2))
   if (parsed.error) return invalidResult(parsed.error)
   const root = path.resolve(gitOutput(process.cwd(), ['rev-parse', '--show-toplevel'], 'GIT_ROOT_UNAVAILABLE'))
-  return runV4Story(root, parsed.storyId, { expectedHead: parsed.expectedHead, approveExactScope: parsed.approveExactScope })
+  return runV4Story(root, parsed.storyId, { expectedHead: parsed.expectedHead, approveExactScope: parsed.approveExactScope, startFingerprint: parsed.startFingerprint, excludeUnrelated: parsed.excludeUnrelated })
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {

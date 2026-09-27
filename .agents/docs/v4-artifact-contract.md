@@ -35,6 +35,28 @@ The Story owns Tasks/Subtasks; the Plan only maps them to implementation slices.
 
 Receipt kinds are `implementation`, `verification`, and `review`. A receipt is UTF-8 JSON with `schema_version: 1`, `story_id`, `slice_id`, `kind`, `checkpoint_commit`, `baseline_commit`, `subject_digest`, `created_from_head`, `changed_paths_sha256`, and nonempty `commands` records (`command`, integer `exit_code`, `tool`, `environment`). `created_from_head` equals the implementation checkpoint. The Plan slice supplies the expected checkpoint, baseline, subject digest, changed-path digest, and `receipt_refs.<kind>: {path, digest}`. A checkpointed slice requires its implementation receipt; verified and reviewed slices additionally require the corresponding receipts. Verification receipts may carry structured `focused_checks` for reuse. The validator checks identity and SHA-256 over compact JSON with object keys sorted recursively (array order preserved); indentation, key order, and Git line-ending conversion do not change the digest. The path must remain relative to the supplied root. Read-only Plan validation inspects receipt content for the current slice and its dependency chain; unrelated historical slices receive safe-path and existence checks. Slice helpers load relevant receipt detail when needed. Once a durable Plan references a receipt, its parsed content is immutable; a policy-authorized replacement must use a new digest/reference. Receipt detail never changes the Story digest.
 
+## Fresh Story start (V4 Lite)
+
+Schema v2 recognizes `next_action: {kind: start_story, target: story}`. Two optional start-only projections are required by the start gate:
+
+```yaml
+planning_approval:
+  decision: APPROVED
+  scope: planning
+  story_normative_digest: sha256:<current-story-digest>
+  approved_at: "<date of the human planning decision, ISO 8601>"
+readiness:
+  status: READY
+  story_normative_digest: sha256:<current-story-digest>
+  dependency_sprint_keys: [<exact-prerequisite-sprint-key>]
+```
+
+The Lead records the actual planning decision and maps all Story dependencies; an empty dependency list is valid only when the Story has none. These fields project Story intent and human planning approval, not completion authority. A digest mismatch blocks start. The helper checks the upstream Epic section digest and that every declared dependency is uniquely present and done in sprint status. Metadata remains valid after start because lifecycle status does not affect the Story normative digest. Schema-v1 behavior is unchanged.
+
+`start-story.mjs check <id> --expected-head <sha>` is read-only. `apply` additionally requires its `--fingerprint <sha256:digest>`. It accepts matching backlog/ready-for-dev Story/Plan/sprint projections with execution ready-for-dev, fresh pending slices and no execution/completion evidence; no blockers/questions; committed artifacts, complete inventory and canonical IDLE. Exact unrelated untracked files may be passed with repeated `--exclude-unrelated`; tracked changes and lifecycle artifact exclusions fail closed.
+
+An exclusive `v4-start-story.lock` in the Git common directory serializes start transactions. It is a transaction identity, never V3 ownership/runtime state. Successful apply commits only Story, Plan and sprint, sets all lifecycle projections and execution to in-progress, and persists `implement_slice:<current>`. It may activate the parent Epic in that same sprint file. It returns `STARTED` without executing the successor. Multi-file writes are recoverable, not filesystem-atomic as a set: interrupted writes/staging/commit retain the lock and partial state and return `RECOVERY_REQUIRED`; no automatic rollback or lock deletion occurs after mutation failure. A leftover lock blocks a new start pending explicit recovery. Existing reconciliation and Human Gate contracts are unchanged.
+
 ## Finalization readiness (V4 Lite)
 
 `.agents/scripts/check-story-finalization.mjs check <story-id> --expected-head <sha>` is a read-only pre-finalization gate. It validates the schema-v2 Story/Plan binding, reviewed slice set, receipt identities and freshness, task-to-slice coverage, canonical AC evidence, upstream Epic section, lifecycle projections, and the exact union of implementation paths from slice baseline/checkpoint diffs. It never edits the Story, Plan, sprint status, receipts, or Human Gate state, and it never enables `finalize_story` or infers approval.

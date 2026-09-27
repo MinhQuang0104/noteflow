@@ -10,6 +10,17 @@ import {
 import { runAction } from './v4-story-runner.mjs'
 import { createCompletionFixture } from './completion-fixture.mjs'
 
+test('fresh start routes only a ready preview and stops before implementing its successor', () => {
+  const input = { nextAction: { kind: 'start_story', target: 'story' }, helperStatus: 'READY' }
+  const result = routeAction(input)
+  assert.equal(result.authorized, true)
+  assert.equal(result.stopCondition, 'STORY_STARTED')
+  for (const status of ['BLOCKED', 'STALE', 'INVALID', undefined]) {
+    assert.equal(routeAction({ ...input, helperStatus: status }).authorized, false)
+  }
+  assert.equal(routeAction({ ...input, nextAction: { kind: 'start_story', target: 'A' } }).authorized, false)
+})
+
 test('finalize_story is authorized only for READY in-progress story state', () => {
   const result = routeAction({
     nextAction: { kind: 'finalize_story', target: 'story' },

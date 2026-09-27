@@ -2,6 +2,8 @@
 
 Root `AGENTS.md` decides authority. This file is routing guidance, not runtime state.
 
+Fresh schema-v2 Story entry additionally supports `start_story` under the Runner's explicit-start contract. Planning approval, readiness and dependencies must be durable; read-only `start-story.mjs check` precedes fingerprint-bound `apply`. Start synchronizes Story/Plan/sprint only, persists `implement_slice:<current>` and stops. It does not use lifecycle reconciliation to manufacture pre-existing execution evidence.
+
 For an explicit request to implement or continue Story `<epic>.<story>` **by V4 Lite**, and only after the canonical active-run pointer is clearly IDLE, route to `.agents/skills/v4-story-runner/SKILL.md`. This foundation permits read-only validation/readiness plus one bounded `reconcile_lifecycle`, `implement_slice`, `verify_slice`, `finalize_story`, or `complete_story` action per invocation under that skill's guards. `finalize_story` stops at `review`/Human Gate. `complete_story` is enabled only with a durable, exact-scope Human approval bound to the current review state; automatic approval, generic continuation authorization, automatic `review → done`, and automatic V3 fallback remain disabled. An explicit V3.1/Orca request follows V3.1. A Story request without a named lane retains the existing V3.1/`story-development` route. If a request names both lanes, stop for clarification.
 
 For explicitly human-authorized V4 Lite migration work, apply the L1 routing below only after the pointer is clearly IDLE.
