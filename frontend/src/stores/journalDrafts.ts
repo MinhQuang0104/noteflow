@@ -145,6 +145,65 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
     return record ? isDirtyRecord(record) : false
   }
 
+  function useServerSnapshot(challengeId: string, localDate: string): void {
+    const record = getDraft(challengeId, localDate)
+    const snapshot = record?.conflictSnapshot
+    if (
+      !record ||
+      !snapshot ||
+      snapshot.challenge_id !== challengeId ||
+      snapshot.local_date !== localDate ||
+      auth.status !== 'authenticated' ||
+      record.authGeneration !== auth.generation ||
+      account.status !== 'ready' ||
+      !account.context ||
+      record.dataEpoch !== account.context.data_epoch
+    ) return
+
+    const text = snapshot.journal ?? ''
+    record.text = text
+    record.acknowledgedText = text
+    record.acknowledgedSnapshot = snapshot
+    record.acknowledgedClientRevision = record.clientRevision
+    record.journalVersion = snapshot.journal_version
+    record.dataEpoch = account.context?.data_epoch ?? record.dataEpoch
+    record.authGeneration = auth.generation
+    record.pendingCommand = null
+    record.conflictSnapshot = null
+    record.error = null
+    record.status = 'saved'
+  }
+
+  function rebaseAfterEpochChange(challengeId: string, localDate: string, snapshot: JournalSnapshot): void {
+    if (
+      snapshot.challenge_id !== challengeId ||
+      snapshot.local_date !== localDate ||
+      auth.status !== 'authenticated' ||
+      !auth.owner ||
+      account.status !== 'ready' ||
+      !account.context
+    ) return
+    const record = getDraft(challengeId, localDate) ?? hydrate(snapshot)
+    if (!record) return
+
+    const wasDirty = isDirtyRecord(record)
+    record.acknowledgedText = snapshot.journal ?? ''
+    record.acknowledgedSnapshot = snapshot
+    record.journalVersion = snapshot.journal_version
+    record.dataEpoch = account.context?.data_epoch ?? record.dataEpoch
+    record.authGeneration = auth.generation
+    record.pendingCommand = null
+    record.conflictSnapshot = null
+    record.error = null
+    if (wasDirty) {
+      record.status = 'dirty'
+    } else {
+      record.text = snapshot.journal ?? ''
+      record.acknowledgedClientRevision = record.clientRevision
+      record.status = 'saved'
+    }
+  }
+
   function quarantine(record: JournalDraftRecord, message: string): void {
     record.status = 'quarantined'
     record.error = { kind: 'stale_context', message }
@@ -326,6 +385,22 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
       return
     }
 
+    const ackAccepted = await sync.recordMutationAck(result.account_revision, result.data_epoch, pending.authGeneration)
+    if (
+      !ackAccepted ||
+      drafts.value[key] !== record ||
+      auth.status !== 'authenticated' ||
+      auth.generation !== pending.authGeneration ||
+      auth.owner?.id !== pending.ownerId ||
+      !account.context ||
+      account.context.data_epoch !== pending.dataEpoch
+    ) {
+      if (drafts.value[key] === record) {
+        quarantine(record, 'Phản hồi lưu thuộc phiên hoặc chu kỳ dữ liệu đã đổi; bản nháp được giữ lại.')
+      }
+      return
+    }
+
     const acknowledgedText = result.journal.journal ?? ''
     record.acknowledgedClientRevision = pending.revision
     record.acknowledgedText = acknowledgedText
@@ -341,9 +416,6 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
     } else {
       record.status = 'dirty'
     }
-
-    // A committed journal ACK remains saved even if query convergence later reports an error.
-    void sync.recordMutationAck(result.account_revision, result.data_epoch, pending.authGeneration).catch(() => undefined)
   }
 
   function save(challengeId: string, localDate: string): Promise<void> {
@@ -392,5 +464,15 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
 
   auth.registerPrivateStateReset(reset)
 
-  return { drafts, getDraft, hydrate, setDraftText, isDirty, save, reset }
+  return {
+    drafts,
+    getDraft,
+    hydrate,
+    setDraftText,
+    isDirty,
+    useServerSnapshot,
+    rebaseAfterEpochChange,
+    save,
+    reset,
+  }
 })

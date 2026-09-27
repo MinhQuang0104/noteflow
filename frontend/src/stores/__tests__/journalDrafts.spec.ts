@@ -130,6 +130,23 @@ describe('useJournalDraftsStore', () => {
     })
   })
 
+  it('rebases only after an explicit epoch refresh while preserving dirty text', () => {
+    drafts.hydrate(snapshot('challenge-a', 'old server text', 3))
+    drafts.setDraftText('challenge-a', DATE, 'local draft')
+    account.context!.data_epoch = 5
+
+    drafts.rebaseAfterEpochChange('challenge-a', DATE, snapshot('challenge-a', 'restored server text', 7))
+
+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({
+      text: 'local draft',
+      acknowledgedText: 'restored server text',
+      journalVersion: 7,
+      dataEpoch: 5,
+      status: 'dirty',
+      pendingCommand: null,
+    })
+  })
+
   it('does not expose a draft to another owner', () => {
     drafts.hydrate(snapshot('challenge-a', 'owner 42', 1))
     drafts.setDraftText('challenge-a', DATE, 'private draft')

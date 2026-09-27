@@ -292,6 +292,8 @@ export const useSyncStore = defineStore('sync', () => {
     epoch: number,
     originatingAuthGen?: number,
   ): Promise<boolean> {
+    // `true` means this server ACK was accepted; query convergence continues
+    // independently and reports any failure through the global sync state.
     // S14-F02: Auth generation fencing for mutation ACKs
     if (originatingAuthGen !== undefined && originatingAuthGen !== auth.generation) {
       return false
@@ -302,6 +304,9 @@ export const useSyncStore = defineStore('sync', () => {
 
     // S14-F02: Epoch check to discard stale ACKs from previous epochs
     if (lastEpoch.value !== null && epoch < lastEpoch.value) {
+      return false
+    }
+    if (account.context && account.context.data_epoch !== epoch) {
       return false
     }
 
@@ -320,39 +325,36 @@ export const useSyncStore = defineStore('sync', () => {
       }
     }
 
-    // Await query invalidation / refetch with throwOnError: true (S14-F02, S14-F04)
-    try {
-      await currentQueryClient.invalidateQueries({ queryKey: ['challenges'] }, { throwOnError: true })
+    // The server ACK commits the journal independently from query convergence. Start
+    // invalidation in the background so the editor can show Saved from this ACK.
+    // Re-fence both convergence callbacks after their await to avoid mutating a newer
+    // auth generation or data epoch.
+    const isCurrentAck = () =>
+      (originatingAuthGen === undefined || originatingAuthGen === auth.generation) &&
+      auth.status === 'authenticated' &&
+      (lastEpoch.value === null || epoch >= lastEpoch.value) &&
+      (!account.context || account.context.data_epoch === epoch)
 
-      // S14-F02: Re-fence originating auth generation/status and epoch AFTER awaited invalidation!
-      if (
-        (originatingAuthGen !== undefined && originatingAuthGen !== auth.generation) ||
-        auth.status !== 'authenticated' ||
-        (lastEpoch.value !== null && epoch < lastEpoch.value)
-      ) {
-        return false
-      }
+    void Promise.resolve()
+      .then(() => currentQueryClient.invalidateQueries({ queryKey: ['challenges'] }, { throwOnError: true }))
+      .then(
+        () => {
+          if (!isCurrentAck()) return
+          consecutiveFailures.value = 0
+          syncError.value = null
+          pendingConvergence.value = false
+          syncStatus.value = 'synced'
+        },
+        () => {
+          if (!isCurrentAck()) return
+          pendingConvergence.value = true
+          consecutiveFailures.value++
+          syncError.value = 'Không thể đồng bộ danh sách challenge mới nhất. Đang thử lại...'
+          syncStatus.value = 'error'
+        },
+      )
 
-      consecutiveFailures.value = 0
-      syncError.value = null
-      pendingConvergence.value = false
-      syncStatus.value = 'synced'
-      return true
-    } catch {
-      // S14-F02: If auth changed while invalidation failed, do not mutate new session state
-      if (
-        (originatingAuthGen !== undefined && originatingAuthGen !== auth.generation) ||
-        auth.status !== 'authenticated'
-      ) {
-        return false
-      }
-
-      pendingConvergence.value = true
-      consecutiveFailures.value++
-      syncError.value = 'Không thể đồng bộ danh sách challenge mới nhất. Đang thử lại...'
-      syncStatus.value = 'error'
-      return false
-    }
+    return true
   }
 
   async function reconcileBeforeWrite(): Promise<{ allowed: boolean; reason?: string }> {

@@ -1,19 +1,14 @@
 <script setup lang="ts">
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
+import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import { computed, ref, watch } from 'vue'
 
 import {
-  ChallengeApiError,
-  generateCommandId,
   getChallengeJournal,
-  saveChallengeJournal,
-  type JournalProblemDetails,
   type JournalReadResult,
-  type JournalSnapshot,
 } from '../api/challenges'
 import { useAccountStore } from '../stores/account'
 import { useAuthStore } from '../stores/auth'
-import { useSyncStore } from '../stores/sync'
+import { useJournalDraftsStore } from '../stores/journalDrafts'
 
 const props = defineProps<{
   challengeId: string
@@ -22,7 +17,7 @@ const props = defineProps<{
 
 const account = useAccountStore()
 const auth = useAuthStore()
-const sync = useSyncStore()
+const journalDrafts = useJournalDraftsStore()
 const queryClient = useQueryClient()
 
 const journalQueryKey = computed(() => ['challenge-journal', props.challengeId, props.localDate] as const)
@@ -40,75 +35,60 @@ const {
   retry: false,
 })
 
-const draft = ref('')
-const savedText = ref('')
-const journalVersion = ref(0)
-const loadedResourceKey = ref<string | null>(null)
-const conflictSnapshot = ref<JournalSnapshot | null>(null)
-const validationError = ref<string | null>(null)
-const saveError = ref<string | null>(null)
-const saveStatus = ref<string | null>(null)
+const record = computed(() => journalDrafts.getDraft(props.challengeId, props.localDate))
+const draft = computed({
+  get: () => record.value?.text ?? '',
+  set: (text: string) => {
+    localValidationError.value = null
+    journalDrafts.setDraftText(props.challengeId, props.localDate, text)
+  },
+})
+const savedText = computed(() => record.value?.acknowledgedText ?? '')
+const conflictSnapshot = computed(() => record.value?.conflictSnapshot ?? null)
+const isDirty = computed(() => journalDrafts.isDirty(props.challengeId, props.localDate))
+const isSaving = computed(() => record.value?.status === 'saving')
+const localValidationError = ref<string | null>(null)
+const localActionError = ref<string | null>(null)
+const showSaveStatus = ref(false)
 const epochChangeBlocked = ref(false)
-
-const activeCommandId = ref<string | null>(null)
-const lastCanonicalPayload = ref<string | null>(null)
-const activeAuthGeneration = ref<number | undefined>(undefined)
-
-const isDirty = computed(() => draft.value !== savedText.value)
 const isMutationBlocked = computed(() => {
   if (account.status !== 'ready' || !account.context) return true
   return account.context.write_state !== 'open'
 })
-const isSaving = computed(() => saveMutation.isPending.value)
-
-watch(
-  journalData,
-  (result) => {
-    if (!result) return
-
-    const snapshot = result.journal
-    const firstLoad = loadedResourceKey.value !== journalResourceKey.value
-    const shouldReplaceDraft = firstLoad || !isDirty.value
-
-    if (shouldReplaceDraft) {
-      draft.value = snapshot.journal ?? ''
-    }
-    savedText.value = snapshot.journal ?? ''
-    journalVersion.value = snapshot.journal_version
-    loadedResourceKey.value = journalResourceKey.value
-
-    if (firstLoad) {
-      conflictSnapshot.value = null
-      validationError.value = null
-      saveError.value = null
-      saveStatus.value = null
-    }
-  },
-  { immediate: true },
+const validationError = computed(
+  () => localValidationError.value ?? (record.value?.error?.kind === 'validation' ? record.value.error.message : null),
 )
+const saveError = computed(() => localActionError.value ?? (
+  record.value?.error && record.value.error.kind !== 'validation' && record.value.error.kind !== 'conflict'
+    ? record.value.error.message
+    : null
+))
+const isRetryable = computed(() =>
+  record.value?.error?.kind === 'network' || record.value?.error?.kind === 'preflight',
+)
+const saveStatus = computed(() => {
+  if (!showSaveStatus.value || !record.value) return null
+  if (record.value.status === 'saving') return 'Đang lưu…'
+  if (record.value.status === 'saved') return 'Đã lưu nhật ký.'
+  if (record.value.status === 'dirty') return 'Chưa lưu thay đổi.'
+  return null
+})
 
-watch(journalResourceKey, () => {
-  loadedResourceKey.value = null
-  draft.value = ''
-  savedText.value = ''
-  journalVersion.value = 0
-  conflictSnapshot.value = null
-  validationError.value = null
-  saveError.value = null
-  saveStatus.value = null
+watch(journalData, (result) => {
+  if (result) journalDrafts.hydrate(result.journal)
+}, { immediate: true })
+
+watch([journalResourceKey, () => auth.generation], () => {
+  localValidationError.value = null
+  localActionError.value = null
+  showSaveStatus.value = false
   epochChangeBlocked.value = false
-  activeCommandId.value = null
-  lastCanonicalPayload.value = null
 })
 
 watch(
   () => account.context?.data_epoch,
   (newEpoch, oldEpoch) => {
     if (oldEpoch === undefined || newEpoch === oldEpoch) return
-
-    activeCommandId.value = null
-    lastCanonicalPayload.value = null
-    conflictSnapshot.value = null
 
     if (isDirty.value) {
       epochChangeBlocked.value = true
@@ -117,25 +97,28 @@ watch(
 )
 
 async function rebaseOnEpochChange(): Promise<void> {
+  const challengeId = props.challengeId
+  const localDate = props.localDate
   const draftWasDirty = isDirty.value
   const result = await refetch()
 
-  if (result.data) {
+  if (
+    result.data?.journal.challenge_id === challengeId &&
+    result.data.journal.local_date === localDate &&
+    props.challengeId === challengeId &&
+    props.localDate === localDate
+  ) {
     const snapshot = result.data.journal
-    savedText.value = snapshot.journal ?? ''
-    journalVersion.value = snapshot.journal_version
-    if (!draftWasDirty) {
-      draft.value = snapshot.journal ?? ''
-    }
+    journalDrafts.rebaseAfterEpochChange(challengeId, localDate, snapshot)
+    queryClient.setQueryData<JournalReadResult>(['challenge-journal', challengeId, localDate], { journal: snapshot })
     epochChangeBlocked.value = false
-    conflictSnapshot.value = null
-    validationError.value = null
-    saveError.value = null
-    saveStatus.value = null
+    localValidationError.value = null
+    localActionError.value = null
+    showSaveStatus.value = !draftWasDirty
     return
   }
 
-  saveError.value = 'Không thể tải dữ liệu nhật ký mới nhất. Vui lòng thử lại.'
+  localActionError.value = 'Không thể tải dữ liệu nhật ký mới nhất. Vui lòng thử lại.'
 }
 
 async function retryJournalLoad(): Promise<void> {
@@ -146,121 +129,38 @@ function useServerSnapshot(): void {
   const snapshot = conflictSnapshot.value
   if (!snapshot) return
 
-  draft.value = snapshot.journal ?? ''
-  savedText.value = snapshot.journal ?? ''
-  journalVersion.value = snapshot.journal_version
+  journalDrafts.useServerSnapshot(props.challengeId, props.localDate)
   queryClient.setQueryData<JournalReadResult>(journalQueryKey.value, { journal: snapshot })
-  conflictSnapshot.value = null
-  validationError.value = null
-  saveError.value = null
-  saveStatus.value = 'Đã tải bản nhật ký đang lưu trên máy chủ.'
-  activeCommandId.value = null
-  lastCanonicalPayload.value = null
+  localValidationError.value = null
+  localActionError.value = null
+  showSaveStatus.value = true
 }
 
-const saveMutation = useMutation({
-  mutationFn: (payload: Parameters<typeof saveChallengeJournal>[2]) =>
-    saveChallengeJournal(props.challengeId, props.localDate, payload),
-})
-
 async function saveJournal(): Promise<void> {
-  validationError.value = null
-  saveError.value = null
-  saveStatus.value = null
+  localValidationError.value = null
+  localActionError.value = null
+  showSaveStatus.value = true
 
   if (epochChangeBlocked.value) {
-    saveError.value = 'Dữ liệu máy chủ đã chuyển chu kỳ mới (epoch). Vui lòng bấm Tải lại dữ liệu mới nhất trước khi tiếp tục.'
+    localActionError.value = 'Dữ liệu máy chủ đã chuyển chu kỳ mới (epoch). Vui lòng bấm Tải lại dữ liệu mới nhất trước khi tiếp tục.'
     return
   }
 
   if (!draft.value.trim()) {
-    validationError.value = 'Nhật ký không được để trống.'
+    localValidationError.value = 'Nhật ký không được để trống.'
     return
   }
 
-  const writeCheck = await sync.reconcileBeforeWrite()
-  if (!writeCheck.allowed) {
-    saveError.value = writeCheck.reason ?? 'Chưa thể lưu nhật ký. Vui lòng thử lại sau.'
-    return
-  }
+  const challengeId = props.challengeId
+  const localDate = props.localDate
+  const beforeSnapshot = journalDrafts.getDraft(challengeId, localDate)?.acknowledgedSnapshot
+  await journalDrafts.save(challengeId, localDate)
 
-  if (account.status !== 'ready' || !account.context || account.context.write_state !== 'open') {
-    saveError.value = 'Chưa thể lưu nhật ký: ngữ cảnh tài khoản chưa sẵn sàng.'
-    return
-  }
-
-  const canonicalPayload = JSON.stringify({
-    challenge_id: props.challengeId,
-    local_date: props.localDate,
-    base_version: journalVersion.value,
-    data_epoch: account.context.data_epoch,
-    journal: draft.value,
-  })
-
-  let commandId = activeCommandId.value
-  if (!commandId || lastCanonicalPayload.value !== canonicalPayload) {
-    commandId = generateCommandId()
-    activeCommandId.value = commandId
-    lastCanonicalPayload.value = canonicalPayload
-  }
-
-  activeAuthGeneration.value = auth.generation
-
-  try {
-    const result = await saveMutation.mutateAsync({
-      command_id: commandId,
-      data_epoch: account.context.data_epoch,
-      base_version: journalVersion.value,
-      journal: draft.value,
+  const updated = journalDrafts.getDraft(challengeId, localDate)
+  if (updated && updated.acknowledgedSnapshot !== beforeSnapshot) {
+    queryClient.setQueryData<JournalReadResult>(['challenge-journal', challengeId, localDate], {
+      journal: updated.acknowledgedSnapshot,
     })
-
-    const accepted = await sync.recordMutationAck(
-      result.account_revision,
-      result.data_epoch,
-      activeAuthGeneration.value,
-    )
-    if (!accepted) return
-
-    if (
-      auth.status !== 'authenticated' ||
-      (activeAuthGeneration.value !== undefined && auth.generation !== activeAuthGeneration.value)
-    ) {
-      return
-    }
-
-    const snapshot = result.journal
-    queryClient.setQueryData<JournalReadResult>(journalQueryKey.value, { journal: snapshot })
-    draft.value = snapshot.journal ?? ''
-    savedText.value = snapshot.journal ?? ''
-    journalVersion.value = snapshot.journal_version
-    conflictSnapshot.value = null
-    activeCommandId.value = null
-    lastCanonicalPayload.value = null
-    saveStatus.value = 'Đã lưu nhật ký.'
-  } catch (error) {
-    if (error instanceof ChallengeApiError) {
-      const problem = error.problem as JournalProblemDetails | undefined
-
-      if (error.status === 409 && problem?.code === 'version_conflict') {
-        conflictSnapshot.value = problem.current_snapshot ?? null
-        saveError.value = conflictSnapshot.value
-          ? null
-          : 'Nhật ký đã được cập nhật trên thiết bị khác. Bản nháp của bạn vẫn được giữ nguyên.'
-        return
-      }
-
-      if (error.status === 422) {
-        validationError.value = error.validation?.errors?.journal?.[0] ?? 'Nhật ký không hợp lệ.'
-        return
-      }
-
-      if (error.status === 401 || error.status === 403) {
-        saveError.value = 'Phiên làm việc không còn hợp lệ. Vui lòng đăng nhập lại.'
-        return
-      }
-    }
-
-    saveError.value = 'Không thể lưu nhật ký. Vui lòng thử lại.'
   }
 }
 </script>
@@ -285,11 +185,11 @@ async function saveJournal(): Promise<void> {
       Phiên làm việc chưa được xác thực. Vui lòng đăng nhập lại.
     </p>
 
-    <p v-else-if="isLoading" class="mt-4 text-sm text-slate-500" role="status">
+    <p v-else-if="isLoading && !record" class="mt-4 text-sm text-slate-500" role="status">
       Đang tải nhật ký…
     </p>
 
-    <div v-else-if="isError && !journalData" class="mt-4 space-y-2 text-sm text-rose-800" role="alert">
+    <div v-else-if="isError && !journalData && !record" class="mt-4 space-y-2 text-sm text-rose-800" role="alert">
       <p>Không thể tải nhật ký cho ngày này.</p>
       <button
         id="journal-load-retry"
@@ -301,7 +201,7 @@ async function saveJournal(): Promise<void> {
       </button>
     </div>
 
-    <form v-else-if="journalData" id="journal-form" class="mt-4 space-y-4" novalidate @submit.prevent="saveJournal">
+    <form v-else-if="journalData || record" id="journal-form" class="mt-4 space-y-4" novalidate @submit.prevent="saveJournal">
       <div
         v-if="isError"
         role="alert"
@@ -346,6 +246,7 @@ async function saveJournal(): Promise<void> {
           id="journal-use-server-btn"
           type="button"
           class="mt-3 rounded-md border border-amber-400 bg-white px-3 py-1.5 text-xs font-semibold hover:bg-amber-100"
+          :disabled="epochChangeBlocked"
           @click="useServerSnapshot"
         >
           Dùng bản lưu trên máy chủ
@@ -362,7 +263,6 @@ async function saveJournal(): Promise<void> {
           v-model="draft"
           :aria-describedby="validationError ? 'journal-error' : undefined"
           :aria-invalid="validationError ? 'true' : 'false'"
-          :disabled="isSaving"
           :aria-label="`Nhật ký ngày ${localDate}`"
           rows="6"
           class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-50"
@@ -391,7 +291,7 @@ async function saveJournal(): Promise<void> {
           :aria-busy="isSaving ? 'true' : 'false'"
           class="inline-flex items-center rounded-lg bg-indigo-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-indigo-600"
         >
-          {{ isSaving ? 'Đang lưu…' : 'Lưu nhật ký' }}
+          {{ isSaving ? 'Đang lưu…' : isRetryable ? 'Thử lại' : 'Lưu nhật ký' }}
         </button>
       </div>
     </form>

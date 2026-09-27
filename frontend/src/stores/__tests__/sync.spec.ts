@@ -785,7 +785,7 @@ describe('useSyncStore', () => {
     sync.stop()
   })
 
-  it('S14-F02 mutation ACK is fenced again after awaited invalidation', async () => {
+  it('S14-F02 mutation ACK convergence callback is fenced after invalidation', async () => {
     const sync = useSyncStore()
     const auth = useAuthStore()
     const account = useAccountStore()
@@ -824,9 +824,76 @@ describe('useSyncStore', () => {
 
     finishInvalidation()
 
-    expect(await staleAck).toBe(false)
+    expect(await staleAck).toBe(true)
     expect(sync.syncStatus).not.toBe('synced')
     expect(account.context).toBeNull()
+    sync.stop()
+  })
+
+  it('keeps the committed account revision when challenge convergence fails after a mutation ACK', async () => {
+    const auth = useAuthStore()
+    const account = useAccountStore()
+    auth.generation = 1
+    auth.status = 'authenticated'
+    const sync = useSyncStore()
+    sync.setQueryClient(queryClient)
+    account.context = {
+      timezone: 'Asia/Ho_Chi_Minh',
+      account_date: '2026-09-19',
+      week: { start_date: '2026-09-15', end_date: '2026-09-21' },
+      account_revision: 1,
+      data_epoch: 1,
+      write_state: 'open',
+    }
+    account.status = 'ready'
+    sync.lastEpoch = 1
+    sync.lastRevision = 1
+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries').mockRejectedValue(new Error('challenge refetch failed'))
+
+    const accepted = await sync.recordMutationAck(2, 1, 1)
+
+    expect(accepted).toBe(true)
+    await vi.waitFor(() => expect(sync.syncStatus).toBe('error'))
+    expect(invalidate).toHaveBeenCalledOnce()
+    expect(account.context?.account_revision).toBe(2)
+    expect(sync.syncStatus).toBe('error')
+    expect(sync.syncError).toContain('đồng bộ danh sách challenge')
+    expect(sync.pendingConvergence).toBe(true)
+    sync.stop()
+  })
+
+  it('suppresses a late convergence error after the account epoch changes', async () => {
+    const auth = useAuthStore()
+    const account = useAccountStore()
+    auth.generation = 1
+    auth.status = 'authenticated'
+    const sync = useSyncStore()
+    sync.setQueryClient(queryClient)
+    account.context = {
+      timezone: 'Asia/Ho_Chi_Minh',
+      account_date: '2026-09-19',
+      week: { start_date: '2026-09-15', end_date: '2026-09-21' },
+      account_revision: 1,
+      data_epoch: 1,
+      write_state: 'open',
+    }
+    account.status = 'ready'
+    sync.lastEpoch = 1
+
+    let rejectInvalidation!: (error: Error) => void
+    vi.spyOn(queryClient, 'invalidateQueries').mockReturnValue(new Promise<void>((_, reject) => {
+      rejectInvalidation = reject
+    }))
+    expect(await sync.recordMutationAck(2, 1, 1)).toBe(true)
+    await Promise.resolve()
+
+    account.context = { ...account.context!, data_epoch: 2 }
+    rejectInvalidation(new Error('old epoch convergence failed'))
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(sync.syncStatus).not.toBe('error')
+    expect(sync.syncError).toBeNull()
     sync.stop()
   })
 })
