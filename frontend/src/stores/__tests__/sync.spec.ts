@@ -38,6 +38,41 @@ describe('useSyncStore', () => {
     vi.restoreAllMocks()
   })
 
+  function prepareAuthenticatedSync() {
+    const auth = useAuthStore()
+    const account = useAccountStore()
+    const sync = useSyncStore()
+    sync.setQueryClient(queryClient)
+    auth.generation = 1
+    auth.status = 'authenticated'
+    account.context = {
+      timezone: 'Asia/Ho_Chi_Minh',
+      account_date: '2026-09-19',
+      week: { start_date: '2026-09-15', end_date: '2026-09-21' },
+      account_revision: 1,
+      data_epoch: 1,
+      write_state: 'open',
+    }
+    account.status = 'ready'
+    sync.lastEpoch = 1
+    sync.lastRevision = 1
+    return sync
+  }
+
+  function createDeferredInvalidation() {
+    let resolve!: () => void
+    let reject!: (error: Error) => void
+    const promise = new Promise<void>((resolvePromise, rejectPromise) => {
+      resolve = resolvePromise
+      reject = rejectPromise
+    })
+    return { promise, resolve, reject }
+  }
+
+  async function flushPendingConvergence() {
+    for (let i = 0; i < 5; i++) await Promise.resolve()
+  }
+
   it('initializes in idle state and starts polling when authenticated', async () => {
     const auth = useAuthStore()
     const sync = useSyncStore()
@@ -859,6 +894,96 @@ describe('useSyncStore', () => {
     expect(sync.syncStatus).toBe('error')
     expect(sync.syncError).toContain('đồng bộ danh sách challenge')
     expect(sync.pendingConvergence).toBe(true)
+    sync.stop()
+  })
+
+  it('keeps a newer same-epoch failure when an older ACK later converges successfully', async () => {
+    const sync = prepareAuthenticatedSync()
+    const olderInvalidation = createDeferredInvalidation()
+    const newerInvalidation = createDeferredInvalidation()
+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries')
+      .mockImplementationOnce(() => olderInvalidation.promise)
+      .mockImplementationOnce(() => newerInvalidation.promise)
+
+    expect(await sync.recordMutationAck(2, 1, 1)).toBe(true)
+    await flushPendingConvergence()
+    expect(invalidate).toHaveBeenCalledTimes(1)
+    expect(await sync.recordMutationAck(3, 1, 1)).toBe(true)
+    await flushPendingConvergence()
+    expect(invalidate).toHaveBeenCalledTimes(2)
+
+    newerInvalidation.reject(new Error('newer challenge refetch failed'))
+    await vi.waitFor(() => expect(sync.syncStatus).toBe('error'))
+    expect(sync.syncError).toContain('đồng bộ danh sách challenge')
+    expect(sync.pendingConvergence).toBe(true)
+    expect(sync.consecutiveFailures).toBe(1)
+
+    olderInvalidation.resolve()
+    await flushPendingConvergence()
+
+    expect(sync.syncStatus).toBe('error')
+    expect(sync.syncError).toContain('đồng bộ danh sách challenge')
+    expect(sync.pendingConvergence).toBe(true)
+    expect(sync.consecutiveFailures).toBe(1)
+    sync.stop()
+  })
+
+  it('keeps a newer same-epoch success when an older ACK later fails', async () => {
+    const sync = prepareAuthenticatedSync()
+    const olderInvalidation = createDeferredInvalidation()
+    const newerInvalidation = createDeferredInvalidation()
+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries')
+      .mockImplementationOnce(() => olderInvalidation.promise)
+      .mockImplementationOnce(() => newerInvalidation.promise)
+
+    expect(await sync.recordMutationAck(2, 1, 1)).toBe(true)
+    await flushPendingConvergence()
+    expect(invalidate).toHaveBeenCalledTimes(1)
+    expect(await sync.recordMutationAck(3, 1, 1)).toBe(true)
+    await flushPendingConvergence()
+    expect(invalidate).toHaveBeenCalledTimes(2)
+
+    newerInvalidation.resolve()
+    await vi.waitFor(() => expect(sync.syncStatus).toBe('synced'))
+    expect(sync.syncError).toBeNull()
+    expect(sync.pendingConvergence).toBe(false)
+    expect(sync.consecutiveFailures).toBe(0)
+
+    olderInvalidation.reject(new Error('older challenge refetch failed'))
+    await flushPendingConvergence()
+
+    expect(sync.syncStatus).toBe('synced')
+    expect(sync.syncError).toBeNull()
+    expect(sync.pendingConvergence).toBe(false)
+    expect(sync.consecutiveFailures).toBe(0)
+    sync.stop()
+  })
+
+  it('ignores a lower same-epoch ACK that arrives after a newer revision has converged', async () => {
+    const sync = prepareAuthenticatedSync()
+    const newerInvalidation = createDeferredInvalidation()
+    const olderInvalidation = createDeferredInvalidation()
+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries')
+      .mockImplementationOnce(() => newerInvalidation.promise)
+      .mockImplementationOnce(() => olderInvalidation.promise)
+
+    expect(await sync.recordMutationAck(3, 1, 1)).toBe(true)
+    await flushPendingConvergence()
+    expect(invalidate).toHaveBeenCalledTimes(1)
+    newerInvalidation.resolve()
+    await vi.waitFor(() => expect(sync.syncStatus).toBe('synced'))
+
+    expect(await sync.recordMutationAck(2, 1, 1)).toBe(true)
+    await flushPendingConvergence()
+    expect(invalidate).toHaveBeenCalledTimes(2)
+    olderInvalidation.reject(new Error('older challenge refetch failed'))
+    await flushPendingConvergence()
+
+    expect(sync.lastRevision).toBe(3)
+    expect(sync.syncStatus).toBe('synced')
+    expect(sync.syncError).toBeNull()
+    expect(sync.pendingConvergence).toBe(false)
+    expect(sync.consecutiveFailures).toBe(0)
     sync.stop()
   })
 
