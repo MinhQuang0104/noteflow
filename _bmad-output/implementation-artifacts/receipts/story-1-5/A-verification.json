@@ -1,0 +1,183 @@
+{
+  "schema_version": 1,
+  "story_id": "1.5",
+  "slice_id": "A",
+  "kind": "verification",
+  "checkpoint_commit": "319e9bc83c43efb22e863d8c2886d8225be40d0b",
+  "baseline_commit": "a81dc668720ab846d2d14986d93dfe140968deab",
+  "subject_digest": "sha256:66fbbb930ddd445d6973c54795f73cb436db493d2c06cd20a35d92c571e6de85",
+  "created_from_head": "319e9bc83c43efb22e863d8c2886d8225be40d0b",
+  "changed_paths_sha256": "sha256:66fbbb930ddd445d6973c54795f73cb436db493d2c06cd20a35d92c571e6de85",
+  "commands": [
+    {
+      "command": "npm.cmd run test:unit -- --run src/stores/__tests__/journalDrafts.spec.ts",
+      "result": "PASS",
+      "exit_code": 0,
+      "tool": "npm/Vitest 5.0.1",
+      "environment": "Windows (win32); Node.js v24.21.0; frontend dependencies via a linked node_modules junction"
+    },
+    {
+      "command": "npm.cmd run type-check",
+      "result": "PASS",
+      "exit_code": 0,
+      "tool": "npm/vue-tsc",
+      "environment": "Windows (win32); Node.js v24.21.0; frontend dependencies via a linked node_modules junction"
+    },
+    {
+      "command": ".\\node_modules\\.bin\\eslint.cmd src/stores/journalDrafts.ts src/stores/__tests__/journalDrafts.spec.ts --no-cache",
+      "result": "PASS",
+      "exit_code": 0,
+      "tool": "ESLint",
+      "environment": "Windows (win32); Node.js v24.21.0; frontend dependencies via a linked node_modules junction"
+    },
+    {
+      "command": "node .agents/scripts/check-verification.mjs check auto --changed frontend/src/stores/__tests__/journalDrafts.spec.ts --changed frontend/src/stores/journalDrafts.ts",
+      "result": "INCOMPLETE: NOT_APPLICABLE; no canonical recipe covers either changed path",
+      "exit_code": 2,
+      "tool": "check-verification.mjs",
+      "environment": "Windows (win32); Node.js v24.21.0"
+    }
+  ],
+  "evidence_status": "fresh",
+  "subject": {
+    "mode": "checkpoint",
+    "baseline_commit": "a81dc668720ab846d2d14986d93dfe140968deab",
+    "checkpoint_commit": "319e9bc83c43efb22e863d8c2886d8225be40d0b",
+    "verified_from_head": "d6aa1656db15f63c8c272a4070347295532d8248",
+    "changed_paths_sha256": "sha256:66fbbb930ddd445d6973c54795f73cb436db493d2c06cd20a35d92c571e6de85",
+    "checkpoint_freshness": "FRESH",
+    "source_freshness": "FRESH",
+    "reference_freshness": "FILE_LEVEL_FRESH",
+    "post_checkpoint_drift": [],
+    "working_drift": []
+  },
+  "changed_paths": [
+    "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+    "frontend/src/stores/journalDrafts.ts"
+  ],
+  "focused_checks": [
+    {
+      "id": "journal-drafts-unit",
+      "kind": "behavioral",
+      "command": "npm.cmd run test:unit -- --run src/stores/__tests__/journalDrafts.spec.ts",
+      "tool": "npm/Vitest 5.0.1",
+      "summary": "1 test file passed; 11 tests passed",
+      "result": "PASS",
+      "exit_code": 0,
+      "subject_digest": "sha256:66fbbb930ddd445d6973c54795f73cb436db493d2c06cd20a35d92c571e6de85",
+      "subject": {
+        "commit": "319e9bc83c43efb22e863d8c2886d8225be40d0b",
+        "tree": "8c91d671c5d6a294ce5f1206e33a63d57adf4a9e"
+      },
+      "changed_paths_sha256": "sha256:66fbbb930ddd445d6973c54795f73cb436db493d2c06cd20a35d92c571e6de85",
+      "command_digest": "sha256:3f8f3688f506234475fe36c60072c0b549c673a4d02f47abbd366ec1f28d8faf",
+      "toolchain_digest": "sha256:93597db795ab5b0250630d0ee0722a49ca809aba2437d294c773152e48132f7b",
+      "environment_sensitive": true,
+      "environment": {
+        "platform": "Windows (win32)",
+        "node": "v24.21.0",
+        "frontend_dependencies": "frontend/node_modules junction to the main workspace frontend/node_modules",
+        "lockfile_sha256": "1829336936c40e0ef070a8a18628ecb2183f0a27f0e2e5c922b004a20fa8e9e7"
+      }
+    },
+    {
+      "id": "frontend-type-check",
+      "kind": "type-check",
+      "command": "npm.cmd run type-check",
+      "tool": "npm/vue-tsc",
+      "summary": "vue-tsc --build passed",
+      "result": "PASS",
+      "exit_code": 0,
+      "subject_digest": "sha256:66fbbb930ddd445d6973c54795f73cb436db493d2c06cd20a35d92c571e6de85",
+      "subject": {
+        "commit": "319e9bc83c43efb22e863d8c2886d8225be40d0b",
+        "tree": "8c91d671c5d6a294ce5f1206e33a63d57adf4a9e"
+      },
+      "changed_paths_sha256": "sha256:66fbbb930ddd445d6973c54795f73cb436db493d2c06cd20a35d92c571e6de85",
+      "command_digest": "sha256:6aafdc8cb41da4fa62fc11c242268d95ff82abe571d14ac26f2cc5e3f61053ee",
+      "toolchain_digest": "sha256:93597db795ab5b0250630d0ee0722a49ca809aba2437d294c773152e48132f7b",
+      "environment_sensitive": true,
+      "environment": {
+        "platform": "Windows (win32)",
+        "node": "v24.21.0",
+        "frontend_dependencies": "frontend/node_modules junction to the main workspace frontend/node_modules",
+        "lockfile_sha256": "1829336936c40e0ef070a8a18628ecb2183f0a27f0e2e5c922b004a20fa8e9e7"
+      }
+    },
+    {
+      "id": "journal-drafts-eslint",
+      "kind": "lint",
+      "command": ".\\node_modules\\.bin\\eslint.cmd src/stores/journalDrafts.ts src/stores/__tests__/journalDrafts.spec.ts --no-cache",
+      "tool": "ESLint",
+      "summary": "Passed with exit code 0; no diagnostics emitted",
+      "result": "PASS",
+      "exit_code": 0,
+      "subject_digest": "sha256:66fbbb930ddd445d6973c54795f73cb436db493d2c06cd20a35d92c571e6de85",
+      "subject": {
+        "commit": "319e9bc83c43efb22e863d8c2886d8225be40d0b",
+        "tree": "8c91d671c5d6a294ce5f1206e33a63d57adf4a9e"
+      },
+      "changed_paths_sha256": "sha256:66fbbb930ddd445d6973c54795f73cb436db493d2c06cd20a35d92c571e6de85",
+      "command_digest": "sha256:4304c4b043382459d2f3e00bbcb296fd4ff53331240cfd56c5d349a8a7968d31",
+      "toolchain_digest": "sha256:93597db795ab5b0250630d0ee0722a49ca809aba2437d294c773152e48132f7b",
+      "environment_sensitive": true,
+      "environment": {
+        "platform": "Windows (win32)",
+        "node": "v24.21.0",
+        "frontend_dependencies": "frontend/node_modules junction to the main workspace frontend/node_modules",
+        "lockfile_sha256": "1829336936c40e0ef070a8a18628ecb2183f0a27f0e2e5c922b004a20fa8e9e7"
+      }
+    }
+  ],
+  "canonical": {
+    "command": "node .agents/scripts/check-verification.mjs check auto --changed frontend/src/stores/__tests__/journalDrafts.spec.ts --changed frontend/src/stores/journalDrafts.ts",
+    "input_digest": "sha256:d1bb00b0d9eadc71af287d70681bfbe978a0c49dc17eec370732e94ccef19c9c",
+    "process_exit": 2,
+    "featureId": null,
+    "changedPaths": [
+      "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+      "frontend/src/stores/journalDrafts.ts"
+    ],
+    "matchedPaths": [],
+    "applicability": "NOT_APPLICABLE",
+    "status": "INCOMPLETE",
+    "complete": false,
+    "checks": [],
+    "escalationReasons": [
+      "NO_APPLICABLE_RECIPE"
+    ]
+  },
+  "escalation": {
+    "command": ".agents/scripts/check-escalation.mjs with canonical verification forwarded unchanged",
+    "input_digest": "sha256:dd1109a5c9a3bb029ef9d25476cb951c7172d9802cfc1639a1b6a8a714581e8a",
+    "process_exit": 1,
+    "risk": "HIGH",
+    "judgment_flags": [
+      "CONCURRENCY_STATE",
+      "SECURITY_AUTH"
+    ],
+    "decision": "REVIEW_REQUIRED",
+    "reasons": [
+      "HIGH_RISK_REVIEW",
+      "JUDGMENT_CONCURRENCY_STATE",
+      "JUDGMENT_SECURITY_AUTH",
+      "VERIFICATION_INCOMPLETE",
+      "VERIFICATION_NO_APPLICABLE_RECIPE"
+    ]
+  },
+  "progression_eligible": true,
+  "progression_reasons": [
+    "All three fresh focused checks passed against the exact Slice A checkpoint scope.",
+    "Canonical verification remains INCOMPLETE/NOT_APPLICABLE because NO_APPLICABLE_RECIPE; it is not relabeled PASS.",
+    "The HIGH-risk escalation was run unchanged and the required targeted review approved the complete checkpoint delta.",
+    "The checkpoint, source, references, and exact implementation path set remain fresh with no drift."
+  ],
+  "verification_obligations": [
+    {
+      "canonical_verification_disposition": "NOT_APPLICABLE/INCOMPLETE",
+      "done_gate_disclosure_required": true,
+      "coverage_authority": "focused_checks",
+      "reason": "NO_APPLICABLE_RECIPE"
+    }
+  ]
+}

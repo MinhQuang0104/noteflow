@@ -1,0 +1,209 @@
+{
+  "schema_version": 1,
+  "story_id": "1.5",
+  "slice_id": "A",
+  "kind": "review",
+  "checkpoint_commit": "319e9bc83c43efb22e863d8c2886d8225be40d0b",
+  "baseline_commit": "a81dc668720ab846d2d14986d93dfe140968deab",
+  "subject_digest": "sha256:66fbbb930ddd445d6973c54795f73cb436db493d2c06cd20a35d92c571e6de85",
+  "created_from_head": "319e9bc83c43efb22e863d8c2886d8225be40d0b",
+  "changed_paths_sha256": "sha256:66fbbb930ddd445d6973c54795f73cb436db493d2c06cd20a35d92c571e6de85",
+  "commands": [
+    {
+      "command": "node .agents/scripts/check-escalation.mjs with canonical verification forwarded unchanged and risk HIGH",
+      "exit_code": 1,
+      "tool": "check-escalation.mjs",
+      "environment": "Windows (win32); Node.js v24.21.0"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base a81dc668720ab846d2d14986d93dfe140968deab --head 319e9bc83c43efb22e863d8c2886d8225be40d0b --path frontend/src/stores/__tests__/journalDrafts.spec.ts",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows (win32); Git explicit checkpoint pair"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base a81dc668720ab846d2d14986d93dfe140968deab --head 319e9bc83c43efb22e863d8c2886d8225be40d0b --path frontend/src/stores/journalDrafts.ts",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows (win32); Git explicit checkpoint pair"
+    }
+  ],
+  "required": true,
+  "verdict": "APPROVE",
+  "findings_total": 0,
+  "findings_blocking": 0,
+  "reviewed_commit": "319e9bc83c43efb22e863d8c2886d8225be40d0b",
+  "reviewed_from_head": "d6aa1656db15f63c8c272a4070347295532d8248",
+  "risk_context_digest": "sha256:5c3e1b7db251e727a044146d7de6dfdca55a28add41d20e71b865ee6be958196",
+  "review_context_digest": "sha256:61e913c64ceaf392734acc3f62a1376ba645e5a62f2345ba8ae4dcc09a9044ef",
+  "freshness": {
+    "status": "FRESH_CANDIDATE",
+    "review_rerun": true,
+    "reasons": [
+      "Review used the exact implementation checkpoint and all four validated evidence units; no unit was omitted, duplicated, or reordered.",
+      "The exact two-path implementation scope has no checkpoint-to-HEAD or working-tree drift.",
+      "Story source and referenced files remain fresh.",
+      "HIGH risk plus concurrency-state and security-auth judgment flags were forwarded to the targeted same-Lead review.",
+      "Review found no blocking delta-related defect, scope ambiguity, or missing evidence for Slice A T-1/T-2."
+    ]
+  },
+  "changeEvidence": {
+    "evidenceSet": {
+      "schema": "change-evidence-set-v1",
+      "provenance": {
+        "producer": "prepare-change-evidence-v1",
+        "comparison": "explicit-pair",
+        "base": "a81dc668720ab846d2d14986d93dfe140968deab",
+        "head": "319e9bc83c43efb22e863d8c2886d8225be40d0b"
+      },
+      "requestedPaths": [
+        "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+        "frontend/src/stores/journalDrafts.ts"
+      ],
+      "sourceDigest": "cb31c4d6288bf6bec6124704d442dcfe09d592f4684cee2b4767a00aa5e7d10f",
+      "unitCount": 4,
+      "paths": [
+        {
+          "path": "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+          "hunks": [
+            {
+              "header": "@@ -0,0 +1,297 @@",
+              "oldStart": 0,
+              "oldLines": 0,
+              "newStart": 1,
+              "newLines": 297,
+              "bodyLineCount": 297
+            }
+          ]
+        },
+        {
+          "path": "frontend/src/stores/journalDrafts.ts",
+          "hunks": [
+            {
+              "header": "@@ -0,0 +1,396 @@",
+              "oldStart": 0,
+              "oldLines": 0,
+              "newStart": 1,
+              "newLines": 396,
+              "bodyLineCount": 396
+            }
+          ]
+        }
+      ],
+      "units": [
+        {
+          "evidenceSetDigest": "cb31c4d6288bf6bec6124704d442dcfe09d592f4684cee2b4767a00aa5e7d10f",
+          "path": "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+          "hunkIndex": 0,
+          "originalOldStart": 0,
+          "originalOldLines": 0,
+          "originalNewStart": 1,
+          "originalNewLines": 297,
+          "unitIndex": 0,
+          "hunkUnitIndex": 0,
+          "hunkUnitCount": 2,
+          "bodyStart": 0,
+          "bodyEnd": 239,
+          "oldLines": 0,
+          "newLines": 239,
+          "diffLineCount": 240,
+          "bodyText": "+import { createPinia, setActivePinia } from 'pinia'\n+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'\n+\n+import * as challengesApi from '../../api/challenges'\n+import { useAccountStore } from '../account'\n+import { useAuthStore } from '../auth'\n+import { useJournalDraftsStore } from '../journalDrafts'\n+import { useSyncStore } from '../sync'\n+\n+const DATE = '2026-09-27'\n+\n+function snapshot(\n+  challengeId: string,\n+  journal: string | null,\n+  journalVersion: number,\n+): challengesApi.JournalSnapshot {\n+  return { challenge_id: challengeId, local_date: DATE, journal, journal_version: journalVersion }\n+}\n+\n+function mutation(\n+  challengeId: string,\n+  journal: string | null,\n+  journalVersion: number,\n+  dataEpoch = 4,\n+): challengesApi.JournalMutationResult {\n+  return {\n+    journal: snapshot(challengeId, journal, journalVersion),\n+    account_revision: 12,\n+    data_epoch: dataEpoch,\n+  }\n+}\n+\n+function deferred<T>() {\n+  let resolve!: (value: T) => void\n+  let reject!: (error: unknown) => void\n+  const promise = new Promise<T>((resolvePromise, rejectPromise) => {\n+    resolve = resolvePromise\n+    reject = rejectPromise\n+  })\n+  return { promise, resolve, reject }\n+}\n+\n+describe('useJournalDraftsStore', () => {\n+  let drafts: ReturnType<typeof useJournalDraftsStore>\n+  let auth: ReturnType<typeof useAuthStore>\n+  let account: ReturnType<typeof useAccountStore>\n+  let sync: ReturnType<typeof useSyncStore>\n+\n+  beforeEach(() => {\n+    setActivePinia(createPinia())\n+    auth = useAuthStore()\n+    account = useAccountStore()\n+    sync = useSyncStore()\n+    drafts = useJournalDraftsStore()\n+\n+    auth.owner = { id: 42, name: 'Owner', email: 'owner@example.test' }\n+    auth.status = 'authenticated'\n+    auth.generation = 3\n+    account.status = 'ready'\n+    account.context = {\n+      timezone: 'Asia/Ho_Chi_Minh',\n+      account_date: DATE,\n+      week: { start_date: '2026-09-21', end_date: '2026-09-27' },\n+      account_revision: 11,\n+      data_epoch: 4,\n+      write_state: 'open',\n+    }\n+    vi.spyOn(sync, 'reconcileBeforeWrite').mockResolvedValue({ allowed: true })\n+    vi.spyOn(sync, 'recordMutationAck').mockResolvedValue(true)\n+    vi.spyOn(challengesApi, 'generateCommandId').mockReturnValue('command-1')\n+  })\n+\n+  afterEach(() => {\n+    vi.restoreAllMocks()\n+  })\n+\n+  it('marks a changed journal dirty immediately after an acknowledged save', async () => {\n+    vi.spyOn(challengesApi, 'saveChallengeJournal').mockResolvedValue(mutation('challenge-a', 'saved text', 2))\n+    drafts.hydrate(snapshot('challenge-a', 'original', 1))\n+    drafts.setDraftText('challenge-a', DATE, 'saved text')\n+\n+    await drafts.save('challenge-a', DATE)\n+    drafts.setDraftText('challenge-a', DATE, 'edited after save')\n+\n+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({\n+      text: 'edited after save',\n+      status: 'dirty',\n+      clientRevision: 2,\n+      acknowledgedClientRevision: 1,\n+    })\n+  })\n+\n+  it('keeps a newer edit dirty when an older revision is acknowledged', async () => {\n+    const response = deferred<challengesApi.JournalMutationResult>()\n+    vi.spyOn(challengesApi, 'saveChallengeJournal').mockReturnValue(response.promise)\n+    drafts.hydrate(snapshot('challenge-a', 'original', 1))\n+    drafts.setDraftText('challenge-a', DATE, 'revision one')\n+\n+    const saving = drafts.save('challenge-a', DATE)\n+    await vi.waitFor(() => expect(challengesApi.saveChallengeJournal).toHaveBeenCalledOnce())\n+    drafts.setDraftText('challenge-a', DATE, 'revision two')\n+    response.resolve(mutation('challenge-a', 'revision one', 2))\n+    await saving\n+\n+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({\n+      text: 'revision two',\n+      journalVersion: 2,\n+      clientRevision: 2,\n+      acknowledgedClientRevision: 1,\n+      status: 'dirty',\n+    })\n+  })\n+\n+  it('keeps resource drafts separate and ignores refetches over dirty text and version', () => {\n+    drafts.hydrate(snapshot('challenge-a', 'server A', 3))\n+    drafts.hydrate(snapshot('challenge-b', 'server B', 8))\n+    drafts.setDraftText('challenge-a', DATE, 'local A')\n+\n+    drafts.hydrate(snapshot('challenge-a', 'refetched A', 9))\n+\n+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({\n+      text: 'local A',\n+      journalVersion: 3,\n+      status: 'dirty',\n+    })\n+    expect(drafts.getDraft('challenge-b', DATE)).toMatchObject({\n+      text: 'server B',\n+      journalVersion: 8,\n+      status: 'saved',\n+    })\n+  })\n+\n+  it('does not expose a draft to another owner', () => {\n+    drafts.hydrate(snapshot('challenge-a', 'owner 42', 1))\n+    drafts.setDraftText('challenge-a', DATE, 'private draft')\n+    auth.owner = { id: 43, name: 'Other owner', email: 'other@example.test' }\n+\n+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()\n+    drafts.hydrate(snapshot('challenge-a', 'owner 43', 7))\n+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({ text: 'owner 43', ownerId: 43 })\n+\n+    auth.owner = { id: 42, name: 'Owner', email: 'owner@example.test' }\n+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({ text: 'private draft', ownerId: 42 })\n+  })\n+\n+  it('serializes double submissions from preflight through the server acknowledgement', async () => {\n+    const preflight = deferred<{ allowed: boolean; reason?: string }>()\n+    const response = deferred<challengesApi.JournalMutationResult>()\n+    vi.mocked(sync.reconcileBeforeWrite).mockReturnValue(preflight.promise)\n+    vi.spyOn(challengesApi, 'saveChallengeJournal').mockReturnValue(response.promise)\n+    drafts.hydrate(snapshot('challenge-a', 'original', 1))\n+    drafts.setDraftText('challenge-a', DATE, 'draft')\n+\n+    const first = drafts.save('challenge-a', DATE)\n+    const second = drafts.save('challenge-a', DATE)\n+    await Promise.resolve()\n+\n+    expect(sync.reconcileBeforeWrite).toHaveBeenCalledOnce()\n+    expect(challengesApi.saveChallengeJournal).not.toHaveBeenCalled()\n+\n+    preflight.resolve({ allowed: true })\n+    await vi.waitFor(() => expect(challengesApi.saveChallengeJournal).toHaveBeenCalledOnce())\n+    response.resolve(mutation('challenge-a', 'draft', 2))\n+    await Promise.all([first, second])\n+\n+    expect(challengesApi.saveChallengeJournal).toHaveBeenCalledOnce()\n+  })\n+\n+  it('replays an uncertain command unchanged before allowing a newer revision to save', async () => {\n+    const save = vi.spyOn(challengesApi, 'saveChallengeJournal')\n+    save.mockRejectedValueOnce(new TypeError('network timeout'))\n+    save.mockResolvedValueOnce(mutation('challenge-a', 'first revision', 2))\n+    save.mockResolvedValueOnce(mutation('challenge-a', 'second revision', 3))\n+    vi.mocked(challengesApi.generateCommandId)\n+      .mockReturnValueOnce('command-original')\n+      .mockReturnValueOnce('command-newer')\n+    drafts.hydrate(snapshot('challenge-a', 'original', 1))\n+    drafts.setDraftText('challenge-a', DATE, 'first revision')\n+\n+    await drafts.save('challenge-a', DATE)\n+    const originalRequest = save.mock.calls[0]\n+    drafts.setDraftText('challenge-a', DATE, 'second revision')\n+    await drafts.save('challenge-a', DATE)\n+\n+    expect(save.mock.calls[1]).toEqual(originalRequest)\n+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({\n+      text: 'second revision',\n+      journalVersion: 2,\n+      clientRevision: 2,\n+      acknowledgedClientRevision: 1,\n+      status: 'dirty',\n+      pendingCommand: null,\n+    })\n+    expect(save).toHaveBeenCalledTimes(2)\n+\n+    await drafts.save('challenge-a', DATE)\n+\n+    expect(save).toHaveBeenCalledTimes(3)\n+    expect(save.mock.calls[2]?.[2]).toMatchObject({\n+      command_id: 'command-newer',\n+      data_epoch: 4,\n+      base_version: 2,\n+      journal: 'second revision',\n+    })\n+  })\n+\n+  it('does not apply a late acknowledgement after the authentication generation changes', async () => {\n+    const response = deferred<challengesApi.JournalMutationResult>()\n+    vi.spyOn(challengesApi, 'saveChallengeJournal').mockReturnValue(response.promise)\n+    drafts.hydrate(snapshot('challenge-a', 'original', 1))\n+    drafts.setDraftText('challenge-a', DATE, 'pending draft')\n+\n+    const saving = drafts.save('challenge-a', DATE)\n+    await vi.waitFor(() => expect(challengesApi.saveChallengeJournal).toHaveBeenCalledOnce())\n+    auth.generation += 1\n+    response.resolve(mutation('challenge-a', 'pending draft', 2))\n+    await saving\n+\n+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({\n+      text: 'pending draft',\n+      journalVersion: 1,\n+      acknowledgedClientRevision: 0,\n+      status: 'quarantined',\n+    })\n+    expect(sync.recordMutationAck).not.toHaveBeenCalled()\n+  })\n+\n+  it('does not apply a late transport error after the authentication generation changes', async () => {\n+    const response = deferred<challengesApi.JournalMutationResult>()\n+    vi.spyOn(challengesApi, 'saveChallengeJournal').mockReturnValue(response.promise)\n+    drafts.hydrate(snapshot('challenge-a', 'original', 1))\n+    drafts.setDraftText('challenge-a', DATE, 'pending draft')\n+\n+    const saving = drafts.save('challenge-a', DATE)\n+    await vi.waitFor(() => expect(challengesApi.saveChallengeJournal).toHaveBeenCalledOnce())\n+    auth.generation += 1\n+    response.reject(new TypeError('network timeout'))\n+    await saving\n+"
+        },
+        {
+          "evidenceSetDigest": "cb31c4d6288bf6bec6124704d442dcfe09d592f4684cee2b4767a00aa5e7d10f",
+          "path": "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+          "hunkIndex": 0,
+          "originalOldStart": 0,
+          "originalOldLines": 0,
+          "originalNewStart": 1,
+          "originalNewLines": 297,
+          "unitIndex": 1,
+          "hunkUnitIndex": 1,
+          "hunkUnitCount": 2,
+          "bodyStart": 239,
+          "bodyEnd": 297,
+          "oldLines": 0,
+          "newLines": 58,
+          "diffLineCount": 59,
+          "bodyText": "+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({\n+      status: 'quarantined',\n+      error: { kind: 'stale_context' },\n+    })\n+  })\n+\n+  it('does not apply a late acknowledgement from an earlier data epoch', async () => {\n+    const response = deferred<challengesApi.JournalMutationResult>()\n+    vi.spyOn(challengesApi, 'saveChallengeJournal').mockReturnValue(response.promise)\n+    drafts.hydrate(snapshot('challenge-a', 'original', 1))\n+    drafts.setDraftText('challenge-a', DATE, 'pending draft')\n+\n+    const saving = drafts.save('challenge-a', DATE)\n+    await vi.waitFor(() => expect(challengesApi.saveChallengeJournal).toHaveBeenCalledOnce())\n+    account.context!.data_epoch = 5\n+    response.resolve(mutation('challenge-a', 'pending draft', 2, 4))\n+    await saving\n+\n+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({\n+      text: 'pending draft',\n+      journalVersion: 1,\n+      acknowledgedClientRevision: 0,\n+      status: 'quarantined',\n+    })\n+    expect(sync.recordMutationAck).not.toHaveBeenCalled()\n+  })\n+\n+  it('does not apply a late transport error from an earlier data epoch', async () => {\n+    const response = deferred<challengesApi.JournalMutationResult>()\n+    vi.spyOn(challengesApi, 'saveChallengeJournal').mockReturnValue(response.promise)\n+    drafts.hydrate(snapshot('challenge-a', 'original', 1))\n+    drafts.setDraftText('challenge-a', DATE, 'pending draft')\n+\n+    const saving = drafts.save('challenge-a', DATE)\n+    await vi.waitFor(() => expect(challengesApi.saveChallengeJournal).toHaveBeenCalledOnce())\n+    account.context!.data_epoch = 5\n+    response.reject(new TypeError('network timeout'))\n+    await saving\n+\n+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({\n+      status: 'quarantined',\n+      error: { kind: 'stale_context' },\n+    })\n+  })\n+\n+  it('does not submit an existing draft in a different authentication generation', async () => {\n+    const save = vi.spyOn(challengesApi, 'saveChallengeJournal')\n+    drafts.hydrate(snapshot('challenge-a', 'original', 1))\n+    drafts.setDraftText('challenge-a', DATE, 'private draft')\n+    auth.generation += 1\n+\n+    await drafts.save('challenge-a', DATE)\n+\n+    expect(sync.reconcileBeforeWrite).not.toHaveBeenCalled()\n+    expect(save).not.toHaveBeenCalled()\n+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({ status: 'quarantined' })\n+  })\n+})"
+        },
+        {
+          "evidenceSetDigest": "cb31c4d6288bf6bec6124704d442dcfe09d592f4684cee2b4767a00aa5e7d10f",
+          "path": "frontend/src/stores/journalDrafts.ts",
+          "hunkIndex": 0,
+          "originalOldStart": 0,
+          "originalOldLines": 0,
+          "originalNewStart": 1,
+          "originalNewLines": 396,
+          "unitIndex": 2,
+          "hunkUnitIndex": 0,
+          "hunkUnitCount": 2,
+          "bodyStart": 0,
+          "bodyEnd": 239,
+          "oldLines": 0,
+          "newLines": 239,
+          "diffLineCount": 240,
+          "bodyText": "+import { defineStore } from 'pinia'\n+import { ref } from 'vue'\n+\n+import * as challengesApi from '../api/challenges'\n+import type { JournalMutationResult, JournalSnapshot, SaveJournalRequest } from '../api/challenges'\n+import { useAccountStore } from './account'\n+import { useAuthStore } from './auth'\n+import { useSyncStore } from './sync'\n+\n+export type JournalDraftStatus = 'saved' | 'dirty' | 'saving' | 'error' | 'conflict' | 'blocked' | 'quarantined'\n+\n+export type JournalDraftErrorKind =\n+  | 'preflight'\n+  | 'network'\n+  | 'validation'\n+  | 'conflict'\n+  | 'blocked'\n+  | 'unauthorized'\n+  | 'unexpected'\n+  | 'stale_context'\n+\n+export interface PendingJournalCommand {\n+  readonly revision: number\n+  readonly ownerId: number\n+  readonly authGeneration: number\n+  readonly dataEpoch: number\n+  readonly request: Readonly<SaveJournalRequest>\n+}\n+\n+export interface JournalDraftRecord {\n+  ownerId: number\n+  challengeId: string\n+  localDate: string\n+  authGeneration: number\n+  dataEpoch: number\n+  text: string\n+  clientRevision: number\n+  acknowledgedClientRevision: number\n+  acknowledgedText: string\n+  acknowledgedSnapshot: JournalSnapshot\n+  journalVersion: number\n+  pendingCommand: PendingJournalCommand | null\n+  conflictSnapshot: JournalSnapshot | null\n+  error: { kind: JournalDraftErrorKind; message: string } | null\n+  status: JournalDraftStatus\n+}\n+\n+function resourceKey(ownerId: number, challengeId: string, localDate: string): string {\n+  return JSON.stringify([ownerId, challengeId, localDate])\n+}\n+\n+function isDirtyRecord(record: JournalDraftRecord): boolean {\n+  return record.clientRevision !== record.acknowledgedClientRevision\n+}\n+\n+function errorStatus(error: unknown): number | null {\n+  return typeof error === 'object' && error !== null && 'status' in error && typeof error.status === 'number'\n+    ? error.status\n+    : null\n+}\n+\n+export const useJournalDraftsStore = defineStore('journalDrafts', () => {\n+  const auth = useAuthStore()\n+  const account = useAccountStore()\n+  const sync = useSyncStore()\n+  const drafts = ref<Record<string, JournalDraftRecord>>({})\n+  const inFlight = new Map<string, Promise<void>>()\n+\n+  function getCurrentKey(challengeId: string, localDate: string): string | null {\n+    if (auth.status !== 'authenticated' || !auth.owner) return null\n+    return resourceKey(auth.owner.id, challengeId, localDate)\n+  }\n+\n+  function getDraft(challengeId: string, localDate: string): JournalDraftRecord | undefined {\n+    const key = getCurrentKey(challengeId, localDate)\n+    return key ? drafts.value[key] : undefined\n+  }\n+\n+  function hydrate(snapshot: JournalSnapshot): JournalDraftRecord | null {\n+    if (auth.status !== 'authenticated' || !auth.owner || account.status !== 'ready' || !account.context) {\n+      return null\n+    }\n+\n+    const ownerId = auth.owner.id\n+    const key = resourceKey(ownerId, snapshot.challenge_id, snapshot.local_date)\n+    const existing = drafts.value[key]\n+    if (existing) {\n+      if (isDirtyRecord(existing) || existing.pendingCommand || existing.status === 'conflict' || existing.status === 'quarantined') {\n+        return existing\n+      }\n+\n+      existing.text = snapshot.journal ?? ''\n+      existing.acknowledgedText = snapshot.journal ?? ''\n+      existing.acknowledgedSnapshot = snapshot\n+      existing.acknowledgedClientRevision = existing.clientRevision\n+      existing.journalVersion = snapshot.journal_version\n+      existing.dataEpoch = account.context.data_epoch\n+      existing.authGeneration = auth.generation\n+      existing.error = null\n+      existing.conflictSnapshot = null\n+      existing.status = 'saved'\n+      return existing\n+    }\n+\n+    const text = snapshot.journal ?? ''\n+    const record: JournalDraftRecord = {\n+      ownerId,\n+      challengeId: snapshot.challenge_id,\n+      localDate: snapshot.local_date,\n+      authGeneration: auth.generation,\n+      dataEpoch: account.context.data_epoch,\n+      text,\n+      clientRevision: 0,\n+      acknowledgedClientRevision: 0,\n+      acknowledgedText: text,\n+      acknowledgedSnapshot: snapshot,\n+      journalVersion: snapshot.journal_version,\n+      pendingCommand: null,\n+      conflictSnapshot: null,\n+      error: null,\n+      status: 'saved',\n+    }\n+    drafts.value[key] = record\n+    return record\n+  }\n+\n+  function setDraftText(challengeId: string, localDate: string, text: string): void {\n+    const key = getCurrentKey(challengeId, localDate)\n+    const record = key ? drafts.value[key] : undefined\n+    if (!record || record.text === text) return\n+\n+    record.text = text\n+    record.clientRevision += 1\n+\n+    if (record.status === 'saving' || record.pendingCommand || record.status === 'conflict' || record.status === 'quarantined') {\n+      return\n+    }\n+\n+    record.error = null\n+    record.status = isDirtyRecord(record) ? 'dirty' : 'saved'\n+  }\n+\n+  function isDirty(challengeId: string, localDate: string): boolean {\n+    const record = getDraft(challengeId, localDate)\n+    return record ? isDirtyRecord(record) : false\n+  }\n+\n+  function quarantine(record: JournalDraftRecord, message: string): void {\n+    record.status = 'quarantined'\n+    record.error = { kind: 'stale_context', message }\n+  }\n+\n+  function handleSaveError(record: JournalDraftRecord, error: unknown): void {\n+    const status = errorStatus(error)\n+    const apiError = error instanceof challengesApi.ChallengeApiError ? error : null\n+    const code = apiError?.problem?.code\n+\n+    if (status === 409 && code === 'version_conflict') {\n+      record.pendingCommand = null\n+      record.conflictSnapshot = apiError?.problem?.current_snapshot as JournalSnapshot | undefined ?? null\n+      record.error = {\n+        kind: 'conflict',\n+        message: 'Nhật ký đã thay đổi trên máy chủ. Bản nháp hiện tại được giữ lại để xử lý.',\n+      }\n+      record.status = 'conflict'\n+      return\n+    }\n+\n+    if (status === 409 && code === 'stale_data_epoch') {\n+      record.pendingCommand = null\n+      quarantine(record, 'Chu kỳ dữ liệu tài khoản đã thay đổi. Bản nháp được giữ lại và chưa thể gửi lại.')\n+      return\n+    }\n+\n+    if (status === 422) {\n+      record.pendingCommand = null\n+      const message = apiError?.validation?.errors?.journal?.[0] ?? 'Dữ liệu nhật ký không hợp lệ.'\n+      record.error = { kind: 'validation', message }\n+      record.status = 'error'\n+      return\n+    }\n+\n+    if (status === 423) {\n+      record.error = {\n+        kind: 'blocked',\n+        message: apiError?.message ?? 'Tài khoản đang tạm khóa ghi. Hãy đồng bộ rồi thử lại.',\n+      }\n+      record.status = 'blocked'\n+      return\n+    }\n+\n+    if (status === 401 || status === 403) {\n+      record.error = { kind: 'unauthorized', message: 'Phiên làm việc không còn hợp lệ. Hãy đăng nhập lại.' }\n+      record.status = 'blocked'\n+      return\n+    }\n+\n+    if (status !== null && status >= 400 && status < 500) {\n+      record.pendingCommand = null\n+      record.error = {\n+        kind: 'unexpected',\n+        message: apiError?.message ?? 'Không thể lưu nhật ký. Hãy kiểm tra nội dung rồi thử lại.',\n+      }\n+      record.status = 'error'\n+      return\n+    }\n+\n+    // A transport/server failure can happen after the server committed. Preserve the exact command.\n+    record.error = { kind: 'network', message: 'Chưa xác định được kết quả lưu. Lần thử lại sẽ gửi lại đúng yêu cầu cũ.' }\n+    record.status = 'error'\n+  }\n+\n+  async function performSave(\n+    key: string,\n+    record: JournalDraftRecord,\n+    ownerIdAtStart: number,\n+    authGenerationAtStart: number,\n+    revisionAtStart: number,\n+    textAtStart: string,\n+    journalVersionAtStart: number,\n+  ): Promise<void> {\n+    let preflight: { allowed: boolean; reason?: string }\n+    try {\n+      preflight = await sync.reconcileBeforeWrite()\n+    } catch {\n+      preflight = { allowed: false, reason: 'Không thể đồng bộ trạng thái mới nhất trước khi ghi.' }\n+    }\n+\n+    if (drafts.value[key] !== record) return\n+    if (!preflight.allowed) {\n+      record.error = { kind: 'preflight', message: preflight.reason ?? 'Chưa thể lưu nhật ký. Hãy thử lại sau.' }\n+      record.status = 'blocked'\n+      return\n+    }\n+\n+    if (\n+      auth.status !== 'authenticated' ||\n+      auth.generation !== authGenerationAtStart ||\n+      auth.owner?.id !== ownerIdAtStart"
+        },
+        {
+          "evidenceSetDigest": "cb31c4d6288bf6bec6124704d442dcfe09d592f4684cee2b4767a00aa5e7d10f",
+          "path": "frontend/src/stores/journalDrafts.ts",
+          "hunkIndex": 0,
+          "originalOldStart": 0,
+          "originalOldLines": 0,
+          "originalNewStart": 1,
+          "originalNewLines": 396,
+          "unitIndex": 3,
+          "hunkUnitIndex": 1,
+          "hunkUnitCount": 2,
+          "bodyStart": 239,
+          "bodyEnd": 396,
+          "oldLines": 0,
+          "newLines": 157,
+          "diffLineCount": 158,
+          "bodyText": "+    ) {\n+      quarantine(record, 'Phiên hoặc chủ tài khoản đã thay đổi. Bản nháp chưa được gửi trong phiên mới.')\n+      return\n+    }\n+\n+    if (account.status !== 'ready' || !account.context || account.context.write_state !== 'open') {\n+      record.error = { kind: 'preflight', message: 'Ngữ cảnh tài khoản chưa sẵn sàng để ghi.' }\n+      record.status = 'blocked'\n+      return\n+    }\n+\n+    const currentEpoch = account.context.data_epoch\n+    if (record.dataEpoch !== currentEpoch) {\n+      quarantine(record, 'Chu kỳ dữ liệu tài khoản đã đổi. Bản nháp được giữ lại, không tự chuyển sang chu kỳ mới.')\n+      return\n+    }\n+\n+    let pending = record.pendingCommand\n+    if (pending) {\n+      if (\n+        pending.ownerId !== ownerIdAtStart ||\n+        pending.authGeneration !== authGenerationAtStart ||\n+        pending.dataEpoch !== currentEpoch\n+      ) {\n+        quarantine(record, 'Yêu cầu đang chờ thuộc phiên hoặc chu kỳ dữ liệu cũ; không gửi lại tự động.')\n+        return\n+      }\n+    } else {\n+      const request: Readonly<SaveJournalRequest> = Object.freeze({\n+        command_id: challengesApi.generateCommandId(),\n+        data_epoch: currentEpoch,\n+        base_version: journalVersionAtStart,\n+        journal: textAtStart,\n+      })\n+      pending = Object.freeze({\n+        revision: revisionAtStart,\n+        ownerId: ownerIdAtStart,\n+        authGeneration: authGenerationAtStart,\n+        dataEpoch: currentEpoch,\n+        request,\n+      })\n+      record.pendingCommand = pending\n+    }\n+\n+    let result: JournalMutationResult\n+    try {\n+      result = await challengesApi.saveChallengeJournal(record.challengeId, record.localDate, pending.request)\n+    } catch (error) {\n+      if (drafts.value[key] !== record) return\n+      if (\n+        auth.status !== 'authenticated' ||\n+        auth.generation !== pending.authGeneration ||\n+        auth.owner?.id !== pending.ownerId\n+      ) {\n+        quarantine(record, 'Phản hồi lỗi thuộc phiên cũ; yêu cầu chưa được gửi lại trong phiên mới.')\n+        return\n+      }\n+      if (!account.context || account.context.data_epoch !== pending.dataEpoch) {\n+        quarantine(record, 'Phản hồi lỗi thuộc chu kỳ dữ liệu cũ; bản nháp chưa được gửi lại.')\n+        return\n+      }\n+      handleSaveError(record, error)\n+      return\n+    }\n+\n+    if (drafts.value[key] !== record) return\n+    if (\n+      auth.status !== 'authenticated' ||\n+      auth.generation !== pending.authGeneration ||\n+      auth.owner?.id !== pending.ownerId\n+    ) {\n+      quarantine(record, 'Phản hồi lưu thuộc phiên cũ; bản nháp chưa được đánh dấu là đã lưu.')\n+      return\n+    }\n+\n+    if (\n+      result.data_epoch !== pending.dataEpoch ||\n+      !account.context ||\n+      account.context.data_epoch !== pending.dataEpoch\n+    ) {\n+      quarantine(record, 'Phản hồi lưu thuộc chu kỳ dữ liệu cũ; bản nháp chưa được đánh dấu là đã lưu.')\n+      return\n+    }\n+\n+    if (result.journal.challenge_id !== record.challengeId || result.journal.local_date !== record.localDate) {\n+      quarantine(record, 'Phản hồi lưu không khớp với nhật ký đang gửi; bản nháp được giữ lại.')\n+      return\n+    }\n+\n+    const acknowledgedText = result.journal.journal ?? ''\n+    record.acknowledgedClientRevision = pending.revision\n+    record.acknowledgedText = acknowledgedText\n+    record.acknowledgedSnapshot = result.journal\n+    record.journalVersion = result.journal.journal_version\n+    record.pendingCommand = null\n+    record.conflictSnapshot = null\n+    record.error = null\n+\n+    if (record.clientRevision === pending.revision) {\n+      record.text = acknowledgedText\n+      record.status = 'saved'\n+    } else {\n+      record.status = 'dirty'\n+    }\n+\n+    // A committed journal ACK remains saved even if query convergence later reports an error.\n+    void sync.recordMutationAck(result.account_revision, result.data_epoch, pending.authGeneration).catch(() => undefined)\n+  }\n+\n+  function save(challengeId: string, localDate: string): Promise<void> {\n+    const key = getCurrentKey(challengeId, localDate)\n+    const record = key ? drafts.value[key] : undefined\n+    if (!key || !record || (!isDirtyRecord(record) && !record.pendingCommand)) return Promise.resolve()\n+    if (record.status === 'conflict' || record.status === 'quarantined') return Promise.resolve()\n+    if (record.authGeneration !== auth.generation) {\n+      quarantine(record, 'Bản nháp thuộc phiên xác thực cũ. Hãy tải lại và đối chiếu dữ liệu trước khi tiếp tục.')\n+      return Promise.resolve()\n+    }\n+\n+    const existing = inFlight.get(key)\n+    if (existing) return existing\n+\n+    const ownerIdAtStart = record.ownerId\n+    const authGenerationAtStart = auth.generation\n+    const revisionAtStart = record.clientRevision\n+    const textAtStart = record.text\n+    const journalVersionAtStart = record.journalVersion\n+    record.status = 'saving'\n+    record.error = null\n+\n+    const operation = performSave(\n+      key,\n+      record,\n+      ownerIdAtStart,\n+      authGenerationAtStart,\n+      revisionAtStart,\n+      textAtStart,\n+      journalVersionAtStart,\n+    ).finally(() => {\n+      if (inFlight.get(key) === operation) inFlight.delete(key)\n+      if (drafts.value[key] === record && record.status === 'saving') {\n+        record.status = isDirtyRecord(record) ? 'dirty' : 'saved'\n+      }\n+    })\n+    inFlight.set(key, operation)\n+    return operation\n+  }\n+\n+  function reset(): void {\n+    drafts.value = {}\n+    inFlight.clear()\n+  }\n+\n+  auth.registerPrivateStateReset(reset)\n+\n+  return { drafts, getDraft, hydrate, setDraftText, isDirty, save, reset }\n+})"
+        }
+      ]
+    }
+  },
+  "evidenceRefs": [
+    {
+      "path": "_bmad-output/implementation-artifacts/1-5-giu-ban-dang-nhap-va-thu-luu-lai-sau-gian-doan.md",
+      "purpose": "Normative Slice A task and acceptance scope"
+    },
+    {
+      "path": "frontend/src/api/challenges.ts",
+      "purpose": "Journal request/response and command-id API contract"
+    },
+    {
+      "path": "frontend/src/stores/auth.ts",
+      "purpose": "Owner, auth-generation, and private-state reset behavior"
+    },
+    {
+      "path": "frontend/src/stores/account.ts",
+      "purpose": "Current account context, data epoch, and write-state projection"
+    },
+    {
+      "path": "frontend/src/stores/sync.ts",
+      "purpose": "Write preflight and mutation-ack generation/epoch fencing"
+    }
+  ],
+  "reviewQuestions": [
+    "Within Slice A T-1/T-2, does the store preserve owner/resource-scoped draft state and keep newer edits dirty when an older revision is acknowledged?",
+    "Within Slice A T-1/T-2, are same-resource submissions serialized and uncertain network retries sent with the same immutable command before a newer revision is saved?",
+    "Do the changed success and error paths fence stale owner, auth-generation, data-epoch, removed-record, and mismatched-resource responses before changing draft or sync acknowledgement state?",
+    "Does the changed store continue to use the existing write preflight and current account write-state boundary while retaining draft state for the scoped network/conflict/error cases?"
+  ],
+  "review_output": {
+    "judgment": "APPROVE",
+    "satisfiedQuestions": [
+      "All four ordered, producer-generated evidence units cover the complete two-path checkpoint delta; the combined evidence set validates with the exact requested path set.",
+      "The store keys drafts by owner, challenge, and local date; same-resource dirty or pending drafts survive hydration without replacing local text or base version.",
+      "In-flight saves are serialized from preflight through acknowledgement. Uncertain transport failure retains the frozen request, and an older acknowledgement advances only its own revision while newer edits remain dirty.",
+      "Success and error callbacks check live record identity, authenticated owner, auth generation, and data epoch before applying state; successful ACKs also validate resource identity before updating the snapshot or notifying sync.",
+      "Writes remain behind reconcileBeforeWrite and the account open-write check. The focused unit, type-check, and lint evidence passes; canonical INCOMPLETE/NOT_APPLICABLE remains disclosed rather than relabeled."
+    ],
+    "findings": [],
+    "requestedEvidence": []
+  }
+}

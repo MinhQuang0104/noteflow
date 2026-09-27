@@ -25,13 +25,13 @@ readiness:
     - 1-4-nhận-dữ-liệu-mới-giữa-hai-thiết-bị
     - 2-1-tạo-và-quản-lý-thông-tin-challenge
     - 2-3-ghi-và-sửa-journal-tùy-chọn
-current_slice: A
+current_slice: B
 risk:
   level: HIGH
   flags: [security, concurrency, idempotency, shared_boundary]
 slices:
   - id: A
-    status: checkpointed
+    status: reviewed
     depends_on: []
     task_refs: [T-1, T-2]
     baseline_commit: a81dc668720ab846d2d14986d93dfe140968deab
@@ -42,6 +42,29 @@ slices:
       implementation:
         path: _bmad-output/implementation-artifacts/receipts/story-1-5/A-implementation.json
         digest: sha256:4c3ff7cb31a890f77d964d4b4e52f3ffbd2b963c7896545c5ba665d4afbbe5a8
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-5/A-verification.json
+        digest: sha256:324566de850a51aa9040c2d795902efc501ec78f5d1fd48440c8ec149affa945
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-5/A-review.json
+        digest: sha256:0cc3147d2281bb9a3454455f257417b6a491c4d07bce2eb277c9506a754d1ea3
+    verification:
+      subject:
+        commit: 319e9bc83c43efb22e863d8c2886d8225be40d0b
+        tree: 8c91d671c5d6a294ce5f1206e33a63d57adf4a9e
+      changed_paths_sha256: sha256:66fbbb930ddd445d6973c54795f73cb436db493d2c06cd20a35d92c571e6de85
+      canonical_applicability: NOT_APPLICABLE
+      canonical_status: INCOMPLETE
+      progression_eligible: true
+      done_gate_disclosure_required: true
+      outstanding_obligation: "canonical verification is INCOMPLETE because NO_APPLICABLE_RECIPE; focused checks are the coverage authority"
+    review:
+      required: true
+      verdict: APPROVE
+      reviewed_commit: 319e9bc83c43efb22e863d8c2886d8225be40d0b
+      risk_context_digest: sha256:5c3e1b7db251e727a044146d7de6dfdca55a28add41d20e71b865ee6be958196
+      review_context_digest: sha256:61e913c64ceaf392734acc3f62a1376ba645e5a62f2345ba8ae4dcc09a9044ef
+      freshness: FRESH_CANDIDATE
   - id: B
     status: pending
     depends_on: [A]
@@ -57,6 +80,6 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: verify_slice
-  target: A
+  kind: implement_slice
+  target: B
 ---
