@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "method": "normal-action-instruction-source-v1",
+  "basis_id": "normal-action-instruction-source-v1",
+  "profile": "v4-lite-normal-action",
+  "description": "Cold-start, healthy-IDLE V4 normal action context. Alternative paths represent the same entry/action role across B and the V4 candidate; a selected Git path is counted once.",
+  "actions": ["implement_slice", "verify_slice"],
+  "sources": [
+    {"id": "root-policy", "required": true, "paths": ["AGENTS.md"]},
+    {"id": "provider-policy", "required": true, "paths": ["CLAUDE.md"]},
+    {"id": "task-router", "required": true, "paths": [".agents/routing/task-router.md"]},
+    {"id": "control-plane-context", "required": true, "paths": [".agents/context/control-plane.md"]},
+    {"id": "verification-context", "required": true, "paths": [".agents/context/verification-context.md"]},
+    {"id": "artifact-contract", "required": true, "paths": [".agents/docs/v4-artifact-contract.md"]},
+    {"id": "entry-skill", "required": true, "paths": [".agents/skills/v4-story-runner/SKILL.md", ".agents/skills/story-development/SKILL.md"]},
+    {"id": "action-guidance", "required": true, "actions": {"implement_slice": [".agents/skills/v4-story-runner/actions/implement-slice.md", ".agents/skills/story-development/SKILL.md"], "verify_slice": [".agents/skills/v4-story-runner/actions/verify-slice.md", ".agents/skills/story-development/SKILL.md"]}},
+    {"id": "verification-entry", "required": true, "paths": [".agents/scripts/check-verification.mjs"]}
+  ]
+}

@@ -37,10 +37,14 @@ evidence, and apply-like instructions are invalid.
 `evaluateEvolution(candidate, comparison)` never applies a change. It keeps
 comparability, deterministic checks, quality checks, measurement coverage,
 known exclusions, correction cost, and model self-rating separate. Self-rating
-cannot replace deterministic or human evidence. Missing provider usage makes
-token savings `INCONCLUSIVE`; missing quality checks cannot produce an
-adoption-ready recommendation. Only a comparable result with measured cost
-and passing deterministic/quality checks can return `AWAITING_HUMAN`.
+cannot replace deterministic or human evidence. The comparison must carry
+verified, complete evidence and an explicit quality `PASS`; raw caller-supplied
+check arrays do not establish that binding. Usage is measured only when it has
+`status: MEASURED`, a non-empty measurement id, and an evidence digest.
+Missing, legacy, stale, incomplete, or unbound evidence makes the evaluation
+`INCONCLUSIVE`; it cannot produce `EVALUATED` or `AWAITING_HUMAN`. Only a
+comparable result with verified evidence, measured cost, and passing
+deterministic/quality checks can return `AWAITING_HUMAN`.
 
 ## Human adoption
 

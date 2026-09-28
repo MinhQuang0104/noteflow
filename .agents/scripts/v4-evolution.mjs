@@ -301,11 +301,17 @@ export function proposeEvolution(root, boundedEvidence) {
   }
 }
 
-function comparisonUsage(comparison) {
-  if (comparison?.observed_usage) return comparison.observed_usage
-  const cases = Array.isArray(comparison?.cases) ? comparison.cases : []
-  const usages = cases.flatMap(item => [item.baseline_usage, item.candidate_usage, item.observed_usage]).filter(Boolean)
-  return usages.length ? usages : null
+function verifiedUsage(value, evidenceVerified) {
+  if (!evidenceVerified || !isObject(value) || value.status !== 'MEASURED' ||
+      typeof value.measurement_id !== 'string' || !value.measurement_id ||
+      !DIGEST.test(value.evidence_digest ?? '')) return null
+  return value
+}
+
+function comparisonUsage(comparison, evidenceVerified) {
+  const direct = verifiedUsage(comparison?.observed_usage, evidenceVerified)
+  if (direct) return direct
+  return verifiedUsage(comparison?.metrics?.token_usage, evidenceVerified)
 }
 
 function comparisonIdentity(comparison) {
@@ -327,20 +333,25 @@ export function evaluateEvolution(candidate, comparison = {}) {
   const identity = comparisonIdentity(comparison)
   const deterministicChecks = comparison.deterministic_checks ?? comparison.check_results ?? []
   const qualityChecks = comparison.quality_checks ?? comparison.quality_findings ?? []
-  const usage = comparisonUsage(comparison)
+  const evidence = comparison.evidence
+  const evidenceVerified = isObject(evidence) && evidence.status === 'VERIFIED' &&
+    (evidence.coverage === undefined || evidence.coverage === 'COMPLETE_VERIFIED')
+  const usage = comparisonUsage(comparison, evidenceVerified)
   const tokenSavings = usage
     ? { status: 'MEASURED', value: comparison.token_savings ?? null, coverage: 'MEASURED' }
     : { status: 'INCONCLUSIVE', value: null, coverage: 'UNKNOWN', reason: 'PROVIDER_USAGE_UNAVAILABLE' }
-  const quality = allPass(qualityChecks)
+  const qualityEvidence = evidenceVerified && comparison?.metrics?.quality === 'PASS'
+  const quality = qualityEvidence && allPass(qualityChecks)
     ? { status: 'PASS', checks: qualityChecks }
     : { status: 'INCOMPLETE', checks: qualityChecks, reason: qualityChecks.length ? 'QUALITY_CHECK_FAILED_OR_INCOMPLETE' : 'QUALITY_CHECKS_REQUIRED' }
   const modelSelfRating = comparison.model_self_rating ?? candidate?.model_self_rating
   const reasons = [...(identity.reasons ?? [])]
   if (modelSelfRating !== undefined) reasons.push('MODEL_SELF_RATING_NOT_AUTHORITATIVE')
   if (identity.verdict !== 'COMPARABLE') reasons.push('COMPARISON_NOT_COMPARABLE')
+  if (!evidenceVerified) reasons.push('EVIDENCE_BINDING_REQUIRED')
   if (!usage) reasons.push('MEASUREMENT_MISSING')
   if (quality.status !== 'PASS') reasons.push('QUALITY_EVIDENCE_INCOMPLETE')
-  const eligible = identity.verdict === 'COMPARABLE' && usage && allPass(deterministicChecks) && quality.status === 'PASS'
+  const eligible = identity.verdict === 'COMPARABLE' && evidenceVerified && usage && allPass(deterministicChecks) && quality.status === 'PASS'
   return {
     schema_version: EVALUATION_SCHEMA_VERSION,
     candidate_id: candidate?.candidate_id ?? null,

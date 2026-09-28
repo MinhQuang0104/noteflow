@@ -142,7 +142,9 @@ test('evaluation separates deterministic evidence, missing measurements, and sel
     comparability: { verdict: 'COMPARABLE', reasons: [] },
     deterministic_checks: [{ id: 'fixture-check', status: 'PASS' }],
     quality_checks: [{ id: 'quality-check', status: 'PASS' }],
-    observed_usage: { baseline_tokens: 100, candidate_tokens: 90, measurement_kind: 'provider' },
+    evidence: { status: 'VERIFIED', coverage: 'COMPLETE_VERIFIED' },
+    metrics: { quality: 'PASS' },
+    observed_usage: { status: 'MEASURED', measurement_id: 'fixture-measurement', evidence_digest: `sha256:${'1'.repeat(64)}`, baseline_tokens: 100, candidate_tokens: 90 },
     model_self_rating: 'excellent',
   })
   assert.equal(evaluated.status, 'EVALUATED')
@@ -152,7 +154,9 @@ test('evaluation separates deterministic evidence, missing measurements, and sel
     comparability: { verdict: 'INCOMPARABLE', reasons: ['toolchain_mismatch'] },
     deterministic_checks: [{ id: 'fixture-check', status: 'PASS' }],
     quality_checks: [{ id: 'quality-check', status: 'PASS' }],
-    observed_usage: { baseline_tokens: 100, candidate_tokens: 90, measurement_kind: 'provider' },
+    evidence: { status: 'VERIFIED', coverage: 'COMPLETE_VERIFIED' },
+    metrics: { quality: 'PASS' },
+    observed_usage: { status: 'MEASURED', measurement_id: 'fixture-measurement', evidence_digest: `sha256:${'1'.repeat(64)}`, baseline_tokens: 100, candidate_tokens: 90 },
   })
   assert.equal(incomparable.status, 'INCONCLUSIVE')
   assert.ok(incomparable.reasons.includes('COMPARISON_NOT_COMPARABLE'))
@@ -166,7 +170,9 @@ test('adoption validation requires exact human-bound candidate/evaluation/scope'
     comparability: { verdict: 'COMPARABLE', reasons: [] },
     deterministic_checks: [{ id: 'fixture-check', status: 'PASS' }],
     quality_checks: [{ id: 'quality-check', status: 'PASS' }],
-    observed_usage: { baseline_tokens: 100, candidate_tokens: 90, measurement_kind: 'provider' },
+    evidence: { status: 'VERIFIED', coverage: 'COMPLETE_VERIFIED' },
+    metrics: { quality: 'PASS' },
+    observed_usage: { status: 'MEASURED', measurement_id: 'fixture-measurement', evidence_digest: `sha256:${'1'.repeat(64)}`, baseline_tokens: 100, candidate_tokens: 90 },
   })
   const scope = boundCandidate.proposed_scope
   const record = {

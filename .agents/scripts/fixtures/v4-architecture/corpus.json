@@ -1,11 +1,17 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
+  "method": "v4-architecture-corpus-v1",
   "cases": [
     {
       "case_id": "L-mapped-low",
       "workload_class": "L",
       "risk": "LOW",
       "coverage": "mapped",
+      "input": {
+        "selector": "corpus-feature",
+        "changed_paths": ["src/fixture.txt"],
+        "risk": "LOW"
+      },
       "expected": "PASS_NO_REVIEW"
     },
     {
@@ -13,6 +19,11 @@
       "workload_class": "M",
       "risk": "MEDIUM",
       "coverage": "mixed",
+      "input": {
+        "selector": "corpus-feature",
+        "changed_paths": ["src/fixture.txt", "src/unmapped.txt"],
+        "risk": "MEDIUM"
+      },
       "expected": "INCOMPLETE_REVIEW_REQUIRED"
     },
     {
@@ -20,6 +31,13 @@
       "workload_class": "H",
       "risk": "HIGH",
       "coverage": "stale-recovery",
+      "input": {
+        "subcases": [
+          {"id": "stale", "mutation": "policy-drift-after-preview"},
+          {"id": "recovery", "failure_phase": "after-commit1"}
+        ],
+        "risk": "HIGH"
+      },
       "expected": "STALE_RECOVERY_REQUIRED"
     }
   ]
