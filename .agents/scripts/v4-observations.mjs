@@ -219,6 +219,70 @@ export function createObservation(inputRoot, input = {}) {
   }
 }
 
+function hookEventId(input) {
+  if (input.event_id !== undefined) return input.event_id
+  const stable = stableJson({
+    event_type: input.event_type,
+    story_id: input.story_id ?? null,
+    slice_id: input.slice_id ?? null,
+    action: input.action ?? null,
+    invocation_id: input.invocation_id ?? null,
+    session_id: input.session_id ?? null,
+    attempt_id: input.attempt_id ?? null,
+    subject: input.payload?.subject ?? null,
+  })
+  return `hook-${input.event_type}-${digest(stable).slice('sha256:'.length, 'sha256:'.length + 48)}`
+}
+
+/**
+ * Small observational adapter used by the real action/check/context paths.
+ * It is deliberately advisory: a failed event write is returned to the
+ * caller, but never becomes lifecycle authority or a reason to rerun an
+ * already completed action.
+ */
+export function recordHookObservation(canonicalRoot, input = {}) {
+  try {
+    const event = createObservation(canonicalRoot, { ...input, event_id: hookEventId(input) })
+    return recordObservation(canonicalRoot, event)
+  } catch (error) {
+    return invalid(error.message || 'OBSERVATION_HOOK_FAILED', { coverage: 'UNKNOWN', warning: 'observational failure does not change lifecycle state' })
+  }
+}
+
+export function recordActionStarted(root, input = {}) {
+  return recordHookObservation(root, { ...input, event_type: 'action_started', coverage: input.coverage ?? 'MEASURED' })
+}
+
+export function recordActionFinished(root, input = {}) {
+  return recordHookObservation(root, { ...input, event_type: 'action_finished', coverage: input.coverage ?? 'MEASURED' })
+}
+
+export function recordCheckFinished(root, input = {}) {
+  return recordHookObservation(root, { ...input, event_type: 'check_finished', coverage: input.coverage ?? 'MEASURED' })
+}
+
+export function recordContextDelivered(root, input = {}) {
+  return recordHookObservation(root, { ...input, event_type: 'context_delivered', coverage: input.coverage ?? 'MEASURED' })
+}
+
+export function recordSessionCheckpoint(root, input = {}) {
+  return recordHookObservation(root, { ...input, event_type: 'session_checkpoint', coverage: input.coverage ?? 'PARTIAL' })
+}
+
+export function recordSessionClosed(root, input = {}) {
+  return recordHookObservation(root, { ...input, event_type: 'session_closed', coverage: input.coverage ?? 'PARTIAL' })
+}
+
+export function recordStoryReviewSnapshot(root, input = {}) {
+  if (input.finalization_status !== 'HUMAN_GATE_REQUIRED') return invalid('REVIEW_SNAPSHOT_REQUIRES_FINALIZATION', { coverage: 'UNKNOWN' })
+  return recordHookObservation(root, { ...input, event_type: 'story_review_snapshot', coverage: input.coverage ?? 'MEASURED' })
+}
+
+export function recordStoryCompleted(root, input = {}) {
+  if (input.approval_present !== true || input.approval_fresh !== true) return invalid('COMPLETION_APPROVAL_REQUIRED', { coverage: 'UNKNOWN' })
+  return recordHookObservation(root, { ...input, event_type: 'story_completed', coverage: input.coverage ?? 'MEASURED' })
+}
+
 function validateEvent(root, event) {
   if (!isObject(event)) return 'INVALID_EVENT'
   if (event.schema_version !== EVENT_SCHEMA_VERSION) return 'INVALID_SCHEMA_VERSION'
@@ -281,7 +345,12 @@ export function recordObservation(canonicalRoot, inputEvent) {
     if (error?.code === 'EEXIST') {
       try {
         const existing = JSON.parse(readFileSync(file, 'utf8'))
-        if (stableJson(existing) === stableJson(event)) return { status: 'NOOP', event_id: event.event_id, path: file, coverage: existing.coverage }
+        const comparable = value => {
+          const copy = { ...value }
+          delete copy.observed_at
+          return stableJson(copy)
+        }
+        if (comparable(existing) === comparable(event)) return { status: 'NOOP', event_id: event.event_id, path: file, coverage: existing.coverage }
         return { status: 'CONFLICT', event_id: event.event_id, path: file, coverage: 'UNKNOWN', reason: 'EVENT_ID_PAYLOAD_CONFLICT' }
       } catch {
         return invalid('OBSERVATION_STORE_CORRUPT', { event_id: event.event_id, coverage: 'UNKNOWN' })

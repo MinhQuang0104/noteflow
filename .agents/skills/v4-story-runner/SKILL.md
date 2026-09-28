@@ -78,6 +78,12 @@ persist at most one explicit successor before stopping.
   partial work; never infer ownership from commit messages or chat history.
 - Telemetry, context projections, and learned experience are derived/advisory;
   they cannot approve, complete, or mutate product or policy truth.
+- Real action, check, and context boundaries may emit bounded observation hook
+  events. Hook write failures are coverage gaps only: they never bypass a
+  gate, authorize a retry, or rerun a completed action. Emit a session
+  checkpoint before yielding and keep provider-session closure unknown unless
+  a real boundary is observed. Emit a review snapshot only after finalization
+  reaches Human Gate, and a completion event only with fresh human approval.
 - Never reset, clean, stash, delete a foreign lock, or overwrite user work.
 
 The selected action document owns its read-only gate, semantic boundary,

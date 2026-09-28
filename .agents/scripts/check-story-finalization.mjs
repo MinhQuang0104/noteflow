@@ -388,7 +388,8 @@ function inspectWorkingTree(root, result, scopePaths, metadataPaths = []) {
   if (relevant.length) issue(result, 'WORKING_SCOPE_DRIFT', 'stale')
   const unexpected = dirty.filter(item => !scope.has(item) && !allowedMetadata.has(item) &&
     item !== 'AGENTS.md' && !item.startsWith('.agents/') && !item.startsWith('docs/superpowers/') &&
-    !item.startsWith('_bmad-output/implementation-artifacts/receipts/'))
+    !item.startsWith('_bmad-output/implementation-artifacts/receipts/') &&
+    !item.startsWith('.agent-state/v4-observations/'))
   if (unexpected.length) issue(result, `UNRELATED_WORKTREE_DRIFT:${unexpected[0]}`, 'blocked')
 }
 

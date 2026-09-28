@@ -7,6 +7,7 @@ import { pathToFileURL } from 'node:url'
 import { inspectStory, normativeDigest } from './check-artifact-contract.mjs'
 import { frontmatter, validate as validateStoryPlan } from './check-story-plan.mjs'
 import { separatedStory } from './v4-separated-plan.mjs'
+import { recordContextDelivered } from './v4-observations.mjs'
 
 const SHA = /^[0-9a-f]{40,64}$/i
 const ACTIONS = new Map([
@@ -409,7 +410,21 @@ export function compileActionContext(root, storyId, action, sliceId, options = {
       pointer,
       sourceInfo,
     )
-    return result('READY', [], { projection, actualHead, expectedHead, validation })
+    const observation = recordContextDelivered(root, {
+      story_id: storyId,
+      slice_id: selectedSliceId,
+      action,
+      invocation_id: options.invocationId ?? null,
+      session_id: options.sessionId ?? null,
+      attempt_id: options.attemptId ?? projection.projection_fingerprint,
+      payload: {
+        projection_fingerprint: projection.projection_fingerprint,
+        byte_counters: projection.byte_counters,
+        source_head: actualHead,
+      },
+      provenance: { kind: 'context_compiler', source: 'compile-v4-context', projection: projection.projection_fingerprint },
+    })
+    return result('READY', [], { projection, actualHead, expectedHead, validation, observation })
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error)
     const blocked = ['V3_POINTER_NOT_IDLE', 'V3_POINTER_MISSING', 'V3_POINTER_INVALID', 'SLICE_MISMATCH', 'UNEXPECTED_SLICE'].includes(reason)

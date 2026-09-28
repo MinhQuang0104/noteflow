@@ -139,7 +139,8 @@ function worktreeInventory(root) {
   return {
     staged: nulPaths(root, ['diff', '--cached', '--name-only', '--diff-filter=ACDMRTUXB', 'HEAD', '--']),
     unstaged: nulPaths(root, ['diff', '--name-only', '--diff-filter=ACDMRTUXB', 'HEAD', '--']),
-    untracked: nulPaths(root, ['ls-files', '--others', '--exclude-standard', '--'])
+    untracked: nulPaths(root, ['ls-files', '--others', '--exclude-standard', '--']).filter(relative =>
+      relative !== '.agent-state/v4-observations' && !relative.startsWith('.agent-state/v4-observations/'))
   }
 }
 

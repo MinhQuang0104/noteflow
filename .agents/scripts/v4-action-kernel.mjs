@@ -9,6 +9,7 @@ import { inspect as inspectSliceVerification } from './check-slice-verification.
 import { verifyChangedPaths } from './check-verification.mjs'
 import { validateEvidenceSet } from './prepare-change-evidence.mjs'
 import { executeCheck, validateCheckEvidence } from './v4-check-executor.mjs'
+import { recordActionFinished, recordActionStarted, recordCheckFinished } from './v4-observations.mjs'
 import {
   canonicalPaths,
   executeMetadataTransaction,
@@ -146,6 +147,55 @@ function stale(reason, extra = {}) {
 
 function errorResult(error, extra = {}) {
   return { status: 'ERROR', ready: false, valid: false, reasons: [error.message], ...extra }
+}
+
+function actionHookInput(request, operation, result = null) {
+  const preview = request?.preview
+  return {
+    story_id: request?.story_id ?? preview?.story_id ?? null,
+    slice_id: request?.slice_id ?? preview?.slice_id ?? null,
+    action: request?.action ?? preview?.action ?? null,
+    invocation_id: request?.invocation_id ?? null,
+    session_id: request?.session_id ?? null,
+    attempt_id: request?.attempt_id ?? preview?.fingerprint ?? request?.transaction_id ?? preview?.transaction_id ?? null,
+    payload: {
+      operation,
+      transaction_id: request?.transaction_id ?? preview?.transaction_id ?? null,
+      expected_head: request?.expected_head ?? preview?.expected_head ?? null,
+      preview_fingerprint: preview?.fingerprint ?? null,
+      result_status: result?.status ?? null,
+      durable_action_count: result?.durable_action_count ?? 0,
+      next_action: result?.next_action ?? null,
+    },
+    provenance: { kind: 'v4_kernel', source: 'v4-action-kernel', operation },
+  }
+}
+
+function observeActionStarted(root, request, operation) {
+  return recordActionStarted(root, actionHookInput(request, operation))
+}
+
+function observeActionFinished(root, request, operation, result) {
+  return recordActionFinished(root, actionHookInput(request, operation, result))
+}
+
+function observeCanonicalCheck(root, preview, canonical, request) {
+  return recordCheckFinished(root, {
+    story_id: preview.story_id,
+    slice_id: preview.slice_id,
+    action: 'verify_slice',
+    invocation_id: request.invocation_id ?? null,
+    session_id: request.session_id ?? null,
+    attempt_id: request.attempt_id ?? preview.fingerprint,
+    payload: {
+      check_id: `canonical:${preview.canonical_selector}`,
+      status: canonical.status,
+      complete: canonical.complete === true,
+      changed_paths: preview.changed_paths,
+      escalation_reasons: canonical.escalationReasons ?? [],
+    },
+    provenance: { kind: 'canonical_verifier', source: 'check-verification', selector: preview.canonical_selector },
+  })
 }
 
 function assertRequestShape(request, operation) {
@@ -794,6 +844,7 @@ function runVerificationBundle(root, preview, request) {
   }
   const subject = { kind: 'commit', value: preview.checkpoint_commit }
   const canonical = verifyChangedPaths(root, preview.canonical_selector, preview.changed_paths, { subject: { commit: preview.checkpoint_commit } })
+  const canonicalObservation = observeCanonicalCheck(root, preview, canonical, request)
   const specs = request.check_specs ?? request.focused_check_specs ?? request.focused_checks ?? preview.check_specs
   const focusedEvidence = specs.map(spec => executeCheck(root, spec, subject))
   const focusedValidation = focusedEvidence.map(evidence => validateCheckEvidence(root, evidence))
@@ -845,7 +896,7 @@ function runVerificationBundle(root, preview, request) {
   let escalation
   try { escalation = runEscalation(root, preview.risk, verification, judgmentFlags) }
   catch (error) { return { blocked: true, reasons: [error.message], manifest, verification } }
-  return { manifest, verification, focusedEvidence, focusedValidation, escalation, judgmentFlags, reasons }
+  return { manifest, verification, focusedEvidence, focusedValidation, escalation, judgmentFlags, reasons, canonicalObservation }
 }
 
 function evidenceRefs(evidence = []) {
@@ -1150,7 +1201,7 @@ function verificationError(error) {
   return errorResult(error)
 }
 
-export function verifySlice(root, request = {}) {
+function verifySliceCore(root, request = {}) {
   try {
     root = path.resolve(root)
     assertVerificationRequestShape(request, 'verify')
@@ -1194,7 +1245,7 @@ function validateReviewAnswers(review, questions) {
   throw new Error('REVIEW_ANSWERS_INCOMPLETE')
 }
 
-export function recordSliceReview(root, request = {}) {
+function recordSliceReviewCore(root, request = {}) {
   try {
     root = path.resolve(root)
     assertVerificationRequestShape({ ...request, action: 'verify_slice' }, 'record-review')
@@ -1246,6 +1297,24 @@ export function recordSliceReview(root, request = {}) {
   } catch (error) { return verificationError(error) }
 }
 
+export function verifySlice(root, request = {}) {
+  observeActionStarted(path.resolve(root), request, 'verify')
+  let result
+  try { result = verifySliceCore(root, request) }
+  catch (error) { result = errorResult(error) }
+  observeActionFinished(path.resolve(root), request, 'verify', result)
+  return result
+}
+
+export function recordSliceReview(root, request = {}) {
+  observeActionStarted(path.resolve(root), request, 'record-review')
+  let result
+  try { result = recordSliceReviewCore(root, request) }
+  catch (error) { result = errorResult(error) }
+  observeActionFinished(path.resolve(root), request, 'record-review', result)
+  return result
+}
+
 export function prepareAction(root, request = {}) {
   try {
     root = path.resolve(root)
@@ -1261,7 +1330,7 @@ export function prepareAction(root, request = {}) {
   }
 }
 
-export function checkpointImplementation(root, request = {}) {
+function checkpointImplementationCore(root, request = {}) {
   try {
     root = path.resolve(root)
     const recovery = request.recovery_authorized === true || request.recovery?.authorized === true
@@ -1305,6 +1374,15 @@ export function checkpointImplementation(root, request = {}) {
     if (error.message === 'MIXED_CONTROL_FLAG:approval' || error.message.startsWith('MIXED_CONTROL_FLAG:')) return invalid(error.message)
     return errorResult(error)
   }
+}
+
+export function checkpointImplementation(root, request = {}) {
+  observeActionStarted(path.resolve(root), request, 'checkpoint')
+  let result
+  try { result = checkpointImplementationCore(root, request) }
+  catch (error) { result = errorResult(error) }
+  observeActionFinished(path.resolve(root), request, 'checkpoint', result)
+  return result
 }
 
 export function inspectActionTransactionPublic(root, transactionId) {

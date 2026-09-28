@@ -122,6 +122,7 @@ function fixture(risk) {
   const story = storySource(risk)
   const storyDigest = normativeDigest(inspectStory(story))
   const files = {
+    '.gitignore': '.agent-state/\n',
     'AGENTS.md': '# fixture policy\n', 'CLAUDE.md': '# provider policy\n',
     '.agents/routing/task-router.md': '# routing\n', '.agents/context/control-plane.md': '# control\n',
     '.agents/context/context-routing.md': '# context\n', '.agents/skills/v4-story-runner/SKILL.md': '# runner\n',

@@ -2,7 +2,7 @@
 
 > **For agentic workers:** Dành cho **Luna 5.6 Max** (model gpt-5.6-luna, reasoning effort max). Khi có yêu cầu triển khai riêng của human, dùng skill superpowers:executing-plans để thực hiện tuần tự từng task. Không mặc định dispatch subagent, Orca hoặc AGY.
 >
-> **Trạng thái:** IN PROGRESS — human đã ủy quyền triển khai trong lane V4 Lite architecture/control-plane migration; T00–T07 đã hoàn tất, T08 là task kế tiếp.
+> **Trạng thái:** IN PROGRESS — human đã ủy quyền triển khai trong lane V4 Lite architecture/control-plane migration; T00–T08 đã hoàn tất, T09 là task kế tiếp.
 >
 > **Ngày:** 2026-09-27. **Baseline đã đọc:** main, d8e813660e44c54785466836e5c0eda658529b74.
 >
@@ -619,18 +619,20 @@ Real recipe evidence under Node `v24.21.0` after `npm ci` in the isolated worktr
 **Consumes:** actual kernel/helper results, explicit host/Lead session checkpoint metadata.
 **Produces:** idempotent session/Story events, report coverage.
 
-- [ ] Test action vs invocation vs session identity tách riêng; unknown provider ID vẫn null.
-- [ ] Wire events khi action/check/context delivery thực sự xảy ra; không log một command chỉ vì có trong Plan.
-- [ ] Đường reader/CLI nằm ngoài wrapper được ghi coverage gap, không giả sử đã instrument toàn bộ host.
-- [ ] Trước Lead yield, skill yêu cầu observational session checkpoint; không coi đó là provider session close.
-- [ ] Graceful close-session ghi final window; interrupted session vẫn PARTIAL có thể nối sau.
-- [ ] finalize → review snapshot; complete thực sự → completed event. Missing approval không tạo completed event.
-- [ ] Observational failure không làm bypass gate hoặc rerun action đã success.
-- [ ] Không thêm invocation tự động, daemon hoặc scheduler.
-- [ ] Run: node --test .agents/scripts/v4-observation-hooks.test.mjs .agents/scripts/v4-observations.test.mjs .agents/scripts/v4-story-runner.test.mjs.
-- [ ] Commit exact T08 files.
+- [x] Test action vs invocation vs session identity tách riêng; unknown provider ID vẫn null.
+- [x] Wire events khi action/check/context delivery thực sự xảy ra; không log một command chỉ vì có trong Plan.
+- [x] Đường reader/CLI nằm ngoài wrapper được ghi coverage gap, không giả sử đã instrument toàn bộ host.
+- [x] Trước Lead yield, skill yêu cầu observational session checkpoint; không coi đó là provider session close.
+- [x] Graceful close-session ghi final window; interrupted session vẫn PARTIAL có thể nối sau.
+- [x] finalize → review snapshot; complete thực sự → completed event. Missing approval không tạo completed event.
+- [x] Observational failure không làm bypass gate hoặc rerun action đã success.
+- [x] Không thêm invocation tự động, daemon hoặc scheduler.
+- [x] Run: node --test .agents/scripts/v4-observation-hooks.test.mjs .agents/scripts/v4-observations.test.mjs .agents/scripts/v4-story-runner.test.mjs.
+- [x] Commit exact T08 files.
 
 **Gate:** vòng học có input thực tế sau session/Story, với limitations minh bạch; không hứa bắt được mọi crash/app close.
+
+**T08 evidence (2026-09-28):** The T08 regression command passed 21 tests with 0 failures in 36.494 seconds. Real action, check, and context paths now emit bounded `action_started`, `action_finished`, `check_finished`, and `context_delivered` events with separate invocation/session/attempt correlation; repeated hook delivery is idempotent while changed payloads remain conflicts. Session checkpoints and graceful close preserve `PARTIAL`/`UNKNOWN` semantics without claiming provider closure. Finalization emits a review snapshot only at `HUMAN_GATE_REQUIRED`, and completion emits a Story-completed event only with fresh approval. Completion/finalization dirty-path guards ignore only the observational runtime subtree, while hook failures remain advisory and cannot alter lifecycle or rerun an action. The common Runner skill documents the reader/CLI coverage gap and yield boundary. No daemon, scheduler, product files, Story/Plan intent, sprint status, receipts, or V3 runtime pointer were changed.
 
 ### T09 — Experience có scope, freshness và retrieval budget
 

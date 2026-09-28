@@ -20,6 +20,25 @@ warning; it cannot change `active-run.json` or relax any gate.
 Runtime observations are disposable derived data. They may be lost or
 reconstructed without changing product truth, Story lifecycle, or Human Gate.
 
+## Hook boundary
+
+The real action, check, and context paths use the small adapters exported by
+`v4-observations.mjs`: `recordActionStarted`, `recordActionFinished`,
+`recordCheckFinished`, `recordContextDelivered`,
+`recordSessionCheckpoint`, `recordSessionClosed`,
+`recordStoryReviewSnapshot`, and `recordStoryCompleted`. These adapters bind
+events to the action, invocation, session, and attempt supplied by the caller;
+they do not infer a session from a branch or turn a successful write into a
+provider-session claim.
+
+Hook failures are coverage warnings only. They never bypass a gate, authorize
+a retry, rerun a completed action, or mutate the lifecycle pointer. Repeated
+delivery of one hook event is idempotent; a changed payload with the same
+event identity is a conflict. A session checkpoint before a Lead yields is
+`PARTIAL` or `UNKNOWN` unless a real provider boundary is observed. Final
+review snapshots require a durable `HUMAN_GATE_REQUIRED` result, and Story
+completion events require both present and fresh human approval.
+
 ## EventEnvelope v1
 
 Every envelope contains:
@@ -66,6 +85,8 @@ The module exports:
 - `normalizeUsage(input)` — validates and normalizes a usage record.
 - `recordObservation(root, event)` — returns `RECORDED`, `NOOP`, `CONFLICT`, or
   `ERROR`.
+- The hook adapters listed above — record bounded provenance at actual action,
+  check, context, session, review, and completion boundaries.
 - `readObservationEvents(root, selection)` — reads raw event files without
   lifecycle interpretation.
 - `summarizeObservations(events, selection)` — returns totals, coverage,

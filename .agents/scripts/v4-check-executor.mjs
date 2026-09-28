@@ -8,6 +8,7 @@ import {
   statSync,
 } from 'node:fs'
 import path from 'node:path'
+import { recordCheckFinished } from './v4-observations.mjs'
 
 const SHA = /^[0-9a-f]{40,64}$/i
 const DIGEST = /^sha256:[0-9a-f]{64}$/i
@@ -338,6 +339,24 @@ export function executeCheck(root, spec, subject) {
     evidence.status = 'FAIL'
     evidence.reasons = ['NONZERO_EXIT']
   }
+  evidence.observation = recordCheckFinished(root, {
+    story_id: spec.story_id ?? null,
+    slice_id: spec.slice_id ?? null,
+    action: spec.action ?? 'verify_slice',
+    invocation_id: spec.invocation_id ?? null,
+    session_id: spec.session_id ?? null,
+    attempt_id: spec.attempt_id ?? evidence.command_digest,
+    payload: {
+      check_id: evidence.check_id,
+      status: evidence.status,
+      exit_code: evidence.exit_code,
+      subject: evidence.subject,
+      command_digest: evidence.command_digest,
+      output_digest: evidence.output_digest,
+      reasons: evidence.reasons,
+    },
+    provenance: { kind: 'check_executor', source: 'v4-check-executor', command_digest: evidence.command_digest },
+  })
   return evidence
 }
 
