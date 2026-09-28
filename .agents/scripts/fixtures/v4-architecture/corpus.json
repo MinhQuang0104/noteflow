@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "case_id": "L-mapped-low",
+      "workload_class": "L",
+      "risk": "LOW",
+      "coverage": "mapped",
+      "expected": "PASS_NO_REVIEW"
+    },
+    {
+      "case_id": "M-mixed-medium",
+      "workload_class": "M",
+      "risk": "MEDIUM",
+      "coverage": "mixed",
+      "expected": "INCOMPLETE_REVIEW_REQUIRED"
+    },
+    {
+      "case_id": "H-stale-recovery",
+      "workload_class": "H",
+      "risk": "HIGH",
+      "coverage": "stale-recovery",
+      "expected": "STALE_RECOVERY_REQUIRED"
+    }
+  ]
+}
