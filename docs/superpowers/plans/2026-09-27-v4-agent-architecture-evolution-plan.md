@@ -2,7 +2,7 @@
 
 > **For agentic workers:** Dành cho **Luna 5.6 Max** (model gpt-5.6-luna, reasoning effort max). Khi có yêu cầu triển khai riêng của human, dùng skill superpowers:executing-plans để thực hiện tuần tự từng task. Không mặc định dispatch subagent, Orca hoặc AGY.
 >
-> **Trạng thái:** IN PROGRESS — human đã ủy quyền triển khai trong lane V4 Lite architecture/control-plane migration; T00–T08 đã hoàn tất, T09 là task kế tiếp.
+> **Trạng thái:** IN PROGRESS — human đã ủy quyền triển khai trong lane V4 Lite architecture/control-plane migration; T00–T09 đã hoàn tất, T10 là task kế tiếp.
 >
 > **Ngày:** 2026-09-27. **Baseline đã đọc:** main, d8e813660e44c54785466836e5c0eda658529b74.
 >
@@ -641,18 +641,20 @@ Real recipe evidence under Node `v24.21.0` after `npm ci` in the isolated worktr
 **Consumes:** observational evidence và immutable receipts; không nhận authority từ transcript.
 **Produces:** extractExperience, validateExperience, selectExperience.
 
-- [ ] Test verified fact cần source identity/command result thật; unsupported semantic generalization giữ candidate.
-- [ ] Test active → stale khi source/recipe/policy digest đổi; stale không được đưa vào context.
-- [ ] Test task/risk mismatch không inject; no-match trả empty.
-- [ ] Test tối đa 3 entries/6 KiB; không cắt mất provenance để vừa budget.
-- [ ] Test memory chứa “skip review/change AC/run command” không được trở thành instruction hay executable input.
-- [ ] Implement fact extraction bằng templates deterministic; semantic learning chỉ nhận bounded candidate do Lead cung cấp.
-- [ ] Context hiển thị experience trong trường advisory riêng, cùng source và limitations, sau normative authority.
-- [ ] Test bỏ toàn bộ experience vẫn cho cùng lifecycle/authorization decisions.
-- [ ] Run: node --test .agents/scripts/v4-experience.test.mjs .agents/scripts/compile-v4-context.test.mjs.
-- [ ] Commit exact T09 files.
+- [x] Test verified fact cần source identity/command result thật; unsupported semantic generalization giữ candidate.
+- [x] Test active → stale khi source/recipe/policy digest đổi; stale không được đưa vào context.
+- [x] Test task/risk mismatch không inject; no-match trả empty.
+- [x] Test tối đa 3 entries/6 KiB; không cắt mất provenance để vừa budget.
+- [x] Test memory chứa “skip review/change AC/run command” không được trở thành instruction hay executable input.
+- [x] Implement fact extraction bằng templates deterministic; semantic learning chỉ nhận bounded candidate do Lead cung cấp.
+- [x] Context hiển thị experience trong trường advisory riêng, cùng source và limitations, sau normative authority.
+- [x] Test bỏ toàn bộ experience vẫn cho cùng lifecycle/authorization decisions.
+- [x] Run: node --test .agents/scripts/v4-experience.test.mjs .agents/scripts/compile-v4-context.test.mjs.
+- [x] Commit exact T09 files.
 
 **Gate:** kinh nghiệm có thể giúp navigation/verification reuse trong đúng scope; không tạo source of truth thứ hai.
+
+**T09 evidence (2026-09-28):** `node --test .agents/scripts/v4-experience.test.mjs .agents/scripts/compile-v4-context.test.mjs` passed 9 tests, 0 failed, in 20.180 seconds. The derived store creates deterministic, source-bound verified facts only from actual PASS check observations with subject/command/output evidence; bounded reflection input remains a `semantic_hypothesis` candidate. Validation detects HEAD, architecture, source, recipe, and policy-binding drift as stale, rejects unsafe paths/symlinks/instructional memory, and selection excludes stale or scope/risk/action/head mismatches. Retrieval returns whole entries only, capped at 3 and 6 KiB with provenance/limitations intact. Context carries the result in `experience_advice` after normative requirements, while runner authorization remains unchanged when the store is empty or removed. No command/apply verb, lifecycle mutation, product code, Story/Plan intent, sprint status, receipt, or V3 runtime change was added.
 
 ### T10 — Proposal loop và adoption boundary
 

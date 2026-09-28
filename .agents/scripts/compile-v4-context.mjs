@@ -8,6 +8,7 @@ import { inspectStory, normativeDigest } from './check-artifact-contract.mjs'
 import { frontmatter, validate as validateStoryPlan } from './check-story-plan.mjs'
 import { separatedStory } from './v4-separated-plan.mjs'
 import { recordContextDelivered } from './v4-observations.mjs'
+import { selectExperience } from './v4-experience.mjs'
 
 const SHA = /^[0-9a-f]{40,64}$/i
 const ACTIONS = new Map([
@@ -284,7 +285,7 @@ function knownScope(slice, plan, planPath) {
   }
 }
 
-function buildProjection(root, storyId, action, selectedSliceId, expectedHead, plan, planPath, story, storyPath, pointer, sourceInfo) {
+function buildProjection(root, storyId, action, selectedSliceId, expectedHead, plan, planPath, story, storyPath, pointer, sourceInfo, experienceAdvice = []) {
   const spec = sourceInfo.spec
   const slice = selectedSliceId ? plan.slices.find(item => item.id === selectedSliceId) : null
   const requirements = story && slice
@@ -338,7 +339,7 @@ function buildProjection(root, storyId, action, selectedSliceId, expectedHead, p
     known_scope: knownScope(slice, plan, planPath),
     output_contract_ref: outputContractRef,
     stop_conditions: [...spec.stop],
-    experience_advice: [],
+    experience_advice: experienceAdvice,
   }
   const projectionBytes = Buffer.byteLength(stableJson(projectionBase), 'utf8')
   const instructionBytes = sourceInfo.bindings
@@ -397,6 +398,13 @@ export function compileActionContext(root, storyId, action, sliceId, options = {
       return result(status, [storyProjection.reason], { actualHead, expectedHead, validation })
     }
     const sourceInfo = actionSources(root, action)
+    const experienceSelection = selectExperience(root, {
+      story_id: storyId,
+      slice_id: selectedSliceId,
+      action,
+      risk: storyProjection.story?.risk ?? null,
+      current_head: actualHead,
+    })
     const projection = buildProjection(
       root,
       storyId,
@@ -409,6 +417,7 @@ export function compileActionContext(root, storyId, action, sliceId, options = {
       storyProjection.storyPath,
       pointer,
       sourceInfo,
+      experienceSelection.status === 'OK' ? experienceSelection.entries : [],
     )
     const observation = recordContextDelivered(root, {
       story_id: storyId,
