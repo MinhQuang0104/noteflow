@@ -10,13 +10,27 @@ Only explicitly human-authorized V4 Lite architecture or control-plane migration
 
 Before migration work, read only the canonical `.agent-state/active-run.json` pointer, without mutation. Proceed outside V3 bootstrap only if it is clearly IDLE and no directly observed state contradicts it. Then load `.agents/routing/task-router.md`. If active, ambiguous, or contradicted, stop and report the conflict to the human; do not resume, reconcile, take over, or mutate V3 runtime state. Do not invoke Orca, Antigravity/AGY, V3 workers, subagents, or V3 recovery/reconciliation merely to satisfy V3 bootstrap requirements. This lane does not change V3.1 worker rules, lease/generation fencing, recovery, reconciliation, Human Gate, or Story development.
 
-## Normal V3 / Story entry
+## Story and provider routing
 
-For a fresh schema-v2 Story explicitly authorized to start by V4 Lite, `start_story` is an additional bounded Runner action. `.agents/scripts/start-story.mjs check` validates committed planning approval/readiness, completed dependency sprint keys, the upstream Epic digest, pending slices without execution evidence, matching backlog/ready-for-dev projections, canonical IDLE, expected HEAD and exact clean scope. `apply` requires the preview fingerprint, uses an exclusive Git-local transaction lock, synchronizes Story/Plan/sprint to in-progress in one exact commit, persists `implement_slice:<current>` and stops. It never implements the successor, fabricates checkpoints, changes V3 runtime state, or grants completion approval. An interrupted transaction retains its files/index/lock and requires explicit recovery; reconciliation rules remain unchanged. Planning approval alone does not authorize invoking start.
+The router chooses the lane before any lane-specific bootstrap. A fresh schema-v2
+Story explicitly authorized by human to start by V4 Lite follows
+`.agents/skills/v4-story-runner/actions/start-story.md`; its read-only gate,
+fingerprint-bound apply, exact lifecycle commit, and stop boundary remain
+authoritative.
 
-An explicit human request to implement or continue a named Story **by V4 Lite** may enter `.agents/skills/v4-story-runner/SKILL.md` after the canonical `.agent-state/active-run.json` pointer is read-only checked as clearly IDLE. The V4 Story Runner authorizes routing, Plan validation, read-only readiness, and one bounded action per invocation: `reconcile_lifecycle` through `.agents/scripts/reconcile-story-lifecycle.mjs`, `implement_slice` through the read-only implementation preflight/recovery gate and its two-commit durability contract, `verify_slice` under the Runner's freshness, deterministic verification, escalation, review-freshness, and durable Plan-update guards, `finalize_story` through the exact finalization transaction to `review`/Human Gate, or `complete_story` through the exact fresh Human approval transaction from `review` to `done`. `review_slice` remains disabled; automatic approval, automatic review-to-done, generic continuation authorization, and automatic V3 fallback remain disabled. A successful action may persist one explicit successor but may not execute it in the same invocation. If the pointer is active, ambiguous, or contradicted, stop; do not take over a V3 run. This opt-in is separate from the V4 Lite migration lane above.
+An explicit human request to implement or continue a named Story **by V4 Lite**
+follows `.agents/skills/v4-story-runner/SKILL.md` and exactly one action document
+under `.agents/skills/v4-story-runner/actions/`. The action documents preserve
+Plan validation, freshness, exact scope, two-commit durability, review
+escalation, recovery, and Human Gate guards. `review_slice`, automatic
+approval, generic continuation authorization, automatic review-to-done, and
+automatic V3 fallback remain disabled. A successful action may persist one
+explicit successor but may not execute it in the same invocation.
 
-Explicit V3.1/Orca requests and Story execution without an explicit V4 Lite lane continue through `.agents/policies/orchestration-v3.md` and its shared Lead bootstrap. Approved or `ready-for-dev` BMAD Stories in that lane use `story-development` as the sole repository execution router. V3.1 remains the fallback. Do not invoke Orca or AGY from the V4 readiness path.
+Explicit V3.1/Orca requests and Story execution without explicit V4 opt-in use
+`.agents/policies/orchestration-v3.md` and `story-development` as the sole
+repository execution router. Do not invoke Orca, AGY, V3 workers, or V3
+recovery from a V4 readiness or migration path.
 
 ## Story risk and retry
 

@@ -19,3 +19,22 @@ Select exactly one primary L1 module by the task's main deliverable:
 Load a second module only when its concern materially affects the same deliverable; never load all modules by default. If the task fits no class, stop and clarify the V4 scope. Product work and approved Stories without explicit V4 opt-in use the existing V3 route in `AGENTS.md` and `.agents/policies/orchestration-v3.md`.
 
 Treat authoritative V3 documents as L2: open relevant detail only for an affected boundary. Keep recovery/failover detail lazy; an observed recovery condition follows existing V3 authority, not a healthy V4 path.
+
+## Action context routing
+
+For a V4 Story action, read the common entry
+`.agents/skills/v4-story-runner/SKILL.md`, then exactly one action document:
+
+| `next_action.kind` | Action document |
+| --- | --- |
+| `start_story` | `actions/start-story.md` |
+| `reconcile_lifecycle` | `actions/reconcile-lifecycle.md` |
+| `implement_slice` | `actions/implement-slice.md` |
+| `verify_slice` | `actions/verify-slice.md` |
+| `finalize_story` | `actions/finalize-story.md` |
+| `complete_story` | `actions/complete-story.md` |
+
+Load `references/recovery.md` only for an observed partial/locked/recovery
+condition and `references/implementation-techniques.md` only when the selected
+action requires its compact implementation recipe. The common entry never
+executes an action and no action document authorizes its successor.

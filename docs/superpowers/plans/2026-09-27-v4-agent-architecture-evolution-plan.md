@@ -2,7 +2,7 @@
 
 > **For agentic workers:** Dành cho **Luna 5.6 Max** (model gpt-5.6-luna, reasoning effort max). Khi có yêu cầu triển khai riêng của human, dùng skill superpowers:executing-plans để thực hiện tuần tự từng task. Không mặc định dispatch subagent, Orca hoặc AGY.
 >
-> **Trạng thái:** IN PROGRESS — human đã ủy quyền triển khai trong lane V4 Lite architecture/control-plane migration; T00 đã hoàn tất, các task sau vẫn chưa chạy.
+> **Trạng thái:** IN PROGRESS — human đã ủy quyền triển khai trong lane V4 Lite architecture/control-plane migration; T00–T02 đã hoàn tất, T03 là task kế tiếp.
 >
 > **Ngày:** 2026-09-27. **Baseline đã đọc:** main, d8e813660e44c54785466836e5c0eda658529b74.
 >
@@ -451,7 +451,7 @@ Mỗi task:
 
 **Gate:** baseline được ghi trung thực; fixture isolated. Nếu baseline fail không liên quan, ghi blocker và xử lý theo authority riêng, không sửa product để thông qua migration.
 
-**T00 evidence (2026-09-28):** baseline HEAD `d8e813660e44c54785466836e5c0eda658529b74`; Node `v24.21.0`; npm `11.6.4`; Git `2.49.0.windows.1`; inventory was clean except the human-provided plan in the isolated worktree. Baseline command `node --test (Get-ChildItem -LiteralPath .agents/scripts -Filter '*.test.mjs' -File | Sort-Object Name | ForEach-Object { $_.FullName })`: 340 pass, 0 fail, 394715.4608 ms. T00 command `node --test .agents/scripts/v4-architecture-baseline.test.mjs`: 6 pass, 0 fail, 13617.0268 ms. Runtime bundle: `.agent-state/v4-observations/evaluations/architecture-upgrade-baseline.json`; provider usage and instruction-byte measurements remain `null`/excluded, and scenario fault-injection cases are not yet executed.
+**T00 evidence (2026-09-28):** baseline HEAD `d8e813660e44c54785466836e5c0eda658529b74`; Node `v24.21.0`; npm `11.6.4`; Git `2.49.0.windows.1`; inventory was clean except the human-provided plan in the isolated worktree. Baseline command `node --test (Get-ChildItem -LiteralPath .agents/scripts -Filter '*.test.mjs' -File | Sort-Object Name | ForEach-Object { $_.FullName })`: 340 pass, 0 fail, 394715.4608 ms. T00 command `node --test .agents/scripts/v4-architecture-baseline.test.mjs`: 6 pass, 0 fail, 13617.0268 ms. Runtime bundle: `.agent-state/v4-observations/evaluations/architecture-upgrade-baseline.json`; provider usage remains `null`, while the pre-T02 instruction baseline is recorded as 30,565 UTF-8 bytes for both implement/verify; scenario fault-injection cases are not yet executed.
 
 ### T01 — Observation contract và cost ledger
 
@@ -479,17 +479,19 @@ Mỗi task:
 **Consumes:** authority và action contracts hiện tại.
 **Produces:** một common entry nhỏ, đúng một action document cho next_action hợp lệ, lazy triggers rõ.
 
-- [ ] Lập invariant checklist: canonical pointer; named lane; Story authority; one action; exact scope; risk/review; no auto fallback; human approval; interrupted transaction.
-- [ ] Sửa CLAUDE.md để đọc AGENTS rồi chọn lane, không ép V3 bootstrap trước routing.
-- [ ] Rút AGENTS về authority/routing/invariants; detail có thể chuyển sang đúng action contract nhưng không bỏ điều kiện gating.
-- [ ] Tách all-action skill; loại đoạn verify lặp. Common entry không tự thực thi action.
-- [ ] Implementation-techniques giữ RED đúng nguyên nhân → GREEN → refactor trong scope, fresh checks và exact diff; full upstream technique chỉ load khi trigger. Quy tắc local V4 phải nói rõ cách ưu tiên để không mâu thuẫn skill generic.
-- [ ] Recovery reference chỉ lazy-load khi state thực sự cần; common entry vẫn phải biết khi nào dừng.
-- [ ] Review bằng routing scenarios: explicit V4; explicit V3; no lane; ambiguous lanes; active pointer; generic continue tại Human Gate; unknown action.
-- [ ] Đo UTF-8 bytes của context instruction mặc định cho implement/verify so với baseline. Mục tiêu giảm ít nhất 30% cho đường bình thường; đây là acceptance về bytes, không về provider tokens.
-- [ ] Commit đúng document files; không sửa policy V3 hoặc skills upstream khác.
+- [x] Lập invariant checklist: canonical pointer; named lane; Story authority; one action; exact scope; risk/review; no auto fallback; human approval; interrupted transaction.
+- [x] Sửa CLAUDE.md để đọc AGENTS rồi chọn lane, không ép V3 bootstrap trước routing.
+- [x] Rút AGENTS về authority/routing/invariants; detail có thể chuyển sang đúng action contract nhưng không bỏ điều kiện gating.
+- [x] Tách all-action skill; loại đoạn verify lặp. Common entry không tự thực thi action.
+- [x] Implementation-techniques giữ RED đúng nguyên nhân → GREEN → refactor trong scope, fresh checks và exact diff; full upstream technique chỉ load khi trigger. Quy tắc local V4 phải nói rõ cách ưu tiên để không mâu thuẫn skill generic.
+- [x] Recovery reference chỉ lazy-load khi state thực sự cần; common entry vẫn phải biết khi nào dừng.
+- [x] Review bằng routing scenarios: explicit V4; explicit V3; no lane; ambiguous lanes; active pointer; generic continue tại Human Gate; unknown action.
+- [x] Đo UTF-8 bytes của context instruction mặc định cho implement/verify so với baseline. Mục tiêu giảm ít nhất 30% cho đường bình thường; đây là acceptance về bytes, không về provider tokens.
+- [x] Commit đúng document files; không sửa policy V3 hoặc skills upstream khác.
 
 **Gate:** không mất invariant; provider routing nhất quán; action docs rõ đầu vào/đầu ra/stop. Tài liệu chuyển sang kernel chỉ khi T06/T07 đã pass, nên ban đầu vẫn chỉ dẫn helper hiện hành.
+
+**T02 evidence (2026-09-28):** `node --test .agents/scripts/check-story-finalization.architecture.test.mjs` — 4 pass, 0 fail, 96 ms. Routing review covered explicit V4, explicit V3, missing/ambiguous lane, active/ambiguous pointer, generic continuation at Human Gate, and unknown action; the common entry only routes and never executes an action. UTF-8 instruction basis before T02 was 30,565 bytes; the split action projections measured 19,468 bytes for `implement_slice` (36.31% reduction) and 18,899 bytes for `verify_slice` (38.17% reduction), meeting the 30% byte goal; this is not a provider-token claim. `git diff --check` passed. The six action docs preserve one-action, exact-scope, risk/review, recovery, and Human Gate boundaries; implementation techniques and recovery details are lazy references. No V3 policy/upstream skill was modified.
 
 ### T03 — Context projection có provenance
 
