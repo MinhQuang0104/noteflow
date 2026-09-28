@@ -484,6 +484,23 @@ describe('useJournalDraftsStore', () => {
     expect(drafts.hasUnsavedDrafts()).toBe(true)
   })
 
+  it('keeps same-owner warning work visible while session refresh is pending', async () => {
+    const session = deferred<authApi.OwnerSession | null>()
+    vi.spyOn(authApi, 'getSession').mockReturnValue(session.promise)
+    drafts.hydrate(snapshot('challenge-a', 'server baseline', 1))
+    drafts.setDraftText('challenge-a', DATE, 'owner 42 private draft')
+
+    const refreshing = auth.refreshSession()
+    await Promise.resolve()
+
+    expect(auth.status).toBe('loading')
+    expect(auth.owner).toMatchObject({ id: 42 })
+    expect(drafts.hasUnsavedDrafts()).toBe(true)
+
+    session.resolve({ owner: { id: 42, name: 'Owner', email: 'owner@example.test' } })
+    await refreshing
+  })
+
   it('treats error, conflict, blocked, and unresolved command states as unsaved work', () => {
     drafts.hydrate(snapshot('challenge-a', 'server baseline', 1))
     const record = drafts.getDraft('challenge-a', DATE)
