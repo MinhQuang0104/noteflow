@@ -1,17 +1,20 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { RouterLink, RouterView, useRouter } from 'vue-router'
 
 import { useAccountStore } from '../stores/account'
 import { useAuthStore } from '../stores/auth'
+import { useJournalDraftsStore } from '../stores/journalDrafts'
 import { useSyncStore } from '../stores/sync'
 
 const auth = useAuthStore()
 const account = useAccountStore()
+const journalDrafts = useJournalDraftsStore()
 const sync = useSyncStore()
 const router = useRouter()
 const navigationOpen = ref(false)
 const loggingOut = ref(false)
+const logoutError = ref<string | null>(null)
 
 const navigation = [
   { to: '/today', label: 'Hôm nay' },
@@ -20,17 +23,35 @@ const navigation = [
   { to: '/calendar', label: 'Lịch' },
 ]
 
+function warnBeforeUnload(event: BeforeUnloadEvent): void {
+  if (!journalDrafts.hasUnsavedDrafts()) return
+  event.preventDefault()
+  event.returnValue = ''
+}
+
 onMounted(() => {
+  window.addEventListener('beforeunload', warnBeforeUnload)
   void sync.start()
 })
 
+onBeforeUnmount(() => {
+  window.removeEventListener('beforeunload', warnBeforeUnload)
+})
+
 async function logOut(): Promise<void> {
+  if (journalDrafts.hasUnsavedDrafts() && !window.confirm('Bạn có bản nháp chưa lưu. Đăng xuất sẽ xóa bản nháp trong phiên này. Tiếp tục?')) {
+    return
+  }
+
   loggingOut.value = true
+  logoutError.value = null
   try {
-    sync.stop()
     await auth.logOut()
+    sync.stop()
     navigationOpen.value = false
     await router.replace('/sign-in')
+  } catch {
+    logoutError.value = 'Không thể đăng xuất. Phiên làm việc và bản nháp vẫn được giữ.'
   } finally {
     loggingOut.value = false
   }
@@ -146,6 +167,14 @@ async function logOut(): Promise<void> {
         </nav>
       </div>
     </header>
+
+    <div
+      v-if="logoutError"
+      role="alert"
+      class="border-b border-rose-300 bg-rose-50 px-4 py-2.5 text-center text-sm font-medium text-rose-900 sm:px-6"
+    >
+      {{ logoutError }}
+    </div>
 
     <!-- Write State Warning Banner -->
     <div

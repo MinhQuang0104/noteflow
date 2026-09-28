@@ -5,15 +5,18 @@ import * as accountApi from '../../api/account'
 import { pinia } from '../../pinia'
 import { useAccountStore } from '../../stores/account'
 import { useAuthStore } from '../../stores/auth'
+import { useJournalDraftsStore } from '../../stores/journalDrafts'
 import router from '..'
 
 beforeEach(async () => {
   vi.restoreAllMocks()
   const auth = useAuthStore(pinia)
   const account = useAccountStore(pinia)
+  const drafts = useJournalDraftsStore(pinia)
   auth.owner = null
   auth.status = 'guest'
   account.reset()
+  drafts.reset()
   await router.push('/sign-in')
 })
 
@@ -51,8 +54,23 @@ test('an authenticated owner cannot return to the login view', async () => {
 
 test('an expired account-context request sends the owner back to login', async () => {
   const auth = useAuthStore(pinia)
+  const account = useAccountStore(pinia)
+  const drafts = useJournalDraftsStore(pinia)
   auth.owner = { id: 1, name: 'Owner', email: 'owner@example.test' }
   auth.status = 'authenticated'
+  account.context = {
+    timezone: 'Asia/Ho_Chi_Minh',
+    account_date: '2026-09-21',
+    week: { start_date: '2026-09-21', end_date: '2026-09-27' },
+    account_revision: 1,
+    data_epoch: 1,
+    write_state: 'open',
+  }
+  account.status = 'ready'
+  drafts.hydrate({ challenge_id: 'challenge-a', local_date: '2026-09-21', journal: 'saved', journal_version: 1 })
+  drafts.setDraftText('challenge-a', '2026-09-21', 'private draft')
+  account.context = null
+  account.status = 'unknown'
   vi.spyOn(accountApi, 'getAccountContext').mockRejectedValue(
     Object.assign(new Error('expired'), { status: 401 }),
   )
@@ -62,4 +80,6 @@ test('an expired account-context request sends the owner back to login', async (
 
   expect(router.currentRoute.value.name).toBe('login')
   expect(router.currentRoute.value.query.redirect).toBe('/today')
+  expect(drafts.getDraft('challenge-a', '2026-09-21')).toBeUndefined()
+  expect(Object.values(drafts.drafts)).toMatchObject([{ text: 'private draft', status: 'quarantined' }])
 })

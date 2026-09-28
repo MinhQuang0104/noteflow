@@ -2,6 +2,8 @@ import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import * as challengesApi from '../../api/challenges'
+import * as accountApi from '../../api/account'
+import * as authApi from '../../api/auth'
 import { useAccountStore } from '../account'
 import { useAuthStore } from '../auth'
 import { useJournalDraftsStore } from '../journalDrafts'
@@ -233,7 +235,8 @@ describe('useJournalDraftsStore', () => {
     response.resolve(mutation('challenge-a', 'pending draft', 2))
     await saving
 
-    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({
+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()
+    expect(Object.values(drafts.drafts)[0]).toMatchObject({
       text: 'pending draft',
       journalVersion: 1,
       acknowledgedClientRevision: 0,
@@ -254,7 +257,8 @@ describe('useJournalDraftsStore', () => {
     response.reject(new TypeError('network timeout'))
     await saving
 
-    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({
+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()
+    expect(Object.values(drafts.drafts)[0]).toMatchObject({
       status: 'quarantined',
       error: { kind: 'stale_context' },
     })
@@ -309,6 +313,186 @@ describe('useJournalDraftsStore', () => {
 
     expect(sync.reconcileBeforeWrite).not.toHaveBeenCalled()
     expect(save).not.toHaveBeenCalled()
-    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({ status: 'quarantined' })
+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()
+    expect(Object.values(drafts.drafts)[0]).toMatchObject({ status: 'quarantined' })
+  })
+
+  it('keeps an expired draft hidden until same-owner epoch and version reconciliation, then replays the same command', async () => {
+    const save = vi.spyOn(challengesApi, 'saveChallengeJournal')
+    save
+      .mockRejectedValueOnce(new TypeError('network timeout'))
+      .mockResolvedValueOnce(mutation('challenge-a', 'private draft', 2))
+    const base = snapshot('challenge-a', 'server baseline', 1)
+    drafts.hydrate(base)
+    drafts.setDraftText('challenge-a', DATE, 'private draft')
+
+    await drafts.save('challenge-a', DATE)
+    const originalRequest = save.mock.calls[0]
+    expect(originalRequest).toBeDefined()
+    expect(drafts.getDraft('challenge-a', DATE)?.pendingCommand?.request).toEqual(originalRequest?.[2])
+
+    vi.spyOn(authApi, 'getSession').mockResolvedValue(null)
+    await auth.refreshSession()
+
+    expect(auth.status).toBe('guest')
+    expect(account.context).toBeNull()
+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()
+    expect(Object.values(drafts.drafts)).toMatchObject([
+      { text: 'private draft', status: 'quarantined', pendingCommand: { request: originalRequest?.[2] } },
+    ])
+
+    vi.spyOn(authApi, 'login').mockResolvedValue({
+      owner: { id: 42, name: 'Owner', email: 'owner@example.test' },
+      redirect_to: '/challenges',
+    } as authApi.LoginResult)
+    await auth.logIn({ email: 'owner@example.test', password: 'secret' })
+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()
+
+    vi.spyOn(accountApi, 'getAccountContext').mockResolvedValue({
+      timezone: 'Asia/Ho_Chi_Minh',
+      account_date: DATE,
+      week: { start_date: '2026-09-21', end_date: '2026-09-27' },
+      account_revision: 12,
+      data_epoch: 4,
+      write_state: 'open',
+    })
+    await account.refresh()
+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()
+
+    drafts.hydrate(base)
+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({
+      text: 'private draft',
+      status: 'error',
+      pendingCommand: { request: originalRequest?.[2] },
+    })
+
+    await drafts.save('challenge-a', DATE)
+
+    expect(save).toHaveBeenCalledTimes(2)
+    expect(save.mock.calls[1]).toEqual(originalRequest)
+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({
+      text: 'private draft',
+      status: 'saved',
+      acknowledgedClientRevision: 1,
+      pendingCommand: null,
+    })
+  })
+
+  it('keeps an expired draft quarantined when the owner returns in a different data epoch', async () => {
+    const save = vi.spyOn(challengesApi, 'saveChallengeJournal')
+    save.mockRejectedValueOnce(new TypeError('network timeout'))
+    const base = snapshot('challenge-a', 'server baseline', 1)
+    drafts.hydrate(base)
+    drafts.setDraftText('challenge-a', DATE, 'private draft')
+
+    await drafts.save('challenge-a', DATE)
+    const originalRequest = save.mock.calls[0]?.[2]
+    expect(originalRequest).toBeDefined()
+
+    vi.spyOn(authApi, 'getSession').mockResolvedValue(null)
+    await auth.refreshSession()
+    vi.spyOn(authApi, 'login').mockResolvedValue({
+      owner: { id: 42, name: 'Owner', email: 'owner@example.test' },
+      redirect_to: '/challenges',
+    } as authApi.LoginResult)
+    await auth.logIn({ email: 'owner@example.test', password: 'secret' })
+    vi.spyOn(accountApi, 'getAccountContext').mockResolvedValue({
+      timezone: 'Asia/Ho_Chi_Minh',
+      account_date: DATE,
+      week: { start_date: '2026-09-21', end_date: '2026-09-27' },
+      account_revision: 13,
+      data_epoch: 5,
+      write_state: 'open',
+    })
+    await account.refresh()
+
+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()
+    drafts.hydrate(snapshot('challenge-a', 'new epoch server text', 7))
+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({
+      text: 'private draft',
+      dataEpoch: 4,
+      status: 'quarantined',
+      pendingCommand: { request: originalRequest },
+    })
+
+    await drafts.save('challenge-a', DATE)
+
+    expect(save).toHaveBeenCalledOnce()
+    expect(save.mock.calls[0]?.[2]).toEqual(originalRequest)
+  })
+
+  it('does not send a journal mutation while the account write state is locked', async () => {
+    const save = vi.spyOn(challengesApi, 'saveChallengeJournal')
+    drafts.hydrate(snapshot('challenge-a', 'server baseline', 1))
+    drafts.setDraftText('challenge-a', DATE, 'private draft')
+    account.context!.write_state = 'locked_for_import'
+
+    await drafts.save('challenge-a', DATE)
+
+    expect(sync.reconcileBeforeWrite).toHaveBeenCalledOnce()
+    expect(save).not.toHaveBeenCalled()
+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({ status: 'blocked' })
+  })
+
+  it('refreshes auth after a 401 and never retries or exposes the draft before reconciliation', async () => {
+    const save = vi.spyOn(challengesApi, 'saveChallengeJournal')
+    save.mockRejectedValueOnce(Object.assign(new Error('expired'), { status: 401 }))
+    vi.spyOn(authApi, 'getSession').mockResolvedValue(null)
+    drafts.hydrate(snapshot('challenge-a', 'server baseline', 1))
+    drafts.setDraftText('challenge-a', DATE, 'private draft')
+
+    await drafts.save('challenge-a', DATE)
+    await drafts.save('challenge-a', DATE)
+
+    expect(auth.status).toBe('guest')
+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()
+    expect(Object.values(drafts.drafts)[0]).toMatchObject({
+      text: 'private draft',
+      status: 'quarantined',
+      requiresReconciliation: true,
+    })
+    expect(save).toHaveBeenCalledOnce()
+  })
+
+  it('treats error, conflict, blocked, and unresolved command states as unsaved work', () => {
+    drafts.hydrate(snapshot('challenge-a', 'server baseline', 1))
+    const record = drafts.getDraft('challenge-a', DATE)
+    expect(record).toBeDefined()
+    expect(drafts.hasUnsavedDrafts()).toBe(false)
+
+    record!.status = 'error'
+    expect(drafts.hasUnsavedDrafts()).toBe(true)
+    record!.status = 'conflict'
+    expect(drafts.hasUnsavedDrafts()).toBe(true)
+    record!.status = 'blocked'
+    expect(drafts.hasUnsavedDrafts()).toBe(true)
+    record!.status = 'saving'
+    record!.pendingCommand = Object.freeze({
+      revision: 0,
+      ownerId: 42,
+      authGeneration: auth.generation,
+      dataEpoch: 4,
+      request: Object.freeze({ command_id: 'uncertain', data_epoch: 4, base_version: 1, journal: 'server baseline' }),
+    })
+    expect(drafts.hasUnsavedDrafts()).toBe(true)
+
+    record!.status = 'saved'
+    record!.pendingCommand = null
+    expect(drafts.hasUnsavedDrafts()).toBe(false)
+  })
+
+  it('reconciles a changed same-epoch version as a conflict without changing the local base', () => {
+    drafts.hydrate(snapshot('challenge-a', 'server baseline', 1))
+    drafts.setDraftText('challenge-a', DATE, 'private draft')
+    auth.generation += 1
+
+    drafts.hydrate(snapshot('challenge-a', 'updated on server', 2))
+
+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({
+      text: 'private draft',
+      journalVersion: 1,
+      status: 'conflict',
+      conflictSnapshot: snapshot('challenge-a', 'updated on server', 2),
+    })
   })
 })

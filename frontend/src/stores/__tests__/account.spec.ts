@@ -5,6 +5,7 @@ import * as accountApi from '../../api/account'
 import * as authApi from '../../api/auth'
 import { useAccountStore } from '../account'
 import { useAuthStore } from '../auth'
+import { useJournalDraftsStore } from '../journalDrafts'
 
 beforeEach(() => {
   setActivePinia(createPinia())
@@ -51,7 +52,7 @@ test('an account API error remains explicit and does not synthesize device time'
   expect(account.status).toBe('error')
 })
 
-test('an expired account request reconciles auth and clears private context', async () => {
+test('an expired account request clears private context and keeps the draft quarantined in memory', async () => {
   vi.spyOn(accountApi, 'getAccountContext').mockRejectedValue(
     Object.assign(new Error('expired'), { status: 401 }),
   )
@@ -60,6 +61,7 @@ test('an expired account request reconciles auth and clears private context', as
   auth.owner = { id: 1, name: 'Owner', email: 'owner@example.test' }
   auth.status = 'authenticated'
   const account = useAccountStore()
+  const drafts = useJournalDraftsStore()
   account.context = {
     timezone: 'Asia/Ho_Chi_Minh',
     account_date: '2026-09-21',
@@ -69,6 +71,8 @@ test('an expired account request reconciles auth and clears private context', as
     write_state: 'open',
   }
   account.status = 'ready'
+  drafts.hydrate({ challenge_id: 'challenge-a', local_date: '2026-09-21', journal: 'saved', journal_version: 1 })
+  drafts.setDraftText('challenge-a', '2026-09-21', 'private unsaved text')
 
   await expect(account.refresh()).resolves.toBe(false)
 
@@ -76,4 +80,10 @@ test('an expired account request reconciles auth and clears private context', as
   expect(auth.owner).toBeNull()
   expect(account.context).toBeNull()
   expect(account.status).toBe('unknown')
+  expect(drafts.getDraft('challenge-a', '2026-09-21')).toBeUndefined()
+  expect(Object.values(drafts.drafts)).toHaveLength(1)
+  expect(Object.values(drafts.drafts)[0]).toMatchObject({
+    text: 'private unsaved text',
+    status: 'quarantined',
+  })
 })

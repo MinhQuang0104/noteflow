@@ -4,7 +4,7 @@ import { ref } from 'vue'
 import * as challengesApi from '../api/challenges'
 import type { JournalMutationResult, JournalSnapshot, SaveJournalRequest } from '../api/challenges'
 import { useAccountStore } from './account'
-import { useAuthStore } from './auth'
+import { useAuthStore, type PrivateStateResetReason } from './auth'
 import { useSyncStore } from './sync'
 
 export type JournalDraftStatus = 'saved' | 'dirty' | 'saving' | 'error' | 'conflict' | 'blocked' | 'quarantined'
@@ -43,6 +43,7 @@ export interface JournalDraftRecord {
   conflictSnapshot: JournalSnapshot | null
   error: { kind: JournalDraftErrorKind; message: string } | null
   status: JournalDraftStatus
+  requiresReconciliation: boolean
 }
 
 function resourceKey(ownerId: number, challengeId: string, localDate: string): string {
@@ -51,6 +52,16 @@ function resourceKey(ownerId: number, challengeId: string, localDate: string): s
 
 function isDirtyRecord(record: JournalDraftRecord): boolean {
   return record.clientRevision !== record.acknowledgedClientRevision
+}
+
+function needsAttention(record: JournalDraftRecord): boolean {
+  return isDirtyRecord(record) ||
+    record.pendingCommand !== null ||
+    record.status === 'saving' ||
+    record.status === 'error' ||
+    record.status === 'conflict' ||
+    record.status === 'blocked' ||
+    record.status === 'quarantined'
 }
 
 function errorStatus(error: unknown): number | null {
@@ -73,7 +84,95 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
 
   function getDraft(challengeId: string, localDate: string): JournalDraftRecord | undefined {
     const key = getCurrentKey(challengeId, localDate)
-    return key ? drafts.value[key] : undefined
+    const record = key ? drafts.value[key] : undefined
+    if (!record || record.requiresReconciliation || record.authGeneration !== auth.generation) return undefined
+    return record
+  }
+
+  function acknowledgeSnapshot(
+    record: JournalDraftRecord,
+    snapshot: JournalSnapshot,
+    dataEpoch: number,
+  ): void {
+    const text = snapshot.journal ?? ''
+    record.text = text
+    record.acknowledgedText = text
+    record.acknowledgedSnapshot = snapshot
+    record.acknowledgedClientRevision = record.clientRevision
+    record.journalVersion = snapshot.journal_version
+    record.dataEpoch = dataEpoch
+    record.authGeneration = auth.generation
+    record.pendingCommand = null
+    record.conflictSnapshot = null
+    record.error = null
+    record.status = 'saved'
+    record.requiresReconciliation = false
+  }
+
+  function reconcileExisting(
+    record: JournalDraftRecord,
+    snapshot: JournalSnapshot,
+    ownerId: number,
+    dataEpoch: number,
+  ): void {
+    record.requiresReconciliation = false
+    record.authGeneration = auth.generation
+
+    if (record.ownerId !== ownerId) {
+      record.requiresReconciliation = true
+      quarantine(record, 'Bản nháp này thuộc chủ tài khoản khác và tiếp tục bị ẩn.')
+      return
+    }
+
+    if (record.dataEpoch !== dataEpoch) {
+      if (!needsAttention(record)) {
+        acknowledgeSnapshot(record, snapshot, dataEpoch)
+        return
+      }
+
+      record.conflictSnapshot = null
+      quarantine(record, 'Chu kỳ dữ liệu tài khoản đã đổi. Bản nháp được giữ lại, không tự chuyển sang chu kỳ mới.')
+      return
+    }
+
+    const pending = record.pendingCommand
+    if (pending) {
+      if (pending.ownerId !== ownerId || pending.dataEpoch !== dataEpoch) {
+        quarantine(record, 'Yêu cầu chưa rõ kết quả thuộc chủ tài khoản hoặc chu kỳ dữ liệu khác; không thể gửi lại.')
+        return
+      }
+
+      // Keep the request byte-for-byte stable; only the authenticated callback fence is refreshed.
+      record.pendingCommand = Object.freeze({ ...pending, authGeneration: auth.generation })
+      record.error = {
+        kind: 'network',
+        message: 'Chưa xác định được kết quả lưu. Sau khi đối chiếu, lần thử lại sẽ gửi đúng yêu cầu cũ.',
+      }
+      record.status = 'error'
+      return
+    }
+
+    if (isDirtyRecord(record)) {
+      if (snapshot.journal_version !== record.journalVersion) {
+        record.conflictSnapshot = snapshot
+        record.error = {
+          kind: 'conflict',
+          message: 'Nhật ký đã thay đổi trên máy chủ. Bản nháp hiện tại được giữ lại để xử lý.',
+        }
+        record.status = 'conflict'
+        return
+      }
+
+      record.acknowledgedSnapshot = snapshot
+      record.acknowledgedText = snapshot.journal ?? ''
+      record.journalVersion = snapshot.journal_version
+      record.error = null
+      record.conflictSnapshot = null
+      record.status = 'dirty'
+      return
+    }
+
+    acknowledgeSnapshot(record, snapshot, dataEpoch)
   }
 
   function hydrate(snapshot: JournalSnapshot): JournalDraftRecord | null {
@@ -85,6 +184,11 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
     const key = resourceKey(ownerId, snapshot.challenge_id, snapshot.local_date)
     const existing = drafts.value[key]
     if (existing) {
+      if (existing.requiresReconciliation || existing.authGeneration !== auth.generation) {
+        reconcileExisting(existing, snapshot, ownerId, account.context.data_epoch)
+        return existing
+      }
+
       if (isDirtyRecord(existing) || existing.pendingCommand || existing.status === 'conflict' || existing.status === 'quarantined') {
         return existing
       }
@@ -119,6 +223,7 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
       conflictSnapshot: null,
       error: null,
       status: 'saved',
+      requiresReconciliation: false,
     }
     drafts.value[key] = record
     return record
@@ -127,7 +232,12 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
   function setDraftText(challengeId: string, localDate: string, text: string): void {
     const key = getCurrentKey(challengeId, localDate)
     const record = key ? drafts.value[key] : undefined
-    if (!record || record.text === text) return
+    if (
+      !record ||
+      record.requiresReconciliation ||
+      record.authGeneration !== auth.generation ||
+      record.text === text
+    ) return
 
     record.text = text
     record.clientRevision += 1
@@ -172,6 +282,7 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
     record.conflictSnapshot = null
     record.error = null
     record.status = 'saved'
+    record.requiresReconciliation = false
   }
 
   function rebaseAfterEpochChange(challengeId: string, localDate: string, snapshot: JournalSnapshot): void {
@@ -195,6 +306,7 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
     record.pendingCommand = null
     record.conflictSnapshot = null
     record.error = null
+    record.requiresReconciliation = false
     if (wasDirty) {
       record.status = 'dirty'
     } else {
@@ -285,7 +397,7 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
       preflight = { allowed: false, reason: 'Không thể đồng bộ trạng thái mới nhất trước khi ghi.' }
     }
 
-    if (drafts.value[key] !== record) return
+    if (drafts.value[key] !== record || record.requiresReconciliation) return
     if (!preflight.allowed) {
       record.error = { kind: 'preflight', message: preflight.reason ?? 'Chưa thể lưu nhật ký. Hãy thử lại sau.' }
       record.status = 'blocked'
@@ -297,6 +409,7 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
       auth.generation !== authGenerationAtStart ||
       auth.owner?.id !== ownerIdAtStart
     ) {
+      record.requiresReconciliation = true
       quarantine(record, 'Phiên hoặc chủ tài khoản đã thay đổi. Bản nháp chưa được gửi trong phiên mới.')
       return
     }
@@ -344,12 +457,21 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
     try {
       result = await challengesApi.saveChallengeJournal(record.challengeId, record.localDate, pending.request)
     } catch (error) {
-      if (drafts.value[key] !== record) return
+      if (drafts.value[key] !== record || record.requiresReconciliation || record.pendingCommand !== pending) return
+      if (errorStatus(error) === 401) {
+        try {
+          await auth.refreshSession()
+        } catch {
+          // A failed session refresh is still a blocked write; never retry the mutation here.
+        }
+        if (record.requiresReconciliation || auth.status !== 'authenticated') return
+      }
       if (
         auth.status !== 'authenticated' ||
         auth.generation !== pending.authGeneration ||
         auth.owner?.id !== pending.ownerId
       ) {
+        record.requiresReconciliation = true
         quarantine(record, 'Phản hồi lỗi thuộc phiên cũ; yêu cầu chưa được gửi lại trong phiên mới.')
         return
       }
@@ -361,12 +483,13 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
       return
     }
 
-    if (drafts.value[key] !== record) return
+    if (drafts.value[key] !== record || record.requiresReconciliation || record.pendingCommand !== pending) return
     if (
       auth.status !== 'authenticated' ||
       auth.generation !== pending.authGeneration ||
       auth.owner?.id !== pending.ownerId
     ) {
+      record.requiresReconciliation = true
       quarantine(record, 'Phản hồi lưu thuộc phiên cũ; bản nháp chưa được đánh dấu là đã lưu.')
       return
     }
@@ -386,9 +509,9 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
     }
 
     const ackAccepted = await sync.recordMutationAck(result.account_revision, result.data_epoch, pending.authGeneration)
+    if (drafts.value[key] !== record || record.requiresReconciliation || record.pendingCommand !== pending) return
     if (
       !ackAccepted ||
-      drafts.value[key] !== record ||
       auth.status !== 'authenticated' ||
       auth.generation !== pending.authGeneration ||
       auth.owner?.id !== pending.ownerId ||
@@ -396,6 +519,11 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
       account.context.data_epoch !== pending.dataEpoch
     ) {
       if (drafts.value[key] === record) {
+        if (
+          auth.status !== 'authenticated' ||
+          auth.generation !== pending.authGeneration ||
+          auth.owner?.id !== pending.ownerId
+        ) record.requiresReconciliation = true
         quarantine(record, 'Phản hồi lưu thuộc phiên hoặc chu kỳ dữ liệu đã đổi; bản nháp được giữ lại.')
       }
       return
@@ -422,8 +550,9 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
     const key = getCurrentKey(challengeId, localDate)
     const record = key ? drafts.value[key] : undefined
     if (!key || !record || (!isDirtyRecord(record) && !record.pendingCommand)) return Promise.resolve()
-    if (record.status === 'conflict' || record.status === 'quarantined') return Promise.resolve()
+    if (record.requiresReconciliation || record.status === 'conflict' || record.status === 'quarantined') return Promise.resolve()
     if (record.authGeneration !== auth.generation) {
+      record.requiresReconciliation = true
       quarantine(record, 'Bản nháp thuộc phiên xác thực cũ. Hãy tải lại và đối chiếu dữ liệu trước khi tiếp tục.')
       return Promise.resolve()
     }
@@ -457,9 +586,24 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
     return operation
   }
 
-  function reset(): void {
+  function reset(reason: PrivateStateResetReason = 'logout'): void {
+    if (reason === 'session_expired') {
+      for (const record of Object.values(drafts.value)) {
+        record.requiresReconciliation = true
+        if (needsAttention(record)) {
+          quarantine(record, 'Phiên đã hết hạn. Bản nháp được giữ trong bộ nhớ và chỉ mở lại sau khi đối chiếu tài khoản.')
+        }
+      }
+      inFlight.clear()
+      return
+    }
+
     drafts.value = {}
     inFlight.clear()
+  }
+
+  function hasUnsavedDrafts(): boolean {
+    return Object.values(drafts.value).some(needsAttention)
   }
 
   auth.registerPrivateStateReset(reset)
@@ -474,5 +618,6 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
     rebaseAfterEpochChange,
     save,
     reset,
+    hasUnsavedDrafts,
   }
 })

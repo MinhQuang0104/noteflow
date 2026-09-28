@@ -6,29 +6,34 @@ import type { LoginInput, Owner } from '../api/auth'
 import { queryClient } from '../queryClient'
 
 export type AuthStatus = 'unknown' | 'loading' | 'authenticated' | 'guest'
+export type PrivateStateResetReason = 'session_expired' | 'logout'
 
 export const useAuthStore = defineStore('auth', () => {
   const owner = ref<Owner | null>(null)
   const status = ref<AuthStatus>('unknown')
   const generation = ref(0)
-  const privateStateResets = new Set<() => void>()
+  const privateStateResets = new Set<(reason: PrivateStateResetReason) => void>()
+  let explicitLogoutPending = false
 
-  function clearPrivateState(): void {
-    for (const reset of privateStateResets) reset()
+  function clearPrivateState(reason: PrivateStateResetReason): void {
+    for (const reset of privateStateResets) reset(reason)
     queryClient.clear()
     owner.value = null
   }
 
   async function refreshSession(): Promise<boolean> {
+    if (explicitLogoutPending) return false
+
     const requestGeneration = generation.value
     status.value = 'loading'
     const session = await authApi.getSession()
 
+    if (explicitLogoutPending) return false
     if (requestGeneration !== generation.value) return false
 
     if (!session) {
       generation.value += 1
-      clearPrivateState()
+      clearPrivateState('session_expired')
       status.value = 'guest'
       return false
     }
@@ -54,13 +59,33 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function logOut(): Promise<void> {
-    generation.value += 1
-    await authApi.logout()
-    clearPrivateState()
-    status.value = 'guest'
+    if (explicitLogoutPending) return
+
+    const requestGeneration = generation.value
+    const previousStatus = status.value === 'loading'
+      ? owner.value ? 'authenticated' : 'guest'
+      : status.value
+    explicitLogoutPending = true
+
+    try {
+      await authApi.logout()
+    } catch (error) {
+      explicitLogoutPending = false
+      if (generation.value === requestGeneration && status.value === 'loading') {
+        status.value = previousStatus
+      }
+      throw error
+    }
+
+    if (generation.value === requestGeneration) {
+      generation.value += 1
+      clearPrivateState('logout')
+      status.value = 'guest'
+    }
+    explicitLogoutPending = false
   }
 
-  function registerPrivateStateReset(reset: () => void): () => void {
+  function registerPrivateStateReset(reset: (reason: PrivateStateResetReason) => void): () => void {
     privateStateResets.add(reset)
     return () => privateStateResets.delete(reset)
   }
