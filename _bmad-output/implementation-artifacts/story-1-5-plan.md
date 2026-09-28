@@ -6,7 +6,7 @@ story:
   normative_digest: sha256:fc382d7fb25552265962f9e7a9a25b98510afc716f733b93d382b8b8ebf9e3cb
 upstream_epic:
   path: docs/product/epics.md
-  section_digest: sha256:9b00b87c6e45bfa0fef5acd28de2b7ef9d7d266f536a073e3bfb30cd02991c1e
+  section_digest: sha256:9fd315d82840cc8d4f6450be08004dd868693a795b8fc552273487813e0b58e3
 sprint_key: 1-5-giữ-bản-đang-nhập-và-thử-lưu-lại-sau-gián-đoạn
 lifecycle_snapshot: in-progress
 execution_status: in-progress
