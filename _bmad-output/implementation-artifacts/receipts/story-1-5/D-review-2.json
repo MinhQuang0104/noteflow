@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "story_id": "1.5",
+  "slice_id": "D",
+  "kind": "review",
+  "checkpoint_commit": "01409eeb4a9c083f858c520629c4ed791217c36f",
+  "baseline_commit": "d0675d088b06dadfa7f7b96fe28cb0588212a63f",
+  "subject_digest": "sha256:3bd79642294cb8fd4fb57a8948221992f74afb46f8cbd037c6c97c4f11b7275f",
+  "created_from_head": "01409eeb4a9c083f858c520629c4ed791217c36f",
+  "changed_paths_sha256": "sha256:3bd79642294cb8fd4fb57a8948221992f74afb46f8cbd037c6c97c4f11b7275f",
+  "commands": [
+    {
+      "command": "node .agents/scripts/check-escalation.mjs with canonical verification JSON; risk HIGH; flags CONCURRENCY_STATE, SECURITY_AUTH",
+      "result": "REVIEW_REQUIRED",
+      "exit_code": 1,
+      "tool": "check-escalation.mjs",
+      "environment": "Windows (win32); Node.js v24.21.0"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base d0675d088b06dadfa7f7b96fe28cb0588212a63f --head 01409eeb4a9c083f858c520629c4ed791217c36f --path frontend/src/views/__tests__/journal-draft-lifecycle.spec.ts",
+      "result": "OK: 1 evidence unit; complete path coverage",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows; Git explicit checkpoint pair"
+    },
+    {
+      "command": "Targeted HIGH-risk review using .agents/review/targeted-reviewer-contract.md; supplied hunk and allowlisted direct references only",
+      "result": "APPROVE; 1/1 changed paths and 1/1 evidence units reviewed",
+      "exit_code": 0,
+      "tool": "targeted-reviewer-contract v1",
+      "environment": "Same Lead; bounded per-path review unit"
+    }
+  ],
+  "required": true,
+  "verdict": "APPROVE",
+  "findings_total": 0,
+  "findings_blocking": 0,
+  "reviewed_commit": "01409eeb4a9c083f858c520629c4ed791217c36f",
+  "reviewed_from_head": "99c5adfe17df90687225686c35d623ff8e1c2e8f",
+  "risk_context_digest": "sha256:5c3e1b7db251e727a044146d7de6dfdca55a28add41d20e71b865ee6be958196",
+  "review_context_digest": "sha256:8fe598f88518916a40988bd6b457c40b797cc1d311934d083f180436d4193fac",
+  "freshness": "FRESH_CANDIDATE",
+  "review_context": {
+    "story_id": "1.5",
+    "slice_id": "D",
+    "checkpoint_commit": "01409eeb4a9c083f858c520629c4ed791217c36f",
+    "baseline_commit": "d0675d088b06dadfa7f7b96fe28cb0588212a63f",
+    "changed_paths_sha256": "sha256:3bd79642294cb8fd4fb57a8948221992f74afb46f8cbd037c6c97c4f11b7275f",
+    "risk_context_digest": "sha256:5c3e1b7db251e727a044146d7de6dfdca55a28add41d20e71b865ee6be958196",
+    "judgment_flags": [
+      "CONCURRENCY_STATE",
+      "SECURITY_AUTH"
+    ],
+    "verification": {
+      "focused_checks": "6 PASS",
+      "canonical_applicability": "NOT_APPLICABLE",
+      "canonical_status": "INCOMPLETE",
+      "escalation_decision": "REVIEW_REQUIRED"
+    },
+    "review_questions": [
+      "Does the integration path prove an uncertain first save can be retried with an identical command/request while a newer local edit stays dirty after the late ACK?",
+      "Does the next save use a fresh command and the server's acknowledged base_version, and avoid completion/progress fields?",
+      "Does reload/remount and route switch read the server-backed journal for the original resource and keep the other resource isolated?",
+      "Does the test exercise the component/store/API/sync boundaries with deterministic stateful server behavior rather than asserting only implementation details?"
+    ],
+    "evidence_groups": [
+      {
+        "id": "journal-lifecycle",
+        "paths": [
+          "frontend/src/views/__tests__/journal-draft-lifecycle.spec.ts"
+        ],
+        "unit_count": 1,
+        "producer": "prepare-change-evidence-v1",
+        "coverage": "complete"
+      }
+    ],
+    "judgment": "APPROVE"
+  },
+  "review_questions": [
+    "Does the integration path prove an uncertain first save can be retried with an identical command/request while a newer local edit stays dirty after the late ACK?",
+    "Does the next save use a fresh command and the server's acknowledged base_version, and avoid completion/progress fields?",
+    "Does reload/remount and route switch read the server-backed journal for the original resource and keep the other resource isolated?",
+    "Does the test exercise the component/store/API/sync boundaries with deterministic stateful server behavior rather than asserting only implementation details?"
+  ],
+  "group_judgments": [
+    {
+      "group_id": "journal-lifecycle",
+      "verdict": "APPROVE",
+      "covered_paths": [
+        "frontend/src/views/__tests__/journal-draft-lifecycle.spec.ts"
+      ],
+      "unit_count": 1,
+      "satisfied_questions": [
+        "The supplied integration hunk commits the first request on the mocked server before throwing, retries the identical request, and verifies that the newer local edit remains dirty after the old ACK.",
+        "The third request has a new command_id, uses base_version 2, saves the newer text, and every request is checked for absent completion and is_done fields.",
+        "The test removes the query cache, remounts from the server-backed journal, switches to another resource, and switches back to prove resource isolation and persistence.",
+        "The test mounts the journal editor with Pinia and Vue Query, uses the real API/store/sync boundaries, and drives a deterministic stateful server mock."
+      ]
+    }
+  ],
+  "satisfied_questions": [
+    "The uncertain first save is retried byte-for-byte with the original command/request while the second local edit remains dirty after the late first revision ACK.",
+    "The later save receives a new command_id, uses the acknowledged base_version, saves the newest text, and does not include completion or is_done fields.",
+    "Cache removal plus remount and resource switching preserve the original journal text while leaving the other resource independent.",
+    "The hunk exercises the mounted component together with Pinia, Vue Query, API calls, and sync hooks using a deterministic stateful server model."
+  ],
+  "findings": [],
+  "requested_evidence": [],
+  "evidence_refs": [
+    {
+      "path": "frontend/src/views/__tests__/journal-draft-lifecycle.spec.ts",
+      "symbol": "keeps the journal lifecycle safe across uncertain retry, late ACK, reload, and route switch",
+      "purpose": "integration evidence for the complete journal draft lifecycle"
+    }
+  ],
+  "judgment_flags": [
+    "CONCURRENCY_STATE",
+    "SECURITY_AUTH"
+  ],
+  "verification": {
+    "canonical_applicability": "NOT_APPLICABLE",
+    "canonical_status": "INCOMPLETE",
+    "focused_checks": "6 PASS: 68 unit tests, type-check, lint, build, contract-check, diff-check",
+    "escalation_decision": "REVIEW_REQUIRED"
+  },
+  "escalation": {
+    "decision": "REVIEW_REQUIRED",
+    "risk": "HIGH",
+    "reasons": [
+      "HIGH_RISK_REVIEW",
+      "JUDGMENT_CONCURRENCY_STATE",
+      "JUDGMENT_SECURITY_AUTH",
+      "VERIFICATION_INCOMPLETE",
+      "VERIFICATION_NO_APPLICABLE_RECIPE"
+    ]
+  },
+  "changeEvidence": {
+    "schema": "targeted-review-evidence-groups-v1",
+    "provenance": {
+      "producer": "prepare-change-evidence-v1",
+      "comparison": "explicit-pair",
+      "base": "d0675d088b06dadfa7f7b96fe28cb0588212a63f",
+      "head": "01409eeb4a9c083f858c520629c4ed791217c36f"
+    },
+    "complete_path_coverage": true,
+    "complete_unit_coverage": true,
+    "groups": [
+      {
+        "id": "journal-lifecycle",
+        "status": "OK",
+        "unit_count": 1,
+        "requested_paths": [
+          "frontend/src/views/__tests__/journal-draft-lifecycle.spec.ts"
+        ]
+      }
+    ]
+  }
+}
