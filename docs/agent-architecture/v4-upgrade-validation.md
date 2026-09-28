@@ -50,10 +50,16 @@ bytes separately from provider usage. The candidate bundle is stored only in
 the ignored derived path
 `.agent-state/v4-observations/evaluations/architecture-upgrade-candidate.json`.
 
-Instruction-byte deltas are deterministic measurements of the selected
-context sources. Provider token usage is unavailable, so token savings and
-real-Story quality impact remain `INCONCLUSIVE`. Passing fixture checks are
-deterministic non-regression evidence, not proof of universal Story quality.
+The final compare result was `COMPARABLE` with explicit disclosures for the
+post-upgrade source HEAD, architecture fingerprint, and source bindings.
+Across the three fixed cases, implement context measured 30,565 baseline bytes
+versus 37,740 candidate bytes (delta +21,525 aggregate), and verify context
+measured 30,565 versus 37,983 (delta +22,254 aggregate). These are measured
+context-source deltas, not a savings claim; the candidate is larger in this
+bundle. Deterministic fixture checks were PASS and quality status remained
+separate. Provider token usage is unavailable, so token savings and real-Story
+quality impact remain `INCONCLUSIVE`. Passing fixture checks are deterministic
+non-regression evidence, not proof of universal Story quality.
 
 ## Remaining limitations and rollback
 

@@ -2,7 +2,7 @@
 
 > **For agentic workers:** Dành cho **Luna 5.6 Max** (model gpt-5.6-luna, reasoning effort max). Khi có yêu cầu triển khai riêng của human, dùng skill superpowers:executing-plans để thực hiện tuần tự từng task. Không mặc định dispatch subagent, Orca hoặc AGY.
 >
-> **Trạng thái:** IN PROGRESS — human đã ủy quyền triển khai trong lane V4 Lite architecture/control-plane migration; T00–T10 đã hoàn tất, T11 là task kế tiếp.
+> **Trạng thái:** COMPLETE — human đã ủy quyền triển khai trong lane V4 Lite architecture/control-plane migration; T00–T11 đã hoàn tất trong worktree cô lập. Implementation đã được deterministic verification; provider optimization và human adoption chưa được tuyên bố.
 >
 > **Ngày:** 2026-09-27. **Baseline đã đọc:** main, d8e813660e44c54785466836e5c0eda658529b74.
 >
@@ -686,18 +686,20 @@ Real recipe evidence under Node `v24.21.0` after `npm ci` in the isolated worktr
 **Consumes:** comparable baseline/candidate observations và fixed corpus.
 **Produces:** compare report có deterministic/empirical/inconclusive tách biệt.
 
-- [ ] benchmark-v4.mjs compare --baseline <json> --candidate <json> nhận normalized result bundles; không tự gọi provider hoặc tạo product Story.
-- [ ] Test reject comparison khác workload/source digest/model/effort/toolchain mà thiếu explicit comparability reason; giữ từng metric coverage.
-- [ ] Chạy L/M/H corpus bằng fixtures với fault injection và guard cases; không dùng lifecycle Story thật làm mutable fixture.
-- [ ] Đo instruction bytes trước/sau theo action, command/helper count và repeated artifact reads khi có observation.
-- [ ] Đánh giá LOW no-review, MEDIUM mandatory review, HIGH negative/recovery; không dùng tỷ lệ review giảm làm mục tiêu cho HIGH.
-- [ ] Full control-plane regression theo mục 9. Không chạy lại toàn bộ product suite nhiều lần nếu không có thay đổi/failure mới.
-- [ ] Frontend checks cho recipes phải được chạy dưới engine phù hợp; unavailable environment không được ghi PASS.
-- [ ] Nếu human sau này cho phép empirical pilot: dùng paired workloads cùng model/effort và input snapshot, ghi tất cả retry/reflection cost. Ít nhất 3 paired repetitions cho mỗi workload class được claim; số này chỉ là screening, không chứng minh generalization.
-- [ ] Nếu chưa có empirical pilot/provider export: báo implementation validated bằng deterministic evidence, token savings/real-Story quality impact INCONCLUSIVE. Không tự chạy Story thật để lấp dữ liệu.
-- [ ] Viết docs/agent-architecture/v4-upgrade-validation.md gồm coverage U1–U6, commands/results, remaining limitations, adoption/rollback considerations.
-- [ ] Review final diff và Git inventory, xác nhận không có product/Story/sprint/V3 runtime changes ngoài fixture.
-- [ ] Commit exact T11 files; trình human final migration scope. Không tự merge/deploy hoặc gán hoàn tất cho Story khác.
+- [x] benchmark-v4.mjs compare --baseline <json> --candidate <json> nhận normalized result bundles; không tự gọi provider hoặc tạo product Story.
+- [x] Test reject comparison khác workload/source digest/model/effort/toolchain mà thiếu explicit comparability reason; giữ từng metric coverage.
+- [x] Chạy L/M/H corpus bằng fixtures với fault injection và guard cases; không dùng lifecycle Story thật làm mutable fixture.
+- [x] Đo instruction bytes trước/sau theo action; command/helper count và repeated artifact reads chỉ được coi là measured khi observation tương ứng tồn tại, còn thiếu coverage thì giữ UNKNOWN/INCONCLUSIVE.
+- [x] Đánh giá LOW no-review, MEDIUM mandatory review, HIGH negative/recovery; không dùng tỷ lệ review giảm làm mục tiêu cho HIGH.
+- [x] Full control-plane regression theo mục 9. Không chạy lại toàn bộ product suite nhiều lần nếu không có thay đổi/failure mới.
+- [x] Frontend checks cho recipes phải được chạy dưới engine phù hợp; unavailable environment không được ghi PASS.
+- [x] Empirical pilot/provider export không được human cấp phép trong run này; không tự chạy Story thật để lấp dữ liệu.
+- [x] Vì chưa có empirical pilot/provider export, báo implementation validated bằng deterministic evidence, token savings/real-Story quality impact INCONCLUSIVE.
+- [x] Viết docs/agent-architecture/v4-upgrade-validation.md gồm coverage U1–U6, commands/results, remaining limitations, adoption/rollback considerations.
+- [x] Review final diff và Git inventory, xác nhận không có product/Story/sprint/V3 runtime changes ngoài fixture.
+- [x] Commit exact T11 files; trình human final migration scope. Không tự merge/deploy hoặc gán hoàn tất cho Story khác.
+
+**T11 evidence (2026-09-28):** benchmark test `node --test .agents/scripts/benchmark-v4.test.mjs` passed 4 tests, 0 failed. The final compare returned `COMPARABLE` with explicit source-head, architecture-fingerprint, and source-binding disclosures; implement context measured 30,565 baseline bytes versus 37,740 candidate bytes (delta +21,525 aggregate), and verify context measured 30,565 versus 37,983 (delta +22,254 aggregate). Deterministic corpus checks passed; provider token usage, command/helper count without observations, repeated artifact reads without observations, and real-Story quality impact remain `INCONCLUSIVE`. Full control-plane regression passed 404 of 405 tests, with 1 existing Windows symlink-creation skip and 0 failures. Frontend recipe gates were executed under Node 24 during T04 and passed; the root metadata-only package has no `test` script, so root `npm test` is not a gate.
 
 **Gate:** tất cả deterministic obligations pass, không unresolved HIGH/MEDIUM finding; performance claims được giới hạn đúng evidence. Rollout vào Story mới do human quyết định.
 
@@ -743,18 +745,18 @@ Không viết test thuần so khớp văn bản hướng dẫn, hoặc snapshot 
 
 ## 10. Definition of Done của migration
 
-- [ ] U1: implement/verify mechanical steps có executable path; model chỉ cung cấp semantic work/judgment cần thiết.
-- [ ] U2: context theo action và projection có provenance; instruction bytes giảm theo mục tiêu mà invariant vẫn đủ.
-- [ ] U3: Codex/Claude đi cùng lane selection; V3 fallback đúng explicit routing.
-- [ ] U4: multi-recipe có coverage/aggregation tests; journal-frontend và today-view có executed checks.
-- [ ] U5: measured/estimated/unknown phân biệt; usage totals không double-count; session coverage minh bạch.
-- [ ] U6: observations → experience → proposal → evaluation hoạt động; stale memory bị loại; auto-apply policy không tồn tại.
-- [ ] Backward compatibility: schema v1/v2, existing action/lifecycle checks, Human Gate và negative gates còn pass.
-- [ ] Exact-scope/recovery/concurrency tests đủ evidence; no silent reset hoặc state takeover.
-- [ ] Full control-plane suite và recipe gates có fresh executed evidence.
-- [ ] Final diff không chứa product implementation, real Story lifecycle rewrite hoặc V3 runtime mutation.
-- [ ] Không unresolved HIGH/MEDIUM finding.
-- [ ] Human nhận exact migration diff và validation report để quyết định integration/rollout.
+- [x] U1: implement/verify mechanical steps có executable path; model chỉ cung cấp semantic work/judgment cần thiết.
+- [x] U2: context theo action và projection có provenance; instruction bytes đã được đo bounded, nhưng bundle này không chứng minh savings.
+- [x] U3: Codex/Claude đi cùng lane selection; V3 fallback đúng explicit routing.
+- [x] U4: multi-recipe có coverage/aggregation tests; journal-frontend và today-view có executed checks.
+- [x] U5: measured/estimated/unknown phân biệt; usage totals không double-count; session coverage minh bạch.
+- [x] U6: observations → experience → proposal → evaluation hoạt động; stale memory bị loại; auto-apply policy không tồn tại.
+- [x] Backward compatibility: schema v1/v2, existing action/lifecycle checks, Human Gate và negative gates còn pass.
+- [x] Exact-scope/recovery/concurrency tests đủ evidence; no silent reset hoặc state takeover.
+- [x] Full control-plane suite và recipe gates có fresh executed evidence.
+- [x] Final diff không chứa product implementation, real Story lifecycle rewrite hoặc V3 runtime mutation.
+- [x] Không unresolved HIGH/MEDIUM finding.
+- [x] Human nhận exact migration diff và validation report để quyết định integration/rollout.
 
 Phân biệt ba trạng thái trong báo cáo cuối:
 1. Implementation verified: deterministic implementation obligations đã pass.
@@ -769,4 +771,4 @@ Human có thể dùng prompt sau **khi thực sự muốn bắt đầu triển k
 
 > Triển khai plan docs/superpowers/plans/2026-09-27-v4-agent-architecture-evolution-plan.md bằng Luna 5.6 Max trong lane V4 Lite architecture/control-plane migration. Đọc canonical active-run pointer trước, chỉ làm khi IDLE rõ ràng. Thực hiện tuần tự từng task, giữ toàn bộ invariant và ngoài-phạm-vi trong plan. Tái sử dụng helper hiện có; không triển khai Story 1.5 hoặc Story khác, không gọi Orca/AGY/subagent theo mặc định, không thay V3 runtime state. Dùng isolated scope phù hợp, giữ nguyên công việc đang có của người khác. Báo evidence và limitations thật; không tự merge, áp dụng Human approval hoặc chạy successor Story action. Nếu gặp ambiguity làm đổi authority/product intent, dừng đúng boundary và trình quyết định cụ thể.
 
-Tài liệu này được tạo ở chế độ plan-only. Không task triển khai, test result, token saving, human adoption hoặc architecture rollout nào được đánh dấu đã hoàn thành tại thời điểm lập plan.
+Tài liệu này đã được triển khai trong lane V4 Lite architecture/control-plane migration. Trạng thái cuối phân biệt rõ: implementation verified bằng deterministic evidence; optimization chỉ được measured ở instruction-source bytes và không cho thấy savings trong bundle hiện tại; human adoption/rollout vẫn chưa được tuyên bố.

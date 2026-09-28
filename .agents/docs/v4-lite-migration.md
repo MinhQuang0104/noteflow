@@ -83,8 +83,11 @@ in an isolated managed worktree. T00–T11 completed with deterministic evidence
 the full control-plane suite reported 405 tests, 404 pass, 1 Windows symlink
 skip, and 0 failures. The new benchmark compares normalized baseline/candidate
 bundles and preserves metric coverage; the fixed L/M/H corpus remains a
-fixture-only guard. Provider token usage, real-Story quality impact, and human
-adoption remain explicitly inconclusive/unclaimed. Experience, proposal, and
+fixture-only guard. The final comparable bundle measured larger current
+instruction-source bytes than the historical baseline (+21,525 implement and
++22,254 verify aggregate); this is not a savings claim. Provider token usage,
+real-Story quality impact, and human adoption remain explicitly
+inconclusive/unclaimed. Experience, proposal, and
 candidate stores are advisory derived data; no auto-apply path, scheduler,
 Story lifecycle mutation, product change, or V3 runtime takeover was added.
 

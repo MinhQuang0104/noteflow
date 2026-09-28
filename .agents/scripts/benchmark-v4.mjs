@@ -281,8 +281,18 @@ function gitOutput(root, args) {
 }
 
 function npmVersion() {
-  const result = spawnSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['--version'], { encoding: 'utf8', windowsHide: true, timeout: 10_000 })
-  return result.status === 0 ? result.stdout.trim() : null
+  const candidates = process.platform === 'win32'
+    ? [
+        process.env.APPDATA ? path.join(process.env.APPDATA, 'npm', 'node_modules', 'npm', 'bin', 'npm-cli.js') : null,
+        path.join(path.dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js'),
+      ]
+    : [path.join(path.dirname(process.execPath), '..', 'lib', 'node_modules', 'npm', 'bin', 'npm-cli.js')]
+  for (const script of candidates.filter(Boolean)) {
+    if (!existsSync(script)) continue
+    const result = spawnSync(process.execPath, [script, '--version'], { encoding: 'utf8', windowsHide: true, timeout: 10_000 })
+    if (result.status === 0) return result.stdout.trim()
+  }
+  return null
 }
 
 function readCorpus(root, corpusPath) {
