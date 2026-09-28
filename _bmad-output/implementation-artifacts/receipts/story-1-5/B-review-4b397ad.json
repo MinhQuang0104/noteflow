@@ -1,0 +1,1080 @@
+{
+  "schema_version": 1,
+  "story_id": "1.5",
+  "slice_id": "B",
+  "kind": "review",
+  "checkpoint_commit": "4b397ad5a9c4929b284897c774281ff3e11b7d85",
+  "baseline_commit": "d529b8329ce495f82e085b7c678f869cf898a1fa",
+  "subject_digest": "sha256:045d6d9871f86125a270cbd27aace95a7d505ceda2b7edd6ee547ac5a34f88bc",
+  "created_from_head": "4b397ad5a9c4929b284897c774281ff3e11b7d85",
+  "changed_paths_sha256": "sha256:045d6d9871f86125a270cbd27aace95a7d505ceda2b7edd6ee547ac5a34f88bc",
+  "commands": [
+    {
+      "command": "check-escalation.mjs with canonical Verification Router JSON forwarded unchanged; risk HIGH; flags CONCURRENCY_STATE, SECURITY_AUTH",
+      "result": "REVIEW_REQUIRED",
+      "exit_code": 1,
+      "tool": "check-escalation.mjs",
+      "environment": "Windows (win32); Node.js v24.21.0"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base d529b8329ce495f82e085b7c678f869cf898a1fa --head 4b397ad5a9c4929b284897c774281ff3e11b7d85 --path frontend/src/stores/__tests__/journalDrafts.spec.ts --path frontend/src/stores/journalDrafts.ts",
+      "result": "OK: 5 evidence units; complete path coverage",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows (win32); Git explicit checkpoint pair"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base d529b8329ce495f82e085b7c678f869cf898a1fa --head 4b397ad5a9c4929b284897c774281ff3e11b7d85 --path frontend/src/stores/__tests__/sync.spec.ts",
+      "result": "OK: 3 evidence units; complete path coverage",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows (win32); Git explicit checkpoint pair"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base d529b8329ce495f82e085b7c678f869cf898a1fa --head 4b397ad5a9c4929b284897c774281ff3e11b7d85 --path frontend/src/stores/sync.ts",
+      "result": "OK: 5 evidence units; complete path coverage",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows (win32); Git explicit checkpoint pair"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base d529b8329ce495f82e085b7c678f869cf898a1fa --head 4b397ad5a9c4929b284897c774281ff3e11b7d85 --path frontend/src/components/ChallengeJournalEditor.vue",
+      "result": "OK: 11 evidence units; complete path coverage",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows (win32); Git explicit checkpoint pair"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base d529b8329ce495f82e085b7c678f869cf898a1fa --head 4b397ad5a9c4929b284897c774281ff3e11b7d85 --path frontend/src/views/__tests__/journal.spec.ts",
+      "result": "OK: 6 evidence units; complete path coverage",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows (win32); Git explicit checkpoint pair"
+    }
+  ],
+  "required": true,
+  "verdict": "APPROVE",
+  "findings_total": 0,
+  "findings_blocking": 0,
+  "reviewed_commit": "4b397ad5a9c4929b284897c774281ff3e11b7d85",
+  "reviewed_from_head": "ccc1e7083328c8ba0924d4c8e7244d557b46764b",
+  "risk_context_digest": "sha256:5c3e1b7db251e727a044146d7de6dfdca55a28add41d20e71b865ee6be958196",
+  "review_context_digest": "sha256:5317164f65fdee53f669b7dbbb1bb78e7dd6c29eac4c0fb3c558993f7a8270e1",
+  "freshness": {
+    "status": "FRESH_CANDIDATE",
+    "review_rerun": true,
+    "reasons": [
+      "The exact Slice B checkpoint is fresh with no product-path drift from checkpoint to review HEAD.",
+      "Five producer-generated groups cover all six changed paths and every hunk or evidence unit.",
+      "HIGH risk and both judgment flags were assessed against the exact canonical INCOMPLETE verification output.",
+      "Deferred invalidation tests and ACK-generation/revision fences resolve the same-epoch callback race in both completion orders."
+    ]
+  },
+  "review_context": {
+    "story_id": "1.5",
+    "slice_id": "B",
+    "checkpoint_commit": "4b397ad5a9c4929b284897c774281ff3e11b7d85",
+    "baseline_commit": "d529b8329ce495f82e085b7c678f869cf898a1fa",
+    "changed_paths_sha256": "sha256:045d6d9871f86125a270cbd27aace95a7d505ceda2b7edd6ee547ac5a34f88bc",
+    "risk_context_digest": "sha256:5c3e1b7db251e727a044146d7de6dfdca55a28add41d20e71b865ee6be958196",
+    "judgment_flags": [
+      "CONCURRENCY_STATE",
+      "SECURITY_AUTH"
+    ],
+    "verification": {
+      "featureId": null,
+      "changedPaths": [
+        "frontend/src/components/ChallengeJournalEditor.vue",
+        "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+        "frontend/src/stores/__tests__/sync.spec.ts",
+        "frontend/src/stores/journalDrafts.ts",
+        "frontend/src/stores/sync.ts",
+        "frontend/src/views/__tests__/journal.spec.ts"
+      ],
+      "matchedPaths": [],
+      "applicability": "NOT_APPLICABLE",
+      "status": "INCOMPLETE",
+      "complete": false,
+      "checks": [],
+      "escalationReasons": [
+        "NO_APPLICABLE_RECIPE"
+      ]
+    },
+    "escalation": {
+      "decision": "REVIEW_REQUIRED",
+      "risk": "HIGH",
+      "reasons": [
+        "HIGH_RISK_REVIEW",
+        "JUDGMENT_CONCURRENCY_STATE",
+        "JUDGMENT_SECURITY_AUTH",
+        "VERIFICATION_INCOMPLETE",
+        "VERIFICATION_NO_APPLICABLE_RECIPE"
+      ]
+    },
+    "review_questions": [
+      "Does the journal draft store preserve per-resource ownership and acknowledge only the matching save revision?",
+      "Can a same-epoch callback from an older mutation ACK overwrite convergence state from a newer ACK outcome?",
+      "Do the editor, direct challenge-list consumer, and mapped tests preserve saved ACK state and visible convergence errors?"
+    ],
+    "evidence_group_digests": [
+      {
+        "id": "journal-draft-store",
+        "evidence_digest": "sha256:f6dd0d1076c8b6da700e79bd8bfaecc5c0f7bee51f999eff730aa3bcf2518a26",
+        "evidence_set_digest": null,
+        "requested_paths": [
+          "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+          "frontend/src/stores/journalDrafts.ts"
+        ],
+        "unit_count": 5
+      },
+      {
+        "id": "sync-ack-convergence-tests",
+        "evidence_digest": "sha256:ac7005250148bdb2baa939e0a213d6463375ff2ec172a7937f2d608293f4481f",
+        "evidence_set_digest": null,
+        "requested_paths": [
+          "frontend/src/stores/__tests__/sync.spec.ts"
+        ],
+        "unit_count": 3
+      },
+      {
+        "id": "sync-ack-convergence-store",
+        "evidence_digest": "sha256:9ad6d41fb2c83b08d55d8ff2ffe04ea380c9e020d5cf2fed60ae854baa656e32",
+        "evidence_set_digest": null,
+        "requested_paths": [
+          "frontend/src/stores/sync.ts"
+        ],
+        "unit_count": 5
+      },
+      {
+        "id": "journal-editor",
+        "evidence_digest": "sha256:7aab3bfd59d15857c8ca1a08b4d64a017092be40d914721bc6dd2838fbee8a1a",
+        "evidence_set_digest": "0ae4c90d117859a0fa56a11d91a51a6603f561d577272e993e31305efd78d28e",
+        "requested_paths": [
+          "frontend/src/components/ChallengeJournalEditor.vue"
+        ],
+        "unit_count": 11
+      },
+      {
+        "id": "journal-view-tests",
+        "evidence_digest": "sha256:a85e4d3b18d3c74fddb154803b837207419ba7a019b29c07891de44f7d098302",
+        "evidence_set_digest": "2fb601c23dc76bc6ef17e5c0821fb6349e9452622d6c5e5d2ec9e63e91d5775d",
+        "requested_paths": [
+          "frontend/src/views/__tests__/journal.spec.ts"
+        ],
+        "unit_count": 6
+      }
+    ],
+    "group_judgments": [
+      {
+        "group_id": "journal-draft-store",
+        "verdict": "APPROVE",
+        "covered_paths": [
+          "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+          "frontend/src/stores/journalDrafts.ts"
+        ],
+        "unit_count": 5,
+        "satisfied_questions": [
+          "The draft-store hunks preserve resource isolation, explicit snapshot rebasing, and matching auth/epoch/revision checks for ACK acceptance."
+        ]
+      },
+      {
+        "group_id": "sync-ack-convergence-tests",
+        "verdict": "APPROVE",
+        "covered_paths": [
+          "frontend/src/stores/__tests__/sync.spec.ts"
+        ],
+        "unit_count": 3,
+        "satisfied_questions": [
+          "Deferred invalidation tests cover both same-epoch completion orders, preserve the newer error or success state, and reject a lower revision from changing convergence state."
+        ]
+      },
+      {
+        "group_id": "sync-ack-convergence-store",
+        "verdict": "APPROVE",
+        "covered_paths": [
+          "frontend/src/stores/sync.ts"
+        ],
+        "unit_count": 5,
+        "satisfied_questions": [
+          "The ACK generation and latest-revision, auth, and epoch predicates fence both asynchronous completion callbacks; reset invalidates callbacks already in flight."
+        ]
+      },
+      {
+        "group_id": "journal-editor",
+        "verdict": "APPROVE",
+        "covered_paths": [
+          "frontend/src/components/ChallengeJournalEditor.vue"
+        ],
+        "unit_count": 11,
+        "satisfied_questions": [
+          "The editor keeps resource-keyed drafts and presents a committed ACK independently from later background query convergence."
+        ]
+      },
+      {
+        "group_id": "journal-view-tests",
+        "verdict": "APPROVE",
+        "covered_paths": [
+          "frontend/src/views/__tests__/journal.spec.ts"
+        ],
+        "unit_count": 6,
+        "satisfied_questions": [
+          "The editor tests cover resource switching, remount/refetch, retry, and saved state when convergence later fails."
+        ]
+      }
+    ],
+    "findings": []
+  },
+  "review_questions": [
+    "Does the journal draft store preserve per-resource ownership and acknowledge only the matching save revision?",
+    "Can a same-epoch callback from an older mutation ACK overwrite convergence state from a newer ACK outcome?",
+    "Do the editor, direct challenge-list consumer, and mapped tests preserve saved ACK state and visible convergence errors?"
+  ],
+  "group_judgments": [
+    {
+      "group_id": "journal-draft-store",
+      "verdict": "APPROVE",
+      "covered_paths": [
+        "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+        "frontend/src/stores/journalDrafts.ts"
+      ],
+      "unit_count": 5,
+      "satisfied_questions": [
+        "The draft-store hunks preserve resource isolation, explicit snapshot rebasing, and matching auth/epoch/revision checks for ACK acceptance."
+      ]
+    },
+    {
+      "group_id": "sync-ack-convergence-tests",
+      "verdict": "APPROVE",
+      "covered_paths": [
+        "frontend/src/stores/__tests__/sync.spec.ts"
+      ],
+      "unit_count": 3,
+      "satisfied_questions": [
+        "Deferred invalidation tests cover both same-epoch completion orders, preserve the newer error or success state, and reject a lower revision from changing convergence state."
+      ]
+    },
+    {
+      "group_id": "sync-ack-convergence-store",
+      "verdict": "APPROVE",
+      "covered_paths": [
+        "frontend/src/stores/sync.ts"
+      ],
+      "unit_count": 5,
+      "satisfied_questions": [
+        "The ACK generation and latest-revision, auth, and epoch predicates fence both asynchronous completion callbacks; reset invalidates callbacks already in flight."
+      ]
+    },
+    {
+      "group_id": "journal-editor",
+      "verdict": "APPROVE",
+      "covered_paths": [
+        "frontend/src/components/ChallengeJournalEditor.vue"
+      ],
+      "unit_count": 11,
+      "satisfied_questions": [
+        "The editor keeps resource-keyed drafts and presents a committed ACK independently from later background query convergence."
+      ]
+    },
+    {
+      "group_id": "journal-view-tests",
+      "verdict": "APPROVE",
+      "covered_paths": [
+        "frontend/src/views/__tests__/journal.spec.ts"
+      ],
+      "unit_count": 6,
+      "satisfied_questions": [
+        "The editor tests cover resource switching, remount/refetch, retry, and saved state when convergence later fails."
+      ]
+    }
+  ],
+  "satisfied_questions": [
+    "Does the journal draft store preserve per-resource ownership and acknowledge only the matching save revision?",
+    "Can a same-epoch callback from an older mutation ACK overwrite convergence state from a newer ACK outcome?",
+    "Do the editor, direct challenge-list consumer, and mapped tests preserve saved ACK state and visible convergence errors?"
+  ],
+  "findings": [],
+  "requested_evidence": [],
+  "evidence_refs": [
+    {
+      "path": "frontend/src/components/ChallengeJournalEditor.vue",
+      "symbol": "saveJournal",
+      "purpose": "ACK status and resource-keyed draft behavior"
+    },
+    {
+      "path": "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+      "symbol": "useJournalDraftsStore",
+      "purpose": "draft rebasing and ownership tests"
+    },
+    {
+      "path": "frontend/src/stores/__tests__/sync.spec.ts",
+      "symbol": "recordMutationAck",
+      "purpose": "out-of-order convergence regression tests"
+    },
+    {
+      "path": "frontend/src/stores/journalDrafts.ts",
+      "symbol": "save",
+      "purpose": "resource-keyed draft and ACK acceptance"
+    },
+    {
+      "path": "frontend/src/stores/sync.ts",
+      "symbol": "recordMutationAck",
+      "purpose": "generation, revision, auth and epoch fencing"
+    },
+    {
+      "path": "frontend/src/views/ChallengesView.vue",
+      "symbol": "sync.syncError",
+      "purpose": "visible consumer for convergence errors"
+    },
+    {
+      "path": "frontend/src/views/__tests__/journal.spec.ts",
+      "symbol": "journal editor tests",
+      "purpose": "consumer behavior and ACK status coverage"
+    }
+  ],
+  "judgment_flags": [
+    "CONCURRENCY_STATE",
+    "SECURITY_AUTH"
+  ],
+  "verification": {
+    "featureId": null,
+    "changedPaths": [
+      "frontend/src/components/ChallengeJournalEditor.vue",
+      "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+      "frontend/src/stores/__tests__/sync.spec.ts",
+      "frontend/src/stores/journalDrafts.ts",
+      "frontend/src/stores/sync.ts",
+      "frontend/src/views/__tests__/journal.spec.ts"
+    ],
+    "matchedPaths": [],
+    "applicability": "NOT_APPLICABLE",
+    "status": "INCOMPLETE",
+    "complete": false,
+    "checks": [],
+    "escalationReasons": [
+      "NO_APPLICABLE_RECIPE"
+    ]
+  },
+  "escalation": {
+    "decision": "REVIEW_REQUIRED",
+    "risk": "HIGH",
+    "reasons": [
+      "HIGH_RISK_REVIEW",
+      "JUDGMENT_CONCURRENCY_STATE",
+      "JUDGMENT_SECURITY_AUTH",
+      "VERIFICATION_INCOMPLETE",
+      "VERIFICATION_NO_APPLICABLE_RECIPE"
+    ]
+  },
+  "changeEvidence": {
+    "schema": "targeted-review-evidence-groups-v1",
+    "provenance": {
+      "producer": "prepare-change-evidence-v1",
+      "comparison": "explicit-pair",
+      "base": "d529b8329ce495f82e085b7c678f869cf898a1fa",
+      "head": "4b397ad5a9c4929b284897c774281ff3e11b7d85"
+    },
+    "complete_path_coverage": true,
+    "complete_unit_coverage": true,
+    "groups": [
+      {
+        "id": "journal-draft-store",
+        "verdict": "APPROVE",
+        "evidence_digest": "sha256:f6dd0d1076c8b6da700e79bd8bfaecc5c0f7bee51f999eff730aa3bcf2518a26",
+        "evidence_set_digest": null,
+        "requested_paths": [
+          "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+          "frontend/src/stores/journalDrafts.ts"
+        ],
+        "unit_count": 5,
+        "producer_output": {
+          "status": "OK",
+          "changeEvidence": {
+            "provenance": {
+              "producer": "prepare-change-evidence-v1",
+              "comparison": "explicit-pair",
+              "base": "d529b8329ce495f82e085b7c678f869cf898a1fa",
+              "head": "4b397ad5a9c4929b284897c774281ff3e11b7d85"
+            },
+            "paths": [
+              {
+                "path": "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+                "hunks": [
+                  {
+                    "oldStart": 130,
+                    "oldLines": 6,
+                    "newStart": 130,
+                    "newLines": 23,
+                    "diffText": "@@ -130,6 +130,23 @@ describe('useJournalDraftsStore', () => {\n     })\n   })\n \n+  it('rebases only after an explicit epoch refresh while preserving dirty text', () => {\n+    drafts.hydrate(snapshot('challenge-a', 'old server text', 3))\n+    drafts.setDraftText('challenge-a', DATE, 'local draft')\n+    account.context!.data_epoch = 5\n+\n+    drafts.rebaseAfterEpochChange('challenge-a', DATE, snapshot('challenge-a', 'restored server text', 7))\n+\n+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({\n+      text: 'local draft',\n+      acknowledgedText: 'restored server text',\n+      journalVersion: 7,\n+      dataEpoch: 5,\n+      status: 'dirty',\n+      pendingCommand: null,\n+    })\n+  })\n+\n   it('does not expose a draft to another owner', () => {\n     drafts.hydrate(snapshot('challenge-a', 'owner 42', 1))\n     drafts.setDraftText('challenge-a', DATE, 'private draft')"
+                  }
+                ]
+              },
+              {
+                "path": "frontend/src/stores/journalDrafts.ts",
+                "hunks": [
+                  {
+                    "oldStart": 145,
+                    "oldLines": 6,
+                    "newStart": 145,
+                    "newLines": 65,
+                    "diffText": "@@ -145,6 +145,65 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {\n     return record ? isDirtyRecord(record) : false\n   }\n \n+  function useServerSnapshot(challengeId: string, localDate: string): void {\n+    const record = getDraft(challengeId, localDate)\n+    const snapshot = record?.conflictSnapshot\n+    if (\n+      !record ||\n+      !snapshot ||\n+      snapshot.challenge_id !== challengeId ||\n+      snapshot.local_date !== localDate ||\n+      auth.status !== 'authenticated' ||\n+      record.authGeneration !== auth.generation ||\n+      account.status !== 'ready' ||\n+      !account.context ||\n+      record.dataEpoch !== account.context.data_epoch\n+    ) return\n+\n+    const text = snapshot.journal ?? ''\n+    record.text = text\n+    record.acknowledgedText = text\n+    record.acknowledgedSnapshot = snapshot\n+    record.acknowledgedClientRevision = record.clientRevision\n+    record.journalVersion = snapshot.journal_version\n+    record.dataEpoch = account.context?.data_epoch ?? record.dataEpoch\n+    record.authGeneration = auth.generation\n+    record.pendingCommand = null\n+    record.conflictSnapshot = null\n+    record.error = null\n+    record.status = 'saved'\n+  }\n+\n+  function rebaseAfterEpochChange(challengeId: string, localDate: string, snapshot: JournalSnapshot): void {\n+    if (\n+      snapshot.challenge_id !== challengeId ||\n+      snapshot.local_date !== localDate ||\n+      auth.status !== 'authenticated' ||\n+      !auth.owner ||\n+      account.status !== 'ready' ||\n+      !account.context\n+    ) return\n+    const record = getDraft(challengeId, localDate) ?? hydrate(snapshot)\n+    if (!record) return\n+\n+    const wasDirty = isDirtyRecord(record)\n+    record.acknowledgedText = snapshot.journal ?? ''\n+    record.acknowledgedSnapshot = snapshot\n+    record.journalVersion = snapshot.journal_version\n+    record.dataEpoch = account.context?.data_epoch ?? record.dataEpoch\n+    record.authGeneration = auth.generation\n+    record.pendingCommand = null\n+    record.conflictSnapshot = null\n+    record.error = null\n+    if (wasDirty) {\n+      record.status = 'dirty'\n+    } else {\n+      record.text = snapshot.journal ?? ''\n+      record.acknowledgedClientRevision = record.clientRevision\n+      record.status = 'saved'\n+    }\n+  }\n+\n   function quarantine(record: JournalDraftRecord, message: string): void {\n     record.status = 'quarantined'\n     record.error = { kind: 'stale_context', message }"
+                  },
+                  {
+                    "oldStart": 326,
+                    "oldLines": 6,
+                    "newStart": 385,
+                    "newLines": 22,
+                    "diffText": "@@ -326,6 +385,22 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {\n       return\n     }\n \n+    const ackAccepted = await sync.recordMutationAck(result.account_revision, result.data_epoch, pending.authGeneration)\n+    if (\n+      !ackAccepted ||\n+      drafts.value[key] !== record ||\n+      auth.status !== 'authenticated' ||\n+      auth.generation !== pending.authGeneration ||\n+      auth.owner?.id !== pending.ownerId ||\n+      !account.context ||\n+      account.context.data_epoch !== pending.dataEpoch\n+    ) {\n+      if (drafts.value[key] === record) {\n+        quarantine(record, 'Phản hồi lưu thuộc phiên hoặc chu kỳ dữ liệu đã đổi; bản nháp được giữ lại.')\n+      }\n+      return\n+    }\n+\n     const acknowledgedText = result.journal.journal ?? ''\n     record.acknowledgedClientRevision = pending.revision\n     record.acknowledgedText = acknowledgedText"
+                  },
+                  {
+                    "oldStart": 341,
+                    "oldLines": 9,
+                    "newStart": 416,
+                    "newLines": 6,
+                    "diffText": "@@ -341,9 +416,6 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {\n     } else {\n       record.status = 'dirty'\n     }\n-\n-    // A committed journal ACK remains saved even if query convergence later reports an error.\n-    void sync.recordMutationAck(result.account_revision, result.data_epoch, pending.authGeneration).catch(() => undefined)\n   }\n \n   function save(challengeId: string, localDate: string): Promise<void> {"
+                  },
+                  {
+                    "oldStart": 392,
+                    "oldLines": 5,
+                    "newStart": 464,
+                    "newLines": 15,
+                    "diffText": "@@ -392,5 +464,15 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {\n \n   auth.registerPrivateStateReset(reset)\n \n-  return { drafts, getDraft, hydrate, setDraftText, isDirty, save, reset }\n+  return {\n+    drafts,\n+    getDraft,\n+    hydrate,\n+    setDraftText,\n+    isDirty,\n+    useServerSnapshot,\n+    rebaseAfterEpochChange,\n+    save,\n+    reset,\n+  }\n })"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "sync-ack-convergence-tests",
+        "verdict": "APPROVE",
+        "evidence_digest": "sha256:ac7005250148bdb2baa939e0a213d6463375ff2ec172a7937f2d608293f4481f",
+        "evidence_set_digest": null,
+        "requested_paths": [
+          "frontend/src/stores/__tests__/sync.spec.ts"
+        ],
+        "unit_count": 3,
+        "producer_output": {
+          "status": "OK",
+          "changeEvidence": {
+            "provenance": {
+              "producer": "prepare-change-evidence-v1",
+              "comparison": "explicit-pair",
+              "base": "d529b8329ce495f82e085b7c678f869cf898a1fa",
+              "head": "4b397ad5a9c4929b284897c774281ff3e11b7d85"
+            },
+            "paths": [
+              {
+                "path": "frontend/src/stores/__tests__/sync.spec.ts",
+                "hunks": [
+                  {
+                    "oldStart": 38,
+                    "oldLines": 6,
+                    "newStart": 38,
+                    "newLines": 41,
+                    "diffText": "@@ -38,6 +38,41 @@ describe('useSyncStore', () => {\n     vi.restoreAllMocks()\n   })\n \n+  function prepareAuthenticatedSync() {\n+    const auth = useAuthStore()\n+    const account = useAccountStore()\n+    const sync = useSyncStore()\n+    sync.setQueryClient(queryClient)\n+    auth.generation = 1\n+    auth.status = 'authenticated'\n+    account.context = {\n+      timezone: 'Asia/Ho_Chi_Minh',\n+      account_date: '2026-09-19',\n+      week: { start_date: '2026-09-15', end_date: '2026-09-21' },\n+      account_revision: 1,\n+      data_epoch: 1,\n+      write_state: 'open',\n+    }\n+    account.status = 'ready'\n+    sync.lastEpoch = 1\n+    sync.lastRevision = 1\n+    return sync\n+  }\n+\n+  function createDeferredInvalidation() {\n+    let resolve!: () => void\n+    let reject!: (error: Error) => void\n+    const promise = new Promise<void>((resolvePromise, rejectPromise) => {\n+      resolve = resolvePromise\n+      reject = rejectPromise\n+    })\n+    return { promise, resolve, reject }\n+  }\n+\n+  async function flushPendingConvergence() {\n+    for (let i = 0; i < 5; i++) await Promise.resolve()\n+  }\n+\n   it('initializes in idle state and starts polling when authenticated', async () => {\n     const auth = useAuthStore()\n     const sync = useSyncStore()"
+                  },
+                  {
+                    "oldStart": 785,
+                    "oldLines": 7,
+                    "newStart": 820,
+                    "newLines": 7,
+                    "diffText": "@@ -785,7 +820,7 @@ describe('useSyncStore', () => {\n     sync.stop()\n   })\n \n-  it('S14-F02 mutation ACK is fenced again after awaited invalidation', async () => {\n+  it('S14-F02 mutation ACK convergence callback is fenced after invalidation', async () => {\n     const sync = useSyncStore()\n     const auth = useAuthStore()\n     const account = useAccountStore()"
+                  },
+                  {
+                    "oldStart": 824,
+                    "oldLines": 9,
+                    "newStart": 859,
+                    "newLines": 166,
+                    "diffText": "@@ -824,9 +859,166 @@ describe('useSyncStore', () => {\n \n     finishInvalidation()\n \n-    expect(await staleAck).toBe(false)\n+    expect(await staleAck).toBe(true)\n     expect(sync.syncStatus).not.toBe('synced')\n     expect(account.context).toBeNull()\n     sync.stop()\n   })\n+\n+  it('keeps the committed account revision when challenge convergence fails after a mutation ACK', async () => {\n+    const auth = useAuthStore()\n+    const account = useAccountStore()\n+    auth.generation = 1\n+    auth.status = 'authenticated'\n+    const sync = useSyncStore()\n+    sync.setQueryClient(queryClient)\n+    account.context = {\n+      timezone: 'Asia/Ho_Chi_Minh',\n+      account_date: '2026-09-19',\n+      week: { start_date: '2026-09-15', end_date: '2026-09-21' },\n+      account_revision: 1,\n+      data_epoch: 1,\n+      write_state: 'open',\n+    }\n+    account.status = 'ready'\n+    sync.lastEpoch = 1\n+    sync.lastRevision = 1\n+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries').mockRejectedValue(new Error('challenge refetch failed'))\n+\n+    const accepted = await sync.recordMutationAck(2, 1, 1)\n+\n+    expect(accepted).toBe(true)\n+    await vi.waitFor(() => expect(sync.syncStatus).toBe('error'))\n+    expect(invalidate).toHaveBeenCalledOnce()\n+    expect(account.context?.account_revision).toBe(2)\n+    expect(sync.syncStatus).toBe('error')\n+    expect(sync.syncError).toContain('đồng bộ danh sách challenge')\n+    expect(sync.pendingConvergence).toBe(true)\n+    sync.stop()\n+  })\n+\n+  it('keeps a newer same-epoch failure when an older ACK later converges successfully', async () => {\n+    const sync = prepareAuthenticatedSync()\n+    const olderInvalidation = createDeferredInvalidation()\n+    const newerInvalidation = createDeferredInvalidation()\n+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries')\n+      .mockImplementationOnce(() => olderInvalidation.promise)\n+      .mockImplementationOnce(() => newerInvalidation.promise)\n+\n+    expect(await sync.recordMutationAck(2, 1, 1)).toBe(true)\n+    await flushPendingConvergence()\n+    expect(invalidate).toHaveBeenCalledTimes(1)\n+    expect(await sync.recordMutationAck(3, 1, 1)).toBe(true)\n+    await flushPendingConvergence()\n+    expect(invalidate).toHaveBeenCalledTimes(2)\n+\n+    newerInvalidation.reject(new Error('newer challenge refetch failed'))\n+    await vi.waitFor(() => expect(sync.syncStatus).toBe('error'))\n+    expect(sync.syncError).toContain('đồng bộ danh sách challenge')\n+    expect(sync.pendingConvergence).toBe(true)\n+    expect(sync.consecutiveFailures).toBe(1)\n+\n+    olderInvalidation.resolve()\n+    await flushPendingConvergence()\n+\n+    expect(sync.syncStatus).toBe('error')\n+    expect(sync.syncError).toContain('đồng bộ danh sách challenge')\n+    expect(sync.pendingConvergence).toBe(true)\n+    expect(sync.consecutiveFailures).toBe(1)\n+    sync.stop()\n+  })\n+\n+  it('keeps a newer same-epoch success when an older ACK later fails', async () => {\n+    const sync = prepareAuthenticatedSync()\n+    const olderInvalidation = createDeferredInvalidation()\n+    const newerInvalidation = createDeferredInvalidation()\n+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries')\n+      .mockImplementationOnce(() => olderInvalidation.promise)\n+      .mockImplementationOnce(() => newerInvalidation.promise)\n+\n+    expect(await sync.recordMutationAck(2, 1, 1)).toBe(true)\n+    await flushPendingConvergence()\n+    expect(invalidate).toHaveBeenCalledTimes(1)\n+    expect(await sync.recordMutationAck(3, 1, 1)).toBe(true)\n+    await flushPendingConvergence()\n+    expect(invalidate).toHaveBeenCalledTimes(2)\n+\n+    newerInvalidation.resolve()\n+    await vi.waitFor(() => expect(sync.syncStatus).toBe('synced'))\n+    expect(sync.syncError).toBeNull()\n+    expect(sync.pendingConvergence).toBe(false)\n+    expect(sync.consecutiveFailures).toBe(0)\n+\n+    olderInvalidation.reject(new Error('older challenge refetch failed'))\n+    await flushPendingConvergence()\n+\n+    expect(sync.syncStatus).toBe('synced')\n+    expect(sync.syncError).toBeNull()\n+    expect(sync.pendingConvergence).toBe(false)\n+    expect(sync.consecutiveFailures).toBe(0)\n+    sync.stop()\n+  })\n+\n+  it('ignores a lower same-epoch ACK that arrives after a newer revision has converged', async () => {\n+    const sync = prepareAuthenticatedSync()\n+    const newerInvalidation = createDeferredInvalidation()\n+    const olderInvalidation = createDeferredInvalidation()\n+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries')\n+      .mockImplementationOnce(() => newerInvalidation.promise)\n+      .mockImplementationOnce(() => olderInvalidation.promise)\n+\n+    expect(await sync.recordMutationAck(3, 1, 1)).toBe(true)\n+    await flushPendingConvergence()\n+    expect(invalidate).toHaveBeenCalledTimes(1)\n+    newerInvalidation.resolve()\n+    await vi.waitFor(() => expect(sync.syncStatus).toBe('synced'))\n+\n+    expect(await sync.recordMutationAck(2, 1, 1)).toBe(true)\n+    await flushPendingConvergence()\n+    expect(invalidate).toHaveBeenCalledTimes(2)\n+    olderInvalidation.reject(new Error('older challenge refetch failed'))\n+    await flushPendingConvergence()\n+\n+    expect(sync.lastRevision).toBe(3)\n+    expect(sync.syncStatus).toBe('synced')\n+    expect(sync.syncError).toBeNull()\n+    expect(sync.pendingConvergence).toBe(false)\n+    expect(sync.consecutiveFailures).toBe(0)\n+    sync.stop()\n+  })\n+\n+  it('suppresses a late convergence error after the account epoch changes', async () => {\n+    const auth = useAuthStore()\n+    const account = useAccountStore()\n+    auth.generation = 1\n+    auth.status = 'authenticated'\n+    const sync = useSyncStore()\n+    sync.setQueryClient(queryClient)\n+    account.context = {\n+      timezone: 'Asia/Ho_Chi_Minh',\n+      account_date: '2026-09-19',\n+      week: { start_date: '2026-09-15', end_date: '2026-09-21' },\n+      account_revision: 1,\n+      data_epoch: 1,\n+      write_state: 'open',\n+    }\n+    account.status = 'ready'\n+    sync.lastEpoch = 1\n+\n+    let rejectInvalidation!: (error: Error) => void\n+    vi.spyOn(queryClient, 'invalidateQueries').mockReturnValue(new Promise<void>((_, reject) => {\n+      rejectInvalidation = reject\n+    }))\n+    expect(await sync.recordMutationAck(2, 1, 1)).toBe(true)\n+    await Promise.resolve()\n+\n+    account.context = { ...account.context!, data_epoch: 2 }\n+    rejectInvalidation(new Error('old epoch convergence failed'))\n+    await Promise.resolve()\n+    await Promise.resolve()\n+\n+    expect(sync.syncStatus).not.toBe('error')\n+    expect(sync.syncError).toBeNull()\n+    sync.stop()\n+  })\n })"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "sync-ack-convergence-store",
+        "verdict": "APPROVE",
+        "evidence_digest": "sha256:9ad6d41fb2c83b08d55d8ff2ffe04ea380c9e020d5cf2fed60ae854baa656e32",
+        "evidence_set_digest": null,
+        "requested_paths": [
+          "frontend/src/stores/sync.ts"
+        ],
+        "unit_count": 5,
+        "producer_output": {
+          "status": "OK",
+          "changeEvidence": {
+            "provenance": {
+              "producer": "prepare-change-evidence-v1",
+              "comparison": "explicit-pair",
+              "base": "d529b8329ce495f82e085b7c678f869cf898a1fa",
+              "head": "4b397ad5a9c4929b284897c774281ff3e11b7d85"
+            },
+            "paths": [
+              {
+                "path": "frontend/src/stores/sync.ts",
+                "hunks": [
+                  {
+                    "oldStart": 38,
+                    "oldLines": 6,
+                    "newStart": 38,
+                    "newLines": 7,
+                    "diffText": "@@ -38,6 +38,7 @@ export const useSyncStore = defineStore('sync', () => {\n   let isStarted = false\n   const requestGeneration = ref<number>(0)\n   const latestCompletedRequestGeneration = ref<number>(0)\n+  let ackConvergenceGeneration = 0\n   let activeReconcileInfo: { promise: Promise<boolean>; authGen: number } | null = null\n \n   function setQueryClient(qc: QueryClient): void {"
+                  },
+                  {
+                    "oldStart": 292,
+                    "oldLines": 6,
+                    "newStart": 293,
+                    "newLines": 8,
+                    "diffText": "@@ -292,6 +293,8 @@ export const useSyncStore = defineStore('sync', () => {\n     epoch: number,\n     originatingAuthGen?: number,\n   ): Promise<boolean> {\n+    // `true` means this server ACK was accepted; query convergence continues\n+    // independently and reports any failure through the global sync state.\n     // S14-F02: Auth generation fencing for mutation ACKs\n     if (originatingAuthGen !== undefined && originatingAuthGen !== auth.generation) {\n       return false"
+                  },
+                  {
+                    "oldStart": 304,
+                    "oldLines": 6,
+                    "newStart": 307,
+                    "newLines": 12,
+                    "diffText": "@@ -304,6 +307,12 @@ export const useSyncStore = defineStore('sync', () => {\n     if (lastEpoch.value !== null && epoch < lastEpoch.value) {\n       return false\n     }\n+    if (account.context && account.context.data_epoch !== epoch) {\n+      return false\n+    }\n+\n+    const isLatestRevisionForEpoch = lastEpoch.value === null || epoch > lastEpoch.value ||\n+      lastRevision.value === null || revision >= lastRevision.value\n \n     if (lastEpoch.value === null || epoch === lastEpoch.value) {\n       lastRevision.value = lastRevision.value !== null ? Math.max(lastRevision.value, revision) : revision"
+                  },
+                  {
+                    "oldStart": 320,
+                    "oldLines": 39,
+                    "newStart": 329,
+                    "newLines": 40,
+                    "diffText": "@@ -320,39 +329,40 @@ export const useSyncStore = defineStore('sync', () => {\n       }\n     }\n \n-    // Await query invalidation / refetch with throwOnError: true (S14-F02, S14-F04)\n-    try {\n-      await currentQueryClient.invalidateQueries({ queryKey: ['challenges'] }, { throwOnError: true })\n-\n-      // S14-F02: Re-fence originating auth generation/status and epoch AFTER awaited invalidation!\n-      if (\n-        (originatingAuthGen !== undefined && originatingAuthGen !== auth.generation) ||\n-        auth.status !== 'authenticated' ||\n-        (lastEpoch.value !== null && epoch < lastEpoch.value)\n-      ) {\n-        return false\n-      }\n-\n-      consecutiveFailures.value = 0\n-      syncError.value = null\n-      pendingConvergence.value = false\n-      syncStatus.value = 'synced'\n-      return true\n-    } catch {\n-      // S14-F02: If auth changed while invalidation failed, do not mutate new session state\n-      if (\n-        (originatingAuthGen !== undefined && originatingAuthGen !== auth.generation) ||\n-        auth.status !== 'authenticated'\n-      ) {\n-        return false\n-      }\n+    if (isLatestRevisionForEpoch) ackConvergenceGeneration++\n+    const capturedAckConvergenceGeneration = ackConvergenceGeneration\n+\n+    // The server ACK commits the journal independently from query convergence. Start\n+    // invalidation in the background so the editor can show Saved from this ACK.\n+    // Re-fence both callbacks against newer ACKs, revisions, auth, and data epochs.\n+    const isCurrentAck = () =>\n+      capturedAckConvergenceGeneration === ackConvergenceGeneration &&\n+      (originatingAuthGen === undefined || originatingAuthGen === auth.generation) &&\n+      auth.status === 'authenticated' &&\n+      (lastEpoch.value === null || epoch >= lastEpoch.value) &&\n+      (lastRevision.value === null || revision >= lastRevision.value) &&\n+      (!account.context || account.context.data_epoch === epoch)\n+\n+    void Promise.resolve()\n+      .then(() => currentQueryClient.invalidateQueries({ queryKey: ['challenges'] }, { throwOnError: true }))\n+      .then(\n+        () => {\n+          if (!isCurrentAck()) return\n+          consecutiveFailures.value = 0\n+          syncError.value = null\n+          pendingConvergence.value = false\n+          syncStatus.value = 'synced'\n+        },\n+        () => {\n+          if (!isCurrentAck()) return\n+          pendingConvergence.value = true\n+          consecutiveFailures.value++\n+          syncError.value = 'Không thể đồng bộ danh sách challenge mới nhất. Đang thử lại...'\n+          syncStatus.value = 'error'\n+        },\n+      )\n \n-      pendingConvergence.value = true\n-      consecutiveFailures.value++\n-      syncError.value = 'Không thể đồng bộ danh sách challenge mới nhất. Đang thử lại...'\n-      syncStatus.value = 'error'\n-      return false\n-    }\n+    return true\n   }\n \n   async function reconcileBeforeWrite(): Promise<{ allowed: boolean; reason?: string }> {"
+                  },
+                  {
+                    "oldStart": 505,
+                    "oldLines": 6,
+                    "newStart": 515,
+                    "newLines": 7,
+                    "diffText": "@@ -505,6 +515,7 @@ export const useSyncStore = defineStore('sync', () => {\n \n   function reset(): void {\n     clearTimer()\n+    ackConvergenceGeneration++\n     syncStatus.value = 'idle'\n     syncError.value = null\n     lastSyncedAt.value = null"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "journal-editor",
+        "verdict": "APPROVE",
+        "evidence_digest": "sha256:7aab3bfd59d15857c8ca1a08b4d64a017092be40d914721bc6dd2838fbee8a1a",
+        "evidence_set_digest": "0ae4c90d117859a0fa56a11d91a51a6603f561d577272e993e31305efd78d28e",
+        "requested_paths": [
+          "frontend/src/components/ChallengeJournalEditor.vue"
+        ],
+        "unit_count": 11,
+        "producer_output": {
+          "status": "OK",
+          "changeEvidence": {
+            "evidenceSet": {
+              "schema": "change-evidence-set-v1",
+              "provenance": {
+                "producer": "prepare-change-evidence-v1",
+                "comparison": "explicit-pair",
+                "base": "d529b8329ce495f82e085b7c678f869cf898a1fa",
+                "head": "4b397ad5a9c4929b284897c774281ff3e11b7d85"
+              },
+              "requestedPaths": [
+                "frontend/src/components/ChallengeJournalEditor.vue"
+              ],
+              "sourceDigest": "0ae4c90d117859a0fa56a11d91a51a6603f561d577272e993e31305efd78d28e",
+              "unitCount": 11,
+              "paths": [
+                {
+                  "path": "frontend/src/components/ChallengeJournalEditor.vue",
+                  "hunks": [
+                    {
+                      "header": "@@ -1,19 +1,14 @@",
+                      "oldStart": 1,
+                      "oldLines": 19,
+                      "newStart": 1,
+                      "newLines": 14,
+                      "bodyLineCount": 21
+                    },
+                    {
+                      "header": "@@ -22,7 +17,7 @@ const props = defineProps<{",
+                      "oldStart": 22,
+                      "oldLines": 7,
+                      "newStart": 17,
+                      "newLines": 7,
+                      "bodyLineCount": 8
+                    },
+                    {
+                      "header": "@@ -40,65 +35,54 @@ const {",
+                      "oldStart": 40,
+                      "oldLines": 65,
+                      "newStart": 35,
+                      "newLines": 54,
+                      "bodyLineCount": 105
+                    },
+                    {
+                      "header": "@@ -106,10 +90,6 @@ watch(",
+                      "oldStart": 106,
+                      "oldLines": 10,
+                      "newStart": 90,
+                      "newLines": 6,
+                      "bodyLineCount": 10
+                    },
+                    {
+                      "header": "@@ -117,25 +97,28 @@ watch(",
+                      "oldStart": 117,
+                      "oldLines": 25,
+                      "newStart": 97,
+                      "newLines": 28,
+                      "bodyLineCount": 39
+                    },
+                    {
+                      "header": "@@ -146,121 +129,38 @@ function useServerSnapshot(): void {",
+                      "oldStart": 146,
+                      "oldLines": 121,
+                      "newStart": 129,
+                      "newLines": 38,
+                      "bodyLineCount": 138
+                    },
+                    {
+                      "header": "@@ -285,11 +185,11 @@ async function saveJournal(): Promise<void> {",
+                      "oldStart": 285,
+                      "oldLines": 11,
+                      "newStart": 185,
+                      "newLines": 11,
+                      "bodyLineCount": 13
+                    },
+                    {
+                      "header": "@@ -301,7 +201,7 @@ async function saveJournal(): Promise<void> {",
+                      "oldStart": 301,
+                      "oldLines": 7,
+                      "newStart": 201,
+                      "newLines": 7,
+                      "bodyLineCount": 8
+                    },
+                    {
+                      "header": "@@ -346,6 +246,7 @@ async function saveJournal(): Promise<void> {",
+                      "oldStart": 346,
+                      "oldLines": 6,
+                      "newStart": 246,
+                      "newLines": 7,
+                      "bodyLineCount": 7
+                    },
+                    {
+                      "header": "@@ -362,7 +263,6 @@ async function saveJournal(): Promise<void> {",
+                      "oldStart": 362,
+                      "oldLines": 7,
+                      "newStart": 263,
+                      "newLines": 6,
+                      "bodyLineCount": 7
+                    },
+                    {
+                      "header": "@@ -391,7 +291,7 @@ async function saveJournal(): Promise<void> {",
+                      "oldStart": 391,
+                      "oldLines": 7,
+                      "newStart": 291,
+                      "newLines": 7,
+                      "bodyLineCount": 8
+                    }
+                  ]
+                }
+              ],
+              "units": [
+                {
+                  "evidenceSetDigest": "0ae4c90d117859a0fa56a11d91a51a6603f561d577272e993e31305efd78d28e",
+                  "path": "frontend/src/components/ChallengeJournalEditor.vue",
+                  "hunkIndex": 0,
+                  "originalOldStart": 1,
+                  "originalOldLines": 19,
+                  "originalNewStart": 1,
+                  "originalNewLines": 14,
+                  "unitIndex": 0,
+                  "hunkUnitIndex": 0,
+                  "hunkUnitCount": 1,
+                  "bodyStart": 0,
+                  "bodyEnd": 21,
+                  "oldLines": 19,
+                  "newLines": 14,
+                  "diffLineCount": 22,
+                  "bodyText": " <script setup lang=\"ts\">\n-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'\n+import { useQuery, useQueryClient } from '@tanstack/vue-query'\n import { computed, ref, watch } from 'vue'\n \n import {\n-  ChallengeApiError,\n-  generateCommandId,\n   getChallengeJournal,\n-  saveChallengeJournal,\n-  type JournalProblemDetails,\n   type JournalReadResult,\n-  type JournalSnapshot,\n } from '../api/challenges'\n import { useAccountStore } from '../stores/account'\n import { useAuthStore } from '../stores/auth'\n-import { useSyncStore } from '../stores/sync'\n+import { useJournalDraftsStore } from '../stores/journalDrafts'\n \n const props = defineProps<{\n   challengeId: string"
+                },
+                {
+                  "evidenceSetDigest": "0ae4c90d117859a0fa56a11d91a51a6603f561d577272e993e31305efd78d28e",
+                  "path": "frontend/src/components/ChallengeJournalEditor.vue",
+                  "hunkIndex": 1,
+                  "originalOldStart": 22,
+                  "originalOldLines": 7,
+                  "originalNewStart": 17,
+                  "originalNewLines": 7,
+                  "unitIndex": 1,
+                  "hunkUnitIndex": 0,
+                  "hunkUnitCount": 1,
+                  "bodyStart": 0,
+                  "bodyEnd": 8,
+                  "oldLines": 7,
+                  "newLines": 7,
+                  "diffLineCount": 9,
+                  "bodyText": " \n const account = useAccountStore()\n const auth = useAuthStore()\n-const sync = useSyncStore()\n+const journalDrafts = useJournalDraftsStore()\n const queryClient = useQueryClient()\n \n const journalQueryKey = computed(() => ['challenge-journal', props.challengeId, props.localDate] as const)"
+                },
+                {
+                  "evidenceSetDigest": "0ae4c90d117859a0fa56a11d91a51a6603f561d577272e993e31305efd78d28e",
+                  "path": "frontend/src/components/ChallengeJournalEditor.vue",
+                  "hunkIndex": 2,
+                  "originalOldStart": 40,
+                  "originalOldLines": 65,
+                  "originalNewStart": 35,
+                  "originalNewLines": 54,
+                  "unitIndex": 2,
+                  "hunkUnitIndex": 0,
+                  "hunkUnitCount": 1,
+                  "bodyStart": 0,
+                  "bodyEnd": 105,
+                  "oldLines": 65,
+                  "newLines": 54,
+                  "diffLineCount": 106,
+                  "bodyText": "   retry: false,\n })\n \n-const draft = ref('')\n-const savedText = ref('')\n-const journalVersion = ref(0)\n-const loadedResourceKey = ref<string | null>(null)\n-const conflictSnapshot = ref<JournalSnapshot | null>(null)\n-const validationError = ref<string | null>(null)\n-const saveError = ref<string | null>(null)\n-const saveStatus = ref<string | null>(null)\n+const record = computed(() => journalDrafts.getDraft(props.challengeId, props.localDate))\n+const draft = computed({\n+  get: () => record.value?.text ?? '',\n+  set: (text: string) => {\n+    localValidationError.value = null\n+    journalDrafts.setDraftText(props.challengeId, props.localDate, text)\n+  },\n+})\n+const savedText = computed(() => record.value?.acknowledgedText ?? '')\n+const conflictSnapshot = computed(() => record.value?.conflictSnapshot ?? null)\n+const isDirty = computed(() => journalDrafts.isDirty(props.challengeId, props.localDate))\n+const isSaving = computed(() => record.value?.status === 'saving')\n+const localValidationError = ref<string | null>(null)\n+const localActionError = ref<string | null>(null)\n+const showSaveStatus = ref(false)\n const epochChangeBlocked = ref(false)\n-\n-const activeCommandId = ref<string | null>(null)\n-const lastCanonicalPayload = ref<string | null>(null)\n-const activeAuthGeneration = ref<number | undefined>(undefined)\n-\n-const isDirty = computed(() => draft.value !== savedText.value)\n const isMutationBlocked = computed(() => {\n   if (account.status !== 'ready' || !account.context) return true\n   return account.context.write_state !== 'open'\n })\n-const isSaving = computed(() => saveMutation.isPending.value)\n-\n-watch(\n-  journalData,\n-  (result) => {\n-    if (!result) return\n-\n-    const snapshot = result.journal\n-    const firstLoad = loadedResourceKey.value !== journalResourceKey.value\n-    const shouldReplaceDraft = firstLoad || !isDirty.value\n-\n-    if (shouldReplaceDraft) {\n-      draft.value = snapshot.journal ?? ''\n-    }\n-    savedText.value = snapshot.journal ?? ''\n-    journalVersion.value = snapshot.journal_version\n-    loadedResourceKey.value = journalResourceKey.value\n-\n-    if (firstLoad) {\n-      conflictSnapshot.value = null\n-      validationError.value = null\n-      saveError.value = null\n-      saveStatus.value = null\n-    }\n-  },\n-  { immediate: true },\n+const validationError = computed(\n+  () => localValidationError.value ?? (record.value?.error?.kind === 'validation' ? record.value.error.message : null),\n+)\n+const saveError = computed(() => localActionError.value ?? (\n+  record.value?.error && record.value.error.kind !== 'validation' && record.value.error.kind !== 'conflict'\n+    ? record.value.error.message\n+    : null\n+))\n+const isRetryable = computed(() =>\n+  record.value?.error?.kind === 'network' || record.value?.error?.kind === 'preflight',\n )\n+const saveStatus = computed(() => {\n+  if (!showSaveStatus.value || !record.value) return null\n+  if (record.value.status === 'saving') return 'Đang lưu…'\n+  if (record.value.status === 'saved') return 'Đã lưu nhật ký.'\n+  if (record.value.status === 'dirty') return 'Chưa lưu thay đổi.'\n+  return null\n+})\n+\n+watch(journalData, (result) => {\n+  if (result) journalDrafts.hydrate(result.journal)\n+}, { immediate: true })\n \n-watch(journalResourceKey, () => {\n-  loadedResourceKey.value = null\n-  draft.value = ''\n-  savedText.value = ''\n-  journalVersion.value = 0\n-  conflictSnapshot.value = null\n-  validationError.value = null\n-  saveError.value = null\n-  saveStatus.value = null\n+watch([journalResourceKey, () => auth.generation], () => {\n+  localValidationError.value = null\n+  localActionError.value = null\n+  showSaveStatus.value = false\n   epochChangeBlocked.value = false\n-  activeCommandId.value = null\n-  lastCanonicalPayload.value = null\n })\n \n watch("
+                },
+                {
+                  "evidenceSetDigest": "0ae4c90d117859a0fa56a11d91a51a6603f561d577272e993e31305efd78d28e",
+                  "path": "frontend/src/components/ChallengeJournalEditor.vue",
+                  "hunkIndex": 3,
+                  "originalOldStart": 106,
+                  "originalOldLines": 10,
+                  "originalNewStart": 90,
+                  "originalNewLines": 6,
+                  "unitIndex": 3,
+                  "hunkUnitIndex": 0,
+                  "hunkUnitCount": 1,
+                  "bodyStart": 0,
+                  "bodyEnd": 10,
+                  "oldLines": 10,
+                  "newLines": 6,
+                  "diffLineCount": 11,
+                  "bodyText": "   (newEpoch, oldEpoch) => {\n     if (oldEpoch === undefined || newEpoch === oldEpoch) return\n \n-    activeCommandId.value = null\n-    lastCanonicalPayload.value = null\n-    conflictSnapshot.value = null\n-\n     if (isDirty.value) {\n       epochChangeBlocked.value = true\n     }"
+                },
+                {
+                  "evidenceSetDigest": "0ae4c90d117859a0fa56a11d91a51a6603f561d577272e993e31305efd78d28e",
+                  "path": "frontend/src/components/ChallengeJournalEditor.vue",
+                  "hunkIndex": 4,
+                  "originalOldStart": 117,
+                  "originalOldLines": 25,
+                  "originalNewStart": 97,
+                  "originalNewLines": 28,
+                  "unitIndex": 4,
+                  "hunkUnitIndex": 0,
+                  "hunkUnitCount": 1,
+                  "bodyStart": 0,
+                  "bodyEnd": 39,
+                  "oldLines": 25,
+                  "newLines": 28,
+                  "diffLineCount": 40,
+                  "bodyText": " )\n \n async function rebaseOnEpochChange(): Promise<void> {\n+  const challengeId = props.challengeId\n+  const localDate = props.localDate\n   const draftWasDirty = isDirty.value\n   const result = await refetch()\n \n-  if (result.data) {\n+  if (\n+    result.data?.journal.challenge_id === challengeId &&\n+    result.data.journal.local_date === localDate &&\n+    props.challengeId === challengeId &&\n+    props.localDate === localDate\n+  ) {\n     const snapshot = result.data.journal\n-    savedText.value = snapshot.journal ?? ''\n-    journalVersion.value = snapshot.journal_version\n-    if (!draftWasDirty) {\n-      draft.value = snapshot.journal ?? ''\n-    }\n+    journalDrafts.rebaseAfterEpochChange(challengeId, localDate, snapshot)\n+    queryClient.setQueryData<JournalReadResult>(['challenge-journal', challengeId, localDate], { journal: snapshot })\n     epochChangeBlocked.value = false\n-    conflictSnapshot.value = null\n-    validationError.value = null\n-    saveError.value = null\n-    saveStatus.value = null\n+    localValidationError.value = null\n+    localActionError.value = null\n+    showSaveStatus.value = !draftWasDirty\n     return\n   }\n \n-  saveError.value = 'Không thể tải dữ liệu nhật ký mới nhất. Vui lòng thử lại.'\n+  localActionError.value = 'Không thể tải dữ liệu nhật ký mới nhất. Vui lòng thử lại.'\n }\n \n async function retryJournalLoad(): Promise<void> {"
+                },
+                {
+                  "evidenceSetDigest": "0ae4c90d117859a0fa56a11d91a51a6603f561d577272e993e31305efd78d28e",
+                  "path": "frontend/src/components/ChallengeJournalEditor.vue",
+                  "hunkIndex": 5,
+                  "originalOldStart": 146,
+                  "originalOldLines": 121,
+                  "originalNewStart": 129,
+                  "originalNewLines": 38,
+                  "unitIndex": 5,
+                  "hunkUnitIndex": 0,
+                  "hunkUnitCount": 1,
+                  "bodyStart": 0,
+                  "bodyEnd": 138,
+                  "oldLines": 121,
+                  "newLines": 38,
+                  "diffLineCount": 139,
+                  "bodyText": "   const snapshot = conflictSnapshot.value\n   if (!snapshot) return\n \n-  draft.value = snapshot.journal ?? ''\n-  savedText.value = snapshot.journal ?? ''\n-  journalVersion.value = snapshot.journal_version\n+  journalDrafts.useServerSnapshot(props.challengeId, props.localDate)\n   queryClient.setQueryData<JournalReadResult>(journalQueryKey.value, { journal: snapshot })\n-  conflictSnapshot.value = null\n-  validationError.value = null\n-  saveError.value = null\n-  saveStatus.value = 'Đã tải bản nhật ký đang lưu trên máy chủ.'\n-  activeCommandId.value = null\n-  lastCanonicalPayload.value = null\n+  localValidationError.value = null\n+  localActionError.value = null\n+  showSaveStatus.value = true\n }\n \n-const saveMutation = useMutation({\n-  mutationFn: (payload: Parameters<typeof saveChallengeJournal>[2]) =>\n-    saveChallengeJournal(props.challengeId, props.localDate, payload),\n-})\n-\n async function saveJournal(): Promise<void> {\n-  validationError.value = null\n-  saveError.value = null\n-  saveStatus.value = null\n+  localValidationError.value = null\n+  localActionError.value = null\n+  showSaveStatus.value = true\n \n   if (epochChangeBlocked.value) {\n-    saveError.value = 'Dữ liệu máy chủ đã chuyển chu kỳ mới (epoch). Vui lòng bấm Tải lại dữ liệu mới nhất trước khi tiếp tục.'\n+    localActionError.value = 'Dữ liệu máy chủ đã chuyển chu kỳ mới (epoch). Vui lòng bấm Tải lại dữ liệu mới nhất trước khi tiếp tục.'\n     return\n   }\n \n   if (!draft.value.trim()) {\n-    validationError.value = 'Nhật ký không được để trống.'\n+    localValidationError.value = 'Nhật ký không được để trống.'\n     return\n   }\n \n-  const writeCheck = await sync.reconcileBeforeWrite()\n-  if (!writeCheck.allowed) {\n-    saveError.value = writeCheck.reason ?? 'Chưa thể lưu nhật ký. Vui lòng thử lại sau.'\n-    return\n-  }\n-\n-  if (account.status !== 'ready' || !account.context || account.context.write_state !== 'open') {\n-    saveError.value = 'Chưa thể lưu nhật ký: ngữ cảnh tài khoản chưa sẵn sàng.'\n-    return\n-  }\n-\n-  const canonicalPayload = JSON.stringify({\n-    challenge_id: props.challengeId,\n-    local_date: props.localDate,\n-    base_version: journalVersion.value,\n-    data_epoch: account.context.data_epoch,\n-    journal: draft.value,\n-  })\n-\n-  let commandId = activeCommandId.value\n-  if (!commandId || lastCanonicalPayload.value !== canonicalPayload) {\n-    commandId = generateCommandId()\n-    activeCommandId.value = commandId\n-    lastCanonicalPayload.value = canonicalPayload\n-  }\n-\n-  activeAuthGeneration.value = auth.generation\n+  const challengeId = props.challengeId\n+  const localDate = props.localDate\n+  const beforeSnapshot = journalDrafts.getDraft(challengeId, localDate)?.acknowledgedSnapshot\n+  await journalDrafts.save(challengeId, localDate)\n \n-  try {\n-    const result = await saveMutation.mutateAsync({\n-      command_id: commandId,\n-      data_epoch: account.context.data_epoch,\n-      base_version: journalVersion.value,\n-      journal: draft.value,\n+  const updated = journalDrafts.getDraft(challengeId, localDate)\n+  if (updated && updated.acknowledgedSnapshot !== beforeSnapshot) {\n+    queryClient.setQueryData<JournalReadResult>(['challenge-journal', challengeId, localDate], {\n+      journal: updated.acknowledgedSnapshot,\n     })\n-\n-    const accepted = await sync.recordMutationAck(\n-      result.account_revision,\n-      result.data_epoch,\n-      activeAuthGeneration.value,\n-    )\n-    if (!accepted) return\n-\n-    if (\n-      auth.status !== 'authenticated' ||\n-      (activeAuthGeneration.value !== undefined && auth.generation !== activeAuthGeneration.value)\n-    ) {\n-      return\n-    }\n-\n-    const snapshot = result.journal\n-    queryClient.setQueryData<JournalReadResult>(journalQueryKey.value, { journal: snapshot })\n-    draft.value = snapshot.journal ?? ''\n-    savedText.value = snapshot.journal ?? ''\n-    journalVersion.value = snapshot.journal_version\n-    conflictSnapshot.value = null\n-    activeCommandId.value = null\n-    lastCanonicalPayload.value = null\n-    saveStatus.value = 'Đã lưu nhật ký.'\n-  } catch (error) {\n-    if (error instanceof ChallengeApiError) {\n-      const problem = error.problem as JournalProblemDetails | undefined\n-\n-      if (error.status === 409 && problem?.code === 'version_conflict') {\n-        conflictSnapshot.value = problem.current_snapshot ?? null\n-        saveError.value = conflictSnapshot.value\n-          ? null\n-          : 'Nhật ký đã được cập nhật trên thiết bị khác. Bản nháp của bạn vẫn được giữ nguyên.'\n-        return\n-      }\n-\n-      if (error.status === 422) {\n-        validationError.value = error.validation?.errors?.journal?.[0] ?? 'Nhật ký không hợp lệ.'\n-        return\n-      }\n-\n-      if (error.status === 401 || error.status === 403) {\n-        saveError.value = 'Phiên làm việc không còn hợp lệ. Vui lòng đăng nhập lại.'\n-        return\n-      }\n-    }\n-\n-    saveError.value = 'Không thể lưu nhật ký. Vui lòng thử lại.'\n   }\n }\n </script>"
+                },
+                {
+                  "evidenceSetDigest": "0ae4c90d117859a0fa56a11d91a51a6603f561d577272e993e31305efd78d28e",
+                  "path": "frontend/src/components/ChallengeJournalEditor.vue",
+                  "hunkIndex": 6,
+                  "originalOldStart": 285,
+                  "originalOldLines": 11,
+                  "originalNewStart": 185,
+                  "originalNewLines": 11,
+                  "unitIndex": 6,
+                  "hunkUnitIndex": 0,
+                  "hunkUnitCount": 1,
+                  "bodyStart": 0,
+                  "bodyEnd": 13,
+                  "oldLines": 11,
+                  "newLines": 11,
+                  "diffLineCount": 14,
+                  "bodyText": "       Phiên làm việc chưa được xác thực. Vui lòng đăng nhập lại.\n     </p>\n \n-    <p v-else-if=\"isLoading\" class=\"mt-4 text-sm text-slate-500\" role=\"status\">\n+    <p v-else-if=\"isLoading && !record\" class=\"mt-4 text-sm text-slate-500\" role=\"status\">\n       Đang tải nhật ký…\n     </p>\n \n-    <div v-else-if=\"isError && !journalData\" class=\"mt-4 space-y-2 text-sm text-rose-800\" role=\"alert\">\n+    <div v-else-if=\"isError && !journalData && !record\" class=\"mt-4 space-y-2 text-sm text-rose-800\" role=\"alert\">\n       <p>Không thể tải nhật ký cho ngày này.</p>\n       <button\n         id=\"journal-load-retry\""
+                },
+                {
+                  "evidenceSetDigest": "0ae4c90d117859a0fa56a11d91a51a6603f561d577272e993e31305efd78d28e",
+                  "path": "frontend/src/components/ChallengeJournalEditor.vue",
+                  "hunkIndex": 7,
+                  "originalOldStart": 301,
+                  "originalOldLines": 7,
+                  "originalNewStart": 201,
+                  "originalNewLines": 7,
+                  "unitIndex": 7,
+                  "hunkUnitIndex": 0,
+                  "hunkUnitCount": 1,
+                  "bodyStart": 0,
+                  "bodyEnd": 8,
+                  "oldLines": 7,
+                  "newLines": 7,
+                  "diffLineCount": 9,
+                  "bodyText": "       </button>\n     </div>\n \n-    <form v-else-if=\"journalData\" id=\"journal-form\" class=\"mt-4 space-y-4\" novalidate @submit.prevent=\"saveJournal\">\n+    <form v-else-if=\"journalData || record\" id=\"journal-form\" class=\"mt-4 space-y-4\" novalidate @submit.prevent=\"saveJournal\">\n       <div\n         v-if=\"isError\"\n         role=\"alert\""
+                },
+                {
+                  "evidenceSetDigest": "0ae4c90d117859a0fa56a11d91a51a6603f561d577272e993e31305efd78d28e",
+                  "path": "frontend/src/components/ChallengeJournalEditor.vue",
+                  "hunkIndex": 8,
+                  "originalOldStart": 346,
+                  "originalOldLines": 6,
+                  "originalNewStart": 246,
+                  "originalNewLines": 7,
+                  "unitIndex": 8,
+                  "hunkUnitIndex": 0,
+                  "hunkUnitCount": 1,
+                  "bodyStart": 0,
+                  "bodyEnd": 7,
+                  "oldLines": 6,
+                  "newLines": 7,
+                  "diffLineCount": 8,
+                  "bodyText": "           id=\"journal-use-server-btn\"\n           type=\"button\"\n           class=\"mt-3 rounded-md border border-amber-400 bg-white px-3 py-1.5 text-xs font-semibold hover:bg-amber-100\"\n+          :disabled=\"epochChangeBlocked\"\n           @click=\"useServerSnapshot\"\n         >\n           Dùng bản lưu trên máy chủ"
+                },
+                {
+                  "evidenceSetDigest": "0ae4c90d117859a0fa56a11d91a51a6603f561d577272e993e31305efd78d28e",
+                  "path": "frontend/src/components/ChallengeJournalEditor.vue",
+                  "hunkIndex": 9,
+                  "originalOldStart": 362,
+                  "originalOldLines": 7,
+                  "originalNewStart": 263,
+                  "originalNewLines": 6,
+                  "unitIndex": 9,
+                  "hunkUnitIndex": 0,
+                  "hunkUnitCount": 1,
+                  "bodyStart": 0,
+                  "bodyEnd": 7,
+                  "oldLines": 7,
+                  "newLines": 6,
+                  "diffLineCount": 8,
+                  "bodyText": "           v-model=\"draft\"\n           :aria-describedby=\"validationError ? 'journal-error' : undefined\"\n           :aria-invalid=\"validationError ? 'true' : 'false'\"\n-          :disabled=\"isSaving\"\n           :aria-label=\"`Nhật ký ngày ${localDate}`\"\n           rows=\"6\"\n           class=\"mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-50\""
+                },
+                {
+                  "evidenceSetDigest": "0ae4c90d117859a0fa56a11d91a51a6603f561d577272e993e31305efd78d28e",
+                  "path": "frontend/src/components/ChallengeJournalEditor.vue",
+                  "hunkIndex": 10,
+                  "originalOldStart": 391,
+                  "originalOldLines": 7,
+                  "originalNewStart": 291,
+                  "originalNewLines": 7,
+                  "unitIndex": 10,
+                  "hunkUnitIndex": 0,
+                  "hunkUnitCount": 1,
+                  "bodyStart": 0,
+                  "bodyEnd": 8,
+                  "oldLines": 7,
+                  "newLines": 7,
+                  "diffLineCount": 9,
+                  "bodyText": "           :aria-busy=\"isSaving ? 'true' : 'false'\"\n           class=\"inline-flex items-center rounded-lg bg-indigo-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-indigo-600\"\n         >\n-          {{ isSaving ? 'Đang lưu…' : 'Lưu nhật ký' }}\n+          {{ isSaving ? 'Đang lưu…' : isRetryable ? 'Thử lại' : 'Lưu nhật ký' }}\n         </button>\n       </div>\n     </form>"
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "journal-view-tests",
+        "verdict": "APPROVE",
+        "evidence_digest": "sha256:a85e4d3b18d3c74fddb154803b837207419ba7a019b29c07891de44f7d098302",
+        "evidence_set_digest": "2fb601c23dc76bc6ef17e5c0821fb6349e9452622d6c5e5d2ec9e63e91d5775d",
+        "requested_paths": [
+          "frontend/src/views/__tests__/journal.spec.ts"
+        ],
+        "unit_count": 6,
+        "producer_output": {
+          "status": "OK",
+          "changeEvidence": {
+            "evidenceSet": {
+              "schema": "change-evidence-set-v1",
+              "provenance": {
+                "producer": "prepare-change-evidence-v1",
+                "comparison": "explicit-pair",
+                "base": "d529b8329ce495f82e085b7c678f869cf898a1fa",
+                "head": "4b397ad5a9c4929b284897c774281ff3e11b7d85"
+              },
+              "requestedPaths": [
+                "frontend/src/views/__tests__/journal.spec.ts"
+              ],
+              "sourceDigest": "2fb601c23dc76bc6ef17e5c0821fb6349e9452622d6c5e5d2ec9e63e91d5775d",
+              "unitCount": 6,
+              "paths": [
+                {
+                  "path": "frontend/src/views/__tests__/journal.spec.ts",
+                  "hunks": [
+                    {
+                      "header": "@@ -6,8 +6,10 @@ import { createMemoryHistory, createRouter } from 'vue-router'",
+                      "oldStart": 6,
+                      "oldLines": 8,
+                      "newStart": 6,
+                      "newLines": 10,
+                      "bodyLineCount": 10
+                    },
+                    {
+                      "header": "@@ -57,6 +59,18 @@ async function mountChallengeDetail() {",
+                      "oldStart": 57,
+                      "oldLines": 6,
+                      "newStart": 59,
+                      "newLines": 18,
+                      "bodyLineCount": 18
+                    },
+                    {
+                      "header": "@@ -71,6 +85,7 @@ beforeEach(() => {",
+                      "oldStart": 71,
+                      "oldLines": 6,
+                      "newStart": 85,
+                      "newLines": 7,
+                      "bodyLineCount": 7
+                    },
+                    {
+                      "header": "@@ -96,7 +111,9 @@ beforeEach(() => {",
+                      "oldStart": 96,
+                      "oldLines": 7,
+                      "newStart": 111,
+                      "newLines": 9,
+                      "bodyLineCount": 10
+                    },
+                    {
+                      "header": "@@ -157,6 +174,7 @@ test('rejects whitespace-only journal text without sending a mutation', async ()",
+                      "oldStart": 157,
+                      "oldLines": 6,
+                      "newStart": 174,
+                      "newLines": 7,
+                      "bodyLineCount": 7
+                    },
+                    {
+                      "header": "@@ -187,9 +205,185 @@ test('preserves a dirty draft after a stale journal conflict and exposes the sav",
+                      "oldStart": 187,
+                      "oldLines": 9,
+                      "newStart": 205,
+                      "newLines": 185,
+                      "bodyLineCount": 185
+                    }
+                  ]
+                }
+              ],
+              "units": [
+                {
+                  "evidenceSetDigest": "2fb601c23dc76bc6ef17e5c0821fb6349e9452622d6c5e5d2ec9e63e91d5775d",
+                  "path": "frontend/src/views/__tests__/journal.spec.ts",
+                  "hunkIndex": 0,
+                  "originalOldStart": 6,
+                  "originalOldLines": 8,
+                  "originalNewStart": 6,
+                  "originalNewLines": 10,
+                  "unitIndex": 0,
+                  "hunkUnitIndex": 0,
+                  "hunkUnitCount": 1,
+                  "bodyStart": 0,
+                  "bodyEnd": 10,
+                  "oldLines": 8,
+                  "newLines": 10,
+                  "diffLineCount": 11,
+                  "bodyText": " \n import * as accountApi from '../../api/account'\n import * as challengesApi from '../../api/challenges'\n+import ChallengeJournalEditor from '../../components/ChallengeJournalEditor.vue'\n import { useAccountStore } from '../../stores/account'\n import { useAuthStore } from '../../stores/auth'\n+import { useJournalDraftsStore } from '../../stores/journalDrafts'\n import { useSyncStore } from '../../stores/sync'\n import ChallengesView from '../ChallengesView.vue'\n "
+                },
+                {
+                  "evidenceSetDigest": "2fb601c23dc76bc6ef17e5c0821fb6349e9452622d6c5e5d2ec9e63e91d5775d",
+                  "path": "frontend/src/views/__tests__/journal.spec.ts",
+                  "hunkIndex": 1,
+                  "originalOldStart": 57,
+                  "originalOldLines": 6,
+                  "originalNewStart": 59,
+                  "originalNewLines": 18,
+                  "unitIndex": 1,
+                  "hunkUnitIndex": 0,
+                  "hunkUnitCount": 1,
+                  "bodyStart": 0,
+                  "bodyEnd": 18,
+                  "oldLines": 6,
+                  "newLines": 18,
+                  "diffLineCount": 19,
+                  "bodyText": "   return wrapper\n }\n \n+async function mountJournalEditor(challengeId = challenge.id, localDate = '2026-09-19') {\n+  const wrapper = mount(ChallengeJournalEditor, {\n+    props: { challengeId, localDate },\n+    global: {\n+      plugins: [[VueQueryPlugin, { queryClient }]],\n+    },\n+  })\n+\n+  await flushPromises()\n+  return wrapper\n+}\n+\n beforeEach(() => {\n   setActivePinia(createPinia())\n   queryClient = new QueryClient({"
+                },
+                {
+                  "evidenceSetDigest": "2fb601c23dc76bc6ef17e5c0821fb6349e9452622d6c5e5d2ec9e63e91d5775d",
+                  "path": "frontend/src/views/__tests__/journal.spec.ts",
+                  "hunkIndex": 2,
+                  "originalOldStart": 71,
+                  "originalOldLines": 6,
+                  "originalNewStart": 85,
+                  "originalNewLines": 7,
+                  "unitIndex": 2,
+                  "hunkUnitIndex": 0,
+                  "hunkUnitCount": 1,
+                  "bodyStart": 0,
+                  "bodyEnd": 7,
+                  "oldLines": 6,
+                  "newLines": 7,
+                  "diffLineCount": 8,
+                  "bodyText": "   const auth = useAuthStore()\n   auth.status = 'authenticated'\n   auth.generation = 1\n+  auth.owner = { id: 42, name: 'Owner', email: 'owner@example.test' }\n \n   vi.spyOn(accountApi, 'getAccountContext').mockResolvedValue({\n     timezone: 'Asia/Ho_Chi_Minh',"
+                },
+                {
+                  "evidenceSetDigest": "2fb601c23dc76bc6ef17e5c0821fb6349e9452622d6c5e5d2ec9e63e91d5775d",
+                  "path": "frontend/src/views/__tests__/journal.spec.ts",
+                  "hunkIndex": 3,
+                  "originalOldStart": 96,
+                  "originalOldLines": 7,
+                  "originalNewStart": 111,
+                  "originalNewLines": 9,
+                  "unitIndex": 3,
+                  "hunkUnitIndex": 0,
+                  "hunkUnitCount": 1,
+                  "bodyStart": 0,
+                  "bodyEnd": 10,
+                  "oldLines": 7,
+                  "newLines": 9,
+                  "diffLineCount": 11,
+                  "bodyText": "   account.status = 'ready'\n \n   vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: [challenge] })\n-  vi.spyOn(challengesApi, 'getChallengeJournal').mockResolvedValue({ journal: emptyJournal })\n+  vi.spyOn(challengesApi, 'getChallengeJournal').mockImplementation(async (challengeId, localDate) => ({\n+    journal: { ...emptyJournal, challenge_id: challengeId, local_date: localDate },\n+  }))\n })\n \n test('renders an optional account-day journal editor for the selected challenge', async () => {"
+                },
+                {
+                  "evidenceSetDigest": "2fb601c23dc76bc6ef17e5c0821fb6349e9452622d6c5e5d2ec9e63e91d5775d",
+                  "path": "frontend/src/views/__tests__/journal.spec.ts",
+                  "hunkIndex": 4,
+                  "originalOldStart": 157,
+                  "originalOldLines": 6,
+                  "originalNewStart": 174,
+                  "originalNewLines": 7,
+                  "unitIndex": 4,
+                  "hunkUnitIndex": 0,
+                  "hunkUnitCount": 1,
+                  "bodyStart": 0,
+                  "bodyEnd": 7,
+                  "oldLines": 6,
+                  "newLines": 7,
+                  "diffLineCount": 8,
+                  "bodyText": " \n   expect(wrapper.get('#journal-error').text()).toContain('không được để trống')\n   expect(saveSpy).not.toHaveBeenCalled()\n+  expect(wrapper.find('#journal-save-status').text()).not.toContain('Đã lưu nhật ký')\n })\n \n test('preserves a dirty draft after a stale journal conflict and exposes the saved server snapshot', async () => {"
+                },
+                {
+                  "evidenceSetDigest": "2fb601c23dc76bc6ef17e5c0821fb6349e9452622d6c5e5d2ec9e63e91d5775d",
+                  "path": "frontend/src/views/__tests__/journal.spec.ts",
+                  "hunkIndex": 5,
+                  "originalOldStart": 187,
+                  "originalOldLines": 9,
+                  "originalNewStart": 205,
+                  "originalNewLines": 185,
+                  "unitIndex": 5,
+                  "hunkUnitIndex": 0,
+                  "hunkUnitCount": 1,
+                  "bodyStart": 0,
+                  "bodyEnd": 185,
+                  "oldLines": 9,
+                  "newLines": 185,
+                  "diffLineCount": 186,
+                  "bodyText": "   expect((wrapper.get('#journal-editor').element as HTMLTextAreaElement).value).toBe('Bản nháp chưa gửi của tôi.')\n   expect(wrapper.get('#journal-conflict-alert').text()).toContain('Nội dung đã lưu trên thiết bị khác.')\n   expect(wrapper.get('#journal-conflict-alert').text()).toContain('Bản đang nhập vẫn được giữ nguyên')\n+  expect(wrapper.find('#journal-save-status').exists()).toBe(false)\n   expect(wrapper.get('#journal-save-btn').attributes('disabled')).toBeDefined()\n \n   await wrapper.get('#journal-use-server-btn').trigger('click')\n   expect((wrapper.get('#journal-editor').element as HTMLTextAreaElement).value).toBe('Nội dung đã lưu trên thiết bị khác.')\n   expect(wrapper.find('#journal-conflict-alert').exists()).toBe(false)\n })\n+\n+test('keeps the editor editable while saving and does not mark an older ACK as saved', async () => {\n+  let resolveSave!: (result: challengesApi.JournalMutationResult) => void\n+  const save = vi.spyOn(challengesApi, 'saveChallengeJournal')\n+  save\n+    .mockImplementationOnce(() => new Promise((resolve) => {\n+      resolveSave = resolve\n+    }))\n+    .mockResolvedValueOnce({\n+      journal: { ...emptyJournal, journal: 'revision two', journal_version: 2 },\n+      account_revision: 3,\n+      data_epoch: 1,\n+    })\n+  const wrapper = await mountJournalEditor()\n+\n+  await wrapper.get('#journal-editor').setValue('revision one')\n+  await wrapper.get('#journal-form').trigger('submit.prevent')\n+  await vi.waitFor(() => expect(challengesApi.saveChallengeJournal).toHaveBeenCalledOnce())\n+\n+  expect(wrapper.get('#journal-editor').attributes('disabled')).toBeUndefined()\n+  expect(wrapper.get('[role=\"status\"]').text()).toContain('Đang lưu')\n+\n+  await wrapper.get('#journal-editor').setValue('revision two')\n+  resolveSave({\n+    journal: { ...emptyJournal, journal: 'revision one', journal_version: 1 },\n+    account_revision: 2,\n+    data_epoch: 1,\n+  })\n+  await flushPromises()\n+\n+  expect((wrapper.get('#journal-editor').element as HTMLTextAreaElement).value).toBe('revision two')\n+  expect(wrapper.get('[role=\"status\"]').text()).toContain('Chưa lưu thay đổi')\n+  expect(wrapper.get('[role=\"status\"]').text()).not.toContain('Đã lưu nhật ký')\n+\n+  await wrapper.get('#journal-form').trigger('submit.prevent')\n+  await flushPromises()\n+  expect(save).toHaveBeenCalledTimes(2)\n+  expect(wrapper.get('[role=\"status\"]').text()).toContain('Đã lưu nhật ký')\n+})\n+\n+test('retains resource drafts across challenge changes and editor remounts', async () => {\n+  const wrapper = await mountJournalEditor()\n+  await wrapper.get('#journal-editor').setValue('draft for A')\n+\n+  await wrapper.setProps({ challengeId: 'challenge-b', localDate: '2026-09-20' })\n+  await flushPromises()\n+  await wrapper.get('#journal-editor').setValue('draft for B')\n+\n+  await wrapper.setProps({ challengeId: challenge.id, localDate: '2026-09-19' })\n+  await flushPromises()\n+  expect((wrapper.get('#journal-editor').element as HTMLTextAreaElement).value).toBe('draft for A')\n+  wrapper.unmount()\n+\n+  const remounted = await mountJournalEditor()\n+  expect((remounted.get('#journal-editor').element as HTMLTextAreaElement).value).toBe('draft for A')\n+  remounted.unmount()\n+})\n+\n+test('shows a stored draft while the remounted editor is still loading its server snapshot', async () => {\n+  const drafts = useJournalDraftsStore()\n+  drafts.hydrate(emptyJournal)\n+  drafts.setDraftText(challenge.id, '2026-09-19', 'draft survives pending GET')\n+  vi.mocked(challengesApi.getChallengeJournal).mockReturnValue(new Promise(() => undefined))\n+\n+  const wrapper = await mountJournalEditor()\n+\n+  expect((wrapper.get('#journal-editor').element as HTMLTextAreaElement).value).toBe('draft survives pending GET')\n+  wrapper.unmount()\n+})\n+\n+test('does not let a journal refetch replace dirty text or its acknowledged base version', async () => {\n+  vi.spyOn(challengesApi, 'saveChallengeJournal').mockResolvedValue({\n+    journal: { ...emptyJournal, journal: 'local draft', journal_version: 1 },\n+    account_revision: 2,\n+    data_epoch: 1,\n+  })\n+  const wrapper = await mountJournalEditor()\n+  await wrapper.get('#journal-editor').setValue('local draft')\n+\n+  queryClient.setQueryData(['challenge-journal', challenge.id, '2026-09-19'], {\n+    journal: { ...emptyJournal, journal: 'new server snapshot', journal_version: 8 },\n+  })\n+  await flushPromises()\n+\n+  expect((wrapper.get('#journal-editor').element as HTMLTextAreaElement).value).toBe('local draft')\n+  await wrapper.get('#journal-form').trigger('submit.prevent')\n+  await flushPromises()\n+\n+  expect(challengesApi.saveChallengeJournal).toHaveBeenCalledWith(\n+    challenge.id,\n+    '2026-09-19',\n+    expect.objectContaining({ base_version: 0, journal: 'local draft' }),\n+  )\n+})\n+\n+test('an ACK for challenge A does not change the active challenge B draft', async () => {\n+  let resolveSave!: (result: challengesApi.JournalMutationResult) => void\n+  vi.spyOn(challengesApi, 'saveChallengeJournal').mockReturnValue(new Promise((resolve) => {\n+    resolveSave = resolve\n+  }))\n+  const wrapper = await mountJournalEditor()\n+\n+  await wrapper.get('#journal-editor').setValue('draft A')\n+  await wrapper.get('#journal-form').trigger('submit.prevent')\n+  await vi.waitFor(() => expect(challengesApi.saveChallengeJournal).toHaveBeenCalledOnce())\n+  await wrapper.setProps({ challengeId: 'challenge-b' })\n+  await flushPromises()\n+  await wrapper.get('#journal-editor').setValue('draft B')\n+\n+  resolveSave({\n+    journal: { ...emptyJournal, journal: 'draft A', journal_version: 1 },\n+    account_revision: 2,\n+    data_epoch: 1,\n+  })\n+  await flushPromises()\n+\n+  expect((wrapper.get('#journal-editor').element as HTMLTextAreaElement).value).toBe('draft B')\n+  expect(wrapper.find('[role=\"status\"]').exists()).toBe(false)\n+})\n+\n+test('keeps a network-failed draft and offers an explicit retry of the same command', async () => {\n+  const save = vi.spyOn(challengesApi, 'saveChallengeJournal')\n+  save\n+    .mockRejectedValueOnce(new TypeError('network timeout'))\n+    .mockResolvedValueOnce({\n+      journal: { ...emptyJournal, journal: 'retry me', journal_version: 1 },\n+      account_revision: 2,\n+      data_epoch: 1,\n+    })\n+  const wrapper = await mountJournalEditor()\n+\n+  await wrapper.get('#journal-editor').setValue('retry me')\n+  await wrapper.get('#journal-form').trigger('submit.prevent')\n+  await flushPromises()\n+\n+  expect((wrapper.get('#journal-editor').element as HTMLTextAreaElement).value).toBe('retry me')\n+  expect(wrapper.get('#journal-save-error').text()).toContain('Chưa xác định được kết quả lưu')\n+  expect(wrapper.get('#journal-save-btn').text()).toContain('Thử lại')\n+\n+  const firstRequest = save.mock.calls[0]\n+  await wrapper.get('#journal-form').trigger('submit.prevent')\n+  await flushPromises()\n+\n+  expect(save).toHaveBeenCalledTimes(2)\n+  expect(save.mock.calls[1]).toEqual(firstRequest)\n+  expect(wrapper.get('[role=\"status\"]').text()).toContain('Đã lưu nhật ký')\n+})\n+\n+test('keeps journal Saved when challenge query convergence fails after a committed ACK', async () => {\n+  const sync = useSyncStore()\n+  let rejectInvalidation!: (error: Error) => void\n+  vi.spyOn(queryClient, 'invalidateQueries').mockReturnValue(new Promise((_, reject) => {\n+    rejectInvalidation = reject\n+  }))\n+  vi.spyOn(challengesApi, 'saveChallengeJournal').mockResolvedValue({\n+    journal: { ...emptyJournal, journal: 'committed journal', journal_version: 1 },\n+    account_revision: 2,\n+    data_epoch: 1,\n+  })\n+  const wrapper = await mountJournalEditor()\n+\n+  await wrapper.get('#journal-editor').setValue('committed journal')\n+  await wrapper.get('#journal-form').trigger('submit.prevent')\n+  await flushPromises()\n+\n+  expect(wrapper.get('[role=\"status\"]').text()).toContain('Đã lưu nhật ký')\n+  rejectInvalidation(new Error('challenge refetch failed'))\n+  await vi.waitFor(() => expect(sync.syncStatus).toBe('error'))\n+  expect(sync.syncStatus).toBe('error')\n+  expect(sync.syncError).toContain('đồng bộ danh sách challenge')\n+\n+  await wrapper.get('#journal-editor').setValue('new edit')\n+  expect(wrapper.get('[role=\"status\"]').text()).toContain('Chưa lưu thay đổi')\n+  expect(wrapper.get('[role=\"status\"]').text()).not.toContain('Đã lưu nhật ký')\n+})"
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  }
+}

@@ -25,7 +25,7 @@ readiness:
     - 1-4-nhận-dữ-liệu-mới-giữa-hai-thiết-bị
     - 2-1-tạo-và-quản-lý-thông-tin-challenge
     - 2-3-ghi-và-sửa-journal-tùy-chọn
-current_slice: B
+current_slice: C
 risk:
   level: HIGH
   flags: [security, concurrency, idempotency, shared_boundary]
@@ -66,7 +66,7 @@ slices:
       review_context_digest: sha256:61e913c64ceaf392734acc3f62a1376ba645e5a62f2345ba8ae4dcc09a9044ef
       freshness: FRESH_CANDIDATE
   - id: B
-    status: checkpointed
+    status: reviewed
     depends_on: [A]
     task_refs: [T-3, T-4]
     baseline_commit: d529b8329ce495f82e085b7c678f869cf898a1fa
@@ -77,6 +77,29 @@ slices:
       implementation:
         path: _bmad-output/implementation-artifacts/receipts/story-1-5/B-resolution-implementation.json
         digest: sha256:aa59239c62504058e42eaeddb3dc3c696aac4d79225e33531528baf985495c75
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-5/B-verification-4b397ad.json
+        digest: sha256:02353a2b8376ba47f45ffd78f0ee1c12a4b73d9031729425f3e4fe573b976bc4
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-5/B-review-4b397ad.json
+        digest: sha256:2501477804e005297ea1d66b722afe493ae4d65a47bf422891c6b00e53d4e7aa
+    verification:
+      subject:
+        commit: 4b397ad5a9c4929b284897c774281ff3e11b7d85
+        tree: bbd9e55a37a015b95c7d09d2e97705ef2411a85c
+      changed_paths_sha256: sha256:045d6d9871f86125a270cbd27aace95a7d505ceda2b7edd6ee547ac5a34f88bc
+      canonical_applicability: NOT_APPLICABLE
+      canonical_status: INCOMPLETE
+      progression_eligible: true
+      done_gate_disclosure_required: true
+      outstanding_obligation: "canonical verification is INCOMPLETE because NO_APPLICABLE_RECIPE; focused checks are the coverage authority"
+    review:
+      required: true
+      verdict: APPROVE
+      reviewed_commit: 4b397ad5a9c4929b284897c774281ff3e11b7d85
+      risk_context_digest: sha256:5c3e1b7db251e727a044146d7de6dfdca55a28add41d20e71b865ee6be958196
+      review_context_digest: sha256:5317164f65fdee53f669b7dbbb1bb78e7dd6c29eac4c0fb3c558993f7a8270e1
+      freshness: FRESH_CANDIDATE
   - id: C
     status: pending
     depends_on: [B]
@@ -88,6 +111,6 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: verify_slice
-  target: B
+  kind: implement_slice
+  target: C
 ---
