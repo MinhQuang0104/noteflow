@@ -24,7 +24,7 @@ reconstructed without changing product truth, Story lifecycle, or Human Gate.
 
 The real action, check, and context paths use the small adapters exported by
 `v4-observations.mjs`: `recordActionStarted`, `recordActionFinished`,
-`recordCheckFinished`, `recordContextDelivered`,
+`recordCheckFinished`, `recordContextDelivered`, `recordReflectionRequested`,
 `recordSessionCheckpoint`, `recordSessionClosed`,
 `recordStoryReviewSnapshot`, and `recordStoryCompleted`. These adapters bind
 events to the action, invocation, session, and attempt supplied by the caller;

@@ -2,7 +2,7 @@
 
 > **For agentic workers:** Dành cho **Luna 5.6 Max** (model gpt-5.6-luna, reasoning effort max). Khi có yêu cầu triển khai riêng của human, dùng skill superpowers:executing-plans để thực hiện tuần tự từng task. Không mặc định dispatch subagent, Orca hoặc AGY.
 >
-> **Trạng thái:** IN PROGRESS — human đã ủy quyền triển khai trong lane V4 Lite architecture/control-plane migration; T00–T09 đã hoàn tất, T10 là task kế tiếp.
+> **Trạng thái:** IN PROGRESS — human đã ủy quyền triển khai trong lane V4 Lite architecture/control-plane migration; T00–T10 đã hoàn tất, T11 là task kế tiếp.
 >
 > **Ngày:** 2026-09-27. **Baseline đã đọc:** main, d8e813660e44c54785466836e5c0eda658529b74.
 >
@@ -663,19 +663,21 @@ Real recipe evidence under Node `v24.21.0` after `npm ci` in the isolated worktr
 **Consumes:** bounded summary và evidence refs.
 **Produces:** proposal, candidate/evaluation/adoption validators; không auto-apply.
 
-- [ ] Test NO_CANDIDATE là kết quả hợp lệ, không ép viết reflection mỗi session.
-- [ ] Trigger: repeated observed issue hoặc human request; một observation vẫn được ghi nhưng không biến thành universal rule.
-- [ ] Per-Story reflection tối đa một lượt mặc định, 12 KiB input summary/4 KiB output/3 candidates; dùng same Lead, tính chi phí nếu đo được.
-- [ ] Candidate bắt buộc có hypothesis, affected scope, evidence, expected effect, quality risk và evaluation cases.
-- [ ] Test model self-rating không thay deterministic evidence hoặc human approval.
-- [ ] Test candidate không ghi AGENTS/policy/code, không mutate active-run/Story/Plan; source stale thì STALE.
-- [ ] validateAdoption kiểm tra human decision metadata và exact candidate/evaluation/scope binding; không tự tạo quyết định APPROVED.
-- [ ] Không có apply verb; output AWAITING_HUMAN chỉ xuất hiện khi evidence đủ cho đề xuất adoption theo giới hạn report.
-- [ ] Test thiếu measurements → INCONCLUSIVE, thiếu quality checks → không AWAITING_HUMAN theo claim chất lượng.
-- [ ] Run: node --test .agents/scripts/v4-evolution.test.mjs .agents/scripts/v4-observation-hooks.test.mjs.
-- [ ] Commit exact T10 files.
+- [x] Test NO_CANDIDATE là kết quả hợp lệ, không ép viết reflection mỗi session.
+- [x] Trigger: repeated observed issue hoặc human request; một observation vẫn được ghi nhưng không biến thành universal rule.
+- [x] Per-Story reflection tối đa một lượt mặc định, 12 KiB input summary/4 KiB output/3 candidates; dùng same Lead, tính chi phí nếu đo được.
+- [x] Candidate bắt buộc có hypothesis, affected scope, evidence, expected effect, quality risk và evaluation cases.
+- [x] Test model self-rating không thay deterministic evidence hoặc human approval.
+- [x] Test candidate không ghi AGENTS/policy/code, không mutate active-run/Story/Plan; source stale thì STALE.
+- [x] validateAdoption kiểm tra human decision metadata và exact candidate/evaluation/scope binding; không tự tạo quyết định APPROVED.
+- [x] Không có apply verb; output AWAITING_HUMAN chỉ xuất hiện khi evidence đủ cho đề xuất adoption theo giới hạn report.
+- [x] Test thiếu measurements → INCONCLUSIVE, thiếu quality checks → không AWAITING_HUMAN theo claim chất lượng.
+- [x] Run: node --test .agents/scripts/v4-evolution.test.mjs .agents/scripts/v4-observation-hooks.test.mjs.
+- [x] Commit exact T10 files.
 
 **Gate:** hệ thống tự tìm cơ hội và tự đề xuất được; human vẫn quyết định adoption, không có policy self-modification.
+
+**T10 evidence (2026-09-28):** `node --test .agents/scripts/v4-evolution.test.mjs .agents/scripts/v4-observation-hooks.test.mjs` passed 10 tests, 0 failed, in 13.192 seconds. The proposal loop records a real reflection observation but returns `NO_CANDIDATE` without a repeated issue or human request; it enforces one reflection, 12 KiB input, 4 KiB output, and three-candidate limits. Candidates require bounded evidence, baseline architecture identity, exact control-plane scope, quality risks, evaluation cases, cost accounting, and rollback/stop text; product/AGENTS/policy mutation paths and apply-like instructions are rejected. Evaluation keeps comparability, deterministic checks, quality checks, provider usage, and model self-rating separate; missing measurements remain `INCONCLUSIVE`. `validateAdoption` accepts only exact candidate/evaluation/scope bindings from a human decision source and exports no apply operation. Runtime writes are limited to derived candidates/observations; no active-run, Story/Plan, sprint, receipt, product, scheduler, or V3 runtime mutation occurred.
 
 ### T11 — Benchmark, full regression và bàn giao
 

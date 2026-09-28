@@ -265,6 +265,10 @@ export function recordContextDelivered(root, input = {}) {
   return recordHookObservation(root, { ...input, event_type: 'context_delivered', coverage: input.coverage ?? 'MEASURED' })
 }
 
+export function recordReflectionRequested(root, input = {}) {
+  return recordHookObservation(root, { ...input, event_type: 'reflection_requested', coverage: input.coverage ?? 'PARTIAL' })
+}
+
 export function recordSessionCheckpoint(root, input = {}) {
   return recordHookObservation(root, { ...input, event_type: 'session_checkpoint', coverage: input.coverage ?? 'PARTIAL' })
 }
