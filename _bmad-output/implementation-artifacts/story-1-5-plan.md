@@ -6,7 +6,7 @@ story:
   normative_digest: sha256:fc382d7fb25552265962f9e7a9a25b98510afc716f733b93d382b8b8ebf9e3cb
 upstream_epic:
   path: docs/product/epics.md
-  section_digest: sha256:1de4482d84c4c9f27c5df1eabec782a228e67a457aa4a1661466519bdcc3eccf
+  section_digest: sha256:24b8d232a3f292e74759611eccc9f1ebc4d53ee9dde9925c9f209e7f7f675f8a
 sprint_key: 1-5-giữ-bản-đang-nhập-và-thử-lưu-lại-sau-gián-đoạn
 lifecycle_snapshot: in-progress
 execution_status: in-progress
@@ -78,8 +78,8 @@ slices:
         path: _bmad-output/implementation-artifacts/receipts/story-1-5/B-resolution-implementation.json
         digest: sha256:aa59239c62504058e42eaeddb3dc3c696aac4d79225e33531528baf985495c75
       verification:
-        path: _bmad-output/implementation-artifacts/receipts/story-1-5/B-verification-4b397ad.json
-        digest: sha256:02353a2b8376ba47f45ffd78f0ee1c12a4b73d9031729425f3e4fe573b976bc4
+        path: _bmad-output/implementation-artifacts/receipts/story-1-5/B-verification-finalization-repair.json
+        digest: sha256:0e106e44a29e31ac5593946882c5903fba3e2f524b0cba9f10fa9488064331a1
       review:
         path: _bmad-output/implementation-artifacts/receipts/story-1-5/B-review-4b397ad.json
         digest: sha256:2501477804e005297ea1d66b722afe493ae4d65a47bf422891c6b00e53d4e7aa
@@ -113,8 +113,8 @@ slices:
         path: _bmad-output/implementation-artifacts/receipts/story-1-5/C-resolution-implementation-3.json
         digest: sha256:815a9f4817431c2e77fe2a95eb870fff89ebbb5a48a418ff95d17e82822a9fa8
       verification:
-        path: _bmad-output/implementation-artifacts/receipts/story-1-5/C-verification-2.json
-        digest: sha256:506e5e82c1a5050b4fa2d9a59960e7d47ddb151cc025c7e9cbe7bb78cfda8457
+        path: _bmad-output/implementation-artifacts/receipts/story-1-5/C-verification-finalization-repair.json
+        digest: sha256:7bea697e3f3b0c0d08884833fffbcd5187abca4fd6deab8b924e18db1dffbf66
       review:
         path: _bmad-output/implementation-artifacts/receipts/story-1-5/C-review-2.json
         digest: sha256:c1639ab111f3a848f0b7bdae241997762c252d2f7c3ebf6a49e61b1d02023d1d
@@ -148,8 +148,8 @@ slices:
         path: _bmad-output/implementation-artifacts/receipts/story-1-5/D-implementation.json
         digest: sha256:8027f6f06ca3d4ae4de21f4b5ce3eaf6d5baf728eb56a0ead5a022e4f331eb4b
       verification:
-        path: _bmad-output/implementation-artifacts/receipts/story-1-5/D-verification-2.json
-        digest: sha256:220bfd69bd70d973bf12dc95bee7a639e125c8573a64e658b5e461af335230ca
+        path: _bmad-output/implementation-artifacts/receipts/story-1-5/D-verification-finalization-repair.json
+        digest: sha256:e01be85ef1dbfcb13212ca40f834dd18c72b057f9c26e229bb88159abb525891
       review:
         path: _bmad-output/implementation-artifacts/receipts/story-1-5/D-review-2.json
         digest: sha256:d13e7c69ff51beba5583042ac016ce164e2e8711300223d33d9d8308fd26a8a4

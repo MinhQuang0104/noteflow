@@ -1,0 +1,312 @@
+{
+  "schema_version": 1,
+  "story_id": "1.5",
+  "slice_id": "D",
+  "kind": "verification",
+  "checkpoint_commit": "01409eeb4a9c083f858c520629c4ed791217c36f",
+  "baseline_commit": "d0675d088b06dadfa7f7b96fe28cb0588212a63f",
+  "subject_digest": "sha256:3bd79642294cb8fd4fb57a8948221992f74afb46f8cbd037c6c97c4f11b7275f",
+  "created_from_head": "01409eeb4a9c083f858c520629c4ed791217c36f",
+  "changed_paths_sha256": "sha256:3bd79642294cb8fd4fb57a8948221992f74afb46f8cbd037c6c97c4f11b7275f",
+  "evidence_status": "fresh",
+  "subject": {
+    "mode": "checkpoint",
+    "baseline_commit": "d0675d088b06dadfa7f7b96fe28cb0588212a63f",
+    "checkpoint_commit": "01409eeb4a9c083f858c520629c4ed791217c36f",
+    "verified_from_head": "99c5adfe17df90687225686c35d623ff8e1c2e8f",
+    "changed_paths_sha256": "sha256:3bd79642294cb8fd4fb57a8948221992f74afb46f8cbd037c6c97c4f11b7275f",
+    "checkpoint_freshness": "FRESH",
+    "source_freshness": "FRESH",
+    "reference_freshness": "FILE_LEVEL_FRESH",
+    "post_checkpoint_drift": [],
+    "working_drift": []
+  },
+  "changed_paths": [
+    "frontend/src/views/__tests__/journal-draft-lifecycle.spec.ts"
+  ],
+  "focused_checks": [
+    {
+      "id": "slice-d-journal-lifecycle",
+      "kind": "behavioral",
+      "command": "npm.cmd run test:unit -- --run src/views/__tests__/journal-draft-lifecycle.spec.ts src/views/__tests__/journal.spec.ts src/stores/__tests__/journalDrafts.spec.ts src/stores/__tests__/sync.spec.ts src/api/__tests__/challenges.spec.ts",
+      "tool": "npm/Vitest 5.0.1",
+      "summary": "5 test files passed; 68 tests passed",
+      "result": "PASS",
+      "exit_code": 0,
+      "subject_digest": "sha256:3bd79642294cb8fd4fb57a8948221992f74afb46f8cbd037c6c97c4f11b7275f",
+      "subject": {
+        "commit": "01409eeb4a9c083f858c520629c4ed791217c36f",
+        "tree": "1ae61a58f622346b6f3f0f18ba936b863e02cf38"
+      },
+      "changed_paths_sha256": "sha256:3bd79642294cb8fd4fb57a8948221992f74afb46f8cbd037c6c97c4f11b7275f",
+      "command_digest": "sha256:1d8cb79c1119479de9dbf7cee0d7925f69b36ad926231ebe65c0983bbf407bd2",
+      "command_digest_method": "sha256-utf8-exact-command-string-v1",
+      "toolchain_digest": "sha256:92033cf42329d9c1432856169a3fdd68548d123568f2564702c991b48218d655",
+      "environment_sensitive": true,
+      "environment": {
+        "platform": "Windows (win32)",
+        "node": "v24.21.0",
+        "npm": "11.6.4",
+        "frontend_dependencies": "frontend/node_modules junction to the main workspace frontend/node_modules",
+        "lockfile_sha256": "1829336936c40e0ef070a8a18628ecb2183f0a27f0e2e5c922b004a20fa8e9e7"
+      }
+    },
+    {
+      "id": "frontend-type-check",
+      "kind": "type-check",
+      "command": "npm.cmd run type-check",
+      "tool": "npm/vue-tsc",
+      "summary": "vue-tsc --build passed",
+      "result": "PASS",
+      "exit_code": 0,
+      "subject_digest": "sha256:3bd79642294cb8fd4fb57a8948221992f74afb46f8cbd037c6c97c4f11b7275f",
+      "subject": {
+        "commit": "01409eeb4a9c083f858c520629c4ed791217c36f",
+        "tree": "1ae61a58f622346b6f3f0f18ba936b863e02cf38"
+      },
+      "changed_paths_sha256": "sha256:3bd79642294cb8fd4fb57a8948221992f74afb46f8cbd037c6c97c4f11b7275f",
+      "command_digest": "sha256:63967bbe0152ee8307abf6bb589cecbf872996998500336e28f28fb07d9b6f01",
+      "command_digest_method": "sha256-utf8-exact-command-string-v1",
+      "toolchain_digest": "sha256:92033cf42329d9c1432856169a3fdd68548d123568f2564702c991b48218d655",
+      "environment_sensitive": true,
+      "environment": {
+        "platform": "Windows (win32)",
+        "node": "v24.21.0",
+        "npm": "11.6.4",
+        "frontend_dependencies": "frontend/node_modules junction to the main workspace frontend/node_modules",
+        "lockfile_sha256": "1829336936c40e0ef070a8a18628ecb2183f0a27f0e2e5c922b004a20fa8e9e7"
+      }
+    },
+    {
+      "id": "frontend-lint",
+      "kind": "lint",
+      "command": "npm.cmd run lint",
+      "tool": "npm-run-all2/oxlint/ESLint",
+      "summary": "oxlint and ESLint emitted no diagnostics",
+      "result": "PASS",
+      "exit_code": 0,
+      "subject_digest": "sha256:3bd79642294cb8fd4fb57a8948221992f74afb46f8cbd037c6c97c4f11b7275f",
+      "subject": {
+        "commit": "01409eeb4a9c083f858c520629c4ed791217c36f",
+        "tree": "1ae61a58f622346b6f3f0f18ba936b863e02cf38"
+      },
+      "changed_paths_sha256": "sha256:3bd79642294cb8fd4fb57a8948221992f74afb46f8cbd037c6c97c4f11b7275f",
+      "command_digest": "sha256:c81a83d3c213e9975ba332ea6993b1ae340e86c3adea2cedc1a2ea704e8f6582",
+      "command_digest_method": "sha256-utf8-exact-command-string-v1",
+      "toolchain_digest": "sha256:92033cf42329d9c1432856169a3fdd68548d123568f2564702c991b48218d655",
+      "environment_sensitive": true,
+      "environment": {
+        "platform": "Windows (win32)",
+        "node": "v24.21.0",
+        "npm": "11.6.4",
+        "frontend_dependencies": "frontend/node_modules junction to the main workspace frontend/node_modules",
+        "lockfile_sha256": "1829336936c40e0ef070a8a18628ecb2183f0a27f0e2e5c922b004a20fa8e9e7"
+      }
+    },
+    {
+      "id": "frontend-build",
+      "kind": "build",
+      "command": "npm.cmd run build",
+      "tool": "npm/Vite 8.3.0",
+      "summary": "vue-tsc --build and Vite production build passed",
+      "result": "PASS",
+      "exit_code": 0,
+      "subject_digest": "sha256:3bd79642294cb8fd4fb57a8948221992f74afb46f8cbd037c6c97c4f11b7275f",
+      "subject": {
+        "commit": "01409eeb4a9c083f858c520629c4ed791217c36f",
+        "tree": "1ae61a58f622346b6f3f0f18ba936b863e02cf38"
+      },
+      "changed_paths_sha256": "sha256:3bd79642294cb8fd4fb57a8948221992f74afb46f8cbd037c6c97c4f11b7275f",
+      "command_digest": "sha256:6bb02d9ac3538d036566e136e6fdc154ec872f075ef475b0d2a1e29de2b880b3",
+      "command_digest_method": "sha256-utf8-exact-command-string-v1",
+      "toolchain_digest": "sha256:92033cf42329d9c1432856169a3fdd68548d123568f2564702c991b48218d655",
+      "environment_sensitive": true,
+      "environment": {
+        "platform": "Windows (win32)",
+        "node": "v24.21.0",
+        "npm": "11.6.4",
+        "frontend_dependencies": "frontend/node_modules junction to the main workspace frontend/node_modules",
+        "lockfile_sha256": "1829336936c40e0ef070a8a18628ecb2183f0a27f0e2e5c922b004a20fa8e9e7"
+      }
+    },
+    {
+      "id": "frontend-contract-check",
+      "kind": "contract",
+      "command": "npm.cmd run contract:check",
+      "tool": "generate-openapi-types.mjs",
+      "summary": "generated OpenAPI types match the committed contract",
+      "result": "PASS",
+      "exit_code": 0,
+      "subject_digest": "sha256:3bd79642294cb8fd4fb57a8948221992f74afb46f8cbd037c6c97c4f11b7275f",
+      "subject": {
+        "commit": "01409eeb4a9c083f858c520629c4ed791217c36f",
+        "tree": "1ae61a58f622346b6f3f0f18ba936b863e02cf38"
+      },
+      "changed_paths_sha256": "sha256:3bd79642294cb8fd4fb57a8948221992f74afb46f8cbd037c6c97c4f11b7275f",
+      "command_digest": "sha256:7c2a3b8153b764f37643222664775cb2ba1526e875877dc0b6c3cd3e6776fd9d",
+      "command_digest_method": "sha256-utf8-exact-command-string-v1",
+      "toolchain_digest": "sha256:92033cf42329d9c1432856169a3fdd68548d123568f2564702c991b48218d655",
+      "environment_sensitive": true,
+      "environment": {
+        "platform": "Windows (win32)",
+        "node": "v24.21.0",
+        "npm": "11.6.4",
+        "frontend_dependencies": "frontend/node_modules junction to the main workspace frontend/node_modules",
+        "lockfile_sha256": "1829336936c40e0ef070a8a18628ecb2183f0a27f0e2e5c922b004a20fa8e9e7"
+      }
+    },
+    {
+      "id": "checkpoint-whitespace",
+      "kind": "diff-check",
+      "command": "git diff --check d0675d088b06dadfa7f7b96fe28cb0588212a63f 01409eeb4a9c083f858c520629c4ed791217c36f --",
+      "tool": "Git",
+      "summary": "No whitespace errors in the baseline-to-checkpoint diff",
+      "result": "PASS",
+      "exit_code": 0,
+      "subject_digest": "sha256:3bd79642294cb8fd4fb57a8948221992f74afb46f8cbd037c6c97c4f11b7275f",
+      "subject": {
+        "commit": "01409eeb4a9c083f858c520629c4ed791217c36f",
+        "tree": "1ae61a58f622346b6f3f0f18ba936b863e02cf38"
+      },
+      "changed_paths_sha256": "sha256:3bd79642294cb8fd4fb57a8948221992f74afb46f8cbd037c6c97c4f11b7275f",
+      "command_digest": "sha256:bd52ae85c62b4afd3349b03cb72861864f444c75048af12d98994f11722106de",
+      "command_digest_method": "sha256-utf8-exact-command-string-v1",
+      "toolchain_digest": "sha256:92033cf42329d9c1432856169a3fdd68548d123568f2564702c991b48218d655",
+      "environment_sensitive": true,
+      "environment": {
+        "platform": "Windows (win32)",
+        "node": "v24.21.0",
+        "npm": "11.6.4",
+        "frontend_dependencies": "frontend/node_modules junction to the main workspace frontend/node_modules",
+        "lockfile_sha256": "1829336936c40e0ef070a8a18628ecb2183f0a27f0e2e5c922b004a20fa8e9e7"
+      }
+    }
+  ],
+  "canonical": {
+    "command": "node .agents/scripts/check-verification.mjs check auto --changed frontend/src/views/__tests__/journal-draft-lifecycle.spec.ts",
+    "process_exit": 1,
+    "output": {
+      "featureId": null,
+      "changedPaths": [
+        "frontend/src/views/__tests__/journal-draft-lifecycle.spec.ts"
+      ],
+      "matchedPaths": [],
+      "applicability": "NOT_APPLICABLE",
+      "status": "INCOMPLETE",
+      "complete": false,
+      "checks": [],
+      "escalationReasons": [
+        "NO_APPLICABLE_RECIPE"
+      ]
+    },
+    "result": "INCOMPLETE: NOT_APPLICABLE; NO_APPLICABLE_RECIPE",
+    "exit_code": 1
+  },
+  "escalation": {
+    "command": "node .agents/scripts/check-escalation.mjs with canonical verification JSON; risk HIGH; flags CONCURRENCY_STATE, SECURITY_AUTH",
+    "process_exit": 1,
+    "risk": "HIGH",
+    "judgment_flags": [
+      "CONCURRENCY_STATE",
+      "SECURITY_AUTH"
+    ],
+    "decision": "REVIEW_REQUIRED",
+    "output": {
+      "decision": "REVIEW_REQUIRED",
+      "risk": "HIGH",
+      "reasons": [
+        "HIGH_RISK_REVIEW",
+        "JUDGMENT_CONCURRENCY_STATE",
+        "JUDGMENT_SECURITY_AUTH",
+        "VERIFICATION_INCOMPLETE",
+        "VERIFICATION_NO_APPLICABLE_RECIPE"
+      ]
+    }
+  },
+  "commands": [
+    {
+      "command": "npm.cmd run test:unit -- --run src/views/__tests__/journal-draft-lifecycle.spec.ts src/views/__tests__/journal.spec.ts src/stores/__tests__/journalDrafts.spec.ts src/stores/__tests__/sync.spec.ts src/api/__tests__/challenges.spec.ts",
+      "result": "PASS: 5 test files passed; 68 tests passed",
+      "exit_code": 0,
+      "tool": "npm/Vitest 5.0.1",
+      "environment": "Windows (win32); Node.js v24.21.0; npm 11.6.4; frontend dependencies via worktree junction; package-lock SHA-256 1829336936c40e0ef070a8a18628ecb2183f0a27f0e2e5c922b004a20fa8e9e7"
+    },
+    {
+      "command": "npm.cmd run type-check",
+      "result": "PASS: vue-tsc --build passed",
+      "exit_code": 0,
+      "tool": "npm/vue-tsc",
+      "environment": "Windows (win32); Node.js v24.21.0; npm 11.6.4; frontend dependencies via worktree junction; package-lock SHA-256 1829336936c40e0ef070a8a18628ecb2183f0a27f0e2e5c922b004a20fa8e9e7"
+    },
+    {
+      "command": "npm.cmd run lint",
+      "result": "PASS: oxlint and ESLint emitted no diagnostics",
+      "exit_code": 0,
+      "tool": "npm-run-all2/oxlint/ESLint",
+      "environment": "Windows (win32); Node.js v24.21.0; npm 11.6.4; frontend dependencies via worktree junction; package-lock SHA-256 1829336936c40e0ef070a8a18628ecb2183f0a27f0e2e5c922b004a20fa8e9e7"
+    },
+    {
+      "command": "npm.cmd run build",
+      "result": "PASS: vue-tsc --build and Vite production build passed",
+      "exit_code": 0,
+      "tool": "npm/Vite 8.3.0",
+      "environment": "Windows (win32); Node.js v24.21.0; npm 11.6.4; frontend dependencies via worktree junction; package-lock SHA-256 1829336936c40e0ef070a8a18628ecb2183f0a27f0e2e5c922b004a20fa8e9e7"
+    },
+    {
+      "command": "npm.cmd run contract:check",
+      "result": "PASS: generated OpenAPI types match the committed contract",
+      "exit_code": 0,
+      "tool": "generate-openapi-types.mjs",
+      "environment": "Windows (win32); Node.js v24.21.0; npm 11.6.4; frontend dependencies via worktree junction; package-lock SHA-256 1829336936c40e0ef070a8a18628ecb2183f0a27f0e2e5c922b004a20fa8e9e7"
+    },
+    {
+      "command": "git diff --check d0675d088b06dadfa7f7b96fe28cb0588212a63f 01409eeb4a9c083f858c520629c4ed791217c36f --",
+      "result": "PASS: no whitespace errors in the baseline-to-checkpoint diff",
+      "exit_code": 0,
+      "tool": "Git",
+      "environment": "Windows; Story worktree codex/story-1-5-v4"
+    },
+    {
+      "command": "php artisan test tests/Feature/ChallengeJournalTest.php tests/Feature/ChallengeJournalApiTest.php tests/Contract/ChallengeContractTest.php",
+      "result": "NOT RUN: backend/vendor/autoload.php is missing in the linked worktree; PostgreSQL backend regression is unavailable in this environment",
+      "exit_code": 1,
+      "tool": "PHP Artisan",
+      "environment": "Windows; linked Story worktree backend without Composer vendor dependencies"
+    },
+    {
+      "command": "node .agents/scripts/check-verification.mjs check auto --changed frontend/src/views/__tests__/journal-draft-lifecycle.spec.ts",
+      "result": "INCOMPLETE: NOT_APPLICABLE; NO_APPLICABLE_RECIPE",
+      "exit_code": 1,
+      "tool": "check-verification.mjs",
+      "environment": "Windows; linked Story worktree"
+    },
+    {
+      "command": "node .agents/scripts/check-escalation.mjs with canonical verification JSON; risk HIGH; flags CONCURRENCY_STATE, SECURITY_AUTH",
+      "result": "REVIEW_REQUIRED",
+      "exit_code": 1,
+      "tool": "check-escalation.mjs",
+      "environment": "Windows (win32); Node.js v24.21.0"
+    }
+  ],
+  "supersedes": {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/D-verification-2.json",
+    "digest": "sha256:220bfd69bd70d973bf12dc95bee7a639e125c8573a64e658b5e461af335230ca"
+  },
+  "progression_eligible": true,
+  "progression_reasons": [
+    "Control-plane reconciliation: the bound Story Plan records progression_eligible=true for this slice.",
+    "The bound targeted review is APPROVE with zero blocking findings; original checkpoint identity and verification evidence are preserved."
+  ],
+  "control_plane_reconciliation": {
+    "type": "progression-eligibility-receipt-repair",
+    "source_receipt": {
+      "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/D-verification-2.json",
+      "digest": "sha256:220bfd69bd70d973bf12dc95bee7a639e125c8573a64e658b5e461af335230ca"
+    },
+    "basis": {
+      "plan_progression_eligible": true,
+      "review_verdict": "APPROVE",
+      "blocking_findings": 0
+    }
+  }
+}
