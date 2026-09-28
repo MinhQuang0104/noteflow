@@ -102,6 +102,60 @@ test('beforeunload warns when an in-memory journal draft is unsaved', async () =
   expect(afterUnmount.defaultPrevented).toBe(false)
 })
 
+test('a new owner is not warned about another owner’s quarantined draft after session expiry', async () => {
+  const auth = useAuthStore(pinia)
+  const account = useAccountStore(pinia)
+  const drafts = useJournalDraftsStore(pinia)
+  auth.owner = { id: 42, name: 'Owner', email: 'owner@example.test' }
+  auth.status = 'authenticated'
+  auth.generation = 1
+  account.status = 'ready'
+  account.context = {
+    timezone: 'Asia/Ho_Chi_Minh',
+    account_date: DATE,
+    week: { start_date: '2026-09-21', end_date: '2026-09-27' },
+    account_revision: 11,
+    data_epoch: 4,
+    write_state: 'open',
+  }
+  drafts.hydrate({ challenge_id: 'challenge-a', local_date: DATE, journal: 'saved', journal_version: 1 })
+  drafts.setDraftText('challenge-a', DATE, 'owner 42 private draft')
+
+  vi.spyOn(authApi, 'getSession').mockResolvedValue(null)
+  await auth.refreshSession()
+  vi.spyOn(authApi, 'login').mockResolvedValue({
+    owner: { id: 43, name: 'Other owner', email: 'other@example.test' },
+    redirect_to: '/today',
+  } as authApi.LoginResult)
+  await auth.logIn({ email: 'other@example.test', password: 'secret' })
+  account.status = 'ready'
+  account.context = {
+    timezone: 'Asia/Ho_Chi_Minh',
+    account_date: DATE,
+    week: { start_date: '2026-09-21', end_date: '2026-09-27' },
+    account_revision: 12,
+    data_epoch: 4,
+    write_state: 'open',
+  }
+
+  const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false)
+  const logout = vi.spyOn(authApi, 'logout').mockResolvedValue()
+  await router.push('/today')
+
+  const wrapper = mount(App, {
+    global: { plugins: [pinia, router, [VueQueryPlugin, { queryClient }]] },
+  })
+  const event = new Event('beforeunload', { cancelable: true })
+  window.dispatchEvent(event)
+  expect(Object.values(drafts.drafts)[0]).toMatchObject({ ownerId: 42, status: 'quarantined' })
+  await wrapper.get('nav button').trigger('click')
+
+  expect(event.defaultPrevented).toBe(false)
+  expect(confirm).not.toHaveBeenCalled()
+  expect(logout).toHaveBeenCalledOnce()
+  wrapper.unmount()
+})
+
 test('a clean journal record does not warn before unload', async () => {
   const auth = useAuthStore(pinia)
   const account = useAccountStore(pinia)

@@ -454,6 +454,36 @@ describe('useJournalDraftsStore', () => {
     expect(save).toHaveBeenCalledOnce()
   })
 
+  it('counts quarantined work only for the owner currently signed in after session expiry', async () => {
+    drafts.hydrate(snapshot('challenge-a', 'server baseline', 1))
+    drafts.setDraftText('challenge-a', DATE, 'owner 42 private draft')
+
+    vi.spyOn(authApi, 'getSession').mockResolvedValue(null)
+    await auth.refreshSession()
+
+    expect(auth.status).toBe('guest')
+    expect(Object.values(drafts.drafts)[0]).toMatchObject({ ownerId: 42, status: 'quarantined' })
+    expect(drafts.hasUnsavedDrafts()).toBe(false)
+
+    vi.spyOn(authApi, 'login').mockResolvedValue({
+      owner: { id: 43, name: 'Other owner', email: 'other@example.test' },
+      redirect_to: '/challenges',
+    } as authApi.LoginResult)
+    await auth.logIn({ email: 'other@example.test', password: 'secret' })
+
+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()
+    expect(drafts.hasUnsavedDrafts()).toBe(false)
+
+    vi.mocked(authApi.login).mockResolvedValue({
+      owner: { id: 42, name: 'Owner', email: 'owner@example.test' },
+      redirect_to: '/challenges',
+    } as authApi.LoginResult)
+    await auth.logIn({ email: 'owner@example.test', password: 'secret' })
+
+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()
+    expect(drafts.hasUnsavedDrafts()).toBe(true)
+  })
+
   it('treats error, conflict, blocked, and unresolved command states as unsaved work', () => {
     drafts.hydrate(snapshot('challenge-a', 'server baseline', 1))
     const record = drafts.getDraft('challenge-a', DATE)
