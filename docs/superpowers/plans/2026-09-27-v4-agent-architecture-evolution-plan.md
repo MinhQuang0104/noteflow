@@ -2,7 +2,7 @@
 
 > **For agentic workers:** Dành cho **Luna 5.6 Max** (model gpt-5.6-luna, reasoning effort max). Khi có yêu cầu triển khai riêng của human, dùng skill superpowers:executing-plans để thực hiện tuần tự từng task. Không mặc định dispatch subagent, Orca hoặc AGY.
 >
-> **Trạng thái:** IN PROGRESS — human đã ủy quyền triển khai trong lane V4 Lite architecture/control-plane migration; T00–T02 đã hoàn tất, T03 là task kế tiếp.
+> **Trạng thái:** IN PROGRESS — human đã ủy quyền triển khai trong lane V4 Lite architecture/control-plane migration; T00–T03 đã hoàn tất, T04 là task kế tiếp.
 >
 > **Ngày:** 2026-09-27. **Baseline đã đọc:** main, d8e813660e44c54785466836e5c0eda658529b74.
 >
@@ -500,16 +500,18 @@ Mỗi task:
 **Consumes:** current validated Story/Plan và action metadata.
 **Produces:** compileActionContext và projection tại 5.2.
 
-- [ ] Test slice chỉ nhận tasks/AC của nó nhưng vẫn giữ risk/invariants cấp Story và dependency dispositions.
-- [ ] Test AC/task/ref thiếu, source digest drift, wrong action, active pointer: không có READY projection.
-- [ ] Test không đọc unrelated historical receipt detail cho model; dependency validation cần thiết vẫn hoạt động.
-- [ ] Test context request không làm thay đổi source, Plan, index hoặc runtime state.
-- [ ] Implement JSON projection, fingerprint và byte counts; không dùng LLM để tóm tắt normative text.
-- [ ] Test unknown file scope không biến thành empty allowlist hay quyền sửa toàn repo.
-- [ ] Run: node --test .agents/scripts/compile-v4-context.test.mjs.
-- [ ] Commit exact T03 files.
+- [x] Test slice chỉ nhận tasks/AC của nó nhưng vẫn giữ risk/invariants cấp Story và dependency dispositions.
+- [x] Test AC/task/ref thiếu, source digest drift, wrong action, active pointer: không có READY projection.
+- [x] Test không đọc unrelated historical receipt detail cho model; dependency validation cần thiết vẫn hoạt động.
+- [x] Test context request không làm thay đổi source, Plan, index hoặc runtime state.
+- [x] Implement JSON projection, fingerprint và byte counts; không dùng LLM để tóm tắt normative text.
+- [x] Test unknown file scope không biến thành empty allowlist hay quyền sửa toàn repo.
+- [x] Run: node --test .agents/scripts/compile-v4-context.test.mjs.
+- [x] Commit exact T03 files.
 
 **Gate:** mỗi field quan trọng truy được nguồn; stale dependency không dùng projection cũ; model vẫn có thể yêu cầu thêm evidence có mục đích.
+
+**T03 evidence (2026-09-28):** `node --test .agents/scripts/compile-v4-context.test.mjs` — 3 pass, 0 fail, 4799.5067 ms; combined T00–T03 regression (`v4-architecture-baseline`, `v4-observations`, finalization architecture guard, and context projection) — 19 pass, 0 fail, 15902.5417 ms. The projection is read-only and fingerprinted, carries selected task/AC text plus Story risk, dependency dispositions and source digests, records projection/instruction bytes, and keeps unknown scope/consumers/checks as `status: UNKNOWN` with `paths/items: null`. Wrong action, expected-head drift, Story digest drift, missing task links, and an active canonical pointer return no projection. v1 plans lacking explicit normalized task/AC fields fail closed rather than infer scope; v2 is the READY projection path. Action docs now require a `READY` projection before implementation or verification.
 
 ### T04 — Multi-recipe verification và hai scope thật
 

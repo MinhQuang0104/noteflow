@@ -30,6 +30,20 @@ RED → GREEN → refactor. Before any completion claim, load the verification
 recipe, run fresh focused checks, inspect the exact diff, and rerun the helper
 with every exact owned path.
 
+## Action context projection
+
+Compile the read-only, provenance-bound context before semantic implementation:
+
+```text
+node .agents/scripts/compile-v4-context.mjs check <story-id>
+  --action implement_slice --slice <slice-id> --expected-head <head>
+```
+
+Continue only on `READY`. Use the selected tasks/AC and Story risk exactly as
+projected. An `UNKNOWN` file scope, consumer set, or check set is not an empty
+allowlist; obtain or inspect evidence explicitly before choosing implementation
+paths. The projection does not authorize a broader scope or a successor.
+
 HIGH-risk slices require targeted negative, security, concurrency, contract,
 or recovery evidence where applicable. Never lower risk to avoid review and
 never turn canonical `INCOMPLETE` into `PASS`.

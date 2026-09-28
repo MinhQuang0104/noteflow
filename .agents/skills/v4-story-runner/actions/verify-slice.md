@@ -4,6 +4,19 @@
 and, when required, same-Lead review evidence. It never changes product code,
 fixes a failed check, executes a future action, or changes the Human Gate.
 
+## Action context projection
+
+Compile the read-only, provenance-bound context before verification:
+
+```text
+node .agents/scripts/compile-v4-context.mjs check <story-id>
+  --action verify_slice --slice <slice-id> --expected-head <head>
+```
+
+Continue only on `READY`. Preserve the selected tasks/AC, Story risk, and
+dependency dispositions exactly; an `UNKNOWN` scope or check set stays unknown
+until explicit evidence is obtained and never becomes an empty allowlist.
+
 ## Evidence flow
 
 Start with the read-only scope/freshness manifest:
