@@ -15,6 +15,14 @@ import { useSyncStore } from '../stores/sync'
 
 const DATE = '2026-09-27'
 
+function deferred<T>() {
+  let resolve!: (value: T) => void
+  const promise = new Promise<T>((resolvePromise) => {
+    resolve = resolvePromise
+  })
+  return { promise, resolve }
+}
+
 beforeEach(async () => {
   vi.restoreAllMocks()
   queryClient.clear()
@@ -100,6 +108,48 @@ test('beforeunload warns when an in-memory journal draft is unsaved', async () =
   const afterUnmount = new Event('beforeunload', { cancelable: true })
   window.dispatchEvent(afterUnmount)
   expect(afterUnmount.defaultPrevented).toBe(false)
+})
+
+test('same-owner warning guards stay active while session refresh is pending', async () => {
+  const auth = useAuthStore(pinia)
+  const account = useAccountStore(pinia)
+  const drafts = useJournalDraftsStore(pinia)
+  auth.owner = { id: 42, name: 'Owner', email: 'owner@example.test' }
+  auth.status = 'authenticated'
+  auth.generation = 1
+  account.status = 'ready'
+  account.context = {
+    timezone: 'Asia/Ho_Chi_Minh',
+    account_date: DATE,
+    week: { start_date: '2026-09-21', end_date: '2026-09-27' },
+    account_revision: 11,
+    data_epoch: 4,
+    write_state: 'open',
+  }
+  drafts.hydrate({ challenge_id: 'challenge-a', local_date: DATE, journal: 'saved', journal_version: 1 })
+  drafts.setDraftText('challenge-a', DATE, 'owner 42 private draft')
+  await router.push('/today')
+
+  const wrapper = mount(App, {
+    global: { plugins: [pinia, router, [VueQueryPlugin, { queryClient }]] },
+  })
+  const session = deferred<authApi.OwnerSession | null>()
+  vi.spyOn(authApi, 'getSession').mockReturnValue(session.promise)
+  const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false)
+  const logout = vi.spyOn(authApi, 'logout').mockResolvedValue()
+  const refreshing = auth.refreshSession()
+  const event = new Event('beforeunload', { cancelable: true })
+  window.dispatchEvent(event)
+
+  await wrapper.get('nav button').trigger('click')
+
+  expect(event.defaultPrevented).toBe(true)
+  expect(confirm).toHaveBeenCalledOnce()
+  expect(logout).not.toHaveBeenCalled()
+
+  session.resolve({ owner: { id: 42, name: 'Owner', email: 'owner@example.test' } })
+  await refreshing
+  wrapper.unmount()
 })
 
 test('a new owner is not warned about another owner’s quarantined draft after session expiry', async () => {

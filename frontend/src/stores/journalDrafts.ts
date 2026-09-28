@@ -603,7 +603,7 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
   }
 
   function hasUnsavedDrafts(): boolean {
-    if (auth.status !== 'authenticated' || !auth.owner) return false
+    if (!auth.owner) return false
     const ownerId = auth.owner.id
     return Object.values(drafts.value).some(record => record.ownerId === ownerId && needsAttention(record))
   }
