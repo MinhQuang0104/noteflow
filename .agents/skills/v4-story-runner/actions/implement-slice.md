@@ -1,77 +1,27 @@
 # `implement_slice` action
 
-`implement_slice` is one bounded Story action. It may change only the current
-slice's implementation files, tests, and contracts, then persist the explicit
-`verify_slice:<same-slice>` successor. It never runs verification as the next
-action in the same invocation, advances lifecycle, executes another slice, or
-grants review or Human Gate authority.
+One bounded action may change only the current slice's implementation files, tests, and contracts, then persist `verify_slice:<same-slice>`. It never verifies, advances lifecycle, implements another slice, or grants review/Human Gate.
 
-## Read-only preflight
-
-Run:
+## Read-only gate and projection
 
 ```text
-node .agents/scripts/check-slice-implementation.mjs check <story-id> <slice-id>
-  [--exclude-unrelated <exact-path>]...
-  [--resume-path <exact-path>]...
-  [--checkpoint-candidate <exact-commit>]
+node .agents/scripts/check-slice-implementation.mjs check <story-id> <slice-id> [--exclude-unrelated <exact-path>]... [--resume-path <exact-path>]... [--checkpoint-candidate <exact-commit>]
 ```
 
-Stop on `STALE`, `BLOCKED`, `INVALID`, or `ERROR`. `READY` may describe
-`FRESH`, `RESUME_WORKTREE`, `CHECKPOINT_UNRECORDED`, `PLAN_UPDATE_PENDING`, or
-`COMPLETE`; use the returned mode exactly. Dirty paths are relevant unless an
-exact deterministic unrelated path is explicitly supplied. The helper is
-read-only and never chooses implementation targets semantically.
+Stop on `STALE`, `BLOCKED`, `INVALID`, or `ERROR`; use the returned mode (`FRESH`, `RESUME_WORKTREE`, `CHECKPOINT_UNRECORDED`, `PLAN_UPDATE_PENDING`, or `COMPLETE`) exactly. Preserve HEAD; inspect current Story/AC, direct consumers/tests, and named anchors; use RED → GREEN → refactor, fresh checks, and exact-diff inspection.
 
-For `FRESH` or `RESUME_WORKTREE`, preserve the returned HEAD as the baseline,
-load only the current Story/AC scope and direct consumers/tests, and inspect
-named architecture/UX references. Load the TDD recipe lazily and use
-RED → GREEN → refactor. Before any completion claim, load the verification
-recipe, run fresh focused checks, inspect the exact diff, and rerun the helper
-with every exact owned path.
-
-## Action context projection
-
-Compile the read-only, provenance-bound context before semantic implementation:
+Compile provenance-bound context and continue only on `READY`:
 
 ```text
-node .agents/scripts/compile-v4-context.mjs check <story-id>
-  --action implement_slice --slice <slice-id> --expected-head <head>
+node .agents/scripts/compile-v4-context.mjs check <story-id> --action implement_slice --slice <slice-id> --expected-head <head>
 ```
 
-Continue only on `READY`. Use the selected tasks/AC and Story risk exactly as
-projected. An `UNKNOWN` file scope, consumer set, or check set is not an empty
-allowlist; obtain or inspect evidence explicitly before choosing implementation
-paths. The projection does not authorize a broader scope or a successor.
-
-HIGH-risk slices require targeted negative, security, concurrency, contract,
-or recovery evidence where applicable. Never lower risk to avoid review and
-never turn canonical `INCOMPLETE` into `PASS`.
+Use projected tasks/AC/risk/dependencies exactly. `UNKNOWN` scope/consumers/checks is not an empty allowlist. HIGH risk needs applicable negative/security/concurrency/contract/recovery evidence; never lower risk or turn canonical `INCOMPLETE` into `PASS`.
 
 ## Two-commit durability
 
-Stage exact implementation paths only; never use `git add .` or `git add -A`.
-The implementation checkpoint commit excludes the Story Plan, receipts,
-lifecycle files, and unrelated noise. It must have a non-empty exact path set.
+Stage exact paths only; never `git add .`/`-A`. The checkpoint excludes Plan, receipts, lifecycle files, and unrelated noise. A separate metadata commit records baseline/checkpoint, changed-path digest, fresh check/red-green evidence (or a reason), the receipt contract, and `verify_slice`; schema-v2 contains exactly the current Plan and new receipt, while schema-v1 keeps its Plan-only contract.
 
-The separate metadata commit records the real baseline/checkpoint, changed-path
-digest, focused checks, red/green evidence or a non-applicability reason, and
-`next_action.kind: verify_slice`. For schema-v2 the implementation receipt is
-created after the checkpoint and the metadata commit contains exactly the Plan
-and that new receipt. Schema-v1 keeps the exact Plan-only metadata contract.
-No Story/sprint lifecycle field or receipt belonging to another slice may be
-introduced by this transaction.
+After the Git-common lock, recheck HEAD, Plan/Story/policy/recipe digests, exact scope, and command evidence; staged-set hook changes fail. A partial transaction preserves files/index/lock/journal and returns `RECOVERY_REQUIRED`; recovery names an explicit checkpoint/input and never replays from chat. Completed work is `NOOP`, never a third commit.
 
-The apply path must recheck HEAD, Plan/Story/policy/recipe digests, exact file
-scope, and command evidence after acquiring the Git-common lock. Hooks that
-change the staged set are a failure. A partial transaction preserves files,
-index, lock and journal and returns `RECOVERY_REQUIRED`; recovery requires an
-explicit exact checkpoint/recovery input and never replays implementation from
-chat history or commit messages. A completed transaction is idempotent and
-returns `NOOP` with the same successor; it never creates a third commit.
-
-## Lazy references
-
-Load `references/implementation-techniques.md` only for the implementation
-technique or review gate, and `references/recovery.md` only when a recovery or
-partial transaction is observed. Those references add no authority.
+Load implementation techniques only for the recipe and recovery only for an observed recovery condition; both are subordinate references.
