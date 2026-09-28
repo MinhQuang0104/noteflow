@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "review_id": "v4-acceptance-2026-09-28",
+  "batch": "A",
+  "reviewed_source_head": "7529540ad9bcbf0389d0b00bc83d1575dea1422a",
+  "base_head": "d8e813660e44c54785466836e5c0eda658529b74",
+  "disposition": "CHANGES_REQUIRED_FOR_NEXT_BATCH",
+  "final_r08_verdict": "NOT_ISSUED",
+  "findings": [
+    {
+      "id": "F01",
+      "severity": "HIGH",
+      "classification": "VALID",
+      "status": "OPEN",
+      "title": "Benchmark and evolution consumers promote unexecuted or caller-supplied evidence to PASS and AWAITING_HUMAN",
+      "source": [
+        {
+          "path": ".agents/scripts/benchmark-v4.mjs",
+          "lines": "7,69-87,153-160,245-272,337-353",
+          "source_head": "7529540ad9bcbf0389d0b00bc83d1575dea1422a"
+        },
+        {
+          "path": ".agents/scripts/benchmark-v4.test.mjs",
+          "lines": "147-178",
+          "source_head": "7529540ad9bcbf0389d0b00bc83d1575dea1422a"
+        },
+        {
+          "path": ".agents/scripts/v4-evolution.mjs",
+          "lines": "304-355",
+          "source_head": "7529540ad9bcbf0389d0b00bc83d1575dea1422a"
+        },
+        {
+          "path": ".agents/scripts/fixtures/v4-architecture/corpus.json",
+          "lines": "1-24",
+          "source_head": "7529540ad9bcbf0389d0b00bc83d1575dea1422a"
+        }
+      ],
+      "trigger": "Build a candidate bundle without supplied case results, then compare it or pass a raw comparison object to evaluateEvolution.",
+      "reproduction": [
+        {
+          "command": "node --input-type=module -e \"import { buildCandidateBundle } from './.agents/scripts/benchmark-v4.mjs'; const b=buildCandidateBundle(process.cwd(), { source_paths: [] }); console.log(JSON.stringify(b.cases.map(x => ({case_id:x.case_id, check_results:x.check_results, correction_cycles:x.correction_cycles, coverage:x.coverage, input_digest:x.input_digest}))))\"",
+          "exit_code": 0,
+          "observed": "All L/M/H cases receive check_results=[{id:'corpus-guard',status:'PASS',tests:3,coverage:'DETERMINISTIC'}], correction_cycles=0, coverage=DETERMINISTIC, input_digest=null; no scenario runner was called."
+        },
+        {
+          "command": "node .agents/scripts/benchmark-v4.mjs compare --baseline .agent-state/v4-observations/evaluations/architecture-upgrade-baseline.json --candidate .agent-state/v4-observations/evaluations/architecture-upgrade-candidate.json",
+          "exit_code": 0,
+          "observed": "The command returns COMPARABLE with metrics.quality=PASS and exit code 0, although the candidate bundle contains only the synthetic corpus-guard record and no case execution evidence."
+        },
+        {
+          "command": "node --input-type=module -e \"import { evaluateEvolution } from './.agents/scripts/v4-evolution.mjs'; const r=evaluateEvolution({candidate_id:'synthetic-candidate'}, {comparability:{verdict:'COMPARABLE',reasons:[]},deterministic_checks:[{status:'PASS'}],quality_checks:[{status:'PASS'}],observed_usage:{}}); console.log(JSON.stringify({status:r.status,recommendation:r.recommendation,token_savings:r.metrics.token_savings,reasons:r.reasons}))\"",
+          "exit_code": 0,
+          "observed": "The consumer returns EVALUATED/AWAITING_HUMAN and labels token_savings MEASURED for an empty observed_usage object supplied by the caller."
+        }
+      ],
+      "expected_invariant": "Missing, legacy, stale, failed, skipped, timeout, or unbound evidence cannot become quality PASS, EVALUATED, or AWAITING_HUMAN. Every L/M/H case must have an actual execution binding, input digest, runner/source identity, raw output reference and assertion result; expected rejection remains raw status plus a separate passing assertion.",
+      "actual": "The schema is still v1; validateCase allows null input_digest and lacks execution/evidence binding requirements. buildCandidateBundle supplies PASS, tests:3, correction_cycles:0 and DETERMINISTIC defaults. compareBundles derives quality solely from those statuses. evaluateEvolution trusts caller-provided usage/check arrays without validating evidence binding or coverage.",
+      "impact": "The review pipeline can report deterministic quality and adoption readiness without running the required scenarios or measuring provider usage. This is an evidence/authority boundary failure, not a cosmetic reporting issue.",
+      "minimal_fix_scope": "Batch B R02-R03: introduce the v2 evidence contract and actual L/M/H runner, fail closed on missing/legacy/unbound evidence, preserve raw statuses, and require the evidence root/binding in compare and evolution consumers.",
+      "regression_required": [
+        "No check_results produces UNKNOWN/INCONCLUSIVE, never PASS.",
+        "Missing/duplicate/tampered/cross-case evidence is invalid or incomplete.",
+        "M expected INCOMPLETE remains raw INCOMPLETE while its assertion can PASS.",
+        "A caller-supplied empty or unbound usage object cannot make evaluation AWAITING_HUMAN."
+      ]
+    },
+    {
+      "id": "F02",
+      "severity": "HIGH",
+      "classification": "VALID",
+      "status": "OPEN",
+      "title": "The worktree plan marks the original U2 acceptance complete despite evidence that the target was not met",
+      "source": [
+        {
+          "path": "docs/superpowers/plans/2026-09-27-v4-agent-architecture-evolution-plan.md",
+          "lines": "5,494,702-704,749",
+          "source_head": "7529540ad9bcbf0389d0b00bc83d1575dea1422a"
+        },
+        {
+          "path": "docs/agent-architecture/v4-upgrade-validation.md",
+          "lines": "3,55-61",
+          "source_head": "7529540ad9bcbf0389d0b00bc83d1575dea1422a"
+        },
+        {
+          "path": ".agents/docs/v4-lite-migration.md",
+          "lines": "79-91",
+          "source_head": "7529540ad9bcbf0389d0b00bc83d1575dea1422a"
+        }
+      ],
+      "trigger": "Read the W plan status, T11 evidence, validation report and migration note together.",
+      "reproduction": [
+        {
+          "command": "rg -n \"Trạng thái|T11 evidence|U2:|candidate is larger|COMPLETE|PASS\" docs/superpowers/plans/2026-09-27-v4-agent-architecture-evolution-plan.md docs/agent-architecture/v4-upgrade-validation.md .agents/docs/v4-lite-migration.md",
+          "exit_code": 0,
+          "observed": "The W plan says COMPLETE, its U2 DoD checkbox is [x], and the T11/validation evidence says candidate instruction bytes are larger than baseline: +21,525 implement aggregate and +22,254 verify aggregate."
+        }
+      ],
+      "expected_invariant": "The original acceptance remains the authority: both normal implement_slice and verify_slice must reduce instruction bytes by at least 30% on a valid comparable basis while preserving invariants. If not measured or not met, U2 remains OPEN/NOT_MET/INCONCLUSIVE. A changed acceptance requires a separate human decision.",
+      "actual": "The plan and migration/validation wording present implementation completion while acknowledging that the bundle does not prove savings and that the candidate is larger. No independent review disposition is recorded in the W before Batch A.",
+      "impact": "A downstream reviewer or human could interpret a checked DoD and COMPLETE/PASS wording as acceptance of the original U2 scope, despite contrary evidence.",
+      "minimal_fix_scope": "R00 report/status update: mark the current validation under review, reopen U2 acceptance, preserve the historical implementer evidence, and explicitly separate implemented/reported/independently verified. Do not change the 30% criterion without a human decision.",
+      "regression_required": [
+        "The plan keeps the original U2 wording and records a separate open/not-met/inconclusive disposition.",
+        "No report calls the original scope PASS_ORIGINAL_SCOPE before R08.",
+        "A human decision is required if a different acceptance scope is proposed."
+      ]
+    },
+    {
+      "id": "F03",
+      "severity": "HIGH",
+      "classification": "VALID",
+      "status": "OPEN",
+      "title": "Instruction-byte measurement does not bind both revisions to one reproducible basis",
+      "source": [
+        {
+          "path": ".agents/scripts/benchmark-v4.mjs",
+          "lines": "165-168,306-319,325-370",
+          "source_head": "7529540ad9bcbf0389d0b00bc83d1575dea1422a"
+        },
+        {
+          "path": ".agent-state/v4-observations/evaluations/architecture-upgrade-baseline.json",
+          "lines": "1-60",
+          "source_head": "7529540ad9bcbf0389d0b00bc83d1575dea1422a"
+        },
+        {
+          "path": ".agent-state/v4-observations/evaluations/architecture-upgrade-candidate.json",
+          "lines": "1-20",
+          "source_head": "7529540ad9bcbf0389d0b00bc83d1575dea1422a"
+        }
+      ],
+      "trigger": "Compare the historical baseline bundle with the candidate bundle and inspect the implementation of measureInstructionBytes.",
+      "reproduction": [
+        {
+          "command": "node .agents/scripts/benchmark-v4.mjs compare --baseline .agent-state/v4-observations/evaluations/architecture-upgrade-baseline.json --candidate .agent-state/v4-observations/evaluations/architecture-upgrade-candidate.json",
+          "exit_code": 0,
+          "observed": "The compare path ignores the instruction_bytes.basis key, accepts explicit source-path/binding disclosures, and aggregates the same 30,565/37,740/37,983 values across all three cases. It reports 91,695 baseline versus 113,220 candidate for implement and 91,695 versus 113,949 for verify."
+        },
+        {
+          "command": "Test-Path .agents/scripts/measure-v4-instruction-context.mjs",
+          "exit_code": 0,
+          "observed": "False; no revision-bound measurement helper or basis manifest exists in H0."
+        }
+      ],
+      "expected_invariant": "The measurement method, profile, action, input and required source manifest must be identical in meaning for B and candidate; raw Git blobs at the named revisions are counted once, missing required sources fail closed, and per-action measurements are not multiplied by repeated L/M/H rows.",
+      "actual": "measureInstructionBytes reads the current checkout, hard-codes a path list per action, catches missing files and adds zero, and compareBundles drops the basis key and sums per-case values without validating a shared measurement basis. The baseline basis string describes four pre-T02 sources while its source bindings list eight paths; the candidate basis string describes a different current-source set.",
+      "impact": "The resulting delta is not a reproducible U2 acceptance metric. It can include or exclude required instructions asymmetrically, count a missing source as zero, and multiply one static context measurement by corpus rows.",
+      "minimal_fix_scope": "Batch B R04: add a versioned instruction-basis manifest and Git-revision measurement helper; record path/blob/bytes/inclusion reason; fail closed on missing or triggered lazy sources; compare basis/profile/action/input coverage before reporting a metric.",
+      "regression_required": [
+        "UTF-8/multibyte and CRLF byte counts are measured from the named Git revision.",
+        "Missing required source and triggered lazy source are INCONCLUSIVE/INVALID, never zero.",
+        "Different basis/profile/action/input makes the metric INCONCLUSIVE even when prose supplies a reason.",
+        "L/M/H rows do not turn one static measurement into three independent samples."
+      ]
+    }
+  ]
+}

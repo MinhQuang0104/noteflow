@@ -1,8 +1,14 @@
 # NoteFlow V4 Lite architecture upgrade validation
 
-Status: implementation verified by deterministic evidence. This report does
-not claim optimization measured from provider usage and does not record human
+Status: UNDER_REVIEW. The deterministic results below are historical
+implementer-reported evidence; Batch A independent review found valid open
+findings F01-F03. This report does not claim provider optimization or human
 adoption of the migration.
+
+Batch A has reopened the original U2/T11 acceptance. The prior numbers and
+limitations are preserved for traceability, but they are not independent
+acceptance until the evidence contract, corpus execution and measurement basis
+are repaired and re-reviewed.
 
 ## Scope and isolation
 

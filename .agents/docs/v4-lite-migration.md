@@ -92,4 +92,27 @@ candidate stores are advisory derived data; no auto-apply path, scheduler,
 Story lifecycle mutation, product change, or V3 runtime takeover was added.
 
 See `docs/agent-architecture/v4-upgrade-validation.md` for commands, scope,
-limitations, and rollback considerations.
+ limitations, and rollback considerations.
+
+## 2026-09-28 Independent review — Batch A
+
+Current review status: UNDER_REVIEW. The historical implementation report
+above is preserved as implementer-reported evidence and is not a final
+independent acceptance.
+
+The independent reviewer inspected B
+d8e813660e44c54785466836e5c0eda658529b74 through H0
+7529540ad9bcbf0389d0b00bc83d1575dea1422a and recorded:
+
+- F01 VALID/HIGH: unexecuted or caller-supplied benchmark/evolution evidence
+  can become PASS or AWAITING_HUMAN.
+- F02 VALID/HIGH: the original U2 30% acceptance was presented as complete
+  although the historical candidate bytes are larger than baseline.
+- F03 VALID/HIGH: the instruction-byte measurement basis is not revision-bound
+  or symmetric and the planned corpus/measurement helpers are absent.
+
+The detailed snapshot, coverage and reproductions are in
+docs/agent-architecture/reviews/v4-acceptance-2026-09-28/. No product, Story,
+V3 runtime or implementation files were changed by Batch A. Batch B must
+repair evidence trust and lock the measurement method before U2 can be
+reassessed.

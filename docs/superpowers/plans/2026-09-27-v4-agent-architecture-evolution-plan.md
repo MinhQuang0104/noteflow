@@ -2,7 +2,7 @@
 
 > **For agentic workers:** Dành cho **Luna 5.6 Max** (model gpt-5.6-luna, reasoning effort max). Khi có yêu cầu triển khai riêng của human, dùng skill superpowers:executing-plans để thực hiện tuần tự từng task. Không mặc định dispatch subagent, Orca hoặc AGY.
 >
-> **Trạng thái:** COMPLETE — human đã ủy quyền triển khai trong lane V4 Lite architecture/control-plane migration; T00–T11 đã hoàn tất trong worktree cô lập. Implementation đã được deterministic verification; provider optimization và human adoption chưa được tuyên bố.
+> **Trạng thái:** UNDER_REVIEW — Batch A (R00–R01) đã mở lại nghiệm thu độc lập trong lane V4 Lite architecture/control-plane migration. Các checkbox/evidence T00–T11 bên dưới là lịch sử implementer-reported cho tới khi reviewer độc lập xác nhận; provider optimization và human adoption chưa được tuyên bố.
 >
 > **Ngày:** 2026-09-27. **Baseline đã đọc:** main, d8e813660e44c54785466836e5c0eda658529b74.
 >
@@ -698,10 +698,17 @@ Real recipe evidence under Node `v24.21.0` after `npm ci` in the isolated worktr
 - [x] Viết docs/agent-architecture/v4-upgrade-validation.md gồm coverage U1–U6, commands/results, remaining limitations, adoption/rollback considerations.
 - [x] Review final diff và Git inventory, xác nhận không có product/Story/sprint/V3 runtime changes ngoài fixture.
 - [x] Commit exact T11 files; trình human final migration scope. Không tự merge/deploy hoặc gán hoàn tất cho Story khác.
+- [ ] Independent R00–R01 acceptance of the benchmark, corpus execution and measurement evidence.
 
 **T11 evidence (2026-09-28):** benchmark test `node --test .agents/scripts/benchmark-v4.test.mjs` passed 4 tests, 0 failed. The final compare returned `COMPARABLE` with explicit source-head, architecture-fingerprint, and source-binding disclosures; implement context measured 30,565 baseline bytes versus 37,740 candidate bytes (delta +21,525 aggregate), and verify context measured 30,565 versus 37,983 (delta +22,254 aggregate). Deterministic corpus checks passed; provider token usage, command/helper count without observations, repeated artifact reads without observations, and real-Story quality impact remain `INCONCLUSIVE`. Full control-plane regression passed 404 of 405 tests, with 1 existing Windows symlink-creation skip and 0 failures. Frontend recipe gates were executed under Node 24 during T04 and passed; the root metadata-only package has no `test` script, so root `npm test` is not a gate.
 
 **Gate:** tất cả deterministic obligations pass, không unresolved HIGH/MEDIUM finding; performance claims được giới hạn đúng evidence. Rollout vào Story mới do human quyết định.
+
+**Independent review status (R00–R01):** OPEN. F01 confirms that the
+candidate builder and evolution consumer can promote missing/unbound evidence;
+F02 reopens the original U2 acceptance; F03 finds the historical measurement
+basis non-reproducible. The T11 implementation report remains historical until
+R02–R08 produce and review fresh evidence.
 
 ## 9. Verification commands và negative matrix
 
@@ -746,7 +753,7 @@ Không viết test thuần so khớp văn bản hướng dẫn, hoặc snapshot 
 ## 10. Definition of Done của migration
 
 - [x] U1: implement/verify mechanical steps có executable path; model chỉ cung cấp semantic work/judgment cần thiết.
-- [x] U2: context theo action và projection có provenance; instruction bytes đã được đo bounded, nhưng bundle này không chứng minh savings.
+- [ ] U2: context theo action and projection có provenance; the original 30% instruction-byte acceptance remains open because the historical bundle does not prove comparable savings.
 - [x] U3: Codex/Claude đi cùng lane selection; V3 fallback đúng explicit routing.
 - [x] U4: multi-recipe có coverage/aggregation tests; journal-frontend và today-view có executed checks.
 - [x] U5: measured/estimated/unknown phân biệt; usage totals không double-count; session coverage minh bạch.
