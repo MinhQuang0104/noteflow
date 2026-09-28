@@ -105,13 +105,13 @@ slices:
     depends_on: [B]
     task_refs: [T-5, T-6]
     baseline_commit: 6c91f5b2e469d4d662f722ae644e55ebf56f7586
-    checkpoint_commit: 3cc3fb6e821ec26a92043117ec4accf052d3889e
+    checkpoint_commit: c4621a9153da0397446f4fa878128c6450fe922b
     subject_digest: sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e
     changed_paths_sha256: sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e
     receipt_refs:
       implementation:
-        path: _bmad-output/implementation-artifacts/receipts/story-1-5/C-resolution-implementation-2.json
-        digest: sha256:81b03fbc35338ea5157279fc3560e77ba46c5edbb17d22c8ab17c8f22f1e8b45
+        path: _bmad-output/implementation-artifacts/receipts/story-1-5/C-resolution-implementation-3.json
+        digest: sha256:815a9f4817431c2e77fe2a95eb870fff89ebbb5a48a418ff95d17e82822a9fa8
   - id: D
     status: pending
     depends_on: [C]
