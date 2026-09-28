@@ -2,7 +2,7 @@
 
 > **For agentic workers:** Dành cho **Luna 5.6 Max** (model gpt-5.6-luna, reasoning effort max). Khi có yêu cầu triển khai riêng của human, dùng skill superpowers:executing-plans để thực hiện tuần tự từng task. Không mặc định dispatch subagent, Orca hoặc AGY.
 >
-> **Trạng thái:** IN PROGRESS — human đã ủy quyền triển khai trong lane V4 Lite architecture/control-plane migration; T00–T04 đã hoàn tất, T05 là task kế tiếp.
+> **Trạng thái:** IN PROGRESS — human đã ủy quyền triển khai trong lane V4 Lite architecture/control-plane migration; T00–T05 đã hoàn tất, T06 là task kế tiếp.
 >
 > **Ngày:** 2026-09-27. **Baseline đã đọc:** main, d8e813660e44c54785466836e5c0eda658529b74.
 >
@@ -545,17 +545,19 @@ Real recipe evidence under Node `v24.21.0` after `npm ci` in the isolated worktr
 **Consumes:** CheckSpec và subject.
 **Produces:** executeCheck và CheckEvidence, dùng được bởi registry và kernel.
 
-- [ ] Test argv-with-spaces, Unicode paths, cwd normalization, symlink/traversal rejection, timeout và unavailable executable trên fixture.
-- [ ] Test secrets redaction, bounded diagnostic và output digest.
-- [ ] Test RED nonzero result không bị coi là acceptance PASS; fabricated summary thiếu provenance không đủ cho reusable evidence.
-- [ ] Implement spawn không shell, Windows hidden processes, bounded output và explicit toolchain identity.
-- [ ] Test drift sau check làm evidence không reusable; Node/npm version ngoài supported range được báo rõ.
-- [ ] Test các check không được phép không chạy dù nằm trong learned candidate.
-- [ ] Run: node --test .agents/scripts/v4-check-executor.test.mjs.
-- [ ] Rerun check-verification tests nếu adapter đổi.
-- [ ] Commit exact T05 files.
+- [x] Test argv-with-spaces, Unicode paths, cwd normalization, symlink/traversal rejection, timeout và unavailable executable trên fixture.
+- [x] Test secrets redaction, bounded diagnostic và output digest.
+- [x] Test RED nonzero result không bị coi là acceptance PASS; fabricated summary thiếu provenance không đủ cho reusable evidence.
+- [x] Implement spawn không shell, Windows hidden processes, bounded output và explicit toolchain identity.
+- [x] Test drift sau check làm evidence không reusable; Node/npm version ngoài supported range được báo rõ.
+- [x] Test các check không được phép không chạy dù nằm trong learned candidate.
+- [x] Run: node --test .agents/scripts/v4-check-executor.test.mjs.
+- [x] Rerun check-verification tests nếu adapter đổi.
+- [x] Commit exact T05 files.
 
 **Gate:** kết quả dựa vào process quan sát được; adapter không nâng permissions và không thay output semantics của canonical verifier.
+
+**T05 evidence (2026-09-28):** `node --test .agents/scripts/v4-check-executor.test.mjs` — 4 pass, 1 skipped, 0 fail, 506.7885 ms. The tests cover direct argv with spaces/Unicode, cwd normalization, traversal, timeout, unavailable executable, bounded/redacted diagnostics, output digest, expected nonzero RED, fabricated evidence rejection, trusted recipe/focused-manifest source, learned-command denial before spawn, worktree subject drift, and unsupported Node/npm ranges. The symlink test is present but skipped because this Windows environment denies symlink creation; the executor still rejects symlinks via `lstat`/realpath checks. `node --test .agents/scripts/check-verification.test.mjs .agents/scripts/v4-check-executor.test.mjs` — 9 pass, 0 fail, 1322.485 ms. The adapter uses direct `spawnSync` with `shell: false`, Windows-hidden processes, a 4 MiB cap, 120 s maximum trusted timeout, explicit toolchain/environment identity, bounded redacted diagnostics, and no learned-command execution.
 
 ### T06 — Kernel implementation checkpoint và recovery
 
