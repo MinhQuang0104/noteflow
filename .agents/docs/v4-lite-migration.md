@@ -116,3 +116,30 @@ docs/agent-architecture/reviews/v4-acceptance-2026-09-28/. No product, Story,
 V3 runtime or implementation files were changed by Batch A. Batch B must
 repair evidence trust and lock the measurement method before U2 can be
 reassessed.
+
+## 2026-09-28 Batch D independent review
+
+The architecture-evolution acceptance was independently reviewed at tested
+source HEAD
+0e4c6b939f2a186399b483718601e86b44a694b5, with normative source commit
+09b9dd961f3919e5c91b5742dcbe4bc0ac2abc92. The verdict is
+PASS_ORIGINAL_SCOPE for the original deterministic migration scope only.
+
+Fresh evidence records 419 control-plane tests with 418 pass, 0 fail and one
+Windows symlink-creation skip; frontend type-check, 30 focused unit tests and
+contract check pass under Node 24.21.0. The L/M/H candidate corpus is
+execution-bound and verified. The locked common-basis measurement is
+30.31% reduction for implement_slice and 30.26% for verify_slice; the
+original 30% criterion was not changed.
+
+F01–F03 are independently VERIFIED_FIXED. The historical legacy bundle
+remains INCOMPARABLE/INCONCLUSIVE and the evolution consumer remains
+fail-closed. Provider usage, paired baseline quality, real-Story quality,
+empirical pilot, rollout and human adoption are not claimed. Human
+integration/adoption is still pending; this section is not an approval or
+rollout record.
+
+Readable Batch D evidence, matrix and decision:
+docs/agent-architecture/reviews/v4-acceptance-2026-09-28/batch-d-results.md,
+acceptance-matrix.md, batch-d-evidence-index.json,
+batch-d-evidence-bundle.json and final-decision.md.

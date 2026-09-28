@@ -698,17 +698,31 @@ Real recipe evidence under Node `v24.21.0` after `npm ci` in the isolated worktr
 - [x] Viết docs/agent-architecture/v4-upgrade-validation.md gồm coverage U1–U6, commands/results, remaining limitations, adoption/rollback considerations.
 - [x] Review final diff và Git inventory, xác nhận không có product/Story/sprint/V3 runtime changes ngoài fixture.
 - [x] Commit exact T11 files; trình human final migration scope. Không tự merge/deploy hoặc gán hoàn tất cho Story khác.
-- [ ] Independent R00–R01 acceptance of the benchmark, corpus execution and measurement evidence.
+- [x] Independent R00–R01 acceptance of the benchmark, corpus execution and measurement evidence, completed by the R08 reviewer without changing the original criterion.
 
 **T11 evidence (2026-09-28):** benchmark test `node --test .agents/scripts/benchmark-v4.test.mjs` passed 4 tests, 0 failed. The final compare returned `COMPARABLE` with explicit source-head, architecture-fingerprint, and source-binding disclosures; implement context measured 30,565 baseline bytes versus 37,740 candidate bytes (delta +21,525 aggregate), and verify context measured 30,565 versus 37,983 (delta +22,254 aggregate). Deterministic corpus checks passed; provider token usage, command/helper count without observations, repeated artifact reads without observations, and real-Story quality impact remain `INCONCLUSIVE`. Full control-plane regression passed 404 of 405 tests, with 1 existing Windows symlink-creation skip and 0 failures. Frontend recipe gates were executed under Node 24 during T04 and passed; the root metadata-only package has no `test` script, so root `npm test` is not a gate.
 
 **Gate:** tất cả deterministic obligations pass, không unresolved HIGH/MEDIUM finding; performance claims được giới hạn đúng evidence. Rollout vào Story mới do human quyết định.
 
-**Independent review status (R00–R01):** OPEN. F01 confirms that the
+**Independent review status (R00–R01):** OPEN at Batch A. F01 confirms that the
 candidate builder and evolution consumer can promote missing/unbound evidence;
 F02 reopens the original U2 acceptance; F03 finds the historical measurement
 basis non-reproducible. The T11 implementation report remains historical until
 R02–R08 produce and review fresh evidence.
+
+**Independent review status (R07–R08, 2026-09-28):** COMPLETE with verdict
+PASS_ORIGINAL_SCOPE. The reviewer tested and reviewed
+0e4c6b939f2a186399b483718601e86b44a694b5, using fresh run
+20260928T112130Z-0e4c6b939f2a186399b483718601e86b44a694b5. Full control-plane
+regression: 419 tests, 418 pass, 0 fail, 1 Windows symlink skip. Frontend
+type-check, the five-file focused recipe (30 tests) and contract check all
+exited 0 under Node v24.21.0. The original U2 gate is met at 30.31% for
+implement_slice and 30.26% for verify_slice under the locked
+normal-action-instruction-source-v1 basis. F01–F03 are VERIFIED_FIXED.
+Provider usage, paired baseline quality, real-Story quality and human adoption
+remain inconclusive/pending; the verdict is not rollout or merge authority.
+See the Batch D evidence index, acceptance matrix and final decision in
+docs/agent-architecture/reviews/v4-acceptance-2026-09-28/.
 
 ## 9. Verification commands và negative matrix
 
@@ -753,7 +767,7 @@ Không viết test thuần so khớp văn bản hướng dẫn, hoặc snapshot 
 ## 10. Definition of Done của migration
 
 - [x] U1: implement/verify mechanical steps có executable path; model chỉ cung cấp semantic work/judgment cần thiết.
-- [ ] U2: context theo action and projection có provenance; the original 30% instruction-byte acceptance remains open because the historical bundle does not prove comparable savings.
+- [x] U2: context theo action and projection có provenance; the original 30% instruction-byte acceptance was independently met in R07–R08 under the locked basis, with provider/real-Story quality claims still unmade.
 - [x] U3: Codex/Claude đi cùng lane selection; V3 fallback đúng explicit routing.
 - [x] U4: multi-recipe có coverage/aggregation tests; journal-frontend và today-view có executed checks.
 - [x] U5: measured/estimated/unknown phân biệt; usage totals không double-count; session coverage minh bạch.

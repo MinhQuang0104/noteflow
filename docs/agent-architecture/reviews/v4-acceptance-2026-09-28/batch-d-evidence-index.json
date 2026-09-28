@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "batch": "D",
+  "base_head": "d8e813660e44c54785466836e5c0eda658529b74",
+  "tested_source_head": "0e4c6b939f2a186399b483718601e86b44a694b5",
+  "reviewed_source_head": "0e4c6b939f2a186399b483718601e86b44a694b5",
+  "handoff_head": "PENDING_FINAL_DOC_COMMIT",
+  "run_id": "20260928T112130Z-0e4c6b939f2a186399b483718601e86b44a694b5",
+  "evidence_root": ".agent-state/v4-observations/evaluations/acceptance/20260928T112130Z-0e4c6b939f2a186399b483718601e86b44a694b5",
+  "environment": {
+    "cwd": "C:/Users/ACER/.codex/worktrees/v4-architecture-evolution/New_Project_My_Note",
+    "os": "Windows",
+    "node": "v24.21.0",
+    "npm": "11.6.4",
+    "git": "2.49.0.windows.1",
+    "source_tree_sha": "363a87177979869876b124857e7a8924316daff6"
+  },
+  "source_files": [
+    { "path": "AGENTS.md", "bytes": 3144, "sha256": "10fe8d5000d6bb57908cff09d82c49be5d37a35a55134ce577ae7b57c2d89fa9", "role": "root-policy" },
+    { "path": "CLAUDE.md", "bytes": 229, "sha256": "02e567795b7c6f539f59aa9c332b6bcaca4bdb0c4947393ba3bf64022dc8a922", "role": "provider-policy" },
+    { "path": ".agents/context/context-routing.md", "bytes": 1020, "sha256": "1fb20b02175c11931058b9c04b24526a23ffe3ac1fdd53663824335e73dda281", "role": "context-routing" },
+    { "path": ".agents/context/control-plane.md", "bytes": 745, "sha256": "3cb26ac50ad7cc2728b5585347c53af18c3e4106a9a2fc181887f3016e889fc3", "role": "control-plane-context" },
+    { "path": ".agents/context/verification-context.md", "bytes": 2021, "sha256": "c25e7de70d5eb826427a0498714008ab25fd60090f26df48495ce0da6812b427", "role": "verification-context" },
+    { "path": ".agents/docs/v4-artifact-contract.md", "bytes": 14543, "sha256": "6a5e45e4ce1a807de40a554e10f3eafcad9740d09eed4c36b8099d8cae9ea246", "role": "artifact-contract" },
+    { "path": ".agents/docs/v4-benchmark-contract.md", "bytes": 4262, "sha256": "02cb894b65accda0022017b3ca86244de8d2ccadc0b5619d3b32e850d9ae56ea", "role": "benchmark-contract" },
+    { "path": ".agents/docs/v4-evolution-contract.md", "bytes": 3119, "sha256": "78cf8350bca14ebccdcd94d7de3828c0f22bb041886c7ea5657bc35f73a8fc9e", "role": "evolution-contract" },
+    { "path": ".agents/docs/v4-lite-migration.md", "bytes": 7086, "sha256": "0cde1c2a4ed1f388fa1db412221a4cd4f591a6fd6a469c2469e8fbcc1c1bc3ab", "role": "migration-report" },
+    { "path": ".agents/routing/task-router.md", "bytes": 1703, "sha256": "e03ea676d11703924faceb779ecbd8e837006f49c80e3cce14414063fd992818", "role": "router" },
+    { "path": ".agents/skills/v4-story-runner/SKILL.md", "bytes": 3322, "sha256": "88a87c65567c3f390946f58efce3c3d289d10c8b2378882f15374f21f82697b0", "role": "runner-entry" },
+    { "path": ".agents/skills/v4-story-runner/actions/implement-slice.md", "bytes": 2210, "sha256": "d306dd452d510c26a5871cf025b89f954b41f9ffc4b8e55a44787758aa757734", "role": "implement-action" },
+    { "path": ".agents/skills/v4-story-runner/actions/verify-slice.md", "bytes": 2239, "sha256": "003dc88436e60d88f1051604392a773a51e4cc6b15c90229cc35ecb98de8cd84", "role": "verify-action" },
+    { "path": ".agents/scripts/benchmark-v4.mjs", "bytes": 2088, "sha256": "9d10e9b58e5952c54b665876fb74a3cd98dbd66ee9851a70a35ffe36f9f98c2b", "role": "benchmark-entry" },
+    { "path": ".agents/scripts/benchmark-v4-v2.mjs", "bytes": 30232, "sha256": "868068b09aea10845f0535f26e4b1cd2bb74e6bca59c6891192f4bb5c0c71476", "role": "benchmark-contract-consumer" },
+    { "path": ".agents/scripts/v4-evolution.mjs", "bytes": 20518, "sha256": "21e4a973ab91822932192024b3d864619db3f4be42eeb4a168104f4af93d01aa", "role": "evolution-consumer" },
+    { "path": ".agents/scripts/measure-v4-instruction-context.mjs", "bytes": 9276, "sha256": "0d303ba7cc7a5fc47cd78e7b5fc0b96301a06c2017693035cc56fb59a3fe31e3", "role": "measurement-helper" },
+    { "path": ".agents/scripts/run-v4-architecture-corpus.mjs", "bytes": 19853, "sha256": "5533b510d0bacb16f42c383d9ae96862f27ad2db36a1f31e6ce99e21778a5da4", "role": "corpus-runner" },
+    { "path": ".agents/scripts/fixtures/v4-architecture/corpus.json", "bytes": 1100, "sha256": "953fcae8e6baac574fd5ba176de51cc1e5dbb21ceed374951e6abc270870fdf8", "role": "LMH-corpus" },
+    { "path": ".agents/scripts/fixtures/v4-architecture/instruction-basis.json", "bytes": 1534, "sha256": "aa21093049c59865fa3dc193606792e53430cb60905455e21597a09bd4899b46", "role": "locked-basis" },
+    { "path": ".agents/scripts/benchmark-v4.test.mjs", "bytes": 16969, "sha256": "983fd0999554cf1e37c081e7faaf69a99a093811a0fe89bb1f623f941b475558", "role": "F01/F03-regressions" },
+    { "path": ".agents/scripts/measure-v4-instruction-context.test.mjs", "bytes": 6266, "sha256": "d692af0147934de9bd918f308f4258ee2bc4651da717a753039ae92e4315897f", "role": "F03-regressions" },
+    { "path": ".agents/scripts/run-v4-architecture-corpus.test.mjs", "bytes": 4374, "sha256": "79235c4b5611b442e0303e1585de76b75303f3c8b3b831dbc93b74938343188", "role": "F01-corpus-regression" },
+    { "path": ".agents/scripts/v4-evolution.test.mjs", "bytes": 10119, "sha256": "ddbc68ff9fc981a9f8ae205e101b151fc60f0334ccb809e206d6a0e1be290da9", "role": "F01-consumer-regression" },
+    { "path": ".agents/scripts/v4-context-invariants.architecture.test.mjs", "bytes": 3742, "sha256": "aa52abb58de9a7fc67818f2400c4442b66acb9c1bfbefae69a239fa31c60bd65", "role": "U2-invariant-regression" },
+    { "path": ".agents/scripts/v4-architecture-baseline.test.mjs", "bytes": 5527, "sha256": "c7d88bad480db6a62186ab31511970da45291cd286ff46570e62a009cba0b31a", "role": "architecture-regression" },
+    { "path": ".agents/scripts/compile-v4-context.test.mjs", "bytes": 7565, "sha256": "64274e30d8cb3b49000f9441dc83a821288301cda2adea1a44e229995b84ccbe", "role": "projection-regression" },
+    { "path": ".agents/scripts/v4-check-executor.mjs", "bytes": 15965, "sha256": "31168c2e44a1f71ccd17e4778a13a0d707d5cbdee625d756885bccacb4d42eff", "role": "symlink/path guard" },
+    { "path": ".agents/scripts/v4-check-executor.test.mjs", "bytes": 6602, "sha256": "30d76d4236db65cee6b1c15fb9b2b5bf7097bb7376c9c509d7e63804fa724145", "role": "scope/recipe regression" },
+    { "path": ".agents/scripts/v4-verification-flow.test.mjs", "bytes": 20300, "sha256": "a2b0488331050531bc15646324ca3eeb91b0116aa3ea09bc2bb97b3e404dbc62", "role": "verification/review regression" },
+    { "path": "frontend/package.json", "bytes": 1831, "sha256": "0323ae9869240b6abde4038619822846d419372a55e0dce2309c720bf2be448d", "role": "frontend recipe config" },
+    { "path": "frontend/package-lock.json", "bytes": 215258, "sha256": "1829336936c40e0ef070a8a18628ecb2183f0a27f0e2e5c922b004a20fa8e9e7", "role": "frontend dependency lock" }
+  ],
+  "raw_files": [
+    { "path": "baseline-instruction-measurement.json", "sha256": "78da36fa9a7600b2216c5a855256c1d4976897c553143344a48ee2d7c01aa53a" },
+    { "path": "candidate-instruction-measurement.json", "sha256": "b8f2842d594a95c0c6700806733d7bb0f19dc9561235f8d0e7cf55c1dcfd319e" },
+    { "path": "instruction-measurement.json", "sha256": "41f3d301c66f010017cdc0211e5c69a1f7af4f879cc1d01d3ff350b77a98b75b" },
+    { "path": "corpus-run.json", "sha256": "c4ee30914d20971378f99b545ff6cab6468467643895f69a581eb3547376c26e" },
+    { "path": "candidate-bundle.json", "sha256": "ce0586a207bfbe692b8fc3a7a775e294c23ae5637343a9d4a7d3d702ba412faa" },
+    { "path": "cases/L-mapped-low.json", "sha256": "8f475ae22bcb2167becc686ae2cb502415ea87b3a5841b5b7671cc8c730a15f6" },
+    { "path": "cases/M-mixed-medium.json", "sha256": "a2701b0ee0b6efaa48779160dbf276c3bb82dc486d1ddd2cf725326f08ab2443" },
+    { "path": "cases/H-stale-recovery.json", "sha256": "9a7154a755cd782168b35551569db4e65992a0eac52f63ee23be30627309bd0e" },
+    { "path": "full-control-plane.log", "sha256": "db0fdc3136fd015cca058a421b0b6c322b14c7bd1986c1501e5c1e31e7139330" },
+    { "path": "frontend-type-check.log", "sha256": "a0f29ab3d9cd79e512d20735b1f5aed00546ca3ba56703ae743419569ac0e57f" },
+    { "path": "frontend-focused-unit.log", "sha256": "bc7f998b4df15b7a2ef1c8069213f226a8fec2294fb53ac8091619d1569cbe77" },
+    { "path": "frontend-contract-check.log", "sha256": "cc9f0f268affc5040bc21b532ff333f456eb5919c7d7a2e96b634c0f634e6d03" },
+    { "path": "measurement-replay.log", "sha256": "5a97048344f3079733fffee54b4b8b0b1119c0ebd2616fc92971cdce7606df8f" },
+    { "path": "candidate-integrity.log", "sha256": "cf825f7245f645e05f1f3aa2127e1f4878295716ff1b2c1987916d8cbe9b7470" },
+    { "path": "legacy-consumer-chain.log", "sha256": "670d0f4ecf0a038bd666c15bc03f09efb257dab7f955d1b3c47ba081c035d538" }
+  ],
+  "historical_bundle_hashes": [
+    { "path": ".agent-state/v4-observations/evaluations/architecture-upgrade-baseline.json", "sha256": "e5113499bb1f3389a019211758b93e2a569bdc8ef5cfbca24d4b488f6514bdb5" },
+    { "path": ".agent-state/v4-observations/evaluations/architecture-upgrade-candidate.json", "sha256": "9a3cf090cc5d3bd79bdb5031e7fb3782abb128b1866f9351037afe312f2cd571" }
+  ],
+  "tracked_prior_artifacts": [
+    { "path": "independent-review.md", "sha256": "19b60857180f8ff8d824fb3692a6cfdb0bfddd0a1aa58b4a0a91a3eb368c16ad" },
+    { "path": "findings.json", "sha256": "5d5d3de449394462c983b44447bb6db19defa88cb7b89da5065172a243021add" },
+    { "path": "batch-b-results.md", "sha256": "5b293b5cd1ac4b8836b1a8c741d046f4a6163ffc8f6a3858cc264d35229d89f6" },
+    { "path": "batch-c-results.md", "sha256": "05568dce26c0de3c972f95d6909643d625210620699f0abe7086ac4ae5f8a786" },
+    { "path": "batch-c-evidence-bundle.json", "sha256": "c797ed0c5f386c4bcac304cc2dcebdc089727f58ac6260f86d78452e33d79396" },
+    { "path": "batch-c-evidence-index.json", "sha256": "4df83cc9d040cee3128ae32a6f0d457050723cb961d56bff445f61821885e298" }
+  ],
+  "superseded_runs": [
+    {
+      "run_id": "20260928T110905Z-0e4c6b939f2a186399b483718601e86b44a694b5",
+      "reason": "reviewer passed the pair measurement object instead of its candidate-side summary into the derived bundle; raw corpus/measurement remain historical, but the bundle was excluded from verdict"
+    }
+  ],
+  "final_verdict": "PASS_ORIGINAL_SCOPE"
+}

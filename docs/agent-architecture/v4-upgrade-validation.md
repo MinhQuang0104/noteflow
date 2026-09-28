@@ -1,6 +1,8 @@
 # NoteFlow V4 Lite architecture upgrade validation
 
-Status: UNDER_REVIEW. The deterministic results below are historical
+Status: INDEPENDENT_REVIEWED — PASS_ORIGINAL_SCOPE for the original
+deterministic migration acceptance; human adoption remains pending. The
+deterministic results below are historical
 implementer-reported evidence; Batch A independent review found valid open
 findings F01-F03. This report does not claim provider optimization or human
 adoption of the migration.
@@ -89,3 +91,40 @@ completion action is provided.
    measured; provider token savings are inconclusive.
 3. **Human adopted:** not claimed. A human must approve the exact migration or
    candidate scope separately.
+
+## R07–R08 final independent review
+
+The final reviewer run is
+20260928T112130Z-0e4c6b939f2a186399b483718601e86b44a694b5, tested and
+reviewed at source HEAD
+0e4c6b939f2a186399b483718601e86b44a694b5. The normative implementation
+commit remains 09b9dd961f3919e5c91b5742dcbe4bc0ac2abc92; later changes in the
+tested HEAD before handoff were report/evidence-only.
+
+Fresh final results:
+
+- Full control-plane suite: 419 tests, 418 pass, 0 fail, 0 cancelled, 1
+  skipped. The skip is the Windows symlink-creation limitation and is retained
+  as a limitation, not counted as a pass.
+- Frontend recipe gates under Node v24.21.0 / npm 11.6.4: type-check exit 0;
+  five focused files, 30 tests passed; contract check exit 0.
+- L/M/H corpus: VERIFIED; L PASS/NO_REVIEW, M raw
+  INCOMPLETE/REVIEW_REQUIRED, H stale/recovery
+  STALE/RECOVERY_REQUIRED/CHECKPOINTED/NOOP, with all required assertions
+  passing.
+- Common-basis measurement: B 65,359 bytes for each normal action; candidate
+  45,551 (implement_slice, 30.31%) and 45,580 (verify_slice, 30.26%). The 30%
+  criterion and basis were not changed.
+- F01, F02 and F03: independently VERIFIED_FIXED.
+
+The candidate self-integrity path returned verified evidence and deterministic
+quality for the fresh fixture bundle. The legacy historical baseline was
+deliberately not upgraded: compare returned INCOMPARABLE/INCONCLUSIVE, and
+the evolution consumer returned INCONCLUSIVE, not AWAITING_HUMAN.
+
+Independent verdict: PASS_ORIGINAL_SCOPE. This is limited to deterministic
+implementation acceptance. Provider token usage, paired baseline L/M/H quality,
+real-Story quality, empirical pilot, rollout, merge and human adoption remain
+unknown, unrun or pending. The report/evidence package is in
+docs/agent-architecture/reviews/v4-acceptance-2026-09-28/; no approval or
+adoption record was created.
