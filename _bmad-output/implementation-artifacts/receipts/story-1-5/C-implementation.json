@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "story_id": "1.5",
+  "slice_id": "C",
+  "kind": "implementation",
+  "checkpoint_commit": "0301a2bb9292b5ee21df3f394589c57030115b97",
+  "baseline_commit": "6c91f5b2e469d4d662f722ae644e55ebf56f7586",
+  "subject_digest": "sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e",
+  "created_from_head": "0301a2bb9292b5ee21df3f394589c57030115b97",
+  "changed_paths_sha256": "sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e",
+  "commands": [
+    {
+      "command": "npm.cmd run test:unit -- --run src/stores/__tests__/auth.spec.ts src/stores/__tests__/account.spec.ts src/stores/__tests__/journalDrafts.spec.ts src/router/__tests__/router.spec.ts src/__tests__/App.spec.ts",
+      "result": "PASS: 37 tests across 5 files",
+      "exit_code": 0,
+      "tool": "npm/Vitest 5.0.1",
+      "environment": "Windows (win32); Node.js v24.21.0; frontend dependencies via worktree junction to main frontend/node_modules"
+    },
+    {
+      "command": "npm.cmd run type-check",
+      "result": "PASS: vue-tsc --build",
+      "exit_code": 0,
+      "tool": "npm/vue-tsc",
+      "environment": "Windows (win32); Node.js v24.21.0; frontend dependencies via worktree junction to main frontend/node_modules"
+    },
+    {
+      "command": "npm.cmd run lint",
+      "result": "PASS: oxlint and ESLint emitted no diagnostics",
+      "exit_code": 0,
+      "tool": "npm-run-all2/oxlint/ESLint",
+      "environment": "Windows (win32); Node.js v24.21.0; frontend dependencies via worktree junction to main frontend/node_modules"
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS: no whitespace errors",
+      "exit_code": 0,
+      "tool": "Git",
+      "environment": "Windows; Git worktree codex/story-1-5-v4"
+    }
+  ],
+  "changed_paths": [
+    "frontend/src/__tests__/App.spec.ts",
+    "frontend/src/components/AppShell.vue",
+    "frontend/src/router/__tests__/router.spec.ts",
+    "frontend/src/stores/__tests__/account.spec.ts",
+    "frontend/src/stores/__tests__/auth.spec.ts",
+    "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+    "frontend/src/stores/auth.ts",
+    "frontend/src/stores/journalDrafts.ts"
+  ],
+  "red_green": {
+    "applicable": true,
+    "red": {
+      "command": "npm.cmd run test:unit -- --run src/stores/__tests__/auth.spec.ts src/stores/__tests__/account.spec.ts src/stores/__tests__/journalDrafts.spec.ts src/router/__tests__/router.spec.ts src/__tests__/App.spec.ts",
+      "exit_code": 1,
+      "result": "14 expected failures exposed private-state clearing on expiry, logout generation changes before API success, missing unload/logout guards, and absent same-owner epoch/version reconciliation."
+    },
+    "green": {
+      "command": "npm.cmd run test:unit -- --run src/stores/__tests__/auth.spec.ts src/stores/__tests__/account.spec.ts src/stores/__tests__/journalDrafts.spec.ts src/router/__tests__/router.spec.ts src/__tests__/App.spec.ts",
+      "exit_code": 0,
+      "result": "PASS: 37 tests after private lifecycle fencing and logout guard changes."
+    }
+  }
+}
