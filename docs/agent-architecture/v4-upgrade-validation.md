@@ -30,7 +30,7 @@ The implementation covers the six plan capabilities:
 - `node --test .agents/scripts/v4-evolution.test.mjs .agents/scripts/v4-observation-hooks.test.mjs` — 10 pass, 0 fail, 13.192 s.
 - `node --test .agents/scripts/v4-experience.test.mjs .agents/scripts/compile-v4-context.test.mjs` — 9 pass, 0 fail, 20.180 s.
 - `node --test .agents/scripts/v4-observation-hooks.test.mjs .agents/scripts/v4-observations.test.mjs .agents/scripts/v4-story-runner.test.mjs` — 21 pass, 0 fail, 36.494 s.
-- Full control-plane suite `node --test .agents/scripts/*.test.mjs` — 405 tests, 404 pass, 0 fail, 1 skipped, 281.426 s. The one skip is the existing Windows symlink-creation limitation; executor symlink rejection remains implemented and tested through the available path.
+- Full control-plane suite `node --test .agents/scripts/*.test.mjs` — 405 tests, 404 pass, 0 fail, 1 skipped, 278.132 s. The one skip is the existing Windows symlink-creation limitation; executor symlink rejection remains implemented and tested through the available path.
 - Frontend recipe gates were executed under the required Node 24 engine during T04: type-check passed; journal-focused tests passed 26; today-focused tests passed 4; contract check passed; isolated `npm ci` installed 355 packages and audited 356 with 0 vulnerabilities. No frontend files changed during T05–T11.
 - `git diff --check` passed. Root `npm test` is intentionally not a gate because the metadata-only root package has no `test` script; the control-plane suite above is the plan-defined test gate.
 
