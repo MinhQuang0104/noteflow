@@ -31,9 +31,27 @@ Parsing converts CRLF to LF, removes trailing whitespace per line, and removes b
 
 The Story owns Tasks/Subtasks; the Plan only maps them to implementation slices. A schema-v2 Plan binds `story.path` and `story.normative_digest` and has nonempty `slices`. Every slice has one or more `task_refs`, all pointing to real Task IDs. Every Story Task is covered by at least one slice. One Task may span slices and one slice may cover Tasks. `depends_on` references real slice IDs and is acyclic. Slices cannot add ACs, Tasks, or product semantics. Plan status/checkpoint/next-action fields are execution state; this helper does not yet replace the schema-v1 runtime validators.
 
-## Receipt binding
+## Receipt binding and implementation checkpoint durability
 
 Receipt kinds are `implementation`, `verification`, and `review`. A receipt is UTF-8 JSON with `schema_version: 1`, `story_id`, `slice_id`, `kind`, `checkpoint_commit`, `baseline_commit`, `subject_digest`, `created_from_head`, `changed_paths_sha256`, and nonempty `commands` records (`command`, integer `exit_code`, `tool`, `environment`). `created_from_head` equals the implementation checkpoint. The Plan slice supplies the expected checkpoint, baseline, subject digest, changed-path digest, and `receipt_refs.<kind>: {path, digest}`. A checkpointed slice requires its implementation receipt; verified and reviewed slices additionally require the corresponding receipts. Verification receipts may carry structured `focused_checks` for reuse. The validator checks identity and SHA-256 over compact JSON with object keys sorted recursively (array order preserved); indentation, key order, and Git line-ending conversion do not change the digest. The path must remain relative to the supplied root. Read-only Plan validation inspects receipt content for the current slice and its dependency chain; unrelated historical slices receive safe-path and existence checks. Slice helpers load relevant receipt detail when needed. Once a durable Plan references a receipt, its parsed content is immutable; a policy-authorized replacement must use a new digest/reference. Receipt detail never changes the Story digest.
+
+For an authorized `implement_slice`, the checkpoint transaction has exactly two
+durable commits. Commit 1 contains the non-empty exact implementation
+files/tests/contracts of the current slice and excludes the Plan, receipts,
+Story, sprint/lifecycle files, control-plane files, and unrelated noise. The
+schema-v2 receipt is created only after commit 1, because it binds the actual
+checkpoint SHA and changed-path digest; commit 2 therefore contains exactly the
+Plan and that new implementation receipt. Schema v1 keeps the historical
+Plan-only metadata commit. No receipt belonging to another slice, Story
+lifecycle mutation, or Human-Gate field belongs in commit 2.
+
+The transaction binds expected HEAD, Plan/Story/policy/recipe bytes, working
+file bytes and modes, exact staged sets, and commit-tree scope. It records a
+common-directory journal before mutation and preserves partial files, index,
+lock, and journal on failure. Recovery requires explicit human authorization
+and an observable journal/explicit checkpoint; it may finish metadata only and
+never replays implementation from a chat transcript or commit subject. A
+completed transaction is idempotent and returns `NOOP` without a third commit.
 
 ## Fresh Story start (V4 Lite)
 

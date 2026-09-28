@@ -124,3 +124,18 @@ test('Runner approval flag is one durable action and the next invocation complet
     f.cleanup()
   }
 })
+
+test('Runner does not invoke the kernel without an explicit current implement action', () => {
+  const f = createCompletionFixture()
+  try {
+    const result = runAction(f.root, '9.1', f.head, {
+      operation: 'checkpoint',
+      input: { story_id: '9.1', action: 'implement_slice', slice_id: 'A' }
+    })
+    assert.equal(result.status, 'UNAUTHORIZED_ACTION')
+    assert.ok(result.reasons.includes('KERNEL_ACTION_NOT_CURRENT'))
+    assert.equal(result.authorized, false)
+  } finally {
+    f.cleanup()
+  }
+})

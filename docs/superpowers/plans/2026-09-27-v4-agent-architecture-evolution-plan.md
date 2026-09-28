@@ -2,7 +2,7 @@
 
 > **For agentic workers:** Dành cho **Luna 5.6 Max** (model gpt-5.6-luna, reasoning effort max). Khi có yêu cầu triển khai riêng của human, dùng skill superpowers:executing-plans để thực hiện tuần tự từng task. Không mặc định dispatch subagent, Orca hoặc AGY.
 >
-> **Trạng thái:** IN PROGRESS — human đã ủy quyền triển khai trong lane V4 Lite architecture/control-plane migration; T00–T05 đã hoàn tất, T06 là task kế tiếp.
+> **Trạng thái:** IN PROGRESS — human đã ủy quyền triển khai trong lane V4 Lite architecture/control-plane migration; T00–T06 đã hoàn tất, T07 là task kế tiếp.
 >
 > **Ngày:** 2026-09-27. **Baseline đã đọc:** main, d8e813660e44c54785466836e5c0eda658529b74.
 >
@@ -566,23 +566,25 @@ Real recipe evidence under Node `v24.21.0` after `npm ci` in the isolated worktr
 **Consumes:** validated input, exact scope, focused evidence.
 **Produces:** prepareAction, checkpointImplementation, inspectActionTransaction.
 
-- [ ] Viết real-Git tests cho hai commits: commit 1 đúng product fixture paths; commit 2 schema v2 đúng Plan + implementation receipt; schema v1 Plan-only.
-- [ ] Test stale HEAD, stale preview, wrong action/slice, dirty unknown index, unrelated staged file và active canonical pointer.
-- [ ] Preview bind working files/modes, Plan/Story/recipe/policy digests; apply recheck sau acquiring Git-common lock.
-- [ ] Lock identity gồm repository/worktree/action/slice/transaction; same-scope concurrent caller bị chặn. Không quảng cáo lock này thay cho coordination của mọi tool Git khác.
-- [ ] Tạo journal trước mutation; ghi phase/checkpoint SHA khi có. Không dùng commit subject để đoán ownership.
-- [ ] Chỉ stage exact paths; kiểm tra staged set trước và sau commit. Hooks làm thay đổi scope phải được phát hiện.
-- [ ] Sau commit 1, receipt lấy checkpoint identity thật; metadata commit atomic theo exact set.
-- [ ] Test failure sau write, sau stage, sau commit 1, trước commit 2, sau commit hook; preserve partial work và báo RECOVERY_REQUIRED.
-- [ ] Recovery khác invocation phải có human-authorized recovery input và observable journal/explicit checkpoint; không tự xóa lock hoặc replay implementation.
-- [ ] Rerun cùng transaction đã hoàn thành trả NOOP với cùng durable successor; không có commit thứ ba.
-- [ ] Đồng bộ D3 trong artifact contract/action docs. Không migrate historical receipts.
-- [ ] Runner chỉ dùng kernel khi có operation/input explicit; helper readiness cũ không trở thành write operation.
-- [ ] Test reject kernel flags trộn approval/start flags, hoặc input Story/action/slice khác validated Plan; không cho metadata input trở thành quyền complete_story.
-- [ ] Run: node --test .agents/scripts/v4-slice-transaction.test.mjs .agents/scripts/v4-action-kernel.test.mjs .agents/scripts/check-slice-implementation.test.mjs .agents/scripts/v4-story-runner.test.mjs.
-- [ ] Inspect adversarial diff và commit exact T06 files.
+- [x] Viết real-Git tests cho hai commits: commit 1 đúng product fixture paths; commit 2 schema v2 đúng Plan + implementation receipt; schema v1 Plan-only.
+- [x] Test stale HEAD, stale preview, wrong action/slice, dirty unknown index, unrelated staged file và active canonical pointer.
+- [x] Preview bind working files/modes, Plan/Story/recipe/policy digests; apply recheck sau acquiring Git-common lock.
+- [x] Lock identity gồm repository/worktree/action/slice/transaction; same-scope concurrent caller bị chặn. Không quảng cáo lock này thay cho coordination của mọi tool Git khác.
+- [x] Tạo journal trước mutation; ghi phase/checkpoint SHA khi có. Không dùng commit subject để đoán ownership.
+- [x] Chỉ stage exact paths; kiểm tra staged set trước và sau commit. Hooks làm thay đổi scope phải được phát hiện.
+- [x] Sau commit 1, receipt lấy checkpoint identity thật; metadata commit atomic theo exact set.
+- [x] Test failure sau write, sau stage, sau commit 1, trước commit 2, sau commit hook; preserve partial work và báo RECOVERY_REQUIRED.
+- [x] Recovery khác invocation phải có human-authorized recovery input và observable journal/explicit checkpoint; không tự xóa lock hoặc replay implementation.
+- [x] Rerun cùng transaction đã hoàn thành trả NOOP với cùng durable successor; không có commit thứ ba.
+- [x] Đồng bộ D3 trong artifact contract/action docs. Không migrate historical receipts.
+- [x] Runner chỉ dùng kernel khi có operation/input explicit; helper readiness cũ không trở thành write operation.
+- [x] Test reject kernel flags trộn approval/start flags, hoặc input Story/action/slice khác validated Plan; không cho metadata input trở thành quyền complete_story.
+- [x] Run: node --test .agents/scripts/v4-slice-transaction.test.mjs .agents/scripts/v4-action-kernel.test.mjs .agents/scripts/check-slice-implementation.test.mjs .agents/scripts/v4-story-runner.test.mjs.
+- [x] Inspect adversarial diff và commit exact T06 files.
 
 **Gate:** final state checkpointed, next_action verify_slice cùng slice; không tự verification. Recovery không cần chat history và không bỏ mất files/index.
+
+**T06 evidence (2026-09-28):** `node --test .agents/scripts/v4-slice-transaction.test.mjs .agents/scripts/v4-action-kernel.test.mjs .agents/scripts/check-slice-implementation.test.mjs .agents/scripts/v4-story-runner.test.mjs` — 48 pass, 0 fail, 47.699 s. Real-Git fixtures prove schema-v2 commit 1 implementation-only plus commit 2 Plan+new implementation receipt, schema-v1 Plan-only, exact staged/commit scopes, working-file/mode and Plan/Story/recipe/policy bindings, stale HEAD/preview/policy, active canonical pointer, dirty/unrelated index, same-scope lock identity, pre-commit scope injection, journal phases, failures after stage/write/commit 1/before commit 2, explicit checkpoint recovery without replay, and completed-transaction `NOOP` with no third commit. Runner/helper regression passes and keeps the old readiness helper read-only. The adversarial review added preview-fingerprint revalidation, receipt identity/immutability checks, completion/finalization authority rejection, binary-safe Git blob comparison, and D3 documentation updates. No historical receipt, Story lifecycle, sprint status, V3 pointer, or product code was changed.
 
 ### T07 — Kernel verification, bounded review và progression
 

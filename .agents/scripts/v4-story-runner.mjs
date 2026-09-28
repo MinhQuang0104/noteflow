@@ -9,6 +9,7 @@ import { applyFinalization } from './finalize-story.mjs'
 import { explicitApprovalInput, inspectCompletion } from './check-story-completion.mjs'
 import { applyCompletion, recordHumanApproval } from './complete-story.mjs'
 import { inspectStart, applyStart } from './start-story.mjs'
+import { checkpointImplementation, prepareAction } from './v4-action-kernel.mjs'
 
 export const V4_AUTHORIZED_ACTIONS = new Set([
   'start_story',
@@ -163,6 +164,18 @@ export function runV4Story(root, storyId, options = {}) {
     }
     if (plan.lifecycle_snapshot === 'done') {
       return inspectCompletion(root, storyId, expectedHead)
+    }
+    const explicitKernelOperation = options.operation ?? options.kernel?.operation
+    if (explicitKernelOperation !== undefined) {
+      if (plan.next_action?.kind !== 'implement_slice') return { status: 'UNAUTHORIZED_ACTION', authorized: false, reasons: ['KERNEL_ACTION_NOT_CURRENT'] }
+      const input = options.input ?? options.kernel?.input
+      if (!input || typeof input !== 'object' || Array.isArray(input)) return invalidResult('KERNEL_INPUT_REQUIRED')
+      if (input.story_id !== storyId || input.action !== 'implement_slice' || input.slice_id !== plan.next_action.target) {
+        return invalidResult('KERNEL_INPUT_PLAN_MISMATCH')
+      }
+      if (explicitKernelOperation === 'prepare') return prepareAction(root, { ...input, operation: 'prepare' })
+      if (explicitKernelOperation === 'checkpoint') return checkpointImplementation(root, { ...input, operation: 'checkpoint' })
+      return invalidResult('KERNEL_OPERATION_UNSUPPORTED')
     }
     const decisionInput = {
       nextAction: plan.next_action,

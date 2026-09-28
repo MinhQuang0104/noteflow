@@ -54,11 +54,13 @@ Stage exact implementation paths only; never use `git add .` or `git add -A`.
 The implementation checkpoint commit excludes the Story Plan, receipts,
 lifecycle files, and unrelated noise. It must have a non-empty exact path set.
 
-The separate Plan-only commit records the real baseline/checkpoint, changed-path
+The separate metadata commit records the real baseline/checkpoint, changed-path
 digest, focused checks, red/green evidence or a non-applicability reason, and
 `next_action.kind: verify_slice`. For schema-v2 the implementation receipt is
-created after the checkpoint and belongs in this metadata commit; schema-v1
-keeps the Plan-only metadata contract. No receipt references another slice.
+created after the checkpoint and the metadata commit contains exactly the Plan
+and that new receipt. Schema-v1 keeps the exact Plan-only metadata contract.
+No Story/sprint lifecycle field or receipt belonging to another slice may be
+introduced by this transaction.
 
 The apply path must recheck HEAD, Plan/Story/policy/recipe digests, exact file
 scope, and command evidence after acquiring the Git-common lock. Hooks that
