@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "story_id": "1.5",
+  "slice_id": "D",
+  "kind": "implementation",
+  "checkpoint_commit": "01409eeb4a9c083f858c520629c4ed791217c36f",
+  "baseline_commit": "d0675d088b06dadfa7f7b96fe28cb0588212a63f",
+  "subject_digest": "sha256:3bd79642294cb8fd4fb57a8948221992f74afb46f8cbd037c6c97c4f11b7275f",
+  "created_from_head": "01409eeb4a9c083f858c520629c4ed791217c36f",
+  "changed_paths_sha256": "sha256:3bd79642294cb8fd4fb57a8948221992f74afb46f8cbd037c6c97c4f11b7275f",
+  "commands": [
+    {
+      "command": "npm.cmd run test:unit -- --run src/views/__tests__/journal-draft-lifecycle.spec.ts",
+      "result": "PASS: 1 test file; 1 test passed",
+      "exit_code": 0,
+      "tool": "npm/Vitest 5.0.1",
+      "environment": "Windows (win32); Node.js v24.21.0; Story worktree frontend/node_modules"
+    },
+    {
+      "command": "npm.cmd run test:unit -- --run src/views/__tests__/journal-draft-lifecycle.spec.ts src/views/__tests__/journal.spec.ts src/stores/__tests__/journalDrafts.spec.ts src/stores/__tests__/sync.spec.ts src/api/__tests__/challenges.spec.ts",
+      "result": "PASS: 5 test files; 68 tests passed",
+      "exit_code": 0,
+      "tool": "npm/Vitest 5.0.1",
+      "environment": "Windows (win32); Node.js v24.21.0; Story worktree frontend/node_modules"
+    },
+    {
+      "command": "npm.cmd run type-check",
+      "result": "PASS: vue-tsc --build",
+      "exit_code": 0,
+      "tool": "npm/vue-tsc",
+      "environment": "Windows (win32); Node.js v24.21.0; Story worktree frontend/node_modules"
+    },
+    {
+      "command": "npm.cmd run lint",
+      "result": "PASS: oxlint and ESLint emitted no diagnostics",
+      "exit_code": 0,
+      "tool": "npm-run-all2/oxlint/ESLint",
+      "environment": "Windows (win32); Node.js v24.21.0; Story worktree frontend/node_modules"
+    },
+    {
+      "command": "npm.cmd run build",
+      "result": "PASS: vue-tsc --build and Vite production build",
+      "exit_code": 0,
+      "tool": "npm/Vite 8.3.0",
+      "environment": "Windows (win32); Node.js v24.21.0; Story worktree frontend/node_modules"
+    },
+    {
+      "command": "npm.cmd run contract:check",
+      "result": "PASS: generated OpenAPI types match the committed contract",
+      "exit_code": 0,
+      "tool": "generate-openapi-types.mjs",
+      "environment": "Windows (win32); Node.js v24.21.0; Story worktree frontend/node_modules"
+    },
+    {
+      "command": "git diff --check d0675d088b06dadfa7f7b96fe28cb0588212a63f 01409eeb4a9c083f858c520629c4ed791217c36f --",
+      "result": "PASS: no whitespace errors in the baseline-to-checkpoint diff",
+      "exit_code": 0,
+      "tool": "Git",
+      "environment": "Windows; Story worktree codex/story-1-5-v4"
+    },
+    {
+      "command": "php artisan test tests/Feature/ChallengeJournalTest.php tests/Feature/ChallengeJournalApiTest.php tests/Contract/ChallengeContractTest.php",
+      "result": "NOT RUN: backend/vendor/autoload.php is missing in the linked worktree; PostgreSQL backend regression is unavailable in this environment",
+      "exit_code": 1,
+      "tool": "PHP Artisan",
+      "environment": "Windows; linked Story worktree backend without Composer vendor dependencies"
+    }
+  ],
+  "changed_paths": [
+    "frontend/src/views/__tests__/journal-draft-lifecycle.spec.ts"
+  ],
+  "red_green": {
+    "applicable": false,
+    "reason": "Slice D adds integration evidence for behavior implemented by earlier T-1 through T-6 slices and changes no production code or public contract. The new test passed on its first focused run; no production fix was necessary."
+  }
+}
