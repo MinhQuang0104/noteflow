@@ -1,7 +1,7 @@
 ---
 story_id: "1.5"
 title: Giữ bản đang nhập và thử lưu lại sau gián đoạn
-status: in-progress
+status: review
 ---
 
 # Story 1.5: Giữ bản đang nhập và thử lưu lại sau gián đoạn
@@ -94,3 +94,54 @@ Phạm vi: trạng thái lưu trung thực, giữ draft, retry an toàn, ACK đ�
 - ux: docs/ux/ux-spec.md#14-accessibility-considerations
 - ux: docs/ux/ux-spec.md#16-dependencies-and-remaining-details
 <!-- v4:references:end -->
+
+## Dev Agent Record
+
+<!-- v4:completion:start -->
+### Dev Agent Record
+
+- Finalization receipt: _bmad-output/implementation-artifacts/receipts/story-1-5/finalization.json
+- Done Gate disposition: SATISFIED_WITH_DISCLOSURES
+
+### AC Evidence / Results
+
+- AC-1: evidence=COVERED; mode=fallback; fallback: 1 test file passed; 11 tests passed
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-1-5/A-verification.json (sha256:324566de850a51aa9040c2d795902efc501ec78f5d1fd48440c8ec149affa945); _bmad-output/implementation-artifacts/receipts/story-1-5/B-verification-finalization-repair.json (sha256:0e106e44a29e31ac5593946882c5903fba3e2f524b0cba9f10fa9488064331a1); _bmad-output/implementation-artifacts/receipts/story-1-5/D-verification-finalization-repair.json (sha256:e01be85ef1dbfcb13212ca40f834dd18c72b057f9c26e229bb88159abb525891)
+  Canonical disposition: NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required; NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required; NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required
+- AC-2: evidence=COVERED; mode=fallback; fallback: 1 test file passed; 11 tests passed
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-1-5/A-verification.json (sha256:324566de850a51aa9040c2d795902efc501ec78f5d1fd48440c8ec149affa945); _bmad-output/implementation-artifacts/receipts/story-1-5/B-verification-finalization-repair.json (sha256:0e106e44a29e31ac5593946882c5903fba3e2f524b0cba9f10fa9488064331a1); _bmad-output/implementation-artifacts/receipts/story-1-5/C-verification-finalization-repair.json (sha256:7bea697e3f3b0c0d08884833fffbcd5187abca4fd6deab8b924e18db1dffbf66); _bmad-output/implementation-artifacts/receipts/story-1-5/D-verification-finalization-repair.json (sha256:e01be85ef1dbfcb13212ca40f834dd18c72b057f9c26e229bb88159abb525891)
+  Canonical disposition: NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required; NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required; NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required; NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required
+- AC-3: evidence=COVERED; mode=fallback; fallback: 1 test file passed; 11 tests passed
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-1-5/A-verification.json (sha256:324566de850a51aa9040c2d795902efc501ec78f5d1fd48440c8ec149affa945); _bmad-output/implementation-artifacts/receipts/story-1-5/B-verification-finalization-repair.json (sha256:0e106e44a29e31ac5593946882c5903fba3e2f524b0cba9f10fa9488064331a1); _bmad-output/implementation-artifacts/receipts/story-1-5/C-verification-finalization-repair.json (sha256:7bea697e3f3b0c0d08884833fffbcd5187abca4fd6deab8b924e18db1dffbf66); _bmad-output/implementation-artifacts/receipts/story-1-5/D-verification-finalization-repair.json (sha256:e01be85ef1dbfcb13212ca40f834dd18c72b057f9c26e229bb88159abb525891)
+  Canonical disposition: NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required; NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required; NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required; NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required
+- AC-4: evidence=COVERED; mode=fallback; fallback: 5 test files passed; 41 tests passed
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-1-5/C-verification-finalization-repair.json (sha256:7bea697e3f3b0c0d08884833fffbcd5187abca4fd6deab8b924e18db1dffbf66); _bmad-output/implementation-artifacts/receipts/story-1-5/D-verification-finalization-repair.json (sha256:e01be85ef1dbfcb13212ca40f834dd18c72b057f9c26e229bb88159abb525891)
+  Canonical disposition: NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required; NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required
+
+### Completion Notes
+
+- Evidenced behavior: **Given** nội dung đang sửa **When** save chạy/thành công/lỗi **Then** UI hiển thị đúng Đang lưu/Đã lưu/Chưa lưu-Lỗi.
+- Evidenced behavior: **Given** mất mạng lúc nhập **When** save lỗi **Then** draft còn trong memory để sửa/retry **And** không được gọi là đã lưu.
+- Evidenced behavior: **Given** response cũ về sau client revision mới **When** xử lý ACK **Then** response cũ không đánh dấu revision mới là đã lưu.
+- Evidenced behavior: **Given** còn draft chưa lưu **When** reload/close/logout **Then** cảnh báo mất draft khi môi trường hỗ trợ.
+
+### File List
+
+- frontend/src/__tests__/App.spec.ts
+- frontend/src/components/AppShell.vue
+- frontend/src/components/ChallengeJournalEditor.vue
+- frontend/src/router/__tests__/router.spec.ts
+- frontend/src/stores/__tests__/account.spec.ts
+- frontend/src/stores/__tests__/auth.spec.ts
+- frontend/src/stores/__tests__/journalDrafts.spec.ts
+- frontend/src/stores/__tests__/sync.spec.ts
+- frontend/src/stores/auth.ts
+- frontend/src/stores/journalDrafts.ts
+- frontend/src/stores/sync.ts
+- frontend/src/views/__tests__/journal-draft-lifecycle.spec.ts
+- frontend/src/views/__tests__/journal.spec.ts
+
+### Change Log
+
+- Finalization recorded for Human Gate: in-progress -> review; next action complete_story.
+<!-- v4:completion:end -->

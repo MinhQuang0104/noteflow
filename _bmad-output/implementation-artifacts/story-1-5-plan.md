@@ -8,8 +8,8 @@ upstream_epic:
   path: docs/product/epics.md
   section_digest: sha256:9fd315d82840cc8d4f6450be08004dd868693a795b8fc552273487813e0b58e3
 sprint_key: 1-5-giữ-bản-đang-nhập-và-thử-lưu-lại-sau-gián-đoạn
-lifecycle_snapshot: in-progress
-execution_status: in-progress
+lifecycle_snapshot: review
+execution_status: complete
 planning_approval:
   decision: APPROVED
   scope: planning
@@ -172,7 +172,16 @@ slices:
       freshness: FRESH_CANDIDATE
 blockers: []
 unresolved_questions: []
+finalization:
+  receipt_ref: _bmad-output/implementation-artifacts/receipts/story-1-5/finalization.json
+  receipt_digest: sha256:e548bb55756743d318210f297cce00d08e079f3eb9cf2358a2a2176c2c5585ba
+  done_gate_disposition: SATISFIED_WITH_DISCLOSURES
+  scope_paths_digest: sha256:d4421fc5b1db4445489d49838ff0a8b8a68f4b617bde16d9ffdcdc22a3e401b1
+  implementation_commit_set_digest: sha256:bda7fead1af7b81c63ee2e680802304fe62a814431090ebfaae3c2b9b59da5c3
+  final_scoped_tree_digest: sha256:963f1f04874f7982b3034aa1c040569c3c68451662af9b664d5e5ed0c4ac1730
+  prepared_from_head: d7a76f1cc041fcb218cc907544b17fb87d961717
+human_approval: null
 next_action:
-  kind: finalize_story
+  kind: complete_story
   target: story
 ---

@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "kind": "story_finalization",
+  "story_id": "1.5",
+  "story_normative_digest": "sha256:fc382d7fb25552265962f9e7a9a25b98510afc716f733b93d382b8b8ebf9e3cb",
+  "upstream_epic_digest": "sha256:9fd315d82840cc8d4f6450be08004dd868693a795b8fc552273487813e0b58e3",
+  "prepared_from_head": "d7a76f1cc041fcb218cc907544b17fb87d961717",
+  "slice_set_digest": "sha256:c1398422f17375217b753c75ecd42c90cb7fc2a8bab844a74957c2124e4d3eca",
+  "receipt_set_digest": "sha256:41e105c96abed81bb1e7d9a675a1fbf31b30cb7ef150348db8714e7320a95eb8",
+  "ac_coverage_digest": "sha256:e9f83cf8e2bff4795f2e998cdd877aac6e05d2d7e9c2232100ad2d1500a4c121",
+  "canonical_disclosures_digest": "sha256:58ba4accfb497bfe761a63c3df65a9c3adef15c8e0d30ccf7f9d47be8d59176e",
+  "scope_path_count": 13,
+  "scope_paths_digest": "sha256:d4421fc5b1db4445489d49838ff0a8b8a68f4b617bde16d9ffdcdc22a3e401b1",
+  "implementation_commit_set_digest": "sha256:bda7fead1af7b81c63ee2e680802304fe62a814431090ebfaae3c2b9b59da5c3",
+  "final_scoped_tree_digest": "sha256:963f1f04874f7982b3034aa1c040569c3c68451662af9b664d5e5ed0c4ac1730",
+  "paths_digest": "sha256:d4421fc5b1db4445489d49838ff0a8b8a68f4b617bde16d9ffdcdc22a3e401b1",
+  "commit_set_digest": "sha256:bda7fead1af7b81c63ee2e680802304fe62a814431090ebfaae3c2b9b59da5c3",
+  "scoped_tree_digest": "sha256:963f1f04874f7982b3034aa1c040569c3c68451662af9b664d5e5ed0c4ac1730",
+  "done_gate_disposition": "SATISFIED_WITH_DISCLOSURES",
+  "lifecycle_from": "in-progress",
+  "lifecycle_target": "review",
+  "slice_summaries": [
+    {
+      "id": "A",
+      "status": "reviewed",
+      "checkpoint": "319e9bc83c43efb22e863d8c2886d8225be40d0b",
+      "progression_eligible": true,
+      "review_required": true,
+      "review_verdict": "APPROVE",
+      "review_freshness": "FRESH_CANDIDATE"
+    },
+    {
+      "id": "B",
+      "status": "reviewed",
+      "checkpoint": "4b397ad5a9c4929b284897c774281ff3e11b7d85",
+      "progression_eligible": true,
+      "review_required": true,
+      "review_verdict": "APPROVE",
+      "review_freshness": "FRESH_CANDIDATE"
+    },
+    {
+      "id": "C",
+      "status": "reviewed",
+      "checkpoint": "c4621a9153da0397446f4fa878128c6450fe922b",
+      "progression_eligible": true,
+      "review_required": true,
+      "review_verdict": "APPROVE",
+      "review_freshness": "FRESH_CANDIDATE"
+    },
+    {
+      "id": "D",
+      "status": "reviewed",
+      "checkpoint": "01409eeb4a9c083f858c520629c4ed791217c36f",
+      "progression_eligible": true,
+      "review_required": true,
+      "review_verdict": "APPROVE",
+      "review_freshness": "FRESH_CANDIDATE"
+    }
+  ]
+}
