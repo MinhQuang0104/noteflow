@@ -1,0 +1,254 @@
+{
+  "schema_version": 1,
+  "story_id": "1.5",
+  "slice_id": "C",
+  "kind": "review",
+  "checkpoint_commit": "c4621a9153da0397446f4fa878128c6450fe922b",
+  "baseline_commit": "6c91f5b2e469d4d662f722ae644e55ebf56f7586",
+  "subject_digest": "sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e",
+  "created_from_head": "c4621a9153da0397446f4fa878128c6450fe922b",
+  "changed_paths_sha256": "sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e",
+  "commands": [
+    {
+      "command": "node .agents/scripts/check-escalation.mjs with canonical verification JSON; risk HIGH; flags CONCURRENCY_STATE, SECURITY_AUTH",
+      "result": "REVIEW_REQUIRED",
+      "exit_code": 1,
+      "tool": "check-escalation.mjs",
+      "environment": "Windows (win32); Node.js v24.21.0"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6c91f5b2e469d4d662f722ae644e55ebf56f7586 --head c4621a9153da0397446f4fa878128c6450fe922b --path frontend/src/__tests__/App.spec.ts",
+      "result": "OK: 4 evidence units; complete path coverage",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows (win32); Git explicit checkpoint pair"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6c91f5b2e469d4d662f722ae644e55ebf56f7586 --head c4621a9153da0397446f4fa878128c6450fe922b --path frontend/src/components/AppShell.vue",
+      "result": "OK: 3 evidence units; complete path coverage",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows (win32); Git explicit checkpoint pair"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6c91f5b2e469d4d662f722ae644e55ebf56f7586 --head c4621a9153da0397446f4fa878128c6450fe922b --path frontend/src/router/__tests__/router.spec.ts",
+      "result": "OK: 3 evidence units; complete path coverage",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows (win32); Git explicit checkpoint pair"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6c91f5b2e469d4d662f722ae644e55ebf56f7586 --head c4621a9153da0397446f4fa878128c6450fe922b --path frontend/src/stores/__tests__/account.spec.ts",
+      "result": "OK: 5 evidence units; complete path coverage",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows (win32); Git explicit checkpoint pair"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6c91f5b2e469d4d662f722ae644e55ebf56f7586 --head c4621a9153da0397446f4fa878128c6450fe922b --path frontend/src/stores/__tests__/auth.spec.ts",
+      "result": "OK: 2 evidence units; complete path coverage",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows (win32); Git explicit checkpoint pair"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6c91f5b2e469d4d662f722ae644e55ebf56f7586 --head c4621a9153da0397446f4fa878128c6450fe922b --path frontend/src/stores/auth.ts",
+      "result": "OK: 2 evidence units; complete path coverage",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows (win32); Git explicit checkpoint pair"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6c91f5b2e469d4d662f722ae644e55ebf56f7586 --head c4621a9153da0397446f4fa878128c6450fe922b --path frontend/src/stores/__tests__/journalDrafts.spec.ts",
+      "result": "OK: 4 evidence units; complete path coverage",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows (win32); Git explicit checkpoint pair"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6c91f5b2e469d4d662f722ae644e55ebf56f7586 --head c4621a9153da0397446f4fa878128c6450fe922b --path frontend/src/stores/journalDrafts.ts",
+      "result": "OK: 18 evidence units; complete path coverage",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows (win32); Git explicit checkpoint pair"
+    },
+    {
+      "command": "Targeted HIGH-risk review using .agents/review/targeted-reviewer-contract.md; supplied hunks and allowlisted direct references only",
+      "result": "APPROVE; 8/8 changed paths and 41/41 evidence units reviewed",
+      "exit_code": 0,
+      "tool": "targeted-reviewer-contract v1",
+      "environment": "Same Lead; bounded per-path review units"
+    }
+  ],
+  "required": true,
+  "verdict": "APPROVE",
+  "findings_total": 0,
+  "findings_blocking": 0,
+  "reviewed_commit": "c4621a9153da0397446f4fa878128c6450fe922b",
+  "reviewed_from_head": "76ce395894f2a48f4b785d795d8517d25c95ef9e",
+  "risk_context_digest": "sha256:5c3e1b7db251e727a044146d7de6dfdca55a28add41d20e71b865ee6be958196",
+  "review_context_digest": "sha256:b211f3c37d797c07d5207dcbb38f25a88b1072b6134adfd2074c0ffd0a997374",
+  "freshness": "FRESH_CANDIDATE",
+  "review_context": {
+    "story_id": "1.5",
+    "slice_id": "C",
+    "checkpoint_commit": "c4621a9153da0397446f4fa878128c6450fe922b",
+    "baseline_commit": "6c91f5b2e469d4d662f722ae644e55ebf56f7586",
+    "changed_paths_sha256": "sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e",
+    "risk_context_digest": "sha256:5c3e1b7db251e727a044146d7de6dfdca55a28add41d20e71b865ee6be958196",
+    "judgment_flags": [
+      "CONCURRENCY_STATE",
+      "SECURITY_AUTH"
+    ],
+    "verification": {
+      "focused_checks": "4 PASS",
+      "canonical_applicability": "NOT_APPLICABLE",
+      "canonical_status": "INCOMPLETE",
+      "escalation_decision": "REVIEW_REQUIRED"
+    },
+    "review_questions": [
+      "Does session expiry keep retained draft text hidden until same-owner reconciliation and prevent a different owner from receiving draft-specific information?",
+      "Do unload and logout guards surface unsaved work only for the authenticated owner while covering dirty, error, conflict, blocked, quarantined, and unresolved-command states?",
+      "Do logout cancellation, failure, success, and expiry during pending logout preserve intended generation, auth, cache, draft, and sync behavior?",
+      "Do account refresh and router expiry handling keep private drafts inaccessible in the guest shell and allow same-owner reconciliation after login?"
+    ],
+    "evidence_groups": [
+      { "id": "app-unload-logout-tests", "paths": ["frontend/src/__tests__/App.spec.ts"], "unit_count": 4, "producer": "prepare-change-evidence-v1", "coverage": "complete" },
+      { "id": "app-unload-logout-guard", "paths": ["frontend/src/components/AppShell.vue"], "unit_count": 3, "producer": "prepare-change-evidence-v1", "coverage": "complete" },
+      { "id": "expiry-router-test", "paths": ["frontend/src/router/__tests__/router.spec.ts"], "unit_count": 3, "producer": "prepare-change-evidence-v1", "coverage": "complete" },
+      { "id": "expiry-account-test", "paths": ["frontend/src/stores/__tests__/account.spec.ts"], "unit_count": 5, "producer": "prepare-change-evidence-v1", "coverage": "complete" },
+      { "id": "auth-lifecycle-tests", "paths": ["frontend/src/stores/__tests__/auth.spec.ts"], "unit_count": 2, "producer": "prepare-change-evidence-v1", "coverage": "complete" },
+      { "id": "auth-lifecycle-store", "paths": ["frontend/src/stores/auth.ts"], "unit_count": 2, "producer": "prepare-change-evidence-v1", "coverage": "complete" },
+      { "id": "draft-session-tests", "paths": ["frontend/src/stores/__tests__/journalDrafts.spec.ts"], "unit_count": 4, "producer": "prepare-change-evidence-v1", "coverage": "complete" },
+      { "id": "draft-session-warning-scope", "paths": ["frontend/src/stores/journalDrafts.ts"], "unit_count": 18, "producer": "prepare-change-evidence-v1", "coverage": "complete" }
+    ],
+    "judgment": "APPROVE"
+  },
+  "review_questions": [
+    "Does session expiry keep retained draft text hidden until same-owner reconciliation and prevent a different owner from receiving draft-specific information?",
+    "Do unload and logout guards surface unsaved work only for the authenticated owner while covering dirty, error, conflict, blocked, quarantined, and unresolved-command states?",
+    "Do logout cancellation, failure, success, and expiry during pending logout preserve intended generation, auth, cache, draft, and sync behavior?",
+    "Do account refresh and router expiry handling keep private drafts inaccessible in the guest shell and allow same-owner reconciliation after login?"
+  ],
+  "group_judgments": [
+    {
+      "group_id": "app-unload-logout-tests",
+      "verdict": "APPROVE",
+      "covered_paths": ["frontend/src/__tests__/App.spec.ts"],
+      "unit_count": 4,
+      "satisfied_questions": ["The deferred session-refresh regression keeps the same-owner beforeunload and logout protections active while refresh is pending, while expiry and owner change remain warning-free."]
+    },
+    {
+      "group_id": "app-unload-logout-guard",
+      "verdict": "APPROVE",
+      "covered_paths": ["frontend/src/components/AppShell.vue"],
+      "unit_count": 3,
+      "satisfied_questions": ["The shell uses the owner-scoped draft warning predicate for unload and logout and cleans up its unload listener."]
+    },
+    {
+      "group_id": "expiry-router-test",
+      "verdict": "APPROVE",
+      "covered_paths": ["frontend/src/router/__tests__/router.spec.ts"],
+      "unit_count": 3,
+      "satisfied_questions": ["Expiry routes to sign-in while the private draft remains quarantined and inaccessible."]
+    },
+    {
+      "group_id": "expiry-account-test",
+      "verdict": "APPROVE",
+      "covered_paths": ["frontend/src/stores/__tests__/account.spec.ts"],
+      "unit_count": 5,
+      "satisfied_questions": ["A 401 account refresh clears visible account context and retains risky text only in quarantine."]
+    },
+    {
+      "group_id": "auth-lifecycle-tests",
+      "verdict": "APPROVE",
+      "covered_paths": ["frontend/src/stores/__tests__/auth.spec.ts"],
+      "unit_count": 2,
+      "satisfied_questions": ["Failed logout and expiry during pending logout preserve generation and private state."]
+    },
+    {
+      "group_id": "auth-lifecycle-store",
+      "verdict": "APPROVE",
+      "covered_paths": ["frontend/src/stores/auth.ts"],
+      "unit_count": 2,
+      "satisfied_questions": ["Logout clears only after success and refresh distinguishes confirmed expiry from a live session."]
+    },
+    {
+      "group_id": "draft-session-tests",
+      "verdict": "APPROVE",
+      "covered_paths": ["frontend/src/stores/__tests__/journalDrafts.spec.ts"],
+      "unit_count": 4,
+      "satisfied_questions": ["Tests cover reconciliation, epoch quarantine, 401 stop, locked writes, owner-keyed reads, and all risky warning states."]
+    },
+    {
+      "group_id": "draft-session-warning-scope",
+      "verdict": "APPROVE",
+      "covered_paths": ["frontend/src/stores/journalDrafts.ts"],
+      "unit_count": 18,
+      "satisfied_questions": ["hasUnsavedDrafts remains scoped to the retained current owner during session refresh and suppresses warnings only after expiry removes the owner or ownership changes."]
+    }
+  ],
+  "satisfied_questions": [
+    "Retained draft text stays inaccessible to the guest and to another owner through owner-keyed lookup; same-owner recovery waits for account-context reconciliation.",
+    "Unload and logout protection remains active for the retained owner during a pending refresh and covers dirty, error, conflict, blocked, quarantined, and unresolved-command states.",
+    "Logout cancellation, failure, success, and pending-logout expiry preserve the intended private-state lifecycle.",
+    "Account-context expiry routes back to login without rendering the quarantined draft in the guest shell."
+  ],
+  "findings": [],
+  "requested_evidence": [],
+  "evidence_refs": [
+    { "path": "frontend/src/__tests__/App.spec.ts", "symbol": "beforeunload/logout lifecycle and deferred refresh tests", "purpose": "changed unload, logout, and same-owner refresh coverage" },
+    { "path": "frontend/src/components/AppShell.vue", "symbol": "warnBeforeUnload/logOut", "purpose": "direct unload and logout guard consumer" },
+    { "path": "frontend/src/router/__tests__/router.spec.ts", "symbol": "expired account-context request test", "purpose": "guest redirect and hidden draft behavior" },
+    { "path": "frontend/src/stores/__tests__/account.spec.ts", "symbol": "expired account request test", "purpose": "quarantine after context expiry" },
+    { "path": "frontend/src/stores/__tests__/auth.spec.ts", "symbol": "failed explicit logout and pending expiry tests", "purpose": "logout and expiry race coverage" },
+    { "path": "frontend/src/stores/auth.ts", "symbol": "clearPrivateState/refreshSession/logOut", "purpose": "session-generation and reset-reason lifecycle" },
+    { "path": "frontend/src/stores/__tests__/journalDrafts.spec.ts", "symbol": "owner lookup and hasUnsavedDrafts tests", "purpose": "draft ownership and warning-state coverage" },
+    { "path": "frontend/src/stores/journalDrafts.ts", "symbol": "resourceKey/getCurrentKey/hasUnsavedDrafts", "purpose": "owner isolation and aggregate guard behavior" },
+    { "path": "frontend/src/stores/account.ts", "symbol": "refresh", "purpose": "direct caller retaining the store while owner context changes" },
+    { "path": "frontend/src/router/index.ts", "symbol": "router.beforeEach", "purpose": "direct expiry and post-login route flow" },
+    { "path": "frontend/src/stores/sync.ts", "symbol": "refreshSession on 401/403", "purpose": "direct trigger for session refresh while the shell is mounted" }
+  ],
+  "judgment_flags": [
+    "CONCURRENCY_STATE",
+    "SECURITY_AUTH"
+  ],
+  "verification": {
+    "canonical_applicability": "NOT_APPLICABLE",
+    "canonical_status": "INCOMPLETE",
+    "focused_checks": "4 PASS: 41 unit tests, type-check, lint, diff-check",
+    "escalation_decision": "REVIEW_REQUIRED"
+  },
+  "escalation": {
+    "decision": "REVIEW_REQUIRED",
+    "risk": "HIGH",
+    "reasons": [
+      "HIGH_RISK_REVIEW",
+      "JUDGMENT_CONCURRENCY_STATE",
+      "JUDGMENT_SECURITY_AUTH",
+      "VERIFICATION_INCOMPLETE",
+      "VERIFICATION_NO_APPLICABLE_RECIPE"
+    ]
+  },
+  "changeEvidence": {
+    "schema": "targeted-review-evidence-groups-v1",
+    "provenance": {
+      "producer": "prepare-change-evidence-v1",
+      "comparison": "explicit-pair",
+      "base": "6c91f5b2e469d4d662f722ae644e55ebf56f7586",
+      "head": "c4621a9153da0397446f4fa878128c6450fe922b"
+    },
+    "complete_path_coverage": true,
+    "complete_unit_coverage": true,
+    "groups": [
+      { "id": "app-unload-logout-tests", "status": "OK", "unit_count": 4, "requested_paths": ["frontend/src/__tests__/App.spec.ts"] },
+      { "id": "app-unload-logout-guard", "status": "OK", "unit_count": 3, "requested_paths": ["frontend/src/components/AppShell.vue"] },
+      { "id": "expiry-router-test", "status": "OK", "unit_count": 3, "requested_paths": ["frontend/src/router/__tests__/router.spec.ts"] },
+      { "id": "expiry-account-test", "status": "OK", "unit_count": 5, "requested_paths": ["frontend/src/stores/__tests__/account.spec.ts"] },
+      { "id": "auth-lifecycle-tests", "status": "OK", "unit_count": 2, "requested_paths": ["frontend/src/stores/__tests__/auth.spec.ts"] },
+      { "id": "auth-lifecycle-store", "status": "OK", "unit_count": 2, "requested_paths": ["frontend/src/stores/auth.ts"] },
+      { "id": "draft-session-tests", "status": "OK", "unit_count": 4, "requested_paths": ["frontend/src/stores/__tests__/journalDrafts.spec.ts"] },
+      { "id": "draft-session-warning-scope", "status": "OK", "unit_count": 18, "requested_paths": ["frontend/src/stores/journalDrafts.ts"] }
+    ]
+  }
+}
