@@ -565,6 +565,208 @@ export function executeSliceTransaction(root, descriptor) {
   catch (error) { return statusResult('ERROR', [error.message], { transaction_id: descriptor?.transaction_id ?? null }) }
 }
 
+// Verification and review actions are metadata-only transactions.  They use
+// the same lock/journal/recovery discipline as implementation, but deliberately
+// do not create an implementation checkpoint.  Keeping this path separate is
+// important: a verification receipt must never smuggle product files into the
+// durable scope or create a second product commit.
+function normalizeMetadataDescriptor(descriptor) {
+  const metadata = canonicalPaths(descriptor.metadata_paths)
+  if (!metadata.length) throw new Error('METADATA_SCOPE_REQUIRED')
+  for (const relative of metadata) if (!safeRelative(relative)) throw new Error(`INVALID_PATH:${relative}`)
+  if (!SHA.test(descriptor.expected_head ?? '')) throw new Error('INVALID_EXPECTED_HEAD')
+  if (!SHA.test(descriptor.checkpoint_commit ?? '')) throw new Error('INVALID_CHECKPOINT_COMMIT')
+  if (!DIGEST.test(descriptor.preview_fingerprint ?? '')) throw new Error('INVALID_PREVIEW_FINGERPRINT')
+  return { ...descriptor, implementation_paths: [], metadata_paths: metadata }
+}
+
+function runMetadataTransaction(root, rawDescriptor) {
+  const descriptor = normalizeMetadataDescriptor(rawDescriptor)
+  const identity = repositoryIdentity(root)
+  const paths = transactionPaths(root, identity, descriptor)
+  let journal = loadExistingJournal(paths)
+  if (journal?.phase === 'COMPLETE') {
+    if (!matchesDescriptor(journal, descriptor, identity)) return statusResult('STALE', ['COMPLETED_TRANSACTION_BINDING_MISMATCH'], { transaction_id: descriptor.transaction_id })
+    return statusResult('NOOP', [], {
+      transaction_id: descriptor.transaction_id,
+      checkpoint_commit: journal.checkpoint_commit,
+      metadata_commit: journal.metadata_commit,
+      next_action: journal.next_action
+    })
+  }
+  const recovery = descriptor.recovery === true
+  if (journal && !recovery) return statusResult('BLOCKED', ['RECOVERY_AUTHORIZATION_REQUIRED'], {
+    transaction_id: descriptor.transaction_id,
+    journal_path: paths.journalPath,
+    checkpoint_commit: journal.checkpoint_commit ?? descriptor.checkpoint_commit
+  })
+  if (journal && recovery) {
+    if (!matchesDescriptor(journal, descriptor, identity)) return statusResult('STALE', ['RECOVERY_BINDING_MISMATCH'], { transaction_id: descriptor.transaction_id })
+    if (journal.checkpoint_commit !== descriptor.recovery_checkpoint) return statusResult('BLOCKED', ['RECOVERY_CHECKPOINT_REQUIRED'], {
+      transaction_id: descriptor.transaction_id,
+      checkpoint_commit: journal.checkpoint_commit ?? null
+    })
+  }
+
+  let lockAcquired = false
+  let mutated = false
+  try {
+    let lock
+    if (journal) {
+      if (!existsSync(paths.lockPath)) throw new Error('RECOVERY_LOCK_MISSING')
+      lock = readJson(paths.lockPath)
+      if (!lock || lock.transaction_id !== descriptor.transaction_id || lock.scope_key !== paths.scopeKey) throw new Error('RECOVERY_LOCK_MISMATCH')
+    } else {
+      lock = acquire(root, descriptor, identity, paths)
+      lockAcquired = true
+      journal = journalSeed(identity, paths, descriptor, lock)
+      journal._path = paths.journalPath
+      journal = updateJournal(journal, {
+        checkpoint_commit: descriptor.checkpoint_commit,
+        baseline_commit: descriptor.baseline_commit ?? null,
+        phase: 'LOCK_ACQUIRED'
+      })
+    }
+
+    const currentHead = gitOutput(root, ['rev-parse', 'HEAD']).trim()
+    if (journal.metadata_commit) {
+      if (journal.metadata_commit !== currentHead) throw new Error('RECOVERY_HEAD_MISMATCH')
+      const committedMetadata = descriptor.readMetadata
+        ? descriptor.readMetadata(root)
+        : metadataFiles(descriptor, {
+        baseline_commit: descriptor.baseline_commit ?? descriptor.expected_head,
+        checkpoint_commit: descriptor.checkpoint_commit,
+        changed_paths: descriptor.changed_paths ?? [],
+        changed_paths_sha256: descriptor.changed_paths_sha256 ?? null,
+        subject: descriptor.subject ?? null,
+        subject_digest: descriptor.subject_digest ?? null
+      })
+      ensureExactSet(commitPaths(root, journal.metadata_commit), descriptor.metadata_paths, 'METADATA_COMMIT_SCOPE_MISMATCH')
+      for (const [relative, expected] of Object.entries(committedMetadata.files)) {
+        const actual = readFileSync(path.resolve(root, relative), 'utf8')
+        if (actual !== expected) throw new Error('COMMITTED_METADATA_CONTENT_MISMATCH')
+        const committed = gitOutput(root, ['show', `${journal.metadata_commit}:${relative}`])
+        if (committed !== expected) throw new Error('COMMITTED_METADATA_MISMATCH')
+      }
+      if (descriptor.validateFinal) descriptor.validateFinal(committedMetadata)
+      verifyClean(root)
+      const nextAction = descriptor.next_action ?? journal.next_action ?? { kind: 'implement_slice', target: descriptor.slice_id }
+      journal = updateJournal(journal, { phase: 'COMPLETE', next_action: nextAction, recovery_required: false })
+      release(paths.lockPath, descriptor.transaction_id)
+      return statusResult('NOOP', [], {
+        transaction_id: descriptor.transaction_id,
+        checkpoint_commit: descriptor.checkpoint_commit,
+        metadata_commit: journal.metadata_commit,
+        next_action: nextAction,
+        journal_path: paths.journalPath,
+        lock_path: paths.lockPath,
+        durable_action_count: 0,
+        stop_condition: descriptor.stop_condition ?? 'NEXT_ACTION_EXPLICIT'
+      })
+    }
+    if (journal.checkpoint_commit !== currentHead) throw new Error('METADATA_HEAD_MISMATCH')
+    if (descriptor.recheck) descriptor.recheck(root)
+    if (!journal.metadata_commit) {
+      const inventory = worktreeInventory(root)
+      const resumingWrite = journal.phase === 'METADATA_WRITTEN' || journal.phase === 'METADATA_STAGED'
+      if (!resumingWrite) {
+        if (inventory.staged.length) throw new Error('DIRTY_INDEX')
+        if (inventory.unstaged.length || inventory.untracked.length) throw new Error('DIRTY_SCOPE_MISMATCH')
+        journal = updateJournal(journal, { phase: 'METADATA_PREPARED', initial_inventory: inventory })
+      }
+      mutated = true
+      const metadata = resumingWrite && descriptor.readMetadata
+        ? descriptor.readMetadata(root)
+        : metadataFiles(descriptor, {
+        baseline_commit: descriptor.baseline_commit ?? descriptor.expected_head,
+        checkpoint_commit: descriptor.checkpoint_commit,
+        changed_paths: descriptor.changed_paths ?? [],
+        changed_paths_sha256: descriptor.changed_paths_sha256 ?? null,
+        subject: descriptor.subject ?? null,
+        subject_digest: descriptor.subject_digest ?? null
+      })
+      if (resumingWrite) {
+        for (const [relative, expected] of Object.entries(metadata.files)) {
+          const file = path.resolve(root, relative)
+          if (!existsSync(file) || readFileSync(file, 'utf8') !== expected) throw new Error('RECOVERY_METADATA_CONTENT_MISMATCH')
+        }
+        if (journal.phase === 'METADATA_WRITTEN') {
+          if (inventory.staged.length || inventory.untracked.length) throw new Error('RECOVERY_METADATA_SCOPE_MISMATCH')
+          ensureExactSet(inventory.unstaged, descriptor.metadata_paths, 'RECOVERY_METADATA_SCOPE_MISMATCH')
+        } else {
+          ensureExactSet(inventory.staged, descriptor.metadata_paths, 'RECOVERY_METADATA_SCOPE_MISMATCH')
+          if (inventory.unstaged.length || inventory.untracked.length) throw new Error('RECOVERY_METADATA_SCOPE_MISMATCH')
+        }
+      } else {
+        journal = updateJournal(journal, { phase: 'METADATA_WRITE_STARTED', metadata_paths: metadata.paths })
+        writeMetadata(root, metadata)
+        maybeFail(descriptor, 'AFTER_WRITE')
+        if (descriptor.validateMetadata) descriptor.validateMetadata(metadata)
+        journal = updateJournal(journal, { phase: 'METADATA_WRITTEN' })
+      }
+      const staged = journal.phase === 'METADATA_STAGED' ? inventory.staged : stageExact(root, descriptor.metadata_paths, null, 'metadata')
+      journal = updateJournal(journal, { phase: 'METADATA_STAGED', staged_paths: staged })
+      maybeFail(descriptor, 'AFTER_METADATA_STAGE')
+      maybeFail(descriptor, 'BEFORE_COMMIT')
+      const metadataCommit = commitExact(root, descriptor.metadata_message ?? `chore(story-${descriptor.story_id}): record verification metadata`, descriptor.metadata_paths)
+      journal = updateJournal(journal, { phase: 'COMMIT_ATTEMPTED', metadata_commit: metadataCommit })
+      maybeFail(descriptor, 'AFTER_COMMIT_HOOK')
+      if (commitParent(root, metadataCommit) !== descriptor.checkpoint_commit) throw new Error('METADATA_PARENT_MISMATCH')
+      ensureExactSet(commitPaths(root, metadataCommit), descriptor.metadata_paths, 'METADATA_COMMIT_SCOPE_MISMATCH')
+      for (const [relative, expected] of Object.entries(metadata.files)) {
+        const actual = readFileSync(path.resolve(root, relative), 'utf8')
+        if (actual !== expected) throw new Error('METADATA_CONTENT_MISMATCH')
+        const committed = gitOutput(root, ['show', `${metadataCommit}:${relative}`])
+        if (committed !== expected) throw new Error('COMMITTED_METADATA_MISMATCH')
+      }
+      if (descriptor.validateFinal) descriptor.validateFinal(metadata)
+      verifyClean(root)
+      const nextAction = descriptor.next_action ?? { kind: 'implement_slice', target: descriptor.slice_id }
+      journal = updateJournal(journal, { phase: 'COMPLETE', metadata_commit: metadataCommit, next_action: nextAction, recovery_required: false })
+      release(paths.lockPath, descriptor.transaction_id)
+      return statusResult('APPLIED', [], {
+        transaction_id: descriptor.transaction_id,
+        checkpoint_commit: descriptor.checkpoint_commit,
+        metadata_commit: metadataCommit,
+        changed_paths: descriptor.changed_paths ?? [],
+        changed_paths_sha256: descriptor.changed_paths_sha256 ?? null,
+        next_action: nextAction,
+        journal_path: paths.journalPath,
+        lock_path: paths.lockPath,
+        durable_action_count: 1,
+        stop_condition: descriptor.stop_condition ?? 'NEXT_ACTION_EXPLICIT'
+      })
+    }
+    throw new Error('METADATA_COMMIT_ALREADY_RECORDED')
+  } catch (error) {
+    const reason = error.code === 'EEXIST' ? 'TRANSACTION_SCOPE_LOCKED' : error.message
+    if (mutated) {
+      if (journal) journal = updateJournal(journal, { phase: 'RECOVERY_REQUIRED', recovery_required: true, error: reason })
+      return statusResult('RECOVERY_REQUIRED', [reason], {
+        transaction_id: descriptor.transaction_id,
+        journal_path: paths.journalPath,
+        lock_path: paths.lockPath,
+        checkpoint_commit: journal?.checkpoint_commit ?? descriptor.checkpoint_commit,
+        recovery: 'Preserve files/index/lock/journal. Inspect the journal and provide explicit human-authorized recovery input; never reset, delete the lock, or replay metadata.'
+      })
+    }
+    if (journal) {
+      try { updateJournal(journal, { phase: 'ABORTED', recovery_required: false, error: reason }) } catch { /* preserve the original failure */ }
+    }
+    if (lockAcquired) release(paths.lockPath, descriptor.transaction_id)
+    return statusResult(reason.startsWith('STALE_') ? 'STALE' : reason === 'TRANSACTION_SCOPE_LOCKED' ? 'BLOCKED' : 'BLOCKED', [reason], {
+      transaction_id: descriptor.transaction_id,
+      journal_path: paths.journalPath,
+      lock_path: paths.lockPath
+    })
+  }
+}
+
+export function executeMetadataTransaction(root, descriptor) {
+  try { return runMetadataTransaction(root, descriptor) }
+  catch (error) { return statusResult('ERROR', [error.message], { transaction_id: descriptor?.transaction_id ?? null }) }
+}
+
 export function transactionPathDigest(paths) { return pathDigest(paths) }
 
 export function transactionHash(value) { return hash(value) }

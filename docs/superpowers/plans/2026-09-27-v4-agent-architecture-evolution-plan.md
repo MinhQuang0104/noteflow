@@ -2,7 +2,7 @@
 
 > **For agentic workers:** Dành cho **Luna 5.6 Max** (model gpt-5.6-luna, reasoning effort max). Khi có yêu cầu triển khai riêng của human, dùng skill superpowers:executing-plans để thực hiện tuần tự từng task. Không mặc định dispatch subagent, Orca hoặc AGY.
 >
-> **Trạng thái:** IN PROGRESS — human đã ủy quyền triển khai trong lane V4 Lite architecture/control-plane migration; T00–T06 đã hoàn tất, T07 là task kế tiếp.
+> **Trạng thái:** IN PROGRESS — human đã ủy quyền triển khai trong lane V4 Lite architecture/control-plane migration; T00–T07 đã hoàn tất, T08 là task kế tiếp.
 >
 > **Ngày:** 2026-09-27. **Baseline đã đọc:** main, d8e813660e44c54785466836e5c0eda658529b74.
 >
@@ -593,22 +593,24 @@ Real recipe evidence under Node `v24.21.0` after `npm ci` in the isolated worktr
 **Consumes:** fresh checkpoint manifest, CheckSpecs, canonical aggregate và semantic judgments có evidence.
 **Produces:** verifySlice, recordSliceReview.
 
-- [ ] Test canonical output được truyền nguyên ý nghĩa sang escalation; HIGH/MEDIUM luôn REVIEW_REQUIRED.
-- [ ] Chạy focused checks qua executor, canonical recipes và escalation trong thứ tự được định nghĩa; không sửa product.
-- [ ] Canonical/required check failure giữ non-progressing state; không tự chọn fix action.
-- [ ] Khi review cần thiết, prepare-change-evidence tạo bounded groups và oversized units; giữ đầy đủ coverage.
-- [ ] Trả REVIEW_REQUIRED với immutable pending evidence refs, exact questions/scope/fingerprint; same Lead review theo contract hiện có.
-- [ ] NEED_MORE_EVIDENCE chỉ cho evidence round trong budget; CHANGES_REQUIRED chặn progression.
-- [ ] record-review reject stale checkpoint/policy, missing unit, duplicate unit, reordered unit, incomplete questions hoặc approve sai scope.
-- [ ] LOW complete PASS/no flags có thể persist verification không review. INCOMPLETE chỉ progression qua điều kiện 5.5 và disclosure.
-- [ ] Metadata commit chỉ Plan + fresh verification/review receipts cần thiết; không sửa old receipts, Story normative text hoặc sprint.
-- [ ] Successor lấy từ validated dependency graph/current slice; multiple eligible ambiguity không được đoán từ file order.
-- [ ] Final slice chỉ persist finalize_story; không execute finalization.
-- [ ] Test retry không duplicate receipts/commits; product/index drift trong lúc review làm continuation STALE.
-- [ ] Run: node --test .agents/scripts/v4-verification-flow.test.mjs .agents/scripts/check-slice-verification.test.mjs .agents/scripts/v4-action-kernel.test.mjs.
-- [ ] Commit exact T07 files sau review invariant.
+- [x] Test canonical output được truyền nguyên ý nghĩa sang escalation; HIGH/MEDIUM luôn REVIEW_REQUIRED.
+- [x] Chạy focused checks qua executor, canonical recipes và escalation trong thứ tự được định nghĩa; không sửa product.
+- [x] Canonical/required check failure giữ non-progressing state; không tự chọn fix action.
+- [x] Khi review cần thiết, prepare-change-evidence tạo bounded groups và oversized units; giữ đầy đủ coverage.
+- [x] Trả REVIEW_REQUIRED với immutable pending evidence refs, exact questions/scope/fingerprint; same Lead review theo contract hiện có.
+- [x] NEED_MORE_EVIDENCE chỉ cho evidence round trong budget; CHANGES_REQUIRED chặn progression.
+- [x] record-review reject stale checkpoint/policy, missing unit, duplicate unit, reordered unit, incomplete questions hoặc approve sai scope.
+- [x] LOW complete PASS/no flags có thể persist verification không review. INCOMPLETE chỉ progression qua điều kiện 5.5 và disclosure.
+- [x] Metadata commit chỉ Plan + fresh verification/review receipts cần thiết; không sửa old receipts, Story normative text hoặc sprint.
+- [x] Successor lấy từ validated dependency graph/current slice; multiple eligible ambiguity không được đoán từ file order.
+- [x] Final slice chỉ persist finalize_story; không execute finalization.
+- [x] Test retry không duplicate receipts/commits; product/index drift trong lúc review làm continuation STALE.
+- [x] Run: node --test .agents/scripts/v4-verification-flow.test.mjs .agents/scripts/check-slice-verification.test.mjs .agents/scripts/v4-action-kernel.test.mjs.
+- [x] Commit exact T07 files sau review invariant.
 
 **Gate:** plumbing chạy bằng code, semantic review vẫn rõ chủ thể; canonical INCOMPLETE không biến thành PASS và Human Gate không bị chạm.
+
+**T07 evidence (2026-09-28):** The verification-flow fixture covers canonical aggregate output forwarded to `check-escalation.mjs`, executor-bound focused checks, LOW PASS/no-review metadata, HIGH mandatory review, bounded change evidence, immutable pending fingerprints, exact scope/question answers, `CHANGES_REQUIRED`, one `NEED_MORE_EVIDENCE` round, stale policy continuation, and interrupted metadata recovery with no duplicate commit. The targeted command `node --test .agents/scripts/v4-verification-flow.test.mjs .agents/scripts/check-slice-verification.test.mjs .agents/scripts/v4-action-kernel.test.mjs` passed 43 tests, 0 failed, in 94.073 seconds. Verification and review receipts are new files only; metadata commits are exact Plan + required receipt paths. The kernel derives the single successor from dependency readiness and persists `finalize_story` for a final slice without executing it. No product files, Story normative text, sprint status, Human Gate, or V3 runtime pointer were changed.
 
 ### T08 — Hooks quan sát sau session và Story
 

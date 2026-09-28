@@ -4,6 +4,24 @@
 and, when required, same-Lead review evidence. It never changes product code,
 fixes a failed check, executes a future action, or changes the Human Gate.
 
+The V4 kernel exposes two explicit operations for this action:
+
+- `verify`: `prepareAction` → `verifySlice`, which runs the canonical recipe,
+  focused `CheckSpec`s and escalation. LOW + complete PASS/no flags may create
+  one metadata commit containing the current Plan and a new verification
+  receipt; MEDIUM/HIGH and every escalation stop at `REVIEW_REQUIRED`.
+- `record-review`: `recordSliceReview`, which accepts only the immutable
+  pending fingerprint, exact ordered bounded evidence, complete answers and
+  exact scope. APPROVE creates the Plan plus fresh verification/review receipt
+  metadata commit; `NEED_MORE_EVIDENCE` has one bounded round and
+  `CHANGES_REQUIRED` never authorizes a fix.
+
+Both operations revalidate the canonical IDLE pointer, checkpoint/policy/recipe
+digests and product/index drift. A partial metadata transaction returns
+`RECOVERY_REQUIRED`; recovery must name the observed checkpoint and explicit
+authorization, and a completed transaction is a `NOOP` rather than a second
+commit.
+
 ## Action context projection
 
 Compile the read-only, provenance-bound context before verification:
