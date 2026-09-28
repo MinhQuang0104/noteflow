@@ -105,46 +105,20 @@ slices:
     depends_on: [B]
     task_refs: [T-5, T-6]
     baseline_commit: 6c91f5b2e469d4d662f722ae644e55ebf56f7586
-    checkpoint_commit: c6b1cac8162ab40f9e1df15743e3195e392d656f
+    checkpoint_commit: 3cc3fb6e821ec26a92043117ec4accf052d3889e
     subject_digest: sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e
     changed_paths_sha256: sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e
     receipt_refs:
       implementation:
-        path: _bmad-output/implementation-artifacts/receipts/story-1-5/C-resolution-implementation.json
-        digest: sha256:7f86a6b0549b320186208d659a877519c72662b75f51bc1544340ede39e75e93
-      verification:
-        path: _bmad-output/implementation-artifacts/receipts/story-1-5/C-verification.json
-        digest: sha256:488e47506f4af9ebf3cb98f875b84d0637f5fc23abd002d9fdfad89f9334921a
-      review:
-        path: _bmad-output/implementation-artifacts/receipts/story-1-5/C-review.json
-        digest: sha256:9aab370a01f220157e7eb6b8c7922371618a80b167f8c576ecaec8d115b9b6fd
-    verification:
-      subject:
-        commit: c6b1cac8162ab40f9e1df15743e3195e392d656f
-        tree: 2e45d38dee5d2bec34d25fcd6b7ba0fa6c6200be
-      changed_paths_sha256: sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e
-      canonical_applicability: NOT_APPLICABLE
-      canonical_status: INCOMPLETE
-      progression_eligible: false
-      done_gate_disclosure_required: true
-      outstanding_obligation: "canonical verification is INCOMPLETE because NO_APPLICABLE_RECIPE; focused checks pass, but a valid HIGH-risk review blocker remains"
-    review:
-      required: true
-      verdict: CHANGES_REQUIRED
-      reviewed_commit: c6b1cac8162ab40f9e1df15743e3195e392d656f
-      risk_context_digest: sha256:5c3e1b7db251e727a044146d7de6dfdca55a28add41d20e71b865ee6be958196
-      review_context_digest: sha256:d8bfd02e671b0ab58ca65c472cf396af623ad660e615bcbb0ce74478e2b0bac4
-      freshness: FRESH_CANDIDATE
+        path: _bmad-output/implementation-artifacts/receipts/story-1-5/C-resolution-implementation-2.json
+        digest: sha256:81b03fbc35338ea5157279fc3560e77ba46c5edbb17d22c8ab17c8f22f1e8b45
   - id: D
     status: pending
     depends_on: [C]
     task_refs: [T-7]
-blockers:
-  - id: same-owner-warning-suppressed-during-session-refresh
-    reason: "The authenticated-only warning gate suppresses same-owner unsaved-draft protection while refreshSession is pending and auth.owner is retained."
+blockers: []
 unresolved_questions: []
 next_action:
-  kind: resolve_blocker
+  kind: verify_slice
   target: C
-  reference: same-owner-warning-suppressed-during-session-refresh
 ---

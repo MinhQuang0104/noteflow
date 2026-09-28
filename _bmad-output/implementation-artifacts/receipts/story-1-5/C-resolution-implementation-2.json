@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "story_id": "1.5",
+  "slice_id": "C",
+  "kind": "implementation",
+  "checkpoint_commit": "3cc3fb6e821ec26a92043117ec4accf052d3889e",
+  "baseline_commit": "6c91f5b2e469d4d662f722ae644e55ebf56f7586",
+  "subject_digest": "sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e",
+  "created_from_head": "3cc3fb6e821ec26a92043117ec4accf052d3889e",
+  "changed_paths_sha256": "sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e",
+  "commands": [
+    {
+      "command": "npm.cmd run test:unit -- --run src/stores/__tests__/journalDrafts.spec.ts -t \"keeps same-owner warning work visible while session refresh is pending\"",
+      "result": "PASS: 1 test; 19 tests skipped",
+      "exit_code": 0,
+      "tool": "npm/Vitest 5.0.1",
+      "environment": "Windows (win32); Node.js v24.21.0; Story worktree frontend/node_modules"
+    },
+    {
+      "command": "npm.cmd run test:unit -- --run src/__tests__/App.spec.ts -t \"same-owner warning guards stay active while session refresh is pending\"",
+      "result": "PASS: 1 test; 8 tests skipped",
+      "exit_code": 0,
+      "tool": "npm/Vitest 5.0.1",
+      "environment": "Windows (win32); Node.js v24.21.0; Story worktree frontend/node_modules"
+    },
+    {
+      "command": "npm.cmd run test:unit -- --run src/stores/__tests__/journalDrafts.spec.ts src/__tests__/App.spec.ts src/router/__tests__/router.spec.ts src/stores/__tests__/account.spec.ts src/stores/__tests__/auth.spec.ts",
+      "result": "PASS: 41 tests across 5 files",
+      "exit_code": 0,
+      "tool": "npm/Vitest 5.0.1",
+      "environment": "Windows (win32); Node.js v24.21.0; Story worktree frontend/node_modules"
+    },
+    {
+      "command": "npm.cmd run type-check",
+      "result": "PASS: vue-tsc --build",
+      "exit_code": 0,
+      "tool": "npm/vue-tsc",
+      "environment": "Windows (win32); Node.js v24.21.0; Story worktree frontend/node_modules"
+    },
+    {
+      "command": ".\\node_modules\\.bin\\eslint.cmd src/__tests__/App.spec.ts src/stores/__tests__/journalDrafts.spec.ts src/stores/journalDrafts.ts --no-cache",
+      "result": "PASS: no diagnostics emitted",
+      "exit_code": 0,
+      "tool": "ESLint",
+      "environment": "Windows (win32); Node.js v24.21.0; Story worktree frontend/node_modules"
+    },
+    {
+      "command": ".\\node_modules\\.bin\\oxlint.cmd src/__tests__/App.spec.ts src/stores/__tests__/journalDrafts.spec.ts src/stores/journalDrafts.ts",
+      "result": "PASS: no diagnostics emitted",
+      "exit_code": 0,
+      "tool": "oxlint",
+      "environment": "Windows (win32); Node.js v24.21.0; Story worktree frontend/node_modules"
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS: no whitespace errors",
+      "exit_code": 0,
+      "tool": "Git",
+      "environment": "Windows; Story worktree codex/story-1-5-v4"
+    }
+  ],
+  "changed_paths": [
+    "frontend/src/__tests__/App.spec.ts",
+    "frontend/src/components/AppShell.vue",
+    "frontend/src/router/__tests__/router.spec.ts",
+    "frontend/src/stores/__tests__/account.spec.ts",
+    "frontend/src/stores/__tests__/auth.spec.ts",
+    "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+    "frontend/src/stores/auth.ts",
+    "frontend/src/stores/journalDrafts.ts"
+  ],
+  "red_green": {
+    "applicable": true,
+    "red": {
+      "command": "npm.cmd run test:unit -- --run src/stores/__tests__/journalDrafts.spec.ts -t \"keeps same-owner warning work visible while session refresh is pending\"",
+      "exit_code": 1,
+      "result": "RED: while refreshSession was pending, auth.status was loading and hasUnsavedDrafts() returned false for the retained same-owner dirty draft."
+    },
+    "green": {
+      "command": "npm.cmd run test:unit -- --run src/stores/__tests__/journalDrafts.spec.ts -t \"keeps same-owner warning work visible while session refresh is pending\"",
+      "exit_code": 0,
+      "result": "GREEN: the retained owner continued to contribute warning work while getSession() was deferred."
+    }
+  }
+}
