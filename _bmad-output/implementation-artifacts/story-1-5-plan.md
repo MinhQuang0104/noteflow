@@ -112,13 +112,39 @@ slices:
       implementation:
         path: _bmad-output/implementation-artifacts/receipts/story-1-5/C-implementation.json
         digest: sha256:726d6e75da01665fb534ca01e4ac79121a250a6bbdc70aec0c24ab71276dd619
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-5/C-verification.json
+        digest: sha256:694b69bf0c0fcd86c99d4dd6066c53e7a6add0d3107f1de9bdd9571895de36fd
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-5/C-review.json
+        digest: sha256:1cc755dcaa388966218dfc90a75a144180d0214f6d24f61e15027233a75c4d08
+    verification:
+      subject:
+        commit: 0301a2bb9292b5ee21df3f394589c57030115b97
+        tree: 2759b5ccc7ef69d7801fc538574ca186d3345338
+      changed_paths_sha256: sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e
+      canonical_applicability: NOT_APPLICABLE
+      canonical_status: INCOMPLETE
+      progression_eligible: false
+      done_gate_disclosure_required: true
+      outstanding_obligation: "Targeted HIGH-risk review found a blocking cross-owner unload/logout warning from a prior owner’s quarantined draft."
+    review:
+      required: true
+      verdict: CHANGES_REQUIRED
+      reviewed_commit: 0301a2bb9292b5ee21df3f394589c57030115b97
+      risk_context_digest: sha256:5c3e1b7db251e727a044146d7de6dfdca55a28add41d20e71b865ee6be958196
+      review_context_digest: sha256:7b6065c2072d3ff84da3d48bf0255b862c1a94971000064b9d54c43259055a6a
+      freshness: FRESH_CANDIDATE
   - id: D
     status: pending
     depends_on: [C]
     task_refs: [T-7]
-blockers: []
+blockers:
+  - id: foreign-owner-quarantined-draft-warning-leak
+    reason: "After session expiry, an old-owner quarantined draft still contributes to the global unsaved-work predicate and causes a different owner’s AppShell to show unload/logout warnings."
 unresolved_questions: []
 next_action:
-  kind: verify_slice
+  kind: resolve_blocker
   target: C
+  reference: foreign-owner-quarantined-draft-warning-leak
 ---
