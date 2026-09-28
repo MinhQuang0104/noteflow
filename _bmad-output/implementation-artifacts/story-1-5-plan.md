@@ -112,13 +112,39 @@ slices:
       implementation:
         path: _bmad-output/implementation-artifacts/receipts/story-1-5/C-resolution-implementation.json
         digest: sha256:7f86a6b0549b320186208d659a877519c72662b75f51bc1544340ede39e75e93
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-5/C-verification.json
+        digest: sha256:488e47506f4af9ebf3cb98f875b84d0637f5fc23abd002d9fdfad89f9334921a
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-5/C-review.json
+        digest: sha256:9aab370a01f220157e7eb6b8c7922371618a80b167f8c576ecaec8d115b9b6fd
+    verification:
+      subject:
+        commit: c6b1cac8162ab40f9e1df15743e3195e392d656f
+        tree: 2e45d38dee5d2bec34d25fcd6b7ba0fa6c6200be
+      changed_paths_sha256: sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e
+      canonical_applicability: NOT_APPLICABLE
+      canonical_status: INCOMPLETE
+      progression_eligible: false
+      done_gate_disclosure_required: true
+      outstanding_obligation: "canonical verification is INCOMPLETE because NO_APPLICABLE_RECIPE; focused checks pass, but a valid HIGH-risk review blocker remains"
+    review:
+      required: true
+      verdict: CHANGES_REQUIRED
+      reviewed_commit: c6b1cac8162ab40f9e1df15743e3195e392d656f
+      risk_context_digest: sha256:5c3e1b7db251e727a044146d7de6dfdca55a28add41d20e71b865ee6be958196
+      review_context_digest: sha256:d8bfd02e671b0ab58ca65c472cf396af623ad660e615bcbb0ce74478e2b0bac4
+      freshness: FRESH_CANDIDATE
   - id: D
     status: pending
     depends_on: [C]
     task_refs: [T-7]
-blockers: []
+blockers:
+  - id: same-owner-warning-suppressed-during-session-refresh
+    reason: "The authenticated-only warning gate suppresses same-owner unsaved-draft protection while refreshSession is pending and auth.owner is retained."
 unresolved_questions: []
 next_action:
-  kind: verify_slice
+  kind: resolve_blocker
   target: C
+  reference: same-owner-warning-suppressed-during-session-refresh
 ---

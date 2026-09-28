@@ -3,17 +3,17 @@
   "story_id": "1.5",
   "slice_id": "C",
   "kind": "verification",
-  "checkpoint_commit": "0301a2bb9292b5ee21df3f394589c57030115b97",
+  "checkpoint_commit": "c6b1cac8162ab40f9e1df15743e3195e392d656f",
   "baseline_commit": "6c91f5b2e469d4d662f722ae644e55ebf56f7586",
   "subject_digest": "sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e",
-  "created_from_head": "0301a2bb9292b5ee21df3f394589c57030115b97",
+  "created_from_head": "c6b1cac8162ab40f9e1df15743e3195e392d656f",
   "changed_paths_sha256": "sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e",
   "evidence_status": "fresh",
   "subject": {
     "mode": "checkpoint",
     "baseline_commit": "6c91f5b2e469d4d662f722ae644e55ebf56f7586",
-    "checkpoint_commit": "0301a2bb9292b5ee21df3f394589c57030115b97",
-    "verified_from_head": "bc70d8291186a12d0160b4a726728deb549b76ce",
+    "checkpoint_commit": "c6b1cac8162ab40f9e1df15743e3195e392d656f",
+    "verified_from_head": "53108cd002e27eef4617e474e7e87869338f73a5",
     "changed_paths_sha256": "sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e",
     "checkpoint_freshness": "FRESH",
     "source_freshness": "FRESH",
@@ -37,13 +37,13 @@
       "kind": "behavioral",
       "command": "npm.cmd run test:unit -- --run src/stores/__tests__/auth.spec.ts src/stores/__tests__/account.spec.ts src/stores/__tests__/journalDrafts.spec.ts src/router/__tests__/router.spec.ts src/__tests__/App.spec.ts",
       "tool": "npm/Vitest 5.0.1",
-      "summary": "5 test files passed; 37 tests passed",
+      "summary": "5 test files passed; 39 tests passed",
       "result": "PASS",
       "exit_code": 0,
       "subject_digest": "sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e",
       "subject": {
-        "commit": "0301a2bb9292b5ee21df3f394589c57030115b97",
-        "tree": "2759b5ccc7ef69d7801fc538574ca186d3345338"
+        "commit": "c6b1cac8162ab40f9e1df15743e3195e392d656f",
+        "tree": "2e45d38dee5d2bec34d25fcd6b7ba0fa6c6200be"
       },
       "changed_paths_sha256": "sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e",
       "command_digest": "sha256:0850844d1afc5a65dc96e0865cc61bedb586b4424d98e7c0d1aa9390786e77a7",
@@ -68,8 +68,8 @@
       "exit_code": 0,
       "subject_digest": "sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e",
       "subject": {
-        "commit": "0301a2bb9292b5ee21df3f394589c57030115b97",
-        "tree": "2759b5ccc7ef69d7801fc538574ca186d3345338"
+        "commit": "c6b1cac8162ab40f9e1df15743e3195e392d656f",
+        "tree": "2e45d38dee5d2bec34d25fcd6b7ba0fa6c6200be"
       },
       "changed_paths_sha256": "sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e",
       "command_digest": "sha256:63967bbe0152ee8307abf6bb589cecbf872996998500336e28f28fb07d9b6f01",
@@ -94,8 +94,8 @@
       "exit_code": 0,
       "subject_digest": "sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e",
       "subject": {
-        "commit": "0301a2bb9292b5ee21df3f394589c57030115b97",
-        "tree": "2759b5ccc7ef69d7801fc538574ca186d3345338"
+        "commit": "c6b1cac8162ab40f9e1df15743e3195e392d656f",
+        "tree": "2e45d38dee5d2bec34d25fcd6b7ba0fa6c6200be"
       },
       "changed_paths_sha256": "sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e",
       "command_digest": "sha256:c81a83d3c213e9975ba332ea6993b1ae340e86c3adea2cedc1a2ea704e8f6582",
@@ -113,18 +113,18 @@
     {
       "id": "checkpoint-whitespace",
       "kind": "diff-check",
-      "command": "git diff --check 6c91f5b2e469d4d662f722ae644e55ebf56f7586 0301a2bb9292b5ee21df3f394589c57030115b97 --",
+      "command": "git diff --check 6c91f5b2e469d4d662f722ae644e55ebf56f7586 c6b1cac8162ab40f9e1df15743e3195e392d656f --",
       "tool": "Git",
       "summary": "No whitespace errors in the baseline-to-checkpoint diff",
       "result": "PASS",
       "exit_code": 0,
       "subject_digest": "sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e",
       "subject": {
-        "commit": "0301a2bb9292b5ee21df3f394589c57030115b97",
-        "tree": "2759b5ccc7ef69d7801fc538574ca186d3345338"
+        "commit": "c6b1cac8162ab40f9e1df15743e3195e392d656f",
+        "tree": "2e45d38dee5d2bec34d25fcd6b7ba0fa6c6200be"
       },
       "changed_paths_sha256": "sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e",
-      "command_digest": "sha256:7d8aed0a4bd1721b7017ad4a463d08ab397fa4009569dbfd0fc465e2d5ea831c",
+      "command_digest": "sha256:ce59b51f71c2a6c21874507b61d854732d6a1d563cbc47b84b81bf510cc946a2",
       "command_digest_method": "sha256-utf8-exact-command-string-v1",
       "toolchain_digest": "sha256:92033cf42329d9c1432856169a3fdd68548d123568f2564702c991b48218d655",
       "environment_sensitive": true,
@@ -188,7 +188,7 @@
   "commands": [
     {
       "command": "npm.cmd run test:unit -- --run src/stores/__tests__/auth.spec.ts src/stores/__tests__/account.spec.ts src/stores/__tests__/journalDrafts.spec.ts src/router/__tests__/router.spec.ts src/__tests__/App.spec.ts",
-      "result": "PASS: 5 test files passed; 37 tests passed",
+      "result": "PASS: 5 test files passed; 39 tests passed",
       "exit_code": 0,
       "tool": "npm/Vitest 5.0.1",
       "environment": "Windows (win32); Node.js v24.21.0; npm 11.6.4; frontend dependencies via worktree junction; package-lock SHA-256 1829336936c40e0ef070a8a18628ecb2183f0a27f0e2e5c922b004a20fa8e9e7"
@@ -208,7 +208,7 @@
       "environment": "Windows (win32); Node.js v24.21.0; npm 11.6.4; frontend dependencies via worktree junction; package-lock SHA-256 1829336936c40e0ef070a8a18628ecb2183f0a27f0e2e5c922b004a20fa8e9e7"
     },
     {
-      "command": "git diff --check 6c91f5b2e469d4d662f722ae644e55ebf56f7586 0301a2bb9292b5ee21df3f394589c57030115b97 --",
+      "command": "git diff --check 6c91f5b2e469d4d662f722ae644e55ebf56f7586 c6b1cac8162ab40f9e1df15743e3195e392d656f --",
       "result": "PASS: No whitespace errors in the baseline-to-checkpoint diff",
       "exit_code": 0,
       "tool": "Git",

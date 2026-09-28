@@ -3,10 +3,10 @@
   "story_id": "1.5",
   "slice_id": "C",
   "kind": "review",
-  "checkpoint_commit": "0301a2bb9292b5ee21df3f394589c57030115b97",
+  "checkpoint_commit": "c6b1cac8162ab40f9e1df15743e3195e392d656f",
   "baseline_commit": "6c91f5b2e469d4d662f722ae644e55ebf56f7586",
   "subject_digest": "sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e",
-  "created_from_head": "0301a2bb9292b5ee21df3f394589c57030115b97",
+  "created_from_head": "c6b1cac8162ab40f9e1df15743e3195e392d656f",
   "changed_paths_sha256": "sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e",
   "commands": [
     {
@@ -17,56 +17,56 @@
       "environment": "Windows (win32); Node.js v24.21.0"
     },
     {
-      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6c91f5b2e469d4d662f722ae644e55ebf56f7586 --head 0301a2bb9292b5ee21df3f394589c57030115b97 --path frontend/src/__tests__/App.spec.ts",
-      "result": "OK: 3 evidence units; complete path coverage",
-      "exit_code": 0,
-      "tool": "prepare-change-evidence.mjs",
-      "environment": "Windows (win32); Git explicit checkpoint pair"
-    },
-    {
-      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6c91f5b2e469d4d662f722ae644e55ebf56f7586 --head 0301a2bb9292b5ee21df3f394589c57030115b97 --path frontend/src/components/AppShell.vue",
-      "result": "OK: 3 evidence units; complete path coverage",
-      "exit_code": 0,
-      "tool": "prepare-change-evidence.mjs",
-      "environment": "Windows (win32); Git explicit checkpoint pair"
-    },
-    {
-      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6c91f5b2e469d4d662f722ae644e55ebf56f7586 --head 0301a2bb9292b5ee21df3f394589c57030115b97 --path frontend/src/router/__tests__/router.spec.ts",
-      "result": "OK: 3 evidence units; complete path coverage",
-      "exit_code": 0,
-      "tool": "prepare-change-evidence.mjs",
-      "environment": "Windows (win32); Git explicit checkpoint pair"
-    },
-    {
-      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6c91f5b2e469d4d662f722ae644e55ebf56f7586 --head 0301a2bb9292b5ee21df3f394589c57030115b97 --path frontend/src/stores/__tests__/account.spec.ts",
-      "result": "OK: 5 evidence units; complete path coverage",
-      "exit_code": 0,
-      "tool": "prepare-change-evidence.mjs",
-      "environment": "Windows (win32); Git explicit checkpoint pair"
-    },
-    {
-      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6c91f5b2e469d4d662f722ae644e55ebf56f7586 --head 0301a2bb9292b5ee21df3f394589c57030115b97 --path frontend/src/stores/__tests__/auth.spec.ts",
-      "result": "OK: 2 evidence units; complete path coverage",
-      "exit_code": 0,
-      "tool": "prepare-change-evidence.mjs",
-      "environment": "Windows (win32); Git explicit checkpoint pair"
-    },
-    {
-      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6c91f5b2e469d4d662f722ae644e55ebf56f7586 --head 0301a2bb9292b5ee21df3f394589c57030115b97 --path frontend/src/stores/auth.ts",
-      "result": "OK: 2 evidence units; complete path coverage",
-      "exit_code": 0,
-      "tool": "prepare-change-evidence.mjs",
-      "environment": "Windows (win32); Git explicit checkpoint pair"
-    },
-    {
-      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6c91f5b2e469d4d662f722ae644e55ebf56f7586 --head 0301a2bb9292b5ee21df3f394589c57030115b97 --path frontend/src/stores/__tests__/journalDrafts.spec.ts",
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6c91f5b2e469d4d662f722ae644e55ebf56f7586 --head c6b1cac8162ab40f9e1df15743e3195e392d656f --path frontend/src/__tests__/App.spec.ts",
       "result": "OK: 4 evidence units; complete path coverage",
       "exit_code": 0,
       "tool": "prepare-change-evidence.mjs",
       "environment": "Windows (win32); Git explicit checkpoint pair"
     },
     {
-      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6c91f5b2e469d4d662f722ae644e55ebf56f7586 --head 0301a2bb9292b5ee21df3f394589c57030115b97 --path frontend/src/stores/journalDrafts.ts",
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6c91f5b2e469d4d662f722ae644e55ebf56f7586 --head c6b1cac8162ab40f9e1df15743e3195e392d656f --path frontend/src/components/AppShell.vue",
+      "result": "OK: 3 evidence units; complete path coverage",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows (win32); Git explicit checkpoint pair"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6c91f5b2e469d4d662f722ae644e55ebf56f7586 --head c6b1cac8162ab40f9e1df15743e3195e392d656f --path frontend/src/router/__tests__/router.spec.ts",
+      "result": "OK: 3 evidence units; complete path coverage",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows (win32); Git explicit checkpoint pair"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6c91f5b2e469d4d662f722ae644e55ebf56f7586 --head c6b1cac8162ab40f9e1df15743e3195e392d656f --path frontend/src/stores/__tests__/account.spec.ts",
+      "result": "OK: 5 evidence units; complete path coverage",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows (win32); Git explicit checkpoint pair"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6c91f5b2e469d4d662f722ae644e55ebf56f7586 --head c6b1cac8162ab40f9e1df15743e3195e392d656f --path frontend/src/stores/__tests__/auth.spec.ts",
+      "result": "OK: 2 evidence units; complete path coverage",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows (win32); Git explicit checkpoint pair"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6c91f5b2e469d4d662f722ae644e55ebf56f7586 --head c6b1cac8162ab40f9e1df15743e3195e392d656f --path frontend/src/stores/auth.ts",
+      "result": "OK: 2 evidence units; complete path coverage",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows (win32); Git explicit checkpoint pair"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6c91f5b2e469d4d662f722ae644e55ebf56f7586 --head c6b1cac8162ab40f9e1df15743e3195e392d656f --path frontend/src/stores/__tests__/journalDrafts.spec.ts",
+      "result": "OK: 4 evidence units; complete path coverage",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence.mjs",
+      "environment": "Windows (win32); Git explicit checkpoint pair"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 6c91f5b2e469d4d662f722ae644e55ebf56f7586 --head c6b1cac8162ab40f9e1df15743e3195e392d656f --path frontend/src/stores/journalDrafts.ts",
       "result": "OK: 18 evidence units; complete path coverage",
       "exit_code": 0,
       "tool": "prepare-change-evidence.mjs",
@@ -74,7 +74,7 @@
     },
     {
       "command": "Targeted HIGH-risk review using .agents/review/targeted-reviewer-contract.md; supplied hunks and allowlisted direct references only",
-      "result": "CHANGES_REQUIRED; 8/8 changed paths and evidence units reviewed",
+      "result": "CHANGES_REQUIRED; 8/8 changed paths and 41/41 evidence units reviewed",
       "exit_code": 0,
       "tool": "targeted-reviewer-contract v1",
       "environment": "Codex Lead review"
@@ -84,15 +84,15 @@
   "verdict": "CHANGES_REQUIRED",
   "findings_total": 1,
   "findings_blocking": 1,
-  "reviewed_commit": "0301a2bb9292b5ee21df3f394589c57030115b97",
-  "reviewed_from_head": "bc70d8291186a12d0160b4a726728deb549b76ce",
+  "reviewed_commit": "c6b1cac8162ab40f9e1df15743e3195e392d656f",
+  "reviewed_from_head": "53108cd002e27eef4617e474e7e87869338f73a5",
   "risk_context_digest": "sha256:5c3e1b7db251e727a044146d7de6dfdca55a28add41d20e71b865ee6be958196",
-  "review_context_digest": "sha256:7b6065c2072d3ff84da3d48bf0255b862c1a94971000064b9d54c43259055a6a",
+  "review_context_digest": "sha256:d8bfd02e671b0ab58ca65c472cf396af623ad660e615bcbb0ce74478e2b0bac4",
   "freshness": "FRESH_CANDIDATE",
   "review_context": {
     "story_id": "1.5",
     "slice_id": "C",
-    "checkpoint_commit": "0301a2bb9292b5ee21df3f394589c57030115b97",
+    "checkpoint_commit": "c6b1cac8162ab40f9e1df15743e3195e392d656f",
     "baseline_commit": "6c91f5b2e469d4d662f722ae644e55ebf56f7586",
     "changed_paths_sha256": "sha256:b3358c19dccc1c1752146a531b7137a89b828a37770dbaad4b9bdafb4e90342e",
     "risk_context_digest": "sha256:5c3e1b7db251e727a044146d7de6dfdca55a28add41d20e71b865ee6be958196",
@@ -142,17 +142,17 @@
       {
         "id": "app-unload-logout-tests",
         "verdict": "APPROVE",
-        "evidence_digest": "sha256:7d2706c2d0625d125585a15317db4a112ccf14874ad18e2ec45e24ffe3076185",
-        "evidence_set_digest": null,
+        "evidence_digest": "sha256:93b045dab75f924ac6f1d9f95b17890a5390a47985a6fb65799adb838cf01d9b",
+        "evidence_set_digest": "9dce9b9e0552b98b2debcd1758de231ef270b36b7eec4e959a6965e28a7951d5",
         "requested_paths": [
           "frontend/src/__tests__/App.spec.ts"
         ],
-        "unit_count": 3
+        "unit_count": 4
       },
       {
         "id": "app-unload-logout-guard",
         "verdict": "APPROVE",
-        "evidence_digest": "sha256:cf3efb6065b73c0f95d5d0c9d9a36e0cf3ade8fdc4e8f88eee7d9710f44810a8",
+        "evidence_digest": "sha256:852cee21d809fc7eec8c6f592fce7d607bb86e17586715a7a9ef5600ae04adc6",
         "evidence_set_digest": null,
         "requested_paths": [
           "frontend/src/components/AppShell.vue"
@@ -162,7 +162,7 @@
       {
         "id": "expiry-router-test",
         "verdict": "APPROVE",
-        "evidence_digest": "sha256:fdd6c9ae6dc0069ff15a8722c1de752befc90c8a5b88a77d6db078b797051495",
+        "evidence_digest": "sha256:dfcc31812d8e090d906fb1e0ac23357dbe22de8dd54c38fee162248cec488ce7",
         "evidence_set_digest": null,
         "requested_paths": [
           "frontend/src/router/__tests__/router.spec.ts"
@@ -172,7 +172,7 @@
       {
         "id": "expiry-account-test",
         "verdict": "APPROVE",
-        "evidence_digest": "sha256:3fc0c597057151e4d515146d85ef8201ff3cd1a3035007119a7ce8399e3fe428",
+        "evidence_digest": "sha256:ad2d995173c5939c2e99809c2b1337271d3de8e856b800b2f829178167ee38ea",
         "evidence_set_digest": null,
         "requested_paths": [
           "frontend/src/stores/__tests__/account.spec.ts"
@@ -182,7 +182,7 @@
       {
         "id": "auth-lifecycle-tests",
         "verdict": "APPROVE",
-        "evidence_digest": "sha256:7948475707a871cde1bb23caa59e9373b0b247920e7dbedaf815262fc25e9307",
+        "evidence_digest": "sha256:a020dd85e2d6f32928de30a7eecb80f8c2d597a1f46b1150eb1faf6b24f5e027",
         "evidence_set_digest": null,
         "requested_paths": [
           "frontend/src/stores/__tests__/auth.spec.ts"
@@ -192,7 +192,7 @@
       {
         "id": "auth-lifecycle-store",
         "verdict": "APPROVE",
-        "evidence_digest": "sha256:4b826e09994fbfa27d17b02e98e5dd549b4240572433713d309ee721f870af85",
+        "evidence_digest": "sha256:287332a767fdc6cae2d974eadec2a6c632d769925f02003bb90f4439d441f328",
         "evidence_set_digest": null,
         "requested_paths": [
           "frontend/src/stores/auth.ts"
@@ -202,8 +202,8 @@
       {
         "id": "draft-session-tests",
         "verdict": "APPROVE",
-        "evidence_digest": "sha256:0089635ffecd718f0cac9a3347a162cb1b9e3cffbd4c03eedc3ea1be36a0c695",
-        "evidence_set_digest": null,
+        "evidence_digest": "sha256:204c01c3a72ed26c1f1eb71f6285eb6ffdf9574c07b979ab893f1e35fa633890",
+        "evidence_set_digest": "d9065f128380ee8dd63661c08ab6f2dcf857bcc4f4236a37e3304e07e87ae937",
         "requested_paths": [
           "frontend/src/stores/__tests__/journalDrafts.spec.ts"
         ],
@@ -212,8 +212,8 @@
       {
         "id": "draft-session-warning-scope",
         "verdict": "CHANGES_REQUIRED",
-        "evidence_digest": "sha256:432fb6fc5306c41f3ab0854dcb749f9b7cc3d8dd883aa749a932eca4497cd848",
-        "evidence_set_digest": "9de0087662c05305a163fbceb1beb9b46709fe3dc465905c83c3c6a581f92bb0",
+        "evidence_digest": "sha256:5d15ee9c0d9e0acde76c68fe7c4de4b348f02234af2eb385277153ddf56618a8",
+        "evidence_set_digest": "99da902cadac2629e0c28a7fb0d568d0ef7eec9bc8571a02d3e2ba8005170e7e",
         "requested_paths": [
           "frontend/src/stores/journalDrafts.ts"
         ],
@@ -227,9 +227,9 @@
         "covered_paths": [
           "frontend/src/__tests__/App.spec.ts"
         ],
-        "unit_count": 3,
+        "unit_count": 4,
         "satisfied_questions": [
-          "App tests cover unload listener cleanup and logout cancel, failure, and success outcomes."
+          "App tests cover unload listener cleanup, logout cancel/failure/success, and the foreign-owner warning regression."
         ]
       },
       {
@@ -240,7 +240,7 @@
         ],
         "unit_count": 3,
         "satisfied_questions": [
-          "The guard confirms before logout, retains state on failure, and removes its unload listener on unmount."
+          "The shell uses the draft warning predicate for unload and logout and cleans up its unload listener."
         ]
       },
       {
@@ -251,7 +251,7 @@
         ],
         "unit_count": 3,
         "satisfied_questions": [
-          "An expired account context redirects to login while the draft remains quarantined and inaccessible."
+          "Expiry routes to sign-in while the private draft remains quarantined and inaccessible."
         ]
       },
       {
@@ -262,7 +262,7 @@
         ],
         "unit_count": 5,
         "satisfied_questions": [
-          "A 401 refresh clears visible account context while retaining the draft only in quarantined memory."
+          "A 401 account refresh clears visible account context and retains risky text only in quarantine."
         ]
       },
       {
@@ -273,7 +273,7 @@
         ],
         "unit_count": 2,
         "satisfied_questions": [
-          "Failed logout and expiry during pending logout do not prematurely advance generation or clear private state."
+          "Failed logout and expiry during pending logout preserve generation and private state."
         ]
       },
       {
@@ -284,7 +284,7 @@
         ],
         "unit_count": 2,
         "satisfied_questions": [
-          "Logout clearing waits for API success and session expiry is distinguished from explicit logout."
+          "Logout clears only after success and refresh distinguishes confirmed expiry from a live session."
         ]
       },
       {
@@ -295,7 +295,7 @@
         ],
         "unit_count": 4,
         "satisfied_questions": [
-          "Tests cover same-owner reconciliation, epoch quarantine, 401 stop, locked writes, owner-keyed lookup, and risky states."
+          "Tests cover reconciliation, epoch quarantine, 401 stop, locked writes, owner-keyed reads, and risky warning states."
         ]
       },
       {
@@ -306,13 +306,13 @@
         ],
         "unit_count": 18,
         "satisfied_questions": [
-          "Expired drafts remain hidden until reconciliation and reads stay keyed by owner identity."
+          "After a different owner signs in, the prior owner?s quarantined record no longer triggers this owner?s warning."
         ]
       }
     ],
     "findings": [
       {
-        "id": "foreign-owner-quarantined-draft-warning-leak",
+        "id": "same-owner-warning-suppressed-during-session-refresh",
         "classification": "VALID",
         "path": "frontend/src/stores/journalDrafts.ts",
         "hunk": {
@@ -320,9 +320,9 @@
           "newStart": 586
         },
         "symbol": "hasUnsavedDrafts",
-        "issue": "After session expiry, reset(session_expired) retains old-owner records as quarantined and needsAttention counts quarantined records as unsaved. If another owner signs in in the same tab, owner-keyed lookup keeps the old text hidden, but hasUnsavedDrafts scans every record and returns true. AppShell uses that global result for beforeunload and logout confirmation, so the new owner receives a warning about work that is not theirs.",
-        "evidence": "The supplied journalDrafts.ts hunk adds needsAttention(quarantined), session-expiry retention, and hasUnsavedDrafts over Object.values(drafts.value). resourceKey/getCurrentKey at frontend/src/stores/journalDrafts.ts:49-50,80-83 keep records keyed to their original owner; reset at :589-600 retains and quarantines them. frontend/src/components/AppShell.vue:26-28,41-43 uses hasUnsavedDrafts for unload and logout. frontend/src/stores/auth.ts:18-36 invokes the session-expiry reset; frontend/src/stores/account.ts:22-47 and frontend/src/router/index.ts:35-70 allow a new authenticated owner to reach the shell while the Pinia draft store remains mounted. The existing owner test at frontend/src/stores/__tests__/journalDrafts.spec.ts:152-163 checks getDraft isolation but not the new guard aggregation.",
-        "requiredCorrection": "Scope hasUnsavedDrafts to records owned by the currently authenticated owner while preserving the same owner’s quarantine and uncertain-write warning. Add an expiry -> different-owner login regression asserting the old draft neither appears nor triggers beforeunload/logout confirmation, while same-owner risky work remains guarded."
+        "issue": "The new authenticated-status gate returns false whenever refreshSession() is pending. refreshSession sets auth.status to loading before awaiting getSession() but retains auth.owner until the result is known. While a same-owner dirty or quarantined draft exists, AppShell still has its beforeunload and logout guards, yet both are suppressed during this window, so leaving can discard in-memory unsaved work.",
+        "evidence": "The supplied journalDrafts.ts hunk at oldStart 457/newStart 586 adds the auth.status !== authenticated early return. The allowlisted auth.ts:27-29 sets status to loading and awaits getSession without clearing owner; sync.ts:193-196 calls refreshSession after an authorization response while the shell-mounted sync coordinator is active; AppShell.vue:26-29 and :41-43 use hasUnsavedDrafts for beforeunload and logout confirmation. needsAttention continues to include dirty and quarantined records.",
+        "requiredCorrection": "Keep warning aggregation scoped to the retained current owner while session refresh is pending, and suppress it only once expiry clears that owner or ownership changes. Add a deferred getSession regression proving a same-owner risky draft still triggers beforeunload/logout protection during refresh, then verify confirmed expiry and a different-owner login remain warning-free."
       }
     ]
   },
@@ -339,9 +339,9 @@
       "covered_paths": [
         "frontend/src/__tests__/App.spec.ts"
       ],
-      "unit_count": 3,
+      "unit_count": 4,
       "satisfied_questions": [
-        "App tests cover unload listener cleanup and logout cancel, failure, and success outcomes."
+        "App tests cover unload listener cleanup, logout cancel/failure/success, and the foreign-owner warning regression."
       ]
     },
     {
@@ -352,7 +352,7 @@
       ],
       "unit_count": 3,
       "satisfied_questions": [
-        "The guard confirms before logout, retains state on failure, and removes its unload listener on unmount."
+        "The shell uses the draft warning predicate for unload and logout and cleans up its unload listener."
       ]
     },
     {
@@ -363,7 +363,7 @@
       ],
       "unit_count": 3,
       "satisfied_questions": [
-        "An expired account context redirects to login while the draft remains quarantined and inaccessible."
+        "Expiry routes to sign-in while the private draft remains quarantined and inaccessible."
       ]
     },
     {
@@ -374,7 +374,7 @@
       ],
       "unit_count": 5,
       "satisfied_questions": [
-        "A 401 refresh clears visible account context while retaining the draft only in quarantined memory."
+        "A 401 account refresh clears visible account context and retains risky text only in quarantine."
       ]
     },
     {
@@ -385,7 +385,7 @@
       ],
       "unit_count": 2,
       "satisfied_questions": [
-        "Failed logout and expiry during pending logout do not prematurely advance generation or clear private state."
+        "Failed logout and expiry during pending logout preserve generation and private state."
       ]
     },
     {
@@ -396,7 +396,7 @@
       ],
       "unit_count": 2,
       "satisfied_questions": [
-        "Logout clearing waits for API success and session expiry is distinguished from explicit logout."
+        "Logout clears only after success and refresh distinguishes confirmed expiry from a live session."
       ]
     },
     {
@@ -407,7 +407,7 @@
       ],
       "unit_count": 4,
       "satisfied_questions": [
-        "Tests cover same-owner reconciliation, epoch quarantine, 401 stop, locked writes, owner-keyed lookup, and risky states."
+        "Tests cover reconciliation, epoch quarantine, 401 stop, locked writes, owner-keyed reads, and risky warning states."
       ]
     },
     {
@@ -418,7 +418,7 @@
       ],
       "unit_count": 18,
       "satisfied_questions": [
-        "Expired drafts remain hidden until reconciliation and reads stay keyed by owner identity."
+        "After a different owner signs in, the prior owner?s quarantined record no longer triggers this owner?s warning."
       ]
     }
   ],
@@ -429,7 +429,7 @@
   ],
   "findings": [
     {
-      "id": "foreign-owner-quarantined-draft-warning-leak",
+      "id": "same-owner-warning-suppressed-during-session-refresh",
       "classification": "VALID",
       "path": "frontend/src/stores/journalDrafts.ts",
       "hunk": {
@@ -437,9 +437,9 @@
         "newStart": 586
       },
       "symbol": "hasUnsavedDrafts",
-      "issue": "After session expiry, reset(session_expired) retains old-owner records as quarantined and needsAttention counts quarantined records as unsaved. If another owner signs in in the same tab, owner-keyed lookup keeps the old text hidden, but hasUnsavedDrafts scans every record and returns true. AppShell uses that global result for beforeunload and logout confirmation, so the new owner receives a warning about work that is not theirs.",
-      "evidence": "The supplied journalDrafts.ts hunk adds needsAttention(quarantined), session-expiry retention, and hasUnsavedDrafts over Object.values(drafts.value). resourceKey/getCurrentKey at frontend/src/stores/journalDrafts.ts:49-50,80-83 keep records keyed to their original owner; reset at :589-600 retains and quarantines them. frontend/src/components/AppShell.vue:26-28,41-43 uses hasUnsavedDrafts for unload and logout. frontend/src/stores/auth.ts:18-36 invokes the session-expiry reset; frontend/src/stores/account.ts:22-47 and frontend/src/router/index.ts:35-70 allow a new authenticated owner to reach the shell while the Pinia draft store remains mounted. The existing owner test at frontend/src/stores/__tests__/journalDrafts.spec.ts:152-163 checks getDraft isolation but not the new guard aggregation.",
-      "requiredCorrection": "Scope hasUnsavedDrafts to records owned by the currently authenticated owner while preserving the same owner’s quarantine and uncertain-write warning. Add an expiry -> different-owner login regression asserting the old draft neither appears nor triggers beforeunload/logout confirmation, while same-owner risky work remains guarded."
+      "issue": "The new authenticated-status gate returns false whenever refreshSession() is pending. refreshSession sets auth.status to loading before awaiting getSession() but retains auth.owner until the result is known. While a same-owner dirty or quarantined draft exists, AppShell still has its beforeunload and logout guards, yet both are suppressed during this window, so leaving can discard in-memory unsaved work.",
+      "evidence": "The supplied journalDrafts.ts hunk at oldStart 457/newStart 586 adds the auth.status !== authenticated early return. The allowlisted auth.ts:27-29 sets status to loading and awaits getSession without clearing owner; sync.ts:193-196 calls refreshSession after an authorization response while the shell-mounted sync coordinator is active; AppShell.vue:26-29 and :41-43 use hasUnsavedDrafts for beforeunload and logout confirmation. needsAttention continues to include dirty and quarantined records.",
+      "requiredCorrection": "Keep warning aggregation scoped to the retained current owner while session refresh is pending, and suppress it only once expiry clears that owner or ownership changes. Add a deferred getSession regression proving a same-owner risky draft still triggers beforeunload/logout protection during refresh, then verify confirmed expiry and a different-owner login remain warning-free."
     }
   ],
   "requested_evidence": [],
@@ -493,6 +493,11 @@
       "path": "frontend/src/router/index.ts",
       "symbol": "router.beforeEach",
       "purpose": "direct expiry and post-login route flow"
+    },
+    {
+      "path": "frontend/src/stores/sync.ts",
+      "symbol": "refreshSession on 401/403",
+      "purpose": "direct trigger for session refresh while AppShell sync is mounted"
     }
   ],
   "judgment_flags": [
@@ -537,7 +542,7 @@
       "producer": "prepare-change-evidence-v1",
       "comparison": "explicit-pair",
       "base": "6c91f5b2e469d4d662f722ae644e55ebf56f7586",
-      "head": "0301a2bb9292b5ee21df3f394589c57030115b97"
+      "head": "c6b1cac8162ab40f9e1df15743e3195e392d656f"
     },
     "complete_path_coverage": true,
     "complete_unit_coverage": true,
@@ -545,56 +550,141 @@
       {
         "id": "app-unload-logout-tests",
         "verdict": "APPROVE",
-        "evidence_digest": "sha256:7d2706c2d0625d125585a15317db4a112ccf14874ad18e2ec45e24ffe3076185",
-        "evidence_set_digest": null,
+        "evidence_digest": "sha256:93b045dab75f924ac6f1d9f95b17890a5390a47985a6fb65799adb838cf01d9b",
+        "evidence_set_digest": "9dce9b9e0552b98b2debcd1758de231ef270b36b7eec4e959a6965e28a7951d5",
         "requested_paths": [
           "frontend/src/__tests__/App.spec.ts"
         ],
-        "unit_count": 3,
+        "unit_count": 4,
         "producer_output": {
           "status": "OK",
           "changeEvidence": {
-            "provenance": {
-              "producer": "prepare-change-evidence-v1",
-              "comparison": "explicit-pair",
-              "base": "6c91f5b2e469d4d662f722ae644e55ebf56f7586",
-              "head": "0301a2bb9292b5ee21df3f394589c57030115b97"
-            },
-            "paths": [
-              {
-                "path": "frontend/src/__tests__/App.spec.ts",
-                "hunks": [
-                  {
-                    "oldStart": 3,
-                    "oldLines": 19,
-                    "newStart": 3,
-                    "newLines": 34,
-                    "diffText": "@@ -3,19 +3,34 @@ import { beforeEach, expect, test, vi } from 'vitest'\n import { mount } from '@vue/test-utils'\n \n import * as challengesApi from '../api/challenges'\n+import * as authApi from '../api/auth'\n import App from '../App.vue'\n+import { useAccountStore } from '../stores/account'\n import { pinia } from '../pinia'\n import { queryClient } from '../queryClient'\n import router from '../router'\n+import { useJournalDraftsStore } from '../stores/journalDrafts'\n import { useAuthStore } from '../stores/auth'\n+import { useSyncStore } from '../stores/sync'\n+\n+const DATE = '2026-09-27'\n \n beforeEach(async () => {\n   vi.restoreAllMocks()\n   queryClient.clear()\n   vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: [] })\n   const auth = useAuthStore(pinia)\n+  const account = useAccountStore(pinia)\n+  const drafts = useJournalDraftsStore(pinia)\n+  const sync = useSyncStore(pinia)\n+  sync.stop()\n+  sync.reset()\n+  drafts.reset()\n+  account.reset()\n   auth.owner = null\n   auth.status = 'guest'\n+  auth.generation = 0\n+  vi.spyOn(sync, 'start').mockResolvedValue(true)\n   await router.push('/sign-in')\n })\n "
-                  },
-                  {
-                    "oldStart": 29,
-                    "oldLines": 6,
-                    "newStart": 44,
-                    "newLines": 7,
-                    "diffText": "@@ -29,6 +44,7 @@ test('guests see the owner login without public registration', () => {\n   expect(wrapper.text()).toContain('không mở đăng ký công khai')\n   expect(wrapper.find('nav').exists()).toBe(false)\n   expect(wrapper.find('main').exists()).toBe(true)\n+  wrapper.unmount()\n })\n \n test('authenticated navigation has the approved order and a clear mobile trigger', async () => {"
-                  },
-                  {
-                    "oldStart": 50,
-                    "oldLines": 4,
-                    "newStart": 66,
-                    "newLines": 188,
-                    "diffText": "@@ -50,4 +66,188 @@ test('authenticated navigation has the approved order and a clear mobile trigger\n     'Cài đặt',\n   ])\n   expect(wrapper.get('button[aria-controls=\"primary-navigation\"]').attributes('aria-expanded')).toBe('false')\n+  wrapper.unmount()\n+})\n+\n+test('beforeunload warns when an in-memory journal draft is unsaved', async () => {\n+  const auth = useAuthStore(pinia)\n+  const account = useAccountStore(pinia)\n+  const drafts = useJournalDraftsStore(pinia)\n+  auth.owner = { id: 42, name: 'Owner', email: 'owner@example.test' }\n+  auth.status = 'authenticated'\n+  auth.generation = 1\n+  account.status = 'ready'\n+  account.context = {\n+    timezone: 'Asia/Ho_Chi_Minh',\n+    account_date: DATE,\n+    week: { start_date: '2026-09-21', end_date: '2026-09-27' },\n+    account_revision: 11,\n+    data_epoch: 4,\n+    write_state: 'open',\n+  }\n+  drafts.hydrate({ challenge_id: 'challenge-a', local_date: DATE, journal: 'saved', journal_version: 1 })\n+  drafts.setDraftText('challenge-a', DATE, 'unsaved draft')\n+  await router.push('/today')\n+\n+  const wrapper = mount(App, {\n+    global: { plugins: [pinia, router, [VueQueryPlugin, { queryClient }]] },\n+  })\n+  const event = new Event('beforeunload', { cancelable: true })\n+  window.dispatchEvent(event)\n+\n+  expect(event.defaultPrevented).toBe(true)\n+  wrapper.unmount()\n+  const afterUnmount = new Event('beforeunload', { cancelable: true })\n+  window.dispatchEvent(afterUnmount)\n+  expect(afterUnmount.defaultPrevented).toBe(false)\n+})\n+\n+test('a clean journal record does not warn before unload', async () => {\n+  const auth = useAuthStore(pinia)\n+  const account = useAccountStore(pinia)\n+  const drafts = useJournalDraftsStore(pinia)\n+  auth.owner = { id: 42, name: 'Owner', email: 'owner@example.test' }\n+  auth.status = 'authenticated'\n+  auth.generation = 1\n+  account.status = 'ready'\n+  account.context = {\n+    timezone: 'Asia/Ho_Chi_Minh',\n+    account_date: DATE,\n+    week: { start_date: '2026-09-21', end_date: '2026-09-27' },\n+    account_revision: 11,\n+    data_epoch: 4,\n+    write_state: 'open',\n+  }\n+  drafts.hydrate({ challenge_id: 'challenge-a', local_date: DATE, journal: 'saved', journal_version: 1 })\n+  await router.push('/today')\n+\n+  const wrapper = mount(App, {\n+    global: { plugins: [pinia, router, [VueQueryPlugin, { queryClient }]] },\n+  })\n+  const event = new Event('beforeunload', { cancelable: true })\n+  window.dispatchEvent(event)\n+\n+  expect(event.defaultPrevented).toBe(false)\n+  wrapper.unmount()\n+})\n+\n+test('canceling logout with a draft leaves the private session and sync running', async () => {\n+  const auth = useAuthStore(pinia)\n+  const account = useAccountStore(pinia)\n+  const drafts = useJournalDraftsStore(pinia)\n+  const sync = useSyncStore(pinia)\n+  auth.owner = { id: 42, name: 'Owner', email: 'owner@example.test' }\n+  auth.status = 'authenticated'\n+  auth.generation = 1\n+  account.status = 'ready'\n+  account.context = {\n+    timezone: 'Asia/Ho_Chi_Minh',\n+    account_date: DATE,\n+    week: { start_date: '2026-09-21', end_date: '2026-09-27' },\n+    account_revision: 11,\n+    data_epoch: 4,\n+    write_state: 'open',\n+  }\n+  drafts.hydrate({ challenge_id: 'challenge-a', local_date: DATE, journal: 'saved', journal_version: 1 })\n+  drafts.setDraftText('challenge-a', DATE, 'unsaved draft')\n+  queryClient.setQueryData(['private-test'], { ownerId: 42 })\n+  const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false)\n+  const logout = vi.spyOn(authApi, 'logout').mockResolvedValue()\n+  const stop = vi.spyOn(sync, 'stop')\n+  await router.push('/today')\n+\n+  const wrapper = mount(App, {\n+    global: { plugins: [pinia, router, [VueQueryPlugin, { queryClient }]] },\n+  })\n+  await wrapper.get('nav button').trigger('click')\n+\n+  expect(confirm).toHaveBeenCalledOnce()\n+  expect(logout).not.toHaveBeenCalled()\n+  expect(stop).not.toHaveBeenCalled()\n+  expect(auth.status).toBe('authenticated')\n+  expect(queryClient.getQueryData(['private-test'])).toEqual({ ownerId: 42 })\n+  expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({ text: 'unsaved draft', status: 'dirty' })\n+  wrapper.unmount()\n+})\n+\n+test('a failed confirmed logout keeps the draft and reports the error without stopping sync', async () => {\n+  const auth = useAuthStore(pinia)\n+  const account = useAccountStore(pinia)\n+  const drafts = useJournalDraftsStore(pinia)\n+  const sync = useSyncStore(pinia)\n+  auth.owner = { id: 42, name: 'Owner', email: 'owner@example.test' }\n+  auth.status = 'authenticated'\n+  auth.generation = 1\n+  account.status = 'ready'\n+  account.context = {\n+    timezone: 'Asia/Ho_Chi_Minh',\n+    account_date: DATE,\n+    week: { start_date: '2026-09-21', end_date: '2026-09-27' },\n+    account_revision: 11,\n+    data_epoch: 4,\n+    write_state: 'open',\n+  }\n+  drafts.hydrate({ challenge_id: 'challenge-a', local_date: DATE, journal: 'saved', journal_version: 1 })\n+  drafts.setDraftText('challenge-a', DATE, 'unsaved draft')\n+  queryClient.setQueryData(['private-test'], { ownerId: 42 })\n+  vi.spyOn(window, 'confirm').mockReturnValue(true)\n+  vi.spyOn(authApi, 'logout').mockRejectedValue(new Error('logout unavailable'))\n+  const stop = vi.spyOn(sync, 'stop')\n+  const generation = auth.generation\n+  await router.push('/today')\n+\n+  const wrapper = mount(App, {\n+    global: { plugins: [pinia, router, [VueQueryPlugin, { queryClient }]] },\n+  })\n+  await wrapper.get('nav button').trigger('click')\n+  await Promise.resolve()\n+  await vi.waitFor(() => expect(wrapper.find('[role=\"alert\"]').exists()).toBe(true))\n+\n+  expect(auth.status).toBe('authenticated')\n+  expect(auth.generation).toBe(generation)\n+  expect(stop).not.toHaveBeenCalled()\n+  expect(queryClient.getQueryData(['private-test'])).toEqual({ ownerId: 42 })\n+  expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({ text: 'unsaved draft', status: 'dirty' })\n+  expect(wrapper.find('[role=\"alert\"]').exists()).toBe(true)\n+  wrapper.unmount()\n+})\n+\n+test('a confirmed successful logout clears private state and stops sync', async () => {\n+  const auth = useAuthStore(pinia)\n+  const account = useAccountStore(pinia)\n+  const drafts = useJournalDraftsStore(pinia)\n+  const sync = useSyncStore(pinia)\n+  auth.owner = { id: 42, name: 'Owner', email: 'owner@example.test' }\n+  auth.status = 'authenticated'\n+  auth.generation = 1\n+  account.status = 'ready'\n+  account.context = {\n+    timezone: 'Asia/Ho_Chi_Minh',\n+    account_date: DATE,\n+    week: { start_date: '2026-09-21', end_date: '2026-09-27' },\n+    account_revision: 11,\n+    data_epoch: 4,\n+    write_state: 'open',\n+  }\n+  drafts.hydrate({ challenge_id: 'challenge-a', local_date: DATE, journal: 'saved', journal_version: 1 })\n+  drafts.setDraftText('challenge-a', DATE, 'unsaved draft')\n+  queryClient.setQueryData(['private-test'], { ownerId: 42 })\n+  vi.spyOn(window, 'confirm').mockReturnValue(true)\n+  const logout = vi.spyOn(authApi, 'logout').mockResolvedValue()\n+  const stop = vi.spyOn(sync, 'stop')\n+  await router.push('/today')\n+\n+  const wrapper = mount(App, {\n+    global: { plugins: [pinia, router, [VueQueryPlugin, { queryClient }]] },\n+  })\n+  await wrapper.get('nav button').trigger('click')\n+\n+  expect(logout).toHaveBeenCalledOnce()\n+  await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('login'))\n+  expect(stop).toHaveBeenCalledOnce()\n+  expect(auth.status).toBe('guest')\n+  expect(auth.owner).toBeNull()\n+  expect(queryClient.getQueryData(['private-test'])).toBeUndefined()\n+  expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()\n+  wrapper.unmount()\n })"
-                  }
-                ]
-              }
-            ]
+            "evidenceSet": {
+              "schema": "change-evidence-set-v1",
+              "provenance": {
+                "producer": "prepare-change-evidence-v1",
+                "comparison": "explicit-pair",
+                "base": "6c91f5b2e469d4d662f722ae644e55ebf56f7586",
+                "head": "c6b1cac8162ab40f9e1df15743e3195e392d656f"
+              },
+              "requestedPaths": [
+                "frontend/src/__tests__/App.spec.ts"
+              ],
+              "sourceDigest": "9dce9b9e0552b98b2debcd1758de231ef270b36b7eec4e959a6965e28a7951d5",
+              "unitCount": 4,
+              "paths": [
+                {
+                  "path": "frontend/src/__tests__/App.spec.ts",
+                  "hunks": [
+                    {
+                      "header": "@@ -3,19 +3,34 @@ import { beforeEach, expect, test, vi } from 'vitest'",
+                      "oldStart": 3,
+                      "oldLines": 19,
+                      "newStart": 3,
+                      "newLines": 34,
+                      "bodyLineCount": 34
+                    },
+                    {
+                      "header": "@@ -29,6 +44,7 @@ test('guests see the owner login without public registration', () => {",
+                      "oldStart": 29,
+                      "oldLines": 6,
+                      "newStart": 44,
+                      "newLines": 7,
+                      "bodyLineCount": 7
+                    },
+                    {
+                      "header": "@@ -50,4 +66,242 @@ test('authenticated navigation has the approved order and a clear mobile trigger",
+                      "oldStart": 50,
+                      "oldLines": 4,
+                      "newStart": 66,
+                      "newLines": 242,
+                      "bodyLineCount": 242
+                    }
+                  ]
+                }
+              ],
+              "units": [
+                {
+                  "evidenceSetDigest": "9dce9b9e0552b98b2debcd1758de231ef270b36b7eec4e959a6965e28a7951d5",
+                  "path": "frontend/src/__tests__/App.spec.ts",
+                  "hunkIndex": 0,
+                  "originalOldStart": 3,
+                  "originalOldLines": 19,
+                  "originalNewStart": 3,
+                  "originalNewLines": 34,
+                  "unitIndex": 0,
+                  "hunkUnitIndex": 0,
+                  "hunkUnitCount": 1,
+                  "bodyStart": 0,
+                  "bodyEnd": 34,
+                  "oldLines": 19,
+                  "newLines": 34,
+                  "diffLineCount": 35,
+                  "bodyText": " import { mount } from '@vue/test-utils'\n \n import * as challengesApi from '../api/challenges'\n+import * as authApi from '../api/auth'\n import App from '../App.vue'\n+import { useAccountStore } from '../stores/account'\n import { pinia } from '../pinia'\n import { queryClient } from '../queryClient'\n import router from '../router'\n+import { useJournalDraftsStore } from '../stores/journalDrafts'\n import { useAuthStore } from '../stores/auth'\n+import { useSyncStore } from '../stores/sync'\n+\n+const DATE = '2026-09-27'\n \n beforeEach(async () => {\n   vi.restoreAllMocks()\n   queryClient.clear()\n   vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: [] })\n   const auth = useAuthStore(pinia)\n+  const account = useAccountStore(pinia)\n+  const drafts = useJournalDraftsStore(pinia)\n+  const sync = useSyncStore(pinia)\n+  sync.stop()\n+  sync.reset()\n+  drafts.reset()\n+  account.reset()\n   auth.owner = null\n   auth.status = 'guest'\n+  auth.generation = 0\n+  vi.spyOn(sync, 'start').mockResolvedValue(true)\n   await router.push('/sign-in')\n })\n "
+                },
+                {
+                  "evidenceSetDigest": "9dce9b9e0552b98b2debcd1758de231ef270b36b7eec4e959a6965e28a7951d5",
+                  "path": "frontend/src/__tests__/App.spec.ts",
+                  "hunkIndex": 1,
+                  "originalOldStart": 29,
+                  "originalOldLines": 6,
+                  "originalNewStart": 44,
+                  "originalNewLines": 7,
+                  "unitIndex": 1,
+                  "hunkUnitIndex": 0,
+                  "hunkUnitCount": 1,
+                  "bodyStart": 0,
+                  "bodyEnd": 7,
+                  "oldLines": 6,
+                  "newLines": 7,
+                  "diffLineCount": 8,
+                  "bodyText": "   expect(wrapper.text()).toContain('không mở đăng ký công khai')\n   expect(wrapper.find('nav').exists()).toBe(false)\n   expect(wrapper.find('main').exists()).toBe(true)\n+  wrapper.unmount()\n })\n \n test('authenticated navigation has the approved order and a clear mobile trigger', async () => {"
+                },
+                {
+                  "evidenceSetDigest": "9dce9b9e0552b98b2debcd1758de231ef270b36b7eec4e959a6965e28a7951d5",
+                  "path": "frontend/src/__tests__/App.spec.ts",
+                  "hunkIndex": 2,
+                  "originalOldStart": 50,
+                  "originalOldLines": 4,
+                  "originalNewStart": 66,
+                  "originalNewLines": 242,
+                  "unitIndex": 2,
+                  "hunkUnitIndex": 0,
+                  "hunkUnitCount": 2,
+                  "bodyStart": 0,
+                  "bodyEnd": 239,
+                  "oldLines": 3,
+                  "newLines": 239,
+                  "diffLineCount": 240,
+                  "bodyText": "     'Cài đặt',\n   ])\n   expect(wrapper.get('button[aria-controls=\"primary-navigation\"]').attributes('aria-expanded')).toBe('false')\n+  wrapper.unmount()\n+})\n+\n+test('beforeunload warns when an in-memory journal draft is unsaved', async () => {\n+  const auth = useAuthStore(pinia)\n+  const account = useAccountStore(pinia)\n+  const drafts = useJournalDraftsStore(pinia)\n+  auth.owner = { id: 42, name: 'Owner', email: 'owner@example.test' }\n+  auth.status = 'authenticated'\n+  auth.generation = 1\n+  account.status = 'ready'\n+  account.context = {\n+    timezone: 'Asia/Ho_Chi_Minh',\n+    account_date: DATE,\n+    week: { start_date: '2026-09-21', end_date: '2026-09-27' },\n+    account_revision: 11,\n+    data_epoch: 4,\n+    write_state: 'open',\n+  }\n+  drafts.hydrate({ challenge_id: 'challenge-a', local_date: DATE, journal: 'saved', journal_version: 1 })\n+  drafts.setDraftText('challenge-a', DATE, 'unsaved draft')\n+  await router.push('/today')\n+\n+  const wrapper = mount(App, {\n+    global: { plugins: [pinia, router, [VueQueryPlugin, { queryClient }]] },\n+  })\n+  const event = new Event('beforeunload', { cancelable: true })\n+  window.dispatchEvent(event)\n+\n+  expect(event.defaultPrevented).toBe(true)\n+  wrapper.unmount()\n+  const afterUnmount = new Event('beforeunload', { cancelable: true })\n+  window.dispatchEvent(afterUnmount)\n+  expect(afterUnmount.defaultPrevented).toBe(false)\n+})\n+\n+test('a new owner is not warned about another owner’s quarantined draft after session expiry', async () => {\n+  const auth = useAuthStore(pinia)\n+  const account = useAccountStore(pinia)\n+  const drafts = useJournalDraftsStore(pinia)\n+  auth.owner = { id: 42, name: 'Owner', email: 'owner@example.test' }\n+  auth.status = 'authenticated'\n+  auth.generation = 1\n+  account.status = 'ready'\n+  account.context = {\n+    timezone: 'Asia/Ho_Chi_Minh',\n+    account_date: DATE,\n+    week: { start_date: '2026-09-21', end_date: '2026-09-27' },\n+    account_revision: 11,\n+    data_epoch: 4,\n+    write_state: 'open',\n+  }\n+  drafts.hydrate({ challenge_id: 'challenge-a', local_date: DATE, journal: 'saved', journal_version: 1 })\n+  drafts.setDraftText('challenge-a', DATE, 'owner 42 private draft')\n+\n+  vi.spyOn(authApi, 'getSession').mockResolvedValue(null)\n+  await auth.refreshSession()\n+  vi.spyOn(authApi, 'login').mockResolvedValue({\n+    owner: { id: 43, name: 'Other owner', email: 'other@example.test' },\n+    redirect_to: '/today',\n+  } as authApi.LoginResult)\n+  await auth.logIn({ email: 'other@example.test', password: 'secret' })\n+  account.status = 'ready'\n+  account.context = {\n+    timezone: 'Asia/Ho_Chi_Minh',\n+    account_date: DATE,\n+    week: { start_date: '2026-09-21', end_date: '2026-09-27' },\n+    account_revision: 12,\n+    data_epoch: 4,\n+    write_state: 'open',\n+  }\n+\n+  const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false)\n+  const logout = vi.spyOn(authApi, 'logout').mockResolvedValue()\n+  await router.push('/today')\n+\n+  const wrapper = mount(App, {\n+    global: { plugins: [pinia, router, [VueQueryPlugin, { queryClient }]] },\n+  })\n+  const event = new Event('beforeunload', { cancelable: true })\n+  window.dispatchEvent(event)\n+  expect(Object.values(drafts.drafts)[0]).toMatchObject({ ownerId: 42, status: 'quarantined' })\n+  await wrapper.get('nav button').trigger('click')\n+\n+  expect(event.defaultPrevented).toBe(false)\n+  expect(confirm).not.toHaveBeenCalled()\n+  expect(logout).toHaveBeenCalledOnce()\n+  wrapper.unmount()\n+})\n+\n+test('a clean journal record does not warn before unload', async () => {\n+  const auth = useAuthStore(pinia)\n+  const account = useAccountStore(pinia)\n+  const drafts = useJournalDraftsStore(pinia)\n+  auth.owner = { id: 42, name: 'Owner', email: 'owner@example.test' }\n+  auth.status = 'authenticated'\n+  auth.generation = 1\n+  account.status = 'ready'\n+  account.context = {\n+    timezone: 'Asia/Ho_Chi_Minh',\n+    account_date: DATE,\n+    week: { start_date: '2026-09-21', end_date: '2026-09-27' },\n+    account_revision: 11,\n+    data_epoch: 4,\n+    write_state: 'open',\n+  }\n+  drafts.hydrate({ challenge_id: 'challenge-a', local_date: DATE, journal: 'saved', journal_version: 1 })\n+  await router.push('/today')\n+\n+  const wrapper = mount(App, {\n+    global: { plugins: [pinia, router, [VueQueryPlugin, { queryClient }]] },\n+  })\n+  const event = new Event('beforeunload', { cancelable: true })\n+  window.dispatchEvent(event)\n+\n+  expect(event.defaultPrevented).toBe(false)\n+  wrapper.unmount()\n+})\n+\n+test('canceling logout with a draft leaves the private session and sync running', async () => {\n+  const auth = useAuthStore(pinia)\n+  const account = useAccountStore(pinia)\n+  const drafts = useJournalDraftsStore(pinia)\n+  const sync = useSyncStore(pinia)\n+  auth.owner = { id: 42, name: 'Owner', email: 'owner@example.test' }\n+  auth.status = 'authenticated'\n+  auth.generation = 1\n+  account.status = 'ready'\n+  account.context = {\n+    timezone: 'Asia/Ho_Chi_Minh',\n+    account_date: DATE,\n+    week: { start_date: '2026-09-21', end_date: '2026-09-27' },\n+    account_revision: 11,\n+    data_epoch: 4,\n+    write_state: 'open',\n+  }\n+  drafts.hydrate({ challenge_id: 'challenge-a', local_date: DATE, journal: 'saved', journal_version: 1 })\n+  drafts.setDraftText('challenge-a', DATE, 'unsaved draft')\n+  queryClient.setQueryData(['private-test'], { ownerId: 42 })\n+  const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false)\n+  const logout = vi.spyOn(authApi, 'logout').mockResolvedValue()\n+  const stop = vi.spyOn(sync, 'stop')\n+  await router.push('/today')\n+\n+  const wrapper = mount(App, {\n+    global: { plugins: [pinia, router, [VueQueryPlugin, { queryClient }]] },\n+  })\n+  await wrapper.get('nav button').trigger('click')\n+\n+  expect(confirm).toHaveBeenCalledOnce()\n+  expect(logout).not.toHaveBeenCalled()\n+  expect(stop).not.toHaveBeenCalled()\n+  expect(auth.status).toBe('authenticated')\n+  expect(queryClient.getQueryData(['private-test'])).toEqual({ ownerId: 42 })\n+  expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({ text: 'unsaved draft', status: 'dirty' })\n+  wrapper.unmount()\n+})\n+\n+test('a failed confirmed logout keeps the draft and reports the error without stopping sync', async () => {\n+  const auth = useAuthStore(pinia)\n+  const account = useAccountStore(pinia)\n+  const drafts = useJournalDraftsStore(pinia)\n+  const sync = useSyncStore(pinia)\n+  auth.owner = { id: 42, name: 'Owner', email: 'owner@example.test' }\n+  auth.status = 'authenticated'\n+  auth.generation = 1\n+  account.status = 'ready'\n+  account.context = {\n+    timezone: 'Asia/Ho_Chi_Minh',\n+    account_date: DATE,\n+    week: { start_date: '2026-09-21', end_date: '2026-09-27' },\n+    account_revision: 11,\n+    data_epoch: 4,\n+    write_state: 'open',\n+  }\n+  drafts.hydrate({ challenge_id: 'challenge-a', local_date: DATE, journal: 'saved', journal_version: 1 })\n+  drafts.setDraftText('challenge-a', DATE, 'unsaved draft')\n+  queryClient.setQueryData(['private-test'], { ownerId: 42 })\n+  vi.spyOn(window, 'confirm').mockReturnValue(true)\n+  vi.spyOn(authApi, 'logout').mockRejectedValue(new Error('logout unavailable'))\n+  const stop = vi.spyOn(sync, 'stop')\n+  const generation = auth.generation\n+  await router.push('/today')\n+\n+  const wrapper = mount(App, {\n+    global: { plugins: [pinia, router, [VueQueryPlugin, { queryClient }]] },\n+  })\n+  await wrapper.get('nav button').trigger('click')\n+  await Promise.resolve()\n+  await vi.waitFor(() => expect(wrapper.find('[role=\"alert\"]').exists()).toBe(true))\n+\n+  expect(auth.status).toBe('authenticated')\n+  expect(auth.generation).toBe(generation)\n+  expect(stop).not.toHaveBeenCalled()\n+  expect(queryClient.getQueryData(['private-test'])).toEqual({ ownerId: 42 })\n+  expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({ text: 'unsaved draft', status: 'dirty' })\n+  expect(wrapper.find('[role=\"alert\"]').exists()).toBe(true)\n+  wrapper.unmount()\n+})\n+\n+test('a confirmed successful logout clears private state and stops sync', async () => {\n+  const auth = useAuthStore(pinia)\n+  const account = useAccountStore(pinia)\n+  const drafts = useJournalDraftsStore(pinia)\n+  const sync = useSyncStore(pinia)\n+  auth.owner = { id: 42, name: 'Owner', email: 'owner@example.test' }\n+  auth.status = 'authenticated'\n+  auth.generation = 1\n+  account.status = 'ready'\n+  account.context = {\n+    timezone: 'Asia/Ho_Chi_Minh',\n+    account_date: DATE,\n+    week: { start_date: '2026-09-21', end_date: '2026-09-27' },\n+    account_revision: 11,\n+    data_epoch: 4,\n+    write_state: 'open',\n+  }\n+  drafts.hydrate({ challenge_id: 'challenge-a', local_date: DATE, journal: 'saved', journal_version: 1 })\n+  drafts.setDraftText('challenge-a', DATE, 'unsaved draft')\n+  queryClient.setQueryData(['private-test'], { ownerId: 42 })\n+  vi.spyOn(window, 'confirm').mockReturnValue(true)\n+  const logout = vi.spyOn(authApi, 'logout').mockResolvedValue()\n+  const stop = vi.spyOn(sync, 'stop')\n+  await router.push('/today')\n+\n+  const wrapper = mount(App, {\n+    global: { plugins: [pinia, router, [VueQueryPlugin, { queryClient }]] },\n+  })\n+  await wrapper.get('nav button').trigger('click')\n+\n+  expect(logout).toHaveBeenCalledOnce()\n+  await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('login'))\n+  expect(stop).toHaveBeenCalledOnce()\n+  expect(auth.status).toBe('guest')\n+  expect(auth.owner).toBeNull()\n+  expect(queryClient.getQueryData(['private-test'])).toBeUndefined()"
+                },
+                {
+                  "evidenceSetDigest": "9dce9b9e0552b98b2debcd1758de231ef270b36b7eec4e959a6965e28a7951d5",
+                  "path": "frontend/src/__tests__/App.spec.ts",
+                  "hunkIndex": 2,
+                  "originalOldStart": 50,
+                  "originalOldLines": 4,
+                  "originalNewStart": 66,
+                  "originalNewLines": 242,
+                  "unitIndex": 3,
+                  "hunkUnitIndex": 1,
+                  "hunkUnitCount": 2,
+                  "bodyStart": 239,
+                  "bodyEnd": 242,
+                  "oldLines": 1,
+                  "newLines": 3,
+                  "diffLineCount": 4,
+                  "bodyText": "+  expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()\n+  wrapper.unmount()\n })"
+                }
+              ]
+            }
           }
         }
       },
       {
         "id": "app-unload-logout-guard",
         "verdict": "APPROVE",
-        "evidence_digest": "sha256:cf3efb6065b73c0f95d5d0c9d9a36e0cf3ade8fdc4e8f88eee7d9710f44810a8",
+        "evidence_digest": "sha256:852cee21d809fc7eec8c6f592fce7d607bb86e17586715a7a9ef5600ae04adc6",
         "evidence_set_digest": null,
         "requested_paths": [
           "frontend/src/components/AppShell.vue"
@@ -607,7 +697,7 @@
               "producer": "prepare-change-evidence-v1",
               "comparison": "explicit-pair",
               "base": "6c91f5b2e469d4d662f722ae644e55ebf56f7586",
-              "head": "0301a2bb9292b5ee21df3f394589c57030115b97"
+              "head": "c6b1cac8162ab40f9e1df15743e3195e392d656f"
             },
             "paths": [
               {
@@ -643,7 +733,7 @@
       {
         "id": "expiry-router-test",
         "verdict": "APPROVE",
-        "evidence_digest": "sha256:fdd6c9ae6dc0069ff15a8722c1de752befc90c8a5b88a77d6db078b797051495",
+        "evidence_digest": "sha256:dfcc31812d8e090d906fb1e0ac23357dbe22de8dd54c38fee162248cec488ce7",
         "evidence_set_digest": null,
         "requested_paths": [
           "frontend/src/router/__tests__/router.spec.ts"
@@ -656,7 +746,7 @@
               "producer": "prepare-change-evidence-v1",
               "comparison": "explicit-pair",
               "base": "6c91f5b2e469d4d662f722ae644e55ebf56f7586",
-              "head": "0301a2bb9292b5ee21df3f394589c57030115b97"
+              "head": "c6b1cac8162ab40f9e1df15743e3195e392d656f"
             },
             "paths": [
               {
@@ -692,7 +782,7 @@
       {
         "id": "expiry-account-test",
         "verdict": "APPROVE",
-        "evidence_digest": "sha256:3fc0c597057151e4d515146d85ef8201ff3cd1a3035007119a7ce8399e3fe428",
+        "evidence_digest": "sha256:ad2d995173c5939c2e99809c2b1337271d3de8e856b800b2f829178167ee38ea",
         "evidence_set_digest": null,
         "requested_paths": [
           "frontend/src/stores/__tests__/account.spec.ts"
@@ -705,7 +795,7 @@
               "producer": "prepare-change-evidence-v1",
               "comparison": "explicit-pair",
               "base": "6c91f5b2e469d4d662f722ae644e55ebf56f7586",
-              "head": "0301a2bb9292b5ee21df3f394589c57030115b97"
+              "head": "c6b1cac8162ab40f9e1df15743e3195e392d656f"
             },
             "paths": [
               {
@@ -755,7 +845,7 @@
       {
         "id": "auth-lifecycle-tests",
         "verdict": "APPROVE",
-        "evidence_digest": "sha256:7948475707a871cde1bb23caa59e9373b0b247920e7dbedaf815262fc25e9307",
+        "evidence_digest": "sha256:a020dd85e2d6f32928de30a7eecb80f8c2d597a1f46b1150eb1faf6b24f5e027",
         "evidence_set_digest": null,
         "requested_paths": [
           "frontend/src/stores/__tests__/auth.spec.ts"
@@ -768,7 +858,7 @@
               "producer": "prepare-change-evidence-v1",
               "comparison": "explicit-pair",
               "base": "6c91f5b2e469d4d662f722ae644e55ebf56f7586",
-              "head": "0301a2bb9292b5ee21df3f394589c57030115b97"
+              "head": "c6b1cac8162ab40f9e1df15743e3195e392d656f"
             },
             "paths": [
               {
@@ -797,7 +887,7 @@
       {
         "id": "auth-lifecycle-store",
         "verdict": "APPROVE",
-        "evidence_digest": "sha256:4b826e09994fbfa27d17b02e98e5dd549b4240572433713d309ee721f870af85",
+        "evidence_digest": "sha256:287332a767fdc6cae2d974eadec2a6c632d769925f02003bb90f4439d441f328",
         "evidence_set_digest": null,
         "requested_paths": [
           "frontend/src/stores/auth.ts"
@@ -810,7 +900,7 @@
               "producer": "prepare-change-evidence-v1",
               "comparison": "explicit-pair",
               "base": "6c91f5b2e469d4d662f722ae644e55ebf56f7586",
-              "head": "0301a2bb9292b5ee21df3f394589c57030115b97"
+              "head": "c6b1cac8162ab40f9e1df15743e3195e392d656f"
             },
             "paths": [
               {
@@ -839,8 +929,8 @@
       {
         "id": "draft-session-tests",
         "verdict": "APPROVE",
-        "evidence_digest": "sha256:0089635ffecd718f0cac9a3347a162cb1b9e3cffbd4c03eedc3ea1be36a0c695",
-        "evidence_set_digest": null,
+        "evidence_digest": "sha256:204c01c3a72ed26c1f1eb71f6285eb6ffdf9574c07b979ab893f1e35fa633890",
+        "evidence_set_digest": "d9065f128380ee8dd63661c08ab6f2dcf857bcc4f4236a37e3304e07e87ae937",
         "requested_paths": [
           "frontend/src/stores/__tests__/journalDrafts.spec.ts"
         ],
@@ -848,55 +938,141 @@
         "producer_output": {
           "status": "OK",
           "changeEvidence": {
-            "provenance": {
-              "producer": "prepare-change-evidence-v1",
-              "comparison": "explicit-pair",
-              "base": "6c91f5b2e469d4d662f722ae644e55ebf56f7586",
-              "head": "0301a2bb9292b5ee21df3f394589c57030115b97"
-            },
-            "paths": [
-              {
-                "path": "frontend/src/stores/__tests__/journalDrafts.spec.ts",
-                "hunks": [
-                  {
-                    "oldStart": 2,
-                    "oldLines": 6,
-                    "newStart": 2,
-                    "newLines": 8,
-                    "diffText": "@@ -2,6 +2,8 @@ import { createPinia, setActivePinia } from 'pinia'\n import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'\n \n import * as challengesApi from '../../api/challenges'\n+import * as accountApi from '../../api/account'\n+import * as authApi from '../../api/auth'\n import { useAccountStore } from '../account'\n import { useAuthStore } from '../auth'\n import { useJournalDraftsStore } from '../journalDrafts'"
-                  },
-                  {
-                    "oldStart": 233,
-                    "oldLines": 7,
-                    "newStart": 235,
-                    "newLines": 8,
-                    "diffText": "@@ -233,7 +235,8 @@ describe('useJournalDraftsStore', () => {\n     response.resolve(mutation('challenge-a', 'pending draft', 2))\n     await saving\n \n-    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({\n+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()\n+    expect(Object.values(drafts.drafts)[0]).toMatchObject({\n       text: 'pending draft',\n       journalVersion: 1,\n       acknowledgedClientRevision: 0,"
-                  },
-                  {
-                    "oldStart": 254,
-                    "oldLines": 7,
-                    "newStart": 257,
-                    "newLines": 8,
-                    "diffText": "@@ -254,7 +257,8 @@ describe('useJournalDraftsStore', () => {\n     response.reject(new TypeError('network timeout'))\n     await saving\n \n-    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({\n+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()\n+    expect(Object.values(drafts.drafts)[0]).toMatchObject({\n       status: 'quarantined',\n       error: { kind: 'stale_context' },\n     })"
-                  },
-                  {
-                    "oldStart": 309,
-                    "oldLines": 6,
-                    "newStart": 313,
-                    "newLines": 186,
-                    "diffText": "@@ -309,6 +313,186 @@ describe('useJournalDraftsStore', () => {\n \n     expect(sync.reconcileBeforeWrite).not.toHaveBeenCalled()\n     expect(save).not.toHaveBeenCalled()\n-    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({ status: 'quarantined' })\n+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()\n+    expect(Object.values(drafts.drafts)[0]).toMatchObject({ status: 'quarantined' })\n+  })\n+\n+  it('keeps an expired draft hidden until same-owner epoch and version reconciliation, then replays the same command', async () => {\n+    const save = vi.spyOn(challengesApi, 'saveChallengeJournal')\n+    save\n+      .mockRejectedValueOnce(new TypeError('network timeout'))\n+      .mockResolvedValueOnce(mutation('challenge-a', 'private draft', 2))\n+    const base = snapshot('challenge-a', 'server baseline', 1)\n+    drafts.hydrate(base)\n+    drafts.setDraftText('challenge-a', DATE, 'private draft')\n+\n+    await drafts.save('challenge-a', DATE)\n+    const originalRequest = save.mock.calls[0]\n+    expect(originalRequest).toBeDefined()\n+    expect(drafts.getDraft('challenge-a', DATE)?.pendingCommand?.request).toEqual(originalRequest?.[2])\n+\n+    vi.spyOn(authApi, 'getSession').mockResolvedValue(null)\n+    await auth.refreshSession()\n+\n+    expect(auth.status).toBe('guest')\n+    expect(account.context).toBeNull()\n+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()\n+    expect(Object.values(drafts.drafts)).toMatchObject([\n+      { text: 'private draft', status: 'quarantined', pendingCommand: { request: originalRequest?.[2] } },\n+    ])\n+\n+    vi.spyOn(authApi, 'login').mockResolvedValue({\n+      owner: { id: 42, name: 'Owner', email: 'owner@example.test' },\n+      redirect_to: '/challenges',\n+    } as authApi.LoginResult)\n+    await auth.logIn({ email: 'owner@example.test', password: 'secret' })\n+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()\n+\n+    vi.spyOn(accountApi, 'getAccountContext').mockResolvedValue({\n+      timezone: 'Asia/Ho_Chi_Minh',\n+      account_date: DATE,\n+      week: { start_date: '2026-09-21', end_date: '2026-09-27' },\n+      account_revision: 12,\n+      data_epoch: 4,\n+      write_state: 'open',\n+    })\n+    await account.refresh()\n+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()\n+\n+    drafts.hydrate(base)\n+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({\n+      text: 'private draft',\n+      status: 'error',\n+      pendingCommand: { request: originalRequest?.[2] },\n+    })\n+\n+    await drafts.save('challenge-a', DATE)\n+\n+    expect(save).toHaveBeenCalledTimes(2)\n+    expect(save.mock.calls[1]).toEqual(originalRequest)\n+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({\n+      text: 'private draft',\n+      status: 'saved',\n+      acknowledgedClientRevision: 1,\n+      pendingCommand: null,\n+    })\n+  })\n+\n+  it('keeps an expired draft quarantined when the owner returns in a different data epoch', async () => {\n+    const save = vi.spyOn(challengesApi, 'saveChallengeJournal')\n+    save.mockRejectedValueOnce(new TypeError('network timeout'))\n+    const base = snapshot('challenge-a', 'server baseline', 1)\n+    drafts.hydrate(base)\n+    drafts.setDraftText('challenge-a', DATE, 'private draft')\n+\n+    await drafts.save('challenge-a', DATE)\n+    const originalRequest = save.mock.calls[0]?.[2]\n+    expect(originalRequest).toBeDefined()\n+\n+    vi.spyOn(authApi, 'getSession').mockResolvedValue(null)\n+    await auth.refreshSession()\n+    vi.spyOn(authApi, 'login').mockResolvedValue({\n+      owner: { id: 42, name: 'Owner', email: 'owner@example.test' },\n+      redirect_to: '/challenges',\n+    } as authApi.LoginResult)\n+    await auth.logIn({ email: 'owner@example.test', password: 'secret' })\n+    vi.spyOn(accountApi, 'getAccountContext').mockResolvedValue({\n+      timezone: 'Asia/Ho_Chi_Minh',\n+      account_date: DATE,\n+      week: { start_date: '2026-09-21', end_date: '2026-09-27' },\n+      account_revision: 13,\n+      data_epoch: 5,\n+      write_state: 'open',\n+    })\n+    await account.refresh()\n+\n+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()\n+    drafts.hydrate(snapshot('challenge-a', 'new epoch server text', 7))\n+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({\n+      text: 'private draft',\n+      dataEpoch: 4,\n+      status: 'quarantined',\n+      pendingCommand: { request: originalRequest },\n+    })\n+\n+    await drafts.save('challenge-a', DATE)\n+\n+    expect(save).toHaveBeenCalledOnce()\n+    expect(save.mock.calls[0]?.[2]).toEqual(originalRequest)\n+  })\n+\n+  it('does not send a journal mutation while the account write state is locked', async () => {\n+    const save = vi.spyOn(challengesApi, 'saveChallengeJournal')\n+    drafts.hydrate(snapshot('challenge-a', 'server baseline', 1))\n+    drafts.setDraftText('challenge-a', DATE, 'private draft')\n+    account.context!.write_state = 'locked_for_import'\n+\n+    await drafts.save('challenge-a', DATE)\n+\n+    expect(sync.reconcileBeforeWrite).toHaveBeenCalledOnce()\n+    expect(save).not.toHaveBeenCalled()\n+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({ status: 'blocked' })\n+  })\n+\n+  it('refreshes auth after a 401 and never retries or exposes the draft before reconciliation', async () => {\n+    const save = vi.spyOn(challengesApi, 'saveChallengeJournal')\n+    save.mockRejectedValueOnce(Object.assign(new Error('expired'), { status: 401 }))\n+    vi.spyOn(authApi, 'getSession').mockResolvedValue(null)\n+    drafts.hydrate(snapshot('challenge-a', 'server baseline', 1))\n+    drafts.setDraftText('challenge-a', DATE, 'private draft')\n+\n+    await drafts.save('challenge-a', DATE)\n+    await drafts.save('challenge-a', DATE)\n+\n+    expect(auth.status).toBe('guest')\n+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()\n+    expect(Object.values(drafts.drafts)[0]).toMatchObject({\n+      text: 'private draft',\n+      status: 'quarantined',\n+      requiresReconciliation: true,\n+    })\n+    expect(save).toHaveBeenCalledOnce()\n+  })\n+\n+  it('treats error, conflict, blocked, and unresolved command states as unsaved work', () => {\n+    drafts.hydrate(snapshot('challenge-a', 'server baseline', 1))\n+    const record = drafts.getDraft('challenge-a', DATE)\n+    expect(record).toBeDefined()\n+    expect(drafts.hasUnsavedDrafts()).toBe(false)\n+\n+    record!.status = 'error'\n+    expect(drafts.hasUnsavedDrafts()).toBe(true)\n+    record!.status = 'conflict'\n+    expect(drafts.hasUnsavedDrafts()).toBe(true)\n+    record!.status = 'blocked'\n+    expect(drafts.hasUnsavedDrafts()).toBe(true)\n+    record!.status = 'saving'\n+    record!.pendingCommand = Object.freeze({\n+      revision: 0,\n+      ownerId: 42,\n+      authGeneration: auth.generation,\n+      dataEpoch: 4,\n+      request: Object.freeze({ command_id: 'uncertain', data_epoch: 4, base_version: 1, journal: 'server baseline' }),\n+    })\n+    expect(drafts.hasUnsavedDrafts()).toBe(true)\n+\n+    record!.status = 'saved'\n+    record!.pendingCommand = null\n+    expect(drafts.hasUnsavedDrafts()).toBe(false)\n+  })\n+\n+  it('reconciles a changed same-epoch version as a conflict without changing the local base', () => {\n+    drafts.hydrate(snapshot('challenge-a', 'server baseline', 1))\n+    drafts.setDraftText('challenge-a', DATE, 'private draft')\n+    auth.generation += 1\n+\n+    drafts.hydrate(snapshot('challenge-a', 'updated on server', 2))\n+\n+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({\n+      text: 'private draft',\n+      journalVersion: 1,\n+      status: 'conflict',\n+      conflictSnapshot: snapshot('challenge-a', 'updated on server', 2),\n+    })\n   })\n })"
-                  }
-                ]
-              }
-            ]
+            "evidenceSet": {
+              "schema": "change-evidence-set-v1",
+              "provenance": {
+                "producer": "prepare-change-evidence-v1",
+                "comparison": "explicit-pair",
+                "base": "6c91f5b2e469d4d662f722ae644e55ebf56f7586",
+                "head": "c6b1cac8162ab40f9e1df15743e3195e392d656f"
+              },
+              "requestedPaths": [
+                "frontend/src/stores/__tests__/journalDrafts.spec.ts"
+              ],
+              "sourceDigest": "d9065f128380ee8dd63661c08ab6f2dcf857bcc4f4236a37e3304e07e87ae937",
+              "unitCount": 4,
+              "paths": [
+                {
+                  "path": "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+                  "hunks": [
+                    {
+                      "header": "@@ -2,6 +2,8 @@ import { createPinia, setActivePinia } from 'pinia'",
+                      "oldStart": 2,
+                      "oldLines": 6,
+                      "newStart": 2,
+                      "newLines": 8,
+                      "bodyLineCount": 8
+                    },
+                    {
+                      "header": "@@ -233,7 +235,8 @@ describe('useJournalDraftsStore', () => {",
+                      "oldStart": 233,
+                      "oldLines": 7,
+                      "newStart": 235,
+                      "newLines": 8,
+                      "bodyLineCount": 9
+                    },
+                    {
+                      "header": "@@ -254,7 +257,8 @@ describe('useJournalDraftsStore', () => {",
+                      "oldStart": 254,
+                      "oldLines": 7,
+                      "newStart": 257,
+                      "newLines": 8,
+                      "bodyLineCount": 9
+                    },
+                    {
+                      "header": "@@ -309,6 +313,216 @@ describe('useJournalDraftsStore', () => {",
+                      "oldStart": 309,
+                      "oldLines": 6,
+                      "newStart": 313,
+                      "newLines": 216,
+                      "bodyLineCount": 217
+                    }
+                  ]
+                }
+              ],
+              "units": [
+                {
+                  "evidenceSetDigest": "d9065f128380ee8dd63661c08ab6f2dcf857bcc4f4236a37e3304e07e87ae937",
+                  "path": "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+                  "hunkIndex": 0,
+                  "originalOldStart": 2,
+                  "originalOldLines": 6,
+                  "originalNewStart": 2,
+                  "originalNewLines": 8,
+                  "unitIndex": 0,
+                  "hunkUnitIndex": 0,
+                  "hunkUnitCount": 1,
+                  "bodyStart": 0,
+                  "bodyEnd": 8,
+                  "oldLines": 6,
+                  "newLines": 8,
+                  "diffLineCount": 9,
+                  "bodyText": " import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'\n \n import * as challengesApi from '../../api/challenges'\n+import * as accountApi from '../../api/account'\n+import * as authApi from '../../api/auth'\n import { useAccountStore } from '../account'\n import { useAuthStore } from '../auth'\n import { useJournalDraftsStore } from '../journalDrafts'"
+                },
+                {
+                  "evidenceSetDigest": "d9065f128380ee8dd63661c08ab6f2dcf857bcc4f4236a37e3304e07e87ae937",
+                  "path": "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+                  "hunkIndex": 1,
+                  "originalOldStart": 233,
+                  "originalOldLines": 7,
+                  "originalNewStart": 235,
+                  "originalNewLines": 8,
+                  "unitIndex": 1,
+                  "hunkUnitIndex": 0,
+                  "hunkUnitCount": 1,
+                  "bodyStart": 0,
+                  "bodyEnd": 9,
+                  "oldLines": 7,
+                  "newLines": 8,
+                  "diffLineCount": 10,
+                  "bodyText": "     response.resolve(mutation('challenge-a', 'pending draft', 2))\n     await saving\n \n-    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({\n+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()\n+    expect(Object.values(drafts.drafts)[0]).toMatchObject({\n       text: 'pending draft',\n       journalVersion: 1,\n       acknowledgedClientRevision: 0,"
+                },
+                {
+                  "evidenceSetDigest": "d9065f128380ee8dd63661c08ab6f2dcf857bcc4f4236a37e3304e07e87ae937",
+                  "path": "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+                  "hunkIndex": 2,
+                  "originalOldStart": 254,
+                  "originalOldLines": 7,
+                  "originalNewStart": 257,
+                  "originalNewLines": 8,
+                  "unitIndex": 2,
+                  "hunkUnitIndex": 0,
+                  "hunkUnitCount": 1,
+                  "bodyStart": 0,
+                  "bodyEnd": 9,
+                  "oldLines": 7,
+                  "newLines": 8,
+                  "diffLineCount": 10,
+                  "bodyText": "     response.reject(new TypeError('network timeout'))\n     await saving\n \n-    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({\n+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()\n+    expect(Object.values(drafts.drafts)[0]).toMatchObject({\n       status: 'quarantined',\n       error: { kind: 'stale_context' },\n     })"
+                },
+                {
+                  "evidenceSetDigest": "d9065f128380ee8dd63661c08ab6f2dcf857bcc4f4236a37e3304e07e87ae937",
+                  "path": "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+                  "hunkIndex": 3,
+                  "originalOldStart": 309,
+                  "originalOldLines": 6,
+                  "originalNewStart": 313,
+                  "originalNewLines": 216,
+                  "unitIndex": 3,
+                  "hunkUnitIndex": 0,
+                  "hunkUnitCount": 1,
+                  "bodyStart": 0,
+                  "bodyEnd": 217,
+                  "oldLines": 6,
+                  "newLines": 216,
+                  "diffLineCount": 218,
+                  "bodyText": " \n     expect(sync.reconcileBeforeWrite).not.toHaveBeenCalled()\n     expect(save).not.toHaveBeenCalled()\n-    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({ status: 'quarantined' })\n+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()\n+    expect(Object.values(drafts.drafts)[0]).toMatchObject({ status: 'quarantined' })\n+  })\n+\n+  it('keeps an expired draft hidden until same-owner epoch and version reconciliation, then replays the same command', async () => {\n+    const save = vi.spyOn(challengesApi, 'saveChallengeJournal')\n+    save\n+      .mockRejectedValueOnce(new TypeError('network timeout'))\n+      .mockResolvedValueOnce(mutation('challenge-a', 'private draft', 2))\n+    const base = snapshot('challenge-a', 'server baseline', 1)\n+    drafts.hydrate(base)\n+    drafts.setDraftText('challenge-a', DATE, 'private draft')\n+\n+    await drafts.save('challenge-a', DATE)\n+    const originalRequest = save.mock.calls[0]\n+    expect(originalRequest).toBeDefined()\n+    expect(drafts.getDraft('challenge-a', DATE)?.pendingCommand?.request).toEqual(originalRequest?.[2])\n+\n+    vi.spyOn(authApi, 'getSession').mockResolvedValue(null)\n+    await auth.refreshSession()\n+\n+    expect(auth.status).toBe('guest')\n+    expect(account.context).toBeNull()\n+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()\n+    expect(Object.values(drafts.drafts)).toMatchObject([\n+      { text: 'private draft', status: 'quarantined', pendingCommand: { request: originalRequest?.[2] } },\n+    ])\n+\n+    vi.spyOn(authApi, 'login').mockResolvedValue({\n+      owner: { id: 42, name: 'Owner', email: 'owner@example.test' },\n+      redirect_to: '/challenges',\n+    } as authApi.LoginResult)\n+    await auth.logIn({ email: 'owner@example.test', password: 'secret' })\n+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()\n+\n+    vi.spyOn(accountApi, 'getAccountContext').mockResolvedValue({\n+      timezone: 'Asia/Ho_Chi_Minh',\n+      account_date: DATE,\n+      week: { start_date: '2026-09-21', end_date: '2026-09-27' },\n+      account_revision: 12,\n+      data_epoch: 4,\n+      write_state: 'open',\n+    })\n+    await account.refresh()\n+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()\n+\n+    drafts.hydrate(base)\n+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({\n+      text: 'private draft',\n+      status: 'error',\n+      pendingCommand: { request: originalRequest?.[2] },\n+    })\n+\n+    await drafts.save('challenge-a', DATE)\n+\n+    expect(save).toHaveBeenCalledTimes(2)\n+    expect(save.mock.calls[1]).toEqual(originalRequest)\n+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({\n+      text: 'private draft',\n+      status: 'saved',\n+      acknowledgedClientRevision: 1,\n+      pendingCommand: null,\n+    })\n+  })\n+\n+  it('keeps an expired draft quarantined when the owner returns in a different data epoch', async () => {\n+    const save = vi.spyOn(challengesApi, 'saveChallengeJournal')\n+    save.mockRejectedValueOnce(new TypeError('network timeout'))\n+    const base = snapshot('challenge-a', 'server baseline', 1)\n+    drafts.hydrate(base)\n+    drafts.setDraftText('challenge-a', DATE, 'private draft')\n+\n+    await drafts.save('challenge-a', DATE)\n+    const originalRequest = save.mock.calls[0]?.[2]\n+    expect(originalRequest).toBeDefined()\n+\n+    vi.spyOn(authApi, 'getSession').mockResolvedValue(null)\n+    await auth.refreshSession()\n+    vi.spyOn(authApi, 'login').mockResolvedValue({\n+      owner: { id: 42, name: 'Owner', email: 'owner@example.test' },\n+      redirect_to: '/challenges',\n+    } as authApi.LoginResult)\n+    await auth.logIn({ email: 'owner@example.test', password: 'secret' })\n+    vi.spyOn(accountApi, 'getAccountContext').mockResolvedValue({\n+      timezone: 'Asia/Ho_Chi_Minh',\n+      account_date: DATE,\n+      week: { start_date: '2026-09-21', end_date: '2026-09-27' },\n+      account_revision: 13,\n+      data_epoch: 5,\n+      write_state: 'open',\n+    })\n+    await account.refresh()\n+\n+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()\n+    drafts.hydrate(snapshot('challenge-a', 'new epoch server text', 7))\n+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({\n+      text: 'private draft',\n+      dataEpoch: 4,\n+      status: 'quarantined',\n+      pendingCommand: { request: originalRequest },\n+    })\n+\n+    await drafts.save('challenge-a', DATE)\n+\n+    expect(save).toHaveBeenCalledOnce()\n+    expect(save.mock.calls[0]?.[2]).toEqual(originalRequest)\n+  })\n+\n+  it('does not send a journal mutation while the account write state is locked', async () => {\n+    const save = vi.spyOn(challengesApi, 'saveChallengeJournal')\n+    drafts.hydrate(snapshot('challenge-a', 'server baseline', 1))\n+    drafts.setDraftText('challenge-a', DATE, 'private draft')\n+    account.context!.write_state = 'locked_for_import'\n+\n+    await drafts.save('challenge-a', DATE)\n+\n+    expect(sync.reconcileBeforeWrite).toHaveBeenCalledOnce()\n+    expect(save).not.toHaveBeenCalled()\n+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({ status: 'blocked' })\n+  })\n+\n+  it('refreshes auth after a 401 and never retries or exposes the draft before reconciliation', async () => {\n+    const save = vi.spyOn(challengesApi, 'saveChallengeJournal')\n+    save.mockRejectedValueOnce(Object.assign(new Error('expired'), { status: 401 }))\n+    vi.spyOn(authApi, 'getSession').mockResolvedValue(null)\n+    drafts.hydrate(snapshot('challenge-a', 'server baseline', 1))\n+    drafts.setDraftText('challenge-a', DATE, 'private draft')\n+\n+    await drafts.save('challenge-a', DATE)\n+    await drafts.save('challenge-a', DATE)\n+\n+    expect(auth.status).toBe('guest')\n+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()\n+    expect(Object.values(drafts.drafts)[0]).toMatchObject({\n+      text: 'private draft',\n+      status: 'quarantined',\n+      requiresReconciliation: true,\n+    })\n+    expect(save).toHaveBeenCalledOnce()\n+  })\n+\n+  it('counts quarantined work only for the owner currently signed in after session expiry', async () => {\n+    drafts.hydrate(snapshot('challenge-a', 'server baseline', 1))\n+    drafts.setDraftText('challenge-a', DATE, 'owner 42 private draft')\n+\n+    vi.spyOn(authApi, 'getSession').mockResolvedValue(null)\n+    await auth.refreshSession()\n+\n+    expect(auth.status).toBe('guest')\n+    expect(Object.values(drafts.drafts)[0]).toMatchObject({ ownerId: 42, status: 'quarantined' })\n+    expect(drafts.hasUnsavedDrafts()).toBe(false)\n+\n+    vi.spyOn(authApi, 'login').mockResolvedValue({\n+      owner: { id: 43, name: 'Other owner', email: 'other@example.test' },\n+      redirect_to: '/challenges',\n+    } as authApi.LoginResult)\n+    await auth.logIn({ email: 'other@example.test', password: 'secret' })\n+\n+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()\n+    expect(drafts.hasUnsavedDrafts()).toBe(false)\n+\n+    vi.mocked(authApi.login).mockResolvedValue({\n+      owner: { id: 42, name: 'Owner', email: 'owner@example.test' },\n+      redirect_to: '/challenges',\n+    } as authApi.LoginResult)\n+    await auth.logIn({ email: 'owner@example.test', password: 'secret' })\n+\n+    expect(drafts.getDraft('challenge-a', DATE)).toBeUndefined()\n+    expect(drafts.hasUnsavedDrafts()).toBe(true)\n+  })\n+\n+  it('treats error, conflict, blocked, and unresolved command states as unsaved work', () => {\n+    drafts.hydrate(snapshot('challenge-a', 'server baseline', 1))\n+    const record = drafts.getDraft('challenge-a', DATE)\n+    expect(record).toBeDefined()\n+    expect(drafts.hasUnsavedDrafts()).toBe(false)\n+\n+    record!.status = 'error'\n+    expect(drafts.hasUnsavedDrafts()).toBe(true)\n+    record!.status = 'conflict'\n+    expect(drafts.hasUnsavedDrafts()).toBe(true)\n+    record!.status = 'blocked'\n+    expect(drafts.hasUnsavedDrafts()).toBe(true)\n+    record!.status = 'saving'\n+    record!.pendingCommand = Object.freeze({\n+      revision: 0,\n+      ownerId: 42,\n+      authGeneration: auth.generation,\n+      dataEpoch: 4,\n+      request: Object.freeze({ command_id: 'uncertain', data_epoch: 4, base_version: 1, journal: 'server baseline' }),\n+    })\n+    expect(drafts.hasUnsavedDrafts()).toBe(true)\n+\n+    record!.status = 'saved'\n+    record!.pendingCommand = null\n+    expect(drafts.hasUnsavedDrafts()).toBe(false)\n+  })\n+\n+  it('reconciles a changed same-epoch version as a conflict without changing the local base', () => {\n+    drafts.hydrate(snapshot('challenge-a', 'server baseline', 1))\n+    drafts.setDraftText('challenge-a', DATE, 'private draft')\n+    auth.generation += 1\n+\n+    drafts.hydrate(snapshot('challenge-a', 'updated on server', 2))\n+\n+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({\n+      text: 'private draft',\n+      journalVersion: 1,\n+      status: 'conflict',\n+      conflictSnapshot: snapshot('challenge-a', 'updated on server', 2),\n+    })\n   })\n })"
+                }
+              ]
+            }
           }
         }
       },
       {
         "id": "draft-session-warning-scope",
         "verdict": "CHANGES_REQUIRED",
-        "evidence_digest": "sha256:432fb6fc5306c41f3ab0854dcb749f9b7cc3d8dd883aa749a932eca4497cd848",
-        "evidence_set_digest": "9de0087662c05305a163fbceb1beb9b46709fe3dc465905c83c3c6a581f92bb0",
+        "evidence_digest": "sha256:5d15ee9c0d9e0acde76c68fe7c4de4b348f02234af2eb385277153ddf56618a8",
+        "evidence_set_digest": "99da902cadac2629e0c28a7fb0d568d0ef7eec9bc8571a02d3e2ba8005170e7e",
         "requested_paths": [
           "frontend/src/stores/journalDrafts.ts"
         ],
@@ -910,12 +1086,12 @@
                 "producer": "prepare-change-evidence-v1",
                 "comparison": "explicit-pair",
                 "base": "6c91f5b2e469d4d662f722ae644e55ebf56f7586",
-                "head": "0301a2bb9292b5ee21df3f394589c57030115b97"
+                "head": "c6b1cac8162ab40f9e1df15743e3195e392d656f"
               },
               "requestedPaths": [
                 "frontend/src/stores/journalDrafts.ts"
               ],
-              "sourceDigest": "9de0087662c05305a163fbceb1beb9b46709fe3dc465905c83c3c6a581f92bb0",
+              "sourceDigest": "99da902cadac2629e0c28a7fb0d568d0ef7eec9bc8571a02d3e2ba8005170e7e",
               "unitCount": 18,
               "paths": [
                 {
@@ -1050,18 +1226,18 @@
                       "bodyLineCount": 10
                     },
                     {
-                      "header": "@@ -457,11 +586,26 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {",
+                      "header": "@@ -457,11 +586,28 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {",
                       "oldStart": 457,
                       "oldLines": 11,
                       "newStart": 586,
-                      "newLines": 26,
-                      "bodyLineCount": 27
+                      "newLines": 28,
+                      "bodyLineCount": 29
                     },
                     {
-                      "header": "@@ -474,5 +618,6 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {",
+                      "header": "@@ -474,5 +620,6 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {",
                       "oldStart": 474,
                       "oldLines": 5,
-                      "newStart": 618,
+                      "newStart": 620,
                       "newLines": 6,
                       "bodyLineCount": 6
                     }
@@ -1070,7 +1246,7 @@
               ],
               "units": [
                 {
-                  "evidenceSetDigest": "9de0087662c05305a163fbceb1beb9b46709fe3dc465905c83c3c6a581f92bb0",
+                  "evidenceSetDigest": "99da902cadac2629e0c28a7fb0d568d0ef7eec9bc8571a02d3e2ba8005170e7e",
                   "path": "frontend/src/stores/journalDrafts.ts",
                   "hunkIndex": 0,
                   "originalOldStart": 4,
@@ -1088,7 +1264,7 @@
                   "bodyText": " import * as challengesApi from '../api/challenges'\n import type { JournalMutationResult, JournalSnapshot, SaveJournalRequest } from '../api/challenges'\n import { useAccountStore } from './account'\n-import { useAuthStore } from './auth'\n+import { useAuthStore, type PrivateStateResetReason } from './auth'\n import { useSyncStore } from './sync'\n \n export type JournalDraftStatus = 'saved' | 'dirty' | 'saving' | 'error' | 'conflict' | 'blocked' | 'quarantined'"
                 },
                 {
-                  "evidenceSetDigest": "9de0087662c05305a163fbceb1beb9b46709fe3dc465905c83c3c6a581f92bb0",
+                  "evidenceSetDigest": "99da902cadac2629e0c28a7fb0d568d0ef7eec9bc8571a02d3e2ba8005170e7e",
                   "path": "frontend/src/stores/journalDrafts.ts",
                   "hunkIndex": 1,
                   "originalOldStart": 43,
@@ -1106,7 +1282,7 @@
                   "bodyText": "   conflictSnapshot: JournalSnapshot | null\n   error: { kind: JournalDraftErrorKind; message: string } | null\n   status: JournalDraftStatus\n+  requiresReconciliation: boolean\n }\n \n function resourceKey(ownerId: number, challengeId: string, localDate: string): string {"
                 },
                 {
-                  "evidenceSetDigest": "9de0087662c05305a163fbceb1beb9b46709fe3dc465905c83c3c6a581f92bb0",
+                  "evidenceSetDigest": "99da902cadac2629e0c28a7fb0d568d0ef7eec9bc8571a02d3e2ba8005170e7e",
                   "path": "frontend/src/stores/journalDrafts.ts",
                   "hunkIndex": 2,
                   "originalOldStart": 53,
@@ -1124,7 +1300,7 @@
                   "bodyText": "   return record.clientRevision !== record.acknowledgedClientRevision\n }\n \n+function needsAttention(record: JournalDraftRecord): boolean {\n+  return isDirtyRecord(record) ||\n+    record.pendingCommand !== null ||\n+    record.status === 'saving' ||\n+    record.status === 'error' ||\n+    record.status === 'conflict' ||\n+    record.status === 'blocked' ||\n+    record.status === 'quarantined'\n+}\n+\n function errorStatus(error: unknown): number | null {\n   return typeof error === 'object' && error !== null && 'status' in error && typeof error.status === 'number'\n     ? error.status"
                 },
                 {
-                  "evidenceSetDigest": "9de0087662c05305a163fbceb1beb9b46709fe3dc465905c83c3c6a581f92bb0",
+                  "evidenceSetDigest": "99da902cadac2629e0c28a7fb0d568d0ef7eec9bc8571a02d3e2ba8005170e7e",
                   "path": "frontend/src/stores/journalDrafts.ts",
                   "hunkIndex": 3,
                   "originalOldStart": 73,
@@ -1142,7 +1318,7 @@
                   "bodyText": " \n   function getDraft(challengeId: string, localDate: string): JournalDraftRecord | undefined {\n     const key = getCurrentKey(challengeId, localDate)\n-    return key ? drafts.value[key] : undefined\n+    const record = key ? drafts.value[key] : undefined\n+    if (!record || record.requiresReconciliation || record.authGeneration !== auth.generation) return undefined\n+    return record\n+  }\n+\n+  function acknowledgeSnapshot(\n+    record: JournalDraftRecord,\n+    snapshot: JournalSnapshot,\n+    dataEpoch: number,\n+  ): void {\n+    const text = snapshot.journal ?? ''\n+    record.text = text\n+    record.acknowledgedText = text\n+    record.acknowledgedSnapshot = snapshot\n+    record.acknowledgedClientRevision = record.clientRevision\n+    record.journalVersion = snapshot.journal_version\n+    record.dataEpoch = dataEpoch\n+    record.authGeneration = auth.generation\n+    record.pendingCommand = null\n+    record.conflictSnapshot = null\n+    record.error = null\n+    record.status = 'saved'\n+    record.requiresReconciliation = false\n+  }\n+\n+  function reconcileExisting(\n+    record: JournalDraftRecord,\n+    snapshot: JournalSnapshot,\n+    ownerId: number,\n+    dataEpoch: number,\n+  ): void {\n+    record.requiresReconciliation = false\n+    record.authGeneration = auth.generation\n+\n+    if (record.ownerId !== ownerId) {\n+      record.requiresReconciliation = true\n+      quarantine(record, 'Bản nháp này thuộc chủ tài khoản khác và tiếp tục bị ẩn.')\n+      return\n+    }\n+\n+    if (record.dataEpoch !== dataEpoch) {\n+      if (!needsAttention(record)) {\n+        acknowledgeSnapshot(record, snapshot, dataEpoch)\n+        return\n+      }\n+\n+      record.conflictSnapshot = null\n+      quarantine(record, 'Chu kỳ dữ liệu tài khoản đã đổi. Bản nháp được giữ lại, không tự chuyển sang chu kỳ mới.')\n+      return\n+    }\n+\n+    const pending = record.pendingCommand\n+    if (pending) {\n+      if (pending.ownerId !== ownerId || pending.dataEpoch !== dataEpoch) {\n+        quarantine(record, 'Yêu cầu chưa rõ kết quả thuộc chủ tài khoản hoặc chu kỳ dữ liệu khác; không thể gửi lại.')\n+        return\n+      }\n+\n+      // Keep the request byte-for-byte stable; only the authenticated callback fence is refreshed.\n+      record.pendingCommand = Object.freeze({ ...pending, authGeneration: auth.generation })\n+      record.error = {\n+        kind: 'network',\n+        message: 'Chưa xác định được kết quả lưu. Sau khi đối chiếu, lần thử lại sẽ gửi đúng yêu cầu cũ.',\n+      }\n+      record.status = 'error'\n+      return\n+    }\n+\n+    if (isDirtyRecord(record)) {\n+      if (snapshot.journal_version !== record.journalVersion) {\n+        record.conflictSnapshot = snapshot\n+        record.error = {\n+          kind: 'conflict',\n+          message: 'Nhật ký đã thay đổi trên máy chủ. Bản nháp hiện tại được giữ lại để xử lý.',\n+        }\n+        record.status = 'conflict'\n+        return\n+      }\n+\n+      record.acknowledgedSnapshot = snapshot\n+      record.acknowledgedText = snapshot.journal ?? ''\n+      record.journalVersion = snapshot.journal_version\n+      record.error = null\n+      record.conflictSnapshot = null\n+      record.status = 'dirty'\n+      return\n+    }\n+\n+    acknowledgeSnapshot(record, snapshot, dataEpoch)\n   }\n \n   function hydrate(snapshot: JournalSnapshot): JournalDraftRecord | null {"
                 },
                 {
-                  "evidenceSetDigest": "9de0087662c05305a163fbceb1beb9b46709fe3dc465905c83c3c6a581f92bb0",
+                  "evidenceSetDigest": "99da902cadac2629e0c28a7fb0d568d0ef7eec9bc8571a02d3e2ba8005170e7e",
                   "path": "frontend/src/stores/journalDrafts.ts",
                   "hunkIndex": 4,
                   "originalOldStart": 85,
@@ -1160,7 +1336,7 @@
                   "bodyText": "     const key = resourceKey(ownerId, snapshot.challenge_id, snapshot.local_date)\n     const existing = drafts.value[key]\n     if (existing) {\n+      if (existing.requiresReconciliation || existing.authGeneration !== auth.generation) {\n+        reconcileExisting(existing, snapshot, ownerId, account.context.data_epoch)\n+        return existing\n+      }\n+\n       if (isDirtyRecord(existing) || existing.pendingCommand || existing.status === 'conflict' || existing.status === 'quarantined') {\n         return existing\n       }"
                 },
                 {
-                  "evidenceSetDigest": "9de0087662c05305a163fbceb1beb9b46709fe3dc465905c83c3c6a581f92bb0",
+                  "evidenceSetDigest": "99da902cadac2629e0c28a7fb0d568d0ef7eec9bc8571a02d3e2ba8005170e7e",
                   "path": "frontend/src/stores/journalDrafts.ts",
                   "hunkIndex": 5,
                   "originalOldStart": 119,
@@ -1178,7 +1354,7 @@
                   "bodyText": "       conflictSnapshot: null,\n       error: null,\n       status: 'saved',\n+      requiresReconciliation: false,\n     }\n     drafts.value[key] = record\n     return record"
                 },
                 {
-                  "evidenceSetDigest": "9de0087662c05305a163fbceb1beb9b46709fe3dc465905c83c3c6a581f92bb0",
+                  "evidenceSetDigest": "99da902cadac2629e0c28a7fb0d568d0ef7eec9bc8571a02d3e2ba8005170e7e",
                   "path": "frontend/src/stores/journalDrafts.ts",
                   "hunkIndex": 6,
                   "originalOldStart": 127,
@@ -1196,7 +1372,7 @@
                   "bodyText": "   function setDraftText(challengeId: string, localDate: string, text: string): void {\n     const key = getCurrentKey(challengeId, localDate)\n     const record = key ? drafts.value[key] : undefined\n-    if (!record || record.text === text) return\n+    if (\n+      !record ||\n+      record.requiresReconciliation ||\n+      record.authGeneration !== auth.generation ||\n+      record.text === text\n+    ) return\n \n     record.text = text\n     record.clientRevision += 1"
                 },
                 {
-                  "evidenceSetDigest": "9de0087662c05305a163fbceb1beb9b46709fe3dc465905c83c3c6a581f92bb0",
+                  "evidenceSetDigest": "99da902cadac2629e0c28a7fb0d568d0ef7eec9bc8571a02d3e2ba8005170e7e",
                   "path": "frontend/src/stores/journalDrafts.ts",
                   "hunkIndex": 7,
                   "originalOldStart": 172,
@@ -1214,7 +1390,7 @@
                   "bodyText": "     record.conflictSnapshot = null\n     record.error = null\n     record.status = 'saved'\n+    record.requiresReconciliation = false\n   }\n \n   function rebaseAfterEpochChange(challengeId: string, localDate: string, snapshot: JournalSnapshot): void {"
                 },
                 {
-                  "evidenceSetDigest": "9de0087662c05305a163fbceb1beb9b46709fe3dc465905c83c3c6a581f92bb0",
+                  "evidenceSetDigest": "99da902cadac2629e0c28a7fb0d568d0ef7eec9bc8571a02d3e2ba8005170e7e",
                   "path": "frontend/src/stores/journalDrafts.ts",
                   "hunkIndex": 8,
                   "originalOldStart": 195,
@@ -1232,7 +1408,7 @@
                   "bodyText": "     record.pendingCommand = null\n     record.conflictSnapshot = null\n     record.error = null\n+    record.requiresReconciliation = false\n     if (wasDirty) {\n       record.status = 'dirty'\n     } else {"
                 },
                 {
-                  "evidenceSetDigest": "9de0087662c05305a163fbceb1beb9b46709fe3dc465905c83c3c6a581f92bb0",
+                  "evidenceSetDigest": "99da902cadac2629e0c28a7fb0d568d0ef7eec9bc8571a02d3e2ba8005170e7e",
                   "path": "frontend/src/stores/journalDrafts.ts",
                   "hunkIndex": 9,
                   "originalOldStart": 285,
@@ -1250,7 +1426,7 @@
                   "bodyText": "       preflight = { allowed: false, reason: 'Không thể đồng bộ trạng thái mới nhất trước khi ghi.' }\n     }\n \n-    if (drafts.value[key] !== record) return\n+    if (drafts.value[key] !== record || record.requiresReconciliation) return\n     if (!preflight.allowed) {\n       record.error = { kind: 'preflight', message: preflight.reason ?? 'Chưa thể lưu nhật ký. Hãy thử lại sau.' }\n       record.status = 'blocked'"
                 },
                 {
-                  "evidenceSetDigest": "9de0087662c05305a163fbceb1beb9b46709fe3dc465905c83c3c6a581f92bb0",
+                  "evidenceSetDigest": "99da902cadac2629e0c28a7fb0d568d0ef7eec9bc8571a02d3e2ba8005170e7e",
                   "path": "frontend/src/stores/journalDrafts.ts",
                   "hunkIndex": 10,
                   "originalOldStart": 297,
@@ -1268,7 +1444,7 @@
                   "bodyText": "       auth.generation !== authGenerationAtStart ||\n       auth.owner?.id !== ownerIdAtStart\n     ) {\n+      record.requiresReconciliation = true\n       quarantine(record, 'Phiên hoặc chủ tài khoản đã thay đổi. Bản nháp chưa được gửi trong phiên mới.')\n       return\n     }"
                 },
                 {
-                  "evidenceSetDigest": "9de0087662c05305a163fbceb1beb9b46709fe3dc465905c83c3c6a581f92bb0",
+                  "evidenceSetDigest": "99da902cadac2629e0c28a7fb0d568d0ef7eec9bc8571a02d3e2ba8005170e7e",
                   "path": "frontend/src/stores/journalDrafts.ts",
                   "hunkIndex": 11,
                   "originalOldStart": 344,
@@ -1286,7 +1462,7 @@
                   "bodyText": "     try {\n       result = await challengesApi.saveChallengeJournal(record.challengeId, record.localDate, pending.request)\n     } catch (error) {\n-      if (drafts.value[key] !== record) return\n+      if (drafts.value[key] !== record || record.requiresReconciliation || record.pendingCommand !== pending) return\n+      if (errorStatus(error) === 401) {\n+        try {\n+          await auth.refreshSession()\n+        } catch {\n+          // A failed session refresh is still a blocked write; never retry the mutation here.\n+        }\n+        if (record.requiresReconciliation || auth.status !== 'authenticated') return\n+      }\n       if (\n         auth.status !== 'authenticated' ||\n         auth.generation !== pending.authGeneration ||\n         auth.owner?.id !== pending.ownerId\n       ) {\n+        record.requiresReconciliation = true\n         quarantine(record, 'Phản hồi lỗi thuộc phiên cũ; yêu cầu chưa được gửi lại trong phiên mới.')\n         return\n       }"
                 },
                 {
-                  "evidenceSetDigest": "9de0087662c05305a163fbceb1beb9b46709fe3dc465905c83c3c6a581f92bb0",
+                  "evidenceSetDigest": "99da902cadac2629e0c28a7fb0d568d0ef7eec9bc8571a02d3e2ba8005170e7e",
                   "path": "frontend/src/stores/journalDrafts.ts",
                   "hunkIndex": 12,
                   "originalOldStart": 361,
@@ -1304,7 +1480,7 @@
                   "bodyText": "       return\n     }\n \n-    if (drafts.value[key] !== record) return\n+    if (drafts.value[key] !== record || record.requiresReconciliation || record.pendingCommand !== pending) return\n     if (\n       auth.status !== 'authenticated' ||\n       auth.generation !== pending.authGeneration ||\n       auth.owner?.id !== pending.ownerId\n     ) {\n+      record.requiresReconciliation = true\n       quarantine(record, 'Phản hồi lưu thuộc phiên cũ; bản nháp chưa được đánh dấu là đã lưu.')\n       return\n     }"
                 },
                 {
-                  "evidenceSetDigest": "9de0087662c05305a163fbceb1beb9b46709fe3dc465905c83c3c6a581f92bb0",
+                  "evidenceSetDigest": "99da902cadac2629e0c28a7fb0d568d0ef7eec9bc8571a02d3e2ba8005170e7e",
                   "path": "frontend/src/stores/journalDrafts.ts",
                   "hunkIndex": 13,
                   "originalOldStart": 386,
@@ -1322,7 +1498,7 @@
                   "bodyText": "     }\n \n     const ackAccepted = await sync.recordMutationAck(result.account_revision, result.data_epoch, pending.authGeneration)\n+    if (drafts.value[key] !== record || record.requiresReconciliation || record.pendingCommand !== pending) return\n     if (\n       !ackAccepted ||\n-      drafts.value[key] !== record ||\n       auth.status !== 'authenticated' ||\n       auth.generation !== pending.authGeneration ||\n       auth.owner?.id !== pending.ownerId ||"
                 },
                 {
-                  "evidenceSetDigest": "9de0087662c05305a163fbceb1beb9b46709fe3dc465905c83c3c6a581f92bb0",
+                  "evidenceSetDigest": "99da902cadac2629e0c28a7fb0d568d0ef7eec9bc8571a02d3e2ba8005170e7e",
                   "path": "frontend/src/stores/journalDrafts.ts",
                   "hunkIndex": 14,
                   "originalOldStart": 396,
@@ -1340,7 +1516,7 @@
                   "bodyText": "       account.context.data_epoch !== pending.dataEpoch\n     ) {\n       if (drafts.value[key] === record) {\n+        if (\n+          auth.status !== 'authenticated' ||\n+          auth.generation !== pending.authGeneration ||\n+          auth.owner?.id !== pending.ownerId\n+        ) record.requiresReconciliation = true\n         quarantine(record, 'Phản hồi lưu thuộc phiên hoặc chu kỳ dữ liệu đã đổi; bản nháp được giữ lại.')\n       }\n       return"
                 },
                 {
-                  "evidenceSetDigest": "9de0087662c05305a163fbceb1beb9b46709fe3dc465905c83c3c6a581f92bb0",
+                  "evidenceSetDigest": "99da902cadac2629e0c28a7fb0d568d0ef7eec9bc8571a02d3e2ba8005170e7e",
                   "path": "frontend/src/stores/journalDrafts.ts",
                   "hunkIndex": 15,
                   "originalOldStart": 422,
@@ -1358,30 +1534,30 @@
                   "bodyText": "     const key = getCurrentKey(challengeId, localDate)\n     const record = key ? drafts.value[key] : undefined\n     if (!key || !record || (!isDirtyRecord(record) && !record.pendingCommand)) return Promise.resolve()\n-    if (record.status === 'conflict' || record.status === 'quarantined') return Promise.resolve()\n+    if (record.requiresReconciliation || record.status === 'conflict' || record.status === 'quarantined') return Promise.resolve()\n     if (record.authGeneration !== auth.generation) {\n+      record.requiresReconciliation = true\n       quarantine(record, 'Bản nháp thuộc phiên xác thực cũ. Hãy tải lại và đối chiếu dữ liệu trước khi tiếp tục.')\n       return Promise.resolve()\n     }"
                 },
                 {
-                  "evidenceSetDigest": "9de0087662c05305a163fbceb1beb9b46709fe3dc465905c83c3c6a581f92bb0",
+                  "evidenceSetDigest": "99da902cadac2629e0c28a7fb0d568d0ef7eec9bc8571a02d3e2ba8005170e7e",
                   "path": "frontend/src/stores/journalDrafts.ts",
                   "hunkIndex": 16,
                   "originalOldStart": 457,
                   "originalOldLines": 11,
                   "originalNewStart": 586,
-                  "originalNewLines": 26,
+                  "originalNewLines": 28,
                   "unitIndex": 16,
                   "hunkUnitIndex": 0,
                   "hunkUnitCount": 1,
                   "bodyStart": 0,
-                  "bodyEnd": 27,
+                  "bodyEnd": 29,
                   "oldLines": 11,
-                  "newLines": 26,
-                  "diffLineCount": 28,
-                  "bodyText": "     return operation\n   }\n \n-  function reset(): void {\n+  function reset(reason: PrivateStateResetReason = 'logout'): void {\n+    if (reason === 'session_expired') {\n+      for (const record of Object.values(drafts.value)) {\n+        record.requiresReconciliation = true\n+        if (needsAttention(record)) {\n+          quarantine(record, 'Phiên đã hết hạn. Bản nháp được giữ trong bộ nhớ và chỉ mở lại sau khi đối chiếu tài khoản.')\n+        }\n+      }\n+      inFlight.clear()\n+      return\n+    }\n+\n     drafts.value = {}\n     inFlight.clear()\n   }\n \n+  function hasUnsavedDrafts(): boolean {\n+    return Object.values(drafts.value).some(needsAttention)\n+  }\n+\n   auth.registerPrivateStateReset(reset)\n \n   return {"
+                  "newLines": 28,
+                  "diffLineCount": 30,
+                  "bodyText": "     return operation\n   }\n \n-  function reset(): void {\n+  function reset(reason: PrivateStateResetReason = 'logout'): void {\n+    if (reason === 'session_expired') {\n+      for (const record of Object.values(drafts.value)) {\n+        record.requiresReconciliation = true\n+        if (needsAttention(record)) {\n+          quarantine(record, 'Phiên đã hết hạn. Bản nháp được giữ trong bộ nhớ và chỉ mở lại sau khi đối chiếu tài khoản.')\n+        }\n+      }\n+      inFlight.clear()\n+      return\n+    }\n+\n     drafts.value = {}\n     inFlight.clear()\n   }\n \n+  function hasUnsavedDrafts(): boolean {\n+    if (auth.status !== 'authenticated' || !auth.owner) return false\n+    const ownerId = auth.owner.id\n+    return Object.values(drafts.value).some(record => record.ownerId === ownerId && needsAttention(record))\n+  }\n+\n   auth.registerPrivateStateReset(reset)\n \n   return {"
                 },
                 {
-                  "evidenceSetDigest": "9de0087662c05305a163fbceb1beb9b46709fe3dc465905c83c3c6a581f92bb0",
+                  "evidenceSetDigest": "99da902cadac2629e0c28a7fb0d568d0ef7eec9bc8571a02d3e2ba8005170e7e",
                   "path": "frontend/src/stores/journalDrafts.ts",
                   "hunkIndex": 17,
                   "originalOldStart": 474,
                   "originalOldLines": 5,
-                  "originalNewStart": 618,
+                  "originalNewStart": 620,
                   "originalNewLines": 6,
                   "unitIndex": 17,
                   "hunkUnitIndex": 0,
