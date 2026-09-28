@@ -8,7 +8,7 @@ upstream_epic:
   path: docs/product/epics.md
   section_digest: sha256:9fd315d82840cc8d4f6450be08004dd868693a795b8fc552273487813e0b58e3
 sprint_key: 1-5-giữ-bản-đang-nhập-và-thử-lưu-lại-sau-gián-đoạn
-lifecycle_snapshot: review
+lifecycle_snapshot: done
 execution_status: complete
 planning_approval:
   decision: APPROVED
@@ -197,7 +197,5 @@ human_approval:
   approved_commit: "cc018ac3092bf9c2886165f3a60c35dc0607c8bd"
   approved_action: "complete_story"
   disclosures_acknowledged: true
-next_action:
-  kind: complete_story
-  target: story
+next_action: null
 ---

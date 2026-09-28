@@ -1,7 +1,7 @@
 ---
 story_id: "1.5"
 title: Giữ bản đang nhập và thử lưu lại sau gián đoạn
-status: review
+status: done
 ---
 
 # Story 1.5: Giữ bản đang nhập và thử lưu lại sau gián đoạn
@@ -144,4 +144,5 @@ Phạm vi: trạng thái lưu trung thực, giữ draft, retry an toàn, ACK đ�
 ### Change Log
 
 - Finalization recorded for Human Gate: in-progress -> review; next action complete_story.
+- Human approval recorded for the exact review scope: review -> done; next action terminal.
 <!-- v4:completion:end -->
