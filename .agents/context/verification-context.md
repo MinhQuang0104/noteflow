@@ -13,6 +13,21 @@ Use deterministic tools, then risk-based escalation, then targeted reasoning. Pl
 - Auto routes mapped scope to its deterministic recipe. No applicable recipe returns applicability `NOT_APPLICABLE`, status `INCOMPLETE`, no checks. Mixed mapped/unmapped scope remains `INCOMPLETE` with unmatched paths preserved. Invalid input returns `ERROR`.
 - Canonical verification still comes only from `check-verification.mjs`; preserve its output exactly. `NOT_APPLICABLE`/`INCOMPLETE` remains non-`PASS`, and progression eligibility is a separate persisted decision that cannot reinterpret canonical status.
 
+The allowlist lives in `.agents/verification/registry.json`. Enabled registry
+entries are the only recipes that auto-selection may load; duplicate IDs/paths,
+missing entries, invalid recipes, and invalid feature maps fail closed. Schema-v2
+maps separate `covered_paths` from `anchor_blobs`: dependency anchors may make a
+recipe applicable and trigger freshness checks, but a dependency-only change is
+still unmatched for coverage and cannot produce `PASS` on its own.
+
+When more than one recipe is applicable, the verifier returns aggregate schema
+v2 with the complete changed-path union, raw per-recipe evidence, shared-check
+references, aggregate coverage, and aggregate status. A shared check is reused
+only when its resolved cwd, argv, environment, and subject are identical. A
+recipe command that cannot run because the supported environment is unavailable
+is `ERROR` with an explicit reason; defining the command is not evidence that it
+passed.
+
 ## Escalation
 
 `.agents/scripts/check-escalation.mjs` is authoritative. Clean, complete LOW `PASS` without judgment flags yields `NO_REVIEW`. MEDIUM, HIGH, `FAIL`, `INCOMPLETE`, `ERROR`, or supported judgment flags require `REVIEW_REQUIRED`. Do not reinterpret its decision.

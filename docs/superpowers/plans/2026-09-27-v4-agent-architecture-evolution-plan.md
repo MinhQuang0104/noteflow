@@ -2,7 +2,7 @@
 
 > **For agentic workers:** Dành cho **Luna 5.6 Max** (model gpt-5.6-luna, reasoning effort max). Khi có yêu cầu triển khai riêng của human, dùng skill superpowers:executing-plans để thực hiện tuần tự từng task. Không mặc định dispatch subagent, Orca hoặc AGY.
 >
-> **Trạng thái:** IN PROGRESS — human đã ủy quyền triển khai trong lane V4 Lite architecture/control-plane migration; T00–T03 đã hoàn tất, T04 là task kế tiếp.
+> **Trạng thái:** IN PROGRESS — human đã ủy quyền triển khai trong lane V4 Lite architecture/control-plane migration; T00–T04 đã hoàn tất, T05 là task kế tiếp.
 >
 > **Ngày:** 2026-09-27. **Baseline đã đọc:** main, d8e813660e44c54785466836e5c0eda658529b74.
 >
@@ -520,19 +520,23 @@ Mỗi task:
 **Consumes:** explicit changed paths và recipe manifests.
 **Produces:** aggregate contract tại 5.5, giữ single-feature compatibility.
 
-- [ ] Test mapped-only, unmapped-only, mixed scope, multiple recipes, shared checks, dependency-only changed path không bị tính là covered, recipe invalid và execution failure.
-- [ ] Bỏ hard-code chỉ một FEATURE khỏi selection; registry là allowlist có version, duplicate/missing IDs fail closed.
-- [ ] Giữ full changed-path union và raw per-recipe output; không overwrite result bằng summary thuận tiện.
-- [ ] Implement aggregation/dedup đúng cwd/argv/environment/subject.
-- [ ] Thêm journal-frontend và today-view theo mục 6; inspect tests thực tế và ghi boundary limitations.
-- [ ] Xác nhận generated-type reference frontend/src/api/schema.generated.ts vẫn khớp generator tại execution HEAD; nếu đã đổi, cập nhật reference có evidence, không tạo file product mới.
-- [ ] Chạy recipe tests trong supported environment, giữ command/exit evidence. Không khởi tạo backend DB hoặc cài dependency ngầm.
-- [ ] Nếu refresh challenge-list anchors, review delta và rerun applicable tests; lưu lý do, không rehash để tránh review.
-- [ ] Run: node --test .agents/scripts/check-verification.test.mjs.
-- [ ] Run frontend type-check, focused unit tests và contract:check trong mục 6.
-- [ ] Commit exact registry/router/map/recipe/docs/tests.
+- [x] Test mapped-only, unmapped-only, mixed scope, multiple recipes, shared checks, dependency-only changed path không bị tính là covered, recipe invalid và execution failure.
+- [x] Bỏ hard-code chỉ một FEATURE khỏi selection; registry là allowlist có version, duplicate/missing IDs fail closed.
+- [x] Giữ full changed-path union và raw per-recipe output; không overwrite result bằng summary thuận tiện.
+- [x] Implement aggregation/dedup đúng cwd/argv/environment/subject.
+- [x] Thêm journal-frontend và today-view theo mục 6; inspect tests thực tế và ghi boundary limitations.
+- [x] Xác nhận generated-type reference frontend/src/api/schema.generated.ts vẫn khớp generator tại execution HEAD; nếu đã đổi, cập nhật reference có evidence, không tạo file product mới.
+- [x] Chạy recipe tests trong supported environment, giữ command/exit evidence. Không khởi tạo backend DB hoặc cài dependency ngầm.
+- [x] Nếu refresh challenge-list anchors, review delta và rerun applicable tests; lưu lý do, không rehash để tránh review.
+- [x] Run: node --test .agents/scripts/check-verification.test.mjs.
+- [x] Run frontend type-check, focused unit tests và contract:check trong mục 6.
+- [x] Commit exact registry/router/map/recipe/docs/tests.
 
 **Gate:** runtime có thể route nhiều recipe; unmatched scope vẫn non-PASS; cả hai recipe có test execution evidence thật trước khi tuyên bố active.
+
+**T04 evidence (2026-09-28):** `node --test .agents/scripts/check-verification.test.mjs` — 5 pass, 0 fail, 1490.2304 ms. `node .agents/scripts/check-feature-map.mjs check` returned `VALID` for challenge-list, journal-frontend, and today-view. The registry routes the legacy challenge-list plus schema-v2 `journal-frontend` and `today-view`; mapped-only, unmapped-only, mixed, multi-recipe, shared-check dedup, dependency-only, invalid-registry, execution-failure, and unavailable-environment cases are covered. The generated reference is confirmed by `frontend/scripts/generate-openapi-types.mjs` resolving `contracts/openapi.yaml` to `frontend/src/api/schema.generated.ts`; `npm run contract:check` exited 0.
+
+Real recipe evidence under Node `v24.21.0` after `npm ci` in the isolated worktree: `npm run type-check` exited 0; journal recipe focused tests — 3 files, 26 tests passed, 12.60 s; today recipe focused tests — 2 files, 4 tests passed, 1.30 s; `node .agents/scripts/check-verification.mjs check auto --changed frontend/src/views/ChallengesView.vue` — aggregate challenge-list + journal-frontend PASS, all 6 aggregate checks PASS, shared type-check deduplicated by cwd/argv/environment/subject; `check today-view --changed frontend/src/views/TodayView.vue` — PASS, 2 files/4 tests. Challenge-list map anchors were refreshed only for reviewed current-HEAD drift from `0caa6cb`/`51a867f` (`ChallengesView.vue`, `api/challenges.ts`, `api/__tests__/challenges.spec.ts`), then the map validator and applicable recipes were rerun. No product files, backend DB, or runtime V3 state were changed; recipe limitations remain the documented frontend boundaries.
 
 ### T05 — Check executor và provenance
 

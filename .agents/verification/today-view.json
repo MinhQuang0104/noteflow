@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "featureId": "today-view",
+  "featureMap": ".agents/features/today-view.json",
+  "cwd": "frontend",
+  "checks": [
+    {
+      "id": "map",
+      "cwd": ".",
+      "argv": ["node", ".agents/scripts/check-feature-map.mjs", "check", ".agents/features/today-view.json"]
+    },
+    {
+      "id": "type-check",
+      "argv": ["npm", "run", "type-check"]
+    },
+    {
+      "id": "mapped-tests",
+      "argv": ["npm", "run", "test:unit", "--", "--run", "src/views/__tests__/today.spec.ts", "src/views/__tests__/account-time.spec.ts"]
+    }
+  ],
+  "unresolved": ["The recipe does not prove the full time invariant, authentication, or backend behavior."]
+}

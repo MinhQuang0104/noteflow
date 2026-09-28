@@ -1,0 +1,24 @@
+{
+  "schema_version": 2,
+  "id": "today-view",
+  "purpose": "Today account-day rendering, journal entry point, and read failure behavior.",
+  "scope_boundary": "This recipe does not prove the full time invariant, authentication, or backend behavior.",
+  "covered_paths": [
+    "frontend/src/views/TodayView.vue",
+    "frontend/src/views/__tests__/today.spec.ts",
+    "frontend/src/views/__tests__/account-time.spec.ts"
+  ],
+  "dependencies": [
+    "frontend/src/api/challenges.ts",
+    "frontend/src/stores/account.ts",
+    "frontend/src/stores/auth.ts"
+  ],
+  "anchor_blobs": {
+    "frontend/src/views/TodayView.vue": "6193970017a41f3af329814407f24e89178cf3c7",
+    "frontend/src/views/__tests__/today.spec.ts": "97d3f0b1deac90322ca3eca3f808047efe9f049b",
+    "frontend/src/views/__tests__/account-time.spec.ts": "10600cebc826f3896f59f48d6ff8f86356b30898",
+    "frontend/src/api/challenges.ts": "1170868875c493ff954398ddecba122ff6272a79",
+    "frontend/src/stores/account.ts": "d182dbf43b69fe5c0c1ee166c1eb427113bfe94e",
+    "frontend/src/stores/auth.ts": "c8a871ae8c817ca7d0128438d06108b2bfb6d3f0"
+  }
+}
