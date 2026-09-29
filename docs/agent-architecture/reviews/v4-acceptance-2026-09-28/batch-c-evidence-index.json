@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "batch": "C",
+  "tested_source_head": "09b9dd961f3919e5c91b5742dcbe4bc0ac2abc92",
+  "base_head": "d8e813660e44c54785466836e5c0eda658529b74",
+  "run_id": "20260928T105031Z-09b9dd961f3919e5c91b5742dcbe4bc0ac2abc92",
+  "evidence_root": ".agent-state/v4-observations/evaluations/acceptance/20260928T105031Z-09b9dd961f3919e5c91b5742dcbe4bc0ac2abc92",
+  "tracked_bundle": {
+    "path": "batch-c-evidence-bundle.json",
+    "sha256": "c797ed0c5f386c4bcac304cc2dcebdc089727f58ac6260f86d78452e33d79396"
+  },
+  "tracked_report": {
+    "path": "batch-c-results.md",
+    "sha256": "05568dce26c0de3c972f95d6909643d625210620699f0abe7086ac4ae5f8a786"
+  },
+  "files": [
+    { "path": "corpus-run.json", "sha256": "ec39c2d3c1621f938a36fbbf6dd2166471848044536052bc12ab7f689038c006" },
+    { "path": "cases/L-mapped-low.json", "sha256": "1d03941079d66eb66c4c33b5b18c8e3adb9852b270ca062d11dc5e7e81905af5" },
+    { "path": "cases/M-mixed-medium.json", "sha256": "33b3dd237eb34b9999a4cbda8319bc987efd5450a88b12a046e686a3942354e4" },
+    { "path": "cases/H-stale-recovery.json", "sha256": "1bb454dac792873944b2efa3e5520fed73f5eb090ac133b29ad8e0d0a1a2b125" },
+    { "path": "baseline-instruction-measurement.json", "sha256": "78da36fa9a7600b2216c5a855256c1d4976897c553143344a48ee2d7c01aa53a" },
+    { "path": "candidate-instruction-measurement.json", "sha256": "6077d7b74e59f90c9526e5adb633fa24afee21ad2f6f874e3fe234ca6b16141a" },
+    { "path": "instruction-measurement.json", "sha256": "3125a1496316a65e1738af7bd7a0686484ab2d55167a70d9e114215ca979d1c5" }
+  ],
+  "historical_bundles": [
+    { "path": ".agent-state/v4-observations/evaluations/architecture-upgrade-baseline.json", "sha256": "e5113499bb1f3389a019211758b93e2a569bdc8ef5cfbca24d4b488f6514bdb5" },
+    { "path": ".agent-state/v4-observations/evaluations/architecture-upgrade-candidate.json", "sha256": "9a3cf090cc5d3bd79bdb5031e7fb3782abb128b1866f9351037afe312f2cd571" }
+  ],
+  "disposition": "R05_TARGET_REACHED_PENDING_R08_REVIEW",
+  "limitations": [
+    "B has no compatible action-kernel corpus runner; candidate L/M/H evidence is not a paired baseline quality run.",
+    "Provider usage and real-Story quality remain unknown.",
+    "Batch D R07/R08 must independently replay/review before any acceptance verdict."
+  ]
+}

@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "batch": "D",
+  "verdict": "PASS_ORIGINAL_SCOPE",
+  "verdict_scope": "Independent deterministic acceptance of the original V4 Lite architecture/control-plane migration scope only; human adoption, rollout, provider savings and real-Story quality remain pending or inconclusive.",
+  "base_head": "d8e813660e44c54785466836e5c0eda658529b74",
+  "initial_reviewed_head": "7529540ad9bcbf0389d0b00bc83d1575dea1422a",
+  "source_fix_commits": [
+    "56a78eeb7678c355718db44f64cc9a9200147363",
+    "09b9dd961f3919e5c91b5742dcbe4bc0ac2abc92"
+  ],
+  "normative_source_head": "09b9dd961f3919e5c91b5742dcbe4bc0ac2abc92",
+  "tested_source_head": "0e4c6b939f2a186399b483718601e86b44a694b5",
+  "reviewed_source_head": "0e4c6b939f2a186399b483718601e86b44a694b5",
+  "handoff_head": "PENDING_FINAL_DOC_COMMIT",
+  "source_tree_sha": "363a87177979869876b124857e7a8924316daff6",
+  "run_id": "20260928T112130Z-0e4c6b939f2a186399b483718601e86b44a694b5",
+  "basis": {
+    "method": "normal-action-instruction-source-v1",
+    "basis_id": "normal-action-instruction-source-v1",
+    "basis_digest": "sha256:6a6749f33ccc57ca4649e4b9e2afa5d7597c0d7db5fdf1a6823a92af4e069998",
+    "profile": "v4-lite-normal-action",
+    "input_digest": "sha256:16b03c97d4fef8b41ca29f1a6a4877fdec3817a7383efffc7038fb0476ddc27b"
+  },
+  "measurement": {
+    "status": "MEASURED",
+    "source": "instruction-measurement.json",
+    "digest": "sha256:41f3d301c66f010017cdc0211e5c69a1f7af4f879cc1d01d3ff350b77a98b75b",
+    "actions": {
+      "implement_slice": {
+        "baseline_bytes": 65359,
+        "candidate_bytes": 45551,
+        "delta_bytes": -19808,
+        "reduction_percent": 30.31,
+        "target_max_bytes": 45751,
+        "projection_bytes": 0
+      },
+      "verify_slice": {
+        "baseline_bytes": 65359,
+        "candidate_bytes": 45580,
+        "delta_bytes": -19779,
+        "reduction_percent": 30.26,
+        "target_max_bytes": 45751,
+        "projection_bytes": 0
+      }
+    },
+    "replay_log": {
+      "path": "measurement-replay.log",
+      "sha256": "5a97048344f3079733fffee54b4b8b0b1119c0ebd2616fc92971cdce7606df8f"
+    }
+  },
+  "corpus": {
+    "status": "VERIFIED",
+    "runner": "run-v4-architecture-corpus.mjs",
+    "runner_digest": "sha256:5533b510d0bacb16f42c383d9ae96862f27ad2db36a1f31e6ce99e21778a5da4",
+    "corpus_digest": "sha256:953fcae8e6baac574fd5ba176de51cc1e5dbb21ceed374951e6abc270870fdf8",
+    "run_file": {
+      "path": "corpus-run.json",
+      "sha256": "c4ee30914d20971378f99b545ff6cab6468467643895f69a581eb3547376c26e"
+    },
+    "cases": [
+      {
+        "case_id": "L-mapped-low",
+        "coverage": "COMPLETE_VERIFIED",
+        "actual": "canonical PASS; escalation NO_REVIEW; required checks 2/2",
+        "raw_digest": "sha256:8f475ae22bcb2167becc686ae2cb502415ea87b3a5841b5b7671cc8c730a15f6"
+      },
+      {
+        "case_id": "M-mixed-medium",
+        "coverage": "COMPLETE_VERIFIED",
+        "actual": "canonical INCOMPLETE; src/unmapped.txt retained; escalation REVIEW_REQUIRED; required checks 2/2",
+        "raw_digest": "sha256:a2701b0ee0b6efaa48779160dbf276c3bb82dc486d1ddd2cf725326f08ab2443"
+      },
+      {
+        "case_id": "H-stale-recovery",
+        "coverage": "COMPLETE_VERIFIED",
+        "actual": "stale STALE; interruption RECOVERY_REQUIRED; authorized recovery CHECKPOINTED; replay NOOP; required checks 4/4",
+        "raw_digest": "sha256:9a7154a755cd782168b35551569db4e65992a0eac52f63ee23be30627309bd0e"
+      }
+    ],
+    "exclusions": [
+      "provider_usage_unavailable",
+      "real_story_quality_unmeasured",
+      "baseline_B_has_no_compatible_action_kernel_runner"
+    ]
+  },
+  "regression": {
+    "full_control_plane": {
+      "command": "PowerShell: $V4AcceptanceTests = @(Get-ChildItem -LiteralPath .agents/scripts -Filter '*.test.mjs' -File | Sort-Object Name | ForEach-Object { $_.FullName }); node --test @V4AcceptanceTests",
+      "exit_code": 0,
+      "tests": 419,
+      "passed": 418,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 1,
+      "skip": "rejects symlinked cwd or referenced paths — symlink creation unavailable in this Windows environment",
+      "output_sha256": "db0fdc3136fd015cca058a421b0b6c322b14c7bd1986c1501e5c1e31e7139330"
+    },
+    "frontend": [
+      {
+        "command": "npm.cmd run type-check",
+        "exit_code": 0,
+        "output_sha256": "a0f29ab3d9cd79e512d20735b1f5aed00546ca3ba56703ae743419569ac0e57f"
+      },
+      {
+        "command": "npm.cmd run test:unit -- --run src/views/__tests__/journal.spec.ts src/views/__tests__/challenges.spec.ts src/api/__tests__/challenges.spec.ts src/views/__tests__/today.spec.ts src/views/__tests__/account-time.spec.ts",
+        "exit_code": 0,
+        "tests": 30,
+        "test_files": 5,
+        "output_sha256": "bc7f998b4df15b7a2ef1c8069213f226a8fec2294fb53ac8091619d1569cbe77"
+      },
+      {
+        "command": "npm.cmd run contract:check",
+        "exit_code": 0,
+        "output_sha256": "cc9f0f268affc5040bc21b532ff333f456eb5919c7d7a2e96b634c0f634e6d03"
+      }
+    ]
+  },
+  "consumer_trace": {
+    "candidate_self_integrity": {
+      "status": "COMPARABLE",
+      "evidence": "VERIFIED",
+      "quality": "PASS",
+      "output_sha256": "cf825f7245f645e05f1f3aa2127e1f4878295716ff1b2c1987916d8cbe9b7470"
+    },
+    "legacy_baseline_chain": {
+      "compare_status": "INCOMPARABLE",
+      "evidence": "INCONCLUSIVE",
+      "quality": "INCONCLUSIVE",
+      "evolution_status": "INCONCLUSIVE",
+      "recommendation": "INCONCLUSIVE",
+      "output_sha256": "670d0f4ecf0a038bd666c15bc03f09efb257dab7f955d1b3c47ba081c035d538"
+    }
+  },
+  "findings": [
+    {
+      "id": "F01",
+      "classification": "VALID/HIGH",
+      "disposition": "VERIFIED_FIXED",
+      "evidence": [
+        "R02 missing/unbound/tampered evidence regressions",
+        "fresh L/M/H raw assertions and candidate self-integrity",
+        "legacy consumer chain remains INCONCLUSIVE"
+      ]
+    },
+    {
+      "id": "F02",
+      "classification": "VALID/HIGH",
+      "disposition": "VERIFIED_FIXED",
+      "evidence": [
+        "original 30% criterion unchanged",
+        "both normal actions pass the original numeric gate",
+        "plan and validation report retain human-adoption boundary"
+      ]
+    },
+    {
+      "id": "F03",
+      "classification": "VALID/HIGH",
+      "disposition": "VERIFIED_FIXED",
+      "evidence": [
+        "same method/profile/basis/input digest",
+        "Git-blob manifests for B and candidate",
+        "measurement replay reproduces 65359/45551 and 65359/45580"
+      ]
+    }
+  ],
+  "limitations": [
+    "No provider export or token-usage measurement; token savings remain INCONCLUSIVE.",
+    "No paired baseline L/M/H quality run because B predates the action-kernel runner; candidate fixture evidence is not a paired quality comparison.",
+    "No real-Story quality observation or empirical pilot was run.",
+    "One symlink negative test is skipped on Windows because symlink creation is unavailable; executor source inspection confirms SYMLINK_PATH/UNSAFE_PATH fail-closed handling, while traversal/scope tests execute.",
+    "The first reviewer-generated run 20260928T110905Z used the full pair measurement object in a candidate bundle; its self-integrity exposed empty per-action compare fields. It is superseded and excluded from this verdict. The final run uses the candidate-side measurement summary and passes self-integrity."
+  ],
+  "human_adoption": "PENDING"
+}

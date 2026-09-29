@@ -1,0 +1,196 @@
+{
+  "schema_version": 1,
+  "review_id": "v4-acceptance-2026-09-28",
+  "batch": "A",
+  "captured_at": "2026-09-28T16:09:32.3608402+07:00",
+  "lane": "V4 Lite architecture/control-plane migration",
+  "status": "UNDER_REVIEW",
+  "reviewer_role": "independent reviewer",
+  "pointer": {
+    "path": "D:/Workspace/Tu_Hoc/New_Project_My_Note/.agent-state/active-run.json",
+    "schemaVersion": 1,
+    "activeRunId": null,
+    "storyId": null,
+    "status": "IDLE",
+    "read_only": true,
+    "observed_before_batch": true,
+    "rechecked_before_report_write": true
+  },
+  "refs": {
+    "main": "d8e813660e44c54785466836e5c0eda658529b74",
+    "base": "d8e813660e44c54785466836e5c0eda658529b74",
+    "initial_review_head": "7529540ad9bcbf0389d0b00bc83d1575dea1422a",
+    "baseline_bundle_source_head": "c858c9946668caf539b69e4214dcf1008ea8578e",
+    "plan_original_main_sha256": "7122633a96aef9bf1bee072ea56e47ec7ab3e50662f93a56db79356994841687",
+    "plan_original_worktree_sha256": "0570961cbfdcd8d91cbb19a951f7aa397cb945d147bba24b021bbda8ff04d32c"
+  },
+  "main": {
+    "root": "D:/Workspace/Tu_Hoc/New_Project_My_Note",
+    "head": "d8e813660e44c54785466836e5c0eda658529b74",
+    "status_at_snapshot": [
+      "A docs/superpowers/plans/2026-09-27-story-1-5-execution-plan.md",
+      "?? _bmad/render/bmad-code-review/",
+      "?? docs/superpowers/plans/2026-09-27-v4-agent-architecture-evolution-plan.md",
+      "?? docs/superpowers/plans/2026-09-28-v4-architecture-independent-review-acceptance-plan.md"
+    ],
+    "preserved": true
+  },
+  "worktree": {
+    "root": "C:/Users/ACER/.codex/worktrees/v4-architecture-evolution/New_Project_My_Note",
+    "head": "7529540ad9bcbf0389d0b00bc83d1575dea1422a",
+    "branch": null,
+    "status_at_snapshot": "clean detached HEAD",
+    "base_is_ancestor": true,
+    "base_to_initial_commit_count": 14,
+    "diff_stat": {
+      "changed_file_count": 59,
+      "files": 59,
+      "insertions": 9571,
+      "deletions": 206
+    },
+    "diff_check": "PASS"
+  },
+  "policy_comparison": {
+    "agents": "W contains the intended V4 provider/action-routing migration delta relative to MAIN; reviewed as migration scope, not treated as stale policy.",
+    "orchestration_v3": "No normalized line-content difference observed between MAIN and W; byte hashes differ because the checkouts use different line-ending bytes.",
+    "story_development": "No normalized line-content difference observed between MAIN and W; byte hashes differ because the checkouts use different line-ending bytes.",
+    "canonical_v3_pointer": "IDLE"
+  },
+  "historical_artifacts": {
+    "baseline_bundle": {
+      "path": ".agent-state/v4-observations/evaluations/architecture-upgrade-baseline.json",
+      "sha256": "e5113499bb1f3389a019211758b93e2a569bdc8ef5cfbca24d4b488f6514bdb5",
+      "bytes": 4762
+    },
+    "candidate_bundle": {
+      "path": ".agent-state/v4-observations/evaluations/architecture-upgrade-candidate.json",
+      "sha256": "9a3cf090cc5d3bd79bdb5031e7fb3782abb128b1866f9351037afe312f2cd571",
+      "bytes": 3761
+    },
+    "corpus": {
+      "path": ".agents/scripts/fixtures/v4-architecture/corpus.json",
+      "sha256": "6f932cf4cb396e3207bc3e63443acb6aed72368e7a127d6c0782ab97ed68905c",
+      "bytes": 558
+    }
+  },
+  "reviewed_source_hashes": {
+    "AGENTS.md": "976d36d9c8cc6583c7c573387af09a36c935a3dbcd7fd535f29545695c2d7d6f",
+    "CLAUDE.md": "875a451c83548930f6067093f0ac86071202289fe8ae79167b38a0786181d81e",
+    ".agents/routing/task-router.md": "9a1691b8f10e55cd2408df60b83a21d1ed1d52baaab165abc74cabb51580fc12",
+    ".agents/context/control-plane.md": "ea1147a1cf6ec11b04a0d01bc47a17cd1f94e6523aed3b2ffb46a4f98e1d9d90",
+    ".agents/context/verification-context.md": "1e16121b1bd32adbdde98d31e9f8bc8bcb175769419d52f1f813de201402753f",
+    ".agents/scripts/benchmark-v4.mjs": "6013f40b08f727a09285b333353549c4c912e9215f854c8dc0a099625bf711e1",
+    ".agents/scripts/benchmark-v4.test.mjs": "6409369b2079fbc760bce331ef6de98c333e7f29c1bf36a32b442c0ee5769ab8",
+    ".agents/scripts/v4-evolution.mjs": "45ec2116b3c9a8b51ce4fcade0ea88e75e86e43213889977ef97d5637b849abe",
+    ".agents/scripts/v4-evolution.test.mjs": "f505e60681c905b54dd3de5d6faf8d4ecbf6a1d322e8bf6493c0eb7dc92599a4",
+    ".agents/scripts/v4-action-kernel.mjs": "93c1f6884d860b341d01b901a3c463e0900fc8a8efa619b7259df3573025270e",
+    ".agents/scripts/v4-slice-transaction.mjs": "b9f0cd2ba710fadc0e681585b7e6e77a63180df22cddd92c51003f3ed1960e6c",
+    ".agents/scripts/v4-check-executor.mjs": "31168c2e44a1f71ccd17e4778a13a0d707d5cbdee625d756885bccacb4d42eff",
+    ".agents/scripts/v4-observations.mjs": "64401dc41891b0218f1d380643ff6aae452b5ed11ba7233355ac0d3fe61b5eac",
+    ".agents/scripts/v4-experience.mjs": "7315575eb1d9b60130dfe090fe402a5101d8e6c7c0cb04705c55dcb639763f73",
+    ".agents/scripts/compile-v4-context.mjs": "88c29c0003e92fa2e656b793fbfa2c19cd37b26565588f511208da35e9eb96b8",
+    ".agents/docs/v4-evolution-contract.md": "c80df03f1aadf0bf2770b853fc9758cd3ee69cd56351a8d8b2e7b41d7364124b",
+    "docs/agent-architecture/v4-upgrade-validation.md": "a01343e66fa37348f2e4ec27067f2d7520f30845c5a89b2118850ad0b549a46b",
+    ".agents/docs/v4-lite-migration.md": "345130031db215ac21e8c5dc84dceb468c73d1e2abc170c2434735a09f2e2b51"
+  },
+  "changed_paths": [
+    ".agents/context/context-routing.md",
+    ".agents/context/control-plane.md",
+    ".agents/context/verification-context.md",
+    ".agents/docs/v4-action-kernel.md",
+    ".agents/docs/v4-artifact-contract.md",
+    ".agents/docs/v4-evolution-contract.md",
+    ".agents/docs/v4-experience-contract.md",
+    ".agents/docs/v4-lite-migration.md",
+    ".agents/docs/v4-observation-contract.md",
+    ".agents/features/challenge-list.json",
+    ".agents/features/journal-frontend.json",
+    ".agents/features/today-view.json",
+    ".agents/routing/task-router.md",
+    ".agents/scripts/benchmark-v4.mjs",
+    ".agents/scripts/benchmark-v4.test.mjs",
+    ".agents/scripts/check-slice-implementation.mjs",
+    ".agents/scripts/check-slice-implementation.test.mjs",
+    ".agents/scripts/check-story-completion.mjs",
+    ".agents/scripts/check-story-finalization.mjs",
+    ".agents/scripts/check-verification.mjs",
+    ".agents/scripts/check-verification.test.mjs",
+    ".agents/scripts/compile-v4-context.mjs",
+    ".agents/scripts/compile-v4-context.test.mjs",
+    ".agents/scripts/complete-story.mjs",
+    ".agents/scripts/fixtures/v4-architecture/corpus.json",
+    ".agents/scripts/v4-action-kernel.mjs",
+    ".agents/scripts/v4-action-kernel.test.mjs",
+    ".agents/scripts/v4-architecture-baseline.test.mjs",
+    ".agents/scripts/v4-architecture-fixture.mjs",
+    ".agents/scripts/v4-check-executor.mjs",
+    ".agents/scripts/v4-check-executor.test.mjs",
+    ".agents/scripts/v4-evolution.mjs",
+    ".agents/scripts/v4-evolution.test.mjs",
+    ".agents/scripts/v4-experience.mjs",
+    ".agents/scripts/v4-experience.test.mjs",
+    ".agents/scripts/v4-observation-hooks.test.mjs",
+    ".agents/scripts/v4-observations.mjs",
+    ".agents/scripts/v4-observations.test.mjs",
+    ".agents/scripts/v4-slice-transaction.mjs",
+    ".agents/scripts/v4-slice-transaction.test.mjs",
+    ".agents/scripts/v4-story-runner.mjs",
+    ".agents/scripts/v4-story-runner.test.mjs",
+    ".agents/scripts/v4-verification-flow.test.mjs",
+    ".agents/skills/v4-story-runner/SKILL.md",
+    ".agents/skills/v4-story-runner/actions/complete-story.md",
+    ".agents/skills/v4-story-runner/actions/finalize-story.md",
+    ".agents/skills/v4-story-runner/actions/implement-slice.md",
+    ".agents/skills/v4-story-runner/actions/reconcile-lifecycle.md",
+    ".agents/skills/v4-story-runner/actions/start-story.md",
+    ".agents/skills/v4-story-runner/actions/verify-slice.md",
+    ".agents/skills/v4-story-runner/references/implementation-techniques.md",
+    ".agents/skills/v4-story-runner/references/recovery.md",
+    ".agents/verification/journal-frontend.json",
+    ".agents/verification/registry.json",
+    ".agents/verification/today-view.json",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "docs/agent-architecture/v4-upgrade-validation.md",
+    "docs/superpowers/plans/2026-09-27-v4-agent-architecture-evolution-plan.md"
+  ],
+  "focused_checks": [
+    {
+      "command": "node --test .agents/scripts/v4-action-kernel.test.mjs .agents/scripts/v4-slice-transaction.test.mjs .agents/scripts/v4-story-runner.test.mjs .agents/scripts/compile-v4-context.test.mjs .agents/scripts/check-verification.test.mjs .agents/scripts/v4-verification-flow.test.mjs .agents/scripts/v4-check-executor.test.mjs .agents/scripts/v4-observations.test.mjs .agents/scripts/v4-observation-hooks.test.mjs .agents/scripts/v4-experience.test.mjs .agents/scripts/v4-evolution.test.mjs .agents/scripts/benchmark-v4.test.mjs .agents/scripts/v4-architecture-baseline.test.mjs",
+      "cwd": "C:/Users/ACER/.codex/worktrees/v4-architecture-evolution/New_Project_My_Note",
+      "exit_code": 0,
+      "tests": 75,
+      "passed": 74,
+      "failed": 0,
+      "skipped": 1,
+      "limitation": "The symlink-cwd test is skipped because symlink creation is unavailable in this Windows environment."
+    },
+    {
+      "command": "node --test .agents/scripts/benchmark-v4.test.mjs .agents/scripts/v4-evolution.test.mjs .agents/scripts/v4-architecture-baseline.test.mjs",
+      "cwd": "C:/Users/ACER/.codex/worktrees/v4-architecture-evolution/New_Project_My_Note",
+      "exit_code": 0,
+      "tests": 16,
+      "passed": 16,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "command": "node .agents/scripts/benchmark-v4.mjs compare --baseline .agent-state/v4-observations/evaluations/architecture-upgrade-baseline.json --candidate .agent-state/v4-observations/evaluations/architecture-upgrade-candidate.json",
+      "cwd": "C:/Users/ACER/.codex/worktrees/v4-architecture-evolution/New_Project_My_Note",
+      "exit_code": 0,
+      "observed": "COMPARABLE with metrics.quality PASS, despite candidate bundle containing only synthetic corpus-guard PASS records."
+    }
+  ],
+  "missing_required_review_artifacts": [
+    ".agents/scripts/run-v4-architecture-corpus.mjs",
+    ".agents/scripts/run-v4-architecture-corpus.test.mjs",
+    ".agents/scripts/measure-v4-instruction-context.mjs",
+    ".agents/scripts/measure-v4-instruction-context.test.mjs",
+    ".agents/docs/v4-benchmark-contract.md"
+  ],
+  "notes": [
+    "B0 is the source_head recorded in the historical baseline bundle and is not the review base B.",
+    "No product code, OpenAPI contract, Story lifecycle, V3 pointer, or runtime state was changed by Batch A before report/status artifacts.",
+    "The reviewed W source remains H0 for the initial review; any later report-only commit must bind tested_source_head and reviewed_source_head to H0."
+  ]
+}

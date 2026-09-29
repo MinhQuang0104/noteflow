@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "batch": "B",
+  "tested_source_head": "56a78eeb7678c355718db44f64cc9a9200147363",
+  "base_head": "d8e813660e44c54785466836e5c0eda658529b74",
+  "run_id": "20260928T100801Z-56a78eeb7678c355718db44f64cc9a9200147363",
+  "evidence_root": ".agent-state/v4-observations/evaluations/acceptance/20260928T100801Z-56a78eeb7678c355718db44f64cc9a9200147363",
+  "files": [
+    { "path": "corpus-run.json", "sha256": "643ff6afb3b91dcba5835ac97666938e419c62dc9ef1f78111898f6a9ae14db1" },
+    { "path": "cases/L-mapped-low.json", "sha256": "b66e7c4d641170bcaa8d36e8e71f8ecc450ca9209e6953fd445b7232410a662a" },
+    { "path": "cases/M-mixed-medium.json", "sha256": "f4e5e3efd39662d6ac4272c3ad8d65b580d9f87642825bdf11df69d523d081ee" },
+    { "path": "cases/H-stale-recovery.json", "sha256": "bfda293407442df35ae5a7e609a9973a012bbeaad38d5c20e47146f7e2ae7dca" },
+    { "path": "baseline-instruction-measurement.json", "sha256": "78da36fa9a7600b2216c5a855256c1d4976897c553143344a48ee2d7c01aa53a" },
+    { "path": "candidate-instruction-measurement.json", "sha256": "eee78f9b3907e67c6c0b8bb495d90ba80002f65b9b367b53b565af336586b120" },
+    { "path": "instruction-measurement.json", "sha256": "4d960301851cdb8fbfd5deb72f49a7a29cd3e8101f87322098c08210306ac9da" },
+    { "path": "candidate-bundle.json", "sha256": "8aff72a9bbe9dbdeca35690a50c5e695f2b6e154fb5c9e9d49a71026b267d987" }
+  ],
+  "historical_bundles": [
+    { "path": ".agent-state/v4-observations/evaluations/architecture-upgrade-baseline.json", "sha256": "e5113499bb1f3389a019211758b93e2a569bdc8ef5cfbca24d4b488f6514bdb5" },
+    { "path": ".agent-state/v4-observations/evaluations/architecture-upgrade-candidate.json", "sha256": "9a3cf090cc5d3bd79bdb5031e7fb3782abb128b1866f9351037afe312f2cd571" }
+  ]
+}

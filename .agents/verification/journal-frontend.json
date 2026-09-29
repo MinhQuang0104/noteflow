@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "featureId": "journal-frontend",
+  "featureMap": ".agents/features/journal-frontend.json",
+  "cwd": "frontend",
+  "checks": [
+    {
+      "id": "map",
+      "cwd": ".",
+      "argv": ["node", ".agents/scripts/check-feature-map.mjs", "check", ".agents/features/journal-frontend.json"]
+    },
+    {
+      "id": "type-check",
+      "argv": ["npm", "run", "type-check"]
+    },
+    {
+      "id": "mapped-tests",
+      "argv": ["npm", "run", "test:unit", "--", "--run", "src/views/__tests__/journal.spec.ts", "src/views/__tests__/challenges.spec.ts", "src/api/__tests__/challenges.spec.ts"]
+    },
+    {
+      "id": "contract-check",
+      "argv": ["npm", "run", "contract:check"]
+    }
+  ],
+  "unresolved": ["The recipe does not prove backend persistence, migrations, or all API-file behavior from path matching alone."]
+}

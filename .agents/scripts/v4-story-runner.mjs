@@ -9,6 +9,8 @@ import { applyFinalization } from './finalize-story.mjs'
 import { explicitApprovalInput, inspectCompletion } from './check-story-completion.mjs'
 import { applyCompletion, recordHumanApproval } from './complete-story.mjs'
 import { inspectStart, applyStart } from './start-story.mjs'
+import { checkpointImplementation, prepareAction, recordSliceReview, verifySlice } from './v4-action-kernel.mjs'
+import { recordActionFinished, recordActionStarted, recordStoryCompleted, recordStoryReviewSnapshot } from './v4-observations.mjs'
 
 export const V4_AUTHORIZED_ACTIONS = new Set([
   'start_story',
@@ -71,6 +73,29 @@ function pointerIdle(root) {
 
 function invalidResult(reason) {
   return { status: 'INVALID', authorized: false, valid: false, reasons: [reason] }
+}
+
+function runnerActionContext(root, storyId, action, expectedHead, options = {}) {
+  return {
+    story_id: storyId,
+    action,
+    invocation_id: options.invocationId ?? null,
+    session_id: options.sessionId ?? null,
+    attempt_id: options.attemptId ?? expectedHead,
+    payload: { expected_head: expectedHead, operation: action },
+    provenance: { kind: 'v4_runner', source: 'v4-story-runner', operation: action },
+  }
+}
+
+function runRunnerAction(root, storyId, action, expectedHead, options, apply, after = null) {
+  recordActionStarted(root, runnerActionContext(root, storyId, action, expectedHead, options))
+  let result
+  try { result = apply() } catch (error) { result = { status: 'ERROR', authorized: false, reasons: [error.message] } }
+  recordActionFinished(root, { ...runnerActionContext(root, storyId, action, expectedHead, options), payload: {
+    expected_head: expectedHead, operation: action, result_status: result.status, next_action: result.next_action ?? null,
+  } })
+  if (after) after(result)
+  return result
 }
 
 export function humanApprovalIntent(value) {
@@ -164,6 +189,29 @@ export function runV4Story(root, storyId, options = {}) {
     if (plan.lifecycle_snapshot === 'done') {
       return inspectCompletion(root, storyId, expectedHead)
     }
+    const explicitKernelOperation = options.operation ?? options.kernel?.operation
+    if (explicitKernelOperation !== undefined) {
+      const input = options.input ?? options.kernel?.input
+      if (!input || typeof input !== 'object' || Array.isArray(input)) return invalidResult('KERNEL_INPUT_REQUIRED')
+      if (plan.next_action?.kind === 'implement_slice') {
+        if (input.story_id !== storyId || input.action !== 'implement_slice' || input.slice_id !== plan.next_action.target) {
+          return invalidResult('KERNEL_INPUT_PLAN_MISMATCH')
+        }
+        if (explicitKernelOperation === 'prepare') return prepareAction(root, { ...input, operation: 'prepare' })
+        if (explicitKernelOperation === 'checkpoint') return checkpointImplementation(root, { ...input, operation: 'checkpoint' })
+        return invalidResult('KERNEL_OPERATION_UNSUPPORTED')
+      }
+      if (plan.next_action?.kind === 'verify_slice') {
+        if (input.story_id !== storyId || input.action !== 'verify_slice' || input.slice_id !== plan.next_action.target) {
+          return invalidResult('KERNEL_INPUT_PLAN_MISMATCH')
+        }
+        if (explicitKernelOperation === 'prepare') return prepareAction(root, { ...input, operation: 'prepare' })
+        if (explicitKernelOperation === 'verify') return verifySlice(root, { ...input, operation: 'verify' })
+        if (explicitKernelOperation === 'record-review' || explicitKernelOperation === 'record_review') return recordSliceReview(root, { ...input, operation: 'record-review' })
+        return invalidResult('KERNEL_OPERATION_UNSUPPORTED')
+      }
+      return { status: 'UNAUTHORIZED_ACTION', authorized: false, reasons: ['KERNEL_ACTION_NOT_CURRENT'] }
+    }
     const decisionInput = {
       nextAction: plan.next_action,
       lifecycle: plan.lifecycle_snapshot,
@@ -177,7 +225,8 @@ export function runV4Story(root, storyId, options = {}) {
       const route = routeAction({ ...decisionInput, helperStatus: helper.status })
       if (!route.authorized) return { ...route, helper }
       if (!options.startFingerprint) return { status: 'BLOCKED', authorized: false, reasons: ['START_PREVIEW_FINGERPRINT_REQUIRED'], helper }
-      return applyStart(root, storyId, expectedHead, options.startFingerprint, startOptions)
+      return runRunnerAction(root, storyId, 'start_story', expectedHead, options,
+        () => applyStart(root, storyId, expectedHead, options.startFingerprint, startOptions))
     }
     if (plan.next_action?.kind === 'complete_story') {
       const helper = inspectCompletion(root, storyId, expectedHead)
@@ -187,7 +236,21 @@ export function runV4Story(root, storyId, options = {}) {
         completionStatus: helper.status
       })
       if (!route.authorized) return { ...route, helper, snapshot: helper.preview }
-      return applyCompletion(root, storyId, expectedHead)
+      return runRunnerAction(root, storyId, 'complete_story', expectedHead, options,
+        () => applyCompletion(root, storyId, expectedHead),
+        result => {
+          if (result.status === 'DONE') recordStoryCompleted(root, {
+            story_id: storyId,
+            action: 'complete_story',
+            invocation_id: options.invocationId ?? null,
+            session_id: options.sessionId ?? null,
+            attempt_id: options.attemptId ?? expectedHead,
+            approval_present: decisionInput.humanApprovalPresent === true,
+            approval_fresh: helper.approval_fresh === true,
+            payload: { result_status: result.status, expected_head: expectedHead },
+            provenance: { kind: 'completion_transaction', source: 'v4-story-runner' },
+          })
+        })
     }
     if (plan.next_action?.kind === 'finalize_story') {
       const helper = inspectFinalization(root, storyId, expectedHead)
@@ -197,7 +260,20 @@ export function runV4Story(root, storyId, options = {}) {
         doneGateDisposition: helper.done_gate_disposition
       })
       if (!route.authorized) return { ...route, helper }
-      return applyFinalization(root, storyId, expectedHead)
+      return runRunnerAction(root, storyId, 'finalize_story', expectedHead, options,
+        () => applyFinalization(root, storyId, expectedHead),
+        result => {
+          if (result.status === 'HUMAN_GATE_REQUIRED') recordStoryReviewSnapshot(root, {
+            story_id: storyId,
+            action: 'finalize_story',
+            invocation_id: options.invocationId ?? null,
+            session_id: options.sessionId ?? null,
+            attempt_id: options.attemptId ?? expectedHead,
+            finalization_status: result.status,
+            payload: { result_status: result.status, expected_head: expectedHead, review_head: result.review_head ?? expectedHead },
+            provenance: { kind: 'finalization_transaction', source: 'v4-story-runner' },
+          })
+        })
     }
     return routeAction(decisionInput)
   } catch (error) {

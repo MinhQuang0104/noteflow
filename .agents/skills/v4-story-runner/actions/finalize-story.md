@@ -1,0 +1,27 @@
+# `finalize_story` action
+
+Use only when the validated Plan requests `finalize_story` for the Story, both
+lifecycle and execution are `in-progress`, and no Human approval exists.
+
+Run the read-only finalization gate:
+
+```text
+node .agents/scripts/check-story-finalization.mjs check <story-id> --expected-head <sha>
+```
+
+Require `READY` with `done_gate_disposition` of `READY` or
+`READY_WITH_DISCLOSURES`. It must validate Story/Plan binding, reviewed slice
+set, receipt identities/freshness, task-to-slice and AC coverage, upstream Epic,
+lifecycle projections, and the exact final implementation path/tree digests.
+Canonical `INCOMPLETE` or `NOT_APPLICABLE` disclosures remain unchanged.
+
+Run `.agents/scripts/finalize-story.mjs` once. It stages and commits exactly
+the Story completion metadata, immutable `story_finalization` receipt, Plan
+lifecycle projection, and sprint Story entry. The transaction ends at
+`review`, sets Plan execution to `complete`, persists
+`next_action: complete_story`, and returns `HUMAN_GATE_REQUIRED`.
+
+Do not write approval, execute `complete_story`, infer a done transition, alter
+normative Story content, rewrite slice receipts, or change product files. A
+partial write/commit preserves the snapshot and must be handled through the
+existing recovery contract; never clean or reset it.

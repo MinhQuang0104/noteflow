@@ -88,6 +88,7 @@ function defaultResult(storyId, sliceId) {
     excludedUnrelatedPaths: [],
     relevantDirtyPaths: [],
     resumePaths: [],
+    metadataPaths: [],
     baselineCommit: null,
     checkpointCommit: null,
     candidateChangedPaths: [],
@@ -320,6 +321,7 @@ export function inspect(root, storyId, sliceId, options = {}) {
     const planStaged = result.stagedPaths.includes(planPath)
     const planUnstaged = result.unstagedPaths.includes(planPath)
     const receiptPath = plan.schema_version === 2 ? slice.receipt_refs?.implementation?.path : null
+    result.metadataPaths = canonicalPaths([planPath, receiptPath].filter(Boolean))
     const otherDirty = result.relevantDirtyPaths.filter(item => item !== planPath && item !== receiptPath)
     if (planStaged || planUnstaged) {
       if (planStaged && planUnstaged) result.reasons.push('PLAN_UPDATE_PARTIALLY_STAGED')

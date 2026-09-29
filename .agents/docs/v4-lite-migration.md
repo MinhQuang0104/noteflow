@@ -75,3 +75,71 @@ Feature Map v1 covers only the challenge-list pilot; the recipe registry contain
 ## Final Result
 
 V4 Lite core architecture: **ACCEPTED**. Migration implementation: **COMPLETE**. V3.1 removal: **NOT PART OF THIS MIGRATION**.
+
+## 2026-09-28 V4 Lite architecture evolution validation
+
+The authorized V4 Lite architecture/control-plane evolution was implemented
+in an isolated managed worktree. T00–T11 completed with deterministic evidence:
+the full control-plane suite reported 405 tests, 404 pass, 1 Windows symlink
+skip, and 0 failures. The new benchmark compares normalized baseline/candidate
+bundles and preserves metric coverage; the fixed L/M/H corpus remains a
+fixture-only guard. The final comparable bundle measured larger current
+instruction-source bytes than the historical baseline (+21,525 implement and
++22,254 verify aggregate); this is not a savings claim. Provider token usage,
+real-Story quality impact, and human adoption remain explicitly
+inconclusive/unclaimed. Experience, proposal, and
+candidate stores are advisory derived data; no auto-apply path, scheduler,
+Story lifecycle mutation, product change, or V3 runtime takeover was added.
+
+See `docs/agent-architecture/v4-upgrade-validation.md` for commands, scope,
+ limitations, and rollback considerations.
+
+## 2026-09-28 Independent review — Batch A
+
+Current review status: UNDER_REVIEW. The historical implementation report
+above is preserved as implementer-reported evidence and is not a final
+independent acceptance.
+
+The independent reviewer inspected B
+d8e813660e44c54785466836e5c0eda658529b74 through H0
+7529540ad9bcbf0389d0b00bc83d1575dea1422a and recorded:
+
+- F01 VALID/HIGH: unexecuted or caller-supplied benchmark/evolution evidence
+  can become PASS or AWAITING_HUMAN.
+- F02 VALID/HIGH: the original U2 30% acceptance was presented as complete
+  although the historical candidate bytes are larger than baseline.
+- F03 VALID/HIGH: the instruction-byte measurement basis is not revision-bound
+  or symmetric and the planned corpus/measurement helpers are absent.
+
+The detailed snapshot, coverage and reproductions are in
+docs/agent-architecture/reviews/v4-acceptance-2026-09-28/. No product, Story,
+V3 runtime or implementation files were changed by Batch A. Batch B must
+repair evidence trust and lock the measurement method before U2 can be
+reassessed.
+
+## 2026-09-28 Batch D independent review
+
+The architecture-evolution acceptance was independently reviewed at tested
+source HEAD
+0e4c6b939f2a186399b483718601e86b44a694b5, with normative source commit
+09b9dd961f3919e5c91b5742dcbe4bc0ac2abc92. The verdict is
+PASS_ORIGINAL_SCOPE for the original deterministic migration scope only.
+
+Fresh evidence records 419 control-plane tests with 418 pass, 0 fail and one
+Windows symlink-creation skip; frontend type-check, 30 focused unit tests and
+contract check pass under Node 24.21.0. The L/M/H candidate corpus is
+execution-bound and verified. The locked common-basis measurement is
+30.31% reduction for implement_slice and 30.26% for verify_slice; the
+original 30% criterion was not changed.
+
+F01–F03 are independently VERIFIED_FIXED. The historical legacy bundle
+remains INCOMPARABLE/INCONCLUSIVE and the evolution consumer remains
+fail-closed. Provider usage, paired baseline quality, real-Story quality,
+empirical pilot, rollout and human adoption are not claimed. Human
+integration/adoption is still pending; this section is not an approval or
+rollout record.
+
+Readable Batch D evidence, matrix and decision:
+docs/agent-architecture/reviews/v4-acceptance-2026-09-28/batch-d-results.md,
+acceptance-matrix.md, batch-d-evidence-index.json,
+batch-d-evidence-bundle.json and final-decision.md.

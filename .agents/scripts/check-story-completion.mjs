@@ -232,7 +232,7 @@ function dirtyPaths(root) {
     ...gitPaths(root, ['diff', '--cached', '--name-only', '--diff-filter=ACDMRTUXB', 'HEAD', '--'], 'GIT_STAGED_PATHS_FAILED'),
     ...gitPaths(root, ['diff', '--name-only', '--diff-filter=ACDMRTUXB', 'HEAD', '--'], 'GIT_UNSTAGED_PATHS_FAILED'),
     ...gitPaths(root, ['ls-files', '--others', '--exclude-standard', '--'], 'GIT_UNTRACKED_PATHS_FAILED')
-  ])].filter(item => !NOISE.has(item)).sort()
+  ])].filter(item => !NOISE.has(item) && !item.startsWith('.agent-state/v4-observations/')).sort()
 }
 
 export function doneGateSummaryDigest(snapshot) {

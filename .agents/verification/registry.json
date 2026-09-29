@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "recipes": [
+    {
+      "featureId": "challenge-list",
+      "path": ".agents/verification/challenge-list.json",
+      "enabled": true
+    },
+    {
+      "featureId": "journal-frontend",
+      "path": ".agents/verification/journal-frontend.json",
+      "enabled": true
+    },
+    {
+      "featureId": "today-view",
+      "path": ".agents/verification/today-view.json",
+      "enabled": true
+    }
+  ]
+}

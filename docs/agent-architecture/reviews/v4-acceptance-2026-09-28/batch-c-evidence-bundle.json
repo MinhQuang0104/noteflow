@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "batch": "C",
+  "run_id": "20260928T105031Z-09b9dd961f3919e5c91b5742dcbe4bc0ac2abc92",
+  "base_head": "d8e813660e44c54785466836e5c0eda658529b74",
+  "source_head": "09b9dd961f3919e5c91b5742dcbe4bc0ac2abc92",
+  "basis": {
+    "method": "normal-action-instruction-source-v1",
+    "basis_id": "normal-action-instruction-source-v1",
+    "basis_digest": "sha256:6a6749f33ccc57ca4649e4b9e2afa5d7597c0d7db5fdf1a6823a92af4e069998",
+    "profile": "v4-lite-normal-action",
+    "input_digest": "sha256:16b03c97d4fef8b41ca29f1a6a4877fdec3817a7383efffc7038fb0476ddc27b"
+  },
+  "measurement": {
+    "status": "MEASURED",
+    "target_reduction": 0.3,
+    "target_max_bytes": 45751,
+    "baseline_bytes": {
+      "implement_slice": 65359,
+      "verify_slice": 65359
+    },
+    "candidate_bytes": {
+      "implement_slice": 45551,
+      "verify_slice": 45580
+    },
+    "delta_bytes": {
+      "implement_slice": -19808,
+      "verify_slice": -19779
+    },
+    "reduction_percent": {
+      "implement_slice": 30.31,
+      "verify_slice": 30.26
+    },
+    "projection_bytes": {
+      "implement_slice": 0,
+      "verify_slice": 0
+    }
+  },
+  "corpus": {
+    "status": "VERIFIED",
+    "method": "v4-architecture-corpus-v1",
+    "runner_digest": "sha256:5533b510d0bacb16f42c383d9ae96862f27ad2db36a1f31e6ce99e21778a5da4",
+    "corpus_digest": "sha256:953fcae8e6baac574fd5ba176de51cc1e5dbb21ceed374951e6abc270870fdf8",
+    "cases": [
+      {
+        "case_id": "L-mapped-low",
+        "actual": "canonical PASS; escalation NO_REVIEW; required checks 2/2",
+        "assertions": ["canonical-pass", "required-checks-executed", "low-risk-no-review"]
+      },
+      {
+        "case_id": "M-mixed-medium",
+        "actual": "canonical INCOMPLETE; unmatched src/unmapped.txt retained; escalation REVIEW_REQUIRED; required checks 2/2",
+        "assertions": ["raw-incomplete-preserved", "unmapped-path-preserved", "medium-risk-review-required"]
+      },
+      {
+        "case_id": "H-stale-recovery",
+        "actual": "stale STALE; interruption RECOVERY_REQUIRED; authorized recovery CHECKPOINTED; replay NOOP; required checks 4/4",
+        "assertions": ["stale-preview-rejected", "stale-preview-no-mutation", "interruption-requires-recovery", "authorized-recovery-completes", "recovery-replay-is-noop"]
+      }
+    ],
+    "exclusions": ["provider_usage_unavailable", "real_story_quality_unmeasured"]
+  },
+  "source_scope": {
+    "changed": [
+      "AGENTS.md",
+      "CLAUDE.md",
+      ".agents/routing/task-router.md",
+      ".agents/context/control-plane.md",
+      ".agents/context/verification-context.md",
+      ".agents/skills/v4-story-runner/SKILL.md",
+      ".agents/skills/v4-story-runner/actions/implement-slice.md",
+      ".agents/skills/v4-story-runner/actions/verify-slice.md",
+      ".agents/scripts/v4-context-invariants.architecture.test.mjs"
+    ],
+    "unchanged_basis": true,
+    "product_story_plan_v3_runtime_unchanged": true
+  }
+}
