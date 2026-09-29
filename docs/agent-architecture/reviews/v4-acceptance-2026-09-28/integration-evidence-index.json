@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "kind": "v4-integration-acceptance-evidence-index",
+  "status": "READY_FOR_HUMAN_MERGE",
+  "scope": "documentation-evidence-provenance-only",
+  "base_main_head": "c7c8eb4ca634f21bdc4ddeb928affe4610863782",
+  "tested_source_head": "0e4c6b939f2a186399b483718601e86b44a694b5",
+  "source_handoff_head": "f9af34659d4059a0febeaa86698a841e58a00cf6",
+  "candidate_code_head": "ad9c18d28503301cec96a113b21aa41b215c2723",
+  "documentation_handoff_head": "PENDING_DOCUMENTATION_BINDING_COMMIT",
+  "run_id": "20260929T-integration-ad9c18d",
+  "hashing": {
+    "revision_bound": "SHA-256 over exact bytes from git cat-file blob; Git blob SHA-1 is recorded where applicable",
+    "bundle_source_bindings": "SHA-256 over exact candidate worktree bytes read during the run; line endings are preserved and separately counted",
+    "historical_errata": "historical values remain unchanged; current values are recorded as new evidence",
+    "source_binding_match": { "matched": 10, "total": 10 }
+  },
+  "candidate_bundle": {
+    "path": ".agent-state/v4-observations/evaluations/acceptance/20260929T-integration-ad9c18d/candidate-bundle.json",
+    "sha256": "00e6681944508628ed391d15993e99fbc8d44d4ad43d0bc6182abc962926efc6",
+    "source_head": "ad9c18d28503301cec96a113b21aa41b215c2723",
+    "architecture_fingerprint": "sha256:6afbb17de8fb3af5b7bb9bc4abed4bb3906301164d3ff04bec7432e14b510352",
+    "corpus_digest": "sha256:f512212da867c552e1f3fab54e8168f3d3e11908e20ca6e53d2984f78dd2959b",
+    "runner_digest": "sha256:ad8cba0e0eeaca60ec0183dd6115a73fdef4b6ef44e05a1dffb63ef285dd4be5",
+    "evidence_status": "VERIFIED",
+    "coverage": "COMPLETE_VERIFIED"
+  },
+  "raw_files": [
+    { "path": ".agent-state/v4-observations/evaluations/integration/20260929T-integration-ad9c18d/corpus-run.json", "sha256": "a07775fce995eb861a38c0809726e02d833ee0ec0006f2a5ac0a36eb70acc2dd", "basis": "exact bytes" },
+    { "path": ".agent-state/v4-observations/evaluations/integration/20260929T-integration-ad9c18d/candidate-instruction-measurement.json", "sha256": "487a3577afaa8fc69ddd712e5dbff15cd2ae93bedb22fb7a73a79d337f859926", "basis": "exact bytes" },
+    { "path": ".agent-state/v4-observations/evaluations/integration/20260929T-integration-ad9c18d/instruction-measurement.json", "sha256": "f996b2e1b7881752bd4ddb89a1cc96f8eb896cca5177603c8a7122b0f4a624af", "basis": "exact bytes" },
+    { "path": ".agent-state/v4-observations/evaluations/integration/20260929T-integration-ad9c18d/cases/L-mapped-low.json", "sha256": "ca92f9a241c4154a845aaa2177b4d7f8cb94be96e7e1a919743e82d937fb1f01", "basis": "exact bytes" },
+    { "path": ".agent-state/v4-observations/evaluations/integration/20260929T-integration-ad9c18d/cases/M-mixed-medium.json", "sha256": "0fbb56a92dd656eb31b2af89665cefff62757d8171cae6c8a26a9afe3c2d3a24", "basis": "exact bytes" },
+    { "path": ".agent-state/v4-observations/evaluations/integration/20260929T-integration-ad9c18d/cases/H-stale-recovery.json", "sha256": "0c80c96a02a72cd855d0277d17792cd589d311c5127c97d568b5462806a1a59a", "basis": "exact bytes" },
+    { "path": ".agent-state/v4-observations/evaluations/integration/20260929T-integration-ad9c18d/full-control-plane-suite.log", "sha256": "eb3f6e823627db6f357a5029af0227074f02112bd09783fc0ed00eb130b313ab", "basis": "exact bytes" }
+  ],
+  "frontend_gates": {
+    "evidence_subject_head": "ad9c18d28503301cec96a113b21aa41b215c2723",
+    "node": "v24.21.0",
+    "npm": "11.6.4",
+    "range": ">=24.12.0 <25",
+    "type_check": { "command": "npm.cmd run type-check", "exit_code": 0 },
+    "focused_unit": { "command": "npm.cmd run test:unit -- --run <five-file recipe>", "files": 5, "tests": 37, "exit_code": 0 },
+    "contract_check": { "command": "npm.cmd run contract:check", "exit_code": 0 },
+    "reuse_basis": "documentation-only changes are outside the recipe source paths and do not change the candidate architecture fingerprint"
+  },
+  "u2": {
+    "basis_method": "normal-action-instruction-source-v1",
+    "profile": "v4-lite-normal-action",
+    "basis_digest": "sha256:6a6749f33ccc57ca4649e4b9e2afa5d7597c0d7db5fdf1a6823a92af4e069998",
+    "implement_slice": { "baseline_bytes": 65359, "candidate_bytes": 45551, "reduction_percent": 30.31, "projection_bytes": 0 },
+    "verify_slice": { "baseline_bytes": 65359, "candidate_bytes": 45580, "reduction_percent": 30.26, "projection_bytes": 0 },
+    "provider_token_usage": "INCONCLUSIVE"
+  },
+  "historical_errata": "docs/agent-architecture/reviews/v4-acceptance-2026-09-28/integration-evidence-errata.md",
+  "original_plan_snapshot": {
+    "path": "docs/agent-architecture/reviews/v4-acceptance-2026-09-28/source-plan-2026-09-27-original-main.md",
+    "source": "D:/Workspace/Tu_Hoc/New_Project_My_Note/docs/superpowers/plans/2026-09-27-v4-agent-architecture-evolution-plan.md",
+    "bytes": 65732,
+    "sha256": "7122633a96aef9bf1bee072ea56e47ec7ab3e50662f93a56db79356994841687"
+  },
+  "human_adoption": { "status": "NOT_CREATED", "human_approval": "PENDING", "merge": "NOT_PERFORMED", "push": "NOT_PERFORMED" },
+  "limitations": [
+    "Provider usage, paired baseline quality, real-Story quality and empirical pilot remain INCONCLUSIVE or out of scope.",
+    "One symlink test is skipped because symlink creation is unavailable in the Windows environment.",
+    "Historical checksum bindings remain preserved and are superseded only by the explicit errata/new index."
+  ]
+}
