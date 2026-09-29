@@ -18,14 +18,14 @@
     "frontend/src/api/schema.generated.ts"
   ],
   "anchor_blobs": {
-    "frontend/src/components/ChallengeJournalEditor.vue": "f43566320037ba25a23d66c6c46328d9ce0087d6",
+    "frontend/src/components/ChallengeJournalEditor.vue": "a90d2a65fb5fa328f94f777499ec332e882ca1f9",
     "frontend/src/views/ChallengesView.vue": "16de61a9c7077b031225b7f9cffc61349fcacdb1",
     "frontend/src/api/challenges.ts": "1170868875c493ff954398ddecba122ff6272a79",
-    "frontend/src/views/__tests__/journal.spec.ts": "cc0f39bad999c263f26fe0d13ae2032d92450244",
+    "frontend/src/views/__tests__/journal.spec.ts": "47e55538615b0120812145e4d8e0998713cccd14",
     "frontend/src/api/__tests__/challenges.spec.ts": "b2638b2671f35176505ab3531ffa6599f8428da5",
-    "frontend/src/stores/auth.ts": "c8a871ae8c817ca7d0128438d06108b2bfb6d3f0",
+    "frontend/src/stores/auth.ts": "7284c8d280ecdbc7524e3ff5563eb67a4862b163",
     "frontend/src/stores/account.ts": "d182dbf43b69fe5c0c1ee166c1eb427113bfe94e",
-    "frontend/src/stores/sync.ts": "1969078fe15aa99345530242bfc0de7ac5cda07b",
+    "frontend/src/stores/sync.ts": "ebfca00bd890b4fd2f44eb528ec6493b9d4d8afe",
     "contracts/openapi.yaml": "32459059818553a2909d0e15df7b7ad500506f4f",
     "frontend/src/api/schema.generated.ts": "de616ea8763ab207f6b72e752464da084c206f6b"
   }

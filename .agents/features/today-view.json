@@ -19,6 +19,6 @@
     "frontend/src/views/__tests__/account-time.spec.ts": "10600cebc826f3896f59f48d6ff8f86356b30898",
     "frontend/src/api/challenges.ts": "1170868875c493ff954398ddecba122ff6272a79",
     "frontend/src/stores/account.ts": "d182dbf43b69fe5c0c1ee166c1eb427113bfe94e",
-    "frontend/src/stores/auth.ts": "c8a871ae8c817ca7d0128438d06108b2bfb6d3f0"
+    "frontend/src/stores/auth.ts": "7284c8d280ecdbc7524e3ff5563eb67a4862b163"
   }
 }
