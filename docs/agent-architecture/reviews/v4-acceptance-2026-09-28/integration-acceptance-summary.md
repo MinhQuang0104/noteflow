@@ -17,7 +17,7 @@ approval, adoption record, rollout decision, or Story completion decision.
 | Tested source | `0e4c6b939f2a186399b483718601e86b44a694b5` |
 | Source handoff | `f9af34659d4059a0febeaa86698a841e58a00cf6` |
 | Candidate implementation | `ad9c18d28503301cec96a113b21aa41b215c2723` |
-| Documentation handoff | recorded in the final documentation-binding commit |
+| Documentation content commit | `88ce9d91383d8efbfdd0815fb59fb98ea9f19abe` (`docs(v4): close integration evidence provenance`) |
 
 The candidate implementation consists of the migration commit
 `9e4b831d78bfe32d693b89b9fff6b9618be876cb` and the mechanical Feature Map

@@ -7,7 +7,7 @@
   "tested_source_head": "0e4c6b939f2a186399b483718601e86b44a694b5",
   "source_handoff_head": "f9af34659d4059a0febeaa86698a841e58a00cf6",
   "candidate_code_head": "ad9c18d28503301cec96a113b21aa41b215c2723",
-  "documentation_handoff_head": "PENDING_DOCUMENTATION_BINDING_COMMIT",
+  "documentation_content_commit": "88ce9d91383d8efbfdd0815fb59fb98ea9f19abe",
   "run_id": "20260929T-integration-ad9c18d",
   "hashing": {
     "revision_bound": "SHA-256 over exact bytes from git cat-file blob; Git blob SHA-1 is recorded where applicable",
