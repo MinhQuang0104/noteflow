@@ -27,7 +27,7 @@ try {
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
     ]);
 } catch (PDOException $e) {
-    fwrite(STDERR, "Failed to connect to PostgreSQL at {$host}:{$port}/{$database}: " . $e->getMessage() . "\n");
+    fwrite(STDERR, "Failed to connect to PostgreSQL at {$host}:{$port}/{$database}: ".$e->getMessage()."\n");
     exit(1);
 }
 
@@ -35,16 +35,16 @@ $action = $argv[1] ?? 'reset';
 
 switch ($action) {
     case 'reset':
-        $pdo->exec("DELETE FROM mutation_commands");
-        $pdo->exec("DELETE FROM challenge_target_periods");
-        $pdo->exec("DELETE FROM challenges");
+        $pdo->exec('DELETE FROM mutation_commands');
+        $pdo->exec('DELETE FROM challenge_target_periods');
+        $pdo->exec('DELETE FROM challenges');
         if ($pdo->query("SELECT to_regclass('public.sessions')")->fetchColumn()) {
-            $pdo->exec("DELETE FROM sessions");
+            $pdo->exec('DELETE FROM sessions');
         }
 
         $passwordHash = password_hash('secret123', PASSWORD_BCRYPT);
 
-        $stmt = $pdo->prepare("SELECT id FROM users WHERE email = :email");
+        $stmt = $pdo->prepare('SELECT id FROM users WHERE email = :email');
         $stmt->execute(['email' => 'owner@example.test']);
         $ownerId = $stmt->fetchColumn();
 
@@ -70,7 +70,7 @@ switch ($action) {
 
     case 'set-write-state':
         $state = $argv[2] ?? 'open';
-        if (!in_array($state, ['open', 'locked_for_import'], true)) {
+        if (! in_array($state, ['open', 'locked_for_import'], true)) {
             fwrite(STDERR, "Invalid write state: {$state}\n");
             exit(1);
         }

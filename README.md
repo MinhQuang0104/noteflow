@@ -84,9 +84,11 @@ are rejected, restores the exact contract, and proves the clean check passes.
 ## Quality gates
 
 ```powershell
+# From the repository root; include PHP E2E helpers as CI does.
+backend\vendor\bin\pint.bat --test
+
 Set-Location backend
 composer validate --strict
-vendor\bin\pint.bat --test
 composer analyse
 php artisan test
 
