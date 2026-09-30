@@ -1,0 +1,176 @@
+name: noteflow-local
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${LOCAL_DB_DATABASE:-noteflow}
+      POSTGRES_USER: ${LOCAL_DB_USERNAME:-noteflow}
+      POSTGRES_PASSWORD: ${LOCAL_DB_PASSWORD:?LOCAL_DB_PASSWORD is required}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./deploy/local
+      dockerfile: Dockerfile
+    image: noteflow-local/backend:dev
+    command: ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000", "--no-reload"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+        restart: true
+    environment:
+      APP_NAME: NoteFlow
+      APP_ENV: local
+      APP_KEY: ${LOCAL_APP_KEY:?LOCAL_APP_KEY is required}
+      APP_DEBUG: "true"
+      APP_URL: http://127.0.0.1:8000
+      LOG_CHANNEL: stack
+      LOG_STACK: single
+      LOG_LEVEL: debug
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_DATABASE: ${LOCAL_DB_DATABASE:-noteflow}
+      DB_USERNAME: ${LOCAL_DB_USERNAME:-noteflow}
+      DB_PASSWORD: ${LOCAL_DB_PASSWORD:?LOCAL_DB_PASSWORD is required}
+      DB_URL: ""
+      SESSION_DRIVER: database
+      SESSION_LIFETIME: "120"
+      SESSION_ENCRYPT: "false"
+      SESSION_SECURE_COOKIE: "false"
+      SESSION_PATH: /
+      SESSION_DOMAIN: "null"
+      BROADCAST_CONNECTION: log
+      FILESYSTEM_DISK: local
+      QUEUE_CONNECTION: sync
+      CACHE_STORE: file
+      MAIL_MAILER: log
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ./backend:/workspace/backend:ro
+      - ./contracts:/workspace/contracts:ro
+      - backend-vendor:/workspace/backend/vendor
+      - backend-storage:/workspace/backend/storage
+      - backend-cache:/workspace/backend/bootstrap/cache
+    networks:
+      - dev
+    working_dir: /workspace/backend
+    healthcheck:
+      test: ["CMD-SHELL", "php -r \"exit(@file_get_contents('http://127.0.0.1:8000/up') === false ? 1 : 0);\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    restart: unless-stopped
+
+  postgres-test:
+    profiles: [test]
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${LOCAL_TEST_DB_DATABASE:-noteflow_test}
+      POSTGRES_USER: ${LOCAL_TEST_DB_USERNAME:-noteflow}
+      POSTGRES_PASSWORD: ${LOCAL_TEST_DB_PASSWORD:?LOCAL_TEST_DB_PASSWORD is required}
+    volumes:
+      - postgres-test-data:/var/lib/postgresql/data
+    networks:
+      - test
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: "no"
+
+  backend-test:
+    profiles: [test]
+    build:
+      context: ./deploy/local
+      dockerfile: Dockerfile
+    image: noteflow-local/backend:dev
+    command: ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000", "--no-reload"]
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+        restart: true
+    environment:
+      APP_NAME: NoteFlow
+      APP_ENV: testing
+      APP_KEY: ${LOCAL_TEST_APP_KEY:?LOCAL_TEST_APP_KEY is required}
+      APP_DEBUG: "false"
+      APP_URL: http://127.0.0.1:8001
+      LOG_CHANNEL: stack
+      LOG_STACK: single
+      LOG_LEVEL: warning
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres-test
+      DB_PORT: "5432"
+      DB_DATABASE: ${LOCAL_TEST_DB_DATABASE:-noteflow_test}
+      DB_USERNAME: ${LOCAL_TEST_DB_USERNAME:-noteflow}
+      DB_PASSWORD: ${LOCAL_TEST_DB_PASSWORD:?LOCAL_TEST_DB_PASSWORD is required}
+      DB_URL: ""
+      SESSION_DRIVER: database
+      SESSION_LIFETIME: "120"
+      SESSION_ENCRYPT: "false"
+      SESSION_SECURE_COOKIE: "false"
+      SESSION_PATH: /
+      SESSION_DOMAIN: "null"
+      BROADCAST_CONNECTION: "null"
+      FILESYSTEM_DISK: local
+      QUEUE_CONNECTION: sync
+      CACHE_STORE: array
+      CACHE_DRIVER: array
+      MAIL_MAILER: array
+    ports:
+      - "127.0.0.1:8001:8000"
+    volumes:
+      - ./backend:/workspace/backend:ro
+      - ./contracts:/workspace/contracts:ro
+      - ./tests/e2e/helpers:/workspace/tests/e2e/helpers:ro
+      - backend-test-vendor:/workspace/backend/vendor
+      - backend-test-storage:/workspace/backend/storage
+      - backend-test-cache:/workspace/backend/bootstrap/cache
+    networks:
+      - test
+    working_dir: /workspace/backend
+    healthcheck:
+      test: ["CMD-SHELL", "php -r \"exit(@file_get_contents('http://127.0.0.1:8000/up') === false ? 1 : 0);\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    restart: "no"
+
+networks:
+  dev:
+    name: noteflow-local-dev
+  test:
+    name: noteflow-local-test
+
+volumes:
+  postgres-data:
+    name: noteflow-local-postgres-data
+  backend-vendor:
+    name: noteflow-local-backend-vendor
+  backend-storage:
+    name: noteflow-local-backend-storage
+  backend-cache:
+    name: noteflow-local-backend-cache
+  postgres-test-data:
+    name: noteflow-local-postgres-test-data
+  backend-test-vendor:
+    name: noteflow-local-backend-test-vendor
+  backend-test-storage:
+    name: noteflow-local-backend-test-storage
+  backend-test-cache:
+    name: noteflow-local-backend-test-cache

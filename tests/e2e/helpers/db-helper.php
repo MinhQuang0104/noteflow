@@ -2,8 +2,19 @@
 
 declare(strict_types=1);
 
-$appEnv = getenv('APP_ENV') ?: 'testing';
-$database = getenv('DB_DATABASE') ?: 'noteflow_test';
+$requiredEnvironment = ['APP_ENV', 'DB_DATABASE', 'DB_HOST', 'DB_PORT', 'DB_USERNAME', 'DB_PASSWORD'];
+$missingEnvironment = array_values(array_filter(
+    $requiredEnvironment,
+    static fn (string $name): bool => getenv($name) === false || trim((string) getenv($name)) === '',
+));
+
+if ($missingEnvironment !== []) {
+    fwrite(STDERR, 'FATAL: db-helper requires explicit test identity environment: '.implode(', ', $missingEnvironment)."\n");
+    exit(1);
+}
+
+$appEnv = (string) getenv('APP_ENV');
+$database = (string) getenv('DB_DATABASE');
 
 if ($appEnv !== 'testing') {
     fwrite(STDERR, "FATAL: db-helper is strictly fail-closed. APP_ENV must be 'testing'. Got: '{$appEnv}'\n");
@@ -15,10 +26,10 @@ if ($database !== 'noteflow_test') {
     exit(1);
 }
 
-$host = getenv('DB_HOST') ?: '127.0.0.1';
-$port = getenv('DB_PORT') ?: '55414';
-$user = getenv('DB_USERNAME') ?: 'noteflow';
-$pass = getenv('DB_PASSWORD') ?: 'noteflow';
+$host = (string) getenv('DB_HOST');
+$port = (string) getenv('DB_PORT');
+$user = (string) getenv('DB_USERNAME');
+$pass = (string) getenv('DB_PASSWORD');
 
 try {
     $dsn = "pgsql:host={$host};port={$port};dbname={$database}";
