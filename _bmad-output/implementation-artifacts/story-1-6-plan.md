@@ -26,13 +26,13 @@ readiness:
     - 1-5-giữ-bản-đang-nhập-và-thử-lưu-lại-sau-gián-đoạn
     - 2-1-tạo-và-quản-lý-thông-tin-challenge
     - 2-3-ghi-và-sửa-journal-tùy-chọn
-current_slice: A
+current_slice: B
 risk:
   level: HIGH
   flags: [concurrency, idempotency, security, shared_boundary]
 slices:
   - id: A
-    status: checkpointed
+    status: reviewed
     depends_on: []
     task_refs: [T-1]
     baseline_commit: e54feb3c3b780eed9de9905858b8c9513fab4c46
@@ -43,6 +43,29 @@ slices:
       implementation:
         path: _bmad-output/implementation-artifacts/receipts/story-1-6/A-implementation.json
         digest: sha256:9bf50f9f6795d70047a410ca49a4e0cb9fdc7161732f261986488cc684856690
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-6/A-verification.json
+        digest: sha256:06015dd4d398045966730d1d883503ec0a79ab6f3e200c606a59f4af75c24b93
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-6/A-review.json
+        digest: sha256:6f79936813a0c46bcb1d5c1c0f2f0b50f4f800c8a8edd0b451fb625476311965
+    verification:
+      subject:
+        commit: b1731a6707640376cb046be9d77850499bd780d8
+      changed_paths_sha256: sha256:5f4ac585b9bca5da6d69d2521e618e385b104258a4811dfd6cdbbd0bea106c98
+      canonical_applicability: NOT_APPLICABLE
+      canonical_status: INCOMPLETE
+      progression_eligible: true
+      done_gate_disclosure_required: true
+      outstanding_obligation: canonical verification remains INCOMPLETE because NO_APPLICABLE_RECIPE; focused backend checks are the T-1 coverage authority
+      review_disclosure: Same-lead bounded review approved focused T-1 evidence; canonical backend recipe coverage remains unavailable and is disclosed.
+    review:
+      required: true
+      verdict: APPROVE
+      reviewed_commit: b1731a6707640376cb046be9d77850499bd780d8
+      risk_context_digest: sha256:54a5ad338aa76d1b6e60a1b073ecb93ce6e9736508edf87586271961e411c46d
+      review_context_digest: sha256:d8625fca3adbd458a8d6d368ff907f11dd87cbfc6cae6e2626d35c42bffcc3db
+      freshness: FRESH_CANDIDATE
     consumers:
       - frontend/src/api/challenges.ts
       - frontend/src/stores/journalDrafts.ts
@@ -96,8 +119,8 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: verify_slice
-  target: A
+  kind: implement_slice
+  target: B
 ---
 
 # Story 1.6 — V4 upgrade execution projection
