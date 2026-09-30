@@ -1,0 +1,35 @@
+{
+  "generation_hash": "fadcfd263fb894402cf5",
+  "inputs": {
+    "project_root": "D:\\Workspace\\Tu_Hoc\\New_Project_My_Note",
+    "renderer_sha256": "06d9f62116f929b5fa6ebe302c73eaabeba4b4ce7273124f5213e9900816279a",
+    "resolved_values": {},
+    "source_sha256": {
+      "references/claims-check.md": "7be5d35dd90a1950addc2062acdf8669026b239117efe1e398da1e8161cfa6f9",
+      "references/deletion-check.md": "0f1f124e4e957147e89164a272b10bedc694ad0d9ad2618c8610ac74ee9cb0da",
+      "review-prompts/edge-case-hunter.md": "5f4572d57340b4c0d155f33454d644a44af101cd7fd02a01591be68a4ebb8b7f",
+      "review-prompts/verification-gap.md": "06f6184d7d94c808970d0146cdc4585dfd66b94a7b7ab2988277fb6fc4208508",
+      "step-01-gather-context.md": "d2edf9dea99ced89819e7c99d1742792c688a8d7ad5c3c3318875cbb64ef60b1",
+      "step-02-review.md": "691fddeff67cf4216225de8b7a168e10b22c2247a35e5ba437d680910856ae9c",
+      "step-03-triage.md": "bfb7efc1150f316efc47e1a36c529b34e019dc8df20a099e68db13805679fcb0",
+      "step-04-present.md": "d4cddab31ff50e10b45646994ba1679fdaa73836a9f4cb22d42ce14ae4658bb9",
+      "workflow.md": "d0cbdc18a2a24367f8343cd9cd6c0e853d0878a88f2264d37b39ce4b7a4ba9aa"
+    }
+  },
+  "outputs": {
+    "references/claims-check.md": "7be5d35dd90a1950addc2062acdf8669026b239117efe1e398da1e8161cfa6f9",
+    "references/deletion-check.md": "0f1f124e4e957147e89164a272b10bedc694ad0d9ad2618c8610ac74ee9cb0da",
+    "review-prompts/edge-case-hunter.md": "5f4572d57340b4c0d155f33454d644a44af101cd7fd02a01591be68a4ebb8b7f",
+    "review-prompts/verification-gap.md": "06f6184d7d94c808970d0146cdc4585dfd66b94a7b7ab2988277fb6fc4208508",
+    "step-01-gather-context.md": "d2edf9dea99ced89819e7c99d1742792c688a8d7ad5c3c3318875cbb64ef60b1",
+    "step-02-review.md": "691fddeff67cf4216225de8b7a168e10b22c2247a35e5ba437d680910856ae9c",
+    "step-03-triage.md": "bfb7efc1150f316efc47e1a36c529b34e019dc8df20a099e68db13805679fcb0",
+    "step-04-present.md": "d4cddab31ff50e10b45646994ba1679fdaa73836a9f4cb22d42ce14ae4658bb9",
+    "workflow.md": "d0cbdc18a2a24367f8343cd9cd6c0e853d0878a88f2264d37b39ce4b7a4ba9aa"
+  },
+  "project_root": "D:\\Workspace\\Tu_Hoc\\New_Project_My_Note",
+  "project_slug": "new-project-my-note",
+  "root_hash": "dab11a55d843",
+  "schema_version": 1,
+  "skill": "bmad-code-review"
+}

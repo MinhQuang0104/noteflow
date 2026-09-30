@@ -7,9 +7,8 @@ applications ship from one repository and are served behind one HTTPS origin.
 
 - Node.js 24 LTS, version 24.12 or newer in the approved release line
 - npm 11 or newer
-- PHP 8.4 with Composer 2
-- PostgreSQL 17
-- Docker for the Nginx configuration check
+- Docker Desktop with Linux containers and the `desktop-linux` context
+- PHP 8.4 with Composer 2 and PostgreSQL 17 for native/CI checks
 
 The repository currently contains no compatibility claim for host Node 22 or
 PHP 8.5. CI is the authoritative pinned environment.
@@ -41,6 +40,16 @@ Run it directly in a trusted terminal so the password is never placed in shell
 history. Production must use HTTPS and set `SESSION_SECURE_COOKIE=true`; public
 registration and password-reset routes are intentionally absent.
 
+### Local test login
+
+The local Docker database has one owner account for manual testing:
+
+- Email: `admin@example.com`
+- Password: `NF-local-admin-2026!X7q`
+
+This credential is for the local environment only. The application calls this
+single admin-capable role `owner` internally.
+
 The frontend keeps `@emnapi/wasi-threads` and `tslib` as explicit dev pins to
 work around the npm bundled-dependency lockfile defect tracked in
 [`npm/cli#9321`](https://github.com/npm/cli/issues/9321). They make a fresh
@@ -48,21 +57,29 @@ work around the npm bundled-dependency lockfile defect tracked in
 
 ## Run locally
 
-Start Laravel and Vite in separate terminals:
+Use the fixed Docker Compose project for the backend. Run these commands from
+the canonical checkout; the first command creates `deploy/local/.env` once,
+builds the PHP 8.4 image, starts PostgreSQL and Laravel, and runs normal
+migrations:
 
 ```powershell
-Set-Location backend
-composer dev
+.\scripts\local.ps1 init
+.\scripts\local.ps1 up
 ```
+
+Start Vite in a second terminal:
 
 ```powershell
 Set-Location frontend
 npm.cmd run dev
 ```
 
-Vite proxies `/api`, `/sanctum`, `/login`, `/logout`, and `/up` to
-`http://127.0.0.1:8000`. Override the target with `VITE_BACKEND_ORIGIN` when
-needed. Browser code always uses relative URLs and same-origin credentials.
+Vite proxies `/api`, `/sanctum`, `/login`, `/logout`, and `/up` to the single
+backend at `http://127.0.0.1:8000`. Use `scripts/local.ps1 status`, `logs`,
+`migrate`, `stop`, or `doctor` for the corresponding runtime operation. The
+backend does not run PHP on the Windows host. See the
+[local runtime runbook](docs/development/local-runtime.md) for test isolation,
+owner provisioning, diagnostics, and data/rollback boundaries.
 
 ## Contract workflow
 
