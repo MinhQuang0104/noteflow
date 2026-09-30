@@ -8,8 +8,8 @@ upstream_epic:
   path: docs/product/epics.md
   section_digest: sha256:2e9a3f2e425a6e1e3b04a5141098c9d8efe9108b1cbf50bd9978d8163eabfdec
 sprint_key: 1-6-giải-quyết-xung-đột-nội-dung-giữa-hai-thiết-bị
-lifecycle_snapshot: backlog
-execution_status: ready-for-dev
+lifecycle_snapshot: in-progress
+execution_status: in-progress
 planning_approval:
   decision: APPROVED
   scope: planning
@@ -88,8 +88,8 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: start_story
-  target: story
+  kind: implement_slice
+  target: A
 ---
 
 # Story 1.6 — V4 upgrade execution projection

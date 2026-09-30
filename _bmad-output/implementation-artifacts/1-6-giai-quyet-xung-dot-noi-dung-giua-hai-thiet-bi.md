@@ -1,7 +1,7 @@
 ---
 story_id: "1.6"
 title: Giải quyết xung đột nội dung giữa hai thiết bị
-status: backlog
+status: in-progress
 ---
 
 # Story 1.6: Giải quyết xung đột nội dung giữa hai thiết bị
