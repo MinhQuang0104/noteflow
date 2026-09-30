@@ -73,9 +73,17 @@ slices:
     verification_obligations:
       - "T-1: journal API/contract/DB invariants and two-connection PostgreSQL contention; backend testing environment; NOT_RUN"
   - id: B
-    status: pending
+    status: checkpointed
     depends_on: [A]
     task_refs: [T-2, T-3]
+    baseline_commit: c77298cb2dbb6d59e2d78d1da20fedf9f5f0a677
+    checkpoint_commit: 7bf99467a2dabb7ef2362b816ab410e4823024d4
+    subject_digest: sha256:c23724e3692896996ec304bffa113ada22e926443398b39c09572d1eb0641c04
+    changed_paths_sha256: sha256:0ff80f148b8e5fbdec8988483ead90895c45f93e248711f131778b6cae79e1e4
+    receipt_refs:
+      implementation:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-6/B-implementation.json
+        digest: sha256:be470af096c958357604ad63ee23d7f7a2a1839f66a8d9f3e2c643316bf11f49
     consumers:
       - frontend/src/components/ChallengeJournalEditor.vue
       - frontend/src/stores/auth.ts
@@ -119,7 +127,7 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: implement_slice
+  kind: verify_slice
   target: B
 ---
 
