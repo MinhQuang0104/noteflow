@@ -32,9 +32,17 @@ risk:
   flags: [concurrency, idempotency, security, shared_boundary]
 slices:
   - id: A
-    status: pending
+    status: checkpointed
     depends_on: []
     task_refs: [T-1]
+    baseline_commit: e54feb3c3b780eed9de9905858b8c9513fab4c46
+    checkpoint_commit: b1731a6707640376cb046be9d77850499bd780d8
+    subject_digest: sha256:eee8f64fc1e0358d109751c75ea214b3d4765631666a855db00e3deb1cdae716
+    changed_paths_sha256: sha256:5f4ac585b9bca5da6d69d2521e618e385b104258a4811dfd6cdbbd0bea106c98
+    receipt_refs:
+      implementation:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-6/A-implementation.json
+        digest: sha256:9bf50f9f6795d70047a410ca49a4e0cb9fdc7161732f261986488cc684856690
     consumers:
       - frontend/src/api/challenges.ts
       - frontend/src/stores/journalDrafts.ts
@@ -88,7 +96,7 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: implement_slice
+  kind: verify_slice
   target: A
 ---
 

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "story_id": "1.6",
+  "slice_id": "A",
+  "kind": "implementation",
+  "checkpoint_commit": "b1731a6707640376cb046be9d77850499bd780d8",
+  "baseline_commit": "e54feb3c3b780eed9de9905858b8c9513fab4c46",
+  "subject_digest": "sha256:eee8f64fc1e0358d109751c75ea214b3d4765631666a855db00e3deb1cdae716",
+  "created_from_head": "b1731a6707640376cb046be9d77850499bd780d8",
+  "changed_paths_sha256": "sha256:5f4ac585b9bca5da6d69d2521e618e385b104258a4811dfd6cdbbd0bea106c98",
+  "commands": [
+    {
+      "command": "docker --context desktop-linux compose --profile test --project-directory 'D:\\Workspace\\Tu_Hoc\\New_Project_My_Note' --file 'D:\\Workspace\\Tu_Hoc\\New_Project_My_Note\\compose.local.yaml' --env-file 'D:\\Workspace\\Tu_Hoc\\New_Project_My_Note\\deploy\\local\\.env' --project-name noteflow-local exec -T backend-test php artisan test tests/Feature/ChallengeJournalTest.php tests/Feature/ChallengeJournalApiTest.php tests/Feature/JournalConflictConcurrencyTest.php tests/Contract/ChallengeContractTest.php --compact",
+      "exit_code": 0,
+      "tool": "docker",
+      "environment": "Docker Desktop context desktop-linux; noteflow-local backend-test with PostgreSQL test service"
+    },
+    {
+      "command": "docker --context desktop-linux compose --profile test --project-directory 'D:\\Workspace\\Tu_Hoc\\New_Project_My_Note' --file 'D:\\Workspace\\Tu_Hoc\\New_Project_My_Note\\compose.local.yaml' --env-file 'D:\\Workspace\\Tu_Hoc\\New_Project_My_Note\\deploy\\local\\.env' --project-name noteflow-local exec -T backend-test php vendor/bin/pint --test tests/Feature/ChallengeJournalTest.php tests/Feature/ChallengeJournalApiTest.php tests/Feature/JournalConflictConcurrencyTest.php tests/Contract/ChallengeContractTest.php",
+      "exit_code": 0,
+      "tool": "docker",
+      "environment": "Docker Desktop context desktop-linux; backend-test PHP Pint check"
+    },
+    {
+      "command": "\\.\\scripts\\local.ps1 test",
+      "exit_code": 0,
+      "tool": "powershell",
+      "environment": "Workspace root; canonical local.ps1 isolated backend/PostgreSQL test profile"
+    }
+  ]
+}
