@@ -172,18 +172,58 @@ test('stale journal version returns saved text and leaves saved state unchanged'
     $challengeId = journalChallenge($owner);
     $useCase = app(SaveJournalUseCase::class);
     $useCase->execute(journalCommand($owner, $challengeId, '2026-09-20', 'Saved first'));
+    DB::table('challenge_daily_records')->where('challenge_id', $challengeId)->update([
+        'is_done' => true,
+        'completion_version' => 7,
+        'row_version' => 2,
+    ]);
 
     try {
         $useCase->execute(journalCommand($owner, $challengeId, '2026-09-20', 'Stale draft'));
         $this->fail('Expected a journal version conflict');
     } catch (VersionConflictException $exception) {
-        expect($exception->currentVersion)->toBe(1)
+        expect($exception->resourceId)->toBe($challengeId)
+            ->and($exception->currentVersion)->toBe(1)
+            ->and($exception->currentSnapshot['challenge_id'])->toBe($challengeId)
             ->and($exception->currentSnapshot['journal'])->toBe('Saved first')
-            ->and($exception->currentSnapshot['local_date'])->toBe('2026-09-20');
+            ->and($exception->currentSnapshot['local_date'])->toBe('2026-09-20')
+            ->and($exception->currentSnapshot['journal_version'])->toBe(1);
     }
 
-    expect(DB::table('challenge_daily_records')->where('challenge_id', $challengeId)->value('journal'))->toBe('Saved first')
-        ->and((int) DB::table('account_states')->where('owner_id', $owner->id)->value('account_revision'))->toBe(1);
+    $row = DB::table('challenge_daily_records')->where('challenge_id', $challengeId)->sole();
+    expect($row->journal)->toBe('Saved first')
+        ->and((bool) $row->is_done)->toBeTrue()
+        ->and((int) $row->completion_version)->toBe(7)
+        ->and((int) $row->row_version)->toBe(2)
+        ->and((int) DB::table('account_states')->where('owner_id', $owner->id)->value('account_revision'))->toBe(1)
+        ->and(DB::table('mutation_commands')->where('owner_id', $owner->id)->count())->toBe(1);
+});
+
+test('journal conflict reports a newer server snapshot when it changes before resolution', function () {
+    $owner = journalOwner();
+    $challengeId = journalChallenge($owner);
+    $useCase = app(SaveJournalUseCase::class);
+
+    $useCase->execute(journalCommand($owner, $challengeId, '2026-09-20', 'First server version'));
+    $useCase->execute(journalCommand($owner, $challengeId, '2026-09-20', 'Second server version', 1));
+
+    try {
+        $useCase->execute(journalCommand($owner, $challengeId, '2026-09-20', 'Resolution from stale snapshot', 1));
+        $this->fail('Expected a conflict against the newer server version');
+    } catch (VersionConflictException $exception) {
+        expect($exception->resourceId)->toBe($challengeId)
+            ->and($exception->currentVersion)->toBe(2)
+            ->and($exception->currentSnapshot)->toMatchArray([
+                'challenge_id' => $challengeId,
+                'local_date' => '2026-09-20',
+                'journal' => 'Second server version',
+                'journal_version' => 2,
+            ]);
+    }
+
+    expect(DB::table('challenge_daily_records')->where('challenge_id', $challengeId)->value('journal'))->toBe('Second server version')
+        ->and((int) DB::table('account_states')->where('owner_id', $owner->id)->value('account_revision'))->toBe(2)
+        ->and(DB::table('mutation_commands')->where('owner_id', $owner->id)->count())->toBe(2);
 });
 
 test('same journal command replays its acknowledgement and a different payload rejects key reuse', function () {

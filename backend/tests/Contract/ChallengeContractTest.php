@@ -158,7 +158,14 @@ test('journal read, write, conflict, validation, and write fence satisfy OpenAPI
         'base_version' => 0,
         'journal' => 'Stale text',
     ]);
-    $conflict->assertStatus(409);
+    $conflict->assertStatus(409)
+        ->assertJsonPath('code', 'version_conflict')
+        ->assertJsonPath('resource_id', $id)
+        ->assertJsonPath('current_version', 1)
+        ->assertJsonPath('current_snapshot.challenge_id', $id)
+        ->assertJsonPath('current_snapshot.local_date', '2026-09-19')
+        ->assertJsonPath('current_snapshot.journal', 'Saved text')
+        ->assertJsonPath('current_snapshot.journal_version', 1);
     $validator->validate('PUT', $path, challengePsrResponse($conflict));
 
     $invalid = $this->actingAs($owner)->putJson($url, [

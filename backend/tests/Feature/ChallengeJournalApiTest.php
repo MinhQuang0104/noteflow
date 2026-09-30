@@ -103,11 +103,16 @@ test('journal HTTP conflict and command replay preserve saved content', function
     $conflict = $this->actingAs($owner)->putJson($url, journalApiPayload('Stale draft'));
     $conflict->assertStatus(409)->assertHeader('content-type', 'application/problem+json')
         ->assertJsonPath('code', 'version_conflict')
+        ->assertJsonPath('resource_id', $id)
         ->assertJsonPath('current_version', 1)
-        ->assertJsonPath('current_snapshot.journal', 'Saved');
+        ->assertJsonPath('current_snapshot.challenge_id', $id)
+        ->assertJsonPath('current_snapshot.local_date', '2026-09-20')
+        ->assertJsonPath('current_snapshot.journal', 'Saved')
+        ->assertJsonPath('current_snapshot.journal_version', 1);
     expect($conflict->getContent())->not->toContain('Stale draft');
     expect(DB::table('challenge_daily_records')->where('challenge_id', $id)->value('journal'))->toBe('Saved')
-        ->and((int) DB::table('account_states')->where('owner_id', $owner->id)->value('account_revision'))->toBe(1);
+        ->and((int) DB::table('account_states')->where('owner_id', $owner->id)->value('account_revision'))->toBe(1)
+        ->and(DB::table('mutation_commands')->where('owner_id', $owner->id)->count())->toBe(1);
 });
 
 test('journal HTTP access is authenticated, owner scoped, and private', function () {
