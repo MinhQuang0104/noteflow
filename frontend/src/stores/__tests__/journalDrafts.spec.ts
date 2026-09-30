@@ -32,6 +32,23 @@ function mutation(
   }
 }
 
+function versionConflict(
+  currentSnapshot: challengesApi.JournalSnapshot,
+  currentVersion = currentSnapshot.journal_version,
+): challengesApi.ChallengeApiError<challengesApi.JournalProblemDetails> {
+  return new challengesApi.ChallengeApiError<challengesApi.JournalProblemDetails>(
+    'Version conflict',
+    409,
+    {
+      message: 'Version conflict',
+      code: 'version_conflict',
+      resource_id: currentSnapshot.challenge_id,
+      current_version: currentVersion,
+      current_snapshot: currentSnapshot,
+    },
+  )
+}
+
 function deferred<T>() {
   let resolve!: (value: T) => void
   let reject!: (error: unknown) => void
@@ -540,6 +557,263 @@ describe('useJournalDraftsStore', () => {
       journalVersion: 1,
       status: 'conflict',
       conflictSnapshot: snapshot('challenge-a', 'updated on server', 2),
+    })
+  })
+
+  it('resolves a conflict with a frozen local choice using the server version and a new command', async () => {
+    const serverSnapshot = snapshot('challenge-a', 'server text', 2)
+    const save = vi.spyOn(challengesApi, 'saveChallengeJournal')
+      .mockRejectedValueOnce(versionConflict(serverSnapshot))
+    drafts.hydrate(snapshot('challenge-a', 'original', 1))
+    drafts.setDraftText('challenge-a', DATE, 'local text')
+    await drafts.save('challenge-a', DATE)
+
+    const expectedClientRevision = drafts.getDraft('challenge-a', DATE)!.clientRevision
+    vi.mocked(challengesApi.generateCommandId).mockReturnValue('resolve-local')
+    const response = deferred<challengesApi.JournalMutationResult>()
+    save.mockReturnValueOnce(response.promise)
+
+    const resolving = drafts.resolveConflict('challenge-a', DATE, 'local', 2, expectedClientRevision)
+    await vi.waitFor(() => expect(save).toHaveBeenCalledTimes(2))
+
+    expect(save.mock.calls[1]?.[2]).toEqual({
+      command_id: 'resolve-local',
+      data_epoch: 4,
+      base_version: 2,
+      journal: 'local text',
+    })
+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({
+      text: 'local text',
+      journalVersion: 1,
+      pendingCommand: {
+        resolution: {
+          choice: 'local',
+          expectedServerVersion: 2,
+          expectedClientRevision,
+        },
+      },
+    })
+
+    response.resolve(mutation('challenge-a', 'local text', 3))
+    await resolving
+
+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({
+      text: 'local text',
+      acknowledgedText: 'local text',
+      journalVersion: 3,
+      status: 'saved',
+      pendingCommand: null,
+      conflictSnapshot: null,
+    })
+  })
+
+  it('resolves a conflict with the validated server choice and does not retain local text', async () => {
+    const serverSnapshot = snapshot('challenge-a', 'server text', 2)
+    const save = vi.spyOn(challengesApi, 'saveChallengeJournal')
+      .mockRejectedValueOnce(versionConflict(serverSnapshot))
+    drafts.hydrate(snapshot('challenge-a', 'original', 1))
+    drafts.setDraftText('challenge-a', DATE, 'local text')
+    await drafts.save('challenge-a', DATE)
+
+    vi.mocked(challengesApi.generateCommandId).mockReturnValue('resolve-server')
+    save.mockResolvedValueOnce(mutation('challenge-a', 'server text', 3))
+    await drafts.resolveConflict('challenge-a', DATE, 'server', 2, 1)
+
+    expect(save.mock.calls[1]?.[2]).toEqual({
+      command_id: 'resolve-server',
+      data_epoch: 4,
+      base_version: 2,
+      journal: 'server text',
+    })
+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({
+      text: 'server text',
+      acknowledgedText: 'server text',
+      journalVersion: 3,
+      status: 'saved',
+      conflictSnapshot: null,
+    })
+  })
+
+  it('cancels a resolution when the owner supplied version or revision is stale', async () => {
+    const serverSnapshot = snapshot('challenge-a', 'server text', 2)
+    const save = vi.spyOn(challengesApi, 'saveChallengeJournal')
+      .mockRejectedValueOnce(versionConflict(serverSnapshot))
+    drafts.hydrate(snapshot('challenge-a', 'original', 1))
+    drafts.setDraftText('challenge-a', DATE, 'local text')
+    await drafts.save('challenge-a', DATE)
+
+    await drafts.resolveConflict('challenge-a', DATE, 'local', 1, 1)
+
+    expect(save).toHaveBeenCalledOnce()
+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({
+      text: 'local text',
+      journalVersion: 1,
+      status: 'conflict',
+      conflictSnapshot: serverSnapshot,
+      error: { kind: 'conflict' },
+    })
+  })
+
+  it('does not send a choice if the conflict snapshot changes during preflight', async () => {
+    const serverSnapshot = snapshot('challenge-a', 'server text', 2)
+    const save = vi.spyOn(challengesApi, 'saveChallengeJournal')
+      .mockRejectedValueOnce(versionConflict(serverSnapshot))
+    drafts.hydrate(snapshot('challenge-a', 'original', 1))
+    drafts.setDraftText('challenge-a', DATE, 'local text')
+    await drafts.save('challenge-a', DATE)
+
+    const preflight = deferred<{ allowed: boolean }>()
+    vi.mocked(sync.reconcileBeforeWrite).mockReturnValue(preflight.promise)
+    const resolving = drafts.resolveConflict('challenge-a', DATE, 'local', 2, 1)
+    drafts.getDraft('challenge-a', DATE)!.conflictSnapshot = snapshot('challenge-a', 'new server text', 3)
+    preflight.resolve({ allowed: true })
+    await resolving
+
+    expect(save).toHaveBeenCalledOnce()
+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({
+      text: 'local text',
+      journalVersion: 1,
+      status: 'conflict',
+      conflictSnapshot: snapshot('challenge-a', 'new server text', 3),
+    })
+  })
+
+  it('serializes double conflict resolution submissions from preflight through acknowledgement', async () => {
+    const serverSnapshot = snapshot('challenge-a', 'server text', 2)
+    const save = vi.spyOn(challengesApi, 'saveChallengeJournal')
+      .mockRejectedValueOnce(versionConflict(serverSnapshot))
+    drafts.hydrate(snapshot('challenge-a', 'original', 1))
+    drafts.setDraftText('challenge-a', DATE, 'local text')
+    await drafts.save('challenge-a', DATE)
+
+    const preflight = deferred<{ allowed: boolean }>()
+    const response = deferred<challengesApi.JournalMutationResult>()
+    vi.mocked(sync.reconcileBeforeWrite).mockClear()
+    vi.mocked(sync.reconcileBeforeWrite).mockReturnValue(preflight.promise)
+    save.mockReturnValueOnce(response.promise)
+    vi.mocked(challengesApi.generateCommandId).mockReturnValue('resolve-once')
+
+    const first = drafts.resolveConflict('challenge-a', DATE, 'local', 2, 1)
+    const second = drafts.resolveConflict('challenge-a', DATE, 'local', 2, 1)
+    await Promise.resolve()
+
+    expect(sync.reconcileBeforeWrite).toHaveBeenCalledOnce()
+    expect(save).toHaveBeenCalledOnce()
+
+    preflight.resolve({ allowed: true })
+    await vi.waitFor(() => expect(save).toHaveBeenCalledTimes(2))
+    response.resolve(mutation('challenge-a', 'local text', 3))
+    await Promise.all([first, second])
+
+    expect(save).toHaveBeenCalledTimes(2)
+  })
+
+  it('replays an uncertain resolution unchanged even after a newer local edit', async () => {
+    const serverSnapshot = snapshot('challenge-a', 'server text', 2)
+    const save = vi.spyOn(challengesApi, 'saveChallengeJournal')
+      .mockRejectedValueOnce(versionConflict(serverSnapshot))
+    drafts.hydrate(snapshot('challenge-a', 'original', 1))
+    drafts.setDraftText('challenge-a', DATE, 'local text')
+    await drafts.save('challenge-a', DATE)
+
+    vi.mocked(challengesApi.generateCommandId).mockReturnValue('resolve-uncertain')
+    save.mockRejectedValueOnce(new TypeError('network timeout'))
+    save.mockResolvedValueOnce(mutation('challenge-a', 'local text', 3))
+    await drafts.resolveConflict('challenge-a', DATE, 'local', 2, 1)
+
+    const firstResolutionRequest = save.mock.calls[1]?.[2]
+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({
+      text: 'local text',
+      status: 'error',
+      pendingCommand: {
+        request: firstResolutionRequest,
+        resolution: { choice: 'local', expectedServerVersion: 2, expectedClientRevision: 1 },
+      },
+    })
+
+    drafts.setDraftText('challenge-a', DATE, 'newer local text')
+    await drafts.save('challenge-a', DATE)
+
+    expect(save.mock.calls[2]?.[2]).toEqual(firstResolutionRequest)
+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({
+      text: 'newer local text',
+      acknowledgedText: 'local text',
+      journalVersion: 3,
+      acknowledgedClientRevision: 1,
+      clientRevision: 2,
+      status: 'dirty',
+      pendingCommand: null,
+    })
+  })
+
+  it('updates the conflict snapshot and clears the pending choice when resolution conflicts again', async () => {
+    const firstSnapshot = snapshot('challenge-a', 'server text', 2)
+    const secondSnapshot = snapshot('challenge-a', 'new server text', 3)
+    const save = vi.spyOn(challengesApi, 'saveChallengeJournal')
+      .mockRejectedValueOnce(versionConflict(firstSnapshot))
+    drafts.hydrate(snapshot('challenge-a', 'original', 1))
+    drafts.setDraftText('challenge-a', DATE, 'local text')
+    await drafts.save('challenge-a', DATE)
+
+    vi.mocked(challengesApi.generateCommandId).mockReturnValue('resolve-conflict-again')
+    save.mockRejectedValueOnce(versionConflict(secondSnapshot))
+    await drafts.resolveConflict('challenge-a', DATE, 'local', 2, 1)
+
+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({
+      text: 'local text',
+      journalVersion: 1,
+      status: 'conflict',
+      conflictSnapshot: secondSnapshot,
+      pendingCommand: null,
+      error: { kind: 'conflict' },
+    })
+  })
+
+  it('does not blind-retry a resolution after a terminal not-found response', async () => {
+    const serverSnapshot = snapshot('challenge-a', 'server text', 2)
+    const save = vi.spyOn(challengesApi, 'saveChallengeJournal')
+      .mockRejectedValueOnce(versionConflict(serverSnapshot))
+    drafts.hydrate(snapshot('challenge-a', 'original', 1))
+    drafts.setDraftText('challenge-a', DATE, 'local text')
+    await drafts.save('challenge-a', DATE)
+
+    vi.mocked(challengesApi.generateCommandId).mockReturnValue('resolve-not-found')
+    save.mockRejectedValueOnce(Object.assign(new Error('missing resource'), { status: 404 }))
+    await drafts.resolveConflict('challenge-a', DATE, 'local', 2, 1)
+    await drafts.save('challenge-a', DATE)
+
+    expect(save).toHaveBeenCalledTimes(2)
+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({
+      text: 'local text',
+      status: 'error',
+      pendingCommand: null,
+      conflictSnapshot: serverSnapshot,
+      error: { kind: 'unexpected' },
+    })
+  })
+
+  it('quarantines a late resolution acknowledgement after the account epoch changes', async () => {
+    const serverSnapshot = snapshot('challenge-a', 'server text', 2)
+    const save = vi.spyOn(challengesApi, 'saveChallengeJournal')
+      .mockRejectedValueOnce(versionConflict(serverSnapshot))
+    drafts.hydrate(snapshot('challenge-a', 'original', 1))
+    drafts.setDraftText('challenge-a', DATE, 'local text')
+    await drafts.save('challenge-a', DATE)
+
+    const response = deferred<challengesApi.JournalMutationResult>()
+    vi.mocked(challengesApi.generateCommandId).mockReturnValue('resolve-epoch')
+    save.mockReturnValueOnce(response.promise)
+    const resolving = drafts.resolveConflict('challenge-a', DATE, 'local', 2, 1)
+    await vi.waitFor(() => expect(save).toHaveBeenCalledTimes(2))
+    account.context!.data_epoch = 5
+    response.resolve(mutation('challenge-a', 'local text', 3, 4))
+    await resolving
+
+    expect(drafts.getDraft('challenge-a', DATE)).toMatchObject({
+      text: 'local text',
+      journalVersion: 1,
+      status: 'quarantined',
+      pendingCommand: { resolution: { choice: 'local' } },
     })
   })
 })

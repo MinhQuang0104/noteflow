@@ -342,3 +342,56 @@ test('saveChallengeJournal exposes stale journal version and snapshot without ec
   const journalSnapshot: JournalSnapshot = current
   expect(journalSnapshot.journal_version).toBe(2)
 })
+
+test('saveChallengeJournal rejects a malformed journal conflict snapshot at the API boundary', async () => {
+  vi.stubGlobal('fetch', vi.fn<typeof fetch>().mockResolvedValue(
+    new Response(JSON.stringify({
+      message: 'Version conflict',
+      code: 'version_conflict',
+      resource_id: 'challenge-1',
+      current_version: 2,
+      current_snapshot: {
+        challenge_id: 'challenge-1',
+        local_date: '2026-09-19',
+        journal: 'Saved text',
+      },
+    }), { status: 409, headers: { 'Content-Type': 'application/problem+json' } }),
+  ))
+
+  const error = await saveChallengeJournal('challenge-1', '2026-09-19', {
+    command_id: 'command-malformed',
+    data_epoch: 4,
+    base_version: 1,
+    journal: 'Unsubmitted text',
+  }).then(() => null, (reason: ChallengeApiError<JournalProblemDetails>) => reason)
+
+  expect(error).toMatchObject({ status: 409, message: 'Version conflict' })
+  expect(error?.problem).toBeUndefined()
+})
+
+test('saveChallengeJournal rejects a journal conflict when current_version disagrees with the snapshot version', async () => {
+  vi.stubGlobal('fetch', vi.fn<typeof fetch>().mockResolvedValue(
+    new Response(JSON.stringify({
+      message: 'Version conflict',
+      code: 'version_conflict',
+      resource_id: 'challenge-1',
+      current_version: 3,
+      current_snapshot: {
+        challenge_id: 'challenge-1',
+        local_date: '2026-09-19',
+        journal: 'Saved text',
+        journal_version: 2,
+      },
+    }), { status: 409, headers: { 'Content-Type': 'application/problem+json' } }),
+  ))
+
+  const error = await saveChallengeJournal('challenge-1', '2026-09-19', {
+    command_id: 'command-mismatch',
+    data_epoch: 4,
+    base_version: 1,
+    journal: 'Unsubmitted text',
+  }).then(() => null, (reason: ChallengeApiError<JournalProblemDetails>) => reason)
+
+  expect(error).toMatchObject({ status: 409, message: 'Version conflict' })
+  expect(error?.problem).toBeUndefined()
+})
