@@ -161,9 +161,17 @@ slices:
       freshness: FRESH_CANDIDATE
       reviewer: same-lead
   - id: D
-    status: pending
+    status: checkpointed
     depends_on: [C]
     task_refs: [T-6]
+    baseline_commit: 3aec738a0dfb9024c0afa1662115781d298c7268
+    checkpoint_commit: 1fdaa79a6c347791dd6a72c7500d3bb8e95b7583
+    subject_digest: sha256:2715621f36aee68f7b93684344f0628ce601766e50fbdc71fac91228f0d306a0
+    changed_paths_sha256: sha256:fd29e52500f4cb026d79ce31de90fdce07f07cd24cedc22e9eb6664ff87e00f0
+    receipt_refs:
+      implementation:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-6/D-implementation.json
+        digest: sha256:d2ef61816154ce75631ff11f1c0286f273ce5f9a77f77d18b96fb8f7e32147d0
     consumers:
       - frontend/src/views/ChallengesView.vue
       - frontend/src/components/ChallengeJournalEditor.vue
@@ -185,7 +193,7 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: implement_slice
+  kind: verify_slice
   target: D
 ---
 

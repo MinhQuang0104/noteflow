@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "story_id": "1.6",
+  "slice_id": "D",
+  "kind": "implementation",
+  "checkpoint_commit": "1fdaa79a6c347791dd6a72c7500d3bb8e95b7583",
+  "baseline_commit": "3aec738a0dfb9024c0afa1662115781d298c7268",
+  "subject_digest": "sha256:2715621f36aee68f7b93684344f0628ce601766e50fbdc71fac91228f0d306a0",
+  "created_from_head": "1fdaa79a6c347791dd6a72c7500d3bb8e95b7583",
+  "changed_paths_sha256": "sha256:fd29e52500f4cb026d79ce31de90fdce07f07cd24cedc22e9eb6664ff87e00f0",
+  "commands": [
+    {
+      "command": "npm.cmd run test:unit -- --run src/stores/__tests__/sync.spec.ts",
+      "exit_code": 0,
+      "tool": "npm.cmd / Vitest 5.0.1",
+      "environment": "Windows; Node v24.21.0; story-1-6 worktree"
+    },
+    {
+      "command": "npm.cmd run test:unit -- --run src/stores/__tests__/sync.spec.ts src/stores/__tests__/journalDrafts.spec.ts src/views/__tests__/journal-draft-lifecycle.spec.ts src/views/__tests__/journal.spec.ts",
+      "exit_code": 0,
+      "tool": "npm.cmd / Vitest 5.0.1",
+      "environment": "Windows; Node v24.21.0; story-1-6 worktree"
+    },
+    {
+      "command": "npm.cmd run type-check",
+      "exit_code": 0,
+      "tool": "npm.cmd / vue-tsc",
+      "environment": "Windows; Node v24.21.0; story-1-6 worktree"
+    },
+    {
+      "command": "npm.cmd exec -- eslint src/stores/sync.ts src/stores/__tests__/sync.spec.ts",
+      "exit_code": 0,
+      "tool": "npm.cmd / ESLint",
+      "environment": "Windows; Node v24.21.0; story-1-6 worktree"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "tool": "git",
+      "environment": "Windows; story-1-6 worktree"
+    }
+  ]
+}
