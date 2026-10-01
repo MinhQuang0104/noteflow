@@ -26,7 +26,7 @@ readiness:
     - 1-5-giữ-bản-đang-nhập-và-thử-lưu-lại-sau-gián-đoạn
     - 2-1-tạo-và-quản-lý-thông-tin-challenge
     - 2-3-ghi-và-sửa-journal-tùy-chọn
-current_slice: C
+current_slice: D
 risk:
   level: HIGH
   flags: [concurrency, idempotency, security, shared_boundary]
@@ -118,7 +118,7 @@ slices:
       - "T-2: typed identity validation and selected resolution payload in journalDrafts/challenges API tests; NOT_RUN"
       - "T-3: single flight, identical retry, revision/auth/epoch/resource fences and private lifecycle regression; NOT_RUN"
   - id: C
-    status: checkpointed
+    status: reviewed
     depends_on: [B]
     task_refs: [T-4, T-5]
     baseline_commit: 3925efa6fc7bb9cfea676f880e7e229c30d9d5b0
@@ -129,12 +129,37 @@ slices:
       implementation:
         path: _bmad-output/implementation-artifacts/receipts/story-1-6/C-implementation.json
         digest: sha256:632fdf35104ca24e079c57e8611f5002e0076a03f22b9b9edcc9f65724b06878
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-6/C-verification.json
+        digest: sha256:c6c6c12c071e7ecdce0b84997bab4507fff22feed542856d229220d0e5845344
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-6/C-review.json
+        digest: sha256:d1ba655df45dfece07047babf5ec50153f31facbcfa52729658b6254414d8e49
     consumers:
       - frontend/src/stores/journalDrafts.ts
       - frontend/src/views/ChallengesView.vue
     verification_obligations:
       - "T-4: ContentConflictDialog component semantics and events; real-browser/AT obligations remain T-7; NOT_RUN"
       - "T-5: journal and journal-draft-lifecycle integration including close/reopen and invalidated choices; NOT_RUN"
+    verification:
+      subject:
+        commit: 211305dcaee5a6b599c581f47c0e4978c7b1eac8
+      changed_paths_sha256: sha256:d64440a6eb066682f7650f58adaa2da97fba7f7f287aa7c1275a37daefdf0d4d
+      status: INCOMPLETE
+      canonical_status: INCOMPLETE
+      escalation_decision: REVIEW_REQUIRED
+      progression_eligible: true
+      done_gate_disclosure_required: true
+      outstanding_obligation: "Canonical verification is INCOMPLETE because three Slice C paths remain unmapped; browser and accessibility obligations remain in Slice E."
+      review_disclosure: "Same-lead HIGH-risk review approved T-4/T-5 focused evidence; canonical status remains INCOMPLETE for three unmapped paths. No browser or screen-reader evidence is claimed."
+    review:
+      required: true
+      verdict: APPROVE
+      reviewed_commit: 211305dcaee5a6b599c581f47c0e4978c7b1eac8
+      risk_context_digest: sha256:54a5ad338aa76d1b6e60a1b073ecb93ce6e9736508edf87586271961e411c46d
+      review_context_digest: sha256:75da57d6b59b82bce5820f2c8d3111889112ae53a1d287b88ab99bcdbcbfbb76
+      freshness: FRESH_CANDIDATE
+      reviewer: same-lead
   - id: D
     status: pending
     depends_on: [C]
@@ -160,8 +185,8 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: verify_slice
-  target: C
+  kind: implement_slice
+  target: D
 ---
 
 # Story 1.6 — V4 upgrade execution projection
