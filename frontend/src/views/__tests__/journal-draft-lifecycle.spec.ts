@@ -3,6 +3,7 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, expect, test, vi } from 'vitest'
 
+import * as authApi from '../../api/auth'
 import * as challengesApi from '../../api/challenges'
 import ChallengeJournalEditor from '../../components/ChallengeJournalEditor.vue'
 import { useAccountStore } from '../../stores/account'
@@ -27,6 +28,26 @@ let serverJournals: Map<string, challengesApi.JournalSnapshot>
 
 function resourceKey(id: string, date: string): string {
   return `${id}:${date}`
+}
+
+function conflictError(
+  id: string,
+  date: string,
+  text: string,
+  version: number,
+): challengesApi.ChallengeApiError<challengesApi.JournalProblemDetails> {
+  return new challengesApi.ChallengeApiError<challengesApi.JournalProblemDetails>('Xung đột phiên bản.', 409, {
+    message: 'Xung đột phiên bản.',
+    code: 'version_conflict',
+    resource_id: id,
+    current_version: version,
+    current_snapshot: {
+      challenge_id: id,
+      local_date: date,
+      journal: text,
+      journal_version: version,
+    },
+  })
 }
 
 async function mountEditor(id = challengeId, date = localDate) {
@@ -184,3 +205,176 @@ test('keeps the journal lifecycle safe across uncertain retry, late ACK, reload,
   expect((reloaded.get('#journal-editor').element as HTMLTextAreaElement).value).toBe('second revision')
   reloaded.unmount()
 })
+
+test('keeps the conflict and draft across close/reopen, and does not cancel a pending choice or lose newer typing', async () => {
+  const drafts = useJournalDraftsStore()
+  const serverSnapshot: challengesApi.JournalSnapshot = {
+    ...emptyJournal,
+    journal: 'Bản lưu trên máy chủ',
+    journal_version: 2,
+  }
+  let acknowledgeResolution!: (result: challengesApi.JournalMutationResult) => void
+  const save = vi.spyOn(challengesApi, 'saveChallengeJournal')
+    .mockRejectedValueOnce(conflictError(challengeId, localDate, serverSnapshot.journal!, 2))
+    .mockImplementationOnce(() => new Promise(resolve => { acknowledgeResolution = resolve }))
+  const wrapper = await mountEditor()
+
+  await wrapper.get('#journal-editor').setValue('Bản nháp gốc trên thiết bị')
+  await wrapper.get('#journal-form').trigger('submit.prevent')
+  await flushPromises()
+  await wrapper.get('#journal-conflict-open').trigger('click')
+  expect(wrapper.get('#content-conflict-dialog').text()).toContain('Bản nháp gốc trên thiết bị')
+  expect(wrapper.get('#content-conflict-dialog').text()).toContain('Bản lưu trên máy chủ')
+
+  await wrapper.get('#content-conflict-close').trigger('click')
+  await flushPromises()
+  expect(wrapper.find('#content-conflict-dialog').attributes('open')).toBeUndefined()
+  expect((wrapper.get('#journal-editor').element as HTMLTextAreaElement).value).toBe('Bản nháp gốc trên thiết bị')
+  expect(drafts.getDraft(challengeId, localDate)?.conflictSnapshot?.journal).toBe('Bản lưu trên máy chủ')
+
+  await wrapper.get('#journal-conflict-open').trigger('click')
+  expect(wrapper.findAll('#content-conflict-dialog input:checked')).toHaveLength(0)
+  await wrapper.get('#conflict-local').setValue()
+  await wrapper.get('#content-conflict-confirm').trigger('click')
+  await vi.waitFor(() => expect(save).toHaveBeenCalledTimes(2))
+  expect(drafts.getDraft(challengeId, localDate)).toMatchObject({
+    text: 'Bản nháp gốc trên thiết bị',
+    status: 'saving',
+    pendingCommand: { resolution: { choice: 'local', expectedServerVersion: 2, expectedClientRevision: 1 } },
+  })
+
+  await wrapper.get('#journal-editor').setValue('Nội dung gõ thêm trong lúc chờ')
+  await wrapper.get('#content-conflict-close').trigger('click')
+  expect(save).toHaveBeenCalledTimes(2)
+  expect(drafts.getDraft(challengeId, localDate)?.pendingCommand?.request.journal).toBe('Bản nháp gốc trên thiết bị')
+
+  await wrapper.get('#journal-conflict-open').trigger('click')
+  expect((wrapper.get('#content-conflict-confirm').element as HTMLButtonElement).disabled).toBe(true)
+  expect((wrapper.get('#content-conflict-close').element as HTMLButtonElement).disabled).toBe(false)
+  acknowledgeResolution({
+    journal: { ...serverSnapshot, journal: 'Bản nháp gốc trên thiết bị', journal_version: 3 },
+    account_revision: 2,
+    data_epoch: 1,
+  })
+  await flushPromises()
+
+  expect(drafts.getDraft(challengeId, localDate)).toMatchObject({
+    text: 'Nội dung gõ thêm trong lúc chờ',
+    acknowledgedText: 'Bản nháp gốc trên thiết bị',
+    status: 'dirty',
+    pendingCommand: null,
+    conflictSnapshot: null,
+  })
+  expect(wrapper.find('#content-conflict-dialog').attributes('open')).toBeUndefined()
+  wrapper.unmount()
+})
+
+test('requires a new choice when another device changes the server snapshot again', async () => {
+  const drafts = useJournalDraftsStore()
+  const save = vi.spyOn(challengesApi, 'saveChallengeJournal')
+    .mockRejectedValueOnce(conflictError(challengeId, localDate, 'Máy chủ phiên bản hai', 2))
+    .mockRejectedValueOnce(conflictError(challengeId, localDate, 'Máy chủ phiên bản ba', 3))
+  const wrapper = await mountEditor()
+
+  await wrapper.get('#journal-editor').setValue('Bản nháp cục bộ')
+  await wrapper.get('#journal-form').trigger('submit.prevent')
+  await flushPromises()
+  await wrapper.get('#journal-conflict-open').trigger('click')
+  await wrapper.get('#conflict-server').setValue()
+  await wrapper.get('#content-conflict-confirm').trigger('click')
+  await flushPromises()
+
+  expect(save).toHaveBeenCalledTimes(2)
+  expect(drafts.getDraft(challengeId, localDate)?.conflictSnapshot).toMatchObject({
+    journal: 'Máy chủ phiên bản ba',
+    journal_version: 3,
+  })
+  expect(wrapper.get('#content-conflict-dialog').text()).toContain('Máy chủ phiên bản ba')
+  expect(wrapper.findAll('#content-conflict-dialog input:checked')).toHaveLength(0)
+  expect((wrapper.get('#content-conflict-confirm').element as HTMLButtonElement).disabled).toBe(true)
+  wrapper.unmount()
+})
+
+test('shows a resolution error and retries the same pending command after the dialog is reopened', async () => {
+  const drafts = useJournalDraftsStore()
+  const serverSnapshot: challengesApi.JournalSnapshot = {
+    ...emptyJournal,
+    journal: 'Bản lưu trên máy chủ',
+    journal_version: 2,
+  }
+  const save = vi.spyOn(challengesApi, 'saveChallengeJournal')
+    .mockRejectedValueOnce(conflictError(challengeId, localDate, serverSnapshot.journal!, 2))
+    .mockRejectedValueOnce(new TypeError('network timeout'))
+    .mockResolvedValueOnce({
+      journal: { ...serverSnapshot, journal: 'Bản nháp cục bộ', journal_version: 3 },
+      account_revision: 2,
+      data_epoch: 1,
+    })
+  const wrapper = await mountEditor()
+
+  await wrapper.get('#journal-editor').setValue('Bản nháp cục bộ')
+  await wrapper.get('#journal-form').trigger('submit.prevent')
+  await flushPromises()
+  await wrapper.get('#journal-conflict-open').trigger('click')
+  await wrapper.get('#conflict-local').setValue()
+  await wrapper.get('#content-conflict-confirm').trigger('click')
+  await flushPromises()
+
+  expect(drafts.getDraft(challengeId, localDate)).toMatchObject({
+    status: 'error',
+    pendingCommand: { resolution: { choice: 'local', expectedServerVersion: 2, expectedClientRevision: 1 } },
+  })
+  expect(wrapper.get('#content-conflict-dialog [role="alert"]').text()).toContain('Chưa xác định được kết quả lưu')
+  const pendingRequest = save.mock.calls[1]?.[2]
+
+  await wrapper.get('#content-conflict-close').trigger('click')
+  await wrapper.get('#journal-conflict-open').trigger('click')
+  expect(wrapper.findAll('#content-conflict-dialog input:checked')).toHaveLength(0)
+  await wrapper.get('#conflict-local').setValue()
+  await wrapper.get('#content-conflict-confirm').trigger('click')
+  await flushPromises()
+
+  expect(save).toHaveBeenCalledTimes(3)
+  expect(save.mock.calls[2]?.[2]).toEqual(pendingRequest)
+  expect(drafts.getDraft(challengeId, localDate)).toMatchObject({
+    status: 'saved',
+    acknowledgedText: 'Bản nháp cục bộ',
+    pendingCommand: null,
+    conflictSnapshot: null,
+  })
+  wrapper.unmount()
+})
+
+test.each(['resource switch', 'session expiry', 'logout'] as const)(
+  'closes conflict UI without showing stale private text after %s',
+  async (transition) => {
+    const localText = 'Bản nháp riêng của phiên cũ'
+    const serverText = 'Bản máy chủ riêng của phiên cũ'
+    vi.spyOn(challengesApi, 'saveChallengeJournal')
+      .mockRejectedValueOnce(conflictError(challengeId, localDate, serverText, 2))
+    const wrapper = await mountEditor()
+
+    await wrapper.get('#journal-editor').setValue(localText)
+    await wrapper.get('#journal-form').trigger('submit.prevent')
+    await flushPromises()
+    await wrapper.get('#journal-conflict-open').trigger('click')
+    expect(wrapper.get('#content-conflict-dialog').text()).toContain(localText)
+
+    if (transition === 'resource switch') {
+      await wrapper.setProps({ challengeId: otherChallengeId, localDate: otherDate })
+    } else if (transition === 'session expiry') {
+      vi.spyOn(authApi, 'getSession').mockResolvedValue(null)
+      await useAuthStore().refreshSession()
+    } else {
+      vi.spyOn(authApi, 'logout').mockResolvedValue()
+      await useAuthStore().logOut()
+    }
+    await flushPromises()
+
+    const dialog = wrapper.find('#content-conflict-dialog')
+    expect(dialog.exists() ? dialog.attributes('open') : undefined).toBeUndefined()
+    expect(wrapper.text()).not.toContain(localText)
+    expect(wrapper.text()).not.toContain(serverText)
+    wrapper.unmount()
+  },
+)
