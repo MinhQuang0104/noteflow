@@ -118,9 +118,17 @@ slices:
       - "T-2: typed identity validation and selected resolution payload in journalDrafts/challenges API tests; NOT_RUN"
       - "T-3: single flight, identical retry, revision/auth/epoch/resource fences and private lifecycle regression; NOT_RUN"
   - id: C
-    status: pending
+    status: checkpointed
     depends_on: [B]
     task_refs: [T-4, T-5]
+    baseline_commit: 3925efa6fc7bb9cfea676f880e7e229c30d9d5b0
+    checkpoint_commit: 211305dcaee5a6b599c581f47c0e4978c7b1eac8
+    subject_digest: sha256:f9c450af54b77765ea9792ee316ad105b4b7b78d53d1384305296c50016294f2
+    changed_paths_sha256: sha256:d64440a6eb066682f7650f58adaa2da97fba7f7f287aa7c1275a37daefdf0d4d
+    receipt_refs:
+      implementation:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-6/C-implementation.json
+        digest: sha256:632fdf35104ca24e079c57e8611f5002e0076a03f22b9b9edcc9f65724b06878
     consumers:
       - frontend/src/stores/journalDrafts.ts
       - frontend/src/views/ChallengesView.vue
@@ -152,7 +160,7 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: implement_slice
+  kind: verify_slice
   target: C
 ---
 

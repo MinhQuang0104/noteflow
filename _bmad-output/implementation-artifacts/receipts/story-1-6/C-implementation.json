@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "story_id": "1.6",
+  "slice_id": "C",
+  "kind": "implementation",
+  "checkpoint_commit": "211305dcaee5a6b599c581f47c0e4978c7b1eac8",
+  "baseline_commit": "3925efa6fc7bb9cfea676f880e7e229c30d9d5b0",
+  "subject_digest": "sha256:f9c450af54b77765ea9792ee316ad105b4b7b78d53d1384305296c50016294f2",
+  "created_from_head": "211305dcaee5a6b599c581f47c0e4978c7b1eac8",
+  "changed_paths_sha256": "sha256:d64440a6eb066682f7650f58adaa2da97fba7f7f287aa7c1275a37daefdf0d4d",
+  "commands": [
+    {
+      "command": "npm.cmd run test:unit -- --run src/components/__tests__/ContentConflictDialog.spec.ts",
+      "exit_code": 1,
+      "tool": "Vitest",
+      "environment": "expected RED before component existed: unresolved ContentConflictDialog import; zero tests ran"
+    },
+    {
+      "command": "npm.cmd run test:unit -- --run src/components/__tests__/ContentConflictDialog.spec.ts src/views/__tests__/journal.spec.ts src/views/__tests__/journal-draft-lifecycle.spec.ts",
+      "exit_code": 0,
+      "tool": "Vitest",
+      "environment": "frontend; targeted Slice C suite; 21 tests passed"
+    },
+    {
+      "command": "npm.cmd run test:unit -- --run",
+      "exit_code": 0,
+      "tool": "Vitest",
+      "environment": "frontend; full unit suite; 134 tests passed across 16 files"
+    },
+    {
+      "command": "npm.cmd run type-check",
+      "exit_code": 0,
+      "tool": "vue-tsc",
+      "environment": "frontend TypeScript project build"
+    },
+    {
+      "command": "npm.cmd run lint",
+      "exit_code": 0,
+      "tool": "ESLint and Oxlint",
+      "environment": "frontend; full lint suite"
+    },
+    {
+      "command": "npm.cmd run build",
+      "exit_code": 0,
+      "tool": "Vite and vue-tsc",
+      "environment": "frontend production build"
+    },
+    {
+      "command": "git -c core.autocrlf=false diff --check",
+      "exit_code": 0,
+      "tool": "Git",
+      "environment": "story-1-6 worktree; whitespace check of tracked Slice C changes"
+    }
+  ]
+}
