@@ -18,10 +18,10 @@
     "frontend/src/api/schema.generated.ts"
   ],
   "anchor_blobs": {
-    "frontend/src/components/ChallengeJournalEditor.vue": "a90d2a65fb5fa328f94f777499ec332e882ca1f9",
+    "frontend/src/components/ChallengeJournalEditor.vue": "fcd2709bf85d169cba8af266692b7038829b9e9a",
     "frontend/src/views/ChallengesView.vue": "16de61a9c7077b031225b7f9cffc61349fcacdb1",
     "frontend/src/api/challenges.ts": "fd2871a941a59f2f59778b2e0d01cfdf26b894a5",
-    "frontend/src/views/__tests__/journal.spec.ts": "47e55538615b0120812145e4d8e0998713cccd14",
+    "frontend/src/views/__tests__/journal.spec.ts": "d3fda0e9450b2e2432c923420ecb87343753b9b2",
     "frontend/src/api/__tests__/challenges.spec.ts": "0d233fedaca5a8e88ced34d40189b804657d72a4",
     "frontend/src/stores/auth.ts": "7284c8d280ecdbc7524e3ff5563eb67a4862b163",
     "frontend/src/stores/account.ts": "d182dbf43b69fe5c0c1ee166c1eb427113bfe94e",
