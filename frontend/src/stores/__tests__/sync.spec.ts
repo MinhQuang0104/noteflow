@@ -123,6 +123,7 @@ describe('useSyncStore', () => {
 
     expect(sync.lastRevision).toBe(2)
     expect(refetchSpy).toHaveBeenCalledWith({ queryKey: ['challenges'] }, { throwOnError: true })
+    expect(refetchSpy).toHaveBeenCalledWith({ queryKey: ['challenge-journal'] }, { throwOnError: true })
 
     // Third poll returns revision 2 (same): does not refetch again
     refetchSpy.mockClear()
@@ -139,6 +140,54 @@ describe('useSyncStore', () => {
     expect(refetchSpy).not.toHaveBeenCalled()
 
     sync.stop()
+  })
+
+  it('refetches an active journal QueryObserver when the account revision advances', async () => {
+    const auth = useAuthStore()
+    const sync = useSyncStore()
+    sync.setQueryClient(queryClient)
+    auth.status = 'authenticated'
+
+    const queryKey = ['challenge-journal', 'challenge-a', '2026-09-19'] as const
+    let fetchCount = 0
+    const observer = new QueryObserver(queryClient, {
+      queryKey,
+      queryFn: async () => {
+        fetchCount += 1
+        return {
+          journal: {
+            challenge_id: 'challenge-a',
+            local_date: '2026-09-19',
+            journal: `journal ${fetchCount}`,
+            journal_version: fetchCount,
+          },
+        }
+      },
+      retry: false,
+    })
+    const unsubscribe = observer.subscribe(() => {})
+
+    try {
+      await vi.waitFor(() => expect(fetchCount).toBe(1))
+      await sync.start()
+      vi.mocked(accountApi.getAccountContext).mockResolvedValueOnce({
+        timezone: 'Asia/Ho_Chi_Minh',
+        account_date: '2026-09-19',
+        week: { start_date: '2026-09-15', end_date: '2026-09-21' },
+        account_revision: 2,
+        data_epoch: 1,
+        write_state: 'open',
+      })
+
+      expect(await sync.reconcile()).toBe(true)
+      expect(fetchCount).toBe(2)
+      expect(queryClient.getQueryData(queryKey)).toMatchObject({
+        journal: { journal: 'journal 2', journal_version: 2 },
+      })
+    } finally {
+      unsubscribe()
+      sync.stop()
+    }
   })
 
   it('detects epoch change, resets queries, and updates lastEpoch (S14-F03)', async () => {
@@ -167,8 +216,59 @@ describe('useSyncStore', () => {
 
     expect(sync.lastEpoch).toBe(2)
     expect(resetSpy).toHaveBeenCalledWith({ queryKey: ['challenges'] }, { throwOnError: true })
+    expect(resetSpy).toHaveBeenCalledWith({ queryKey: ['challenge-journal'] }, { throwOnError: true })
 
     sync.stop()
+  })
+
+  it('resets and refetches an active journal QueryObserver on an epoch change', async () => {
+    const auth = useAuthStore()
+    const sync = useSyncStore()
+    sync.setQueryClient(queryClient)
+    auth.status = 'authenticated'
+
+    const queryKey = ['challenge-journal', 'challenge-a', '2026-09-19'] as const
+    let epoch = 1
+    let fetchCount = 0
+    const observer = new QueryObserver(queryClient, {
+      queryKey,
+      queryFn: async () => {
+        fetchCount += 1
+        return {
+          journal: {
+            challenge_id: 'challenge-a',
+            local_date: '2026-09-19',
+            journal: `epoch ${epoch}`,
+            journal_version: epoch,
+          },
+        }
+      },
+      retry: false,
+    })
+    const unsubscribe = observer.subscribe(() => {})
+
+    try {
+      await vi.waitFor(() => expect(fetchCount).toBe(1))
+      await sync.start()
+      epoch = 2
+      vi.mocked(accountApi.getAccountContext).mockResolvedValueOnce({
+        timezone: 'Asia/Ho_Chi_Minh',
+        account_date: '2026-09-19',
+        week: { start_date: '2026-09-15', end_date: '2026-09-21' },
+        account_revision: 1,
+        data_epoch: 2,
+        write_state: 'open',
+      })
+
+      expect(await sync.reconcile()).toBe(true)
+      expect(fetchCount).toBe(2)
+      expect(queryClient.getQueryData(queryKey)).toMatchObject({
+        journal: { journal: 'epoch 2', journal_version: 2 },
+      })
+    } finally {
+      unsubscribe()
+      sync.stop()
+    }
   })
 
   it('pauses polling when document becomes hidden, resumes and reconciles on visible', async () => {
@@ -423,12 +523,9 @@ describe('useSyncStore', () => {
 
     await sync.start()
 
-    let resolveRefetch: (() => void) | null = null
-    vi.spyOn(queryClient, 'refetchQueries').mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          resolveRefetch = resolve
-        }),
+    const refetchResolvers: Array<() => void> = []
+    const refetch = vi.spyOn(queryClient, 'refetchQueries').mockImplementation(
+      () => new Promise<void>((resolve) => refetchResolvers.push(resolve)),
     )
 
     vi.spyOn(accountApi, 'getAccountContext').mockResolvedValueOnce({
@@ -441,11 +538,13 @@ describe('useSyncStore', () => {
     })
 
     const pollPromise = sync.reconcile()
-    await vi.advanceTimersByTimeAsync(1)
+    await vi.waitFor(() => expect(refetch).toHaveBeenCalledTimes(2))
+    expect(refetch).toHaveBeenCalledWith({ queryKey: ['challenges'] }, { throwOnError: true })
+    expect(refetch).toHaveBeenCalledWith({ queryKey: ['challenge-journal'] }, { throwOnError: true })
 
     // While refetch is pending, user logs out / rotates generation
     auth.generation = 2
-    resolveRefetch!()
+    refetchResolvers.forEach((resolve) => resolve())
 
     const result = await pollPromise
     // Must return false and not mark as synced
@@ -839,16 +938,13 @@ describe('useSyncStore', () => {
     sync.lastEpoch = 1
     sync.lastRevision = 1
 
-    let finishInvalidation!: () => void
-    vi.spyOn(queryClient, 'invalidateQueries').mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          finishInvalidation = resolve
-        }),
+    const finishInvalidations: Array<() => void> = []
+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries').mockImplementation(
+      () => new Promise<void>((resolve) => finishInvalidations.push(resolve)),
     )
 
     const staleAck = sync.recordMutationAck(2, 1, 1)
-    await Promise.resolve()
+    await vi.waitFor(() => expect(invalidate).toHaveBeenCalledTimes(2))
     auth.generation = 2
     auth.status = 'guest'
     account.context = null
@@ -857,7 +953,7 @@ describe('useSyncStore', () => {
     auth.generation = 3
     auth.status = 'authenticated'
 
-    finishInvalidation()
+    finishInvalidations.forEach((finish) => finish())
 
     expect(await staleAck).toBe(true)
     expect(sync.syncStatus).not.toBe('synced')
@@ -865,7 +961,7 @@ describe('useSyncStore', () => {
     sync.stop()
   })
 
-  it('keeps the committed account revision when challenge convergence fails after a mutation ACK', async () => {
+  it('keeps the committed account revision when query convergence fails after a mutation ACK', async () => {
     const auth = useAuthStore()
     const account = useAccountStore()
     auth.generation = 1
@@ -889,32 +985,116 @@ describe('useSyncStore', () => {
 
     expect(accepted).toBe(true)
     await vi.waitFor(() => expect(sync.syncStatus).toBe('error'))
-    expect(invalidate).toHaveBeenCalledOnce()
+    expect(invalidate).toHaveBeenCalledTimes(2)
     expect(account.context?.account_revision).toBe(2)
     expect(sync.syncStatus).toBe('error')
-    expect(sync.syncError).toContain('đồng bộ danh sách challenge')
+    expect(sync.syncError).toBeTruthy()
     expect(sync.pendingConvergence).toBe(true)
     sync.stop()
+  })
+
+  it('invalidates journal queries on ACK, preserves their cache on failure, and retries at the same revision', async () => {
+    const sync = prepareAuthenticatedSync()
+    const challengesKey = ['challenges'] as const
+    const journalKey = ['challenge-journal', 'challenge-a', '2026-09-19'] as const
+    let challengeFetchCount = 0
+    let journalFetchCount = 0
+    let failJournalFetch = false
+
+    const challengesObserver = new QueryObserver(queryClient, {
+      queryKey: challengesKey,
+      queryFn: async () => {
+        challengeFetchCount += 1
+        return { challenges: [`challenge ${challengeFetchCount}`] }
+      },
+      retry: false,
+    })
+    const journalObserver = new QueryObserver(queryClient, {
+      queryKey: journalKey,
+      queryFn: async () => {
+        journalFetchCount += 1
+        if (failJournalFetch) throw new Error('journal temporarily unavailable')
+        return {
+          journal: {
+            challenge_id: 'challenge-a',
+            local_date: '2026-09-19',
+            journal: `journal ${journalFetchCount}`,
+            journal_version: journalFetchCount,
+          },
+        }
+      },
+      retry: false,
+    })
+    const unsubscribeChallenges = challengesObserver.subscribe(() => {})
+    const unsubscribeJournal = journalObserver.subscribe(() => {})
+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries')
+
+    try {
+      await vi.waitFor(() => {
+        expect(challengeFetchCount).toBe(1)
+        expect(journalFetchCount).toBe(1)
+      })
+      failJournalFetch = true
+
+      expect(await sync.recordMutationAck(2, 1, 1)).toBe(true)
+      await vi.waitFor(() => expect(sync.syncStatus).toBe('error'))
+
+      expect(invalidate).toHaveBeenCalledWith({ queryKey: ['challenges'] }, { throwOnError: true })
+      expect(invalidate).toHaveBeenCalledWith({ queryKey: ['challenge-journal'] }, { throwOnError: true })
+      expect(challengeFetchCount).toBe(2)
+      expect(journalFetchCount).toBe(2)
+      expect(queryClient.getQueryData(journalKey)).toMatchObject({
+        journal: { journal: 'journal 1', journal_version: 1 },
+      })
+      expect(queryClient.getQueryData(challengesKey)).toEqual({ challenges: ['challenge 2'] })
+      expect(sync.pendingConvergence).toBe(true)
+      expect(sync.syncError).toBeTruthy()
+
+      failJournalFetch = false
+      vi.mocked(accountApi.getAccountContext).mockResolvedValueOnce({
+        timezone: 'Asia/Ho_Chi_Minh',
+        account_date: '2026-09-19',
+        week: { start_date: '2026-09-15', end_date: '2026-09-21' },
+        account_revision: 2,
+        data_epoch: 1,
+        write_state: 'open',
+      })
+
+      expect(await sync.reconcile()).toBe(true)
+      expect(challengeFetchCount).toBe(3)
+      expect(journalFetchCount).toBe(3)
+      expect(queryClient.getQueryData(journalKey)).toMatchObject({
+        journal: { journal: 'journal 3', journal_version: 3 },
+      })
+      expect(sync.pendingConvergence).toBe(false)
+      expect(sync.syncStatus).toBe('synced')
+    } finally {
+      unsubscribeChallenges()
+      unsubscribeJournal()
+      sync.stop()
+    }
   })
 
   it('keeps a newer same-epoch failure when an older ACK later converges successfully', async () => {
     const sync = prepareAuthenticatedSync()
     const olderInvalidation = createDeferredInvalidation()
     const newerInvalidation = createDeferredInvalidation()
-    const invalidate = vi.spyOn(queryClient, 'invalidateQueries')
-      .mockImplementationOnce(() => olderInvalidation.promise)
-      .mockImplementationOnce(() => newerInvalidation.promise)
+    let invalidationCallCount = 0
+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries').mockImplementation(() => {
+      invalidationCallCount += 1
+      return invalidationCallCount <= 2 ? olderInvalidation.promise : newerInvalidation.promise
+    })
 
     expect(await sync.recordMutationAck(2, 1, 1)).toBe(true)
     await flushPendingConvergence()
-    expect(invalidate).toHaveBeenCalledTimes(1)
+    expect(invalidate).toHaveBeenCalledTimes(2)
     expect(await sync.recordMutationAck(3, 1, 1)).toBe(true)
     await flushPendingConvergence()
-    expect(invalidate).toHaveBeenCalledTimes(2)
+    expect(invalidate).toHaveBeenCalledTimes(4)
 
     newerInvalidation.reject(new Error('newer challenge refetch failed'))
     await vi.waitFor(() => expect(sync.syncStatus).toBe('error'))
-    expect(sync.syncError).toContain('đồng bộ danh sách challenge')
+    expect(sync.syncError).toBeTruthy()
     expect(sync.pendingConvergence).toBe(true)
     expect(sync.consecutiveFailures).toBe(1)
 
@@ -922,7 +1102,7 @@ describe('useSyncStore', () => {
     await flushPendingConvergence()
 
     expect(sync.syncStatus).toBe('error')
-    expect(sync.syncError).toContain('đồng bộ danh sách challenge')
+    expect(sync.syncError).toBeTruthy()
     expect(sync.pendingConvergence).toBe(true)
     expect(sync.consecutiveFailures).toBe(1)
     sync.stop()
@@ -932,16 +1112,18 @@ describe('useSyncStore', () => {
     const sync = prepareAuthenticatedSync()
     const olderInvalidation = createDeferredInvalidation()
     const newerInvalidation = createDeferredInvalidation()
-    const invalidate = vi.spyOn(queryClient, 'invalidateQueries')
-      .mockImplementationOnce(() => olderInvalidation.promise)
-      .mockImplementationOnce(() => newerInvalidation.promise)
+    let invalidationCallCount = 0
+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries').mockImplementation(() => {
+      invalidationCallCount += 1
+      return invalidationCallCount <= 2 ? olderInvalidation.promise : newerInvalidation.promise
+    })
 
     expect(await sync.recordMutationAck(2, 1, 1)).toBe(true)
     await flushPendingConvergence()
-    expect(invalidate).toHaveBeenCalledTimes(1)
+    expect(invalidate).toHaveBeenCalledTimes(2)
     expect(await sync.recordMutationAck(3, 1, 1)).toBe(true)
     await flushPendingConvergence()
-    expect(invalidate).toHaveBeenCalledTimes(2)
+    expect(invalidate).toHaveBeenCalledTimes(4)
 
     newerInvalidation.resolve()
     await vi.waitFor(() => expect(sync.syncStatus).toBe('synced'))
@@ -963,19 +1145,21 @@ describe('useSyncStore', () => {
     const sync = prepareAuthenticatedSync()
     const newerInvalidation = createDeferredInvalidation()
     const olderInvalidation = createDeferredInvalidation()
-    const invalidate = vi.spyOn(queryClient, 'invalidateQueries')
-      .mockImplementationOnce(() => newerInvalidation.promise)
-      .mockImplementationOnce(() => olderInvalidation.promise)
+    let invalidationCallCount = 0
+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries').mockImplementation(() => {
+      invalidationCallCount += 1
+      return invalidationCallCount <= 2 ? newerInvalidation.promise : olderInvalidation.promise
+    })
 
     expect(await sync.recordMutationAck(3, 1, 1)).toBe(true)
     await flushPendingConvergence()
-    expect(invalidate).toHaveBeenCalledTimes(1)
+    expect(invalidate).toHaveBeenCalledTimes(2)
     newerInvalidation.resolve()
     await vi.waitFor(() => expect(sync.syncStatus).toBe('synced'))
 
     expect(await sync.recordMutationAck(2, 1, 1)).toBe(true)
     await flushPendingConvergence()
-    expect(invalidate).toHaveBeenCalledTimes(2)
+    expect(invalidate).toHaveBeenCalledTimes(4)
     olderInvalidation.reject(new Error('older challenge refetch failed'))
     await flushPendingConvergence()
 

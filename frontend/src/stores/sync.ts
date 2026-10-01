@@ -144,10 +144,16 @@ export const useSyncStore = defineStore('sync', () => {
         try {
           if (epochChanged) {
             // S14-F03, S14-F04: resetQueries preserves active query listeners; throwOnError ensures failures reject
-            await currentQueryClient.resetQueries({ queryKey: ['challenges'] }, { throwOnError: true })
+            await Promise.all([
+              currentQueryClient.resetQueries({ queryKey: ['challenges'] }, { throwOnError: true }),
+              currentQueryClient.resetQueries({ queryKey: ['challenge-journal'] }, { throwOnError: true }),
+            ])
           } else {
             // S14-F04: throwOnError ensures refetch rejection is not swallowed by TanStack Query
-            await currentQueryClient.refetchQueries({ queryKey: ['challenges'] }, { throwOnError: true })
+            await Promise.all([
+              currentQueryClient.refetchQueries({ queryKey: ['challenges'] }, { throwOnError: true }),
+              currentQueryClient.refetchQueries({ queryKey: ['challenge-journal'] }, { throwOnError: true }),
+            ])
           }
 
           // Boundary check after async refetch (S14-F02)
@@ -166,7 +172,7 @@ export const useSyncStore = defineStore('sync', () => {
           // S14-F04: Invalidation failure leaves coordinator in error state and retries on equal revision
           pendingConvergence.value = true
           consecutiveFailures.value++
-          syncError.value = 'Không thể đồng bộ danh sách challenge mới nhất. Đang thử lại...'
+          syncError.value = 'Không thể đồng bộ danh sách challenge và nhật ký mới nhất. Đang thử lại...'
           syncStatus.value = 'error'
           return false
         }
@@ -344,7 +350,10 @@ export const useSyncStore = defineStore('sync', () => {
       (!account.context || account.context.data_epoch === epoch)
 
     void Promise.resolve()
-      .then(() => currentQueryClient.invalidateQueries({ queryKey: ['challenges'] }, { throwOnError: true }))
+      .then(() => Promise.all([
+        currentQueryClient.invalidateQueries({ queryKey: ['challenges'] }, { throwOnError: true }),
+        currentQueryClient.invalidateQueries({ queryKey: ['challenge-journal'] }, { throwOnError: true }),
+      ]))
       .then(
         () => {
           if (!isCurrentAck()) return
@@ -357,7 +366,7 @@ export const useSyncStore = defineStore('sync', () => {
           if (!isCurrentAck()) return
           pendingConvergence.value = true
           consecutiveFailures.value++
-          syncError.value = 'Không thể đồng bộ danh sách challenge mới nhất. Đang thử lại...'
+          syncError.value = 'Không thể đồng bộ danh sách challenge và nhật ký mới nhất. Đang thử lại...'
           syncStatus.value = 'error'
         },
       )
