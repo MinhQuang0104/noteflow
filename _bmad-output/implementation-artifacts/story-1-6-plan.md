@@ -26,7 +26,7 @@ readiness:
     - 1-5-giữ-bản-đang-nhập-và-thử-lưu-lại-sau-gián-đoạn
     - 2-1-tạo-và-quản-lý-thông-tin-challenge
     - 2-3-ghi-và-sửa-journal-tùy-chọn
-current_slice: B
+current_slice: C
 risk:
   level: HIGH
   flags: [concurrency, idempotency, security, shared_boundary]
@@ -73,7 +73,7 @@ slices:
     verification_obligations:
       - "T-1: journal API/contract/DB invariants and two-connection PostgreSQL contention; backend testing environment; NOT_RUN"
   - id: B
-    status: checkpointed
+    status: reviewed
     depends_on: [A]
     task_refs: [T-2, T-3]
     baseline_commit: c77298cb2dbb6d59e2d78d1da20fedf9f5f0a677
@@ -84,6 +84,31 @@ slices:
       implementation:
         path: _bmad-output/implementation-artifacts/receipts/story-1-6/B-implementation.json
         digest: sha256:be470af096c958357604ad63ee23d7f7a2a1839f66a8d9f3e2c643316bf11f49
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-6/B-verification.json
+        digest: sha256:3adf34b7b2009f3057a16796c0c9024cbfe7aa91de91c8a4be16b8427d6febeb
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-6/B-review.json
+        digest: sha256:ca100f3cedc043ec62b35ebfa51e62ba0171c5f430481137936c170df1d0d52e
+    verification:
+      subject:
+        commit: 7bf99467a2dabb7ef2362b816ab410e4823024d4
+      changed_paths_sha256: sha256:0ff80f148b8e5fbdec8988483ead90895c45f93e248711f131778b6cae79e1e4
+      status: INCOMPLETE
+      canonical_status: INCOMPLETE
+      escalation_decision: REVIEW_REQUIRED
+      progression_eligible: true
+      done_gate_disclosure_required: true
+      outstanding_obligation: "Canonical mapping excludes the journal draft store paths; raw canonical status remains INCOMPLETE."
+      review_disclosure: "Same-lead HIGH-risk review approved the exact T-2/T-3 focused evidence. Canonical journal recipe remains INCOMPLETE because the store paths are unmapped."
+    review:
+      required: true
+      verdict: APPROVE
+      reviewed_commit: 7bf99467a2dabb7ef2362b816ab410e4823024d4
+      risk_context_digest: sha256:54a5ad338aa76d1b6e60a1b073ecb93ce6e9736508edf87586271961e411c46d
+      review_context_digest: sha256:d796d1192c85afcf71e13bd22e4e35a20d739f4817c886e3ea4dfadd77810999
+      freshness: FRESH_CANDIDATE
+      reviewer: same-lead
     consumers:
       - frontend/src/components/ChallengeJournalEditor.vue
       - frontend/src/stores/auth.ts
@@ -127,8 +152,8 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: verify_slice
-  target: B
+  kind: implement_slice
+  target: C
 ---
 
 # Story 1.6 — V4 upgrade execution projection
