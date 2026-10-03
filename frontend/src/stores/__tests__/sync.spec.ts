@@ -3,6 +3,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import * as accountApi from '../../api/account'
+import * as authApi from '../../api/auth'
 import { useAccountStore } from '../account'
 import { useAuthStore } from '../auth'
 import { useSyncStore } from '../sync'
@@ -72,6 +73,188 @@ describe('useSyncStore', () => {
   async function flushPendingConvergence() {
     for (let i = 0; i < 5; i++) await Promise.resolve()
   }
+
+  function observeDelayedJournal() {
+    const deferred = createDeferredInvalidation()
+    const queryKey = ['challenge-journal', 'challenge-a', '2026-09-19'] as const
+    let delayFetch = true
+    const observer = new QueryObserver(queryClient, {
+      queryKey,
+      initialData: {
+        journal: { challenge_id: 'challenge-a', local_date: '2026-09-19', journal: 'cached journal', journal_version: 1 },
+      },
+      staleTime: Infinity,
+      queryFn: async () => {
+        if (delayFetch) await deferred.promise
+        return {
+          journal: { challenge_id: 'challenge-a', local_date: '2026-09-19', journal: 'fresh journal', journal_version: 2 },
+        }
+      },
+      retry: false,
+    })
+    const unsubscribe = observer.subscribe(() => {})
+    return {
+      queryKey,
+      deferred,
+      finish: (outcome: 'success' | 'failure') => {
+        delayFetch = false
+        if (outcome === 'failure') deferred.reject(new Error('journal request failed'))
+        else deferred.resolve()
+      },
+      unsubscribe,
+    }
+  }
+
+  it.each(['logout', 'reset', 'expiry', 'epoch'] as const)(
+    'fences late journal refetch callbacks after %s (D-F1)',
+    async (transition) => {
+      for (const outcome of ['success', 'failure'] as const) {
+        const sync = prepareAuthenticatedSync()
+        const auth = useAuthStore()
+        const account = useAccountStore()
+        vi.mocked(accountApi.getAccountContext).mockResolvedValue({ ...account.context!, account_revision: 2 })
+        const journal = observeDelayedJournal()
+        const pending = sync.start()
+        await flushPendingConvergence()
+        expect(queryClient.getQueryState(journal.queryKey)?.fetchStatus).toBe('fetching')
+
+        if (transition === 'logout') {
+          auth.generation++
+          auth.status = 'guest'
+          sync.reset()
+        } else if (transition === 'reset') {
+          sync.reset()
+        } else if (transition === 'expiry') {
+          vi.spyOn(authApi, 'getSession').mockResolvedValue(null)
+          await auth.refreshSession()
+        } else {
+          account.context = { ...account.context!, data_epoch: 2 }
+          sync.lastEpoch = 2
+        }
+        await flushPendingConvergence()
+        const state = {
+          status: sync.syncStatus,
+          error: sync.syncError,
+          pending: sync.pendingConvergence,
+          failures: sync.consecutiveFailures,
+        }
+
+        journal.finish(outcome)
+        try {
+          expect(await pending).toBe(false)
+          expect({
+            status: sync.syncStatus,
+            error: sync.syncError,
+            pending: sync.pendingConvergence,
+            failures: sync.consecutiveFailures,
+          }).toEqual(state)
+        } finally {
+          journal.unsubscribe()
+          sync.stop()
+          sync.reset()
+          queryClient.clear()
+        }
+      }
+    },
+  )
+
+  it.each([
+    ['offline', 'failure'], ['hidden', 'failure'],
+    ['offline', 'success'], ['hidden', 'success'],
+  ] as const)('keeps %s paused after journal refetch %s and retries the same revision (D-F2)', async (transition, outcome) => {
+    const sync = prepareAuthenticatedSync()
+    vi.mocked(accountApi.getAccountContext).mockResolvedValue({ ...useAccountStore().context!, account_revision: 2 })
+    const journal = observeDelayedJournal()
+    const pending = sync.start()
+    await flushPendingConvergence()
+    expect(queryClient.getQueryState(journal.queryKey)?.fetchStatus).toBe('fetching')
+    if (transition === 'offline') sync.handleOnlineStatusChange(false)
+    else sync.handleVisibilityChange(false)
+    journal.finish(outcome)
+
+    try {
+      expect(await pending).toBe(false)
+      expect(sync.syncStatus).toBe('paused')
+      expect(sync.syncError).toBeNull()
+      expect(sync.consecutiveFailures).toBe(0)
+      expect(sync.pendingConvergence).toBe(true)
+      const expectedJournal = outcome === 'failure'
+        ? { journal: 'cached journal', journal_version: 1 }
+        : { journal: 'fresh journal', journal_version: 2 }
+      expect(queryClient.getQueryData(journal.queryKey)).toMatchObject({ journal: expectedJournal })
+
+      // Avoid an automatic resume: explicitly exercise equal-revision convergence.
+      sync.stop()
+      sync.isOnline = true
+      sync.isVisible = true
+      expect(await sync.reconcile()).toBe(true)
+      expect(sync.lastRevision).toBe(2)
+      expect(queryClient.getQueryData(journal.queryKey)).toMatchObject({ journal: { journal: 'fresh journal', journal_version: 2 } })
+      expect(sync.pendingConvergence).toBe(false)
+      expect(sync.syncStatus).toBe('synced')
+    } finally {
+      journal.unsubscribe()
+      sync.stop()
+    }
+  })
+
+  it.each([
+    ['offline', 'success'], ['hidden', 'success'],
+    ['offline', 'failure'], ['hidden', 'failure'],
+  ] as const)('keeps %s paused after ACK invalidation %s without losing the committed revision (D-F3)', async (transition, outcome) => {
+    const sync = prepareAuthenticatedSync()
+    const journal = observeDelayedJournal()
+    expect(await sync.recordMutationAck(2, 1, 1)).toBe(true)
+    await flushPendingConvergence()
+    expect(queryClient.getQueryState(journal.queryKey)?.fetchStatus).toBe('fetching')
+    if (transition === 'offline') sync.handleOnlineStatusChange(false)
+    else sync.handleVisibilityChange(false)
+    journal.finish(outcome)
+
+    try {
+      await vi.waitFor(() => expect(queryClient.getQueryState(journal.queryKey)?.fetchStatus).toBe('idle'))
+      await flushPendingConvergence()
+      expect(sync.syncStatus).toBe('paused')
+      expect(sync.syncError).toBeNull()
+      expect(sync.pendingConvergence).toBe(true)
+      expect(sync.consecutiveFailures).toBe(0)
+      expect(sync.lastRevision).toBe(2)
+      expect(useAccountStore().context?.account_revision).toBe(2)
+    } finally {
+      journal.unsubscribe()
+      sync.stop()
+    }
+  })
+
+  it.each(['success', 'failure'] as const)('does not let an older poll %s overwrite a newer ACK convergence failure', async (outcome) => {
+    const sync = prepareAuthenticatedSync()
+    const refetch = createDeferredInvalidation()
+    const invalidation = createDeferredInvalidation()
+    vi.mocked(accountApi.getAccountContext).mockResolvedValue({ ...useAccountStore().context!, account_revision: 2 })
+    vi.spyOn(queryClient, 'refetchQueries').mockReturnValue(refetch.promise)
+    vi.spyOn(queryClient, 'invalidateQueries').mockReturnValue(invalidation.promise)
+
+    const pending = sync.start()
+    await flushPendingConvergence()
+    expect(sync.lastRevision).toBe(2)
+    expect(await sync.recordMutationAck(3, 1, 1)).toBe(true)
+    invalidation.reject(new Error('newer ACK convergence failed'))
+    await vi.waitFor(() => expect(sync.syncStatus).toBe('error'))
+    const error = sync.syncError
+    if (outcome === 'success') refetch.resolve()
+    else refetch.reject(new Error('older poll failed'))
+
+    try {
+      expect(await pending).toBe(false)
+      expect(sync.lastRevision).toBe(3)
+      expect(sync.syncStatus).toBe('error')
+      expect(sync.syncError).toBe(error)
+      expect(sync.pendingConvergence).toBe(true)
+      expect(sync.consecutiveFailures).toBe(1)
+    } finally {
+      sync.stop()
+    }
+  })
 
   it('initializes in idle state and starts polling when authenticated', async () => {
     const auth = useAuthStore()
