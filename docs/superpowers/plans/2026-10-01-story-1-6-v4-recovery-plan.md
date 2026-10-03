@@ -1,5 +1,7 @@
 # Story 1.6 V4 recovery and continuation plan
 
+> Continuation update (2026-10-03): recovery is complete. Use [the remaining-debug plan](2026-10-03-story-1-6-debug-remaining-plan.md) for all remaining work. It supersedes Task 3 and the proposed direct D reimplementation below: the current Runner does not yet support a new implementation receipt for the same slice. Do not reopen D manually or replay the retired transaction.
+
 **Goal:** Remove the verified V4 metadata deadlock, prevent its recurrence, and resume Story 1.6 in `.worktrees/story-1-6` using fresh evidence.
 
 **Architecture:** Preserve the original failed transaction and its fingerprint. Retire only a demonstrably unwritten metadata transaction through an explicit, fingerprint-bound recovery operation; archive its journal and owned lock. A new verification transaction uses a corrected Plan template and independently executed checks/review. Product code, AC-1..AC-4, and Human Gate remain authoritative.
