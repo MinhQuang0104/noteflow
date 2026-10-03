@@ -161,9 +161,17 @@ slices:
       freshness: FRESH_CANDIDATE
       reviewer: same-lead
   - id: D
-    status: pending
+    status: checkpointed
     depends_on: [C]
     task_refs: [T-6]
+    baseline_commit: d3200ef5341d047cda7c43a7b1ba4cdac88b46fd
+    checkpoint_commit: 64ca94d4191e0a8978b3c60f18092ea31a26fc1e
+    subject_digest: sha256:0d748ad53546e48d99a364914a0bd8aeb47fae5eadad4b45f6eabbe0af1c56f3
+    changed_paths_sha256: sha256:fd29e52500f4cb026d79ce31de90fdce07f07cd24cedc22e9eb6664ff87e00f0
+    receipt_refs:
+      implementation:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-6/D-implementation-attempt-2.json
+        digest: sha256:e5ad7deea4dc10511a4a99fa39044fba91c33a2157c42e3ca46b9e0ed9e8ba2c
     attempt_history:
       - attempt_id: 1
         status: checkpointed
@@ -205,7 +213,7 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: implement_slice
+  kind: verify_slice
   target: D
 ---
 
