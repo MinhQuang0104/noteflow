@@ -10,6 +10,8 @@ import { spawnSync } from 'node:child_process'
 import { inspectStory, normativeDigest, receiptDigest, validateReceipt } from './check-artifact-contract.mjs'
 import { frontmatter, validate as validateStoryPlan } from './check-story-plan.mjs'
 import { actionFingerprint, checkpointImplementation, prepareAction, recordSliceReview, verifySlice } from './v4-action-kernel.mjs'
+import { inspectActionTransaction, transactionIdentity } from './v4-slice-transaction.mjs'
+import { runV4Story } from './v4-story-runner.mjs'
 
 const PLAN = '_bmad-output/implementation-artifacts/story-9-1-plan.md'
 const STORY = 'docs/story.md'
@@ -330,6 +332,152 @@ test('verification metadata recovery resumes an interrupted commit without repla
     })
     assert.equal(recovered.status, 'NOOP', JSON.stringify(recovered))
     assert.equal(git(f.root, 'rev-list', '--count', 'HEAD'), '4')
+    assert.equal(git(f.root, 'status', '--porcelain'), '')
+  } finally { f.cleanup() }
+})
+
+test('wrong verification successor is rejected before creating a transaction or lock', () => {
+  const f = fixture('LOW')
+  try {
+    const prepared = prepareVerification(f)
+    const result = verifySlice(f.root, {
+      ...f.verifyRequest, operation: 'verify', preview: prepared.preview,
+      plan_template: verificationTemplate(f, false).replace('{{NEXT_ACTION_KIND}}', 'verify_slice').replace('{{NEXT_ACTION_TARGET}}', 'A')
+    })
+    assert.ok(result.reasons.includes('SUCCESSOR_PROJECTION_MISMATCH'), JSON.stringify(result))
+    assert.equal(inspectActionTransaction(f.root, f.verifyRequest.transaction_id).status, 'NOT_FOUND')
+    assert.equal(existsSync(transactionIdentity(f.root, f.verifyRequest).lockPath), false)
+    assert.equal(existsSync(path.join(f.root, VERIFICATION_RECEIPT)), false)
+    assert.equal(git(f.root, 'rev-parse', 'HEAD'), f.head)
+    assert.equal(git(f.root, 'status', '--porcelain'), '')
+  } finally { f.cleanup() }
+})
+
+for (const failure of ['after-write', 'after-metadata-stage']) {
+  test(`verification recovery resumes ${failure} without regenerating evidence`, () => {
+    const f = fixture('LOW')
+    try {
+      const prepared = prepareVerification(f)
+      const input = { ...f.verifyRequest, operation: 'verify', preview: prepared.preview, plan_template: verificationTemplate(f, false) }
+      const first = verifySlice(f.root, { ...input, fail_at: failure })
+      assert.equal(first.status, 'RECOVERY_REQUIRED', JSON.stringify(first))
+      const receiptBytes = readFileSync(path.join(f.root, VERIFICATION_RECEIPT), 'utf8')
+      const recovered = verifySlice(f.root, { ...input, recovery_authorized: true, recovery_checkpoint: first.checkpoint_commit })
+      assert.equal(recovered.status, 'APPLIED', JSON.stringify(recovered))
+      assert.equal(readFileSync(path.join(f.root, VERIFICATION_RECEIPT), 'utf8'), receiptBytes)
+      assert.equal(git(f.root, 'rev-list', '--count', 'HEAD'), '4')
+      assert.equal(git(f.root, 'status', '--porcelain'), '')
+      assert.equal(verifySlice(f.root, { ...input, recovery_authorized: true, recovery_checkpoint: first.checkpoint_commit }).status, 'NOOP')
+    } finally { f.cleanup() }
+  })
+}
+
+test('interrupted metadata recovery rejects a changed receipt and preserves partial state', () => {
+  const f = fixture('LOW')
+  try {
+    const prepared = prepareVerification(f)
+    const input = { ...f.verifyRequest, operation: 'verify', preview: prepared.preview, plan_template: verificationTemplate(f, false) }
+    const first = verifySlice(f.root, { ...input, fail_at: 'after-write' })
+    const receipt = JSON.parse(readFileSync(path.join(f.root, VERIFICATION_RECEIPT), 'utf8'))
+    receipt.commands[0].environment = 'tampered'
+    write(f.root, VERIFICATION_RECEIPT, JSON.stringify(receipt) + '\n')
+    const before = readFileSync(path.join(f.root, VERIFICATION_RECEIPT), 'utf8')
+    const recovered = verifySlice(f.root, { ...input, recovery_authorized: true, recovery_checkpoint: first.checkpoint_commit })
+    assert.equal(recovered.status, 'RECOVERY_REQUIRED', JSON.stringify(recovered))
+    assert.ok(recovered.reasons.includes('RECOVERY_METADATA_CONTENT_MISMATCH'), JSON.stringify(recovered))
+    assert.equal(readFileSync(path.join(f.root, VERIFICATION_RECEIPT), 'utf8'), before)
+    assert.equal(git(f.root, 'rev-parse', 'HEAD'), f.head)
+    assert.ok(existsSync(first.lock_path))
+  } finally { f.cleanup() }
+})
+
+function legacyMetadataFailure(f) {
+  const request = { action: 'verify_slice', story_id: '9.1', slice_id: 'A', transaction_id: 'legacy-prewrite', recovery_checkpoint: f.head, maintenance_paths: [] }
+  const identity = transactionIdentity(f.root, request)
+  const lock = { schema_version: 1, repository: identity.repository, worktree: identity.worktree, action: 'verify_slice', story_id: '9.1', slice_id: 'A', transaction_id: request.transaction_id, scope_key: identity.scopeKey, created_at: '2026-10-01T00:00:00.000Z' }
+  const journal = { ...lock, expected_head: f.head, checkpoint_commit: f.head, implementation_paths: [], metadata_paths: [PLAN, VERIFICATION_RECEIPT, REVIEW_RECEIPT].sort(), preview_fingerprint: digest('legacy-preview'), lock_identity: lock, phase: 'RECOVERY_REQUIRED', error: 'SUCCESSOR_PROJECTION_MISMATCH', recovery_required: true, initial_inventory: { staged: [], unstaged: [], untracked: [] }, lock_path: identity.lockPath, journal_path: identity.journalPath, _path: identity.journalPath }
+  mkdirSync(identity.transactionRoot, { recursive: true })
+  const journalBytes = JSON.stringify(journal, null, 2) + '\n'
+  const lockBytes = JSON.stringify(lock, null, 2) + '\n'
+  writeFileSync(identity.journalPath, journalBytes)
+  writeFileSync(identity.lockPath, lockBytes)
+  const run = (operation, extra = {}) => runV4Story(f.root, '9.1', { expectedHead: f.head, operation, input: { ...request, ...extra } })
+  return { request, identity, journalBytes, lockBytes, run }
+}
+
+test('Runner retires only the unwritten legacy transaction and preserves its journal and lock evidence', () => {
+  const f = fixture('HIGH')
+  try {
+    const legacy = legacyMetadataFailure(f)
+    const prepared = legacy.run('prepare-recovery-abort')
+    assert.equal(prepared.status, 'READY', JSON.stringify(prepared))
+    assert.equal(legacy.run('abort-unwritten-metadata', { preview: prepared.preview }).status, 'BLOCKED')
+    const result = legacy.run('abort-unwritten-metadata', { preview: prepared.preview, recovery_authorized: true })
+    assert.equal(result.status, 'ABORTED', JSON.stringify(result))
+    assert.equal(readFileSync(result.archive_journal_path, 'utf8'), legacy.journalBytes)
+    assert.equal(readFileSync(result.archive_lock_path, 'utf8'), legacy.lockBytes)
+    assert.equal(existsSync(legacy.identity.lockPath), false)
+    assert.equal(inspectActionTransaction(f.root, legacy.request.transaction_id).status, 'ABORTED')
+    assert.equal(git(f.root, 'rev-parse', 'HEAD'), f.head)
+    assert.equal(git(f.root, 'status', '--porcelain'), '')
+    assert.equal(existsSync(path.join(f.root, VERIFICATION_RECEIPT)), false)
+    assert.equal(legacy.run('abort-unwritten-metadata', { preview: prepared.preview, recovery_authorized: true }).status, 'NOOP')
+  } finally { f.cleanup() }
+})
+
+for (const fault of ['wrong-checkpoint', 'foreign-lock', 'dirty-product', 'dirty-metadata', 'staged-work', 'non-idle']) {
+  test(`unwritten retirement rejects ${fault} without changing recovery evidence`, () => {
+    const f = fixture('HIGH')
+    try {
+      const legacy = legacyMetadataFailure(f)
+      if (fault === 'wrong-checkpoint') legacy.request.recovery_checkpoint = 'f'.repeat(40)
+      if (fault === 'foreign-lock') writeFileSync(legacy.identity.lockPath, legacy.lockBytes.replace('legacy-prewrite', 'foreign-owner'))
+      if (fault === 'dirty-product') write(f.root, 'src/base.txt', 'user work\n')
+      if (fault === 'dirty-metadata') write(f.root, VERIFICATION_RECEIPT, '{}\n')
+      if (fault === 'staged-work') { write(f.root, 'user.txt', 'staged\n'); git(f.root, 'add', 'user.txt') }
+      if (fault === 'non-idle') write(f.root, '.agent-state/active-run.json', JSON.stringify({ schemaVersion: 1, status: 'RUNNING', activeRunId: 'other', storyId: '9.2' }))
+      const lockBefore = readFileSync(legacy.identity.lockPath, 'utf8')
+      const statusBefore = git(f.root, 'status', '--porcelain')
+      const result = legacy.run('prepare-recovery-abort')
+      assert.equal(result.status, 'BLOCKED', JSON.stringify(result))
+      assert.equal(readFileSync(legacy.identity.journalPath, 'utf8'), legacy.journalBytes)
+      assert.equal(readFileSync(legacy.identity.lockPath, 'utf8'), lockBefore)
+      assert.equal(git(f.root, 'status', '--porcelain'), statusBefore)
+    } finally { f.cleanup() }
+  })
+}
+
+test('retirement binds maintenance changes and rejects a stale preview', () => {
+  const f = fixture('HIGH')
+  try {
+    const legacy = legacyMetadataFailure(f)
+    const maintenance = '.agents/scripts/v4-repair.mjs'
+    write(f.root, maintenance, '// authorized tooling repair\n')
+    legacy.request.maintenance_paths = [maintenance]
+    const prepared = legacy.run('prepare-recovery-abort')
+    assert.equal(prepared.status, 'READY', JSON.stringify(prepared))
+    write(f.root, maintenance, '// changed after preview\n')
+    const result = legacy.run('abort-unwritten-metadata', { preview: prepared.preview, recovery_authorized: true })
+    assert.equal(result.status, 'STALE', JSON.stringify(result))
+    assert.equal(readFileSync(legacy.identity.journalPath, 'utf8'), legacy.journalBytes)
+    assert.equal(readFileSync(legacy.identity.lockPath, 'utf8'), legacy.lockBytes)
+  } finally { f.cleanup() }
+})
+
+test('retirement resumes interrupted owned-lock archival without replacing evidence', () => {
+  const f = fixture('HIGH')
+  try {
+    const legacy = legacyMetadataFailure(f)
+    const prepared = legacy.run('prepare-recovery-abort')
+    assert.equal(prepared.status, 'READY', JSON.stringify(prepared))
+    const input = { preview: prepared.preview, recovery_authorized: true }
+    const first = legacy.run('abort-unwritten-metadata', { ...input, fail_at: 'AFTER_ABORT_JOURNAL' })
+    assert.equal(first.status, 'RECOVERY_REQUIRED', JSON.stringify(first))
+    assert.ok(existsSync(legacy.identity.lockPath))
+    const recovered = legacy.run('abort-unwritten-metadata', input)
+    assert.equal(recovered.status, 'ABORTED', JSON.stringify(recovered))
+    assert.equal(readFileSync(recovered.archive_journal_path, 'utf8'), legacy.journalBytes)
+    assert.equal(readFileSync(recovered.archive_lock_path, 'utf8'), legacy.lockBytes)
     assert.equal(git(f.root, 'status', '--porcelain'), '')
   } finally { f.cleanup() }
 })

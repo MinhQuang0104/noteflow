@@ -10,6 +10,7 @@ import { explicitApprovalInput, inspectCompletion } from './check-story-completi
 import { applyCompletion, recordHumanApproval } from './complete-story.mjs'
 import { inspectStart, applyStart } from './start-story.mjs'
 import { checkpointImplementation, prepareAction, recordSliceReview, verifySlice } from './v4-action-kernel.mjs'
+import { prepareMetadataAbort, applyMetadataAbort } from './v4-metadata-recovery.mjs'
 import { recordActionFinished, recordActionStarted, recordStoryCompleted, recordStoryReviewSnapshot } from './v4-observations.mjs'
 
 export const V4_AUTHORIZED_ACTIONS = new Set([
@@ -205,6 +206,8 @@ export function runV4Story(root, storyId, options = {}) {
         if (input.story_id !== storyId || input.action !== 'verify_slice' || input.slice_id !== plan.next_action.target) {
           return invalidResult('KERNEL_INPUT_PLAN_MISMATCH')
         }
+        if (explicitKernelOperation === 'prepare-recovery-abort') return prepareMetadataAbort(root, input)
+        if (explicitKernelOperation === 'abort-unwritten-metadata') return applyMetadataAbort(root, input)
         if (explicitKernelOperation === 'prepare') return prepareAction(root, { ...input, operation: 'prepare' })
         if (explicitKernelOperation === 'verify') return verifySlice(root, { ...input, operation: 'verify' })
         if (explicitKernelOperation === 'record-review' || explicitKernelOperation === 'record_review') return recordSliceReview(root, { ...input, operation: 'record-review' })
