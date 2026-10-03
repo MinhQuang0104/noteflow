@@ -4,6 +4,7 @@ import path from 'node:path'
 
 const SHA = /^[0-9a-f]{40,64}$/
 const DIGEST = /^sha256:[0-9a-f]{64}$/
+const ATTEMPT_ID = /^[1-9][0-9]*$/
 const CATEGORIES = ['story', 'ac', 'tasks', 'readiness', 'references', 'risk', 'completion']
 const REQUIRED = ['story', 'ac', 'tasks', 'readiness']
 const hash = bytes => `sha256:${createHash('sha256').update(bytes).digest('hex')}`
@@ -114,11 +115,15 @@ export function validateTaskSlices(story, plan) {
   return [...new Set(errors)]
 }
 
-export function readReceipt(root, plan, sliceId, kind) {
+export function attemptReceiptPath(storyId, sliceId, attemptId, kind) {
+  if (!/^\d+\.\d+$/.test(storyId ?? '') || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(sliceId ?? '') ||
+      !ATTEMPT_ID.test(String(attemptId)) || !['implementation', 'verification', 'review'].includes(kind)) return null
+  return `_bmad-output/implementation-artifacts/receipts/story-${storyId.replace('.', '-')}/${sliceId}-${kind}-attempt-${attemptId}.json`
+}
+
+function readReceiptRecord(root, plan, sliceId, kind, ref, expected, attemptId = null) {
   const errors = []
-  const slice = plan.slices?.find(item => item.id === sliceId)
-  const ref = slice?.receipt_refs?.[kind]
-  if (!['implementation', 'verification', 'review'].includes(kind) || !slice || !ref || typeof ref.path !== 'string' ||
+  if (!['implementation', 'verification', 'review'].includes(kind) || !expected || !ref || typeof ref.path !== 'string' ||
       !ref.path || path.isAbsolute(ref.path) || path.win32.isAbsolute(ref.path) ||
       ref.path.includes('\\') || ref.path.split('/').some(part => !part || part === '.' || part === '..') || !DIGEST.test(ref.digest ?? '')) return { receipt: null, errors: ['INVALID_RECEIPT_REF'] }
   let bytes, receipt
@@ -130,10 +135,11 @@ export function readReceipt(root, plan, sliceId, kind) {
   if (receiptDigest(receipt) !== ref.digest) errors.push('RECEIPT_DIGEST_MISMATCH')
   if (receipt.story_id !== plan.story_id) errors.push('STORY_ID_MISMATCH')
   if (receipt.slice_id !== sliceId) errors.push('SLICE_ID_MISMATCH')
-  if (receipt.checkpoint_commit !== slice.checkpoint_commit) errors.push('CHECKPOINT_MISMATCH')
-  if (receipt.baseline_commit !== slice.baseline_commit) errors.push('BASELINE_MISMATCH')
-  if (receipt.subject_digest !== slice.subject_digest) errors.push('SUBJECT_MISMATCH')
-  if (receipt.changed_paths_sha256 !== slice.changed_paths_sha256) errors.push('CHANGED_PATHS_MISMATCH')
+  if (receipt.checkpoint_commit !== expected.checkpoint_commit) errors.push('CHECKPOINT_MISMATCH')
+  if (receipt.baseline_commit !== expected.baseline_commit) errors.push('BASELINE_MISMATCH')
+  if (receipt.subject_digest !== expected.subject_digest) errors.push('SUBJECT_MISMATCH')
+  if (receipt.changed_paths_sha256 !== expected.changed_paths_sha256) errors.push('CHANGED_PATHS_MISMATCH')
+  if (attemptId !== null && receipt.attempt_id !== attemptId) errors.push('ATTEMPT_ID_MISMATCH')
   if (receipt.schema_version !== 1 || receipt.kind !== kind || !SHA.test(receipt.checkpoint_commit ?? '') ||
       !SHA.test(receipt.baseline_commit ?? '') || !SHA.test(receipt.created_from_head ?? '') ||
       receipt.created_from_head !== receipt.checkpoint_commit || !DIGEST.test(receipt.subject_digest ?? '') ||
@@ -143,6 +149,19 @@ export function readReceipt(root, plan, sliceId, kind) {
     typeof item.command !== 'string' || !item.command || !Number.isInteger(item.exit_code) ||
     typeof item.tool !== 'string' || !item.tool || typeof item.environment !== 'string' || !item.environment)) errors.push('INVALID_RECEIPT_PAYLOAD')
   return { receipt, errors: [...new Set(errors)] }
+}
+
+export function readReceipt(root, plan, sliceId, kind) {
+  const slice = plan.slices?.find(item => item.id === sliceId)
+  const attemptId = slice?.current_attempt?.attempt_id
+  return readReceiptRecord(root, plan, sliceId, kind, slice?.receipt_refs?.[kind], slice,
+    Number.isInteger(attemptId) && attemptId > 1 ? attemptId : null)
+}
+
+export function readReceiptForAttempt(root, plan, sliceId, attempt, kind = 'implementation') {
+  const attemptId = attempt?.attempt_id
+  return readReceiptRecord(root, plan, sliceId, kind, attempt?.receipt_refs?.[kind], attempt,
+    Number.isInteger(attemptId) && attemptId > 1 ? attemptId : null)
 }
 
 export function validateReceipt(root, plan, sliceId, kind) {

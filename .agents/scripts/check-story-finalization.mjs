@@ -9,6 +9,7 @@ import {
   inspectStory,
   normativeDigest,
   readReceipt,
+  readReceiptForAttempt,
   validateTaskSlices
 } from './check-artifact-contract.mjs'
 import { stableFinalizationDigest, validateFinalizationReceipt } from './finalization-contract.mjs'
@@ -303,27 +304,43 @@ function blobAt(root, commit, relative) {
   return result.status === 0 ? result.stdout.trim() : 'DELETED'
 }
 
-function deriveScope(root, storyId, storyPath, slices, expectedHead, result) {
+export function deriveScope(root, storyId, storyPath, slices, expectedHead, result) {
   const records = new Map()
   const implementationCommits = []
   const excludedPaths = new Set()
   for (const slice of slices) {
-    const actual = gitPaths(root,
-      ['diff', '--name-only', '--diff-filter=ACDMRTUXB', `${slice.baseline_commit}..${slice.checkpoint_commit}`, '--'],
-      'GIT_CHECKPOINT_DIFF_FAILED')
-    const implementation = slice.receipts.implementation
-    const receiptPaths = canonicalPaths(implementation?.changed_paths)
-    if (!implementation || !Array.isArray(implementation.changed_paths)) {
-      issue(result, `IMPLEMENTATION_PATHS_MISSING:${slice.id}`, 'blocked')
-      continue
-    }
-    if (!equalPaths(actual, receiptPaths)) issue(result, `IMPLEMENTATION_PATHS_MISMATCH:${slice.id}`, 'stale')
-    const actualDigest = pathListDigest(actual)
-    if (actualDigest !== slice.changed_paths_sha256 || implementation.changed_paths_sha256 !== actualDigest) {
-      issue(result, `IMPLEMENTATION_PATH_DIGEST_MISMATCH:${slice.id}`, 'stale')
-    }
-    implementationCommits.push({ slice_id: slice.id, checkpoint_commit: slice.checkpoint_commit })
-    for (const relative of receiptPaths) {
+    const historical = Array.isArray(slice.attempts) ? slice.attempts :
+      (Array.isArray(slice.attempt_history) ? slice.attempt_history : [])
+    const attemptAware = historical.length > 0 || (slice.current_attempt?.attempt_id ?? 1) > 1
+    const attempts = [
+      ...historical,
+      {
+        attempt_id: slice.current_attempt?.attempt_id ?? 1,
+        baseline_commit: slice.baseline_commit,
+        checkpoint_commit: slice.checkpoint_commit,
+        changed_paths_sha256: slice.changed_paths_sha256,
+        receipt: slice.receipts?.implementation ?? null
+      }
+    ]
+    for (const attempt of attempts) {
+      const actual = gitPaths(root,
+        ['diff', '--name-only', '--diff-filter=ACDMRTUXB', `${attempt.baseline_commit}..${attempt.checkpoint_commit}`, '--'],
+        'GIT_CHECKPOINT_DIFF_FAILED')
+      const implementation = attempt.receipt ?? attempt.receipts?.implementation ?? null
+      const receiptPaths = canonicalPaths(Array.isArray(implementation?.changed_paths) ? implementation.changed_paths : actual)
+      if (!implementation) {
+        issue(result, `IMPLEMENTATION_PATHS_MISSING:${slice.id}`, 'blocked')
+        continue
+      }
+      if (!equalPaths(actual, receiptPaths)) issue(result, `IMPLEMENTATION_PATHS_MISMATCH:${slice.id}`, 'stale')
+      const actualDigest = pathListDigest(actual)
+      if (actualDigest !== attempt.changed_paths_sha256 || implementation.changed_paths_sha256 !== actualDigest) {
+        issue(result, `IMPLEMENTATION_PATH_DIGEST_MISMATCH:${slice.id}`, 'stale')
+      }
+      implementationCommits.push(attemptAware
+        ? { slice_id: slice.id, attempt_id: attempt.attempt_id ?? 1, checkpoint_commit: attempt.checkpoint_commit }
+        : { slice_id: slice.id, checkpoint_commit: attempt.checkpoint_commit })
+      for (const relative of receiptPaths) {
       if (scopeExcluded(relative, storyId, storyPath)) {
         excludedPaths.add(relative)
         continue
@@ -337,8 +354,9 @@ function deriveScope(root, storyId, storyPath, slices, expectedHead, result) {
       }
       if (!record.contributor_slices.includes(slice.id)) record.contributor_slices.push(slice.id)
       record.latest_slice = slice.id
-      record.latest_checkpoint = slice.checkpoint_commit
+      record.latest_checkpoint = attempt.checkpoint_commit
       records.set(relative, record)
+      }
     }
   }
 
@@ -444,7 +462,33 @@ function loadSliceReceipts(root, plan, result) {
   const slices = plan.slices ?? []
   const details = []
   for (const slice of slices) {
-    const detail = { ...slice, receipts: {}, receipt_refs: [] }
+    const detail = { ...slice, receipts: {}, receipt_refs: [], attempts: [], historical_receipt_refs: [] }
+    for (const attempt of slice.attempt_history ?? []) {
+      const historical = { ...attempt, receipts: {}, receipt_refs: [] }
+      for (const kind of RECEIPT_KINDS) {
+        const required = kind === 'implementation' || kind === 'verification' || attempt.status === 'reviewed'
+        const ref = attempt.receipt_refs?.[kind]
+        if (!required) continue
+        if (!ref) {
+          issue(result, `HISTORICAL_${kind.toUpperCase()}_RECEIPT_REQUIRED:${slice.id}:${attempt.attempt_id}`, 'blocked')
+          continue
+        }
+        if (!safePath(root, ref.path) || !existsSync(path.resolve(root, ref.path))) {
+          issue(result, `HISTORICAL_${kind.toUpperCase()}_RECEIPT_MISSING:${slice.id}:${attempt.attempt_id}`, 'blocked')
+          continue
+        }
+        const loaded = readReceiptForAttempt(root, plan, slice.id, attempt, kind)
+        historical.receipt_refs.push({ kind, path: ref.path, digest: ref.digest, attempt_id: attempt.attempt_id })
+        detail.historical_receipt_refs.push({ kind, path: ref.path, digest: ref.digest, attempt_id: attempt.attempt_id })
+        if (loaded.errors.length) {
+          for (const error of loaded.errors) issue(result, `HISTORICAL_${error}:${slice.id}:${attempt.attempt_id}`, receiptErrorKind(error))
+          continue
+        }
+        historical.receipts[kind] = loaded.receipt
+      }
+      historical.receipt = historical.receipts.implementation ?? null
+      detail.attempts.push(historical)
+    }
     for (const kind of RECEIPT_KINDS) {
       const required = kind === 'implementation' || kind === 'verification' || slice.review?.required === true
       const ref = slice.receipt_refs?.[kind]
@@ -736,7 +780,7 @@ export function inspectFinalization(root, storyId, expectedHead) {
   }))
   result.slices = sliceSummary
   result.slice_set_digest = stableDigest(sliceSummary)
-  result.receipt_set_digest = stableDigest(details.flatMap(detail => detail.receipt_refs))
+  result.receipt_set_digest = stableDigest(details.flatMap(detail => [...detail.historical_receipt_refs, ...detail.receipt_refs]))
 
   const upstream = plan.upstream_epic
   if (!upstream || !safePath(root, upstream.path) || !DIGEST.test(upstream.section_digest ?? '')) issue(result, 'INVALID_UPSTREAM_EPIC_REF', 'invalid')

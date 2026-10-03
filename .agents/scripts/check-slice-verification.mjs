@@ -5,7 +5,7 @@ import { spawnSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
 
 import { frontmatter, validate as validateStoryPlan } from './check-story-plan.mjs'
-import { readReceipt } from './check-artifact-contract.mjs'
+import { attemptReceiptPath, readReceipt } from './check-artifact-contract.mjs'
 import { separatedStory } from './v4-separated-plan.mjs'
 
 const CODES = { READY: 0, RERUN_REQUIRED: 0, STALE: 2, BLOCKED: 3, INVALID: 4, ERROR: 5 }
@@ -74,6 +74,8 @@ function defaultManifest(storyId, sliceId) {
   return {
     storyId,
     sliceId,
+    attemptId: null,
+    historicalAttemptCount: 0,
     valid: false,
     status: 'INVALID',
     mode: 'checkpoint',
@@ -178,6 +180,12 @@ export function inspect(root, storyId, sliceId) {
   if (!slice) {
     reason('TARGET_SLICE_MISSING', 'invalid')
     return finish(manifest, flags)
+  }
+  manifest.attemptId = slice.current_attempt?.attempt_id ?? 1
+  manifest.historicalAttemptCount = Array.isArray(slice.attempt_history) ? slice.attempt_history.length : 0
+  if (plan.schema_version === 2 && manifest.attemptId > 1 &&
+      slice.receipt_refs?.implementation?.path !== attemptReceiptPath(storyId, sliceId, manifest.attemptId, 'implementation')) {
+    reason('CURRENT_ATTEMPT_RECEIPT_PATH_MISMATCH', 'invalid')
   }
   if (plan.current_slice !== sliceId) reason('TARGET_NOT_CURRENT_SLICE', 'invalid')
   if (plan.next_action?.kind !== 'verify_slice' || plan.next_action?.target !== sliceId) reason('VERIFY_SLICE_ACTION_REQUIRED', 'invalid')
