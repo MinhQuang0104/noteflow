@@ -26,7 +26,7 @@ readiness:
     - 1-5-giữ-bản-đang-nhập-và-thử-lưu-lại-sau-gián-đoạn
     - 2-1-tạo-và-quản-lý-thông-tin-challenge
     - 2-3-ghi-và-sửa-journal-tùy-chọn
-current_slice: D
+current_slice: E
 risk:
   level: HIGH
   flags: [concurrency, idempotency, security, shared_boundary]
@@ -161,7 +161,7 @@ slices:
       freshness: FRESH_CANDIDATE
       reviewer: same-lead
   - id: D
-    status: checkpointed
+    status: reviewed
     depends_on: [C]
     task_refs: [T-6]
     baseline_commit: d3200ef5341d047cda7c43a7b1ba4cdac88b46fd
@@ -172,6 +172,12 @@ slices:
       implementation:
         path: _bmad-output/implementation-artifacts/receipts/story-1-6/D-implementation-attempt-2.json
         digest: sha256:e5ad7deea4dc10511a4a99fa39044fba91c33a2157c42e3ca46b9e0ed9e8ba2c
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-6/D-verification-attempt-2.json
+        digest: sha256:ba8a151da82f608f510af7b7cdc70c20d5f3eaa46fb0754d6831b9aa8d4bb205
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-6/D-review-attempt-2.json
+        digest: sha256:0091177f94dc0efde2613e40efff7b72b7b2a15351ed958b70e5f1f092ba752f
     attempt_history:
       - attempt_id: 1
         status: checkpointed
@@ -198,6 +204,27 @@ slices:
       - frontend/src/stores/journalDrafts.ts
     verification_obligations:
       - "T-6: real journal QueryObserver convergence plus sync/draft and stale callback regressions; NOT_RUN"
+    verification:
+      subject:
+        commit: 64ca94d4191e0a8978b3c60f18092ea31a26fc1e
+      changed_paths_sha256: sha256:fd29e52500f4cb026d79ce31de90fdce07f07cd24cedc22e9eb6664ff87e00f0
+      status: INCOMPLETE
+      canonical_status: INCOMPLETE
+      escalation_decision: REVIEW_REQUIRED
+      progression_eligible: true
+      done_gate_disclosure_required: true
+      outstanding_obligation: "Canonical verification remains INCOMPLETE: sync.ts is dependency-only and both changed paths are unmapped. Two-device browser, accessibility/manual AT and full Story gates remain Slice E obligations."
+      review_disclosure: "Human APPROVE records bounded T-6 review of attempt 2 plus preserved original attempt 1; fresh focused evidence closes D-F1/D-F2/D-F3. Raw canonical INCOMPLETE is unchanged; no browser/AT evidence, finalization or Human Gate is granted."
+    review:
+      required: true
+      verdict: APPROVE
+      reviewed_commit: 64ca94d4191e0a8978b3c60f18092ea31a26fc1e
+      risk_context_digest: sha256:54a5ad338aa76d1b6e60a1b073ecb93ce6e9736508edf87586271961e411c46d
+      review_context_digest: sha256:4077d2571e8eb304c06ff4a6ced043517f4ca3cc658704c6edd9b786648ea0a7
+      pending_fingerprint: sha256:33ee39a4be3e04ba65368dee1c2c72281ec100a60b8d091c5c856de0d9025f7d
+      scope_digest: sha256:c85f464ce4ff9d35ae9f5283bc29c8ed8c0fca0ff0cd2564a19a0cc3a7cba807
+      freshness: FRESH_CANDIDATE
+      reviewer: human
   - id: E
     status: pending
     depends_on: [D]
@@ -213,8 +240,8 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: verify_slice
-  target: D
+  kind: implement_slice
+  target: E
 ---
 
 # Story 1.6 — V4 upgrade execution projection

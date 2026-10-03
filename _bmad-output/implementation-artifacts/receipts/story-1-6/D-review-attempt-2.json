@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "story_id": "1.6",
+  "slice_id": "D",
+  "kind": "review",
+  "attempt_id": 2,
+  "checkpoint_commit": "64ca94d4191e0a8978b3c60f18092ea31a26fc1e",
+  "baseline_commit": "d3200ef5341d047cda7c43a7b1ba4cdac88b46fd",
+  "subject_digest": "sha256:0d748ad53546e48d99a364914a0bd8aeb47fae5eadad4b45f6eabbe0af1c56f3",
+  "created_from_head": "64ca94d4191e0a8978b3c60f18092ea31a26fc1e",
+  "changed_paths_sha256": "sha256:fd29e52500f4cb026d79ce31de90fdce07f07cd24cedc22e9eb6664ff87e00f0",
+  "commands": [
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base d3200ef5341d047cda7c43a7b1ba4cdac88b46fd --head 64ca94d4191e0a8978b3c60f18092ea31a26fc1e --path frontend/src/stores/__tests__/sync.spec.ts",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence-v1",
+      "environment": "win32; Node v24.21.0; worktree story-1-6; HEAD 596845bddb8e1b3ad8ba190db7896c36ea3e0335"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base d3200ef5341d047cda7c43a7b1ba4cdac88b46fd --head 64ca94d4191e0a8978b3c60f18092ea31a26fc1e --path frontend/src/stores/sync.ts",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence-v1",
+      "environment": "win32; Node v24.21.0; worktree story-1-6; HEAD 596845bddb8e1b3ad8ba190db7896c36ea3e0335"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 3aec738a0dfb9024c0afa1662115781d298c7268 --head 1fdaa79a6c347791dd6a72c7500d3bb8e95b7583 --path frontend/src/stores/__tests__/sync.spec.ts",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence-v1",
+      "environment": "win32; Node v24.21.0; worktree story-1-6; HEAD 596845bddb8e1b3ad8ba190db7896c36ea3e0335"
+    },
+    {
+      "command": "node .agents/scripts/prepare-change-evidence.mjs --comparison explicit-pair --base 3aec738a0dfb9024c0afa1662115781d298c7268 --head 1fdaa79a6c347791dd6a72c7500d3bb8e95b7583 --path frontend/src/stores/sync.ts",
+      "exit_code": 0,
+      "tool": "prepare-change-evidence-v1",
+      "environment": "win32; Node v24.21.0; worktree story-1-6; HEAD 596845bddb8e1b3ad8ba190db7896c36ea3e0335"
+    }
+  ],
+  "judgment": "APPROVE",
+  "questions": [
+    {
+      "id": "scope",
+      "question": "Is every official diff unit of Slice D attempt 2 and the preserved original implementation attempt covered, together with all T-6 consumers?"
+    },
+    {
+      "id": "lifecycle-findings",
+      "question": "Does fresh checkpoint-bound evidence close D-F1/D-F2/D-F3 and cover logout/reset/expiry/epoch/hidden/offline plus old poll/new ACK ordering without losing committed revisions or dirty drafts?"
+    },
+    {
+      "id": "coverage",
+      "question": "Are the raw canonical mapping limitations and remaining browser/AT/Story obligations disclosed unchanged, without relabeling INCOMPLETE as PASS or granting Human Gate?"
+    }
+  ],
+  "answers": [
+    {
+      "id": "scope",
+      "answer": "Human decision APPROVE applies only to bounded T-6 Slice D attempt 2 at 64ca94d4191e0a8978b3c60f18092ea31a26fc1e, baseline d3200ef5341d047cda7c43a7b1ba4cdac88b46fd, exact two requested paths and all six ordered diff hunks. Both singleton official producer outputs were regenerated and matched. Original attempt 1 is included: baseline 3aec738a0dfb9024c0afa1662115781d298c7268, checkpoint 1fdaa79a6c347791dd6a72c7500d3bb8e95b7583, immutable receipt _bmad-output/implementation-artifacts/receipts/story-1-6/D-implementation.json digest sha256:d2ef61816154ce75631ff11f1c0286f273ce5f9a77f77d18b96fb8f7e32147d0; all 12 official test evidenceSet units (sourceDigest 1bd0665d01a1e3d0cae22e3c84af9d64a2819df07c681707b9c4f1513dc5a68e) and all four production hunks were read, validated and matched regenerated producers. ChallengesView, ChallengeJournalEditor and journalDrafts consumers were inspected: ACK stays separate from query convergence; hydrate preserves dirty/pending/conflict/quarantined drafts, and ACK acknowledges only its pending revision. No original receipt or attempt_history entry is replaced."
+    },
+    {
+      "id": "lifecycle-findings",
+      "answer": "Fresh checkpoint-bound pending focused evidence is PASS: t6-journal-sync-regression (91 tests across sync, journalDrafts, journal and draft lifecycle); t6-known-lifecycle-regressions-D-F1-D-F2-D-F3 (three original regressions now pass); eslint and oxlint both pass. Current input bindings were validated without rerunning or modifying this pending evidence. Attempt 2 fences auth/request/ACK generations and both epoch identities on poll success and rejection; hidden/offline success and rejection remain paused with pending convergence and preserved committed revision. Real QueryObserver deferred tests cover logout/reset/actual refreshSession expiry/epoch; equal-revision retry and cache preservation are asserted. Old-poll/new-ACK ordering is covered by the two deferred boundary tests; no real browser, DB or AT evidence is inferred."
+    },
+    {
+      "id": "coverage",
+      "answer": "Raw verification and canonical status remain INCOMPLETE, bound to pending sha256:33ee39a4be3e04ba65368dee1c2c72281ec100a60b8d091c5c856de0d9025f7d, scope sha256:c85f464ce4ff9d35ae9f5283bc29c8ed8c0fca0ff0cd2564a19a0cc3a7cba807, preview sha256:20277295bd44c673cb37d0523c2a88c6fe6a3a35e8f4925e4f4bb5fcbc87c9df. canonical coveredPaths is empty; sync.ts is dependency-only, both requested paths are unmapped. Expected changed map anchor remains disclosed STALE with no unexplained drift, not relabeled as complete coverage. Existing semantic COVERED disposition is T-6 focused coverage only. Human APPROVE authorizes this bounded slice review and successor metadata only; two-device/browser, manual AT, full Story gates and exact-scope Human Gate remain outstanding. No product edit, Slice E execution, finalize or completion is authorized by this record."
+    }
+  ],
+  "evidence_refs": [
+    {
+      "path": "frontend/src/stores/__tests__/sync.spec.ts",
+      "hunk_index": 0,
+      "body_digest": "sha256:a08fafe60fa20f89375e7d7fbc0e6bfcfe7ca963bb288ec4185a057bdd2e4e68"
+    },
+    {
+      "path": "frontend/src/stores/__tests__/sync.spec.ts",
+      "hunk_index": 1,
+      "body_digest": "sha256:b006587df6c2dec11008a788023f2fac5d71e72ba752bd08307f9312d6a12083"
+    },
+    {
+      "path": "frontend/src/stores/sync.ts",
+      "hunk_index": 0,
+      "body_digest": "sha256:16c25f9f7953debadab6e48143b4a9b6ad0f3f34141b9a4f8b58857d4df724ec"
+    },
+    {
+      "path": "frontend/src/stores/sync.ts",
+      "hunk_index": 1,
+      "body_digest": "sha256:bd9a61ea7aee95b0ccd76e25532d000ded1dcaa0a69c1d2b3251eeefa323f317"
+    },
+    {
+      "path": "frontend/src/stores/sync.ts",
+      "hunk_index": 2,
+      "body_digest": "sha256:727ccff2918a6914554f11a24e4b53824278781c0cf846458cc1e47a9c62ad57"
+    },
+    {
+      "path": "frontend/src/stores/sync.ts",
+      "hunk_index": 3,
+      "body_digest": "sha256:9fe4edbbaf5d62b10f90210c34c5016fff4ffb8470326868ed6bfa2e6f65b04f"
+    }
+  ],
+  "scope_digest": "sha256:c85f464ce4ff9d35ae9f5283bc29c8ed8c0fca0ff0cd2564a19a0cc3a7cba807",
+  "risk_context_digest": "sha256:54a5ad338aa76d1b6e60a1b073ecb93ce6e9736508edf87586271961e411c46d",
+  "reviewed_commit": "64ca94d4191e0a8978b3c60f18092ea31a26fc1e",
+  "reviewer": "human"
+}
