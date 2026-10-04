@@ -2,6 +2,7 @@ import { createHash, randomUUID } from 'node:crypto'
 import { existsSync, lstatSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
 
 import { frontmatter, validate as validateStoryPlan } from './check-story-plan.mjs'
 import { attemptReceiptPath, readReceipt, receiptDigest } from './check-artifact-contract.mjs'
@@ -14,9 +15,12 @@ import {
   canonicalPaths,
   executeMetadataTransaction,
   executeSliceTransaction,
+  executeStagedRecoveryTransaction,
   inspectActionTransaction,
   safeRelative,
   snapshotWorkingFiles,
+  matchesWorkingSnapshot,
+  prepareStagedRecoveryTransaction,
   transactionHash,
   transactionIdentity,
   transactionPathDigest,
@@ -79,7 +83,7 @@ function previewFingerprint(preview) {
 }
 
 function git(root, args) {
-  const result = spawnSync('git', args, { cwd: root, encoding: 'utf8', windowsHide: true, timeout: 10000 })
+  const result = spawnSync('git', ['--no-optional-locks', ...args], { cwd: root, encoding: 'utf8', windowsHide: true, timeout: 10000 })
   if (result.error || result.status === null) throw new Error(`GIT_UNAVAILABLE:${args[0]}`)
   return result
 }
@@ -474,7 +478,7 @@ function descriptorFromPreview(root, request, preview, recovery = false) {
       if (hash(Buffer.from(readText(freshRoot, preview.plan_path))) !== preview.plan_digest) throw new Error('STALE_PLAN_PREVIEW')
       const current = snapshotWorkingFiles(freshRoot, preview.implementation_paths)
       for (const relative of preview.implementation_paths) {
-        if (!sameJson(current[relative], preview.snapshot[relative])) throw new Error('STALE_WORKTREE_PREVIEW')
+        if (!matchesWorkingSnapshot(preview.snapshot[relative], current[relative])) throw new Error('STALE_WORKTREE_PREVIEW')
       }
       const inventory = worktreeInventory(freshRoot)
       if (inventory.staged.length) throw new Error('DIRTY_INDEX')
@@ -1660,6 +1664,74 @@ export function checkpointImplementation(root, request = {}) {
   catch (error) { result = errorResult(error) }
   observeActionFinished(path.resolve(root), request, 'checkpoint', result)
   return result
+}
+
+const EXECUTOR_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
+const EXECUTOR_PATHS = ['.agents/scripts', '.agents/docs/v4-artifact-contract.md', '.agents/skills/v4-story-runner/references/recovery.md']
+
+function stagedRecoveryExecutor(expectedCommit) {
+  if (!SHA.test(expectedCommit ?? '') || gitOutput(EXECUTOR_ROOT, ['rev-parse', 'HEAD']) !== expectedCommit) throw new Error('STALE_MAINTENANCE_EXECUTOR')
+  // Bind the actually imported runtime, not a caller-supplied directory.
+  if (gitOutput(EXECUTOR_ROOT, ['status', '--porcelain=v1', '--', ...EXECUTOR_PATHS])) throw new Error('MAINTENANCE_EXECUTOR_NOT_CLEAN')
+  const paths = gitOutput(EXECUTOR_ROOT, ['ls-files', '-z', '--', ...EXECUTOR_PATHS]).split('\0').filter(Boolean)
+  if (!paths.includes('.agents/scripts/v4-action-kernel.mjs') || !paths.includes('.agents/scripts/v4-slice-transaction.mjs') ||
+      !paths.includes('.agents/scripts/v4-story-runner.mjs')) throw new Error('MAINTENANCE_EXECUTOR_NOT_TRACKED')
+  return { root: EXECUTOR_ROOT, commit: expectedCommit, sources: digestFiles(EXECUTOR_ROOT, paths) }
+}
+
+function stagedRecoveryKernelDescriptor(root, request, operation) {
+  assertRequestShape(request, operation)
+  if (request.maintenance_authorization !== 'V4_LITE_STAGED_RECOVERY') throw new Error('STAGED_RECOVERY_AUTHORIZATION_REQUIRED')
+  if (request.recovery_authorized || request.recovery || request.recovery_checkpoint) throw new Error('MIXED_RECOVERY_OPERATION')
+  const original = request.original_preview
+  if (!original) throw new Error('ORIGINAL_PREVIEW_REQUIRED')
+  if (request.expected_head !== original.expected_head) throw new Error('STALE_HEAD')
+  if (original.original_plan?.next_action?.kind !== 'implement_slice' || original.original_plan.next_action.target !== request.slice_id ||
+      original.original_slice?.status !== 'pending') throw new Error('RECOVERY_PLAN_ACTION_MISMATCH')
+  const executor = stagedRecoveryExecutor(request.executor_commit)
+  const checks = commandRecords({ commands: request.fresh_checks })
+  if (checks.some(check => check.exit_code !== 0)) throw new Error('FRESH_CHECKS_NOT_PASSING')
+  const descriptor = descriptorFromPreview(root, buildRequestFromPreview(original, request, operation), original, true)
+  const receiptDirectory = `_bmad-output/implementation-artifacts/receipts/story-${request.story_id.replace('.', '-')}`
+  const receiptPaths = gitOutput(root, ['ls-files', '-z', '--cached', '--others', '--exclude-standard', '--', receiptDirectory]).split('\0')
+    .filter(relative => relative && relative !== original.receipt_path)
+  const authorityPaths = canonicalPaths([...original.policy.paths, ...original.recipes.paths, original.story_path, SPRINT_PATH, ...receiptPaths])
+  const authority = digestFiles(root, authorityPaths)
+  descriptor.authority_binding = { executor, fresh_checks: checks, authority }
+  descriptor.staged_recovery_authorization = request.maintenance_authorization
+  descriptor.fail_at = request.fail_at
+  descriptor.validateRecoveryAuthority = freshRoot => {
+    if (assertPointerIdle(freshRoot).digest !== original.pointer_digest) throw new Error('STALE_POINTER_PREVIEW')
+    if (digestFiles(freshRoot, [original.story_path]).files[original.story_path] !== original.story_digest) throw new Error('STALE_STORY_PREVIEW')
+    if (digestFiles(freshRoot, original.policy.paths).digest !== original.policy.digest) throw new Error('STALE_POLICY_PREVIEW')
+    if (digestFiles(freshRoot, original.recipes.paths).digest !== original.recipes.digest) throw new Error('STALE_RECIPE_PREVIEW')
+    if (!sameJson(stagedRecoveryExecutor(request.executor_commit), executor)) throw new Error('STALE_MAINTENANCE_EXECUTOR')
+    if (!sameJson(digestFiles(freshRoot, authorityPaths), authority)) throw new Error('STALE_RECOVERY_AUTHORITY')
+  }
+  // Refresh command evidence in the new receipt without modifying/re-signing
+  // the original implementation preview or its journal identity.
+  descriptor.buildMetadata = checkpoint => buildMetadata(root, { ...original, commands: [...original.commands, ...checks] }, checkpoint)
+  return descriptor
+}
+
+export function prepareStagedRecovery(root, request = {}) {
+  try {
+    root = path.resolve(root)
+    const descriptor = stagedRecoveryKernelDescriptor(root, request, 'prepare-staged-recovery')
+    const original = request.original_preview
+    if (hash(Buffer.from(readText(root, original.plan_path))) !== original.plan_digest) throw new Error('STALE_PLAN_PREVIEW')
+    const checked = validateStoryPlan(root, request.story_id)
+    if (checked.status !== 'READY') throw new Error('RECOVERY_PLAN_NOT_READY')
+    return prepareStagedRecoveryTransaction(root, descriptor)
+  } catch (error) { return error.message.includes('STALE') ? stale(error.message) : blocked(error.message) }
+}
+
+export function applyStagedRecovery(root, request = {}) {
+  try {
+    root = path.resolve(root)
+    const descriptor = stagedRecoveryKernelDescriptor(root, request, 'apply-staged-recovery')
+    return executeStagedRecoveryTransaction(root, descriptor, request.recovery_preview)
+  } catch (error) { return error.message.includes('STALE') ? stale(error.message) : blocked(error.message) }
 }
 
 export function inspectActionTransactionPublic(root, transactionId) {

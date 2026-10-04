@@ -53,6 +53,57 @@ and an observable journal/explicit checkpoint; it may finish metadata only and
 never replays implementation from a chat transcript or commit subject. A
 completed transaction is idempotent and returns `NOOP` without a third commit.
 
+### Canonical Git identity and explicit staged recovery
+
+Working snapshots retain raw SHA-256 and file mode for freshness. New snapshots
+also bind Git's canonical blob OID and the effective Git config/attribute
+context. Index/commit checks compare canonical blobs, not raw CRLF working
+bytes. LF, CRLF, mixed text EOL and binary paths use Git's own non-writing
+`hash-object --path` conversion. External filters, working-tree encoding and
+ident expansion are unsupported and rejected before conversion. This does not
+change Git config, attributes or working bytes. Legacy raw-only previews remain
+immutable; they are upgraded only inside a separately authorized recovery
+preview, never silently re-signed.
+
+An implementation transaction at `RECOVERY_REQUIRED` with no checkpoint and
+the complete exact implementation set already staged may use only the explicit
+operations `prepare-staged-recovery` and `apply-staged-recovery`, with
+`maintenance_authorization: V4_LITE_STAGED_RECOVERY`. Ordinary `checkpoint`,
+`recovery_authorized` or an empty checkpoint are not authorization for this
+operation. A missing/foreign lock, partial/extra index, existing metadata write,
+stale original HEAD/preview/Plan/Story/policy/recipe, raw working drift, mode or
+blob mismatch, failed fresh checks, or changed Git context rejects read-only.
+
+The executor is the actually imported runtime in a separate clean committed
+maintenance checkout. `executor_commit` must match its HEAD. Its tracked script
+and recovery-contract bytes, fresh focused command records, original preview
+fingerprint, target repository/worktree, raw journal/lock, full index, working
+snapshots, metadata baseline, existing receipts, sprint and hooks are bound in
+the read-only recovery preview. The caller supplies the untouched
+`original_preview`, fresh passing `fresh_checks` records, explicit baseline
+`expected_head`, Story/slice identity and exact old template/scope. Apply also
+supplies `recovery_preview`. Checks must actually be rerun by the Lead; command
+records are evidence, not permission to claim an unrun check passed.
+
+Apply consumes the existing implementation index without unstage/restage or
+product replay. It archives the original journal/lock bytes in an append-only
+`staged_recovery` record and retains the original transaction fingerprint. It
+creates exactly one implementation commit and one Plan/new-receipt commit,
+adding fresh checks to the receipt. Lifecycle, prior attempts/receipts,
+canonical verification dispositions and Human Gate are unchanged. The only
+successor is `verify_slice` for the same slice, never executed by recovery.
+
+Before mutation all guards are rechecked. Rejection preserves HEAD, index,
+files, lock and journal. Once recovery starts, its sealed journal binds resume
+phases and the same recovery preview must be reused: retry may finish only the
+exact recorded metadata projection. Commit-before-journal interruptions are
+recognized using parent, exact path set, blob/mode identities and the bound
+recovery token together; a subject alone never establishes ownership. Foreign
+or ambiguous candidates stop. `COMPLETE` retry validates durable state and is
+`NOOP`; interruption before owned-lock release may release only that exact
+owned lock after validation, without another commit. Post-checkpoint recovery
+and verification-only abort contracts remain separate.
+
 ## Fresh Story start (V4 Lite)
 
 Schema v2 recognizes `next_action: {kind: start_story, target: story}`. Two optional start-only projections are required by the start gate:
