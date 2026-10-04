@@ -25,3 +25,14 @@ Do not write approval, execute `complete_story`, infer a done transition, alter
 normative Story content, rewrite slice receipts, or change product files. A
 partial write/commit preserves the snapshot and must be handled through the
 existing recovery contract; never clean or reset it.
+
+Git add failure is `GIT_ADD_FAILED`, distinct from a successful add with
+`STAGED_SCOPE_MISMATCH`. Git failure evidence preserves command, status, signal,
+error, stdout/stderr, timeout and timeout phase. Staged paths use NUL-delimited
+Git output rather than newline/quoted-path parsing.
+
+For an existing four-file `UNCOMMITTED_FINALIZATION` candidate, do not retry this
+finalizer. With explicit maintenance authorization use the separate read-only
+`prepare-finalization-recovery`, then a separately authorized fingerprint-bound
+`apply-finalization-recovery` described in the recovery reference. It consumes
+the unchanged candidate once and stops at HUMAN_GATE_REQUIRED.
