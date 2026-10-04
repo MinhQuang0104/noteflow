@@ -59,6 +59,19 @@ function close(): void {
   emit('close')
 }
 
+function recoverDisabledFocus(): void {
+  const dialog = dialogElement.value
+  const active = document.activeElement
+  if (!dialog?.open || !(active instanceof HTMLElement) || !dialog.contains(active)) return
+
+  // Capture before Vue disables the focused control. Chromium may then blur it to BODY.
+  void nextTick(() => {
+    if (!props.open || !dialog.open || !active.isConnected || !active.matches(':disabled')) return
+    const focused = document.activeElement
+    if (focused === active || focused === document.body) closeButton.value?.focus()
+  })
+}
+
 function handleKeydown(event: KeyboardEvent): void {
   if (event.key === 'Escape') {
     if (event.isComposing || event.keyCode === 229) return
@@ -106,7 +119,9 @@ function confirmChoice(): void {
 }
 
 watch(() => props.open, syncDialog, { flush: 'post' })
+watch(() => props.busy, recoverDisabledFocus)
 watch(() => [props.serverVersion, props.clientRevision], () => {
+  recoverDisabledFocus()
   selectedChoice.value = null
 })
 

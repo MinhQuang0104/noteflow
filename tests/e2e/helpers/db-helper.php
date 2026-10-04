@@ -95,6 +95,41 @@ switch ($action) {
         echo json_encode(['status' => 'ok', 'write_state' => $state]);
         break;
 
+    case 'get-journal-state':
+        $challengeId = $argv[2] ?? '';
+        $localDate = $argv[3] ?? '';
+        $date = DateTimeImmutable::createFromFormat('!Y-m-d', $localDate);
+        if (preg_match('/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/iD', $challengeId) !== 1
+            || $date === false || $date->format('Y-m-d') !== $localDate) {
+            fwrite(STDERR, "Invalid journal identity\n");
+            exit(1);
+        }
+        $stmt = $pdo->prepare("
+            SELECT c.id AS challenge_id, CAST(:local_date AS date) AS local_date,
+                   c.start_date, r.journal, COALESCE(r.journal_version, 0) AS journal_version,
+                   COALESCE(r.completion_version, 0) AS completion_version,
+                   COALESCE(r.is_done, false) AS is_done, a.account_revision,
+                   (SELECT COUNT(*) FROM mutation_commands m
+                    WHERE m.owner_id = c.owner_id AND m.resource_id = c.id
+                      AND m.command_type = 'save_challenge_journal') AS journal_commands
+            FROM challenges c
+            JOIN users u ON u.id = c.owner_id AND u.email = 'owner@example.test'
+            JOIN account_states a ON a.owner_id = c.owner_id
+            LEFT JOIN challenge_daily_records r
+              ON r.owner_id = c.owner_id AND r.challenge_id = c.id AND r.local_date = :record_date
+            WHERE c.id = :challenge_id
+        ");
+        $stmt->execute(['local_date' => $localDate, 'record_date' => $localDate, 'challenge_id' => $challengeId]);
+        $state = $stmt->fetch();
+        if ($state !== false) {
+            foreach (['journal_version', 'completion_version', 'account_revision', 'journal_commands'] as $field) {
+                $state[$field] = (int) $state[$field];
+            }
+            $state['is_done'] = filter_var($state['is_done'], FILTER_VALIDATE_BOOLEAN);
+        }
+        echo json_encode($state === false ? null : $state, JSON_THROW_ON_ERROR);
+        break;
+
     case 'get-revision':
         $stmt = $pdo->prepare("
             SELECT account_states.account_revision
