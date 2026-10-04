@@ -8,6 +8,7 @@ import { useAuthStore, type PrivateStateResetReason } from './auth'
 import { useSyncStore } from './sync'
 
 export type JournalDraftStatus = 'saved' | 'dirty' | 'saving' | 'error' | 'conflict' | 'blocked' | 'quarantined'
+export type JournalConflictChoice = 'local' | 'server'
 
 export type JournalDraftErrorKind =
   | 'preflight'
@@ -25,6 +26,13 @@ export interface PendingJournalCommand {
   readonly authGeneration: number
   readonly dataEpoch: number
   readonly request: Readonly<SaveJournalRequest>
+  readonly resolution?: Readonly<PendingJournalResolution>
+}
+
+export interface PendingJournalResolution {
+  readonly choice: JournalConflictChoice
+  readonly expectedServerVersion: number
+  readonly expectedClientRevision: number
 }
 
 export interface JournalDraftRecord {
@@ -68,6 +76,25 @@ function errorStatus(error: unknown): number | null {
   return typeof error === 'object' && error !== null && 'status' in error && typeof error.status === 'number'
     ? error.status
     : null
+}
+
+function isValidConflictSnapshot(
+  value: unknown,
+  challengeId: string,
+  localDate: string,
+  expectedVersion?: number,
+): value is JournalSnapshot {
+  return challengesApi.isJournalSnapshot(value) &&
+    value.challenge_id === challengeId &&
+    value.local_date === localDate &&
+    (expectedVersion === undefined || value.journal_version === expectedVersion) &&
+    value.journal !== null
+}
+
+function sameResolution(left: PendingJournalResolution | undefined, right: PendingJournalResolution): boolean {
+  return left?.choice === right.choice &&
+    left.expectedServerVersion === right.expectedServerVersion &&
+    left.expectedClientRevision === right.expectedClientRevision
 }
 
 export const useJournalDraftsStore = defineStore('journalDrafts', () => {
@@ -267,7 +294,8 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
       record.authGeneration !== auth.generation ||
       account.status !== 'ready' ||
       !account.context ||
-      record.dataEpoch !== account.context.data_epoch
+      record.dataEpoch !== account.context.data_epoch ||
+      !isValidConflictSnapshot(snapshot, challengeId, localDate)
     ) return
 
     const text = snapshot.journal ?? ''
@@ -321,14 +349,48 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
     record.error = { kind: 'stale_context', message }
   }
 
+  function cancelResolution(record: JournalDraftRecord, message: string): void {
+    record.pendingCommand = null
+    record.error = { kind: 'conflict', message }
+    record.status = 'conflict'
+  }
+
+  function resolutionContextMatches(
+    record: JournalDraftRecord,
+    challengeId: string,
+    localDate: string,
+    expectedServerVersion: number,
+    expectedClientRevision: number,
+  ): boolean {
+    return auth.status === 'authenticated' &&
+      auth.owner?.id === record.ownerId &&
+      record.authGeneration === auth.generation &&
+      record.challengeId === challengeId &&
+      record.localDate === localDate &&
+      record.clientRevision === expectedClientRevision &&
+      account.status === 'ready' &&
+      account.context !== null &&
+      record.dataEpoch === account.context.data_epoch &&
+      isValidConflictSnapshot(record.conflictSnapshot, challengeId, localDate, expectedServerVersion)
+  }
+
   function handleSaveError(record: JournalDraftRecord, error: unknown): void {
     const status = errorStatus(error)
     const apiError = error instanceof challengesApi.ChallengeApiError ? error : null
     const code = apiError?.problem?.code
 
     if (status === 409 && code === 'version_conflict') {
+      const currentVersion = apiError?.problem?.current_version
+      const currentSnapshot = apiError?.problem?.current_snapshot
+      if (!isValidConflictSnapshot(currentSnapshot, record.challengeId, record.localDate, currentVersion)) {
+        record.pendingCommand = null
+        record.error = { kind: 'validation', message: 'Phản hồi xung đột nhật ký không hợp lệ; bản nháp được giữ lại để đối chiếu.' }
+        record.status = 'error'
+        return
+      }
+
       record.pendingCommand = null
-      record.conflictSnapshot = apiError?.problem?.current_snapshot as JournalSnapshot | undefined ?? null
+      record.conflictSnapshot = currentSnapshot
       record.error = {
         kind: 'conflict',
         message: 'Nhật ký đã thay đổi trên máy chủ. Bản nháp hiện tại được giữ lại để xử lý.',
@@ -389,6 +451,7 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
     revisionAtStart: number,
     textAtStart: string,
     journalVersionAtStart: number,
+    resolutionAtStart?: PendingJournalResolution,
   ): Promise<void> {
     let preflight: { allowed: boolean; reason?: string }
     try {
@@ -426,8 +489,23 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
       return
     }
 
+    if (resolutionAtStart && !resolutionContextMatches(
+      record,
+      record.challengeId,
+      record.localDate,
+      resolutionAtStart.expectedServerVersion,
+      resolutionAtStart.expectedClientRevision,
+    )) {
+      cancelResolution(record, 'Bản xung đột đã thay đổi trong lúc chuẩn bị gửi. Hãy đối chiếu lại lựa chọn.')
+      return
+    }
+
     let pending = record.pendingCommand
     if (pending) {
+      if (resolutionAtStart && !sameResolution(pending.resolution, resolutionAtStart)) {
+        cancelResolution(record, 'Yêu cầu xử lý xung đột không còn khớp với lựa chọn hiện tại.')
+        return
+      }
       if (
         pending.ownerId !== ownerIdAtStart ||
         pending.authGeneration !== authGenerationAtStart ||
@@ -440,7 +518,7 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
       const request: Readonly<SaveJournalRequest> = Object.freeze({
         command_id: challengesApi.generateCommandId(),
         data_epoch: currentEpoch,
-        base_version: journalVersionAtStart,
+        base_version: resolutionAtStart?.expectedServerVersion ?? journalVersionAtStart,
         journal: textAtStart,
       })
       pending = Object.freeze({
@@ -449,6 +527,7 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
         authGeneration: authGenerationAtStart,
         dataEpoch: currentEpoch,
         request,
+        ...(resolutionAtStart ? { resolution: Object.freeze({ ...resolutionAtStart }) } : {}),
       })
       record.pendingCommand = pending
     }
@@ -551,6 +630,7 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
     const record = key ? drafts.value[key] : undefined
     if (!key || !record || (!isDirtyRecord(record) && !record.pendingCommand)) return Promise.resolve()
     if (record.requiresReconciliation || record.status === 'conflict' || record.status === 'quarantined') return Promise.resolve()
+    if (record.status === 'error' && !record.pendingCommand && record.error?.kind !== 'network') return Promise.resolve()
     if (record.authGeneration !== auth.generation) {
       record.requiresReconciliation = true
       quarantine(record, 'Bản nháp thuộc phiên xác thực cũ. Hãy tải lại và đối chiếu dữ liệu trước khi tiếp tục.')
@@ -576,6 +656,71 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
       revisionAtStart,
       textAtStart,
       journalVersionAtStart,
+    ).finally(() => {
+      if (inFlight.get(key) === operation) inFlight.delete(key)
+      if (drafts.value[key] === record && record.status === 'saving') {
+        record.status = isDirtyRecord(record) ? 'dirty' : 'saved'
+      }
+    })
+    inFlight.set(key, operation)
+    return operation
+  }
+
+  function resolveConflict(
+    challengeId: string,
+    localDate: string,
+    choice: JournalConflictChoice,
+    expectedServerVersion: number,
+    expectedClientRevision: number,
+  ): Promise<void> {
+    const key = getCurrentKey(challengeId, localDate)
+    const record = key ? drafts.value[key] : undefined
+    if (!key || !record || (choice !== 'local' && choice !== 'server') ||
+      !Number.isInteger(expectedServerVersion) || expectedServerVersion < 0 ||
+      !Number.isInteger(expectedClientRevision) || expectedClientRevision < 0) return Promise.resolve()
+
+    const existing = inFlight.get(key)
+    if (existing) return existing
+
+    const pendingResolution = record.pendingCommand?.resolution
+    const requestedResolution: PendingJournalResolution = {
+      choice,
+      expectedServerVersion,
+      expectedClientRevision,
+    }
+    if (pendingResolution) {
+      return sameResolution(pendingResolution, requestedResolution) ? save(challengeId, localDate) : Promise.resolve()
+    }
+
+    if (!resolutionContextMatches(record, challengeId, localDate, expectedServerVersion, expectedClientRevision)) {
+      cancelResolution(record, 'Bản xung đột không còn khớp với phiên bản hoặc bản nháp đang hiển thị.')
+      return Promise.resolve()
+    }
+
+    const snapshot = record.conflictSnapshot!
+    const selectedText = choice === 'local' ? record.text : snapshot.journal
+    if (selectedText === null || selectedText.length === 0) {
+      record.error = { kind: 'validation', message: 'Không thể gửi lựa chọn nhật ký rỗng hoặc thiếu nội dung.' }
+      record.status = 'error'
+      return Promise.resolve()
+    }
+
+    const ownerIdAtStart = record.ownerId
+    const authGenerationAtStart = auth.generation
+    const revisionAtStart = record.clientRevision
+    const journalVersionAtStart = record.journalVersion
+    record.status = 'saving'
+    record.error = null
+
+    const operation = performSave(
+      key,
+      record,
+      ownerIdAtStart,
+      authGenerationAtStart,
+      revisionAtStart,
+      selectedText,
+      journalVersionAtStart,
+      requestedResolution,
     ).finally(() => {
       if (inFlight.get(key) === operation) inFlight.delete(key)
       if (drafts.value[key] === record && record.status === 'saving') {
@@ -619,6 +764,7 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
     useServerSnapshot,
     rebaseAfterEpochChange,
     save,
+    resolveConflict,
     reset,
     hasUnsavedDrafts,
   }

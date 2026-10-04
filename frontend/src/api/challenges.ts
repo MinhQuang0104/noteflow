@@ -20,6 +20,54 @@ export type JournalProblemDetails = Omit<ProblemDetails, 'current_snapshot'> & {
   current_snapshot?: JournalSnapshot
 }
 
+const problemCodes: ReadonlySet<ProblemDetails['code']> = new Set([
+  'version_conflict',
+  'stale_data_epoch',
+  'idempotency_key_reused',
+  'write_fence_active',
+])
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function isNonNegativeInteger(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 0
+}
+
+export function isJournalSnapshot(value: unknown): value is JournalSnapshot {
+  if (!isRecord(value)) return false
+  if (Object.keys(value).some((key) => !['challenge_id', 'local_date', 'journal', 'journal_version'].includes(key))) return false
+  return typeof value.challenge_id === 'string' && value.challenge_id.length > 0 &&
+    typeof value.local_date === 'string' && value.local_date.length > 0 &&
+    (typeof value.journal === 'string' || value.journal === null) &&
+    isNonNegativeInteger(value.journal_version)
+}
+
+function parseJournalProblemDetails(value: unknown): JournalProblemDetails | undefined {
+  if (!isRecord(value) || typeof value.message !== 'string' ||
+    typeof value.code !== 'string' || !problemCodes.has(value.code as ProblemDetails['code'])) return undefined
+
+  if (value.resource_id !== undefined && (typeof value.resource_id !== 'string' || value.resource_id.length === 0)) return undefined
+  if (value.current_version !== undefined && !isNonNegativeInteger(value.current_version)) return undefined
+
+  const currentSnapshot = value.current_snapshot
+  if (currentSnapshot !== undefined && !isJournalSnapshot(currentSnapshot)) return undefined
+  if (currentSnapshot !== undefined && value.current_version !== currentSnapshot.journal_version) return undefined
+
+  if (value.code === 'version_conflict' &&
+    (typeof value.resource_id !== 'string' || value.resource_id.length === 0 ||
+      !isNonNegativeInteger(value.current_version) || !isJournalSnapshot(currentSnapshot))) return undefined
+
+  return {
+    message: value.message,
+    code: value.code as JournalProblemDetails['code'],
+    ...(value.resource_id !== undefined ? { resource_id: value.resource_id as string } : {}),
+    ...(value.current_version !== undefined ? { current_version: value.current_version } : {}),
+    ...(currentSnapshot !== undefined ? { current_snapshot: currentSnapshot } : {}),
+  }
+}
+
 export class ChallengeApiError<TProblem extends ProblemDetails = ChallengeProblemDetails> extends Error {
   constructor(
     message: string,
@@ -31,6 +79,8 @@ export class ChallengeApiError<TProblem extends ProblemDetails = ChallengeProble
     this.name = 'ChallengeApiError'
   }
 }
+
+type ProblemParser<TProblem extends ProblemDetails> = (value: unknown) => TProblem | undefined
 
 export function xsrfToken(): string | null {
   if (typeof document === 'undefined') return null
@@ -56,6 +106,7 @@ export function generateCommandId(): string {
 async function requestJson<T, TProblem extends ProblemDetails = ChallengeProblemDetails>(
   path: string,
   init?: RequestInit,
+  problemParser?: ProblemParser<TProblem>,
 ): Promise<T> {
   const token = xsrfToken()
   const headers: Record<string, string> = {
@@ -91,8 +142,9 @@ async function requestJson<T, TProblem extends ProblemDetails = ChallengeProblem
       validation = errorBody as ValidationError
       message = validation.message || 'Dữ liệu không hợp lệ.'
     } else if (response.status === 409 || response.status === 423) {
-      problem = errorBody as TProblem
-      message = problem.message || 'Xung đột phiên bản dữ liệu.'
+      problem = problemParser ? problemParser(errorBody) : errorBody as TProblem
+      if (problem) message = problem.message || 'Xung đột phiên bản dữ liệu.'
+      else if (isRecord(errorBody) && typeof errorBody.message === 'string') message = errorBody.message
     } else if (errorBody?.message) {
       message = errorBody.message
     }
@@ -142,5 +194,6 @@ export async function saveChallengeJournal(
   return requestJson<JournalMutationResult, JournalProblemDetails>(
     `/api/v1/challenges/${encodeURIComponent(id)}/journals/${encodeURIComponent(date)}`,
     { method: 'PUT', body: JSON.stringify(payload) },
+    parseJournalProblemDetails,
   )
 }

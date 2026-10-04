@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "story_id": "1.6",
+  "slice_id": "A",
+  "kind": "review",
+  "checkpoint_commit": "b1731a6707640376cb046be9d77850499bd780d8",
+  "baseline_commit": "e54feb3c3b780eed9de9905858b8c9513fab4c46",
+  "subject_digest": "sha256:eee8f64fc1e0358d109751c75ea214b3d4765631666a855db00e3deb1cdae716",
+  "created_from_head": "b1731a6707640376cb046be9d77850499bd780d8",
+  "changed_paths_sha256": "sha256:5f4ac585b9bca5da6d69d2521e618e385b104258a4811dfd6cdbbd0bea106c98",
+  "commands": [
+    {
+      "command": "check:t1-focused-backend",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "desktop-linux/noteflow-local/backend-test PostgreSQL"
+    },
+    {
+      "command": "check:t1-pint",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "desktop-linux/noteflow-local/backend-test PHP Pint"
+    },
+    {
+      "command": "check:t1-full-backend",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "scripts/local.ps1 isolated PostgreSQL test profile"
+    },
+    {
+      "command": "prepare-change-evidence explicit-pair e54feb3..b1731a6",
+      "exit_code": 0,
+      "tool": "node",
+      "environment": "canonical checkout"
+    }
+  ],
+  "judgment": "APPROVE",
+  "questions": [
+    {
+      "id": "ac-1-conflict-identity",
+      "question": "Do the fresh focused backend results cover AC-1 typed stale conflict identity/snapshot and no mutation?"
+    },
+    {
+      "id": "ac-3-convergence",
+      "question": "Do the fresh PostgreSQL two-connection results cover AC-3 version-checked convergence and the no-lost-update invariant?"
+    },
+    {
+      "id": "canonical-backend-recipe",
+      "question": "What is the disposition for the canonical verifier having no applicable backend recipe for these four changed test paths?"
+    }
+  ],
+  "answers": [
+    {
+      "id": "ac-1-conflict-identity",
+      "answer": "Yes. The fresh focused backend suite asserts typed stale conflict identity/current snapshot and verifies that saved journal, completion, account revision, and success ledger state do not mutate."
+    },
+    {
+      "id": "ac-3-convergence",
+      "answer": "Yes. The fresh concurrency test uses two PostgreSQL connections/transactions to exercise the account-row lock and proves a same-base competing writer cannot commit a different journal silently; the focused suite and full backend suite passed."
+    },
+    {
+      "id": "canonical-backend-recipe",
+      "answer": "The canonical registry has no backend recipe for these four test paths. I approve progression only with this INCOMPLETE status and disclosure; the fresh focused backend checks are the bounded T-1 coverage authority, not a claim that canonical coverage is PASS."
+    }
+  ],
+  "evidence_refs": [
+    {
+      "path": "backend/tests/Contract/ChallengeContractTest.php",
+      "hunk_index": 0,
+      "body_digest": "sha256:7061b685856da050ca89608cd08858927903ceb66cac00bb85e3a2359c0175c3"
+    },
+    {
+      "path": "backend/tests/Feature/ChallengeJournalApiTest.php",
+      "hunk_index": 0,
+      "body_digest": "sha256:106c74b8c8fb88c1983731ed1ab0d9233f2583c1b7d4c531384e3ae9cdfe1c78"
+    },
+    {
+      "path": "backend/tests/Feature/ChallengeJournalTest.php",
+      "hunk_index": 0,
+      "body_digest": "sha256:ddf42a105af8b830c4ce182a8d7926ed087c07199344731b5c9ee036fbabc426"
+    },
+    {
+      "path": "backend/tests/Feature/JournalConflictConcurrencyTest.php",
+      "hunk_index": 0,
+      "body_digest": "sha256:5cece582677e34831661c1c8f42829592b53f9d44a9bd84b702e58136e6a7b79"
+    }
+  ],
+  "scope_digest": "sha256:83364de71358c20119fdb56bc31117d38ef56c27eeeaf3a68fb49ba6b02e59d6",
+  "risk_context_digest": "sha256:54a5ad338aa76d1b6e60a1b073ecb93ce6e9736508edf87586271961e411c46d",
+  "reviewed_commit": "b1731a6707640376cb046be9d77850499bd780d8",
+  "reviewer": "same-lead"
+}
