@@ -226,9 +226,17 @@ slices:
       freshness: FRESH_CANDIDATE
       reviewer: human
   - id: E
-    status: pending
+    status: checkpointed
     depends_on: [D]
     task_refs: [T-4, T-7, T-8]
+    baseline_commit: 93aa010de4618f803b96ea005db3a520986f0157
+    checkpoint_commit: 7fde0a933ce3f749d5c4d923018b6610223b09de
+    subject_digest: sha256:e096bcba1d1840169f527d143b76b6af81eaae1028db19d77aa619f8142de77e
+    changed_paths_sha256: sha256:0ed64dd5e09b4539ddf304b79ccd6cdb27358850db7a8d14ad02027c30d6e1b3
+    receipt_refs:
+      implementation:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-6/E-implementation.json
+        digest: sha256:427916ec65a26cd3f30403d109c335fef4f36f487cde3ac578138ef6ec3d0124
     consumers:
       - tests/e2e/cross-device-sync.spec.ts
       - tests/e2e/helpers/db-state.ts
@@ -240,7 +248,7 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: implement_slice
+  kind: verify_slice
   target: E
 ---
 
