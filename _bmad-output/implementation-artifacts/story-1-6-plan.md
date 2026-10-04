@@ -228,7 +228,7 @@ slices:
   - id: E
     status: pending
     depends_on: [D]
-    task_refs: [T-7, T-8]
+    task_refs: [T-4, T-7, T-8]
     consumers:
       - tests/e2e/cross-device-sync.spec.ts
       - tests/e2e/helpers/db-state.ts
@@ -274,7 +274,22 @@ frontmatter. Plan này không tự cấp quyền start hoặc implementation.
 | B | T-2, T-3 | A | Resolution state, retry và lifecycle guards |
 | C | T-4, T-5 | B | Dialog và journal editor integration |
 | D | T-6 | C | Journal query convergence |
-| E | T-7, T-8 | D | Hai thiết bị, accessibility và full verification |
+| E | T-4 (E-F1 only), T-7, T-8 | D | Sửa E-F1, hai thiết bị, accessibility và full verification |
+
+### Planning scope amendment — 2026-10-04
+
+Human đã duyệt bổ sung T-4 vào Slice E, chỉ để sửa finding E-F1: focus
+rơi về BODY và Escape không đóng dialog sau conflict lần hai. Phần T-4
+bổ sung này chỉ cho phép sửa `frontend/src/components/ContentConflictDialog.vue`
+và regression tests tại
+`frontend/src/components/__tests__/ContentConflictDialog.spec.ts`, trong
+intent/invariants T-4 hiện có; không mở rộng API/store hoặc product semantics.
+
+T-7/T-8 và toàn bộ diff E hiện có được giữ nguyên. Amendment chỉ thay
+planning projection của E; Story intent/normative digest, slices A–D,
+checkpoints, receipts và lifecycle không đổi. E vẫn pending, `next_action`
+vẫn là `implement_slice:E`; đây không phải implementation, verification,
+review approval hoặc Human Gate.
 
 Mỗi implement_slice chỉ làm slice hiện tại. Commit implementation chứa
 exact paths của task; commit metadata kế tiếp chỉ Plan và implementation
