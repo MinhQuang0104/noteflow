@@ -14,6 +14,9 @@ const SPRINT = '_bmad-output/implementation-artifacts/sprint-status.yaml'
 const STORY = 'docs/story-9-1.md'
 const EPIC = 'docs/product/epics.md'
 const digest = value => `sha256:${createHash('sha256').update(value, 'utf8').digest('hex')}`
+const stableValue = value => Array.isArray(value) ? value.map(stableValue) : value && typeof value === 'object'
+  ? Object.fromEntries(Object.keys(value).sort().map(key => [key, stableValue(value[key])])) : value
+const stableDigest = value => digest(JSON.stringify(stableValue(value)))
 const pathDigest = paths => digest([...new Set(paths)].sort().map(item => item.replaceAll('\\', '/')).join('\n') + '\n')
 
 function git(root, ...args) {
@@ -157,7 +160,16 @@ function fixture(options = {}) {
       { id: `${slice.id.toLowerCase()}-focused`, result: 'PASS', exit_code: 0, subject_digest: subjectDigest, changed_paths_sha256: changedPathsSha256 }
     ]
     const canonical = slice.canonical ?? { applicability: 'NOT_APPLICABLE', status: 'PASS', complete: true }
-    verification.canonical = {
+    verification.canonical = options.canonicalProvenance ? {
+      featureId: 'fixture-feature',
+      changedPaths: slice.changedPaths,
+      matchedPaths: slice.changedPaths.slice(0, 1),
+      unmatchedPaths: slice.changedPaths.slice(1),
+      dependencyOnlyPaths: [],
+      status: 'INCOMPLETE',
+      complete: false,
+      escalationReasons: ['UNMAPPED_CHANGED_PATH']
+    } : {
       applicability: canonical.applicability,
       status: canonical.status,
       complete: canonical.complete,
@@ -177,11 +189,33 @@ function fixture(options = {}) {
     }
     const review = receiptBase('9.1', slice.id, 'review', slice.baseline, slice.checkpoint, subjectDigest, changedPathsSha256)
     review.required = true
-    review.verdict = options.reviewVerdict ?? 'APPROVE'
+    if (options.kernelReview) {
+      review.judgment = options.reviewVerdict ?? 'APPROVE'
+      const evidenceRefs = slice.changedPaths.map((file, hunkIndex) => ({
+        path: file,
+        hunk_index: hunkIndex,
+        body_digest: digest('fixture:' + slice.id + ':' + file)
+      }))
+      review.evidence_refs = evidenceRefs
+      review.scope_digest = stableDigest({ paths: [...slice.changedPaths].sort(), refs: evidenceRefs })
+      review.risk_context_digest = digest(JSON.stringify({ level: 'MEDIUM' }))
+    } else {
+      review.verdict = options.reviewVerdict ?? 'APPROVE'
+      review.freshness = { status: options.reviewFreshness ?? 'FRESH_CANDIDATE', reasons: [] }
+    }
+    if (!review.evidence_refs) {
+      const evidenceRefs = slice.changedPaths.map((file, hunkIndex) => ({
+        path: file,
+        hunk_index: hunkIndex,
+        body_digest: digest('fixture:' + slice.id + ':' + file)
+      }))
+      review.evidence_refs = evidenceRefs
+      review.scope_digest = stableDigest({ paths: [...slice.changedPaths].sort(), refs: evidenceRefs })
+    }
+    review.risk_context_digest ??= digest(JSON.stringify({ level: 'MEDIUM' }))
     review.findings_total = options.findingsTotal ?? 0
     review.findings_blocking = options.findingsBlocking ?? 0
     review.reviewed_commit = slice.checkpoint
-    review.freshness = { status: options.reviewFreshness ?? 'FRESH_CANDIDATE', reasons: [] }
 
     const refs = {}
     for (const [kind, receipt] of [['implementation', implementation], ['verification', verification], ['review', review]]) {
@@ -211,15 +245,13 @@ function fixture(options = {}) {
         path: ${refs.review.path}
         digest: ${refs.review.digest}
     verification:
-      canonical_applicability: ${canonical.applicability}
-      canonical_status: ${canonical.status}
-      progression_eligible: ${verification.progression_eligible}
-      done_gate_disclosure_required: ${disclosure}
+      ${canonical.applicability === undefined ? 'canonical_status: INCOMPLETE\n      ' : 'canonical_applicability: ' + canonical.applicability + '\n      canonical_status: ' + canonical.status + '\n      '}progression_eligible: ${verification.progression_eligible}
+      done_gate_disclosure_required: ${options.canonicalProvenance ? 'true' : disclosure}
     review:
       required: true
-      verdict: ${review.verdict}
+      verdict: ${review.verdict ?? 'APPROVE'}
       reviewed_commit: ${review.reviewed_commit}
-      freshness: ${options.reviewFreshness ?? 'FRESH_CANDIDATE'}`)
+      ${options.kernelReview ? '' : 'freshness: ' + (options.reviewFreshness ?? 'FRESH_CANDIDATE')}`)
   }
 
   const plan = `---
@@ -435,7 +467,7 @@ test('unsupported Plan schema is INVALID', () => withFixture({}, f => {
 test('upstream Epic section freshness is enforced', () => withFixture({}, f => {
   const file = path.join(f.root, EPIC)
   writeFileSync(file, readFileSync(file, 'utf8').replace('Done.', 'Changed.'))
-  expectStatus(run(f), 'STALE', 2, 'UPSTREAM_EPIC_DIGEST_STALE')
+  expectStatus(run(f), 'STALE', 2, 'UPSTREAM_EPIC_WORKTREE_DRIFT')
 }))
 
 test('uncommitted completion metadata is a repairable partial transition', () => withFixture({}, f => {
@@ -515,4 +547,45 @@ test('schema-v2 fixture is READY with disclosures at finalization entry state', 
   assert.equal(result.json.lifecycle_from, 'in-progress')
   assert.equal(result.json.lifecycle_target, 'review')
   assert.equal(result.json.scope.path_count, 1)
+}))
+
+test('kernel-produced judgment and ordered evidence prove review freshness', () => withFixture({ kernelReview: true }, f => {
+  const result = run(f)
+  expectStatus(result, 'READY', 0)
+  assert.equal(result.json.slices[0].review_verdict, 'APPROVE')
+  assert.equal(result.json.slices[0].review_freshness, 'FRESH_REUSED')
+}))
+
+test('validated canonical recipe provenance infers applicability without relabeling INCOMPLETE', () => withFixture({
+  canonicalProvenance: true,
+  slices: [{ id: 'A', path: 'src/a.txt', canonical: { status: 'INCOMPLETE', complete: false } }]
+}, f => {
+  const result = run(f)
+  expectStatus(result, 'READY', 0)
+  assert.equal(result.json.done_gate_disposition, 'READY_WITH_DISCLOSURES')
+  assert.equal(result.json.canonical_disclosures[0].applicability, 'APPLICABLE')
+  assert.equal(result.json.canonical_disclosures[0].status, 'INCOMPLETE')
+}))
+
+test('CRLF-only Epic checkout representation remains fresh against the canonical Git blob', () => withFixture({}, f => {
+  const file = path.join(f.root, EPIC)
+  writeFileSync(file, readFileSync(file, 'utf8').replaceAll('\n', '\r\n'))
+  expectStatus(run(f), 'READY', 0)
+}))
+
+test('conflicting kernel judgment and legacy verdict reject idempotently without finalization mutation', () => withFixture({ kernelReview: true }, f => {
+  const receiptPath = path.join(f.root, '_bmad-output/implementation-artifacts/receipts/story-9-1/A-review.json')
+  const receipt = JSON.parse(readFileSync(receiptPath, 'utf8'))
+  receipt.verdict = 'CHANGES_REQUIRED'
+  writeFileSync(receiptPath, JSON.stringify(receipt, null, 2) + '\n')
+  const planPath = path.join(f.root, PLAN)
+  const planBefore = readFileSync(planPath, 'utf8')
+  writeFileSync(planPath, planBefore.replace(/digest: sha256:[0-9a-f]+(?=\n    verification:)/, 'digest: ' + receiptDigest(receipt)))
+  const statusBefore = git(f.root, 'status', '--porcelain=v1', '--untracked-files=all')
+  const first = run(f)
+  const second = run(f)
+  expectStatus(first, 'RECONCILIATION_REQUIRED', 1, 'REVIEW_DECISION_CONFLICT:A')
+  expectStatus(second, 'RECONCILIATION_REQUIRED', 1, 'REVIEW_DECISION_CONFLICT:A')
+  assert.deepEqual(second.json, first.json)
+  assert.equal(git(f.root, 'status', '--porcelain=v1', '--untracked-files=all'), statusBefore)
 }))
