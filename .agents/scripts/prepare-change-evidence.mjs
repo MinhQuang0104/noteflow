@@ -6,7 +6,8 @@ import { fileURLToPath } from 'node:url'
 
 const EXIT = { OK: 0, NO_CHANGE: 1, SPLIT_REQUIRED: 2, UNSUPPORTED: 3, INVALID_INPUT: 4, ERROR: 5 }
 const MAX_OUTPUT = 64 * 1024 * 1024
-const MAX_PATHS = 4
+const MAX_INLINE_PATHS = 4
+const MAX_EVIDENCE_SET_PATHS = 16
 const MAX_HUNKS = 6
 const MAX_LINES = 240
 const decoder = new TextDecoder('utf-8', { fatal: true })
@@ -286,10 +287,28 @@ function makeEvidenceSet(provenance, requestedPaths, paths) {
 
 export function validateEvidenceSet(set) {
   const invalid = () => { throw new Error('invalid or incomplete evidence set') }
+  const validPath = value => {
+    try { return typeof value === 'string' && canonical(value) === value } catch { return false }
+  }
+  const provenanceValid = set?.provenance && typeof set.provenance === 'object' &&
+    set.provenance.producer === 'prepare-change-evidence-v1' &&
+    ['working-tree-vs-HEAD', 'explicit-pair'].includes(set.provenance.comparison) &&
+    /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/.test(set.provenance.base ?? '') &&
+    (set.provenance.comparison === 'explicit-pair'
+      ? /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/.test(set.provenance.head ?? '')
+      : set.provenance.head === 'working-tree')
+  const requestedPaths = set?.requestedPaths
+  const orderedPaths = set?.paths?.map(item => item?.path)
   if (set?.schema !== SET_SCHEMA || !Array.isArray(set.requestedPaths) ||
       !Array.isArray(set.paths) || !Array.isArray(set.units) ||
-      set.unitCount !== set.units.length || !/^[0-9a-f]{64}$/.test(set.sourceDigest ?? '') ||
-      JSON.stringify(set.requestedPaths) !== JSON.stringify(set.paths.map(p => p.path))) invalid()
+      !provenanceValid || set.unitCount !== set.units.length || !Number.isSafeInteger(set.unitCount) || set.unitCount < 0 ||
+      !/^[0-9a-f]{64}$/.test(set.sourceDigest ?? '') || requestedPaths.length < 1 ||
+      requestedPaths.length > MAX_EVIDENCE_SET_PATHS || requestedPaths.some(pathValue => !validPath(pathValue)) ||
+      new Set(requestedPaths).size !== requestedPaths.length ||
+      JSON.stringify(requestedPaths) !== JSON.stringify([...requestedPaths].sort()) ||
+      JSON.stringify(requestedPaths) !== JSON.stringify(orderedPaths) ||
+      set.paths.some(entry => !entry || typeof entry !== 'object' || !Array.isArray(entry.hunks) ||
+        (entry.changeType !== undefined && entry.changeType !== 'added'))) invalid()
   const reconstructed = []
   let nextUnit = 0
   for (const entry of set.paths) {
@@ -333,8 +352,10 @@ export function validateEvidenceSet(set) {
 
 function main() {
   const options = parseArgs(process.argv.slice(2))
-  const paths = [...new Set(options.paths.map(canonical))].sort()
-  if (paths.length > MAX_PATHS) fail('SPLIT_REQUIRED', 'more than 4 paths')
+  const requestedPaths = options.paths.map(canonical)
+  if (new Set(requestedPaths).size !== requestedPaths.length) fail('INVALID_INPUT', 'duplicate path')
+  const paths = [...requestedPaths].sort()
+  if (paths.length > MAX_EVIDENCE_SET_PATHS) fail('SPLIT_REQUIRED', 'evidence set path limit: more than 16 paths')
   const rootResult = git(['rev-parse', '--show-toplevel'], process.cwd())
   if (rootResult.status !== 0 || !rootResult.stdout.trim()) fail('ERROR', 'repository root unavailable')
   const root = rootResult.stdout.trim()
@@ -359,13 +380,7 @@ function main() {
   }
   const provenance = { producer: 'prepare-change-evidence-v1', comparison: options.comparison, base, head }
   const hasOversizedHunkGroup = evidencePaths.some(entry => entry.hunks.length > MAX_HUNKS)
-  if (totalLines > MAX_LINES || hasOversizedHunkGroup) {
-    if (paths.length !== 1) {
-      const reason = hasOversizedHunkGroup
-        ? 'more than 6 hunks in a multi-path group'
-        : 'more than 240 diff lines across paths'
-      fail('SPLIT_REQUIRED', reason)
-    }
+  if (paths.length > MAX_INLINE_PATHS || totalLines > MAX_LINES || hasOversizedHunkGroup) {
     return { status: 'OK', changeEvidence: { evidenceSet: makeEvidenceSet(provenance, paths, evidencePaths) } }
   }
   return {
