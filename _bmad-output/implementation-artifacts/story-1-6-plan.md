@@ -226,7 +226,7 @@ slices:
       freshness: FRESH_CANDIDATE
       reviewer: human
   - id: E
-    status: checkpointed
+    status: reviewed
     depends_on: [D]
     task_refs: [T-4, T-7, T-8]
     baseline_commit: 93aa010de4618f803b96ea005db3a520986f0157
@@ -237,6 +237,33 @@ slices:
       implementation:
         path: _bmad-output/implementation-artifacts/receipts/story-1-6/E-implementation.json
         digest: sha256:427916ec65a26cd3f30403d109c335fef4f36f487cde3ac578138ef6ec3d0124
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-6/E-verification.json
+        digest: sha256:14cc78be1fa6e3034548eb50829ff83a3937170c1449ed02324df6fe2c81bebc
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-6/E-review.json
+        digest: sha256:a7d70ca013a0f54cc51e4c5cbc770e59e77ab4f737921928bab057102076ecad
+    verification:
+      subject:
+        commit: 7fde0a933ce3f749d5c4d923018b6610223b09de
+      changed_paths_sha256: sha256:0ed64dd5e09b4539ddf304b79ccd6cdb27358850db7a8d14ad02027c30d6e1b3
+      status: INCOMPLETE
+      canonical_status: INCOMPLETE
+      escalation_decision: REVIEW_REQUIRED
+      progression_eligible: true
+      done_gate_disclosure_required: true
+      outstanding_obligation: "Canonical verification remains INCOMPLETE because NO_APPLICABLE_RECIPE; T-7 manual screen-reader evidence remains NOT_RUN and is not replaced by automated evidence."
+      review_disclosure: "Human APPROVE records bounded Slice E review of fresh attempt-5 evidence; canonical INCOMPLETE and T-7 NOT_RUN remain disclosed; no Human Gate is granted."
+    review:
+      required: true
+      verdict: APPROVE
+      reviewed_commit: 7fde0a933ce3f749d5c4d923018b6610223b09de
+      risk_context_digest: sha256:54a5ad338aa76d1b6e60a1b073ecb93ce6e9736508edf87586271961e411c46d
+      pending_fingerprint: sha256:d7f85628615a9c971f8d7207a9a53be8d3e4f06f55696259870cf1b4ca1fb77d
+      scope_digest: sha256:d85b6efeb532b5552360166d5b33e30a0ad748efaa453a0fcd30637165c28a7a
+      freshness: FRESH_CANDIDATE
+      reviewer: human
+
     consumers:
       - tests/e2e/cross-device-sync.spec.ts
       - tests/e2e/helpers/db-state.ts
@@ -248,8 +275,8 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: verify_slice
-  target: E
+  kind: finalize_story
+  target: story
 ---
 
 # Story 1.6 — V4 upgrade execution projection
