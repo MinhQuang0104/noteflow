@@ -8,8 +8,8 @@ upstream_epic:
   path: docs/product/epics.md
   section_digest: sha256:2e9a3f2e425a6e1e3b04a5141098c9d8efe9108b1cbf50bd9978d8163eabfdec
 sprint_key: 1-6-giải-quyết-xung-đột-nội-dung-giữa-hai-thiết-bị
-lifecycle_snapshot: in-progress
-execution_status: in-progress
+lifecycle_snapshot: review
+execution_status: complete
 planning_approval:
   decision: APPROVED
   scope: planning
@@ -274,8 +274,17 @@ slices:
       - "T-8: complete frontend/backend/E2E gates, exact-diff HIGH-risk review and AC evidence; NOT_RUN"
 blockers: []
 unresolved_questions: []
+finalization:
+  receipt_ref: _bmad-output/implementation-artifacts/receipts/story-1-6/finalization.json
+  receipt_digest: sha256:738e384271a9bcc65861b117d213c2be318079c0830522b1aae388e35bea88ca
+  done_gate_disposition: SATISFIED_WITH_DISCLOSURES
+  scope_paths_digest: sha256:0fa7441ba4330706c621e85e78bc051628f3a7326fcc10db3f8075b808ec8a76
+  implementation_commit_set_digest: sha256:9e32d25e510c7db0af31565d097fa9bc19527d7229e75d452529cd5626fa927e
+  final_scoped_tree_digest: sha256:8be3340a8180fadd8c1a82da0a86abb901cf64ea359018e09b26f9425326d70d
+  prepared_from_head: bc588adb4e65ab30e63345f9e9d4be62289153cb
+human_approval: null
 next_action:
-  kind: finalize_story
+  kind: complete_story
   target: story
 ---
 

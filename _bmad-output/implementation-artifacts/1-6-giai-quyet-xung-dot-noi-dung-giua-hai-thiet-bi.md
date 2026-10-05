@@ -1,7 +1,7 @@
 ---
 story_id: "1.6"
 title: Giải quyết xung đột nội dung giữa hai thiết bị
-status: in-progress
+status: review
 ---
 
 # Story 1.6: Giải quyết xung đột nội dung giữa hai thiết bị
@@ -77,3 +77,59 @@ Scope gồm typed conflict, resolution state, dialog accessible, journal query c
 - architecture: docs/architecture/architecture-noteflow-2026-09-12/ARCHITECTURE-PROPOSAL.md
 - ux: docs/ux/ux-spec.md
 <!-- v4:references:end -->
+
+## Dev Agent Record
+
+<!-- v4:completion:start -->
+### Dev Agent Record
+
+- Finalization receipt: _bmad-output/implementation-artifacts/receipts/story-1-6/finalization.json
+- Done Gate disposition: SATISFIED_WITH_DISCLOSURES
+
+### AC Evidence / Results
+
+- AC-1: evidence=COVERED; mode=fallback; fallback: receipt-level PASS evidence
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-1-6/A-verification.json (sha256:06015dd4d398045966730d1d883503ec0a79ab6f3e200c606a59f4af75c24b93); _bmad-output/implementation-artifacts/receipts/story-1-6/B-verification.json (sha256:3adf34b7b2009f3057a16796c0c9024cbfe7aa91de91c8a4be16b8427d6febeb); _bmad-output/implementation-artifacts/receipts/story-1-6/E-verification.json (sha256:14cc78be1fa6e3034548eb50829ff83a3937170c1449ed02324df6fe2c81bebc)
+  Canonical disposition: NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required; APPLICABLE/INCOMPLETE; complete=false; disclosure=required; NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required
+- AC-2: evidence=COVERED; mode=fallback; fallback: receipt-level PASS evidence
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-1-6/B-verification.json (sha256:3adf34b7b2009f3057a16796c0c9024cbfe7aa91de91c8a4be16b8427d6febeb); _bmad-output/implementation-artifacts/receipts/story-1-6/C-verification.json (sha256:c6c6c12c071e7ecdce0b84997bab4507fff22feed542856d229220d0e5845344); _bmad-output/implementation-artifacts/receipts/story-1-6/E-verification.json (sha256:14cc78be1fa6e3034548eb50829ff83a3937170c1449ed02324df6fe2c81bebc)
+  Canonical disposition: APPLICABLE/INCOMPLETE; complete=false; disclosure=required; APPLICABLE/INCOMPLETE; complete=false; disclosure=required; NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required
+- AC-3: evidence=COVERED; mode=fallback; fallback: receipt-level PASS evidence
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-1-6/A-verification.json (sha256:06015dd4d398045966730d1d883503ec0a79ab6f3e200c606a59f4af75c24b93); _bmad-output/implementation-artifacts/receipts/story-1-6/B-verification.json (sha256:3adf34b7b2009f3057a16796c0c9024cbfe7aa91de91c8a4be16b8427d6febeb); _bmad-output/implementation-artifacts/receipts/story-1-6/C-verification.json (sha256:c6c6c12c071e7ecdce0b84997bab4507fff22feed542856d229220d0e5845344); _bmad-output/implementation-artifacts/receipts/story-1-6/D-verification-attempt-2.json (sha256:ba8a151da82f608f510af7b7cdc70c20d5f3eaa46fb0754d6831b9aa8d4bb205); _bmad-output/implementation-artifacts/receipts/story-1-6/E-verification.json (sha256:14cc78be1fa6e3034548eb50829ff83a3937170c1449ed02324df6fe2c81bebc)
+  Canonical disposition: NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required; APPLICABLE/INCOMPLETE; complete=false; disclosure=required; APPLICABLE/INCOMPLETE; complete=false; disclosure=required; APPLICABLE/INCOMPLETE; complete=false; disclosure=required; NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required
+- AC-4: evidence=COVERED; mode=fallback; fallback: receipt-level PASS evidence
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-1-6/C-verification.json (sha256:c6c6c12c071e7ecdce0b84997bab4507fff22feed542856d229220d0e5845344); _bmad-output/implementation-artifacts/receipts/story-1-6/E-verification.json (sha256:14cc78be1fa6e3034548eb50829ff83a3937170c1449ed02324df6fe2c81bebc)
+  Canonical disposition: APPLICABLE/INCOMPLETE; complete=false; disclosure=required; NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required
+
+### Completion Notes
+
+- Evidenced behavior: **Given** mutation dùng version cũ **When** server có thay đổi xung đột **Then** không mutate **And** trả typed conflict với identity/version/snapshot.
+- Evidenced behavior: **Given** conflict UI **When** owner mở xử lý **Then** cả draft và saved version đọc được **And** có lựa chọn rõ.
+- Evidenced behavior: **Given** owner chọn kết quả **When** gửi với version/epoch hiện hành **Then** chỉ kết quả chọn được lưu và thiết bị hội tụ.
+- Evidenced behavior: **Given** conflict dialog **When** dùng keyboard/touch/screen reader **Then** focus trap, labels, scrolling và focus return hoạt động.
+
+### File List
+
+- backend/tests/Contract/ChallengeContractTest.php
+- backend/tests/Feature/ChallengeJournalApiTest.php
+- backend/tests/Feature/ChallengeJournalTest.php
+- backend/tests/Feature/JournalConflictConcurrencyTest.php
+- frontend/src/api/__tests__/challenges.spec.ts
+- frontend/src/api/challenges.ts
+- frontend/src/components/ChallengeJournalEditor.vue
+- frontend/src/components/ContentConflictDialog.vue
+- frontend/src/components/__tests__/ContentConflictDialog.spec.ts
+- frontend/src/stores/__tests__/journalDrafts.spec.ts
+- frontend/src/stores/__tests__/sync.spec.ts
+- frontend/src/stores/journalDrafts.ts
+- frontend/src/stores/sync.ts
+- frontend/src/views/__tests__/journal-draft-lifecycle.spec.ts
+- frontend/src/views/__tests__/journal.spec.ts
+- tests/e2e/content-conflict.spec.ts
+- tests/e2e/helpers/db-helper.php
+- tests/e2e/helpers/db-state.ts
+
+### Change Log
+
+- Finalization recorded for Human Gate: in-progress -> review; next action complete_story.
+<!-- v4:completion:end -->
