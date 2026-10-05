@@ -8,7 +8,7 @@ upstream_epic:
   path: docs/product/epics.md
   section_digest: sha256:2e9a3f2e425a6e1e3b04a5141098c9d8efe9108b1cbf50bd9978d8163eabfdec
 sprint_key: 1-6-giải-quyết-xung-đột-nội-dung-giữa-hai-thiết-bị
-lifecycle_snapshot: review
+lifecycle_snapshot: done
 execution_status: complete
 planning_approval:
   decision: APPROVED
@@ -299,9 +299,7 @@ human_approval:
   approved_commit: "84140b3888aa08adb022df9c196cbd069a93104c"
   approved_action: "complete_story"
   disclosures_acknowledged: true
-next_action:
-  kind: complete_story
-  target: story
+next_action: null
 ---
 
 # Story 1.6 — V4 upgrade execution projection

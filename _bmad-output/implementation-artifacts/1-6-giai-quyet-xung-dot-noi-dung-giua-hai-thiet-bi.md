@@ -1,7 +1,7 @@
 ---
 story_id: "1.6"
 title: Giải quyết xung đột nội dung giữa hai thiết bị
-status: review
+status: done
 ---
 
 # Story 1.6: Giải quyết xung đột nội dung giữa hai thiết bị
@@ -132,4 +132,5 @@ Scope gồm typed conflict, resolution state, dialog accessible, journal query c
 ### Change Log
 
 - Finalization recorded for Human Gate: in-progress -> review; next action complete_story.
+- Human approval recorded for the exact review scope: review -> done; next action terminal.
 <!-- v4:completion:end -->
