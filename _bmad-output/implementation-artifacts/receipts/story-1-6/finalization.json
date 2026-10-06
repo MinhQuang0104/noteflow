@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "kind": "story_finalization",
+  "story_id": "1.6",
+  "story_normative_digest": "sha256:e47376dc5ccc2d1d34ec3c0466c2165f1654845b9ef0cdaed222acac0db68d76",
+  "upstream_epic_digest": "sha256:2e9a3f2e425a6e1e3b04a5141098c9d8efe9108b1cbf50bd9978d8163eabfdec",
+  "prepared_from_head": "bc588adb4e65ab30e63345f9e9d4be62289153cb",
+  "slice_set_digest": "sha256:5471e31916a2696253f54b8d5c538bd6c257e1056f1afe9870a77d04c1308767",
+  "receipt_set_digest": "sha256:f55743b19ffc19d6ff372f8642a84c0f93382b82dc7029eeb410084338d4cf44",
+  "ac_coverage_digest": "sha256:92ea7bba48eb2cfc25114c52d5ff483ea833f4ad2624e875442a3c16f6846ccc",
+  "canonical_disclosures_digest": "sha256:adcdb2b1fcb5728183ce666554c0b12ccb81938b17554b46dd0094a596d0c00d",
+  "scope_path_count": 18,
+  "scope_paths_digest": "sha256:0fa7441ba4330706c621e85e78bc051628f3a7326fcc10db3f8075b808ec8a76",
+  "implementation_commit_set_digest": "sha256:9e32d25e510c7db0af31565d097fa9bc19527d7229e75d452529cd5626fa927e",
+  "final_scoped_tree_digest": "sha256:8be3340a8180fadd8c1a82da0a86abb901cf64ea359018e09b26f9425326d70d",
+  "paths_digest": "sha256:0fa7441ba4330706c621e85e78bc051628f3a7326fcc10db3f8075b808ec8a76",
+  "commit_set_digest": "sha256:9e32d25e510c7db0af31565d097fa9bc19527d7229e75d452529cd5626fa927e",
+  "scoped_tree_digest": "sha256:8be3340a8180fadd8c1a82da0a86abb901cf64ea359018e09b26f9425326d70d",
+  "done_gate_disposition": "SATISFIED_WITH_DISCLOSURES",
+  "lifecycle_from": "in-progress",
+  "lifecycle_target": "review",
+  "slice_summaries": [
+    {
+      "id": "A",
+      "status": "reviewed",
+      "checkpoint": "b1731a6707640376cb046be9d77850499bd780d8",
+      "progression_eligible": true,
+      "review_required": true,
+      "review_verdict": "APPROVE",
+      "review_freshness": "FRESH_REUSED"
+    },
+    {
+      "id": "B",
+      "status": "reviewed",
+      "checkpoint": "7bf99467a2dabb7ef2362b816ab410e4823024d4",
+      "progression_eligible": true,
+      "review_required": true,
+      "review_verdict": "APPROVE",
+      "review_freshness": "FRESH_REUSED"
+    },
+    {
+      "id": "C",
+      "status": "reviewed",
+      "checkpoint": "211305dcaee5a6b599c581f47c0e4978c7b1eac8",
+      "progression_eligible": true,
+      "review_required": true,
+      "review_verdict": "APPROVE",
+      "review_freshness": "FRESH_REUSED"
+    },
+    {
+      "id": "D",
+      "status": "reviewed",
+      "checkpoint": "64ca94d4191e0a8978b3c60f18092ea31a26fc1e",
+      "progression_eligible": true,
+      "review_required": true,
+      "review_verdict": "APPROVE",
+      "review_freshness": "FRESH_REUSED"
+    },
+    {
+      "id": "E",
+      "status": "reviewed",
+      "checkpoint": "7fde0a933ce3f749d5c4d923018b6610223b09de",
+      "progression_eligible": true,
+      "review_required": true,
+      "review_verdict": "APPROVE",
+      "review_freshness": "FRESH_REUSED"
+    }
+  ]
+}

@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "story_id": "1.6",
+  "slice_id": "C",
+  "kind": "review",
+  "checkpoint_commit": "211305dcaee5a6b599c581f47c0e4978c7b1eac8",
+  "baseline_commit": "3925efa6fc7bb9cfea676f880e7e229c30d9d5b0",
+  "subject_digest": "sha256:f9c450af54b77765ea9792ee316ad105b4b7b78d53d1384305296c50016294f2",
+  "created_from_head": "211305dcaee5a6b599c581f47c0e4978c7b1eac8",
+  "changed_paths_sha256": "sha256:d64440a6eb066682f7650f58adaa2da97fba7f7f287aa7c1275a37daefdf0d4d",
+  "commands": [
+    {
+      "command": "Manual HIGH-risk review of the exact five-path Slice C diff, 17 evidence units, focused checks, and canonical INCOMPLETE disclosure",
+      "exit_code": 0,
+      "tool": "Codex same-Lead reviewer",
+      "environment": "V4 Lite; story-1-6 linked worktree; implementation checkpoint 211305dcaee5a6b599c581f47c0e4978c7b1eac8"
+    }
+  ],
+  "judgment": "APPROVE",
+  "questions": [
+    {
+      "id": "canonical-gap",
+      "question": "Does Slice C have sufficient focused evidence for T-4/T-5 while canonical status remains INCOMPLETE solely because three changed paths are unmapped?"
+    },
+    {
+      "id": "scope-boundary",
+      "question": "Do these checks cover only the dialog and journal lifecycle work in Slice C, while browser, touch, and screen-reader evidence stays deferred to T-7 in Slice E?"
+    }
+  ],
+  "answers": [
+    {
+      "id": "canonical-gap",
+      "answer": "Approve Slice C only: all seven required focused checks pass, canonical remains INCOMPLETE solely because three changed paths are unmapped, and this limitation is disclosed; this does not mark canonical PASS or complete the Story."
+    },
+    {
+      "id": "scope-boundary",
+      "answer": "Approve for T-4/T-5 only: the reviewed diff and tests match the dialog and journal lifecycle scope; browser, touch, screen-reader, backend, and two-device obligations remain open and are not claimed."
+    }
+  ],
+  "evidence_refs": [
+    {
+      "path": "frontend/src/components/ChallengeJournalEditor.vue",
+      "unit_index": 0,
+      "evidence_set_digest": "34bfe4889f1ee99956db3d7ef506e00f7b517aae52fc4406c11ece244953af0f"
+    },
+    {
+      "path": "frontend/src/components/ChallengeJournalEditor.vue",
+      "unit_index": 1,
+      "evidence_set_digest": "34bfe4889f1ee99956db3d7ef506e00f7b517aae52fc4406c11ece244953af0f"
+    },
+    {
+      "path": "frontend/src/components/ChallengeJournalEditor.vue",
+      "unit_index": 2,
+      "evidence_set_digest": "34bfe4889f1ee99956db3d7ef506e00f7b517aae52fc4406c11ece244953af0f"
+    },
+    {
+      "path": "frontend/src/components/ChallengeJournalEditor.vue",
+      "unit_index": 3,
+      "evidence_set_digest": "34bfe4889f1ee99956db3d7ef506e00f7b517aae52fc4406c11ece244953af0f"
+    },
+    {
+      "path": "frontend/src/components/ChallengeJournalEditor.vue",
+      "unit_index": 4,
+      "evidence_set_digest": "34bfe4889f1ee99956db3d7ef506e00f7b517aae52fc4406c11ece244953af0f"
+    },
+    {
+      "path": "frontend/src/components/ChallengeJournalEditor.vue",
+      "unit_index": 5,
+      "evidence_set_digest": "34bfe4889f1ee99956db3d7ef506e00f7b517aae52fc4406c11ece244953af0f"
+    },
+    {
+      "path": "frontend/src/components/ChallengeJournalEditor.vue",
+      "unit_index": 6,
+      "evidence_set_digest": "34bfe4889f1ee99956db3d7ef506e00f7b517aae52fc4406c11ece244953af0f"
+    },
+    {
+      "path": "frontend/src/components/ContentConflictDialog.vue",
+      "unit_index": 7,
+      "evidence_set_digest": "34bfe4889f1ee99956db3d7ef506e00f7b517aae52fc4406c11ece244953af0f"
+    },
+    {
+      "path": "frontend/src/components/__tests__/ContentConflictDialog.spec.ts",
+      "unit_index": 8,
+      "evidence_set_digest": "34bfe4889f1ee99956db3d7ef506e00f7b517aae52fc4406c11ece244953af0f"
+    },
+    {
+      "path": "frontend/src/views/__tests__/journal-draft-lifecycle.spec.ts",
+      "unit_index": 9,
+      "evidence_set_digest": "34bfe4889f1ee99956db3d7ef506e00f7b517aae52fc4406c11ece244953af0f"
+    },
+    {
+      "path": "frontend/src/views/__tests__/journal-draft-lifecycle.spec.ts",
+      "unit_index": 10,
+      "evidence_set_digest": "34bfe4889f1ee99956db3d7ef506e00f7b517aae52fc4406c11ece244953af0f"
+    },
+    {
+      "path": "frontend/src/views/__tests__/journal-draft-lifecycle.spec.ts",
+      "unit_index": 11,
+      "evidence_set_digest": "34bfe4889f1ee99956db3d7ef506e00f7b517aae52fc4406c11ece244953af0f"
+    },
+    {
+      "path": "frontend/src/views/__tests__/journal.spec.ts",
+      "unit_index": 12,
+      "evidence_set_digest": "34bfe4889f1ee99956db3d7ef506e00f7b517aae52fc4406c11ece244953af0f"
+    },
+    {
+      "path": "frontend/src/views/__tests__/journal.spec.ts",
+      "unit_index": 13,
+      "evidence_set_digest": "34bfe4889f1ee99956db3d7ef506e00f7b517aae52fc4406c11ece244953af0f"
+    },
+    {
+      "path": "frontend/src/views/__tests__/journal.spec.ts",
+      "unit_index": 14,
+      "evidence_set_digest": "34bfe4889f1ee99956db3d7ef506e00f7b517aae52fc4406c11ece244953af0f"
+    },
+    {
+      "path": "frontend/src/views/__tests__/journal.spec.ts",
+      "unit_index": 15,
+      "evidence_set_digest": "34bfe4889f1ee99956db3d7ef506e00f7b517aae52fc4406c11ece244953af0f"
+    },
+    {
+      "path": "frontend/src/views/__tests__/journal.spec.ts",
+      "unit_index": 16,
+      "evidence_set_digest": "34bfe4889f1ee99956db3d7ef506e00f7b517aae52fc4406c11ece244953af0f"
+    }
+  ],
+  "scope_digest": "sha256:2f46241ec254f10cf38b0ed43fef5e0d4a64d256ef22a6c66c8843a06548b1ba",
+  "risk_context_digest": "sha256:54a5ad338aa76d1b6e60a1b073ecb93ce6e9736508edf87586271961e411c46d",
+  "reviewed_commit": "211305dcaee5a6b599c581f47c0e4978c7b1eac8",
+  "reviewer": "same-lead"
+}

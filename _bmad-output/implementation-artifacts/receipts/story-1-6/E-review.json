@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "story_id": "1.6",
+  "slice_id": "E",
+  "kind": "review",
+  "checkpoint_commit": "7fde0a933ce3f749d5c4d923018b6610223b09de",
+  "baseline_commit": "93aa010de4618f803b96ea005db3a520986f0157",
+  "subject_digest": "sha256:e096bcba1d1840169f527d143b76b6af81eaae1028db19d77aa619f8142de77e",
+  "created_from_head": "7fde0a933ce3f749d5c4d923018b6610223b09de",
+  "changed_paths_sha256": "sha256:0ed64dd5e09b4539ddf304b79ccd6cdb27358850db7a8d14ad02027c30d6e1b3",
+  "commands": [
+    {
+      "command": "prepare-change-evidence review attempt-5",
+      "exit_code": 0,
+      "tool": "v4-review-evidence-producer",
+      "environment": "maintenance executor c6afbc752436c76b126d3aa1e889e3f875d4c584"
+    },
+    {
+      "command": "bounded human review decision APPROVE",
+      "exit_code": 0,
+      "tool": "human-review",
+      "environment": "Story 1.6 V4 Lite; T-7 manual screen-reader evidence NOT_RUN"
+    }
+  ],
+  "judgment": "APPROVE",
+  "questions": [
+    {
+      "id": "scope",
+      "question": "Is every changed path of Slice E checkpoint 7fde0a933ce3f749d5c4d923018b6610223b09de covered by fresh evidence, including the approved T-4 E-F1 repair and preserved helper scope?"
+    },
+    {
+      "id": "behavior",
+      "question": "Do the fresh browser, keyboard, mobile and backend results support the conflict-resolution invariants without claiming unrun manual screen-reader evidence?"
+    },
+    {
+      "id": "coverage",
+      "question": "Are canonical NO_APPLICABLE_RECIPE/INCOMPLETE limitations and T-7 manual screen-reader NOT_RUN disclosed unchanged, without converting them to PASS or Human Gate approval?"
+    }
+  ],
+  "answers": [
+    {
+      "id": "scope",
+      "answer": "APPROVE. Fresh attempt-5 change-evidence-set-v1 covers all five changed paths in canonical order and binds checkpoint 7fde0a933ce3f749d5c4d923018b6610223b09de, including the approved T-4 E-F1 repair and preserved helper scope."
+    },
+    {
+      "id": "behavior",
+      "answer": "APPROVE with disclosure. The fresh frontend, backend, browser-context, keyboard and mobile evidence supports the conflict-resolution invariants; manual screen-reader evidence was not run and automated checks are not used as a substitute."
+    },
+    {
+      "id": "coverage",
+      "answer": "APPROVE with disclosure. Canonical verification remains INCOMPLETE/NO_APPLICABLE_RECIPE and T-7 remains NOT_RUN; this review does not convert either into PASS or Human Gate approval."
+    }
+  ],
+  "evidence_refs": [
+    {
+      "path": "frontend/src/components/ContentConflictDialog.vue",
+      "unit_index": 0,
+      "evidence_set_digest": "6ece749a2dc04552fda4b7bb3c918530981c2f38fe479db38564e020de9ee684"
+    },
+    {
+      "path": "frontend/src/components/ContentConflictDialog.vue",
+      "unit_index": 1,
+      "evidence_set_digest": "6ece749a2dc04552fda4b7bb3c918530981c2f38fe479db38564e020de9ee684"
+    },
+    {
+      "path": "frontend/src/components/__tests__/ContentConflictDialog.spec.ts",
+      "unit_index": 2,
+      "evidence_set_digest": "6ece749a2dc04552fda4b7bb3c918530981c2f38fe479db38564e020de9ee684"
+    },
+    {
+      "path": "frontend/src/components/__tests__/ContentConflictDialog.spec.ts",
+      "unit_index": 3,
+      "evidence_set_digest": "6ece749a2dc04552fda4b7bb3c918530981c2f38fe479db38564e020de9ee684"
+    },
+    {
+      "path": "frontend/src/components/__tests__/ContentConflictDialog.spec.ts",
+      "unit_index": 4,
+      "evidence_set_digest": "6ece749a2dc04552fda4b7bb3c918530981c2f38fe479db38564e020de9ee684"
+    },
+    {
+      "path": "tests/e2e/content-conflict.spec.ts",
+      "unit_index": 5,
+      "evidence_set_digest": "6ece749a2dc04552fda4b7bb3c918530981c2f38fe479db38564e020de9ee684"
+    },
+    {
+      "path": "tests/e2e/content-conflict.spec.ts",
+      "unit_index": 6,
+      "evidence_set_digest": "6ece749a2dc04552fda4b7bb3c918530981c2f38fe479db38564e020de9ee684"
+    },
+    {
+      "path": "tests/e2e/helpers/db-helper.php",
+      "unit_index": 7,
+      "evidence_set_digest": "6ece749a2dc04552fda4b7bb3c918530981c2f38fe479db38564e020de9ee684"
+    },
+    {
+      "path": "tests/e2e/helpers/db-state.ts",
+      "unit_index": 8,
+      "evidence_set_digest": "6ece749a2dc04552fda4b7bb3c918530981c2f38fe479db38564e020de9ee684"
+    }
+  ],
+  "scope_digest": "sha256:d85b6efeb532b5552360166d5b33e30a0ad748efaa453a0fcd30637165c28a7a",
+  "risk_context_digest": "sha256:54a5ad338aa76d1b6e60a1b073ecb93ce6e9736508edf87586271961e411c46d",
+  "reviewed_commit": "7fde0a933ce3f749d5c4d923018b6610223b09de",
+  "reviewer": "human"
+}

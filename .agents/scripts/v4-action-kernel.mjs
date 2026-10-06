@@ -4,7 +4,7 @@ import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 
 import { frontmatter, validate as validateStoryPlan } from './check-story-plan.mjs'
-import { receiptDigest } from './check-artifact-contract.mjs'
+import { attemptReceiptPath, readReceipt, receiptDigest } from './check-artifact-contract.mjs'
 import { inspect as inspectSliceVerification } from './check-slice-verification.mjs'
 import { verifyChangedPaths } from './check-verification.mjs'
 import { validateEvidenceSet } from './prepare-change-evidence.mjs'
@@ -264,6 +264,17 @@ function sliceById(plan, sliceId) {
   return slice
 }
 
+function implementationReceiptPath(storyId, slice) {
+  const attemptId = slice?.current_attempt?.attempt_id
+  return Number.isInteger(attemptId) && attemptId > 1
+    ? attemptReceiptPath(storyId, slice.id, attemptId, 'implementation')
+    : `_bmad-output/implementation-artifacts/receipts/story-${storyId.replace('.', '-')}/${slice.id}-implementation.json`
+}
+
+function currentAttemptId(slice) {
+  return Number.isInteger(slice?.current_attempt?.attempt_id) ? slice.current_attempt.attempt_id : 1
+}
+
 function validateMetadataProjection(root, descriptor, checkpoint, metadata) {
   const planText = metadata.files[descriptor.plan_path]
   const generated = frontmatter(planText)
@@ -284,6 +295,8 @@ function validateMetadataProjection(root, descriptor, checkpoint, metadata) {
     if (original.id !== descriptor.slice_id && !sameJson(original, next)) throw new Error('OTHER_SLICE_METADATA_CHANGED')
   }
   const slice = sliceById(generated, descriptor.slice_id)
+  if (!sameJson(slice.attempt_history, descriptor.original_slice.attempt_history) ||
+      !sameJson(slice.current_attempt, descriptor.original_slice.current_attempt)) throw new Error('ATTEMPT_HISTORY_CHANGED')
   const changedDigest = descriptor.schema_version === 2
     ? slice.changed_paths_sha256
     : slice.implementation?.changed_paths_sha256
@@ -327,13 +340,14 @@ function buildPreview(root, request) {
   const storyPath = plan.schema_version === 2 ? plan.story?.path : 'docs/product/epics.md'
   if (!safeRelative(storyPath)) throw new Error('STORY_PATH_INVALID')
   const owned = normalizePaths(root, request.owned_paths, 'IMPLEMENTATION_SCOPE')
+  const expectedReceiptPath = plan.schema_version === 2 ? implementationReceiptPath(request.story_id, slice) : null
   const receiptPath = plan.schema_version === 2
-    ? (request.receipt_path ?? `_bmad-output/implementation-artifacts/receipts/story-${request.story_id.replace('.', '-')}/${request.slice_id}-implementation.json`)
+    ? (request.receipt_path ?? expectedReceiptPath)
     : null
   const metadata = [planPath, ...(receiptPath ? [receiptPath] : [])]
   ensureUniquePathGroups(owned, metadata, storyPath, receiptPath)
   if (receiptPath && !safeRelative(receiptPath)) throw new Error('RECEIPT_PATH_INVALID')
-  if (receiptPath && receiptPath !== `_bmad-output/implementation-artifacts/receipts/story-${request.story_id.replace('.', '-')}/${request.slice_id}-implementation.json`) throw new Error('RECEIPT_PATH_IDENTITY_MISMATCH')
+  if (receiptPath && receiptPath !== expectedReceiptPath) throw new Error('RECEIPT_PATH_IDENTITY_MISMATCH')
   if (receiptPath && git(root, ['cat-file', '-e', `${head}:${receiptPath}`]).status === 0) throw new Error('IMPLEMENTATION_RECEIPT_ALREADY_EXISTS')
   const commands = commandRecords(request)
   const semanticCoverage = request.semantic_coverage
@@ -384,6 +398,7 @@ function buildPreview(root, request) {
     snapshot,
     metadata_paths: metadata,
     receipt_path: receiptPath,
+    attempt_id: currentAttemptId(slice),
     plan_template: request.plan_template,
     plan_template_digest: hash(Buffer.from(request.plan_template)),
     commands,
@@ -508,6 +523,7 @@ function buildMetadata(root, preview, checkpoint) {
     story_id: preview.story_id,
     slice_id: preview.slice_id,
     kind: 'implementation',
+    ...(preview.attempt_id > 1 ? { attempt_id: preview.attempt_id } : {}),
     checkpoint_commit: checkpoint.checkpoint_commit,
     baseline_commit: checkpoint.baseline_commit,
     subject_digest: checkpoint.subject_digest,
@@ -538,6 +554,255 @@ function buildMetadata(root, preview, checkpoint) {
   validateMetadataProjection(root, descriptor, checkpoint, metadata)
   metadata.checkpoint = checkpoint
   return metadata
+}
+
+// Rework is a control-plane maintenance action.  It only commits a new Plan
+// projection; the next invocation must still run implement_slice for the same
+// slice.  Historical attempts are copied into an append-only ledger and the
+// new attempt reserves all three receipt identities before any product work.
+const REWORK_AUTHORIZATION = 'V4_LITE_REWORK'
+
+function assertReworkRequestShape(request, operation) {
+  if (!request || typeof request !== 'object' || Array.isArray(request)) throw new Error('INPUT_REQUIRED')
+  if (request.operation !== undefined && request.operation !== operation) throw new Error('OPERATION_MISMATCH')
+  if (request.action !== 'rework_slice') throw new Error('ACTION_MISMATCH')
+  if (request.maintenance_authorization !== REWORK_AUTHORIZATION) throw new Error('MAINTENANCE_AUTHORIZATION_REQUIRED')
+  if (!STORY_ID.test(request.story_id ?? '')) throw new Error('INVALID_STORY_ID')
+  if (!SLICE_ID.test(request.slice_id ?? '')) throw new Error('INVALID_SLICE_ID')
+  if (!SHA.test(request.expected_head ?? '')) throw new Error('INVALID_EXPECTED_HEAD')
+  if (Object.hasOwn(request, 'approval') || Object.hasOwn(request, 'human_approval') || Object.hasOwn(request, 'next_action')) {
+    throw new Error('REWORK_AUTHORITY_FORBIDDEN')
+  }
+}
+
+function normalizedFindings(value) {
+  if (!Array.isArray(value) || !value.length) throw new Error('REWORK_FINDINGS_REQUIRED')
+  const findings = value.map(item => {
+    if (typeof item === 'string' && item.trim()) return item.trim()
+    if (!item || typeof item !== 'object' || Array.isArray(item) || typeof item.id !== 'string' || !item.id ||
+        typeof item.summary !== 'string' || !item.summary.trim()) throw new Error('REWORK_FINDING_INVALID')
+    if (item.judgment === 'APPROVE' || item.decision === 'APPROVE') throw new Error('REWORK_APPROVAL_FORBIDDEN')
+    return JSON.parse(JSON.stringify(item))
+  })
+  return findings
+}
+
+function reworkChangedPaths(root, slice) {
+  const result = git(root, ['diff', '--name-only', '--diff-filter=ACDMRTUXB', `${slice.baseline_commit}..${slice.checkpoint_commit}`, '--'])
+  if (result.status !== 0) throw new Error('REWORK_CHECKPOINT_DIFF_FAILED')
+  return canonicalPaths(result.stdout.split(/\r?\n/))
+}
+
+function reworkAttemptSnapshot(slice) {
+  return {
+    attempt_id: currentAttemptId(slice),
+    status: slice.status,
+    baseline_commit: slice.baseline_commit,
+    checkpoint_commit: slice.checkpoint_commit,
+    subject_digest: slice.subject_digest,
+    changed_paths_sha256: slice.changed_paths_sha256,
+    receipt_refs: JSON.parse(JSON.stringify(slice.receipt_refs ?? {})),
+    ...(slice.verification !== undefined ? { verification: JSON.parse(JSON.stringify(slice.verification)) } : {}),
+    ...(slice.review !== undefined ? { review: JSON.parse(JSON.stringify(slice.review)) } : {})
+  }
+}
+
+function expectedReworkAttempt(storyId, sliceId, attemptId) {
+  return {
+    attempt_id: attemptId,
+    receipt_refs: Object.fromEntries(['implementation', 'verification', 'review'].map(kind => [kind, {
+      path: attemptReceiptPath(storyId, sliceId, attemptId, kind)
+    }]))
+  }
+}
+
+function validateReworkProjection(root, request, originalPlan, generated, oldSnapshot, newAttempt) {
+  if (generated.schema_version !== originalPlan.schema_version || generated.story_id !== request.story_id) throw new Error('PLAN_IDENTITY_CHANGED')
+  if (generated.lifecycle_snapshot !== originalPlan.lifecycle_snapshot || generated.execution_status !== originalPlan.execution_status) throw new Error('PLAN_LIFECYCLE_CHANGED')
+  if (generated.current_slice !== request.slice_id || generated.next_action?.kind !== 'implement_slice' || generated.next_action?.target !== request.slice_id) throw new Error('REWORK_SAME_SLICE_IMPLEMENTATION_REQUIRED')
+  if (generated.human_approval != null || generated.finalization != null) throw new Error('COMPLETION_AUTHORITY_FORBIDDEN')
+  assertUnchanged(originalPlan, generated, [
+    'schema_version', 'story_id', 'story', 'upstream_epic', 'sprint_key', 'lifecycle_snapshot',
+    'execution_status', 'planning_approval', 'readiness', 'current_slice', 'risk', 'blockers',
+    'unresolved_questions', 'checkpoints', 'human_approval', 'finalization'
+  ])
+  const originalSlices = originalPlan.slices ?? []
+  const generatedSlices = generated.slices ?? []
+  if (generatedSlices.length !== originalSlices.length) throw new Error('PLAN_SLICE_SET_CHANGED')
+  for (const original of originalSlices) {
+    const next = generated.slices?.find(item => item?.id === original.id)
+    if (!next) throw new Error('PLAN_SLICE_SET_CHANGED')
+    if (original.id !== request.slice_id && !sameJson(original, next)) throw new Error('OTHER_SLICE_METADATA_CHANGED')
+  }
+  const slice = sliceById(generated, request.slice_id)
+  if (slice.status !== 'pending') throw new Error('REWORK_PENDING_PROJECTION_REQUIRED')
+  if (slice.baseline_commit || slice.checkpoint_commit || slice.subject_digest || slice.changed_paths_sha256 || slice.receipt_refs) {
+    throw new Error('REWORK_OLD_CHECKPOINT_MUST_MOVE_TO_HISTORY')
+  }
+  const originalHistory = originalPlan.slices.find(item => item.id === request.slice_id)?.attempt_history ?? []
+  if (!sameJson(slice.attempt_history, [...originalHistory, oldSnapshot])) throw new Error('REWORK_HISTORY_APPEND_ONLY_REQUIRED')
+  if (!sameJson(slice.current_attempt, newAttempt)) throw new Error('REWORK_ATTEMPT_IDENTITY_MISMATCH')
+  const successor = generated.slices?.find(item => item.id === 'E')
+  if (successor && successor.status !== 'pending') throw new Error('REWORK_SUCCESSOR_ALREADY_STARTED')
+  const checked = validateStoryPlan(root, request.story_id)
+  if (checked.status !== 'READY') throw new Error(`POST_REWORK_PLAN_NOT_READY:${checked.reasons.join(',')}`)
+}
+
+function validateReworkState(root, request, { template = true } = {}) {
+  assertReworkRequestShape(request, 'prepare-rework')
+  if (template && (typeof request.plan_template !== 'string' || !request.plan_template)) throw new Error('PLAN_TEMPLATE_REQUIRED')
+  const pointer = assertPointerIdle(root)
+  const head = gitOutput(root, ['rev-parse', 'HEAD'])
+  if (head !== request.expected_head) throw new Error('EXPECTED_HEAD_MISMATCH')
+  const { planPath, text: planText, plan } = planAtHead(root, request.story_id)
+  if (plan.story_id !== request.story_id) throw new Error('STORY_ID_MISMATCH')
+  const checked = validateStoryPlan(root, request.story_id)
+  if (checked.status !== 'READY') throw new Error(`PLAN_NOT_READY:${checked.status}:${checked.reasons.join(',')}`)
+  const slice = sliceById(plan, request.slice_id)
+  if (plan.current_slice !== request.slice_id || plan.next_action?.kind !== 'verify_slice' || plan.next_action?.target !== request.slice_id) throw new Error('REWORK_PLAN_ACTION_MISMATCH')
+  if (!['checkpointed', 'verified'].includes(slice.status)) throw new Error('REWORK_SLICE_NOT_REWORKABLE')
+  if (slice.status === 'reviewed' || slice.review?.verdict === 'APPROVE') throw new Error('REWORK_AFTER_REVIEW_FORBIDDEN')
+  const successor = plan.slices?.find(item => item.id === 'E')
+  if (successor && successor.status !== 'pending') throw new Error('REWORK_SUCCESSOR_ALREADY_STARTED')
+  if (slice.checkpoint_commit !== request.old_checkpoint_commit) throw new Error('REWORK_OLD_CHECKPOINT_MISMATCH')
+  const implementationRef = slice.receipt_refs?.implementation
+  if (!implementationRef || implementationRef.digest !== request.old_receipt_digest) throw new Error('REWORK_OLD_RECEIPT_MISMATCH')
+  const oldReceipt = readReceipt(root, plan, request.slice_id, 'implementation')
+  if (oldReceipt.errors.length) throw new Error(`REWORK_OLD_RECEIPT_INVALID:${oldReceipt.errors.join(',')}`)
+  const changedPaths = reworkChangedPaths(root, slice)
+  if (changedPaths.length !== 2) throw new Error('REWORK_EXACT_TWO_PATHS_REQUIRED')
+  if (!Array.isArray(request.rework_paths) || !sameJson(canonicalPaths(request.rework_paths), changedPaths)) throw new Error('REWORK_SCOPE_MISMATCH')
+  const findings = normalizedFindings(request.findings)
+  const newAttempt = expectedReworkAttempt(request.story_id, request.slice_id, currentAttemptId(slice) + 1)
+  const oldSnapshot = reworkAttemptSnapshot(slice)
+  const generated = template ? frontmatter(request.plan_template) : null
+  if (generated) validateReworkProjection(root, request, plan, generated, oldSnapshot, newAttempt)
+  const identity = transactionIdentity(root, {
+    action: 'rework_slice', story_id: request.story_id, slice_id: request.slice_id,
+    transaction_id: request.transaction_id ?? 'rework-preview'
+  })
+  if (existsSync(identity.lockPath)) {
+    const lock = (() => { try { return JSON.parse(readFileSync(identity.lockPath, 'utf8')) } catch { return null } })()
+    if (lock?.transaction_id !== request.transaction_id) throw new Error('TRANSACTION_SCOPE_LOCKED')
+  }
+  return { pointer, head, planPath, planText, plan, slice, checked, oldReceipt: oldReceipt.receipt,
+    oldSnapshot, newAttempt, findings, changedPaths, identity }
+}
+
+function buildReworkPreview(root, request) {
+  const state = validateReworkState(root, request)
+  const transactionId = request.transaction_id ?? randomUUID()
+  const preview = {
+    schema_version: 1,
+    action: 'rework_slice',
+    operation: 'apply-rework',
+    story_id: request.story_id,
+    slice_id: request.slice_id,
+    transaction_id: transactionId,
+    expected_head: state.head,
+    plan_path: state.planPath,
+    original_plan: state.plan,
+    original_slice: state.slice,
+    plan_digest: hash(Buffer.from(state.planText)),
+    pointer_digest: state.pointer.digest,
+    old_checkpoint_commit: request.old_checkpoint_commit,
+    old_receipt_digest: request.old_receipt_digest,
+    old_receipt: state.oldReceipt,
+    old_snapshot: state.oldSnapshot,
+    new_attempt: state.newAttempt,
+    findings: state.findings,
+    findings_digest: digestValue(state.findings),
+    rework_paths: state.changedPaths,
+    metadata_paths: [state.planPath],
+    plan_template: request.plan_template,
+    plan_template_digest: hash(Buffer.from(request.plan_template)),
+    metadata_message: request.metadata_message ?? `chore(story-${request.story_id}): prepare ${request.slice_id} rework`,
+    next_action: { kind: 'implement_slice', target: request.slice_id },
+    stop_condition: 'IMPLEMENT_SAME_SLICE_NEW_ATTEMPT'
+  }
+  preview.fingerprint = previewFingerprint(preview)
+  return { status: 'READY', ready: true, valid: true, action: 'rework_slice', operation: 'prepare-rework', fingerprint: preview.fingerprint, preview }
+}
+
+function reworkDescriptorFromPreview(root, request, preview, recovery = false) {
+  if (!preview || typeof preview !== 'object') throw new Error('PREVIEW_REQUIRED')
+  if (preview.fingerprint !== previewFingerprint(preview)) throw new Error('STALE_PREVIEW')
+  if (preview.action !== 'rework_slice' || preview.story_id !== request.story_id || preview.slice_id !== request.slice_id) throw new Error('PREVIEW_IDENTITY_MISMATCH')
+  assertReworkRequestShape({ ...request, operation: 'apply-rework' }, 'apply-rework')
+  if (request.transaction_id && request.transaction_id !== preview.transaction_id) throw new Error('TRANSACTION_ID_MISMATCH')
+  const pointer = assertPointerIdle(root)
+  if (pointer.digest !== preview.pointer_digest) throw new Error('STALE_POINTER_PREVIEW')
+  if (!recovery && gitOutput(root, ['rev-parse', 'HEAD']) !== preview.expected_head) throw new Error('STALE_HEAD')
+  if (!recovery && hash(Buffer.from(readText(root, preview.plan_path))) !== preview.plan_digest) throw new Error('STALE_PLAN_PREVIEW')
+  if (request.plan_template !== undefined && request.plan_template !== preview.plan_template) throw new Error('STALE_PLAN_TEMPLATE')
+  if (request.old_checkpoint_commit !== undefined && request.old_checkpoint_commit !== preview.old_checkpoint_commit) throw new Error('STALE_REWORK_BINDING')
+  if (request.old_receipt_digest !== undefined && request.old_receipt_digest !== preview.old_receipt_digest) throw new Error('STALE_REWORK_BINDING')
+  if (request.rework_paths !== undefined && !sameJson(canonicalPaths(request.rework_paths), preview.rework_paths)) throw new Error('STALE_REWORK_SCOPE')
+  if (request.findings !== undefined && !sameJson(normalizedFindings(request.findings), preview.findings)) throw new Error('STALE_REWORK_FINDINGS')
+  if (!recovery) validateReworkState(root, { ...request, operation: 'prepare-rework' })
+  const descriptor = {
+    action: 'rework_slice', story_id: preview.story_id, slice_id: preview.slice_id,
+    transaction_id: preview.transaction_id, expected_head: preview.expected_head,
+    checkpoint_commit: preview.expected_head, baseline_commit: preview.expected_head,
+    preview_fingerprint: preview.fingerprint, metadata_paths: preview.metadata_paths,
+    metadata_message: preview.metadata_message, next_action: preview.next_action,
+    stop_condition: preview.stop_condition, recovery, recovery_checkpoint: request.recovery_checkpoint ?? request.recovery?.checkpoint_commit,
+    fail_at: request.fail_at ?? request.failure_phase,
+    buildMetadata: () => ({ paths: preview.metadata_paths, files: { [preview.plan_path]: preview.plan_template } }),
+    readMetadata: freshRoot => ({ paths: preview.metadata_paths, files: { [preview.plan_path]: readText(freshRoot, preview.plan_path) } }),
+    recheck: recovery ? undefined : freshRoot => {
+      if (gitOutput(freshRoot, ['rev-parse', 'HEAD']) !== preview.expected_head) throw new Error('STALE_HEAD')
+      const freshPointer = assertPointerIdle(freshRoot)
+      if (freshPointer.digest !== preview.pointer_digest) throw new Error('STALE_POINTER_PREVIEW')
+      if (hash(Buffer.from(readText(freshRoot, preview.plan_path))) !== preview.plan_digest) throw new Error('STALE_PLAN_PREVIEW')
+      validateReworkState(freshRoot, { ...request, operation: 'prepare-rework' })
+    },
+    validateMetadata: metadata => {
+      const generated = frontmatter(metadata.files[preview.plan_path])
+      validateReworkProjection(root, request, preview.original_plan, generated, preview.old_snapshot, preview.new_attempt)
+    },
+    validateFinal: metadata => {
+      const generated = frontmatter(metadata.files[preview.plan_path])
+      validateReworkProjection(root, request, preview.original_plan, generated, preview.old_snapshot, preview.new_attempt)
+    }
+  }
+  return descriptor
+}
+
+function reworkError(error) {
+  if (error.message === 'WORKTREE_SCOPE_MISMATCH') return blocked('DIRTY_SCOPE_MISMATCH')
+  if (error.message.includes('DIRTY') || error.message.includes('WORKTREE') || error.message.includes('LOCKED') || error.message.includes('REWORK_') ||
+      error.message.includes('PLAN_') || error.message.includes('ATTEMPT') || error.message.includes('COMPLETION_AUTHORITY') ||
+      error.message.includes('POST_REWORK')) return blocked(error.message)
+  if (error.message.includes('STALE') || error.message.includes('MISMATCH') || error.message === 'EXPECTED_HEAD_MISMATCH') return stale(error.message)
+  if (['INPUT_REQUIRED', 'INVALID_STORY_ID', 'INVALID_SLICE_ID', 'INVALID_EXPECTED_HEAD', 'ACTION_MISMATCH',
+    'OPERATION_MISMATCH', 'MAINTENANCE_AUTHORIZATION_REQUIRED', 'REWORK_AUTHORITY_FORBIDDEN'].includes(error.message)) return invalid(error.message)
+  return errorResult(error)
+}
+
+export function prepareRework(root, request = {}) {
+  observeActionStarted(path.resolve(root), request, 'prepare-rework')
+  let result
+  try { result = buildReworkPreview(path.resolve(root), request) } catch (error) { result = reworkError(error) }
+  observeActionFinished(path.resolve(root), request, 'prepare-rework', result)
+  return result
+}
+
+export function applyRework(root, request = {}) {
+  observeActionStarted(path.resolve(root), request, 'apply-rework')
+  let result
+  try {
+    root = path.resolve(root)
+    const recovery = request.recovery_authorized === true || request.recovery?.authorized === true
+    const descriptor = reworkDescriptorFromPreview(root, request, request.preview, recovery)
+    result = executeMetadataTransaction(root, descriptor)
+    if (result.status === 'ERROR' && result.reasons?.[0]) result = reworkError(new Error(result.reasons[0]))
+    if (result.status === 'APPLIED' || result.status === 'NOOP') {
+      result = { ...result, action: 'rework_slice', operation: 'apply-rework', next_action: result.next_action ?? descriptor.next_action }
+    }
+  } catch (error) { result = reworkError(error) }
+  observeActionFinished(path.resolve(root), request, 'apply-rework', result)
+  return result
 }
 
 function buildRequestFromPreview(preview, request, operation) {
@@ -592,8 +857,11 @@ function exactList(left, right) {
   return Array.isArray(left) && Array.isArray(right) && left.length === right.length && left.every((item, index) => item === right[index])
 }
 
-function verificationReceiptPath(storyId, sliceId, kind) {
-  return `_bmad-output/implementation-artifacts/receipts/story-${storyId.replace('.', '-')}/${sliceId}-${kind}.json`
+function verificationReceiptPath(storyId, sliceId, kind, slice = null) {
+  const attemptId = currentAttemptId(slice)
+  return attemptId > 1
+    ? attemptReceiptPath(storyId, sliceId, attemptId, kind)
+    : `_bmad-output/implementation-artifacts/receipts/story-${storyId.replace('.', '-')}/${sliceId}-${kind}.json`
 }
 
 function planAtHead(root, storyId) {
@@ -714,9 +982,12 @@ function buildVerificationPreview(root, request) {
   const risk = riskLevel(plan, request)
   const checkSpecs = verificationCheckSpecs(request)
   const semanticCoverage = request.semantic_coverage ?? null
-  const verificationReceipt = request.verification_receipt_path ?? verificationReceiptPath(request.story_id, request.slice_id, 'verification')
-  const reviewReceipt = request.review_receipt_path ?? verificationReceiptPath(request.story_id, request.slice_id, 'review')
+  const expectedVerificationReceipt = verificationReceiptPath(request.story_id, request.slice_id, 'verification', slice)
+  const expectedReviewReceipt = verificationReceiptPath(request.story_id, request.slice_id, 'review', slice)
+  const verificationReceipt = request.verification_receipt_path ?? expectedVerificationReceipt
+  const reviewReceipt = request.review_receipt_path ?? expectedReviewReceipt
   if (!safeRelative(verificationReceipt) || !safeRelative(reviewReceipt)) throw new Error('RECEIPT_PATH_INVALID')
+  if (verificationReceipt !== expectedVerificationReceipt || reviewReceipt !== expectedReviewReceipt) throw new Error('RECEIPT_PATH_IDENTITY_MISMATCH')
   if (git(root, ['cat-file', '-e', `${head}:${verificationReceipt}`]).status === 0) throw new Error('VERIFICATION_RECEIPT_ALREADY_EXISTS')
   if (git(root, ['cat-file', '-e', `${head}:${reviewReceipt}`]).status === 0) throw new Error('REVIEW_RECEIPT_ALREADY_EXISTS')
   const nextAction = successorFor(plan, request.slice_id)
@@ -733,6 +1004,7 @@ function buildVerificationPreview(root, request) {
     story_path: storyPath,
     original_plan: plan,
     original_slice: slice,
+    attempt_id: currentAttemptId(slice),
     plan_digest: planDigest,
     story_digest: hash(readFileSync(safeFile(root, storyPath))),
     policy: { paths: policy.paths, files: policy.files, digest: policy.digest },
@@ -986,6 +1258,7 @@ function buildVerificationMetadata(root, preview, outcome, targetStatus, review 
     story_id: preview.story_id,
     slice_id: preview.slice_id,
     kind: 'verification',
+    ...(preview.attempt_id > 1 ? { attempt_id: preview.attempt_id } : {}),
     checkpoint_commit: preview.checkpoint_commit,
     baseline_commit: preview.baseline_commit,
     subject_digest: preview.subject_digest,
@@ -1011,6 +1284,7 @@ function buildVerificationMetadata(root, preview, outcome, targetStatus, review 
       story_id: preview.story_id,
       slice_id: preview.slice_id,
       kind: 'review',
+      ...(preview.attempt_id > 1 ? { attempt_id: preview.attempt_id } : {}),
       checkpoint_commit: preview.checkpoint_commit,
       baseline_commit: preview.baseline_commit,
       subject_digest: preview.subject_digest,
@@ -1099,6 +1373,8 @@ function validateVerificationMetadata(root, preview, metadata) {
     if (original.id !== preview.slice_id && !sameJson(original, next)) throw new Error('OTHER_SLICE_METADATA_CHANGED')
   }
   const slice = sliceById(generated, preview.slice_id)
+  if (!sameJson(slice.attempt_history, preview.original_slice.attempt_history) ||
+      !sameJson(slice.current_attempt, preview.original_slice.current_attempt)) throw new Error('ATTEMPT_HISTORY_CHANGED')
   if (slice.status !== metadata.target_status || slice.baseline_commit !== preview.baseline_commit ||
       slice.checkpoint_commit !== preview.checkpoint_commit || slice.subject_digest !== preview.subject_digest ||
       slice.changed_paths_sha256 !== preview.changed_paths_sha256) throw new Error('VERIFICATION_SCOPE_MISMATCH')
@@ -1318,6 +1594,7 @@ export function recordSliceReview(root, request = {}) {
 export function prepareAction(root, request = {}) {
   try {
     root = path.resolve(root)
+    if (request?.action === 'rework_slice') return buildReworkPreview(root, request)
     if (request?.action === 'verify_slice') return buildVerificationPreview(root, request)
     return buildPreview(root, request)
   }

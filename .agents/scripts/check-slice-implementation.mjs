@@ -5,7 +5,7 @@ import { spawnSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
 
 import { frontmatter, validate as validateStoryPlan } from './check-story-plan.mjs'
-import { validateReceipt } from './check-artifact-contract.mjs'
+import { attemptReceiptPath, validateReceipt } from './check-artifact-contract.mjs'
 
 const CODES = { READY: 0, RECONCILIATION_REQUIRED: 1, STALE: 2, BLOCKED: 3, INVALID: 4, ERROR: 5 }
 const SHA = /^[0-9a-f]{40,64}$/
@@ -142,6 +142,12 @@ function inspectImplementationMetadata(root, result, slice, planPath, plan) {
   const implementation = slice.implementation
   const baseline = slice.baseline_commit
   const checkpoint = slice.checkpoint_commit
+  const attemptId = slice.current_attempt?.attempt_id ?? 1
+  result.attemptId = attemptId
+  result.historicalAttemptCount = Array.isArray(slice.attempt_history) ? slice.attempt_history.length : 0
+  if (plan.schema_version === 2 && attemptId > 1 && slice.receipt_refs?.implementation?.path !== attemptReceiptPath(plan.story_id, slice.id, attemptId, 'implementation')) {
+    result.reasons.push('CURRENT_ATTEMPT_RECEIPT_PATH_MISMATCH')
+  }
   if (!commitExists(root, baseline)) result.reasons.push('BASELINE_COMMIT_INVALID')
   if (!commitExists(root, checkpoint)) result.reasons.push('CHECKPOINT_COMMIT_INVALID')
   if (result.reasons.includes('BASELINE_COMMIT_INVALID') || result.reasons.includes('CHECKPOINT_COMMIT_INVALID')) return false
@@ -180,7 +186,7 @@ function inspectImplementationMetadata(root, result, slice, planPath, plan) {
   result.candidateChangedPaths = changedPaths
   return !result.reasons.some(reason => [
     'BASELINE_NOT_ANCESTOR_OF_CHECKPOINT', 'CHECKPOINT_NOT_ANCESTOR', 'EMPTY_IMPLEMENTATION_CHECKPOINT',
-    'IMPLEMENTATION_CHECKPOINT_CONTAINS_PLAN', 'IMPLEMENTATION_METADATA_REQUIRED',
+    'IMPLEMENTATION_CHECKPOINT_CONTAINS_PLAN', 'IMPLEMENTATION_METADATA_REQUIRED', 'CURRENT_ATTEMPT_RECEIPT_PATH_MISMATCH',
     'IMPLEMENTATION_CHANGED_PATHS_MISMATCH', 'IMPLEMENTATION_CHANGED_PATH_DIGEST_MISMATCH',
     'IMPLEMENTATION_FOCUSED_CHECKS_INVALID', 'IMPLEMENTATION_RED_GREEN_EVIDENCE_INVALID',
     'INVALID_RECEIPT_REF', 'INVALID_RECEIPT_FILE', 'RECEIPT_DIGEST_MISMATCH', 'STORY_ID_MISMATCH',
@@ -284,6 +290,8 @@ export function inspect(root, storyId, sliceId, options = {}) {
     return finish(result, 'INVALID')
   }
   result.sliceStatus = slice.status
+  result.attemptId = slice.current_attempt?.attempt_id ?? 1
+  result.historicalAttemptCount = Array.isArray(slice.attempt_history) ? slice.attempt_history.length : 0
   result.blockers = Array.isArray(plan.blockers) ? plan.blockers : []
   result.unresolvedQuestions = Array.isArray(plan.unresolved_questions) ? plan.unresolved_questions : []
   result.dependencies = (slice.depends_on ?? []).map(id => dependencyEntry(plan, id))

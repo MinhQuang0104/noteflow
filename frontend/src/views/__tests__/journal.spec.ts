@@ -177,9 +177,14 @@ test('rejects whitespace-only journal text without sending a mutation', async ()
   expect(wrapper.find('#journal-save-status').text()).not.toContain('Đã lưu nhật ký')
 })
 
-test('preserves a dirty draft after a stale journal conflict and exposes the saved server snapshot', async () => {
-  const saveSpy = vi.spyOn(challengesApi, 'saveChallengeJournal').mockRejectedValue(
-    new challengesApi.ChallengeApiError(
+test('preserves both journal versions until the owner explicitly confirms the server choice', async () => {
+  const serverSnapshot = {
+    ...emptyJournal,
+    journal: 'Nội dung đã lưu trên thiết bị khác.',
+    journal_version: 2,
+  }
+  const saveSpy = vi.spyOn(challengesApi, 'saveChallengeJournal')
+    .mockRejectedValueOnce(new challengesApi.ChallengeApiError(
       'Xung đột phiên bản.',
       409,
       {
@@ -187,14 +192,10 @@ test('preserves a dirty draft after a stale journal conflict and exposes the sav
         code: 'version_conflict',
         resource_id: challenge.id,
         current_version: 2,
-        current_snapshot: {
-          ...emptyJournal,
-          journal: 'Nội dung đã lưu trên thiết bị khác.',
-          journal_version: 2,
-        },
+        current_snapshot: serverSnapshot,
       },
-    ),
-  )
+    ))
+    .mockResolvedValueOnce({ journal: serverSnapshot, account_revision: 2, data_epoch: 1 })
   const wrapper = await mountChallengeDetail()
 
   await wrapper.get('#journal-editor').setValue('Bản nháp chưa gửi của tôi.')
@@ -203,14 +204,30 @@ test('preserves a dirty draft after a stale journal conflict and exposes the sav
 
   expect(saveSpy).toHaveBeenCalledTimes(1)
   expect((wrapper.get('#journal-editor').element as HTMLTextAreaElement).value).toBe('Bản nháp chưa gửi của tôi.')
-  expect(wrapper.get('#journal-conflict-alert').text()).toContain('Nội dung đã lưu trên thiết bị khác.')
+  expect(wrapper.get('#journal-conflict-alert').text()).not.toContain('Nội dung đã lưu trên thiết bị khác.')
   expect(wrapper.get('#journal-conflict-alert').text()).toContain('Bản đang nhập vẫn được giữ nguyên')
   expect(wrapper.find('#journal-save-status').exists()).toBe(false)
   expect(wrapper.get('#journal-save-btn').attributes('disabled')).toBeDefined()
 
-  await wrapper.get('#journal-use-server-btn').trigger('click')
+  await wrapper.get('#journal-conflict-open').trigger('click')
+  const dialog = wrapper.get('#content-conflict-dialog')
+  expect(dialog.text()).toContain('Bản nháp chưa gửi của tôi.')
+  expect(dialog.text()).toContain('Nội dung đã lưu trên thiết bị khác.')
+  expect(wrapper.findAll('#content-conflict-dialog input:checked')).toHaveLength(0)
+
+  await wrapper.get('#conflict-server').setValue()
+  expect((wrapper.get('#journal-editor').element as HTMLTextAreaElement).value).toBe('Bản nháp chưa gửi của tôi.')
+  await wrapper.get('#content-conflict-confirm').trigger('click')
+  await flushPromises()
+
+  expect(saveSpy).toHaveBeenCalledTimes(2)
+  expect(saveSpy.mock.calls[1]?.[2]).toMatchObject({
+    base_version: 2,
+    journal: 'Nội dung đã lưu trên thiết bị khác.',
+  })
   expect((wrapper.get('#journal-editor').element as HTMLTextAreaElement).value).toBe('Nội dung đã lưu trên thiết bị khác.')
   expect(wrapper.find('#journal-conflict-alert').exists()).toBe(false)
+  expect(wrapper.find('#content-conflict-dialog').attributes('open')).toBeUndefined()
 })
 
 test('keeps the editor editable while saving and does not mark an older ACK as saved', async () => {
@@ -232,7 +249,7 @@ test('keeps the editor editable while saving and does not mark an older ACK as s
   await vi.waitFor(() => expect(challengesApi.saveChallengeJournal).toHaveBeenCalledOnce())
 
   expect(wrapper.get('#journal-editor').attributes('disabled')).toBeUndefined()
-  expect(wrapper.get('[role="status"]').text()).toContain('Đang lưu')
+  expect(wrapper.get('#journal-save-status').text()).toContain('Đang lưu')
 
   await wrapper.get('#journal-editor').setValue('revision two')
   resolveSave({
@@ -243,13 +260,13 @@ test('keeps the editor editable while saving and does not mark an older ACK as s
   await flushPromises()
 
   expect((wrapper.get('#journal-editor').element as HTMLTextAreaElement).value).toBe('revision two')
-  expect(wrapper.get('[role="status"]').text()).toContain('Chưa lưu thay đổi')
-  expect(wrapper.get('[role="status"]').text()).not.toContain('Đã lưu nhật ký')
+  expect(wrapper.get('#journal-save-status').text()).toContain('Chưa lưu thay đổi')
+  expect(wrapper.get('#journal-save-status').text()).not.toContain('Đã lưu nhật ký')
 
   await wrapper.get('#journal-form').trigger('submit.prevent')
   await flushPromises()
   expect(save).toHaveBeenCalledTimes(2)
-  expect(wrapper.get('[role="status"]').text()).toContain('Đã lưu nhật ký')
+  expect(wrapper.get('#journal-save-status').text()).toContain('Đã lưu nhật ký')
 })
 
 test('retains resource drafts across challenge changes and editor remounts', async () => {

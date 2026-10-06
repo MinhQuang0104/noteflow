@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 
 import {
   getChallengeJournal,
   type JournalReadResult,
 } from '../api/challenges'
+import ContentConflictDialog from './ContentConflictDialog.vue'
 import { useAccountStore } from '../stores/account'
 import { useAuthStore } from '../stores/auth'
 import { useJournalDraftsStore } from '../stores/journalDrafts'
@@ -51,6 +52,8 @@ const localValidationError = ref<string | null>(null)
 const localActionError = ref<string | null>(null)
 const showSaveStatus = ref(false)
 const epochChangeBlocked = ref(false)
+const isConflictDialogOpen = ref(false)
+const journalEditor = ref<HTMLTextAreaElement | null>(null)
 const isMutationBlocked = computed(() => {
   if (account.status !== 'ready' || !account.context) return true
   return account.context.write_state !== 'open'
@@ -73,16 +76,20 @@ const saveStatus = computed(() => {
   if (record.value.status === 'dirty') return 'Chưa lưu thay đổi.'
   return null
 })
+const conflictResourceLabel = computed(() => `Challenge ${props.challengeId} · ngày ${props.localDate}`)
+const conflictClientRevision = computed(() => record.value?.clientRevision ?? 0)
+const conflictDialogError = computed(() => localActionError.value ?? record.value?.error?.message ?? null)
 
 watch(journalData, (result) => {
   if (result) journalDrafts.hydrate(result.journal)
 }, { immediate: true })
 
-watch([journalResourceKey, () => auth.generation], () => {
+watch([journalResourceKey, () => auth.generation, () => auth.status, () => auth.owner?.id], () => {
   localValidationError.value = null
   localActionError.value = null
   showSaveStatus.value = false
   epochChangeBlocked.value = false
+  isConflictDialogOpen.value = false
 })
 
 watch(
@@ -90,11 +97,16 @@ watch(
   (newEpoch, oldEpoch) => {
     if (oldEpoch === undefined || newEpoch === oldEpoch) return
 
+    isConflictDialogOpen.value = false
     if (isDirty.value) {
       epochChangeBlocked.value = true
     }
   },
 )
+
+watch(conflictSnapshot, (snapshot) => {
+  if (!snapshot) isConflictDialogOpen.value = false
+})
 
 async function rebaseOnEpochChange(): Promise<void> {
   const challengeId = props.challengeId
@@ -125,15 +137,37 @@ async function retryJournalLoad(): Promise<void> {
   await refetch()
 }
 
-function useServerSnapshot(): void {
-  const snapshot = conflictSnapshot.value
-  if (!snapshot) return
+function openConflictDialog(): void {
+  if (conflictSnapshot.value && !epochChangeBlocked.value) isConflictDialogOpen.value = true
+}
 
-  journalDrafts.useServerSnapshot(props.challengeId, props.localDate)
-  queryClient.setQueryData<JournalReadResult>(journalQueryKey.value, { journal: snapshot })
-  localValidationError.value = null
+async function confirmConflict(payload: {
+  choice: 'local' | 'server'
+  expectedServerVersion: number
+  expectedClientRevision: number
+}): Promise<void> {
+  const challengeId = props.challengeId
+  const localDate = props.localDate
+  const beforeSnapshot = journalDrafts.getDraft(challengeId, localDate)?.acknowledgedSnapshot
   localActionError.value = null
-  showSaveStatus.value = true
+  await journalDrafts.resolveConflict(
+    challengeId,
+    localDate,
+    payload.choice,
+    payload.expectedServerVersion,
+    payload.expectedClientRevision,
+  )
+
+  const updated = journalDrafts.getDraft(challengeId, localDate)
+  if (!updated || updated.acknowledgedSnapshot === beforeSnapshot) return
+
+  queryClient.setQueryData<JournalReadResult>(journalQueryKey.value, { journal: updated.acknowledgedSnapshot })
+  if (!updated.conflictSnapshot && props.challengeId === challengeId && props.localDate === localDate) {
+    isConflictDialogOpen.value = false
+    showSaveStatus.value = true
+    await nextTick()
+    journalEditor.value?.focus()
+  }
 }
 
 async function saveJournal(): Promise<void> {
@@ -232,26 +266,39 @@ async function saveJournal(): Promise<void> {
         v-if="conflictSnapshot"
         id="journal-conflict-alert"
         role="alert"
-        aria-live="assertive"
+        aria-live="polite"
         class="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"
       >
         <p class="font-semibold">Nhật ký đã được cập nhật từ thiết bị khác.</p>
         <p class="mt-1 text-xs leading-relaxed">
-          Bản đang lưu trên máy chủ (phiên bản {{ conflictSnapshot.journal_version }}):
-          <span v-if="conflictSnapshot.journal" class="whitespace-pre-wrap">{{ conflictSnapshot.journal }}</span>
-          <em v-else>chưa có nội dung</em>.
           Bản đang nhập vẫn được giữ nguyên để bạn quyết định.
         </p>
         <button
-          id="journal-use-server-btn"
+          id="journal-conflict-open"
           type="button"
+          aria-haspopup="dialog"
+          aria-controls="content-conflict-dialog"
+          :aria-expanded="isConflictDialogOpen ? 'true' : 'false'"
           class="mt-3 rounded-md border border-amber-400 bg-white px-3 py-1.5 text-xs font-semibold hover:bg-amber-100"
           :disabled="epochChangeBlocked"
-          @click="useServerSnapshot"
+          @click="openConflictDialog"
         >
-          Dùng bản lưu trên máy chủ
+          Xem và giải quyết
         </button>
       </div>
+
+      <ContentConflictDialog
+        :open="isConflictDialogOpen"
+        :resource-label="conflictResourceLabel"
+        :local-text="draft"
+        :server-text="conflictSnapshot?.journal ?? ''"
+        :server-version="conflictSnapshot?.journal_version ?? 0"
+        :client-revision="conflictClientRevision"
+        :busy="isSaving"
+        :error="conflictDialogError"
+        @close="isConflictDialogOpen = false"
+        @confirm="confirmConflict"
+      />
 
       <div>
         <label for="journal-editor" class="block text-sm font-medium text-slate-700">
@@ -260,6 +307,7 @@ async function saveJournal(): Promise<void> {
         </label>
         <textarea
           id="journal-editor"
+          ref="journalEditor"
           v-model="draft"
           :aria-describedby="validationError ? 'journal-error' : undefined"
           :aria-invalid="validationError ? 'true' : 'false'"

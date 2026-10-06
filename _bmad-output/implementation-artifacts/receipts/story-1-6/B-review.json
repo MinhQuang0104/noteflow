@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "story_id": "1.6",
+  "slice_id": "B",
+  "kind": "review",
+  "checkpoint_commit": "7bf99467a2dabb7ef2362b816ab410e4823024d4",
+  "baseline_commit": "c77298cb2dbb6d59e2d78d1da20fedf9f5f0a677",
+  "subject_digest": "sha256:c23724e3692896996ec304bffa113ada22e926443398b39c09572d1eb0641c04",
+  "created_from_head": "7bf99467a2dabb7ef2362b816ab410e4823024d4",
+  "changed_paths_sha256": "sha256:0ff80f148b8e5fbdec8988483ead90895c45f93e248711f131778b6cae79e1e4",
+  "commands": [
+    {
+      "command": "Inspected exact Slice B diff, fresh V4 verification evidence, AC/task invariants, and all 21 bounded evidence units.",
+      "exit_code": 0,
+      "tool": "Codex same-lead review",
+      "environment": "codex/story-1-6 at c44a0e6902580261341a536809de0a57d8a3c8cd"
+    }
+  ],
+  "judgment": "APPROVE",
+  "questions": [
+    {
+      "id": "question-1",
+      "question": "UNMAPPED_CHANGED_PATH"
+    }
+  ],
+  "answers": [
+    {
+      "id": "question-1",
+      "answer": "Approved with disclosure: journal-frontend leaves frontend/src/stores/journalDrafts.ts and its test unmapped, so the canonical aggregate remains INCOMPLETE. The fresh targeted lifecycle suite passed 52 tests and the full frontend suite passed 125 tests; type-check, OpenAPI validation, generated contract check, ESLint, Oxlint and checkpoint diff check also passed. The focused suites and four-path bounded evidence cover Slice B T-2/T-3, and the reviewed diff preserves command identity, owner/auth/epoch/resource fences and draft state."
+    }
+  ],
+  "evidence_refs": [
+    {
+      "path": "frontend/src/api/__tests__/challenges.spec.ts",
+      "unit_index": 0,
+      "evidence_set_digest": "2836271a172aad529ebd220a69c02a2721440fe6bf85b9f501513b84cd2ff2c7"
+    },
+    {
+      "path": "frontend/src/api/challenges.ts",
+      "unit_index": 1,
+      "evidence_set_digest": "2836271a172aad529ebd220a69c02a2721440fe6bf85b9f501513b84cd2ff2c7"
+    },
+    {
+      "path": "frontend/src/api/challenges.ts",
+      "unit_index": 2,
+      "evidence_set_digest": "2836271a172aad529ebd220a69c02a2721440fe6bf85b9f501513b84cd2ff2c7"
+    },
+    {
+      "path": "frontend/src/api/challenges.ts",
+      "unit_index": 3,
+      "evidence_set_digest": "2836271a172aad529ebd220a69c02a2721440fe6bf85b9f501513b84cd2ff2c7"
+    },
+    {
+      "path": "frontend/src/api/challenges.ts",
+      "unit_index": 4,
+      "evidence_set_digest": "2836271a172aad529ebd220a69c02a2721440fe6bf85b9f501513b84cd2ff2c7"
+    },
+    {
+      "path": "frontend/src/api/challenges.ts",
+      "unit_index": 5,
+      "evidence_set_digest": "2836271a172aad529ebd220a69c02a2721440fe6bf85b9f501513b84cd2ff2c7"
+    },
+    {
+      "path": "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+      "unit_index": 6,
+      "evidence_set_digest": "2836271a172aad529ebd220a69c02a2721440fe6bf85b9f501513b84cd2ff2c7"
+    },
+    {
+      "path": "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+      "unit_index": 7,
+      "evidence_set_digest": "2836271a172aad529ebd220a69c02a2721440fe6bf85b9f501513b84cd2ff2c7"
+    },
+    {
+      "path": "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+      "unit_index": 8,
+      "evidence_set_digest": "2836271a172aad529ebd220a69c02a2721440fe6bf85b9f501513b84cd2ff2c7"
+    },
+    {
+      "path": "frontend/src/stores/journalDrafts.ts",
+      "unit_index": 9,
+      "evidence_set_digest": "2836271a172aad529ebd220a69c02a2721440fe6bf85b9f501513b84cd2ff2c7"
+    },
+    {
+      "path": "frontend/src/stores/journalDrafts.ts",
+      "unit_index": 10,
+      "evidence_set_digest": "2836271a172aad529ebd220a69c02a2721440fe6bf85b9f501513b84cd2ff2c7"
+    },
+    {
+      "path": "frontend/src/stores/journalDrafts.ts",
+      "unit_index": 11,
+      "evidence_set_digest": "2836271a172aad529ebd220a69c02a2721440fe6bf85b9f501513b84cd2ff2c7"
+    },
+    {
+      "path": "frontend/src/stores/journalDrafts.ts",
+      "unit_index": 12,
+      "evidence_set_digest": "2836271a172aad529ebd220a69c02a2721440fe6bf85b9f501513b84cd2ff2c7"
+    },
+    {
+      "path": "frontend/src/stores/journalDrafts.ts",
+      "unit_index": 13,
+      "evidence_set_digest": "2836271a172aad529ebd220a69c02a2721440fe6bf85b9f501513b84cd2ff2c7"
+    },
+    {
+      "path": "frontend/src/stores/journalDrafts.ts",
+      "unit_index": 14,
+      "evidence_set_digest": "2836271a172aad529ebd220a69c02a2721440fe6bf85b9f501513b84cd2ff2c7"
+    },
+    {
+      "path": "frontend/src/stores/journalDrafts.ts",
+      "unit_index": 15,
+      "evidence_set_digest": "2836271a172aad529ebd220a69c02a2721440fe6bf85b9f501513b84cd2ff2c7"
+    },
+    {
+      "path": "frontend/src/stores/journalDrafts.ts",
+      "unit_index": 16,
+      "evidence_set_digest": "2836271a172aad529ebd220a69c02a2721440fe6bf85b9f501513b84cd2ff2c7"
+    },
+    {
+      "path": "frontend/src/stores/journalDrafts.ts",
+      "unit_index": 17,
+      "evidence_set_digest": "2836271a172aad529ebd220a69c02a2721440fe6bf85b9f501513b84cd2ff2c7"
+    },
+    {
+      "path": "frontend/src/stores/journalDrafts.ts",
+      "unit_index": 18,
+      "evidence_set_digest": "2836271a172aad529ebd220a69c02a2721440fe6bf85b9f501513b84cd2ff2c7"
+    },
+    {
+      "path": "frontend/src/stores/journalDrafts.ts",
+      "unit_index": 19,
+      "evidence_set_digest": "2836271a172aad529ebd220a69c02a2721440fe6bf85b9f501513b84cd2ff2c7"
+    },
+    {
+      "path": "frontend/src/stores/journalDrafts.ts",
+      "unit_index": 20,
+      "evidence_set_digest": "2836271a172aad529ebd220a69c02a2721440fe6bf85b9f501513b84cd2ff2c7"
+    }
+  ],
+  "scope_digest": "sha256:400058dfdaea636b30ba36b33fe1caf9ef721f549ed809bd2cdaeb1f7e14c54f",
+  "risk_context_digest": "sha256:54a5ad338aa76d1b6e60a1b073ecb93ce6e9736508edf87586271961e411c46d",
+  "reviewed_commit": "7bf99467a2dabb7ef2362b816ab410e4823024d4",
+  "reviewer": "same-lead"
+}

@@ -9,7 +9,8 @@ import { applyFinalization } from './finalize-story.mjs'
 import { explicitApprovalInput, inspectCompletion } from './check-story-completion.mjs'
 import { applyCompletion, recordHumanApproval } from './complete-story.mjs'
 import { inspectStart, applyStart } from './start-story.mjs'
-import { checkpointImplementation, prepareAction, recordSliceReview, verifySlice } from './v4-action-kernel.mjs'
+import { applyRework, checkpointImplementation, prepareAction, prepareRework, recordSliceReview, verifySlice } from './v4-action-kernel.mjs'
+import { prepareMetadataAbort, applyMetadataAbort } from './v4-metadata-recovery.mjs'
 import { recordActionFinished, recordActionStarted, recordStoryCompleted, recordStoryReviewSnapshot } from './v4-observations.mjs'
 
 export const V4_AUTHORIZED_ACTIONS = new Set([
@@ -193,6 +194,15 @@ export function runV4Story(root, storyId, options = {}) {
     if (explicitKernelOperation !== undefined) {
       const input = options.input ?? options.kernel?.input
       if (!input || typeof input !== 'object' || Array.isArray(input)) return invalidResult('KERNEL_INPUT_REQUIRED')
+      if (explicitKernelOperation === 'prepare-rework' || explicitKernelOperation === 'apply-rework') {
+        if (input.action !== 'rework_slice' || input.story_id !== storyId || input.slice_id !== plan.current_slice ||
+            input.expected_head !== expectedHead || input.maintenance_authorization !== 'V4_LITE_REWORK') {
+          return invalidResult('MAINTENANCE_INPUT_MISMATCH')
+        }
+        if (explicitKernelOperation === 'prepare-rework') return prepareRework(root, { ...input, operation: 'prepare-rework' })
+        return runRunnerAction(root, storyId, 'rework_slice', expectedHead, options,
+          () => applyRework(root, { ...input, operation: 'apply-rework' }))
+      }
       if (plan.next_action?.kind === 'implement_slice') {
         if (input.story_id !== storyId || input.action !== 'implement_slice' || input.slice_id !== plan.next_action.target) {
           return invalidResult('KERNEL_INPUT_PLAN_MISMATCH')
@@ -205,6 +215,8 @@ export function runV4Story(root, storyId, options = {}) {
         if (input.story_id !== storyId || input.action !== 'verify_slice' || input.slice_id !== plan.next_action.target) {
           return invalidResult('KERNEL_INPUT_PLAN_MISMATCH')
         }
+        if (explicitKernelOperation === 'prepare-recovery-abort') return prepareMetadataAbort(root, input)
+        if (explicitKernelOperation === 'abort-unwritten-metadata') return applyMetadataAbort(root, input)
         if (explicitKernelOperation === 'prepare') return prepareAction(root, { ...input, operation: 'prepare' })
         if (explicitKernelOperation === 'verify') return verifySlice(root, { ...input, operation: 'verify' })
         if (explicitKernelOperation === 'record-review' || explicitKernelOperation === 'record_review') return recordSliceReview(root, { ...input, operation: 'record-review' })

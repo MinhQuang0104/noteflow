@@ -586,6 +586,7 @@ function runMetadataTransaction(root, rawDescriptor) {
   const identity = repositoryIdentity(root)
   const paths = transactionPaths(root, identity, descriptor)
   let journal = loadExistingJournal(paths)
+  if (journal?.phase === 'ABORTED') return statusResult('BLOCKED', ['TRANSACTION_ABORTED'], { transaction_id: descriptor.transaction_id })
   if (journal?.phase === 'COMPLETE') {
     if (!matchesDescriptor(journal, descriptor, identity)) return statusResult('STALE', ['COMPLETED_TRANSACTION_BINDING_MISMATCH'], { transaction_id: descriptor.transaction_id })
     return statusResult('NOOP', [], {
@@ -609,8 +610,27 @@ function runMetadataTransaction(root, rawDescriptor) {
     })
   }
 
+  // A template/receipt builder is pure preparation. Reject invalid projections
+  // before taking ownership, so a caller error cannot strand a scope lock.
+  const checkpoint = {
+    baseline_commit: descriptor.baseline_commit ?? descriptor.expected_head,
+    checkpoint_commit: descriptor.checkpoint_commit,
+    changed_paths: descriptor.changed_paths ?? [],
+    changed_paths_sha256: descriptor.changed_paths_sha256 ?? null,
+    subject: descriptor.subject ?? null,
+    subject_digest: descriptor.subject_digest ?? null
+  }
+  let preparedMetadata
+  if (!journal) {
+    if (gitOutput(root, ['rev-parse', 'HEAD']).trim() !== descriptor.checkpoint_commit) throw new Error('METADATA_HEAD_MISMATCH')
+    if (descriptor.recheck) descriptor.recheck(root)
+    verifyClean(root)
+    preparedMetadata = metadataFiles(descriptor, checkpoint)
+  }
   let lockAcquired = false
-  let mutated = false
+  // An existing recovery journal must never be silently changed to ABORTED
+  // merely because a recovery precondition fails.
+  let mutated = Boolean(journal)
   try {
     let lock
     if (journal) {
@@ -669,43 +689,45 @@ function runMetadataTransaction(root, rawDescriptor) {
     if (descriptor.recheck) descriptor.recheck(root)
     if (!journal.metadata_commit) {
       const inventory = worktreeInventory(root)
-      const resumingWrite = journal.phase === 'METADATA_WRITTEN' || journal.phase === 'METADATA_STAGED'
+      const resumePhase = journal.phase === 'RECOVERY_REQUIRED' ? journal.resume_phase : journal.phase
+      const resumingWrite = ['METADATA_WRITE_STARTED', 'METADATA_WRITTEN', 'METADATA_STAGED'].includes(resumePhase)
       if (!resumingWrite) {
         if (inventory.staged.length) throw new Error('DIRTY_INDEX')
         if (inventory.unstaged.length || inventory.untracked.length) throw new Error('DIRTY_SCOPE_MISMATCH')
         journal = updateJournal(journal, { phase: 'METADATA_PREPARED', initial_inventory: inventory })
       }
       mutated = true
+      if (resumingWrite) {
+        ensureExactSet(dirtyPaths(inventory), descriptor.metadata_paths, 'RECOVERY_METADATA_SCOPE_MISMATCH')
+        for (const relative of descriptor.metadata_paths) {
+          const expected = journal.metadata_hashes?.[relative]
+          const file = path.resolve(root, relative)
+          if (!expected || !existsSync(file) || hash(readFileSync(file)) !== expected) throw new Error('RECOVERY_METADATA_CONTENT_MISMATCH')
+          // Preserve user index changes, even if the worktree file is intact.
+          if (inventory.staged.includes(relative)) {
+            const staged = treeBytes(root, ':', relative)
+            if (!staged || hash(staged) !== expected) throw new Error('RECOVERY_METADATA_CONTENT_MISMATCH')
+          }
+        }
+      }
       const metadata = resumingWrite && descriptor.readMetadata
         ? descriptor.readMetadata(root)
-        : metadataFiles(descriptor, {
-        baseline_commit: descriptor.baseline_commit ?? descriptor.expected_head,
-        checkpoint_commit: descriptor.checkpoint_commit,
-        changed_paths: descriptor.changed_paths ?? [],
-        changed_paths_sha256: descriptor.changed_paths_sha256 ?? null,
-        subject: descriptor.subject ?? null,
-        subject_digest: descriptor.subject_digest ?? null
-      })
+        : preparedMetadata ?? metadataFiles(descriptor, checkpoint)
       if (resumingWrite) {
         for (const [relative, expected] of Object.entries(metadata.files)) {
           const file = path.resolve(root, relative)
           if (!existsSync(file) || readFileSync(file, 'utf8') !== expected) throw new Error('RECOVERY_METADATA_CONTENT_MISMATCH')
         }
-        if (journal.phase === 'METADATA_WRITTEN') {
-          if (inventory.staged.length || inventory.untracked.length) throw new Error('RECOVERY_METADATA_SCOPE_MISMATCH')
-          ensureExactSet(inventory.unstaged, descriptor.metadata_paths, 'RECOVERY_METADATA_SCOPE_MISMATCH')
-        } else {
-          ensureExactSet(inventory.staged, descriptor.metadata_paths, 'RECOVERY_METADATA_SCOPE_MISMATCH')
-          if (inventory.unstaged.length || inventory.untracked.length) throw new Error('RECOVERY_METADATA_SCOPE_MISMATCH')
-        }
+        if (descriptor.validateMetadata) descriptor.validateMetadata(metadata)
       } else {
-        journal = updateJournal(journal, { phase: 'METADATA_WRITE_STARTED', metadata_paths: metadata.paths })
+        const metadataHashes = Object.fromEntries(descriptor.metadata_paths.map(relative => [relative, hash(Buffer.from(metadata.files[relative]))]))
+        journal = updateJournal(journal, { phase: 'METADATA_WRITE_STARTED', metadata_paths: metadata.paths, metadata_hashes: metadataHashes })
         writeMetadata(root, metadata)
         maybeFail(descriptor, 'AFTER_WRITE')
         if (descriptor.validateMetadata) descriptor.validateMetadata(metadata)
         journal = updateJournal(journal, { phase: 'METADATA_WRITTEN' })
       }
-      const staged = journal.phase === 'METADATA_STAGED' ? inventory.staged : stageExact(root, descriptor.metadata_paths, null, 'metadata')
+      const staged = stageExact(root, descriptor.metadata_paths, null, 'metadata')
       journal = updateJournal(journal, { phase: 'METADATA_STAGED', staged_paths: staged })
       maybeFail(descriptor, 'AFTER_METADATA_STAGE')
       maybeFail(descriptor, 'BEFORE_COMMIT')
@@ -742,7 +764,10 @@ function runMetadataTransaction(root, rawDescriptor) {
   } catch (error) {
     const reason = error.code === 'EEXIST' ? 'TRANSACTION_SCOPE_LOCKED' : error.message
     if (mutated) {
-      if (journal) journal = updateJournal(journal, { phase: 'RECOVERY_REQUIRED', recovery_required: true, error: reason })
+      if (journal) journal = updateJournal(journal, {
+        phase: 'RECOVERY_REQUIRED', recovery_required: true, error: reason,
+        resume_phase: journal.phase === 'RECOVERY_REQUIRED' ? journal.resume_phase ?? null : journal.phase
+      })
       return statusResult('RECOVERY_REQUIRED', [reason], {
         transaction_id: descriptor.transaction_id,
         journal_path: paths.journalPath,

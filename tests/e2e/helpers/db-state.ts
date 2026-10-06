@@ -21,6 +21,22 @@ export function resetTestDatabase(): void {
   runTestPhp(['artisan', 'cache:clear'], 'backend', testEnv)
 }
 
+export interface TestJournalState {
+  challenge_id: string
+  local_date: string
+  start_date: string
+  journal: string | null
+  journal_version: number
+  completion_version: number
+  is_done: boolean
+  account_revision: number
+  journal_commands: number
+}
+
+export function getTestJournalState(challengeId: string, localDate: string): TestJournalState | null {
+  return JSON.parse(runTestPhp(['db-helper.php', 'get-journal-state', challengeId, localDate], 'helpers', testEnv)) as TestJournalState | null
+}
+
 export function setTestAccountWriteState(state: 'open' | 'locked_for_import'): void {
   runTestPhp(['db-helper.php', 'set-write-state', state], 'helpers', testEnv)
 }

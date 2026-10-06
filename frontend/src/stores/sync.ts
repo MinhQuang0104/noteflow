@@ -141,32 +141,52 @@ export const useSyncStore = defineStore('sync', () => {
 
       // Observable query convergence (S14-F03, S14-F04)
       if (needsConvergence) {
+        const capturedAckGeneration = ackConvergenceGeneration
+        const isCurrentConvergence = () =>
+          auth.generation === capturedAuthGen && auth.status === 'authenticated' &&
+          currentReqGen === requestGeneration.value &&
+          capturedAckGeneration === ackConvergenceGeneration &&
+          lastEpoch.value === nextContext.data_epoch &&
+          account.context?.data_epoch === nextContext.data_epoch
+
         try {
           if (epochChanged) {
             // S14-F03, S14-F04: resetQueries preserves active query listeners; throwOnError ensures failures reject
-            await currentQueryClient.resetQueries({ queryKey: ['challenges'] }, { throwOnError: true })
+            await Promise.all([
+              currentQueryClient.resetQueries({ queryKey: ['challenges'] }, { throwOnError: true }),
+              currentQueryClient.resetQueries({ queryKey: ['challenge-journal'] }, { throwOnError: true }),
+            ])
           } else {
             // S14-F04: throwOnError ensures refetch rejection is not swallowed by TanStack Query
-            await currentQueryClient.refetchQueries({ queryKey: ['challenges'] }, { throwOnError: true })
+            await Promise.all([
+              currentQueryClient.refetchQueries({ queryKey: ['challenges'] }, { throwOnError: true }),
+              currentQueryClient.refetchQueries({ queryKey: ['challenge-journal'] }, { throwOnError: true }),
+            ])
           }
 
           // Boundary check after async refetch (S14-F02)
-          if (auth.generation !== capturedAuthGen || auth.status !== 'authenticated') {
+          if (!isCurrentConvergence()) {
             return false
           }
 
           // Lifecycle check after refetch (S14-F01, S14-F05)
           if (!isVisible.value || !isOnline.value) {
+            pendingConvergence.value = true
             syncStatus.value = 'paused'
             return false
           }
 
           pendingConvergence.value = false
         } catch {
-          // S14-F04: Invalidation failure leaves coordinator in error state and retries on equal revision
+          if (!isCurrentConvergence()) return false
           pendingConvergence.value = true
+          if (!isVisible.value || !isOnline.value) {
+            syncStatus.value = 'paused'
+            return false
+          }
+          // S14-F04: Invalidation failure leaves coordinator in error state and retries on equal revision
           consecutiveFailures.value++
-          syncError.value = 'Không thể đồng bộ danh sách challenge mới nhất. Đang thử lại...'
+          syncError.value = 'Không thể đồng bộ danh sách challenge và nhật ký mới nhất. Đang thử lại...'
           syncStatus.value = 'error'
           return false
         }
@@ -344,10 +364,18 @@ export const useSyncStore = defineStore('sync', () => {
       (!account.context || account.context.data_epoch === epoch)
 
     void Promise.resolve()
-      .then(() => currentQueryClient.invalidateQueries({ queryKey: ['challenges'] }, { throwOnError: true }))
+      .then(() => Promise.all([
+        currentQueryClient.invalidateQueries({ queryKey: ['challenges'] }, { throwOnError: true }),
+        currentQueryClient.invalidateQueries({ queryKey: ['challenge-journal'] }, { throwOnError: true }),
+      ]))
       .then(
         () => {
           if (!isCurrentAck()) return
+          if (!isVisible.value || !isOnline.value) {
+            pendingConvergence.value = true
+            syncStatus.value = 'paused'
+            return
+          }
           consecutiveFailures.value = 0
           syncError.value = null
           pendingConvergence.value = false
@@ -356,8 +384,12 @@ export const useSyncStore = defineStore('sync', () => {
         () => {
           if (!isCurrentAck()) return
           pendingConvergence.value = true
+          if (!isVisible.value || !isOnline.value) {
+            syncStatus.value = 'paused'
+            return
+          }
           consecutiveFailures.value++
-          syncError.value = 'Không thể đồng bộ danh sách challenge mới nhất. Đang thử lại...'
+          syncError.value = 'Không thể đồng bộ danh sách challenge và nhật ký mới nhất. Đang thử lại...'
           syncStatus.value = 'error'
         },
       )

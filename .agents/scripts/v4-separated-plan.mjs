@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
-import { inspectStory, normativeDigest, validateTaskSlices, validateReceipt } from './check-artifact-contract.mjs'
+import { attemptReceiptPath, inspectStory, normativeDigest, readReceiptForAttempt, validateTaskSlices, validateReceipt } from './check-artifact-contract.mjs'
 import { validateFinalizationReceipt } from './finalization-contract.mjs'
 
 const DIGEST = /^sha256:[0-9a-f]{64}$/
@@ -28,6 +28,104 @@ function commitState(root, sha) {
   if (exists.status !== 0) return 'MISSING'
   const ancestor = spawnSync('git', ['merge-base', '--is-ancestor', sha, 'HEAD'], { cwd: root, windowsHide: true })
   return ancestor.status === 0 ? 'FRESH' : 'NOT_ANCESTOR'
+}
+
+function attemptId(value) {
+  return Number.isInteger(value) && value > 0
+}
+
+function attemptReceiptKinds(status) {
+  return status === 'reviewed' ? ['implementation', 'verification', 'review'] :
+    status === 'verified' ? ['implementation', 'verification'] : ['implementation']
+}
+
+function isAncestor(root, ancestor, descendant) {
+  if (!SHA.test(ancestor ?? '') || !SHA.test(descendant ?? '')) return false
+  return spawnSync('git', ['merge-base', '--is-ancestor', ancestor, descendant], { cwd: root, windowsHide: true }).status === 0
+}
+
+function validateAttemptRef(root, plan, slice, attempt, kind, invalid, stale, required = true) {
+  const ref = attempt.receipt_refs?.[kind]
+  if (!ref) {
+    if (required) invalid(`ATTEMPT_${kind.toUpperCase()}_RECEIPT_REQUIRED`)
+    return
+  }
+  const expectedPath = attemptReceiptPath(plan.story_id, slice.id, attempt.attempt_id, kind)
+  if (attempt.attempt_id > 1 && (!expectedPath || ref.path !== expectedPath)) invalid('INVALID_ATTEMPT_RECEIPT_PATH')
+  const file = safePath(root, ref.path)
+  if (!file || !DIGEST.test(ref.digest ?? '')) invalid('INVALID_ATTEMPT_RECEIPT_REF')
+  else if (!existsSync(file)) invalid('INVALID_ATTEMPT_RECEIPT_FILE')
+  else {
+    const loaded = readReceiptForAttempt(root, plan, slice.id, attempt, kind)
+    for (const error of loaded.errors) {
+      if (error === 'RECEIPT_DIGEST_MISMATCH' || error.endsWith('_MISMATCH')) stale(`ATTEMPT_${error}`)
+      else invalid(`ATTEMPT_${error}`)
+    }
+  }
+}
+
+function validateAttemptMetadata(root, plan, slice, invalid, stale) {
+  const history = slice.attempt_history
+  const current = slice.current_attempt
+  if (history === undefined && current === undefined) return
+  if (history !== undefined && (!Array.isArray(history) || !history.length)) {
+    invalid('INVALID_ATTEMPT_HISTORY')
+    return
+  }
+  const attempts = Array.isArray(history) ? history : []
+  let previous = 0
+  for (const attempt of attempts) {
+    if (!attempt || typeof attempt !== 'object' || Array.isArray(attempt) || !attemptId(attempt.attempt_id) || attempt.attempt_id <= previous) {
+      invalid('INVALID_ATTEMPT_HISTORY')
+      continue
+    }
+    previous = attempt.attempt_id
+    if (!['checkpointed', 'verified', 'reviewed'].includes(attempt.status)) invalid('INVALID_ATTEMPT_STATUS')
+    if (!SHA.test(attempt.baseline_commit ?? '') || !SHA.test(attempt.checkpoint_commit ?? '') ||
+        !DIGEST.test(attempt.subject_digest ?? '') || !DIGEST.test(attempt.changed_paths_sha256 ?? '')) invalid('INVALID_ATTEMPT_CHECKPOINT_METADATA')
+    if (!isAncestor(root, attempt.baseline_commit, attempt.checkpoint_commit)) invalid('ATTEMPT_BASELINE_NOT_ANCESTOR')
+    const checkpointState = commitState(root, attempt.checkpoint_commit)
+    if (checkpointState !== 'FRESH') stale(checkpointState === 'MISSING' ? 'ATTEMPT_CHECKPOINT_MISSING' : 'ATTEMPT_CHECKPOINT_NOT_ANCESTOR')
+    const baselineState = commitState(root, attempt.baseline_commit)
+    if (baselineState !== 'FRESH') stale('ATTEMPT_BASELINE_COMMIT_INVALID')
+    if (!attempt.receipt_refs || typeof attempt.receipt_refs !== 'object' || Array.isArray(attempt.receipt_refs)) {
+      invalid('INVALID_ATTEMPT_RECEIPTS')
+      continue
+    }
+    for (const kind of attemptReceiptKinds(attempt.status)) validateAttemptRef(root, plan, slice, attempt, kind, invalid, stale)
+    for (const kind of Object.keys(attempt.receipt_refs)) {
+      if (!['implementation', 'verification', 'review'].includes(kind)) invalid('INVALID_ATTEMPT_RECEIPT_REF')
+    }
+  }
+
+  if (current === undefined) {
+    if (attempts.length) invalid('CURRENT_ATTEMPT_REQUIRED')
+    return
+  }
+  if (!current || typeof current !== 'object' || Array.isArray(current) || !attemptId(current.attempt_id)) {
+    invalid('INVALID_CURRENT_ATTEMPT')
+    return
+  }
+  if (current.attempt_id !== previous + 1) invalid('CURRENT_ATTEMPT_SEQUENCE_MISMATCH')
+  if (!current.receipt_refs || typeof current.receipt_refs !== 'object' || Array.isArray(current.receipt_refs) ||
+      !current.receipt_refs.implementation) invalid('CURRENT_IMPLEMENTATION_RECEIPT_REQUIRED')
+  for (const kind of Object.keys(current.receipt_refs ?? {})) {
+    if (!['implementation', 'verification', 'review'].includes(kind)) invalid('INVALID_CURRENT_ATTEMPT_RECEIPT_REF')
+    const expectedPath = attemptReceiptPath(plan.story_id, slice.id, current.attempt_id, kind)
+    if (!expectedPath || current.receipt_refs[kind]?.path !== expectedPath) invalid('INVALID_CURRENT_ATTEMPT_RECEIPT_PATH')
+  }
+  if (current.attempt_id > 1 && (!current.receipt_refs.verification || !current.receipt_refs.review)) {
+    invalid('CURRENT_ATTEMPT_RECEIPT_IDENTITY_INCOMPLETE')
+  }
+  if (slice.status === 'pending') {
+    if (Object.keys(current.receipt_refs ?? {}).some(kind => {
+      const file = safePath(root, current.receipt_refs[kind]?.path)
+      return file && existsSync(file)
+    })) invalid('CURRENT_ATTEMPT_RECEIPT_ALREADY_EXISTS')
+  } else {
+    const implementation = slice.receipt_refs?.implementation
+    if (!implementation || implementation.path !== current.receipt_refs.implementation.path) invalid('CURRENT_ATTEMPT_IMPLEMENTATION_BINDING_MISMATCH')
+  }
 }
 
 function validateHumanApproval(root, plan, result, finalization) {
@@ -159,6 +257,7 @@ export function validateSeparatedPlan(root, id, plan, result) {
     }
     if (slice.verification !== undefined && (!slice.verification || typeof slice.verification !== 'object' || Array.isArray(slice.verification) ||
         (slice.verification.progression_eligible !== undefined && typeof slice.verification.progression_eligible !== 'boolean'))) invalid('INVALID_VERIFICATION_SCHEMA')
+    validateAttemptMetadata(root, plan, slice, invalid, stale)
   }
   const terminalState = plan.lifecycle_snapshot === 'done' && plan.execution_status === 'complete'
   if (plan.next_action === null) {
