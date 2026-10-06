@@ -1,0 +1,6 @@
+﻿Preflight condition check for B9 (composer test):
+- Condition (a) Guard of Việc 1 committed: MET (commit 4cb179702659e2ad48f12a4c4c94bd712c99bb67).
+- Condition (b) PostgreSQL reachable at 127.0.0.1:5432 and current_database() == noteflow_test: NOT MET.
+  TCP connection test to 127.0.0.1:5432 failed (TcpTestSucceeded = False).
+  Hard constraints prohibit starting Docker containers or modifying database configurations.
+Result: NOT_RUN/ENV (lý do: PostgreSQL service at 127.0.0.1:5432 is not running/unreachable).

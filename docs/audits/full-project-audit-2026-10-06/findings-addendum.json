@@ -1,0 +1,124 @@
+[
+  {
+    "id": "R-01",
+    "workstream": "H",
+    "title": "Baseline B2 pytest thất bại do thiếu dependency jsonschema và thiếu file template config.template.toml",
+    "severity": "HIGH",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "_bmad/scripts/tests/test_agent_architecture.py:12",
+        "note": "Import jsonschema thất bại: ModuleNotFoundError: No module named 'jsonschema'."
+      },
+      {
+        "kind": "F",
+        "ref": "_bmad/scripts/tests/test_render_skill.py:29",
+        "note": "Đọc template thất bại: FileNotFoundError: [Errno 2] No such file or directory: '_bmad/assets/config.template.toml'."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/rerun-B2.log:1",
+        "note": "Exit code 2; pytest interrupted: 2 errors during collection (0 passed, 2 errors)."
+      }
+    ],
+    "failure_scenario": "Khi môi trường có sẵn pytest và chạy lệnh test `_bmad/scripts/tests -q`, quá trình collection dừng ngay lập tức với 2 lỗi import/file thiếu, khiến bộ test Python của scripts không thể thực thi.",
+    "affected_paths": [
+      "_bmad/scripts/tests/test_agent_architecture.py",
+      "_bmad/scripts/tests/test_render_skill.py",
+      "_bmad/assets/config.template.toml"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Cài đặt gói jsonschema vào Python test environment, đồng thời khôi phục hoặc tạo file template `_bmad/assets/config.template.toml` theo đúng cấu hình mong đợi của test.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "LOW"
+  },
+  {
+    "id": "R-02",
+    "workstream": "E",
+    "title": "Lỗ hổng bảo mật HIGH trong production dependency frontend source-map-js (GHSA-68fv-2mgg-jv7q)",
+    "severity": "HIGH",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "frontend/package-lock.json",
+        "note": "Gói source-map-js phiên bản 1.0.0 - 1.2.1 chứa lỗ hổng Denial of Service."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/rerun-B13.log:5",
+        "note": "npm audit --omit=dev tại frontend trả về exit code 1; phát hiện 1 high severity vulnerability: GHSA-68fv-2mgg-jv7q."
+      }
+    ],
+    "failure_scenario": "Chạy kiểm tra bảo mật dependencies production của frontend (`npm audit --omit=dev`), lệnh trả về exit code 1 do source-map-js có thể gây event-loop denial of service qua indexed source-map section offsets.",
+    "affected_paths": [
+      "frontend/package.json",
+      "frontend/package-lock.json"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Nâng cấp source-map-js lên phiên bản đã vá hoặc chạy `npm audit fix` tương thích.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "LOW"
+  },
+  {
+    "id": "R-03",
+    "workstream": "C",
+    "title": "Lỗ hổng bảo mật HIGH Quadratic-time Denial of Service trong backend package league/commonmark (GHSA-3q6v-r5mr-hxv8)",
+    "severity": "HIGH",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "backend/composer.lock:1020",
+        "note": "Gói league/commonmark v2.10.1 nằm trong danh sách ảnh hưởng (>=2.0.0, <=2.10.1)."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/rerun-B13.log:35",
+        "note": "composer audit tại backend trả về exit code 1; PKSA-m4t9-vsgq-8khn / GHSA-3q6v-r5mr-hxv8."
+      }
+    ],
+    "failure_scenario": "Quá trình kiểm toán Composer (`composer audit` và `composer audit --locked`) phát hiện lỗ hổng thuật toán bậc hai (quadratic-time DoS) trong extension GitHub Flavored Markdown Table block-start scan khi xử lý markdown.",
+    "affected_paths": [
+      "backend/composer.json",
+      "backend/composer.lock"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Cập nhật dependency league/commonmark lên phiên bản bản vá mới nhất khi hệ sinh thái Laravel tương thích.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "LOW"
+  },
+  {
+    "id": "R-04",
+    "workstream": "C",
+    "title": "Lỗ hổng bảo mật MEDIUM DisallowedRawHtml bypass trong backend package league/commonmark (GHSA-97jj-33gv-5xf9)",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "backend/composer.lock:1020",
+        "note": "Gói league/commonmark v2.10.1 bị ảnh hưởng (>=1.3.0, <=2.10.1)."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/rerun-B13.log:25",
+        "note": "composer audit tại backend phát hiện PKSA-m2dq-1fhr-29b1 / GHSA-97jj-33gv-5xf9."
+      }
+    ],
+    "failure_scenario": "Extension DisallowedRawHtml có thể bị vượt qua nếu tên thẻ bị cấm nằm ở cuối chuỗi raw-HTML literal, dẫn đến nguy cơ parse HTML không như mong đợi.",
+    "affected_paths": [
+      "backend/composer.json",
+      "backend/composer.lock"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Cập nhật dependency league/commonmark lên bản vá mới nhất cùng với R-03.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "LOW"
+  }
+]
