@@ -7,7 +7,8 @@ import { spawnSync } from 'node:child_process'
 import { inspectStory, normativeDigest, receiptDigest } from './check-artifact-contract.mjs'
 import { stableFinalizationDigest } from './finalization-contract.mjs'
 import { pathListDigest } from './check-slice-verification.mjs'
-import { inspectFinalization } from './check-story-finalization.mjs'
+import { inspectFinalization, stableDigest } from './check-story-finalization.mjs'
+import { digestValue } from './v4-finalization-contract.mjs'
 
 export const STORY = 'docs/story.md'
 export const PLAN = '_bmad-output/implementation-artifacts/story-9-1-plan.md'
@@ -108,6 +109,22 @@ function replacePlan(text, replacements) {
   return next
 }
 
+const RISK = { level: 'LOW' }
+
+function hunkBodies(root, from, to, file) {
+  const diff = git(root, 'diff', '--no-color', '-U0', from, to, '--', file)
+  return diff.split(/^(?=@@ )/m).slice(1)
+}
+
+export function reviewEvidenceRefs(root, from, to, paths) {
+  return paths.flatMap(file => hunkBodies(root, from, to, file)
+    .map((body, hunk_index) => ({ path: file, hunk_index, body_digest: rawDigest(body) })))
+}
+
+export function reviewScopeDigest(paths, refs) {
+  return digestValue({ paths, refs })
+}
+
 function buildPlan({ storyDigest, epicDigest, baseline, checkpoint, refs, changedPathsDigest, finalization }) {
   return `---\n${yaml({
     schema_version: 2,
@@ -118,7 +135,7 @@ function buildPlan({ storyDigest, epicDigest, baseline, checkpoint, refs, change
     lifecycle_snapshot: 'review',
     execution_status: 'complete',
     current_slice: 'A',
-    risk: { level: 'LOW' },
+    risk: RISK,
     slices: [{
       id: 'A', status: 'reviewed', depends_on: [], task_refs: ['T-1'],
       baseline_commit: baseline, checkpoint_commit: checkpoint,
@@ -143,7 +160,8 @@ function buildPlan({ storyDigest, epicDigest, baseline, checkpoint, refs, change
   })}\n---\n`
 }
 
-export function createCompletionFixture() {
+export function createCompletionFixture({ implementationPaths = ['src/implementation.txt'], mutateReview = null } = {}) {
+  const scopePaths = [...implementationPaths].sort()
   const root = mkdtempSync(path.join(tmpdir(), 'v4-completion-'))
   write(root, STORY, storyText('in-progress'))
   const epicSection = '### Story 9.1: Fixture completion story\n\nDone.\n\n'
@@ -157,19 +175,19 @@ export function createCompletionFixture() {
   git(root, 'add', '.')
   git(root, 'commit', '-qm', 'baseline')
   const baseline = git(root, 'rev-parse', 'HEAD')
-  write(root, 'src/implementation.txt', 'implementation\n')
+  for (const file of scopePaths) write(root, file, 'implementation\n')
   git(root, 'add', '.')
   git(root, 'commit', '-qm', 'checkpoint')
   const checkpoint = git(root, 'rev-parse', 'HEAD')
   const storyDigest = normativeDigest(inspectStory(storyText('review')))
   const epicDigest = rawDigest(epicSection)
-  const changedPathsDigest = pathListDigest(['src/implementation.txt'])
+  const changedPathsDigest = pathListDigest(scopePaths)
   const receiptBase = kind => ({
     schema_version: 1, story_id: '9.1', slice_id: 'A', kind,
     checkpoint_commit: checkpoint, baseline_commit: baseline,
     subject_digest: storyDigest, created_from_head: checkpoint,
     changed_paths_sha256: changedPathsDigest,
-    changed_paths: ['src/implementation.txt'],
+    changed_paths: scopePaths,
     commands: [{ command: 'fixture check', exit_code: 0, tool: 'fixture', environment: 'node-test' }]
   })
   const implementation = receiptBase('implementation')
@@ -180,7 +198,14 @@ export function createCompletionFixture() {
     canonical: { applicability: 'APPLICABLE', status: 'PASS', complete: true },
     ac_evidence: [{ id: 'ac-1', ac: 'AC-1', status: 'PASS', contribution: 'fixture behavior checked' }]
   }
-  const review = { ...receiptBase('review'), verdict: 'APPROVE', findings_blocking: 0, reviewed_commit: checkpoint, freshness: 'FRESH' }
+  const evidenceRefs = reviewEvidenceRefs(root, baseline, checkpoint, scopePaths)
+  const baseReview = {
+    ...receiptBase('review'), verdict: 'APPROVE', findings_blocking: 0, reviewed_commit: checkpoint, freshness: 'FRESH',
+    risk_context_digest: stableDigest(RISK),
+    evidence_refs: evidenceRefs,
+    scope_digest: reviewScopeDigest(scopePaths, evidenceRefs)
+  }
+  const review = mutateReview ? mutateReview(structuredClone(baseReview), { scopePaths, evidenceRefs }) : baseReview
   const refs = {
     implementation: { path: 'receipts/implementation.json', digest: receiptDigest(implementation) },
     verification: { path: 'receipts/verification.json', digest: receiptDigest(verification) },
@@ -197,10 +222,10 @@ export function createCompletionFixture() {
     receipt_set_digest: stableFinalizationDigest(Object.values(refs)),
     ac_coverage_digest: stableFinalizationDigest([]),
     canonical_disclosures_digest: stableFinalizationDigest([]),
-    scope_path_count: 1,
-    scope_paths_digest: stableFinalizationDigest(['src/implementation.txt']),
+    scope_path_count: scopePaths.length,
+    scope_paths_digest: stableFinalizationDigest(scopePaths),
     implementation_commit_set_digest: stableFinalizationDigest([{ slice_id: 'A', checkpoint_commit: checkpoint }]),
-    final_scoped_tree_digest: stableFinalizationDigest([{ path: 'src/implementation.txt', blob: git(root, 'rev-parse', checkpoint + ':src/implementation.txt') }]),
+    final_scoped_tree_digest: stableFinalizationDigest(scopePaths.map(file => ({ path: file, blob: git(root, 'rev-parse', checkpoint + ':' + file) }))),
     done_gate_disposition: 'SATISFIED', lifecycle_from: 'in-progress', lifecycle_target: 'review'
   }
   write(root, FINALIZATION, JSON.stringify(placeholder))
@@ -228,7 +253,7 @@ export function createCompletionFixture() {
   git(root, 'commit', '-qm', 'review fixture')
   head = git(root, 'rev-parse', 'HEAD')
   return {
-    root, head, storyDigest, finalization,
+    root, head, storyDigest, finalization, scopePaths,
     cleanup: () => rmSync(root, { recursive: true, force: true }),
     refreshHead() { this.head = git(root, 'rev-parse', 'HEAD'); return this.head },
     readPlan() { return readFileSync(path.join(root, PLAN), 'utf8') },
