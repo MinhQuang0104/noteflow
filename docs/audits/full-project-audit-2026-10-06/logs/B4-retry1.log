@@ -1,0 +1,6 @@
+
+> frontend@0.0.0 lint
+> run-s "lint:*"
+
+'run-s' is not recognized as an internal or external command,
+operable program or batch file.

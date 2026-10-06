@@ -1,0 +1,6 @@
+
+> frontend@0.0.0 contract:validate
+> redocly lint ../contracts/openapi.yaml --config ../redocly.yaml
+
+'redocly' is not recognized as an internal or external command,
+operable program or batch file.

@@ -1,0 +1,9 @@
+{
+  "id": "B11-retry2-correct-cwd",
+  "command": "& './vendor/bin/pint' --test",
+  "cwd": "D:\\Workspace\\Tu_Hoc\\New_Project_My_Note\\.worktrees\\full-project-audit\\backend",
+  "started_utc": "2026-10-06T04:00:10.9314695Z",
+  "seconds": 0.9549535,
+  "exit_code": 1,
+  "log": "B11-retry2-correct-cwd.log"
+}

@@ -1,0 +1,22 @@
+npm error code EACCES
+npm error errno EACCES
+npm error FetchError: request to https://registry.npmjs.org/vitest failed, reason:
+npm error     at ClientRequest.<anonymous> (C:\Users\ACER\AppData\Roaming\npm\node_modules\npm\node_modules\minipass-fetch\lib\index.js:130:14)
+npm error     at ClientRequest.emit (node:events:514:28)
+npm error     at emitErrorEvent (node:_http_client:114:11)
+npm error     at _destroy (node:_http_client:1167:9)
+npm error     at onSocketNT (node:_http_client:1188:5)
+npm error     at process.processTicksAndRejections (node:internal/process/task_queues:91:21) {
+npm error   code: 'EACCES',
+npm error   errno: 'EACCES',
+npm error   type: 'system'
+npm error }
+npm error
+npm error The operation was rejected by your operating system.
+npm error It's possible that the file was already in use (by a text editor or antivirus),
+npm error or that you lack permissions to access it.
+npm error
+npm error If you believe this might be a permissions issue, please double-check the
+npm error permissions of the file and its containing directories, or try running
+npm error the command again as root/Administrator.
+npm error A complete log of this run can be found in: D:\Workspace\Tu_Hoc\New_Project_My_Note\.worktrees\full-project-audit\docs\audits\full-project-audit-2026-10-06\logs\.npm-cache\_logs\2026-10-06T03_56_07_189Z-debug-0.log

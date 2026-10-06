@@ -1,0 +1,9 @@
+{
+  "id": "B5",
+  "command": "npx --no-install vitest run",
+  "cwd": "D:\\Workspace\\Tu_Hoc\\New_Project_My_Note\\.worktrees\\full-project-audit\\frontend",
+  "started_utc": "2026-10-06T03:56:05.2054733Z",
+  "seconds": 83.5955174,
+  "exit_code": 1,
+  "log": "B5.log"
+}

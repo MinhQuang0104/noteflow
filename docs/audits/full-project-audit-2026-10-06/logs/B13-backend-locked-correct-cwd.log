@@ -1,0 +1,13 @@
+PHP Deprecated:  Case statements followed by a semicolon (;) are deprecated, use a colon (:) instead in phar://C:/composer/composer.phar/vendor/react/promise/src/functions.php on line 300
+
+Deprecated: Case statements followed by a semicolon (;) are deprecated, use a colon (:) instead in phar://C:/composer/composer.phar/vendor/react/promise/src/functions.php on line 300
+Deprecation Notice: The predefined locally scoped $http_response_header variable is deprecated, call http_get_last_response_headers() instead in phar://C:/composer/composer.phar/vendor/justinrainbow/json-schema/src/JsonSchema/Uri/Retrievers/FileGetContents.php:57
+More deprecation notices were hidden, run again with `-v` to show them.
+
+In CurlDownloader.php line 390:
+
+  curl error 7 while downloading https://repo.packagist.org/packages.json: Failed to connect to repo.packagist.org:44
+  3 after 0 ms: Could not connect to server
+
+
+audit [--no-dev] [-f|--format FORMAT] [--locked] [--abandoned ABANDONED] [--ignore-severity IGNORE-SEVERITY]

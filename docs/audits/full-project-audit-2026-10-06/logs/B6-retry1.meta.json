@@ -1,0 +1,9 @@
+{
+  "id": "B6-retry1",
+  "command": "npm run build-only",
+  "cwd": "D:\\Workspace\\Tu_Hoc\\New_Project_My_Note\\.worktrees\\full-project-audit\\frontend",
+  "started_utc": "2026-10-06T03:58:04.6461990Z",
+  "seconds": 1.9930161,
+  "exit_code": 1,
+  "log": "B6-retry1.log"
+}

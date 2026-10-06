@@ -1,0 +1,3172 @@
+[
+  {
+    "path": ".agents/context/context-routing.md",
+    "bytes": 1039,
+    "hash": "BA27364AE429EF08114F395374B1DB6B9AC9B5744CE58B63787457C10B50FE40"
+  },
+  {
+    "path": ".agents/context/control-plane.md",
+    "bytes": 752,
+    "hash": "5097E028CDEFD536390EC853C1BF9E2E30D76C1FDC046AEC3FA15D3EE76AB4F0"
+  },
+  {
+    "path": ".agents/context/verification-context.md",
+    "bytes": 2038,
+    "hash": "160F64092426D65644BB59B80EB06B59D136AAC0988A6CD161CC9DF0ADF7DF6E"
+  },
+  {
+    "path": ".agents/docs/v4-action-kernel.md",
+    "bytes": 2459,
+    "hash": "68FDB9776A33B1742A3B310EBF01C18202ABDC4FC719B227DFC096BA3B897814"
+  },
+  {
+    "path": ".agents/docs/v4-artifact-contract.md",
+    "bytes": 19233,
+    "hash": "835CEDBB3FF8E01F7F34E55E818B7433B646AC8A235EBE0C23AE088EC074FFDC"
+  },
+  {
+    "path": ".agents/docs/v4-benchmark-contract.md",
+    "bytes": 4339,
+    "hash": "547B38A5CC8321B18C220DC1E61612896A9E59E431A89F27E0438C8B847CEF7B"
+  },
+  {
+    "path": ".agents/docs/v4-evolution-contract.md",
+    "bytes": 3179,
+    "hash": "751E873CEED527A369EFC201C292A2FF38A7FB94546AA8D43DC01C6DA6608C0F"
+  },
+  {
+    "path": ".agents/docs/v4-experience-contract.md",
+    "bytes": 3659,
+    "hash": "C3C8DE70BC77305F789DF86A04F4976D83423D751C308C591381CBFB3FE797D8"
+  },
+  {
+    "path": ".agents/docs/v4-lite-migration.md",
+    "bytes": 8494,
+    "hash": "0573F0ADDA0DD81AB0157029503C71A1DDE6E2B6610255CCEF3A1CD283338D41"
+  },
+  {
+    "path": ".agents/docs/v4-observation-contract.md",
+    "bytes": 5667,
+    "hash": "1AB936676568545EA32A0B67A0201F8EFD3C5D3137052CEE34AE31455D23D397"
+  },
+  {
+    "path": ".agents/features/challenge-list.json",
+    "bytes": 1558,
+    "hash": "193CEA70E450F426B47903CDFC31C17A9EA8589749586F79E446FC0A11BF9A13"
+  },
+  {
+    "path": ".agents/features/journal-frontend.json",
+    "bytes": 1651,
+    "hash": "AE8AFE25B118A2F93905AE383BA28707B213FFD18DE49D5EC6BAEF329EE17C17"
+  },
+  {
+    "path": ".agents/features/today-view.json",
+    "bytes": 1130,
+    "hash": "628DBB68D0CB530C3C1559AE555345A10C836405624058E3AB0F5284BA8606F3"
+  },
+  {
+    "path": ".agents/policies/orchestration-v3.md",
+    "bytes": 43332,
+    "hash": "501013AADF0194CE6C2BE30685FDC4AB9D8B78D0106B4431C22D0C2EEB1F8EBE"
+  },
+  {
+    "path": ".agents/policies/v3-telemetry.md",
+    "bytes": 9853,
+    "hash": "DE71F33723BBA4422F516C2354E7E4C76A15642058EFF234F272C41B5816A17D"
+  },
+  {
+    "path": ".agents/review/targeted-reviewer-contract.md",
+    "bytes": 5954,
+    "hash": "F165505879568153B60278EAEC998BDFAF490E191B68027DE5C396C8866A3257"
+  },
+  {
+    "path": ".agents/routing/task-router.md",
+    "bytes": 1718,
+    "hash": "FA794D41EAB11DB8BEC1A9EE5B79F391B4A11266CEDBD77C111B0B50B4475869"
+  },
+  {
+    "path": ".agents/schemas/run-state.schema.json",
+    "bytes": 9003,
+    "hash": "1A649BD2963286CD1EC4D94FC0B667B083E4F386823C4178CA33B521C1624D82"
+  },
+  {
+    "path": ".agents/schemas/worker-report.schema.json",
+    "bytes": 6525,
+    "hash": "185CE9B5AD2367F170A0E77F3E1E5433A65C1786D9F5F12108F403AC93730A9B"
+  },
+  {
+    "path": ".agents/schemas/worker-state.schema.json",
+    "bytes": 5391,
+    "hash": "F041B37E1E86660C875E9ECD63B4AF41DCA6A57874C37BA476BD643E2FB8D28E"
+  },
+  {
+    "path": ".agents/scripts/benchmark-v4-v2.mjs",
+    "bytes": 30698,
+    "hash": "84B6EAFB5E71EE69D8D2034F2F53B098D2C076916C56CC34A26387093E0BEC0A"
+  },
+  {
+    "path": ".agents/scripts/benchmark-v4.mjs",
+    "bytes": 2133,
+    "hash": "7EBD3ABC173B578763F6CCE0B5D7C12D6E9676FBE0E6BE1877BB449B7451F9A0"
+  },
+  {
+    "path": ".agents/scripts/benchmark-v4.test.mjs",
+    "bytes": 17327,
+    "hash": "6C93AD786174FD55BED8C53DE9589E60A46B7E38EEDCFCAEF4F613BC870E493D"
+  },
+  {
+    "path": ".agents/scripts/check-artifact-contract.mjs",
+    "bytes": 10577,
+    "hash": "653ACE4512BC6CB5E9D657777DB87738D2DD63D1FE0F11D0A297AA1B4D8F7591"
+  },
+  {
+    "path": ".agents/scripts/check-artifact-contract.test.mjs",
+    "bytes": 7769,
+    "hash": "247E371F4B5BB0C186C584063E66229C10C4E54ABB54675A572264C34178D917"
+  },
+  {
+    "path": ".agents/scripts/check-escalation.mjs",
+    "bytes": 3348,
+    "hash": "05C8FF5DFD468306F64A578686E627F48D5271048058246251C6869F9A015282"
+  },
+  {
+    "path": ".agents/scripts/check-feature-map.mjs",
+    "bytes": 4054,
+    "hash": "EC3A44E582F2ABBE6A966A22F2E0A1B3A7177AE5606DBC621F7413F034DED1A2"
+  },
+  {
+    "path": ".agents/scripts/check-slice-implementation.mjs",
+    "bytes": 21067,
+    "hash": "635F496624FAC701AE53E57A723E2FDD9123D7D7B628663C5A612061191ADC8A"
+  },
+  {
+    "path": ".agents/scripts/check-slice-implementation.test.mjs",
+    "bytes": 13519,
+    "hash": "1BB326D025C7ACF1DC9AC47720A561863AA4D9499632834E06C7CD716EBBBF26"
+  },
+  {
+    "path": ".agents/scripts/check-slice-verification.mjs",
+    "bytes": 18088,
+    "hash": "C67E638A59A32D307B76E99F6F9785D70438621124E337DFBF7EB68FC99323A4"
+  },
+  {
+    "path": ".agents/scripts/check-slice-verification.test.mjs",
+    "bytes": 14988,
+    "hash": "8202093CD75DA10EBF02A3D0EBA9DC3BAA10F54523747172D3BC790630E5D11D"
+  },
+  {
+    "path": ".agents/scripts/check-story-completion.mjs",
+    "bytes": 27260,
+    "hash": "A5174E15C62B9B7919107DE0FA092D1BC3285057B5A815B7EFA2BB7AC92F81F9"
+  },
+  {
+    "path": ".agents/scripts/check-story-completion.test.mjs",
+    "bytes": 15666,
+    "hash": "B3C4234AE32D31BA23BEF67B46E0AEE43F32224483372AC9837563DA74B0524D"
+  },
+  {
+    "path": ".agents/scripts/check-story-finalization.architecture.test.mjs",
+    "bytes": 1956,
+    "hash": "6E27D89A8C8C8489713082F5FFAD7EFE2A2D50C3083AFB9B13CB5469AA59D725"
+  },
+  {
+    "path": ".agents/scripts/check-story-finalization.mjs",
+    "bytes": 49052,
+    "hash": "AEB875434EA260F66E1F1B2418D036731A77E8C5F5A4E0B277E059F000BC9C79"
+  },
+  {
+    "path": ".agents/scripts/check-story-finalization.test.mjs",
+    "bytes": 27306,
+    "hash": "C8681D4B693D65C7DB52885A9CFE0A26E7043A35011862E899257BC91AB0ECE4"
+  },
+  {
+    "path": ".agents/scripts/check-story-plan.mjs",
+    "bytes": 16275,
+    "hash": "AB81F00A97DC99E36B2FEDBEDCCDF38BED2C6CCE7464A52D30893FDE726491F0"
+  },
+  {
+    "path": ".agents/scripts/check-story-plan.test.mjs",
+    "bytes": 15552,
+    "hash": "E42339D47A143C07314FF18F558686A283E85B4C40298B8D793B9569241E3692"
+  },
+  {
+    "path": ".agents/scripts/check-verification.mjs",
+    "bytes": 18131,
+    "hash": "FD01110B0A288C2B407120993BFDE611C61C024884C557CE65CB4180E36A72B5"
+  },
+  {
+    "path": ".agents/scripts/check-verification.test.mjs",
+    "bytes": 7595,
+    "hash": "3345000EC8162BEB3F75B44034217292D5F5F37C38D838BE9904CD3D36B872B3"
+  },
+  {
+    "path": ".agents/scripts/compile-v4-context.mjs",
+    "bytes": 21056,
+    "hash": "97EF613E120A809C3BC9D25233B98451B5C5182147181DE43AE3F2227EACE66E"
+  },
+  {
+    "path": ".agents/scripts/compile-v4-context.test.mjs",
+    "bytes": 7754,
+    "hash": "BC71AE51B1A310A56EB31629FE2B4D1E7BB1DEBB25BA1F627690BA2D62E51593"
+  },
+  {
+    "path": ".agents/scripts/complete-story.mjs",
+    "bytes": 15071,
+    "hash": "7F45A22AF1ABA79FD56D59DBC661E861556A75802C18A14815118413B9D4C650"
+  },
+  {
+    "path": ".agents/scripts/complete-story.test.mjs",
+    "bytes": 4833,
+    "hash": "775DAC9AE5F15EBC54E4A7E2E6C2EA072695DE4639144D7ED992C373FE84F3B9"
+  },
+  {
+    "path": ".agents/scripts/completion-fixture.mjs",
+    "bytes": 11686,
+    "hash": "10F33D9CE8A46E12A004497E1F77D3507CB5904B8523244F6379127713120A3D"
+  },
+  {
+    "path": ".agents/scripts/dual-schema.test.mjs",
+    "bytes": 17201,
+    "hash": "A28142A210ABA789116263C09A4542528E86A38F27A2948A24BCBFF4CE2DDA02"
+  },
+  {
+    "path": ".agents/scripts/finalization-contract.mjs",
+    "bytes": 8110,
+    "hash": "1BBCB7E1666E59F0C188B52CC6EC87B6A01155ED2B84310B9D61BF635457DB2D"
+  },
+  {
+    "path": ".agents/scripts/finalization-contract.test.mjs",
+    "bytes": 5110,
+    "hash": "0C08FB90B4D08854B9526AAA6815AD1629922CC1436671C8B02F877AC22DDCC4"
+  },
+  {
+    "path": ".agents/scripts/finalization-plan-state.test.mjs",
+    "bytes": 8370,
+    "hash": "291D761A732FD02F1C6EB46E077FA0FF931FC6EB27680B4BBA54F16AE4D5E5BF"
+  },
+  {
+    "path": ".agents/scripts/finalization-recovery.mjs",
+    "bytes": 23872,
+    "hash": "4949FFD16EB4D528AE83D3E87125B6F9F68E908E2EFF87751D272C991B325282"
+  },
+  {
+    "path": ".agents/scripts/finalization-recovery.test.mjs",
+    "bytes": 12868,
+    "hash": "136F66561A9F907061FA7AE394E55B7476BC03DD38303C14FE5A878D1020A0C5"
+  },
+  {
+    "path": ".agents/scripts/finalize-story.mjs",
+    "bytes": 20234,
+    "hash": "BB7CBF10B22A737A56C999D005DC560DA83323E1EBDF3BA3724B88629FF155FD"
+  },
+  {
+    "path": ".agents/scripts/finalize-story.test.mjs",
+    "bytes": 29244,
+    "hash": "CCE4ACEA5DFE68F5CB2AA4A3D7D46098625B6FFE54FAAEE9DE2969AC5267847E"
+  },
+  {
+    "path": ".agents/scripts/fixtures/artifact-contract/plan.json",
+    "bytes": 1023,
+    "hash": "6ED44A87F6509DB7F1DF0B64B881D741C392DDF2D0E50CDDE4693CAB995C09E8"
+  },
+  {
+    "path": ".agents/scripts/fixtures/artifact-contract/receipt.json",
+    "bytes": 631,
+    "hash": "2E264D8EB82244852C6B61E0A9CF26CCB9AAEBB100D8E372E8A898DBAA458817"
+  },
+  {
+    "path": ".agents/scripts/fixtures/artifact-contract/story-9-1.md",
+    "bytes": 1127,
+    "hash": "B7027E68174612F50376C7D21F56E54D2147A9E7FF4C09284E60A7EAFFEB8A71"
+  },
+  {
+    "path": ".agents/scripts/fixtures/v4-architecture/corpus.json",
+    "bytes": 1144,
+    "hash": "F512212DA867C552E1F3FAB54E8168F3D3E11908E20CA6E53D2984F78DD2959B"
+  },
+  {
+    "path": ".agents/scripts/fixtures/v4-architecture/instruction-basis.json",
+    "bytes": 1553,
+    "hash": "5B8BD2134F83DD2B57DFEBB2499584F3B3CDE516DBF37858778D5822B766C3DF"
+  },
+  {
+    "path": ".agents/scripts/measure-v4-instruction-context.mjs",
+    "bytes": 9455,
+    "hash": "3C06F178F2206F6641AB731E36399334D8AFE19D771B50ADC1C80772049DB29A"
+  },
+  {
+    "path": ".agents/scripts/measure-v4-instruction-context.test.mjs",
+    "bytes": 6401,
+    "hash": "55F2A90FDE18CEA78AEB95C83C822E8814E6790356EDBE1CC13AC983085872E1"
+  },
+  {
+    "path": ".agents/scripts/prepare-change-evidence.mjs",
+    "bytes": 17602,
+    "hash": "AF3A34F924055B7615F495D320F7416664E077F37E6F024FD7DDEBE32F87EED4"
+  },
+  {
+    "path": ".agents/scripts/prepare-change-evidence.test.mjs",
+    "bytes": 14782,
+    "hash": "77FC84324C5381BFBA4CFC8A375331F9E68319F9BD1792A1865097F9991A8F98"
+  },
+  {
+    "path": ".agents/scripts/reconcile-story-lifecycle.mjs",
+    "bytes": 15261,
+    "hash": "CB3C5EC1E4AB65418F0B94ABFD5E1D65C3EEC6D02C0743305976C6DFEBD0E058"
+  },
+  {
+    "path": ".agents/scripts/reconcile-story-lifecycle.test.mjs",
+    "bytes": 15202,
+    "hash": "51544B01CF3FB64B5E9BAFCFD0827F189FBF288425FDA9394CA83133350A0121"
+  },
+  {
+    "path": ".agents/scripts/run-v4-architecture-corpus.mjs",
+    "bytes": 20198,
+    "hash": "AD8CBA0E0EEACA60EC0183DD6115A73FDEF4B6EF44E05A1DFFB63EF285DD4BE5"
+  },
+  {
+    "path": ".agents/scripts/run-v4-architecture-corpus.test.mjs",
+    "bytes": 4463,
+    "hash": "7E5BF7372B80FE92C63AA844851508096F90E1E55905007302184E14D6D124F8"
+  },
+  {
+    "path": ".agents/scripts/start-story.mjs",
+    "bytes": 17802,
+    "hash": "E900D1E3DE5299CD328FC2039CCB27EEFFF1EC588BE0D992AB395454415B4AA0"
+  },
+  {
+    "path": ".agents/scripts/start-story.test.mjs",
+    "bytes": 15022,
+    "hash": "7F484E7791FE0A3A35EFF3E4FDE6935EFB6172680D4FB197BE5B8E47709AD514"
+  },
+  {
+    "path": ".agents/scripts/v4-action-kernel.mjs",
+    "bytes": 104841,
+    "hash": "26521D86B1DEF1912955531A3060075C67D08537DC69485F6289DF7EDEC2C1DA"
+  },
+  {
+    "path": ".agents/scripts/v4-action-kernel.test.mjs",
+    "bytes": 26254,
+    "hash": "2E7E6DC842410EAAB0FAEF7C20D879F659A20FC3AB61737FBBCA15D8A28781B8"
+  },
+  {
+    "path": ".agents/scripts/v4-architecture-baseline.test.mjs",
+    "bytes": 5663,
+    "hash": "B6322B349F747F29189DC560AD325C4140FB726F2A2F985129C62198FDDF3FBC"
+  },
+  {
+    "path": ".agents/scripts/v4-architecture-fixture.mjs",
+    "bytes": 10619,
+    "hash": "367B5FBA5A57E4070F5D704E3B8992DC8F3964E6AD6E40EC539D24843B850DAC"
+  },
+  {
+    "path": ".agents/scripts/v4-check-executor.mjs",
+    "bytes": 16351,
+    "hash": "4D8983DE4313182D52D8BE4EAB9E5FFC61FF8F558D9E15ED6A802CF754C57340"
+  },
+  {
+    "path": ".agents/scripts/v4-check-executor.test.mjs",
+    "bytes": 6761,
+    "hash": "570D37081D79D8B2F3748035DF10ABBBF2DC9FAEC5F57DDD3EBBA0BA42426341"
+  },
+  {
+    "path": ".agents/scripts/v4-context-invariants.architecture.test.mjs",
+    "bytes": 3832,
+    "hash": "5D6CF8AFA816563B6DE2EE70368C7646E18033C196EDE0FDAE8179F32BEE8CFD"
+  },
+  {
+    "path": ".agents/scripts/v4-evolution.mjs",
+    "bytes": 20918,
+    "hash": "1034D20A47A9D4BA2126236E3677BBE794D97E9FD128BEBF94DFF81ADB36C850"
+  },
+  {
+    "path": ".agents/scripts/v4-evolution.test.mjs",
+    "bytes": 10310,
+    "hash": "259D17ADFBA06C4AEE4CD8C43ABDF14BED7996A6EA62E8D660DAC3467242BC01"
+  },
+  {
+    "path": ".agents/scripts/v4-experience.mjs",
+    "bytes": 20575,
+    "hash": "96D56FFB65258857C6F2285329629EB1056420C3B4D9E7DD2AF6A7DE45E45E47"
+  },
+  {
+    "path": ".agents/scripts/v4-experience.test.mjs",
+    "bytes": 8874,
+    "hash": "6C63E245E58316B4567E6092D15C4A7BED55BD4EA8EC89BD055D7B241C84D582"
+  },
+  {
+    "path": ".agents/scripts/v4-finalization-contract.mjs",
+    "bytes": 7994,
+    "hash": "E3375C7C57E472C24580E7E48AEA9DA8C74756426C32662E0601E0465D686FB7"
+  },
+  {
+    "path": ".agents/scripts/v4-finalization-contract.test.mjs",
+    "bytes": 4602,
+    "hash": "83CF5B0459E8E2C9E86F283F6C476E59379C299572158D949D99937345DBD73B"
+  },
+  {
+    "path": ".agents/scripts/v4-metadata-recovery.mjs",
+    "bytes": 10833,
+    "hash": "04273603E785A9445A01F1BCFB69E3C0B1A9D794085A2F88AE390ED4EA04A190"
+  },
+  {
+    "path": ".agents/scripts/v4-observation-hooks.test.mjs",
+    "bytes": 7266,
+    "hash": "8CF2E3FEE0FF6DF6C2D3FA5D57BE4EAF176B9FE8344D5D4AE003236AD6DF3014"
+  },
+  {
+    "path": ".agents/scripts/v4-observations.mjs",
+    "bytes": 22400,
+    "hash": "BE06F621678E9BE2243C8551E6B42C10D155281BA73D4DD084E2CC6CC6729DA1"
+  },
+  {
+    "path": ".agents/scripts/v4-observations.test.mjs",
+    "bytes": 8006,
+    "hash": "D56CD4E9A463E9209BD78D763DF73AA85545C6716E56BE642B74F17C12246958"
+  },
+  {
+    "path": ".agents/scripts/v4-rework.test.mjs",
+    "bytes": 21310,
+    "hash": "BFBE534434BE59A81942CBFF3A24B41542CF6C31B15B4E6DE57DF9007C1A6D46"
+  },
+  {
+    "path": ".agents/scripts/v4-separated-plan.mjs",
+    "bytes": 21537,
+    "hash": "4AEA2275D606AE9778C1D918C4E779E6DA166C7F84F4C914D8699CCD79C948B4"
+  },
+  {
+    "path": ".agents/scripts/v4-slice-transaction.mjs",
+    "bytes": 59326,
+    "hash": "6EB2EE3A02A2390C4CE7FB10B81DC5C8E3CE7257355977A65FFA6B21770450CD"
+  },
+  {
+    "path": ".agents/scripts/v4-slice-transaction.test.mjs",
+    "bytes": 16619,
+    "hash": "51ED72170A62419BF82038800475BEF20AFF3E73E210107C1D7C87D7F2EBECC5"
+  },
+  {
+    "path": ".agents/scripts/v4-story-runner.mjs",
+    "bytes": 21469,
+    "hash": "A289D7439DBC923026AC1262C9A0B8D0B3F8949E3BCFF7DFCC6564B76BCCA2EA"
+  },
+  {
+    "path": ".agents/scripts/v4-story-runner.test.mjs",
+    "bytes": 7468,
+    "hash": "BA8E8869703FB1C80DF3825D1F421B70A7DE09BD414625B0184F96392F855364"
+  },
+  {
+    "path": ".agents/scripts/v4-verification-flow.test.mjs",
+    "bytes": 35517,
+    "hash": "8A24708F05BD259D214E5A3179C18B0821FE716E379E4CE526FCC3DBC05CB95C"
+  },
+  {
+    "path": ".agents/skills/bmad-agent-analyst/SKILL.md",
+    "bytes": 4523,
+    "hash": "09AFED9BE77EA360ADF70B1A6BDCEBB1E46E8930778933670CF9992E3DD6E2AD"
+  },
+  {
+    "path": ".agents/skills/bmad-agent-analyst/customize.toml",
+    "bytes": 4568,
+    "hash": "EAED9EFBFF9CC115B83D5D263B19B9E0202B5B30FA9C4321D18F8C401CBFE85E"
+  },
+  {
+    "path": ".agents/skills/bmad-agent-analyst/module-manifest.toml",
+    "bytes": 159,
+    "hash": "5EADCE5221FD82146E53699FDDD5A69540D090F42A51283D575B07F4CA1FA7EE"
+  },
+  {
+    "path": ".agents/skills/bmad-agent-architect/SKILL.md",
+    "bytes": 4471,
+    "hash": "CBAE80E480147AB46DF5C11DBAC461EC8910C3A02AE687FDF5E664D99F783FEB"
+  },
+  {
+    "path": ".agents/skills/bmad-agent-architect/customize.toml",
+    "bytes": 2808,
+    "hash": "3C95D1FB331A635A8E689AED7EED7D929E7E4BF88085D732574F4E6E7E95B2E9"
+  },
+  {
+    "path": ".agents/skills/bmad-agent-architect/module-manifest.toml",
+    "bytes": 159,
+    "hash": "5EADCE5221FD82146E53699FDDD5A69540D090F42A51283D575B07F4CA1FA7EE"
+  },
+  {
+    "path": ".agents/skills/bmad-agent-dev/SKILL.md",
+    "bytes": 4533,
+    "hash": "F805F7B2D80740CAC56C360DDB435F6914979D7FE18B1F03A2124DA401437BF2"
+  },
+  {
+    "path": ".agents/skills/bmad-agent-dev/customize.toml",
+    "bytes": 3412,
+    "hash": "B3BE272CDC1A9DB28B2704DADED0A7F022388B5C8B93578CFD39106B458034A3"
+  },
+  {
+    "path": ".agents/skills/bmad-agent-dev/module-manifest.toml",
+    "bytes": 159,
+    "hash": "5EADCE5221FD82146E53699FDDD5A69540D090F42A51283D575B07F4CA1FA7EE"
+  },
+  {
+    "path": ".agents/skills/bmad-agent-pm/SKILL.md",
+    "bytes": 4469,
+    "hash": "A96183E27DA3AD848EF997F2E8D7A6D03526DC725B10ED4A93CB74C65351D739"
+  },
+  {
+    "path": ".agents/skills/bmad-agent-pm/customize.toml",
+    "bytes": 3135,
+    "hash": "58C14AEFB6C70513CC063763058817B01B887CAE37C87015EED336EB3E36876E"
+  },
+  {
+    "path": ".agents/skills/bmad-agent-pm/module-manifest.toml",
+    "bytes": 159,
+    "hash": "5EADCE5221FD82146E53699FDDD5A69540D090F42A51283D575B07F4CA1FA7EE"
+  },
+  {
+    "path": ".agents/skills/bmad-agent-ux-designer/SKILL.md",
+    "bytes": 4490,
+    "hash": "C3CB0E94A2CEC7FDDC8B6B14A96FC72615A2DDE1B86C337BE40AB442311294F2"
+  },
+  {
+    "path": ".agents/skills/bmad-agent-ux-designer/customize.toml",
+    "bytes": 2546,
+    "hash": "0C14A4FF7979976E22A8BFCDAA5ABAF43A15CD211AACE3172E380BA7AC8F0BBF"
+  },
+  {
+    "path": ".agents/skills/bmad-agent-ux-designer/module-manifest.toml",
+    "bytes": 159,
+    "hash": "5EADCE5221FD82146E53699FDDD5A69540D090F42A51283D575B07F4CA1FA7EE"
+  },
+  {
+    "path": ".agents/skills/bmad-architecture/SKILL.md",
+    "bytes": 14024,
+    "hash": "DCC7DBD80EDFF116F8D1D0B6F0BB23E4226B2BD79E90F59EA9F8EB0F06A1DE28"
+  },
+  {
+    "path": ".agents/skills/bmad-architecture/assets/spine-template.md",
+    "bytes": 4436,
+    "hash": "0BC3A5FEA101644A19BC268DE5F237EF92699D2399E2853CC75C15C252DC7C04"
+  },
+  {
+    "path": ".agents/skills/bmad-architecture/customize.toml",
+    "bytes": 6436,
+    "hash": "D03B3783AA6E4C659AE0BD5E60AD1D922A0058C7FB502972A4E3B28DB934B517"
+  },
+  {
+    "path": ".agents/skills/bmad-architecture/module-manifest.toml",
+    "bytes": 159,
+    "hash": "5EADCE5221FD82146E53699FDDD5A69540D090F42A51283D575B07F4CA1FA7EE"
+  },
+  {
+    "path": ".agents/skills/bmad-architecture/references/headless.md",
+    "bytes": 2686,
+    "hash": "D6D0D79C3FE12C1ABF2E8AAC161E28D14C19646F840117EFC591A45D984C70E1"
+  },
+  {
+    "path": ".agents/skills/bmad-architecture/references/reviewer-gate.md",
+    "bytes": 3258,
+    "hash": "81657C8908699BEE8FD144551FBCFCBB88FED634877B9B9C26786B56A40BBCA5"
+  },
+  {
+    "path": ".agents/skills/bmad-architecture/scripts/lint_spine.py",
+    "bytes": 11046,
+    "hash": "80E2B9EB117AD4B5F32FC7B638B181C689B7F30E81F0A2F9A21C98C99266DB06"
+  },
+  {
+    "path": ".agents/skills/bmad-architecture/scripts/tests/test_lint_spine.py",
+    "bytes": 10101,
+    "hash": "B372D1CBB1A118ACF00E1918A9988268E6D4A79531FA67CA69FAFAA91CFF7BB1"
+  },
+  {
+    "path": ".agents/skills/bmad-build/SKILL.md",
+    "bytes": 1095,
+    "hash": "6F5CD8D50B5D7B20A92E99064417DB9E98155E9C474957A89E9CD395BC2798B0"
+  },
+  {
+    "path": ".agents/skills/bmad-build/compile-epic-context.md",
+    "bytes": 2980,
+    "hash": "B76743F29011226904823CCBB0ECEB34479A18E2F421930E82FEDC8A21798771"
+  },
+  {
+    "path": ".agents/skills/bmad-build/customize.toml",
+    "bytes": 7039,
+    "hash": "D71343389EE2D98B093028C5148B02AC6D35B3A3CFE8E5FD1BD42DEBE97D3F0E"
+  },
+  {
+    "path": ".agents/skills/bmad-build/module-manifest.toml",
+    "bytes": 159,
+    "hash": "5EADCE5221FD82146E53699FDDD5A69540D090F42A51283D575B07F4CA1FA7EE"
+  },
+  {
+    "path": ".agents/skills/bmad-build/references/claims-check.md",
+    "bytes": 1444,
+    "hash": "5B3D40C7C685EEF0AE2EDF706CC058D9B195C9E138FF926105F560918047B6FE"
+  },
+  {
+    "path": ".agents/skills/bmad-build/references/deletion-check.md",
+    "bytes": 1023,
+    "hash": "2690305265A71A83C46F3F35F2C972552D440447D9FC3E5AC20B5F728CD7749B"
+  },
+  {
+    "path": ".agents/skills/bmad-build/review-prompts/edge-case-hunter.md",
+    "bytes": 8473,
+    "hash": "B9D4B3AE284B71FEDF8064391EF03535EF0A34BC4DDE892A2B03EA484F0280F2"
+  },
+  {
+    "path": ".agents/skills/bmad-build/review-prompts/verification-gap.md",
+    "bytes": 9934,
+    "hash": "561382B2C19466C2EE761E2160015E3A5386FF9A79D6E03E940EA70496C875EA"
+  },
+  {
+    "path": ".agents/skills/bmad-build/spec-template.md",
+    "bytes": 4409,
+    "hash": "F37DC185ADA49357060421E481DC5A4FBF6D047F82E790E30047249BE2905FB9"
+  },
+  {
+    "path": ".agents/skills/bmad-build/step-01-clarify-and-route.md",
+    "bytes": 11139,
+    "hash": "4C5ADE415D597F5F6346EEF884B9C1C965E6602AB536977545C83E5D5EEF23B0"
+  },
+  {
+    "path": ".agents/skills/bmad-build/step-02-plan.md",
+    "bytes": 5585,
+    "hash": "A1C50426A4EBA55F808C901FAF15198C7F7DD46960DEF5FB39F1160AF71BAFBA"
+  },
+  {
+    "path": ".agents/skills/bmad-build/step-03-implement.md",
+    "bytes": 3960,
+    "hash": "E1F0132E1D5D1D00C0FE457A899F6ADEA4A281B10B5D97236CD04E9A3C5ADE7A"
+  },
+  {
+    "path": ".agents/skills/bmad-build/step-04-review.md",
+    "bytes": 10914,
+    "hash": "2C32CAABA46E93845F187F6F1FCED15872D2F05828C214B16F53B02DA7F321F5"
+  },
+  {
+    "path": ".agents/skills/bmad-build/step-05-present.md",
+    "bytes": 1279,
+    "hash": "F7D4EC03A1EF9563213F6EC878992D585AA21CAD10667EBA2A2C1A6EBB7077F3"
+  },
+  {
+    "path": ".agents/skills/bmad-build/step-oneshot.md",
+    "bytes": 6240,
+    "hash": "B5C49FB6E4B8341B3CE4416496E8D96955692788F67DC3CAB310E96997F00C81"
+  },
+  {
+    "path": ".agents/skills/bmad-build/sync-sprint-status.md",
+    "bytes": 424,
+    "hash": "4ACD5D047728E997CFFB9F26EA410ABE68D0312706A0BC9DC33369772D8A6A77"
+  },
+  {
+    "path": ".agents/skills/bmad-build/workflow.md",
+    "bytes": 4041,
+    "hash": "86DFD0EED59DDE6784D70084F626D7D0E5752FE62A1FDFA8229785E2765B8D25"
+  },
+  {
+    "path": ".agents/skills/bmad-code-review/SKILL.md",
+    "bytes": 1098,
+    "hash": "456263719B3C47504D6E3F3F158C55CB83BB92F75528136F2E833437C3D095BD"
+  },
+  {
+    "path": ".agents/skills/bmad-code-review/customize.toml",
+    "bytes": 5178,
+    "hash": "CF78B4F78128B7E6E6D46408758BE8EC6DF8EAD3E80580E61C1E031BCCFAFBFB"
+  },
+  {
+    "path": ".agents/skills/bmad-code-review/module-manifest.toml",
+    "bytes": 159,
+    "hash": "5EADCE5221FD82146E53699FDDD5A69540D090F42A51283D575B07F4CA1FA7EE"
+  },
+  {
+    "path": ".agents/skills/bmad-code-review/references/claims-check.md",
+    "bytes": 1376,
+    "hash": "E7A26D72F810D7CC9796047574632F1A51D83118E2B112004E9FC8907145FF83"
+  },
+  {
+    "path": ".agents/skills/bmad-code-review/references/deletion-check.md",
+    "bytes": 1023,
+    "hash": "2690305265A71A83C46F3F35F2C972552D440447D9FC3E5AC20B5F728CD7749B"
+  },
+  {
+    "path": ".agents/skills/bmad-code-review/review-prompts/edge-case-hunter.md",
+    "bytes": 8546,
+    "hash": "18B23F2C4F7ADC537F43156D8A03C002F86113D3F95C4A5D3DBBFA7E6766FF50"
+  },
+  {
+    "path": ".agents/skills/bmad-code-review/review-prompts/verification-gap.md",
+    "bytes": 9864,
+    "hash": "EF01D8B3CC49CA9CB673808DAA220432279D08433581235952829FEDA1A99E4C"
+  },
+  {
+    "path": ".agents/skills/bmad-code-review/step-01-gather-context.md",
+    "bytes": 8218,
+    "hash": "6C81C7359BFF452AD14FD59658A77271C2BB4B6687486EB257B50AF0037D19CA"
+  },
+  {
+    "path": ".agents/skills/bmad-code-review/step-02-review.md",
+    "bytes": 2674,
+    "hash": "09798D0EF42315319BDD41D342126B3DA2082413FBE742E7CA6481718D0DDC3A"
+  },
+  {
+    "path": ".agents/skills/bmad-code-review/step-03-triage.md",
+    "bytes": 5385,
+    "hash": "F12AEDBDDA6399C684ABB1CE146AB79F9EDE2ED3C23014DEFC6C49CA47C00788"
+  },
+  {
+    "path": ".agents/skills/bmad-code-review/step-04-present.md",
+    "bytes": 6648,
+    "hash": "AB76393E57521A53CBED34A33235FD7D99EA2C5B70A8920167DCD27CC810E603"
+  },
+  {
+    "path": ".agents/skills/bmad-code-review/workflow.md",
+    "bytes": 2589,
+    "hash": "2472F24257E2039EE015B31D8AD4C34895FE7817C2DC7D19F5BF4B0CBB4E403A"
+  },
+  {
+    "path": ".agents/skills/bmad-correct-course/SKILL.md",
+    "bytes": 14093,
+    "hash": "767DE303AA4B914C1F0BF2D948813156C9F24337B09A56E74D5993A024D30ACE"
+  },
+  {
+    "path": ".agents/skills/bmad-correct-course/checklist.md",
+    "bytes": 11922,
+    "hash": "93B788CBA72FEB78F46C69590B985BEDC623FE0F873D928012F75F9E083D8327"
+  },
+  {
+    "path": ".agents/skills/bmad-correct-course/customize.toml",
+    "bytes": 1631,
+    "hash": "7D71F834A4EBE176605361257B84745A7EB7AD1A46246037D5F9115ACD0CA2FF"
+  },
+  {
+    "path": ".agents/skills/bmad-correct-course/module-manifest.toml",
+    "bytes": 159,
+    "hash": "5EADCE5221FD82146E53699FDDD5A69540D090F42A51283D575B07F4CA1FA7EE"
+  },
+  {
+    "path": ".agents/skills/bmad-create-epics-and-stories/SKILL.md",
+    "bytes": 5111,
+    "hash": "0E17F69578685781D70BF9CB4CE19671A8928725222B57744FE4371CB2BD4917"
+  },
+  {
+    "path": ".agents/skills/bmad-create-epics-and-stories/customize.toml",
+    "bytes": 1656,
+    "hash": "D0811D3B0C723780196DA92720A004F9B715F0D62F0EA23B3101BFBFBAE28FF8"
+  },
+  {
+    "path": ".agents/skills/bmad-create-epics-and-stories/module-manifest.toml",
+    "bytes": 159,
+    "hash": "5EADCE5221FD82146E53699FDDD5A69540D090F42A51283D575B07F4CA1FA7EE"
+  },
+  {
+    "path": ".agents/skills/bmad-create-epics-and-stories/steps/step-01-validate-prerequisites.md",
+    "bytes": 11177,
+    "hash": "B06BC02754D2E81FF78A8852768327B8FD1A197CFEC33F7721AB4DAED93AD52A"
+  },
+  {
+    "path": ".agents/skills/bmad-create-epics-and-stories/steps/step-02-design-epics.md",
+    "bytes": 9008,
+    "hash": "914923ACE63D08AA011F9A80B49E7375CCA32D75B59F7AE09FF6B005B2452498"
+  },
+  {
+    "path": ".agents/skills/bmad-create-epics-and-stories/steps/step-03-create-stories.md",
+    "bytes": 8567,
+    "hash": "37E8132113C3475F1058968B1DD0E6B82202EA2F4771291ACF009DCAE47E43A8"
+  },
+  {
+    "path": ".agents/skills/bmad-create-epics-and-stories/steps/step-04-final-validation.md",
+    "bytes": 5454,
+    "hash": "97FF984162822D8B69C8E3F80356C29A3E2A425E5987FBF55EDC8BB9D35384C0"
+  },
+  {
+    "path": ".agents/skills/bmad-create-epics-and-stories/templates/epics-template.md",
+    "bytes": 1166,
+    "hash": "D758D8118DC83DD92196C7F154DC9F1A1B07C1B56C731D0FDA91F344352ABFDA"
+  },
+  {
+    "path": ".agents/skills/bmad-deep-recon/SKILL.md",
+    "bytes": 9242,
+    "hash": "B16D2826426DF90D5B60D586397225D0DCC24E01B6633F7C15D3A903023F24AE"
+  },
+  {
+    "path": ".agents/skills/bmad-deep-recon/assets/research.template.md",
+    "bytes": 478,
+    "hash": "E70F1881DD4E0F8606C74180EF824142B7C98F94C0581F9CE925772A529C2AA8"
+  },
+  {
+    "path": ".agents/skills/bmad-deep-recon/customize.toml",
+    "bytes": 9715,
+    "hash": "C51DC489BDD7F407ED1F9025AC4E3B1287EDE7CC745B9B25AB153A80399C49B0"
+  },
+  {
+    "path": ".agents/skills/bmad-deep-recon/module-manifest.toml",
+    "bytes": 160,
+    "hash": "FA2B9321448BD5142E509DEBEC87EB77837D190A76ACB9E918BE3F8738899DD6"
+  },
+  {
+    "path": ".agents/skills/bmad-deep-recon/references/draft.md",
+    "bytes": 1917,
+    "hash": "9F9588AEB77F0021501951BF43CF84DA59EDE633E32CFB70740E1968792C7F50"
+  },
+  {
+    "path": ".agents/skills/bmad-deep-recon/references/finalize.md",
+    "bytes": 1808,
+    "hash": "5D37B2684E9DDF1C621FCE1D8357E84FA7A72B273DE63D936BB622E8D82B9A1F"
+  },
+  {
+    "path": ".agents/skills/bmad-deep-recon/references/html-briefing.md",
+    "bytes": 2450,
+    "hash": "C4E90F5BA06C53A8CA741C5873BB263298C5680F79D999AF38A5D1105A11AB09"
+  },
+  {
+    "path": ".agents/skills/bmad-deep-recon/references/lifecycle.md",
+    "bytes": 1148,
+    "hash": "E2DA93FD0BB5063D88E5EE0BDE14AE62FBEAFB41D59F24F0AA5CB33A7839AE30"
+  },
+  {
+    "path": ".agents/skills/bmad-deep-recon/references/process.md",
+    "bytes": 1965,
+    "hash": "EB8A6DDD7F5A96BA9658345630309FB11C3CE0F01556C8F44D0C0CBC0D9C9731"
+  },
+  {
+    "path": ".agents/skills/bmad-deep-recon/references/run.md",
+    "bytes": 9532,
+    "hash": "1E8763845B44AD76A4493E63DD2493F39C810E741A298E4FA6692E3DD8DE045D"
+  },
+  {
+    "path": ".agents/skills/bmad-deep-recon/references/selection.md",
+    "bytes": 2354,
+    "hash": "4927638720201571521BDBB1E3EF71EB892F00BEDB7A6FCA4C870177110BDDFF"
+  },
+  {
+    "path": ".agents/skills/bmad-deep-recon/references/synthesis.md",
+    "bytes": 2760,
+    "hash": "E754568D152830D755D22A0ED353A712BEE4579574991DF76F0B198DBBF22B7B"
+  },
+  {
+    "path": ".agents/skills/bmad-deep-recon/references/verification.md",
+    "bytes": 4251,
+    "hash": "06A7C812CD5A983B377A24561B2189DE5CA7424EAD312696927B5B7A49992290"
+  },
+  {
+    "path": ".agents/skills/bmad-deep-recon/scripts/recon_kit.py",
+    "bytes": 12866,
+    "hash": "29AA9172DBA87D82AB735954E8A20BB4740A7E928604D17822ACE42BFD28163F"
+  },
+  {
+    "path": ".agents/skills/bmad-deep-recon/scripts/tests/test_recon_kit.py",
+    "bytes": 5148,
+    "hash": "A0A1A8F16F1C9DB6EC8944C8D88C2159A872E2C82FD9F70BD44A8EFC7A7286D8"
+  },
+  {
+    "path": ".agents/skills/bmad-deep-recon/types/academic-lit.md",
+    "bytes": 1563,
+    "hash": "50A9B43B76EEB3EBC61B8586840227294723F605B0EE3F705B7D520228144834"
+  },
+  {
+    "path": ".agents/skills/bmad-deep-recon/types/competitive.md",
+    "bytes": 1531,
+    "hash": "519749AEA0145EF47A6312D44957EE29C7945C2433A54DB108D8AF62419293A9"
+  },
+  {
+    "path": ".agents/skills/bmad-deep-recon/types/domain.md",
+    "bytes": 1731,
+    "hash": "FFC3A8E2254A2F87D34DEE5F5DF65E3933A8EBE8923BD33ECF5A8B4DD358AE2F"
+  },
+  {
+    "path": ".agents/skills/bmad-deep-recon/types/market.md",
+    "bytes": 1356,
+    "hash": "D19F819B4E31E5EC947656666E2AF91F6D1AB34D30C0EC19594A7C2928C6BF1E"
+  },
+  {
+    "path": ".agents/skills/bmad-deep-recon/types/technical.md",
+    "bytes": 1673,
+    "hash": "75CC8040EF5D6DDA816B734B024606E49A09805807C3C238F0E41BBDB71FB6E6"
+  },
+  {
+    "path": ".agents/skills/bmad-deep-recon/types/user-voice.md",
+    "bytes": 1777,
+    "hash": "ED70726AE6AEB1C721C09CAF6A43B05893BD423D1E01A53724B96CFC25C4E88E"
+  },
+  {
+    "path": ".agents/skills/bmad-sprint-planning/SKILL.md",
+    "bytes": 5277,
+    "hash": "2E105F6F584AACE4A7C260EF026BD5453C19A1FAF6BCE91E709EF4A78EB455B2"
+  },
+  {
+    "path": ".agents/skills/bmad-sprint-planning/customize.toml",
+    "bytes": 1597,
+    "hash": "05842D580A507EB79D77EEE0F29BBE6D5F7A0CF66EBA55F1A31BDEB40455707A"
+  },
+  {
+    "path": ".agents/skills/bmad-sprint-planning/module-manifest.toml",
+    "bytes": 159,
+    "hash": "5EADCE5221FD82146E53699FDDD5A69540D090F42A51283D575B07F4CA1FA7EE"
+  },
+  {
+    "path": ".agents/skills/bmad-sprint-planning/references/fix-sprint-status.md",
+    "bytes": 2772,
+    "hash": "7BF5C22486FBF1C4270EFE42535BBF45854EE1D178B3A537093C37A9A675BC65"
+  },
+  {
+    "path": ".agents/skills/bmad-sprint-planning/references/generate-tracking.md",
+    "bytes": 2631,
+    "hash": "30F711BD5938C4E5396D688C4954FBA075ED080F0B89DAA254A86FC46BD6D807"
+  },
+  {
+    "path": ".agents/skills/bmad-sprint-planning/references/readiness-gate.md",
+    "bytes": 1836,
+    "hash": "7B6CCBC924D44754CFD11110D61040929EDEBB7D6F9260E548F65191A54769E3"
+  },
+  {
+    "path": ".agents/skills/bmad-sprint-planning/references/status-view.md",
+    "bytes": 1658,
+    "hash": "AC8F95A90F3A68CF90B188464673F1C541FF7FC98EE25A25724DB841662F5D3B"
+  },
+  {
+    "path": ".agents/skills/bmad-sprint-planning/references/validate.md",
+    "bytes": 602,
+    "hash": "7CDD1EF0E1ABE7C0A351C307DFC6B82A53A0294492809C8C34BDD236504F4D9F"
+  },
+  {
+    "path": ".agents/skills/bmad-sprint-planning/scripts/sprint_plan.py",
+    "bytes": 29948,
+    "hash": "ABB1C80DAF24AE40B5EE739ACC0D3172AAA512F5627A13E85169EB98C868871F"
+  },
+  {
+    "path": ".agents/skills/bmad-sprint-planning/scripts/tests/test_sprint_plan.py",
+    "bytes": 23080,
+    "hash": "7E9A2AC6051AB12C9D2ED6BC9651AE4B2CEB511E33D299133E8A71EFE6C37416"
+  },
+  {
+    "path": ".agents/skills/bmad-sprint-planning/sprint-status-template.yaml",
+    "bytes": 2464,
+    "hash": "038395DF314B97B3579947917D12E83D1C9129FDA0E9681AE801CF6741D7E29C"
+  },
+  {
+    "path": ".agents/skills/bmad/SKILL.md",
+    "bytes": 6435,
+    "hash": "D6474E61C9A1F37827CD81EC004FC8A8E32F7C274D7CE0E2549E3A7A4D96DA2F"
+  },
+  {
+    "path": ".agents/skills/bmad/assets/config.template.toml",
+    "bytes": 2257,
+    "hash": "0AF70EABB1065BDF7D0D96D34FEFA34D0564A33C68EAF19B4570607F4A0A2DBD"
+  },
+  {
+    "path": ".agents/skills/bmad/module-manifest.toml",
+    "bytes": 160,
+    "hash": "FA2B9321448BD5142E509DEBEC87EB77837D190A76ACB9E918BE3F8738899DD6"
+  },
+  {
+    "path": ".agents/skills/bmad/references/help.md",
+    "bytes": 7905,
+    "hash": "9F4C805272F3CBA82665167C93BE9A2B634854C92CF14A496E3674CCBA4DB7A7"
+  },
+  {
+    "path": ".agents/skills/bmad/references/setup.md",
+    "bytes": 7032,
+    "hash": "3FE3B9DEFA67773990ABDB7513C9DD380BB5BCCA0A42387D756C2F1D83171454"
+  },
+  {
+    "path": ".agents/skills/bmad/scripts/config_utils.py",
+    "bytes": 4212,
+    "hash": "989410C4009B908121BBB0FE551A2D7DB29F89385D0688CDA5CBFC162A5511A1"
+  },
+  {
+    "path": ".agents/skills/bmad/scripts/memlog.py",
+    "bytes": 9487,
+    "hash": "AACE8CE342CB6857679A47B37FB906055905371DF4F037257E2C16E1167FAE4A"
+  },
+  {
+    "path": ".agents/skills/bmad/scripts/render_skill.py",
+    "bytes": 15623,
+    "hash": "06D9F62116F929B5FA6EBE302C73EAABEBA4B4CE7273124F5213E9900816279A"
+  },
+  {
+    "path": ".agents/skills/bmad/scripts/resolve_config.py",
+    "bytes": 2248,
+    "hash": "39D91BE0C3B08B922642D600463F40179AF01BFD7C1343DD17BE423248ABA5F6"
+  },
+  {
+    "path": ".agents/skills/bmad/scripts/resolve_customization.py",
+    "bytes": 5337,
+    "hash": "416090831CCBA053600BDFE8F10837F7FA785A02ED12F4E02F92BFBADC387352"
+  },
+  {
+    "path": ".agents/skills/bmad/scripts/setup.py",
+    "bytes": 52396,
+    "hash": "45CC2533FE4264C8B5CDB98BED45F4FF74F35ECA2971D9FAF4E813CF63753F51"
+  },
+  {
+    "path": ".agents/skills/bmad/scripts/tests/test_config_utils.py",
+    "bytes": 3614,
+    "hash": "B3292AAC8F01B0878EA7E1AB7EDCA3677FF43695F2EC2E98E3D6353CD9200EC8"
+  },
+  {
+    "path": ".agents/skills/bmad/scripts/tests/test_memlog.py",
+    "bytes": 10451,
+    "hash": "1A0E750EEF8B6C41BFA4C45D2F06C7CFD516B4FBF51509D3638D584FC4C58497"
+  },
+  {
+    "path": ".agents/skills/bmad/scripts/tests/test_render_skill.py",
+    "bytes": 22349,
+    "hash": "5443EB245B02A33D05A17EE4033FA202A709F58B316313D7AD3B19A9B56490C6"
+  },
+  {
+    "path": ".agents/skills/bmad/scripts/tests/test_resolve_config.py",
+    "bytes": 4512,
+    "hash": "FF92DB3B5A216B6EB533416332A6341EC63A84923C541F1EBD166ABCEDF82EEA"
+  },
+  {
+    "path": ".agents/skills/bmad/scripts/tests/test_resolve_customization.py",
+    "bytes": 7355,
+    "hash": "280E30CB556398466AAD604290920D4EF8A7FACCB000768DA07730E068DEC762"
+  },
+  {
+    "path": ".agents/skills/orca-cli/SKILL.md",
+    "bytes": 2256,
+    "hash": "ECB4F277B8380A8C44E82DC8CC25241B34DDF9428F152AB3EFF326BC20F9A09F"
+  },
+  {
+    "path": ".agents/skills/orchestration/SKILL.md",
+    "bytes": 3574,
+    "hash": "D748F65C0100C50A44A17EFFD8D10F96CD0CB3DD3BE77DC3EC02196BFD9F7718"
+  },
+  {
+    "path": ".agents/skills/story-development/SKILL.md",
+    "bytes": 7520,
+    "hash": "3A834AA5B67F6AFE258079C8078E872742778E5ED7BFA1973025E42886D33ADF"
+  },
+  {
+    "path": ".agents/skills/story-development/references/complexity-rubric.md",
+    "bytes": 2338,
+    "hash": "C0A122DD2F2D001C290D42DD9AB73E263032C108418757885110FAF8B5450C70"
+  },
+  {
+    "path": ".agents/skills/superpowers/brainstorming/SKILL.md",
+    "bytes": 15706,
+    "hash": "99476557E55F9DAA60BEE5BA350C2C2800FAE621C54F5ACA3C32ECB85F803A1A"
+  },
+  {
+    "path": ".agents/skills/superpowers/brainstorming/scripts/frame-template.html",
+    "bytes": 8307,
+    "hash": "7B9418E9939DDED0CF8E6A5549A18162B7C7E5495DEEEFA83A12F3394B81395D"
+  },
+  {
+    "path": ".agents/skills/superpowers/brainstorming/scripts/helper.js",
+    "bytes": 5782,
+    "hash": "78C3A22DD5E799623CAB8908B0B03E764404EFDE2D2EDC94A8814CF450A09E81"
+  },
+  {
+    "path": ".agents/skills/superpowers/brainstorming/scripts/server.cjs",
+    "bytes": 26416,
+    "hash": "EE89AF11506AC4933324C89A2CFB36B391FE611F82EFB9EEB3B814E40825145F"
+  },
+  {
+    "path": ".agents/skills/superpowers/brainstorming/scripts/start-server.sh",
+    "bytes": 7117,
+    "hash": "526F3FC34BBDC56D97532D84BF861A1113F9F08FEC6479C3553C13EC627C2448"
+  },
+  {
+    "path": ".agents/skills/superpowers/brainstorming/scripts/stop-server.sh",
+    "bytes": 3383,
+    "hash": "6A2F3F3B7CA84FDE8EF3C43825D392E1F12126B52A93B42C4D4940779BAC884D"
+  },
+  {
+    "path": ".agents/skills/superpowers/brainstorming/spec-document-reviewer-prompt.md",
+    "bytes": 1796,
+    "hash": "793F2546815A28F2712F0DCB926AB96DC4A60145FBEA6F9A08D88287EC8E15BC"
+  },
+  {
+    "path": ".agents/skills/superpowers/brainstorming/visual-companion.md",
+    "bytes": 13682,
+    "hash": "770BA4339DD33B24B11100B20E4343670442764087F32B710390704755F9778A"
+  },
+  {
+    "path": ".agents/skills/superpowers/dispatching-parallel-agents/SKILL.md",
+    "bytes": 6245,
+    "hash": "FC9875393A1DCD6B649BF22D9FF62F3A02080C0CE365932451BC73E63D87DDAB"
+  },
+  {
+    "path": ".agents/skills/superpowers/executing-plans/SKILL.md",
+    "bytes": 2369,
+    "hash": "FE85231F6C15B83DFADF1409535D01F304C43B920BC937B1DCC0907EC7824984"
+  },
+  {
+    "path": ".agents/skills/superpowers/finishing-a-development-branch/SKILL.md",
+    "bytes": 8006,
+    "hash": "2B8CB8F9CABB1951BE2EBB1D72DA90D3313F7E3705FD25F5B8F2D0432E139BAE"
+  },
+  {
+    "path": ".agents/skills/superpowers/receiving-code-review/SKILL.md",
+    "bytes": 6408,
+    "hash": "BBE7EB200AC9FEB97F2620308BA8ECB517837465009A858BC5687695F3D0A6AE"
+  },
+  {
+    "path": ".agents/skills/superpowers/requesting-code-review/SKILL.md",
+    "bytes": 3051,
+    "hash": "7681DB08BD8697F94295C7689E1FC059B7EA76136995B181D8A53F5CBBDE7973"
+  },
+  {
+    "path": ".agents/skills/superpowers/requesting-code-review/code-reviewer.md",
+    "bytes": 5850,
+    "hash": "8BF83519A1CD1C40DE0F2C1EE98939D872BF2B151064EA90876DD3A14530C94A"
+  },
+  {
+    "path": ".agents/skills/superpowers/subagent-driven-development/SKILL.md",
+    "bytes": 32907,
+    "hash": "CA15B1B17CABE88289D0B30294B8BA5AE83A4199615584A58778B6620B516FB7"
+  },
+  {
+    "path": ".agents/skills/superpowers/subagent-driven-development/implementer-prompt.md",
+    "bytes": 6489,
+    "hash": "BDA42C4969D1578EAB92BC1CCA864397203329D22DBC143A8C6A896ADB548B42"
+  },
+  {
+    "path": ".agents/skills/superpowers/subagent-driven-development/re-review-prompt.md",
+    "bytes": 4871,
+    "hash": "39BF775586E5BE93DA98C4F16BE5C556195FC806509D22E3F3A79F96C1A0C5D7"
+  },
+  {
+    "path": ".agents/skills/superpowers/subagent-driven-development/scripts/review-package",
+    "bytes": 1515,
+    "hash": "7CFEE68AD5C53DEA3532ACD4C34D85148D3E591F2F8DA94853478FFD57BF4211"
+  },
+  {
+    "path": ".agents/skills/superpowers/subagent-driven-development/scripts/sdd-workspace",
+    "bytes": 1626,
+    "hash": "36C0CAD20D4891DACE227110C17624E09A1E607329841B5DE02FB84FD37D4207"
+  },
+  {
+    "path": ".agents/skills/superpowers/subagent-driven-development/scripts/task-brief",
+    "bytes": 1199,
+    "hash": "BE4896ABF0918DA67832E81CAD80D39599F85E461E721F4613828A3810F3E493"
+  },
+  {
+    "path": ".agents/skills/superpowers/subagent-driven-development/task-reviewer-prompt.md",
+    "bytes": 9228,
+    "hash": "D9A35C4C09034622606061414B988EF618D47940CEF1BE6BDD91E70A524395C8"
+  },
+  {
+    "path": ".agents/skills/superpowers/systematic-debugging/CREATION-LOG.md",
+    "bytes": 4376,
+    "hash": "397F122F115F994372A1805E30071FC0AD86C0DC1E427FBF5B5F1B14143399F5"
+  },
+  {
+    "path": ".agents/skills/superpowers/systematic-debugging/SKILL.md",
+    "bytes": 9748,
+    "hash": "23F249E47A3A4B06C3A5030E37AAF3CED12A54F406782766B384ED127D21ECA4"
+  },
+  {
+    "path": ".agents/skills/superpowers/systematic-debugging/condition-based-waiting-example.ts",
+    "bytes": 5212,
+    "hash": "0602407671F97439ACC9E3CC2FE27AD42A22EB0DBCA62F56D610FB223DAADB0F"
+  },
+  {
+    "path": ".agents/skills/superpowers/systematic-debugging/condition-based-waiting.md",
+    "bytes": 3631,
+    "hash": "02AA854BD9E761F275E1450D7136BA60F1A4D103FE94B552FDCE822DD3C99506"
+  },
+  {
+    "path": ".agents/skills/superpowers/systematic-debugging/defense-in-depth.md",
+    "bytes": 3772,
+    "hash": "9407EFCBD028A5EC45EDFDF6692B988716C0A7B34D1FB5E05D60146171D8041E"
+  },
+  {
+    "path": ".agents/skills/superpowers/systematic-debugging/find-polluter.sh",
+    "bytes": 2058,
+    "hash": "31AA8BBAB625FFAE398C357DE90FE3F4CB8F6DD39B23101BF81EF6DD53638B7C"
+  },
+  {
+    "path": ".agents/skills/superpowers/systematic-debugging/root-cause-tracing.md",
+    "bytes": 5485,
+    "hash": "CB00878F1B5B79442DC474F0E0D67B44F8175E741BA90ABBF5E9778B67BA4854"
+  },
+  {
+    "path": ".agents/skills/superpowers/systematic-debugging/test-academic.md",
+    "bytes": 667,
+    "hash": "51E07C1C56052A6C46CDE8E7D42D6612598EA076F128086FD85911F4D2D3E8DD"
+  },
+  {
+    "path": ".agents/skills/superpowers/systematic-debugging/test-pressure-1.md",
+    "bytes": 1958,
+    "hash": "FBF04219C44460E76D96642D7DC16960A2390936E0A6937D0B133E013FA55AFB"
+  },
+  {
+    "path": ".agents/skills/superpowers/systematic-debugging/test-pressure-2.md",
+    "bytes": 2351,
+    "hash": "FC6B2594BED3F2A15ECE75D0A211B55CB9A4668D85B9873F2BAB5EE54ED31CBF"
+  },
+  {
+    "path": ".agents/skills/superpowers/systematic-debugging/test-pressure-3.md",
+    "bytes": 2761,
+    "hash": "69ED6A5A59DAC92D58D284519991A46B90978BC40A229776DAC0FFA3A6123BFE"
+  },
+  {
+    "path": ".agents/skills/superpowers/test-driven-development/SKILL.md",
+    "bytes": 9335,
+    "hash": "FAD42344223013A560FB3F2A9AD40509C5EA569595BAB7F064DBF13149E9C53F"
+  },
+  {
+    "path": ".agents/skills/superpowers/test-driven-development/writing-good-tests.md",
+    "bytes": 8466,
+    "hash": "87F56D0A4236F804165149EC038787D20062AFC9B37AA240A167C394B39D2065"
+  },
+  {
+    "path": ".agents/skills/superpowers/using-git-worktrees/SKILL.md",
+    "bytes": 6980,
+    "hash": "49AC647DD5A65E0E79F87D346005DDE8CE27C6886BCCF966164917EE8BB4DF80"
+  },
+  {
+    "path": ".agents/skills/superpowers/using-superpowers/SKILL.md",
+    "bytes": 3171,
+    "hash": "3FF749D00D9BAA18813A2EC2A114D09B6C0BF6E9938B030AAC617C0EA12ADDED"
+  },
+  {
+    "path": ".agents/skills/superpowers/using-superpowers/references/antigravity-tools.md",
+    "bytes": 1518,
+    "hash": "343AF08ABAB2936A4063399EC0908A0D3A129F66A54A42EF1F14E9B9EDC0B8FA"
+  },
+  {
+    "path": ".agents/skills/superpowers/using-superpowers/references/codex-tools.md",
+    "bytes": 4870,
+    "hash": "51D2E878AAC90809BFDD0358C974281E2FB88C7D46571E6310587D9DF6CD55EA"
+  },
+  {
+    "path": ".agents/skills/superpowers/using-superpowers/references/gemini-tools.md",
+    "bytes": 4661,
+    "hash": "3E0E732356EAF1780DA7CFD93773723A68FF1FE03DBC519AAAC38CD7E9B62E87"
+  },
+  {
+    "path": ".agents/skills/superpowers/using-superpowers/references/hermes-tools.md",
+    "bytes": 2020,
+    "hash": "32C262E22DA268AC1BC33F2B318E597E78539F10BE170A7453DEE07FF432F36B"
+  },
+  {
+    "path": ".agents/skills/superpowers/using-superpowers/references/pi-tools.md",
+    "bytes": 1258,
+    "hash": "FB6DB6991508E958B0117861B6107FB1CAFCC752210C7CFE66DEF13F1E34D371"
+  },
+  {
+    "path": ".agents/skills/superpowers/verification-before-completion/SKILL.md",
+    "bytes": 3766,
+    "hash": "8F15B9F67E566F286D531B7DA77052F4009B5065FD8EDFCB659C9F837EEBB4A4"
+  },
+  {
+    "path": ".agents/skills/superpowers/writing-plans/SKILL.md",
+    "bytes": 7224,
+    "hash": "82E7D50B27B5F460A1F30858408483CBBDDA55B1B3DA78E3FD86FA7B60573081"
+  },
+  {
+    "path": ".agents/skills/superpowers/writing-plans/plan-document-reviewer-prompt.md",
+    "bytes": 1762,
+    "hash": "5E9997798714B4E7275A2B87374C75211122B4449A17AEE61B936E9097E3C449"
+  },
+  {
+    "path": ".agents/skills/superpowers/writing-skills/SKILL.md",
+    "bytes": 27039,
+    "hash": "09DE7D4B8E865AB333438520CE772A006B04DA6A3A7BEB81B4E3B4BBE94D268B"
+  },
+  {
+    "path": ".agents/skills/superpowers/writing-skills/anthropic-best-practices.md",
+    "bytes": 47347,
+    "hash": "26F2FC231B4BEA7AD7EC034A61615F8FE8BFFF6C436AD77E60D5734BE16A6A15"
+  },
+  {
+    "path": ".agents/skills/superpowers/writing-skills/examples/CLAUDE_MD_TESTING.md",
+    "bytes": 5612,
+    "hash": "3648A10C414546FDEA2EAE3A8F21345CDA2234ACA54A084042E5F933A6B332CA"
+  },
+  {
+    "path": ".agents/skills/superpowers/writing-skills/graphviz-conventions.dot",
+    "bytes": 6141,
+    "hash": "B18A02773875F6C7B92F2A260E88550C92A62549B0009DF9D680F7E9541D0ECC"
+  },
+  {
+    "path": ".agents/skills/superpowers/writing-skills/persuasion-principles.md",
+    "bytes": 6088,
+    "hash": "73FFB3D9D9F510F82296DE0E3509BDCC1BAE13379EF56354877E3F33303B44BF"
+  },
+  {
+    "path": ".agents/skills/superpowers/writing-skills/render-graphs.js",
+    "bytes": 5137,
+    "hash": "7F558E910DC0DC1C24A30FDA9B0595643399F16014F8CD12B56E1EF1AD113A84"
+  },
+  {
+    "path": ".agents/skills/superpowers/writing-skills/testing-skills-with-subagents.md",
+    "bytes": 12942,
+    "hash": "134A5D0F695D717F6D34609DFF44EC9316A593C2F6DB981EC94A61750FCCE1BB"
+  },
+  {
+    "path": ".agents/skills/v4-story-runner/SKILL.md",
+    "bytes": 3508,
+    "hash": "4C4F098432FEB8187510DF381AF5B2F9A992DD5A270BC01B3C7A8E259702E55F"
+  },
+  {
+    "path": ".agents/skills/v4-story-runner/actions/complete-story.md",
+    "bytes": 1563,
+    "hash": "DCEEA7EE5E1C491352553F0E6DE7F142A5CCD26D5F39605BE47ABAB814DBD5C9"
+  },
+  {
+    "path": ".agents/skills/v4-story-runner/actions/finalize-story.md",
+    "bytes": 2026,
+    "hash": "AE57E1715428D6585C709EAFC58B3D82A6A6DFCD240A3CB4F750408B82573D07"
+  },
+  {
+    "path": ".agents/skills/v4-story-runner/actions/implement-slice.md",
+    "bytes": 2237,
+    "hash": "A6EC361E87743F6461FEBF6E2C7F895A9963C49BE56B9AF2B9EBB0620174C584"
+  },
+  {
+    "path": ".agents/skills/v4-story-runner/actions/reconcile-lifecycle.md",
+    "bytes": 1263,
+    "hash": "80BC4AAA7490FEED19D60F73116204956BA2CF2244C61385E8ABEF1AFCB6B422"
+  },
+  {
+    "path": ".agents/skills/v4-story-runner/actions/start-story.md",
+    "bytes": 2281,
+    "hash": "4923FE6090D1CF340D4A0E3AE06E323BD0255860F6D26EF6AE02F334D7FEDE02"
+  },
+  {
+    "path": ".agents/skills/v4-story-runner/actions/verify-slice.md",
+    "bytes": 2264,
+    "hash": "C7A27B84DAE2801FFEDAECFF9995DD1A6D5F944EC9D3175DEDE5EF14DBCA3770"
+  },
+  {
+    "path": ".agents/skills/v4-story-runner/references/implementation-techniques.md",
+    "bytes": 1259,
+    "hash": "9B4072D6B78286023C9C4F51A73FB70773AC01095E6D25E20DF736D9D22E3D9D"
+  },
+  {
+    "path": ".agents/skills/v4-story-runner/references/recovery.md",
+    "bytes": 9340,
+    "hash": "E3BF1F1F803DCF65847E3CA4E7E79FD90113CC6E906CB19C21D70DA65034EEC7"
+  },
+  {
+    "path": ".agents/templates/lead-handoff.md",
+    "bytes": 917,
+    "hash": "65D8AC365242C98EFE21B5AA177DBEBF9AD8D58DE219F989710A90E2C3143ADE"
+  },
+  {
+    "path": ".agents/templates/worker-contract.md",
+    "bytes": 3577,
+    "hash": "B56AB665EB52F90004EEDE9BADA33F77C91025FF7CA8A4A6B2EE5A5D49C06820"
+  },
+  {
+    "path": ".agents/verification/challenge-list.json",
+    "bytes": 672,
+    "hash": "EE93442F5547839AD0B95715E4CE6A05E95FCAE899F2E66642B369F37761B6BE"
+  },
+  {
+    "path": ".agents/verification/journal-frontend.json",
+    "bytes": 871,
+    "hash": "F39A5AD46EC9D31680E3888F0918638732493AB20B73DBA56795A27D406EF771"
+  },
+  {
+    "path": ".agents/verification/registry.json",
+    "bytes": 451,
+    "hash": "DB84F3AE3997EE5F048F2E661931402A281FE43F98ABC208FA6AC4B10CF4E038"
+  },
+  {
+    "path": ".agents/verification/today-view.json",
+    "bytes": 697,
+    "hash": "D1FF14A4FFAD74D876BF887E44F951745406BDAFA47F0453CDAFEF9100FB1B54"
+  },
+  {
+    "path": ".claude/skills/orca-cli/SKILL.md",
+    "bytes": 2256,
+    "hash": "ECB4F277B8380A8C44E82DC8CC25241B34DDF9428F152AB3EFF326BC20F9A09F"
+  },
+  {
+    "path": ".claude/skills/orchestration/SKILL.md",
+    "bytes": 3574,
+    "hash": "D748F65C0100C50A44A17EFFD8D10F96CD0CB3DD3BE77DC3EC02196BFD9F7718"
+  },
+  {
+    "path": ".github/workflows/ci.yml",
+    "bytes": 4265,
+    "hash": "694F9C2D934C1D78A0C420192BF50FC81E6E44E7CC8548B540647440C01CF80E"
+  },
+  {
+    "path": ".gitignore",
+    "bytes": 842,
+    "hash": "937D14595D84C5A3E09800AE9EC0D00CA6A4083E0593F7504CED94F8FBC108B2"
+  },
+  {
+    "path": "AGENTS.md",
+    "bytes": 3318,
+    "hash": "E722920CBB6D6EBE444C2D1C56517F3332477DC7AAC34C3FCE4EF94637DCE24E"
+  },
+  {
+    "path": "CLAUDE.md",
+    "bytes": 232,
+    "hash": "C4866695B0CAAA55BCAE77CA860C0E5AA342A2A7CEF5D97925CA39B32E9A1DCD"
+  },
+  {
+    "path": "README.md",
+    "bytes": 5205,
+    "hash": "C51697D86AADA5B2489B18775898B6C48B610E27E915ED657D933E810FFA03D8"
+  },
+  {
+    "path": "VIBE_CODE_AUDIT.md",
+    "bytes": 59777,
+    "hash": "DBFBACA4406D8F97F7822735FFFB4552CAC92C42FAA822D1F8C70D3563BC903A"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/1-1-khởi-tạo-nền-tảng-noteflow-từ-starter-được-duyệt.md",
+    "bytes": 24862,
+    "hash": "8A3298581790166C5B1B7B0ABBD59048F7DA507D4210B327775475E647413E54"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/1-2-đăng-nhập-và-bảo-vệ-dữ-liệu-owner.md",
+    "bytes": 11549,
+    "hash": "9C6E79D0FBF4A88880C5C634F839F00C472E34110BB337004B9F37406F7C925A"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/1-3-dùng-một-ngày-và-tuần-thống-nhất-trên-mọi-thiết-bị.md",
+    "bytes": 11866,
+    "hash": "E934C92A0DF1D37FE414D35B77426C063A05E467D9FBA1E261D23BD505F59963"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/1-4-nhận-dữ-liệu-mới-giữa-hai-thiết-bị.md",
+    "bytes": 15074,
+    "hash": "A28B1D4520419E16C41BD9254B6B5996CEDBCDCF68A95BBB13A4C84F88ED7898"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/1-5-giu-ban-dang-nhap-va-thu-luu-lai-sau-gian-doan.md",
+    "bytes": 25652,
+    "hash": "4E0762BE68DCB9EE6D98ED13713B25917379FCDAE40F1BB8276DF305990D0056"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/1-6-giai-quyet-xung-dot-noi-dung-giua-hai-thiet-bi.md",
+    "bytes": 23648,
+    "hash": "7BCD2E205A86DA05E8596DF7F93CEB8A4D2CB0FE05CA89A91774C519DD05002A"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/2-1-tạo-và-quản-lý-thông-tin-challenge.md",
+    "bytes": 10923,
+    "hash": "BC940FC05B0972D0AFECA16BC75321A81202B313CC926351E1D0EE74A47519E0"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/2-3-ghi-và-sửa-journal-tùy-chọn.md",
+    "bytes": 9527,
+    "hash": "F8D65114A225CDE580F16D389F3CCA209259CD2ACA03788A16D7F4B14C7DCA22"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/A-implementation.json",
+    "bytes": 2167,
+    "hash": "BC86AAE664B30E6EB008EE0CF737E77771D91F9EBBFECEF9F97EB51A145645EF"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/A-review.json",
+    "bytes": 35988,
+    "hash": "F18D5B2BF6FB2B2FB8B05AED69E93E538A79C0ED1B268ED6C86BEAC45A86EC4A"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/A-verification.json",
+    "bytes": 8260,
+    "hash": "8B25B315056BA5D9FBA363A00DD99AF9E91E66E0AB6FA34B620D99161E71632C"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/B-implementation.json",
+    "bytes": 3475,
+    "hash": "D3C277EA335D838E568ABB7120F58147DBBAC026E8120645E4BA96DC1F7EB236"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/B-resolution-implementation.json",
+    "bytes": 4077,
+    "hash": "FC342090D0CD22656B2E3A160288F61C212A9C4C5BD3CB1BDB0B1683466C8EC0"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/B-review-4b397ad.json",
+    "bytes": 86478,
+    "hash": "E967A67B1D4DFD32E922AD472803B7F0F5CA4B6C6EE94C2CC8ECA61FDA5128A8"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/B-review.json",
+    "bytes": 77361,
+    "hash": "CC0290145FCF3EE8C9E6BD7229D93D74ED59D946ED846C85234B9DFA0FE43400"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/B-verification-4b397ad.json",
+    "bytes": 12736,
+    "hash": "75B915D52BDECABA5377672ECA2A6BEDFB9BB3A6F204FD42173D7DA5172AFF77"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/B-verification-finalization-repair.json",
+    "bytes": 13726,
+    "hash": "DC099C7578E208CAB0295AD2DD2FC53CF29AABF462E894B8ECF55F7E0CA70668"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/B-verification.json",
+    "bytes": 13605,
+    "hash": "A5212022DEB9F011FFFE7FC53C454A5EB2034A1B2E4264C6AF6D4CB04F28DDBD"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/C-implementation.json",
+    "bytes": 3136,
+    "hash": "9A35863AF7BC32DCF265A2E1A4C0546DECC6CFA19107406737737700EF119F76"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/C-resolution-implementation-2.json",
+    "bytes": 4106,
+    "hash": "461AB1BF31B4FAAA886269BC181EAC12E960C709DB136B250E7BB02C89966F09"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/C-resolution-implementation-3.json",
+    "bytes": 4106,
+    "hash": "D050F2A1DB2776FFBF131546C5BB4F0BE5103AC9133F49FEB99E770CC6DECC6C"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/C-resolution-implementation.json",
+    "bytes": 4470,
+    "hash": "39AEDB47D44BC581FCCFEE3F1D5B4D4E8CEF7353FA37F78C37A83D29EB50B86C"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/C-review-2.json",
+    "bytes": 16275,
+    "hash": "6DB4C1327C2A26B7409B171A8CF06CC30126F80054C3DE24D274B9A4C203EAB1"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/C-review.json",
+    "bytes": 111249,
+    "hash": "BB61FE2F28E2673499546F7A760DA37E10833D0BDB33CD75F093BAF605301D71"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/C-verification-2.json",
+    "bytes": 11629,
+    "hash": "85EB49C0EB1F3F5B0C231AAE7C369F9FCDF7799DA8E0B413A10BB30969BE1ABD"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/C-verification-finalization-repair.json",
+    "bytes": 12607,
+    "hash": "5F6408644696B1963CFEB0C98CE2D7FE62B1203DAEC567C4D7B85851D909380B"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/C-verification.json",
+    "bytes": 11596,
+    "hash": "F38DF84347A41549C20984CC4A63F41340F5F8A1599C162FD02D003BB600A857"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/D-implementation.json",
+    "bytes": 3644,
+    "hash": "9E30E25A8E91FEF008CE81778AB8EBD2CF82F9219F982BA1622F33F1BA88D0FE"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/D-review-2.json",
+    "bytes": 7750,
+    "hash": "8957430F2812BA69E1B3CDDA0705FC65311D33077BF66EEB3BD32981359FD211"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/D-verification-2.json",
+    "bytes": 14061,
+    "hash": "A5C6388457F1BC876AB023B0EECDE4F85B6F85EB86448475CC9919143B4C213B"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/D-verification-finalization-repair.json",
+    "bytes": 15039,
+    "hash": "132D1E908AAC0218244CEEA24ABE8C277E6EC8747F4FFE37FADDF9C4834F88EA"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-5/finalization.json",
+    "bytes": 2671,
+    "hash": "FEB06DAE022C9E978EB29BEA721AFB1FE42F06CA394B8DE8765FC45EC168A5D7"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-6/A-implementation.json",
+    "bytes": 2151,
+    "hash": "80CA990220334550C9D4419DC0390037F37613FD6755195BCF2DC81CD9514BD4"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-6/A-review.json",
+    "bytes": 3949,
+    "hash": "3D1278FEBCB4480595B0C874E124E84425342C4B9BB0CE25A2F4BAC8097B088D"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-6/A-verification.json",
+    "bytes": 30232,
+    "hash": "6078B53A51A2FC1FCED9CA108045034AD2B3103D9E6AB42A5AAA8024C7A8C51D"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-6/B-implementation.json",
+    "bytes": 1782,
+    "hash": "2E94C808318E3088198FA3612EA4E3D6E7922CFE6854EB234807D88807DC68FB"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-6/B-review.json",
+    "bytes": 5932,
+    "hash": "8C973F1289E2E3B315AE4B690EA15EC195C8B4E1AE9D6471548437DFE2A208A2"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-6/B-verification.json",
+    "bytes": 50475,
+    "hash": "B9262FFA86C28A602D088B05E98C4F59EAB7B701DAA5CB7F878D5AC533385ECD"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-6/C-implementation.json",
+    "bytes": 2041,
+    "hash": "1AC65F9128F5195F9F3EF2A2D26F765C9780DA115C4FC583A942DF83E8AD3BDD"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-6/C-review.json",
+    "bytes": 5767,
+    "hash": "395212CF53094B88E4C3579AE5B71221926DE0658F01B8E7EB2F1396F0C5773C"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-6/C-verification.json",
+    "bytes": 46377,
+    "hash": "43084A183CE98E87B60142A0FA2592C16CE84698CC1CBD8A4FAA11CCA18FD3C6"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-6/D-implementation-attempt-2.json",
+    "bytes": 3529,
+    "hash": "6619AC0696C76A3A170F0818063695A927633E16D43AA727CEB11FD01507AA82"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-6/D-implementation.json",
+    "bytes": 1689,
+    "hash": "A00417CA61AB12D67E94F40F3EA89428F4DBD49B2A61571739901C088F2D8B4D"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-6/D-review-attempt-2.json",
+    "bytes": 7423,
+    "hash": "53AB4DF95DDA183C42DD4BEB61A8A4E5D26599DA5490611C3362D005E1C83012"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-6/D-verification-attempt-2.json",
+    "bytes": 25843,
+    "hash": "1AFB9DA26A9E74FB58CE3C97B9D02B2506DE2776304C140BDE9D7CE4E2BABB6B"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-6/E-implementation.json",
+    "bytes": 13944,
+    "hash": "E76EDEFF0331618404D440E7BA5B49FFBE34FE730B5CEC8E2F8D2101DD6A0EBA"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-6/E-review.json",
+    "bytes": 4660,
+    "hash": "20D3B171B4B40DF6E5BD950DF0AFDF2CA27E903870E76F1732EDFC47C95E9C8E"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-6/E-verification.json",
+    "bytes": 200880,
+    "hash": "4393343DF342525711166A895A7EE81C4767D548B57FBA271C892E07E27B3805"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-1-6/finalization.json",
+    "bytes": 2933,
+    "hash": "5DDB5A4C73D8E634CDA8EDA011C5C632D5C827B11045D0CED6CC1EB9D03D374C"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-2-3/A-implementation.json",
+    "bytes": 1879,
+    "hash": "E0FEFD827CD6253A11D8A9B2086BE0FA79A816D695CD6E825F4F13A7F9E5FAF0"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-2-3/A-review.json",
+    "bytes": 1621,
+    "hash": "3C939A2DC32B1E2F25A90BBD166DB667641AA06C846621E4034D76F0C8D4B71A"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-2-3/A-verification.json",
+    "bytes": 11015,
+    "hash": "DF89F5DED7CFBE7CB4C832C7E3A8F700AD53C60080F74CD7D6F401B0E116DAF8"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-2-3/B-implementation.json",
+    "bytes": 3839,
+    "hash": "FA5B39C77B24AE1BDE840BFAD6822434DB909E04EBB4DF8B9BE05987CCBD7B90"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-2-3/B-review.json",
+    "bytes": 4453,
+    "hash": "94C18D626B5F5ED0FB0B80398DC74A6E015619E8D3A4E96AB5C834A04F5EA3E4"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-2-3/B-verification.json",
+    "bytes": 19833,
+    "hash": "30A881783025282F83C519C79703D8B292F57CBD2E35DB50E61C8FD11C5E43A9"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-2-3/C-implementation.json",
+    "bytes": 4146,
+    "hash": "66F17CC32104CEC0E6BACC0BC5566D440FD5EC4CE95BA6E9ADC04E50FBADE8EA"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-2-3/C-review.json",
+    "bytes": 5232,
+    "hash": "AF6F7C5E5FBC6C0C6EC6A26423CC908500264F7D7A344DCAE24C8FAB5DBB3DCB"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-2-3/C-verification.json",
+    "bytes": 16580,
+    "hash": "9EDB9335F04AE28273E9594E13A6BE57DCB3343FE68E5AB74620BC222661F1C7"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-2-3/D-implementation.json",
+    "bytes": 5757,
+    "hash": "DAC18AF16D837DEDC8D84AC0AF86F42EAA8A2D6EDBD312DE1789FC9E914136E3"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-2-3/D-review.json",
+    "bytes": 6486,
+    "hash": "3CD1ACA551688E4B11919117E7D2E2BCB55BBDF8FE983F60B6738B2D9FA514EC"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-2-3/D-verification.json",
+    "bytes": 24354,
+    "hash": "E4889E85B9A06194D9C78B6B8F395B0C3529994735FAA97D71BCE5C7D6281A3D"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/receipts/story-2-3/finalization.json",
+    "bytes": 2668,
+    "hash": "F2C7EDD431682E3A55ADB81A6CACA466894C90A9CB05342162B69596D8C052D4"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/sprint-status.yaml",
+    "bytes": 3700,
+    "hash": "BFF0B948632AA048C655A0AFC4C7445C3B835D6F6CCF59583BCA93244F9A31D7"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/story-1-5-plan.md",
+    "bytes": 10906,
+    "hash": "50E10A0E175D9113768C003B0C37C01A256D8191F9B6B17B5B5C8A472E931CDA"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/story-1-6-plan.md",
+    "bytes": 23289,
+    "hash": "6D5A1E3BA6839116C57CC38B367239F0CF37FC9FA1DB067C4A6F18635C2C5B7C"
+  },
+  {
+    "path": "_bmad-output/implementation-artifacts/story-2-3-plan.md",
+    "bytes": 8814,
+    "hash": "F3CBE28F3DA8CF0F63F61BEB61D5ABDC0E8658DA1BC095E277EA48FA43E8AEBF"
+  },
+  {
+    "path": "_bmad-output/planning-artifacts/research/technical-story-1-5-vs-1-6-v4-audit-2026-10-06/.memlog.md",
+    "bytes": 357,
+    "hash": "26284FF5DB5044AFA14543C5A91F8B08E7549EF5B7486F17C8A8548FBFD59EC2"
+  },
+  {
+    "path": "_bmad-output/planning-artifacts/research/technical-story-1-5-vs-1-6-v4-audit-2026-10-06/brief.md",
+    "bytes": 10124,
+    "hash": "6936F7150BFDDED67396EC5D80AD262B0D9346EA953D45FCAEE819779B394E85"
+  },
+  {
+    "path": "_bmad/config.toml",
+    "bytes": 2260,
+    "hash": "11809BE570BF6834420A536E74E21A493CEE04850F29981633B6505AB771B0ED"
+  },
+  {
+    "path": "_bmad/render/bmad-build/new-project-my-note-dab11a55d843/aa151f017016a16df833/compile-epic-context.md",
+    "bytes": 2980,
+    "hash": "B76743F29011226904823CCBB0ECEB34479A18E2F421930E82FEDC8A21798771"
+  },
+  {
+    "path": "_bmad/render/bmad-build/new-project-my-note-dab11a55d843/aa151f017016a16df833/manifest.json",
+    "bytes": 3295,
+    "hash": "0297B076F2661FC70E20B82FCE39A54A860958D02D6E1849652AE8C9B8DCE238"
+  },
+  {
+    "path": "_bmad/render/bmad-build/new-project-my-note-dab11a55d843/aa151f017016a16df833/references/claims-check.md",
+    "bytes": 1444,
+    "hash": "5B3D40C7C685EEF0AE2EDF706CC058D9B195C9E138FF926105F560918047B6FE"
+  },
+  {
+    "path": "_bmad/render/bmad-build/new-project-my-note-dab11a55d843/aa151f017016a16df833/references/deletion-check.md",
+    "bytes": 1023,
+    "hash": "2690305265A71A83C46F3F35F2C972552D440447D9FC3E5AC20B5F728CD7749B"
+  },
+  {
+    "path": "_bmad/render/bmad-build/new-project-my-note-dab11a55d843/aa151f017016a16df833/review-prompts/edge-case-hunter.md",
+    "bytes": 8473,
+    "hash": "B9D4B3AE284B71FEDF8064391EF03535EF0A34BC4DDE892A2B03EA484F0280F2"
+  },
+  {
+    "path": "_bmad/render/bmad-build/new-project-my-note-dab11a55d843/aa151f017016a16df833/review-prompts/verification-gap.md",
+    "bytes": 9934,
+    "hash": "561382B2C19466C2EE761E2160015E3A5386FF9A79D6E03E940EA70496C875EA"
+  },
+  {
+    "path": "_bmad/render/bmad-build/new-project-my-note-dab11a55d843/aa151f017016a16df833/spec-template.md",
+    "bytes": 4409,
+    "hash": "F37DC185ADA49357060421E481DC5A4FBF6D047F82E790E30047249BE2905FB9"
+  },
+  {
+    "path": "_bmad/render/bmad-build/new-project-my-note-dab11a55d843/aa151f017016a16df833/step-01-clarify-and-route.md",
+    "bytes": 11139,
+    "hash": "4C5ADE415D597F5F6346EEF884B9C1C965E6602AB536977545C83E5D5EEF23B0"
+  },
+  {
+    "path": "_bmad/render/bmad-build/new-project-my-note-dab11a55d843/aa151f017016a16df833/step-02-plan.md",
+    "bytes": 5585,
+    "hash": "A1C50426A4EBA55F808C901FAF15198C7F7DD46960DEF5FB39F1160AF71BAFBA"
+  },
+  {
+    "path": "_bmad/render/bmad-build/new-project-my-note-dab11a55d843/aa151f017016a16df833/step-03-implement.md",
+    "bytes": 3960,
+    "hash": "E1F0132E1D5D1D00C0FE457A899F6ADEA4A281B10B5D97236CD04E9A3C5ADE7A"
+  },
+  {
+    "path": "_bmad/render/bmad-build/new-project-my-note-dab11a55d843/aa151f017016a16df833/step-04-review.md",
+    "bytes": 10914,
+    "hash": "2C32CAABA46E93845F187F6F1FCED15872D2F05828C214B16F53B02DA7F321F5"
+  },
+  {
+    "path": "_bmad/render/bmad-build/new-project-my-note-dab11a55d843/aa151f017016a16df833/step-05-present.md",
+    "bytes": 1279,
+    "hash": "F7D4EC03A1EF9563213F6EC878992D585AA21CAD10667EBA2A2C1A6EBB7077F3"
+  },
+  {
+    "path": "_bmad/render/bmad-build/new-project-my-note-dab11a55d843/aa151f017016a16df833/step-oneshot.md",
+    "bytes": 6240,
+    "hash": "B5C49FB6E4B8341B3CE4416496E8D96955692788F67DC3CAB310E96997F00C81"
+  },
+  {
+    "path": "_bmad/render/bmad-build/new-project-my-note-dab11a55d843/aa151f017016a16df833/sync-sprint-status.md",
+    "bytes": 424,
+    "hash": "4ACD5D047728E997CFFB9F26EA410ABE68D0312706A0BC9DC33369772D8A6A77"
+  },
+  {
+    "path": "_bmad/render/bmad-build/new-project-my-note-dab11a55d843/aa151f017016a16df833/workflow.md",
+    "bytes": 4041,
+    "hash": "86DFD0EED59DDE6784D70084F626D7D0E5752FE62A1FDFA8229785E2765B8D25"
+  },
+  {
+    "path": "_bmad/render/bmad-code-review/new-project-my-note-dab11a55d843/fadcfd263fb894402cf5/manifest.json",
+    "bytes": 2329,
+    "hash": "91BE1C9B033049F4E1745FE184A10533DC6997F858E009646816001A36008193"
+  },
+  {
+    "path": "_bmad/render/bmad-code-review/new-project-my-note-dab11a55d843/fadcfd263fb894402cf5/references/claims-check.md",
+    "bytes": 1376,
+    "hash": "E7A26D72F810D7CC9796047574632F1A51D83118E2B112004E9FC8907145FF83"
+  },
+  {
+    "path": "_bmad/render/bmad-code-review/new-project-my-note-dab11a55d843/fadcfd263fb894402cf5/references/deletion-check.md",
+    "bytes": 1023,
+    "hash": "2690305265A71A83C46F3F35F2C972552D440447D9FC3E5AC20B5F728CD7749B"
+  },
+  {
+    "path": "_bmad/render/bmad-code-review/new-project-my-note-dab11a55d843/fadcfd263fb894402cf5/review-prompts/edge-case-hunter.md",
+    "bytes": 8546,
+    "hash": "18B23F2C4F7ADC537F43156D8A03C002F86113D3F95C4A5D3DBBFA7E6766FF50"
+  },
+  {
+    "path": "_bmad/render/bmad-code-review/new-project-my-note-dab11a55d843/fadcfd263fb894402cf5/review-prompts/verification-gap.md",
+    "bytes": 9864,
+    "hash": "EF01D8B3CC49CA9CB673808DAA220432279D08433581235952829FEDA1A99E4C"
+  },
+  {
+    "path": "_bmad/render/bmad-code-review/new-project-my-note-dab11a55d843/fadcfd263fb894402cf5/step-01-gather-context.md",
+    "bytes": 8218,
+    "hash": "6C81C7359BFF452AD14FD59658A77271C2BB4B6687486EB257B50AF0037D19CA"
+  },
+  {
+    "path": "_bmad/render/bmad-code-review/new-project-my-note-dab11a55d843/fadcfd263fb894402cf5/step-02-review.md",
+    "bytes": 2674,
+    "hash": "09798D0EF42315319BDD41D342126B3DA2082413FBE742E7CA6481718D0DDC3A"
+  },
+  {
+    "path": "_bmad/render/bmad-code-review/new-project-my-note-dab11a55d843/fadcfd263fb894402cf5/step-03-triage.md",
+    "bytes": 5385,
+    "hash": "F12AEDBDDA6399C684ABB1CE146AB79F9EDE2ED3C23014DEFC6C49CA47C00788"
+  },
+  {
+    "path": "_bmad/render/bmad-code-review/new-project-my-note-dab11a55d843/fadcfd263fb894402cf5/step-04-present.md",
+    "bytes": 6648,
+    "hash": "AB76393E57521A53CBED34A33235FD7D99EA2C5B70A8920167DCD27CC810E603"
+  },
+  {
+    "path": "_bmad/render/bmad-code-review/new-project-my-note-dab11a55d843/fadcfd263fb894402cf5/workflow.md",
+    "bytes": 2589,
+    "hash": "2472F24257E2039EE015B31D8AD4C34895FE7817C2DC7D19F5BF4B0CBB4E403A"
+  },
+  {
+    "path": "_bmad/scripts/config_utils.py",
+    "bytes": 4212,
+    "hash": "989410C4009B908121BBB0FE551A2D7DB29F89385D0688CDA5CBFC162A5511A1"
+  },
+  {
+    "path": "_bmad/scripts/memlog.py",
+    "bytes": 9487,
+    "hash": "AACE8CE342CB6857679A47B37FB906055905371DF4F037257E2C16E1167FAE4A"
+  },
+  {
+    "path": "_bmad/scripts/render_skill.py",
+    "bytes": 15623,
+    "hash": "06D9F62116F929B5FA6EBE302C73EAABEBA4B4CE7273124F5213E9900816279A"
+  },
+  {
+    "path": "_bmad/scripts/resolve_config.py",
+    "bytes": 2248,
+    "hash": "39D91BE0C3B08B922642D600463F40179AF01BFD7C1343DD17BE423248ABA5F6"
+  },
+  {
+    "path": "_bmad/scripts/resolve_customization.py",
+    "bytes": 5337,
+    "hash": "416090831CCBA053600BDFE8F10837F7FA785A02ED12F4E02F92BFBADC387352"
+  },
+  {
+    "path": "_bmad/scripts/setup.py",
+    "bytes": 52396,
+    "hash": "45CC2533FE4264C8B5CDB98BED45F4FF74F35ECA2971D9FAF4E813CF63753F51"
+  },
+  {
+    "path": "_bmad/scripts/tests/test_agent_architecture.py",
+    "bytes": 32914,
+    "hash": "15F6FDA3B68FD75ADCE52AACC67102A2180635EC5D0F2FA491F03174C465605F"
+  },
+  {
+    "path": "_bmad/scripts/tests/test_config_utils.py",
+    "bytes": 3614,
+    "hash": "B3292AAC8F01B0878EA7E1AB7EDCA3677FF43695F2EC2E98E3D6353CD9200EC8"
+  },
+  {
+    "path": "_bmad/scripts/tests/test_memlog.py",
+    "bytes": 10451,
+    "hash": "1A0E750EEF8B6C41BFA4C45D2F06C7CFD516B4FBF51509D3638D584FC4C58497"
+  },
+  {
+    "path": "_bmad/scripts/tests/test_render_skill.py",
+    "bytes": 22349,
+    "hash": "5443EB245B02A33D05A17EE4033FA202A709F58B316313D7AD3B19A9B56490C6"
+  },
+  {
+    "path": "_bmad/scripts/tests/test_resolve_config.py",
+    "bytes": 4512,
+    "hash": "FF92DB3B5A216B6EB533416332A6341EC63A84923C541F1EBD166ABCEDF82EEA"
+  },
+  {
+    "path": "_bmad/scripts/tests/test_resolve_customization.py",
+    "bytes": 7355,
+    "hash": "280E30CB556398466AAD604290920D4EF8A7FACCB000768DA07730E068DEC762"
+  },
+  {
+    "path": "backend/.editorconfig",
+    "bytes": 252,
+    "hash": "F78CC5A2EF8BA61AD956D0F5DB453748A981270F6A1B9F4A5A00DF8690E7946D"
+  },
+  {
+    "path": "backend/.env.example",
+    "bytes": 853,
+    "hash": "A64EF614E1B1877BCB553BA519FEF7A39B23190ABFE753F244855273BF32B764"
+  },
+  {
+    "path": "backend/.gitattributes",
+    "bytes": 186,
+    "hash": "A40EB27EE0B545CA5B5542DAAF99FEC51F84F23B3766A6353864EF2A115BC51C"
+  },
+  {
+    "path": "backend/.gitignore",
+    "bytes": 283,
+    "hash": "41E54ABD62AA86FD5B731E0CD411C5BC7D4196A1F7AEF363F434672DA8FFFA5D"
+  },
+  {
+    "path": "backend/app/Console/Commands/ProvisionOwner.php",
+    "bytes": 2045,
+    "hash": "12487FE327F011135E807E5998DE7FDF66D88662764B3347BD6D75FE01A40279"
+  },
+  {
+    "path": "backend/app/Http/Controllers/AccountContextController.php",
+    "bytes": 1059,
+    "hash": "D829F91AF7051FE41F8550F9CDD3BDA8F42C447DAC694EF2441DE77B4C4EFB87"
+  },
+  {
+    "path": "backend/app/Http/Controllers/Auth/AuthenticatedSessionController.php",
+    "bytes": 2114,
+    "hash": "506E034F7FD8C5421FD391C232E6EDD045422B09405BB3FB051C0DC8187ACA6D"
+  },
+  {
+    "path": "backend/app/Http/Controllers/ChallengeController.php",
+    "bytes": 9215,
+    "hash": "F044EA6724ECECB0F7BEE4C96305BBEF57F634C709B58F718A4121AC18F25F3C"
+  },
+  {
+    "path": "backend/app/Http/Controllers/ChallengeJournalController.php",
+    "bytes": 4948,
+    "hash": "89D2FC8D4113B384194BE0DDFC17A17C122B562DA77B62A784DF02B8E7566AB1"
+  },
+  {
+    "path": "backend/app/Http/Controllers/Controller.php",
+    "bytes": 77,
+    "hash": "25D1C1EF8E6CC8A376553FAACFBA2B07D9DFAEE9BDBB84F14F77517580E9DEB1"
+  },
+  {
+    "path": "backend/app/Http/Controllers/FoundationHealthController.php",
+    "bytes": 311,
+    "hash": "E4AC38DA79CD04FC9C200A66AA5212DFDB0D8B46781328CFEE7E581AEE7B22C9"
+  },
+  {
+    "path": "backend/app/Http/Middleware/EnsureOwner.php",
+    "bytes": 337,
+    "hash": "3DAC4FB03BAF730FADFF8AB09A46E3FE54797475DF5E78FD88BC910CA139C099"
+  },
+  {
+    "path": "backend/app/Http/Middleware/PrivateNoStore.php",
+    "bytes": 377,
+    "hash": "CA4C2B6E2FC9D323F2D82DB629A0EF4E22CDB769E4F42E8E37D991FE9198CC14"
+  },
+  {
+    "path": "backend/app/Http/Requests/LoginRequest.php",
+    "bytes": 650,
+    "hash": "26203859814C8FB6F0BED2B956943291C396D6E1F794E90438CBE1202455FCFB"
+  },
+  {
+    "path": "backend/app/Models/User.php",
+    "bytes": 889,
+    "hash": "49EB96746A04D2EF3CD55E1DC63E4D07EA2675B85241F053BFE1CEF6C6B92142"
+  },
+  {
+    "path": "backend/app/Modules/Challenges/Application/Commands/CreateChallengeCommand.php",
+    "bytes": 345,
+    "hash": "C18E9D08D92CDEEFD12C05F9F2AFDC10A5773871555C96D37D6CBD617EA76E3A"
+  },
+  {
+    "path": "backend/app/Modules/Challenges/Application/Commands/SaveJournalCommand.php",
+    "bytes": 378,
+    "hash": "EED8DD654435958D68A8E23402B72C370C4D4EC52C080C06A69F37B4410F6502"
+  },
+  {
+    "path": "backend/app/Modules/Challenges/Application/Commands/UpdateChallengeMetadataCommand.php",
+    "bytes": 390,
+    "hash": "2D28B41EC2E9D17FADF5A8E7A253893B75D94A0BADA80151AEE4F57D8872D421"
+  },
+  {
+    "path": "backend/app/Modules/Challenges/Application/UseCases/CreateChallengeUseCase.php",
+    "bytes": 6204,
+    "hash": "7940A13D085D256E8E012689911C0939D13333537D65D1912CBAA0EF880A3905"
+  },
+  {
+    "path": "backend/app/Modules/Challenges/Application/UseCases/GetChallengeDetailQuery.php",
+    "bytes": 1660,
+    "hash": "B1CCEBD9644C5B630679F78D2564AEE0420C5359E5F179CE30AECEA2EB3C3943"
+  },
+  {
+    "path": "backend/app/Modules/Challenges/Application/UseCases/GetChallengeListQuery.php",
+    "bytes": 2106,
+    "hash": "29C5E51382837F7ECE4DC90F0E5A931464643D4E75960812485D83F6F5CD545B"
+  },
+  {
+    "path": "backend/app/Modules/Challenges/Application/UseCases/GetJournalQuery.php",
+    "bytes": 1845,
+    "hash": "7FA530BD5ACEFFAAF096C4585BE169B9931FB3EA4B3F5BE43FEF09BC995115F5"
+  },
+  {
+    "path": "backend/app/Modules/Challenges/Application/UseCases/SaveJournalUseCase.php",
+    "bytes": 7524,
+    "hash": "15996AEEE404F5B66BA6635465680019342E10A4660F9EA525DC39F567D6A699"
+  },
+  {
+    "path": "backend/app/Modules/Challenges/Application/UseCases/UpdateChallengeMetadataUseCase.php",
+    "bytes": 8784,
+    "hash": "986ED7A78A4D0B1478ECCE54072866856F1CF319070C56E58D2E7DE9D05B0BAF"
+  },
+  {
+    "path": "backend/app/Modules/Challenges/Domain/Exceptions/IdempotencyKeyReusedException.php",
+    "bytes": 330,
+    "hash": "17539F3006B7E999170909A992E1B404E11048058E3EBEE3BA3F5F7CBCB8B3F0"
+  },
+  {
+    "path": "backend/app/Modules/Challenges/Domain/Exceptions/InvalidChallengeNameException.php",
+    "bytes": 319,
+    "hash": "6747821C9DFA60CE5CDC7D42C032F2A9BD79C798EEE1D8DA4A5517E9D9ED6D04"
+  },
+  {
+    "path": "backend/app/Modules/Challenges/Domain/Exceptions/InvalidJournalDayException.php",
+    "bytes": 281,
+    "hash": "48749FD715148BEF94768101E147B8F0ABE58D70481B58796D7BA8113603ACF9"
+  },
+  {
+    "path": "backend/app/Modules/Challenges/Domain/Exceptions/InvalidJournalTextException.php",
+    "bytes": 269,
+    "hash": "F2571628F256E77D02F58498174B3181812F55C861332422A465731A0BCB3ED9"
+  },
+  {
+    "path": "backend/app/Modules/Challenges/Domain/Exceptions/InvalidTargetDaysException.php",
+    "bytes": 316,
+    "hash": "09D0AD4522B8D2476AA1952F907EDC6783F9599764CC0AB2C7923FA04F946BDF"
+  },
+  {
+    "path": "backend/app/Modules/Challenges/Domain/Exceptions/StaleDataEpochException.php",
+    "bytes": 306,
+    "hash": "60015A1681CFB12B425632C8FA578BF0CE9A11D158CA37AA3562AC712524CCE0"
+  },
+  {
+    "path": "backend/app/Modules/Challenges/Domain/Exceptions/VersionConflictException.php",
+    "bytes": 530,
+    "hash": "4C3CAD6DABB62007DE68E0D774D7413B83DCF031C7B69057A2A4099D03DF0801"
+  },
+  {
+    "path": "backend/app/Modules/Challenges/Domain/Exceptions/WriteFenceActiveException.php",
+    "bytes": 308,
+    "hash": "FF39DB310386371B3CB06F712256A5DC9635E5EAC58AFED162EEDAE1B3C95CBE"
+  },
+  {
+    "path": "backend/app/Modules/Identity/Application/AccountTimeContextFactory.php",
+    "bytes": 414,
+    "hash": "F62EE6625F3B3E0284AF2C69A1C857710071760E054BE4239904A2C8F2D33CF3"
+  },
+  {
+    "path": "backend/app/Modules/Identity/Contracts/Clock.php",
+    "bytes": 140,
+    "hash": "7CD127D175CD58D833784AC3B4AC35C68994DF2D097F9CE8BBC307D19A15249A"
+  },
+  {
+    "path": "backend/app/Modules/Identity/Domain/AccountTimeContext.php",
+    "bytes": 1350,
+    "hash": "E7416F8C143E690F8659BBCFFBA292DEBE555C0A8EF3F89BCDC96B46323E66FC"
+  },
+  {
+    "path": "backend/app/Modules/Identity/Infrastructure/SystemClock.php",
+    "bytes": 311,
+    "hash": "F3F53BB56594CBD9E69BD799C7FC32F44B19A52F2D982391F03826E99A94B85D"
+  },
+  {
+    "path": "backend/app/Modules/README.md",
+    "bytes": 246,
+    "hash": "F87F745B41AF7EDB88C8AFB37B222C35E5C8C8DE1BC8E9B0F160C3DAE8DBB54A"
+  },
+  {
+    "path": "backend/app/Providers/AppServiceProvider.php",
+    "bytes": 845,
+    "hash": "67DE0C4F990F5B6DE18D0A74C6BA48F198352DB7F6540BB703A079E719D8657E"
+  },
+  {
+    "path": "backend/artisan",
+    "bytes": 425,
+    "hash": "F91A517C0C5D3A904C3F390933964A5E08EC1FC68146882730DAAC4ACA4FFCEC"
+  },
+  {
+    "path": "backend/bootstrap/app.php",
+    "bytes": 1993,
+    "hash": "AD6EC07D22E557FCF461E40ECB6FADB14F482CE2A6011AE06081B09AF8D4157D"
+  },
+  {
+    "path": "backend/bootstrap/cache/.gitignore",
+    "bytes": 14,
+    "hash": "240A3E0D37D2E86B614063F5347EB02D4F99CA6C254DE6B82871FF8D95532A7D"
+  },
+  {
+    "path": "backend/bootstrap/providers.php",
+    "bytes": 89,
+    "hash": "F720E185207A343D4C19FC99DBB317A4187EFBCD7D38A303A695BBDD77FFB943"
+  },
+  {
+    "path": "backend/composer.json",
+    "bytes": 2555,
+    "hash": "AABE4AB0DF4DBA8D9438F34FEF8474EC24E6AC6458DDEE0D7A1E481AF64BE6E6"
+  },
+  {
+    "path": "backend/composer.lock",
+    "bytes": 386759,
+    "hash": "C61566910D1AECB8878387309CAA28DE021EBE1EF4664B1CAD5CFD253EE870A9"
+  },
+  {
+    "path": "backend/config/app.php",
+    "bytes": 4272,
+    "hash": "78DCD36B226FD7B24057CB95F567CB6E96561C2406653892D8AEF6DCEA8461E4"
+  },
+  {
+    "path": "backend/config/auth.php",
+    "bytes": 4040,
+    "hash": "C7E204E9785C9F596D66FB884B493F658F2327F157646BDB4088EFD6B3A7773F"
+  },
+  {
+    "path": "backend/config/cache.php",
+    "bytes": 4155,
+    "hash": "AFF5A15068835CDBBFB4CE876D34202A221933B086BF7F3F7F309D4A312A20AE"
+  },
+  {
+    "path": "backend/config/database.php",
+    "bytes": 6981,
+    "hash": "B5510FB6B64159C68C646BFBF0B2EA0EFAC2FAD8FDD6009CE7D9FBA36E54222E"
+  },
+  {
+    "path": "backend/config/filesystems.php",
+    "bytes": 2532,
+    "hash": "BA7060D7A23E490C3CE830656F6D24AD3CCF5B868E3293F2A12E411959DC5635"
+  },
+  {
+    "path": "backend/config/logging.php",
+    "bytes": 4340,
+    "hash": "299EC1BA5B5A803C8E20F666AE7628E442E856CC2FF7AC9E2ADB17B97E8AD63B"
+  },
+  {
+    "path": "backend/config/mail.php",
+    "bytes": 3631,
+    "hash": "C43FF49A31C5F32CE21EB7159F2A4B3CD2F4074EAED5838D265646DBFEDD3474"
+  },
+  {
+    "path": "backend/config/queue.php",
+    "bytes": 4199,
+    "hash": "6101774DA7C8B79AF46D0028F2B8B31A484C3F7EDA10B76E5B27B6093AD364A4"
+  },
+  {
+    "path": "backend/config/sanctum.php",
+    "bytes": 3165,
+    "hash": "9127A337E5E0ADD68D1040DB64E0992023E19343C1CDA60E88B2939549FA4DD8"
+  },
+  {
+    "path": "backend/config/services.php",
+    "bytes": 1039,
+    "hash": "8258C4487EB1D73A97E569EB0E411E3F25368044812DF4CBA807860432BE1D92"
+  },
+  {
+    "path": "backend/config/session.php",
+    "bytes": 8423,
+    "hash": "64272CFBEF6F47C65BF857F1C5B1E853700C0D0278DE46B86663FD83EF4AEED8"
+  },
+  {
+    "path": "backend/database/.gitignore",
+    "bytes": 10,
+    "hash": "E758642D95E83E907E010B6E46B07B3F953C7CEF11FE5EBEFC2A77B9D7B4D5F7"
+  },
+  {
+    "path": "backend/database/factories/UserFactory.php",
+    "bytes": 1226,
+    "hash": "F2D9C075B721E7EEF1B659B0FC9C7486095811F605E061F14CF61846419024C9"
+  },
+  {
+    "path": "backend/database/migrations/0001_01_01_000000_create_users_table.php",
+    "bytes": 1473,
+    "hash": "10D79883BC08CE46510F9AD8B1830B4D06D586DC56AE2C8BAC3B3E491F69A90F"
+  },
+  {
+    "path": "backend/database/migrations/2026_09_16_135722_create_personal_access_tokens_table.php",
+    "bytes": 863,
+    "hash": "C81ECDE85EA5072188C468DCAF79776728B6EB8F684D63FC0D88A4908484CA75"
+  },
+  {
+    "path": "backend/database/migrations/2026_09_18_000000_add_owner_admission_to_users_table.php",
+    "bytes": 721,
+    "hash": "7DD194F39D91635F0AB1C91B57DE3F3C0342602AA2767930E5CB97DB18539DE5"
+  },
+  {
+    "path": "backend/database/migrations/2026_09_18_010000_create_account_states_table.php",
+    "bytes": 1117,
+    "hash": "D76A69050D7AF09B80385A3D2A09BF19930D75703523D901C822F4EE65384785"
+  },
+  {
+    "path": "backend/database/migrations/2026_09_19_010000_add_revision_fields_to_account_states_table.php",
+    "bytes": 1306,
+    "hash": "1DC609488FE573D42FA8C38426BD3A6D856E1DAEC2C2F02AE91A310769FA5369"
+  },
+  {
+    "path": "backend/database/migrations/2026_09_19_020000_create_challenges_and_target_periods_tables.php",
+    "bytes": 1854,
+    "hash": "439D7A550ED8D1959403DF037CE61A024F9955EEAFBB04E5E41FA6BA521812AA"
+  },
+  {
+    "path": "backend/database/migrations/2026_09_19_030000_create_mutation_commands_table.php",
+    "bytes": 1057,
+    "hash": "F8758B35101CFE35A32A9021668BDF4BE854FD691383FC7A4658CD9D912221E2"
+  },
+  {
+    "path": "backend/database/migrations/2026_09_24_010000_create_challenge_daily_records_table.php",
+    "bytes": 1192,
+    "hash": "47C14D5E9C66EB029D5B45463E3BC0CDA3890E07C211551BAE284F2D8613AFA7"
+  },
+  {
+    "path": "backend/database/seeders/DatabaseSeeder.php",
+    "bytes": 482,
+    "hash": "CF8E4B6E48360218BB5534F66419C955288F78338EB8A3DBA9D8AC3394EC3DBC"
+  },
+  {
+    "path": "backend/phpstan.neon",
+    "bytes": 124,
+    "hash": "BB7C569074E340100CBEC86468ED260D46502DAB0AD8FAA5362D5FA6F295D7CD"
+  },
+  {
+    "path": "backend/phpunit.xml",
+    "bytes": 1685,
+    "hash": "399D4A9AC0B4D8FDB11F9B855150A91F52F061E41E99C715E96B98499B4092E7"
+  },
+  {
+    "path": "backend/public/.htaccess",
+    "bytes": 740,
+    "hash": "B7E379C77639FD56144947DBAE84C84EB466D9C686EA81F2F013AE85421DA923"
+  },
+  {
+    "path": "backend/public/index.php",
+    "bytes": 543,
+    "hash": "EBA77CBA39695B6BD091FE5211D481F7EBB2CE2D8D26230B5A609465D0A4AFF9"
+  },
+  {
+    "path": "backend/public/robots.txt",
+    "bytes": 24,
+    "hash": "E5C4B84484EE4216E9373BE99380320C25DD94805F99F0A805846F087636553F"
+  },
+  {
+    "path": "backend/routes/api.php",
+    "bytes": 1801,
+    "hash": "5B4FD79B293A3DFE3DC9658BD0C0E09AC78DF28FBC395785F83C12E6A85A694A"
+  },
+  {
+    "path": "backend/routes/console.php",
+    "bytes": 210,
+    "hash": "9ADCCC33E7DD400683E434774077C7FDB2F299C5712CEDF16A43FDF56F2850FA"
+  },
+  {
+    "path": "backend/routes/web.php",
+    "bytes": 412,
+    "hash": "9CBA56A6257B32A048EA7F60884CE75F0DB6A9FCD8198BDED8F6E352BF4EBF0F"
+  },
+  {
+    "path": "backend/storage/app/.gitignore",
+    "bytes": 33,
+    "hash": "993B9E3709D7B5189DA331725D1169D79E561A509DB2490B722B525073D2D976"
+  },
+  {
+    "path": "backend/storage/app/private/.gitignore",
+    "bytes": 14,
+    "hash": "240A3E0D37D2E86B614063F5347EB02D4F99CA6C254DE6B82871FF8D95532A7D"
+  },
+  {
+    "path": "backend/storage/app/public/.gitignore",
+    "bytes": 14,
+    "hash": "240A3E0D37D2E86B614063F5347EB02D4F99CA6C254DE6B82871FF8D95532A7D"
+  },
+  {
+    "path": "backend/storage/framework/.gitignore",
+    "bytes": 119,
+    "hash": "2D452D65596636197757AFA17DF52331C84DA7BB74EE0F3462FD5BE4EB6AFDC6"
+  },
+  {
+    "path": "backend/storage/framework/cache/.gitignore",
+    "bytes": 21,
+    "hash": "32F79194633DDB34F013C6EE8819D112104FF822357ADF308EC385B46A7F42F6"
+  },
+  {
+    "path": "backend/storage/framework/cache/data/.gitignore",
+    "bytes": 14,
+    "hash": "240A3E0D37D2E86B614063F5347EB02D4F99CA6C254DE6B82871FF8D95532A7D"
+  },
+  {
+    "path": "backend/storage/framework/sessions/.gitignore",
+    "bytes": 14,
+    "hash": "240A3E0D37D2E86B614063F5347EB02D4F99CA6C254DE6B82871FF8D95532A7D"
+  },
+  {
+    "path": "backend/storage/framework/testing/.gitignore",
+    "bytes": 14,
+    "hash": "240A3E0D37D2E86B614063F5347EB02D4F99CA6C254DE6B82871FF8D95532A7D"
+  },
+  {
+    "path": "backend/storage/framework/views/.gitignore",
+    "bytes": 14,
+    "hash": "240A3E0D37D2E86B614063F5347EB02D4F99CA6C254DE6B82871FF8D95532A7D"
+  },
+  {
+    "path": "backend/storage/logs/.gitignore",
+    "bytes": 14,
+    "hash": "240A3E0D37D2E86B614063F5347EB02D4F99CA6C254DE6B82871FF8D95532A7D"
+  },
+  {
+    "path": "backend/tests/Contract/AccountContextContractTest.php",
+    "bytes": 1617,
+    "hash": "510D22AC232ABDB3A1FED7B032572BF4B3309595B234C326770A21BA0649B773"
+  },
+  {
+    "path": "backend/tests/Contract/AuthResponseContractTest.php",
+    "bytes": 3434,
+    "hash": "49F2815815EF9797981718742314665F4DD7EFF04401DA62BB17FB647BCC0DDE"
+  },
+  {
+    "path": "backend/tests/Contract/ChallengeContractTest.php",
+    "bytes": 6806,
+    "hash": "E6172572C8612ACB635A25DFADCF545AA043913E4B8945A40676AAF8F67F9B8F"
+  },
+  {
+    "path": "backend/tests/Contract/FoundationResponseContractTest.php",
+    "bytes": 1219,
+    "hash": "FF8D1DA3D9A2DBE4A0B34D84D85DEA26797ABF18C9A0119F7D87435C92813BD3"
+  },
+  {
+    "path": "backend/tests/Contract/OpenApiResponseValidator.php",
+    "bytes": 752,
+    "hash": "33AF0B4E2E77C61E4154BC23356664B4AF85C8C6ED52BC1F36AE63F793392B38"
+  },
+  {
+    "path": "backend/tests/Feature/AccountContextTest.php",
+    "bytes": 2701,
+    "hash": "9CCC43339A1C024FE539E603FCDF8E8C7D0315582901009725928DCF8AA265A5"
+  },
+  {
+    "path": "backend/tests/Feature/ChallengeApiTest.php",
+    "bytes": 14423,
+    "hash": "D0B40EB7786040E21E25131D5471A82A8CA2316D312D8D973562C165E092FE6A"
+  },
+  {
+    "path": "backend/tests/Feature/ChallengeConcurrencyTest.php",
+    "bytes": 9510,
+    "hash": "A3ED252E713A24BA5B7D1CC49481B6774276A5CF3705404D4E99AD101C9DF0DE"
+  },
+  {
+    "path": "backend/tests/Feature/ChallengeJournalApiTest.php",
+    "bytes": 7231,
+    "hash": "24CB6E44CC959341C735B38B36F08D58DD53334FB270599FF5837831ADF156C1"
+  },
+  {
+    "path": "backend/tests/Feature/ChallengeJournalTest.php",
+    "bytes": 13069,
+    "hash": "036F871B3B0B764AC70B244F6408CBBCB7DCD4C6D50DF0A38F610F099F89D91A"
+  },
+  {
+    "path": "backend/tests/Feature/ChallengePersistenceTest.php",
+    "bytes": 8077,
+    "hash": "1E000C3F8AE0D2CCDCE0C07A0D327D516D8CC9442C427529C01955D66A041D8A"
+  },
+  {
+    "path": "backend/tests/Feature/ChallengeUseCasesTest.php",
+    "bytes": 14998,
+    "hash": "6AF8E19CE2A1E25BBB9B109F5F38028F7B8C63C58EE4D185AF7B759F53314A1E"
+  },
+  {
+    "path": "backend/tests/Feature/FoundationHealthTest.php",
+    "bytes": 346,
+    "hash": "E700079375C4BB48171F5C9AA4E3748537D4B3C570F1F18BB03228856780CABE"
+  },
+  {
+    "path": "backend/tests/Feature/JournalConflictConcurrencyTest.php",
+    "bytes": 4640,
+    "hash": "C1BECD0E6F91758F47F41B2A50A1D56C840ACBBCABD154EB9A472747C4720F58"
+  },
+  {
+    "path": "backend/tests/Feature/OwnerAuthenticationTest.php",
+    "bytes": 6249,
+    "hash": "EE89B609D23AD71F2D8CBCF72138525A160D547D8C8D30C91947C45596B936E2"
+  },
+  {
+    "path": "backend/tests/Feature/ProvisionOwnerCommandTest.php",
+    "bytes": 3704,
+    "hash": "D7C560FEDA6A6225F1196F12599CBFC676BB8446A6235B8F12F4065A252B2580"
+  },
+  {
+    "path": "backend/tests/Feature/Story14IntegrationSeamTest.php",
+    "bytes": 9441,
+    "hash": "990E4EB145E3AA75BC88603C0FBEFA9B446EAEDFC14AB7995A0BC23ACB4F2C8D"
+  },
+  {
+    "path": "backend/tests/Pest.php",
+    "bytes": 78,
+    "hash": "3D7F77A1723B0C95991852D5E2EA969F807A24CE17CC8D389B778F08441EFB7C"
+  },
+  {
+    "path": "backend/tests/TestCase.php",
+    "bytes": 142,
+    "hash": "C7C209F5579C42647C1F7B2A79AC828E8B54AC62A98442045A6E94FA2C0D0EBC"
+  },
+  {
+    "path": "backend/tests/Unit/.gitkeep",
+    "bytes": 1,
+    "hash": "01BA4719C80B6FE911B091A7C05124B64EEECE964E09C058EF8F9805DACA546B"
+  },
+  {
+    "path": "backend/tests/Unit/AccountTimeContextTest.php",
+    "bytes": 2007,
+    "hash": "4A0DFD9E741E2F777A580AA7C0FD19665EF5D8131909B7AC20FBE9969B9FA6D4"
+  },
+  {
+    "path": "compose.local.yaml",
+    "bytes": 5467,
+    "hash": "78C1E8FC76E27237E8018355B037CD96B77C4BEBF149C7A35C28B048DA87A5B9"
+  },
+  {
+    "path": "contracts/openapi.yaml",
+    "bytes": 22802,
+    "hash": "B1911F199EDA778727554AFD6649E50FFA3DAAE4273CE3D66A326E0791452F12"
+  },
+  {
+    "path": "deploy/README.md",
+    "bytes": 809,
+    "hash": "380AB25F5AF8238745ECEC4961594FC425F2DA9E41C9F134CDFB6E427D14AD3F"
+  },
+  {
+    "path": "deploy/local/.dockerignore",
+    "bytes": 32,
+    "hash": "D9C38AD109941CA231ED9ADE219740F51BAEADDC9AD6BA23F073AF97BDBB731E"
+  },
+  {
+    "path": "deploy/local/.env.example",
+    "bytes": 287,
+    "hash": "731778240F815ED886BCC4C7AABFD4B176F5685AD357A152C5A487DEDDF15B8C"
+  },
+  {
+    "path": "deploy/local/Dockerfile",
+    "bytes": 477,
+    "hash": "7631CA435F7687127F5763B798E819F02DE047B879495E9457E8D0C8F88C1254"
+  },
+  {
+    "path": "deploy/local/entrypoint.sh",
+    "bytes": 397,
+    "hash": "36327B779D4052FA1359A154B4C3F12439A69985DCACF22C31985A7FCFE47564"
+  },
+  {
+    "path": "deploy/nginx/noteflow.conf",
+    "bytes": 605,
+    "hash": "5B197A9D69A688980A07DAF97B00813B048B48A77171623DA8AA04713ABD7AD7"
+  },
+  {
+    "path": "docs/agent-architecture/reviews/agent-architecture-review-2026-09-30.md",
+    "bytes": 11459,
+    "hash": "5466FBA2EA76F1DA20583DFA0E3F34BD656ED7C416CD87EA1262A93865EB7A4D"
+  },
+  {
+    "path": "docs/agent-architecture/reviews/story-1-5-vs-1-6-audit-2026-10-06/audit-report.md",
+    "bytes": 43117,
+    "hash": "74E694D89117F21C2488349FF15DD0800464DAF86ED20071451F579399BAF4F0"
+  },
+  {
+    "path": "docs/agent-architecture/reviews/v4-acceptance-2026-09-28/acceptance-matrix.md",
+    "bytes": 4341,
+    "hash": "2476197E1A1B74D4546350BADBAC11E3F7F63E19AF25677F0DE89B1A31415894"
+  },
+  {
+    "path": "docs/agent-architecture/reviews/v4-acceptance-2026-09-28/batch-b-evidence-index.json",
+    "bytes": 1788,
+    "hash": "D73A9FE9033952C1F5DB10B488EB1361D77B28306268CCA1311475D821B3B461"
+  },
+  {
+    "path": "docs/agent-architecture/reviews/v4-acceptance-2026-09-28/batch-b-results.md",
+    "bytes": 8577,
+    "hash": "CA0FBB9B603C47D8B8DDB0F68A27B81534ED1491016A8168F02A63E672479BAF"
+  },
+  {
+    "path": "docs/agent-architecture/reviews/v4-acceptance-2026-09-28/batch-c-evidence-bundle.json",
+    "bytes": 3033,
+    "hash": "EE31E3309146EEFA007829DFA64879D68769E2D75BD5EAF8193D86DDF96F8A27"
+  },
+  {
+    "path": "docs/agent-architecture/reviews/v4-acceptance-2026-09-28/batch-c-evidence-index.json",
+    "bytes": 2324,
+    "hash": "A49B1FF1ECB972AF4991F1312BF557C1CF3AD00899119C6C1E41DE59891C400D"
+  },
+  {
+    "path": "docs/agent-architecture/reviews/v4-acceptance-2026-09-28/batch-c-results.md",
+    "bytes": 6400,
+    "hash": "695B6456407D1EF446F409C6D891A2C4ED8795B784CBBA99EDB5081140C0FE6F"
+  },
+  {
+    "path": "docs/agent-architecture/reviews/v4-acceptance-2026-09-28/batch-d-evidence-bundle.json",
+    "bytes": 7628,
+    "hash": "3B56841A801898EDF86EE78D452768E68754F2E0018650FEF9DF04DB15BC9D95"
+  },
+  {
+    "path": "docs/agent-architecture/reviews/v4-acceptance-2026-09-28/batch-d-evidence-index.json",
+    "bytes": 10088,
+    "hash": "3CE461607C9A769F0A8CDB3B1B8A80F5E1D0E2B975EE6D9577EF228DC84627A7"
+  },
+  {
+    "path": "docs/agent-architecture/reviews/v4-acceptance-2026-09-28/batch-d-results.md",
+    "bytes": 8391,
+    "hash": "1CD4B6121586A09185ECAB8CBEB258C12CB96B69561FAA319E571F0B8ADF4165"
+  },
+  {
+    "path": "docs/agent-architecture/reviews/v4-acceptance-2026-09-28/final-decision.md",
+    "bytes": 1187,
+    "hash": "8FAE4B5DC03093D9D715B66677240DF48CFB79198EFAAD9BAC18211DF9E6A52C"
+  },
+  {
+    "path": "docs/agent-architecture/reviews/v4-acceptance-2026-09-28/findings.json",
+    "bytes": 11610,
+    "hash": "D1BCC08F4F6D6AA8F1F68C72CB716FDD3F20BC19DA453DA71026708BC2F99A06"
+  },
+  {
+    "path": "docs/agent-architecture/reviews/v4-acceptance-2026-09-28/independent-review.md",
+    "bytes": 9753,
+    "hash": "CEF0015A66403A738F97C76AE886B563633AF08B57872D019DFB4A4A9C49D43E"
+  },
+  {
+    "path": "docs/agent-architecture/reviews/v4-acceptance-2026-09-28/integration-acceptance-summary.md",
+    "bytes": 7044,
+    "hash": "CC8A2D222FDF7CFA1931F6D8A9D49AF7EE082960464B8A989C48901E75B1AF59"
+  },
+  {
+    "path": "docs/agent-architecture/reviews/v4-acceptance-2026-09-28/integration-evidence-errata.md",
+    "bytes": 4373,
+    "hash": "7D2F7CD712303CB756A28F24B60A0AFE50079E1168B6202047463028B81B6764"
+  },
+  {
+    "path": "docs/agent-architecture/reviews/v4-acceptance-2026-09-28/integration-evidence-index.json",
+    "bytes": 5480,
+    "hash": "B269C03EA8D4548B232E3E4B09D9ED260A89F5F8531C9D76B6C1F9A72398DA4F"
+  },
+  {
+    "path": "docs/agent-architecture/reviews/v4-acceptance-2026-09-28/snapshot.json",
+    "bytes": 10905,
+    "hash": "C65FA7AE25A6765613339A5CE2CEBBAAC08AA2A24FD50A8E831EAD656C74F896"
+  },
+  {
+    "path": "docs/agent-architecture/reviews/v4-acceptance-2026-09-28/source-plan-2026-09-27-original-main.md",
+    "bytes": 66480,
+    "hash": "4523C7647E25D838002AF78BE888690D833CB497CFD33B23C3832DCB3F09E674"
+  },
+  {
+    "path": "docs/agent-architecture/v4-upgrade-validation.md",
+    "bytes": 7855,
+    "hash": "63893E775390C0EA136A523B7A48766AE82BF8E84BE3355ABBC4D4FC25740ED2"
+  },
+  {
+    "path": "docs/architecture/AGENTIC-SDLC-V2-GUIDE.md",
+    "bytes": 29361,
+    "hash": "4359B7391E21090B20E41F57D1A1F0A28F356DB06D66C645EC574F24E0268F51"
+  },
+  {
+    "path": "docs/architecture/V3-PHASE-3A-FAILOVER-POC.md",
+    "bytes": 5422,
+    "hash": "AF5FB288488CB80C281CE5233DBBD96F4A4AFCCAAA7D280CE26E7AF83950653F"
+  },
+  {
+    "path": "docs/architecture/architecture-noteflow-2026-09-12/.memlog.md",
+    "bytes": 8811,
+    "hash": "27FDF82831F2E31E6CA77842F08655DC7975E2704F7E46384DEE7E058560CA56"
+  },
+  {
+    "path": "docs/architecture/architecture-noteflow-2026-09-12/ARCHITECTURE-PROPOSAL.md",
+    "bytes": 49798,
+    "hash": "D9E8BEFACD9E97009600B75601D1D05DA8034DEB41F5AE0CF4A64DCF5A3EE9BA"
+  },
+  {
+    "path": "docs/architecture/architecture-noteflow-2026-09-12/ARCHITECTURE-SPINE.md",
+    "bytes": 25136,
+    "hash": "9583600368BB536A8002AEC2E3C960E5C730BF5458ACAA64BFC1693BBCD1DB88"
+  },
+  {
+    "path": "docs/architecture/architecture-noteflow-2026-09-12/reviews/review-adversarial-seams.md",
+    "bytes": 30799,
+    "hash": "E0803C54AAF111CC6F667954BCCBF5E075D3899C31EDF228920DDFEC8134121D"
+  },
+  {
+    "path": "docs/architecture/architecture-noteflow-2026-09-12/reviews/review-current-tech.md",
+    "bytes": 5207,
+    "hash": "64C4C7B4153F43E9E0433DCCF214A3B9E6B4F9525CBF20F51E295E04730FBECB"
+  },
+  {
+    "path": "docs/architecture/architecture-noteflow-2026-09-12/reviews/review-resolution.md",
+    "bytes": 2350,
+    "hash": "73244A0A50411B731C8F781DA93E7567BF889BCA6EC776EA6F4D6839A4ADD770"
+  },
+  {
+    "path": "docs/architecture/architecture-noteflow-2026-09-12/reviews/review-rubric.md",
+    "bytes": 20046,
+    "hash": "7CCA42359701B7EB86C50D2D96629FB7E624942319ABE9D1FB1A286578EDEF27"
+  },
+  {
+    "path": "docs/architecture/architecture-noteflow-2026-09-12/reviews/review-vue-laravel-resolution.md",
+    "bytes": 1489,
+    "hash": "635116D7BBD909A30C5264B038DD21E6C71A174D9EFC6BDBA34AC7D275164B67"
+  },
+  {
+    "path": "docs/architecture/architecture-noteflow-2026-09-12/reviews/review-vue-laravel-rubric.md",
+    "bytes": 4482,
+    "hash": "55A0DD36C732020D045078AF0F0380B05FF04F6C0FAFB26516D0377C466EE284"
+  },
+  {
+    "path": "docs/architecture/architecture-noteflow-2026-09-12/reviews/review-vue-laravel-seams.md",
+    "bytes": 2144,
+    "hash": "570BD28806E6230F80988BD0D1BF19BA559F60248132DF5ECE5F42C2DF39DCB6"
+  },
+  {
+    "path": "docs/architecture/architecture-noteflow-2026-09-12/reviews/review-vue-laravel-tech.md",
+    "bytes": 7397,
+    "hash": "C03E92C39A6A3DED5696E9B4805F84F3F1583DF0C5CD6FC31EB08FA2D943EB46"
+  },
+  {
+    "path": "docs/development/local-runtime.md",
+    "bytes": 4507,
+    "hash": "2072844079F84F49E475A81F63F547E8B84F3E927ED39CBBEB96C723E849812E"
+  },
+  {
+    "path": "docs/product/epics.md",
+    "bytes": 48005,
+    "hash": "A328020423FB230FC5933BD486D53741A99C3E3AF2E14DF5DB3AD49A845B5E94"
+  },
+  {
+    "path": "docs/product/prd.md",
+    "bytes": 72493,
+    "hash": "1B119946664B8368BEAE3D2C254D754CF6D769C8DD4DBA5833EF666447D5A710"
+  },
+  {
+    "path": "docs/product/project-brief.md",
+    "bytes": 32397,
+    "hash": "5E484135E3F0FF98D59A46AE12A3A3A1311AB58FC4CF03C593C592D66A702446"
+  },
+  {
+    "path": "docs/superpowers/plans/2026-09-26-v4-explicit-human-approved-completion.md",
+    "bytes": 8378,
+    "hash": "A7C3BCF1BB282B2BA9DEA6FB5B5C3636FC3A7AFC3097ED7B33E23FF1BF76BA79"
+  },
+  {
+    "path": "docs/superpowers/plans/2026-09-26-v4-finalization-human-gate.md",
+    "bytes": 10058,
+    "hash": "EA8EC6586E76B5D3CD6375FF6636FAE4A7AE53342291522092700A1ED6B57596"
+  },
+  {
+    "path": "docs/superpowers/plans/2026-09-26-v4-fresh-story-start.md",
+    "bytes": 3293,
+    "hash": "DA9338939C965EF15F9F501CA1E416DCACF30C45EA65B5FD1E17F8D7A1164E8A"
+  },
+  {
+    "path": "docs/superpowers/plans/2026-09-27-story-1-5-execution-plan.md",
+    "bytes": 15658,
+    "hash": "81BBC8B87FF43EE8A946E2B7AD19EDB0E8DC339F30F07616D4BCF895F4DD1D12"
+  },
+  {
+    "path": "docs/superpowers/plans/2026-09-27-v4-agent-architecture-evolution-plan.md",
+    "bytes": 66480,
+    "hash": "4523C7647E25D838002AF78BE888690D833CB497CFD33B23C3832DCB3F09E674"
+  },
+  {
+    "path": "docs/superpowers/plans/2026-09-27-v4-inventory-and-regression-fix.md",
+    "bytes": 12524,
+    "hash": "52F8295CE20EE12171D21E5546085ADD113CFDDD73B4DFFF07B2FCDCC2FD910F"
+  },
+  {
+    "path": "docs/superpowers/plans/2026-09-27-worktree-integration-plan.md",
+    "bytes": 19828,
+    "hash": "1F9AE90A72C81E7CC69D7FE77C250422C8C12E020709E3992789F9EE4A3D495C"
+  },
+  {
+    "path": "docs/superpowers/plans/2026-09-28-v4-architecture-independent-review-acceptance-plan.md",
+    "bytes": 61951,
+    "hash": "2A43A99C8458B599846B21843C29DD14254149A255575F7A5C877C85659C9EDA"
+  },
+  {
+    "path": "docs/superpowers/plans/2026-09-29-backend-ci-fix-plan.md",
+    "bytes": 3787,
+    "hash": "93D4C755B888F49DDEAC48A2FDC0CD09A355554E812C0ADED51B7E8AA620A97F"
+  },
+  {
+    "path": "docs/superpowers/plans/2026-09-29-unified-local-backend-plan.md",
+    "bytes": 41070,
+    "hash": "F3E9116AAD8BE5AAFF19420BC551A55A8FAF00739E08E7119E3C371654B1A329"
+  },
+  {
+    "path": "docs/superpowers/plans/2026-09-30-story-1-6-execution-plan.md",
+    "bytes": 7276,
+    "hash": "EB59AEC2FEFA58280BA199AD5FC53BDE044CA68D1A9BF59758CA64B498AE2378"
+  },
+  {
+    "path": "docs/superpowers/plans/2026-10-01-story-1-6-v4-recovery-plan.md",
+    "bytes": 9937,
+    "hash": "762B0D7FF6F5D5AA0BEA771536CE4A152520485880D64A980EFB94BB9EAC346E"
+  },
+  {
+    "path": "docs/superpowers/plans/2026-10-03-story-1-6-debug-remaining-plan.md",
+    "bytes": 24643,
+    "hash": "9237A35AD1C319B6F2D5E5BE14416D38E49398DCFD132897DE30B3A75E645DFC"
+  },
+  {
+    "path": "docs/superpowers/specs/2026-09-26-v4-finalization-human-gate-design.md",
+    "bytes": 6306,
+    "hash": "3AB16BE48DBA4B15ED78BA137A765E5262F211DEE8D010397F892F1E94F5A975"
+  },
+  {
+    "path": "docs/ux/ux-spec.md",
+    "bytes": 57403,
+    "hash": "F1570B16CF5C9D48EC9DE82EC72A60B1E500E56CF8587060030BB4030E34B180"
+  },
+  {
+    "path": "frontend/.editorconfig",
+    "bytes": 216,
+    "hash": "140A3AF47B162217409F8E635FC70D0B01CAF0EE81612D8904412366E83A1063"
+  },
+  {
+    "path": "frontend/.gitattributes",
+    "bytes": 19,
+    "hash": "D60F352D0DB1404C70AFB4BB8B2CA3FD1C610572AA40720E8A0B7BAA7885418C"
+  },
+  {
+    "path": "frontend/.gitignore",
+    "bytes": 396,
+    "hash": "AAF850032EBD5BA963AB779A087807F817E1BCB5D49350D2087F12F591CA82EF"
+  },
+  {
+    "path": "frontend/.oxlintrc.json",
+    "bytes": 227,
+    "hash": "E7C18B68F304584EC9A4899D28D35A0B51BEBF6F4DFA7E3383CE7F6E7C700A90"
+  },
+  {
+    "path": "frontend/.prettierrc.json",
+    "bytes": 120,
+    "hash": "F676D50058F1D9C72B54328A9A44C0F0DF5AD31BE3252849AB910CE83123CCA6"
+  },
+  {
+    "path": "frontend/env.d.ts",
+    "bytes": 38,
+    "hash": "65996936FBB042915F7B74A200FCDDE7E410F32A669B1AB9597CFAA4B0FADDB5"
+  },
+  {
+    "path": "frontend/eslint.config.ts",
+    "bytes": 1055,
+    "hash": "B213544EA9438FCAF37A851052296496D591EB69C6956772FEAF656C3C6D307E"
+  },
+  {
+    "path": "frontend/index.html",
+    "bytes": 289,
+    "hash": "A6D95B110A0CCF0E9CAB84DB0A313CE60D3E4418D330F42569ED5377CFB33C9A"
+  },
+  {
+    "path": "frontend/package-lock.json",
+    "bytes": 215258,
+    "hash": "1829336936C40E0EF070A8A18628ECB2183F0A27F0E2E5C922B004A20FA8E9E7"
+  },
+  {
+    "path": "frontend/package.json",
+    "bytes": 1831,
+    "hash": "0323AE9869240B6ABDE4038619822846D419372A55E0DCE2309C720BF2BE448D"
+  },
+  {
+    "path": "frontend/scripts/generate-openapi-types.mjs",
+    "bytes": 4415,
+    "hash": "0BADD05B1AA69D9F081BEFD14BEE654C07FF625E4D1FE955C58BC6CF43F16851"
+  },
+  {
+    "path": "frontend/scripts/prove-contract-drift.mjs",
+    "bytes": 1370,
+    "hash": "1A3358723A59C9663F8D0A42570F5F8955A134DA7318B1B9A9884F02AB759069"
+  },
+  {
+    "path": "frontend/src/App.vue",
+    "bytes": 123,
+    "hash": "7CC31EE3FDEA3C700E71ED1477004310FA73D0FBEFFEF2F26C68A8663B85F9E4"
+  },
+  {
+    "path": "frontend/src/__tests__/App.spec.ts",
+    "bytes": 13310,
+    "hash": "3976189334AF4DA74B33B14C60F892F23577CC541ED626CA42E44161B6C4E705"
+  },
+  {
+    "path": "frontend/src/api/__tests__/account.spec.ts",
+    "bytes": 1082,
+    "hash": "A6FAD0C54E60F338FAC7085BE5FEA3FA4C065C4323E69F782238CDF8D3CA2D20"
+  },
+  {
+    "path": "frontend/src/api/__tests__/auth.spec.ts",
+    "bytes": 2864,
+    "hash": "A863C5CDF0DD7358E1DF369FDB0E55B4569792D0CE370F4B871D535E7BBCF380"
+  },
+  {
+    "path": "frontend/src/api/__tests__/challenges.spec.ts",
+    "bytes": 12317,
+    "hash": "399428BDFA0680B6CA67A3A3CE2B3E4326EB194C6A8CF5CF3A3AE4E0BF021AD6"
+  },
+  {
+    "path": "frontend/src/api/__tests__/http.spec.ts",
+    "bytes": 1020,
+    "hash": "13578911F8D4276FE812DE6F6B309440C80FB86C8CF8F2860AC2517CE7D04151"
+  },
+  {
+    "path": "frontend/src/api/account.ts",
+    "bytes": 650,
+    "hash": "5BB6C33BC88667C9B3B71FA06A18346C95D1AB3AF353716E094CF6189223D2D3"
+  },
+  {
+    "path": "frontend/src/api/auth.ts",
+    "bytes": 2807,
+    "hash": "1A5DE11A5F3BE0388359057ED06F321711B925518B9F319117FCDA9483FBA79D"
+  },
+  {
+    "path": "frontend/src/api/challenges.ts",
+    "bytes": 7971,
+    "hash": "9C72F4BCABE1FE8C4938CDBC6351FB48358452CD01FFD8F62550047353D8DD5D"
+  },
+  {
+    "path": "frontend/src/api/http.ts",
+    "bytes": 498,
+    "hash": "29758F8F7595ADBE7E5CBB5835F13859715D87A8D8A8ADB914E5954F62200AD0"
+  },
+  {
+    "path": "frontend/src/api/schema.generated.ts",
+    "bytes": 9229,
+    "hash": "B9D2102C022F93AF188AC0387F3FCA76138E6B6EF29917D5847DA0F6B110C0F5"
+  },
+  {
+    "path": "frontend/src/assets/main.css",
+    "bytes": 351,
+    "hash": "0CE7AE2637DC437D4196F691C4351C00E3630A54E643AC265A29D2F3B896854B"
+  },
+  {
+    "path": "frontend/src/components/AppShell.vue",
+    "bytes": 6566,
+    "hash": "77D7C1E1F56C295C666D9308EE5C92BCF799C471793BA41E5CDFBA326AEEBC11"
+  },
+  {
+    "path": "frontend/src/components/ChallengeJournalEditor.vue",
+    "bytes": 13394,
+    "hash": "9DDA339DA57B7FEBFE1FD2F5939A8348CE70305908AE807837D226E1AAE016CE"
+  },
+  {
+    "path": "frontend/src/components/ContentConflictDialog.vue",
+    "bytes": 8998,
+    "hash": "795E951FB75DD316D2F3F913D7D456439D63B6DE524FA9175DC68EDF1F80EAE2"
+  },
+  {
+    "path": "frontend/src/components/__tests__/ContentConflictDialog.spec.ts",
+    "bytes": 6311,
+    "hash": "3A7D206462597C71EE769D19D5104BEA4205202BAED482233BA482D3F87A7D01"
+  },
+  {
+    "path": "frontend/src/main.ts",
+    "bytes": 367,
+    "hash": "C22296333C2762D8EB79C25C72D7861D8C0C7D7BE3F00E6116529D1A3FECD0A9"
+  },
+  {
+    "path": "frontend/src/modules/.gitkeep",
+    "bytes": 1,
+    "hash": "01BA4719C80B6FE911B091A7C05124B64EEECE964E09C058EF8F9805DACA546B"
+  },
+  {
+    "path": "frontend/src/pinia.ts",
+    "bytes": 72,
+    "hash": "487E2027859FEFEFEA762D7B7F936E2174C47ECBE92DB44626B3EF4544611B78"
+  },
+  {
+    "path": "frontend/src/queryClient.ts",
+    "bytes": 226,
+    "hash": "A5F2E1DF1856C74F9B657C6288B085809F6EADD7C7B45A506637B70D3CD5BDC2"
+  },
+  {
+    "path": "frontend/src/router/__tests__/router.spec.ts",
+    "bytes": 2954,
+    "hash": "ADD406A1577FA9295203AD1894D584D4992F54CA4E7EDD0A503488B253C87884"
+  },
+  {
+    "path": "frontend/src/router/index.ts",
+    "bytes": 2299,
+    "hash": "0627F1424BE884E55C6B848A4C90BAB5447D5FCDFFAEB27A43DE5A1BDD4D4897"
+  },
+  {
+    "path": "frontend/src/stores/__tests__/account.spec.ts",
+    "bytes": 3060,
+    "hash": "1486B2C07CD1C498CD73C50D907D88400C344677AD77C047817CCA6FD08E2216"
+  },
+  {
+    "path": "frontend/src/stores/__tests__/auth.spec.ts",
+    "bytes": 4128,
+    "hash": "52940F2D4F5E9518D658A0F6C5C90B67FCBE54D617FF5CF12BBF893AB579D42E"
+  },
+  {
+    "path": "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+    "bytes": 32680,
+    "hash": "737D531F089AF8837DE97B749C31D5CB4C6790D855389A47CE7B6C215D59BCA4"
+  },
+  {
+    "path": "frontend/src/stores/__tests__/sync.spec.ts",
+    "bytes": 46986,
+    "hash": "579AA2CE352906340C7307EB150A823B216260687C2D00A7CC0BCF9B89A80C1A"
+  },
+  {
+    "path": "frontend/src/stores/account.ts",
+    "bytes": 1415,
+    "hash": "14AAC1ABB3F813349E7447CFDDB8BC29AA4631D3EFDAC101F109F8E664F04B11"
+  },
+  {
+    "path": "frontend/src/stores/auth.ts",
+    "bytes": 2745,
+    "hash": "0F65EFAC80486A757ABCD050BC8EF1FB55F26B8B7A6A8AE3B4C41D7DCB598048"
+  },
+  {
+    "path": "frontend/src/stores/journalDrafts.ts",
+    "bytes": 27835,
+    "hash": "7D771BD9D99A89D5EAB097675C30EE4EC2EA5937481E5C837A0EA0130F8C97E3"
+  },
+  {
+    "path": "frontend/src/stores/sync.ts",
+    "bytes": 20366,
+    "hash": "98356258245780C88716C9BF57234964D38F1299A0A65D829E82EACD35939DBE"
+  },
+  {
+    "path": "frontend/src/views/AccountSettingsView.vue",
+    "bytes": 933,
+    "hash": "A6B839FD2437B133B18766AF56245C5CE0A03B131DADE49DE7E6C1A097B1F2F5"
+  },
+  {
+    "path": "frontend/src/views/ChallengesView.vue",
+    "bytes": 36835,
+    "hash": "78C4BB41F1156F47E42E60A0404A04AA94783182F298F7227F00D57CB30C4CA1"
+  },
+  {
+    "path": "frontend/src/views/DeepLinkView.vue",
+    "bytes": 522,
+    "hash": "2294F75FF31656D7AAFE50585615D336E46705D057944F24E712AAD2680B6A86"
+  },
+  {
+    "path": "frontend/src/views/FoundationView.vue",
+    "bytes": 1425,
+    "hash": "5B4FBF135F9321200E3F971C233875E2143CF1313DB9DBB7167F95A350D61391"
+  },
+  {
+    "path": "frontend/src/views/LoginView.vue",
+    "bytes": 2387,
+    "hash": "5561068A990390371FC071BCEE64D4F4A7658E7B5935468E589618495BCA8A0B"
+  },
+  {
+    "path": "frontend/src/views/PrivatePlaceholderView.vue",
+    "bytes": 280,
+    "hash": "0F53C5E8A662631176133B191D5B3D194679CA39EC49B229AD5369BEFC241559"
+  },
+  {
+    "path": "frontend/src/views/TodayView.vue",
+    "bytes": 3736,
+    "hash": "62122D17DBD27586D8280A18FCB42325215ABAC4745BF2E11DB5DF951426A0DD"
+  },
+  {
+    "path": "frontend/src/views/__tests__/account-time.spec.ts",
+    "bytes": 1692,
+    "hash": "48BB38AC17B6BA3401640351F20C56C4E017EDB5B00BC293D8F7F29B176FD658"
+  },
+  {
+    "path": "frontend/src/views/__tests__/challenges.spec.ts",
+    "bytes": 25756,
+    "hash": "D62A9D5224C720F20D504D6474B43EF2CF93329CE9F42068CE99F2D45E88AA78"
+  },
+  {
+    "path": "frontend/src/views/__tests__/journal-draft-lifecycle.spec.ts",
+    "bytes": 14754,
+    "hash": "79A3FABC58AE1EB3D2BBB29F3B3BDCA07188C484BCC06B23F411103D5E30A1C8"
+  },
+  {
+    "path": "frontend/src/views/__tests__/journal.spec.ts",
+    "bytes": 15955,
+    "hash": "6686B43F024AE68DA3D9C11EEA67C50D0229715D948F9866C0A3E449E0E2AACE"
+  },
+  {
+    "path": "frontend/src/views/__tests__/today.spec.ts",
+    "bytes": 3282,
+    "hash": "C42BE69346A91939EF5E0BDD2E2D4740082C199640192E58633F0875746C2E8A"
+  },
+  {
+    "path": "frontend/tsconfig.app.json",
+    "bytes": 594,
+    "hash": "92496D0DB20BB707BE8B697A9DC316C7DED1011F8A9998A472C89F3E612822F2"
+  },
+  {
+    "path": "frontend/tsconfig.json",
+    "bytes": 191,
+    "hash": "9C4D36D79809AB9835A9E674B60DD208F3C15958EB9F2DEA1AFB218F6D0E483B"
+  },
+  {
+    "path": "frontend/tsconfig.node.json",
+    "bytes": 1004,
+    "hash": "F3D48B85104C3B01AA68EE8758762EB6E90CB09677251F6B7B4B53360E37BDE1"
+  },
+  {
+    "path": "frontend/tsconfig.vitest.json",
+    "bytes": 667,
+    "hash": "6AED91CC02F169D58A4757B98C7A69C4C80BA55C5692F62EBA97335DE0059302"
+  },
+  {
+    "path": "frontend/vite.config.ts",
+    "bytes": 854,
+    "hash": "12D7403FF1412062398CCB93013EED4EC9D4D92D174431AED3E1E96DAFD6E2B1"
+  },
+  {
+    "path": "frontend/vitest.config.ts",
+    "bytes": 442,
+    "hash": "326FAC2CCE6E2CECBEFE3BC94B3EB1752E22CEFB34197374705A0889AF2F3697"
+  },
+  {
+    "path": "package.json",
+    "bytes": 261,
+    "hash": "D802B8BC6093AF81F2C6785720D43E16DE37700A4130DD8E6B217C32DA152B6A"
+  },
+  {
+    "path": "redocly.yaml",
+    "bytes": 89,
+    "hash": "840FAE2DBFDE168ECC2CA489A19B85C7A8BF6A7FC0560C751C7B7513D4A312BB"
+  },
+  {
+    "path": "scripts/local.ps1",
+    "bytes": 16091,
+    "hash": "96B33C8852F4327AD41157D42682FAC6AAB8580F68035873965A1B1D00A91477"
+  },
+  {
+    "path": "scripts/verify-local.ps1",
+    "bytes": 12602,
+    "hash": "FB4831CE95D29C852059DB4F8C44F06AFDC184729D1A45E737A9A78FE1698F38"
+  },
+  {
+    "path": "skills-lock.json",
+    "bytes": 3884,
+    "hash": "725F9CCCF9CAD9788F22B89A41CFCB8A892D22D41DE031264B3D9EE0FE3879E3"
+  },
+  {
+    "path": "tests/e2e/account-time.spec.ts",
+    "bytes": 1379,
+    "hash": "53B82F8065F956C30738C86F91608A9D575C85A481874EC1DF0DEAED8F043813"
+  },
+  {
+    "path": "tests/e2e/challenges.spec.ts",
+    "bytes": 8456,
+    "hash": "1A7198856FF6A78984DC8BB2B1F3EEDA58436213CAA2CA786E028BC6DF033BE9"
+  },
+  {
+    "path": "tests/e2e/content-conflict.spec.ts",
+    "bytes": 15073,
+    "hash": "B040B8A8D1B7CF7409B3E84E80CF245C5111C2776C855D8676AF2C9BB8AA93F7"
+  },
+  {
+    "path": "tests/e2e/cross-device-sync.spec.ts",
+    "bytes": 13871,
+    "hash": "9B34C3E700D8869E722EEBB3BFEDD044B879E35D1CB10E685280512FAA0580A1"
+  },
+  {
+    "path": "tests/e2e/foundation.spec.ts",
+    "bytes": 1011,
+    "hash": "BCDFDB00C6B8F80A7838641F7051035ABEFFFBE7C499BE0D514923FBB5510F61"
+  },
+  {
+    "path": "tests/e2e/helpers/db-helper-guard.test.ts",
+    "bytes": 1647,
+    "hash": "56278E5CC33193222A763646FE505B3E5F87C6CE02D2E39D6505EF29E8CC2958"
+  },
+  {
+    "path": "tests/e2e/helpers/db-helper.php",
+    "bytes": 7399,
+    "hash": "21838832BB074DD9126C76C3F65C4CE1D072066C5878BAE68E446F22318F4B74"
+  },
+  {
+    "path": "tests/e2e/helpers/db-state.ts",
+    "bytes": 2193,
+    "hash": "C4AC4F31A25D5435D7139C21739F4BA211802CAE0B08C9DA35FA055B72593C36"
+  },
+  {
+    "path": "tests/e2e/helpers/php-runtime.test.ts",
+    "bytes": 2183,
+    "hash": "2DE97E85EA2A7A43BCC09F80A3E8ADBF2EAADF75FE75893DA9E9D8C7B7271398"
+  },
+  {
+    "path": "tests/e2e/helpers/php-runtime.ts",
+    "bytes": 4654,
+    "hash": "3EDB0AC8EC0EC920BA54978635E17FD1193184163FFCDCAC642E72FC77877CA5"
+  },
+  {
+    "path": "tests/e2e/package-lock.json",
+    "bytes": 1807,
+    "hash": "87990D63F37563BAE5507B404B51947B025A67BB21C890038E0D404AC98948CF"
+  },
+  {
+    "path": "tests/e2e/package.json",
+    "bytes": 337,
+    "hash": "924975905F022D2A947BD7C518736E1A0BC82EEC1358CA3407C4A45621E65F6D"
+  },
+  {
+    "path": "tests/e2e/playwright.config.ts",
+    "bytes": 2085,
+    "hash": "FD44B664B20A908BA1A580C2DEC8B96A1A6640989B8728C9665CB3634B9EA74B"
+  },
+  {
+    "path": "tests/e2e/responsive.spec.ts",
+    "bytes": 1282,
+    "hash": "B60BC03116269DD0495FDAC8242DA98A02E138B311BE96B6DB787DFAE0F378BF"
+  },
+  {
+    "path": "tests/e2e/routing.spec.ts",
+    "bytes": 3521,
+    "hash": "992354495355178AC01C55D2F819AA094FC9F81B4F579C34E8240C2523149888"
+  },
+  {
+    "path": "tests/e2e/scripts/patch-playwright-windows-cleanup.mjs",
+    "bytes": 687,
+    "hash": "EC5E5A784F3241AC4B0C83ECB67B7F17F940F0B84C5D1340838FC53FED9AC020"
+  }
+]

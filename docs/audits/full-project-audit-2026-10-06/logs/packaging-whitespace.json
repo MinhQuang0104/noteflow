@@ -1,0 +1,92 @@
+{
+  "kind": "F",
+  "initial_packaging_command": "git diff --cached --check",
+  "initial_exit_code": 2,
+  "root_cause": "trailing presentation whitespace in npm/Composer stdout; extra terminal blank lines in generated audit documents",
+  "changes": "only audit artifact formatting; .log full text retained after trailing-margin/terminal-blank normalization; exact original bytes kept in .log.raw.gz",
+  "plan_modified": false,
+  "source_modified": false,
+  "changed": [
+    {
+      "path": "docs/audits/full-project-audit-2026-10-06/01-baseline-checks.md",
+      "raw_backup": null,
+      "raw_sha256": null
+    },
+    {
+      "path": "docs/audits/full-project-audit-2026-10-06/D-contract.md",
+      "raw_backup": null,
+      "raw_sha256": null
+    },
+    {
+      "path": "docs/audits/full-project-audit-2026-10-06/D-findings.json",
+      "raw_backup": null,
+      "raw_sha256": null
+    },
+    {
+      "path": "docs/audits/full-project-audit-2026-10-06/G-infra.md",
+      "raw_backup": null,
+      "raw_sha256": null
+    },
+    {
+      "path": "docs/audits/full-project-audit-2026-10-06/H-control-plane.md",
+      "raw_backup": null,
+      "raw_sha256": null
+    },
+    {
+      "path": "docs/audits/full-project-audit-2026-10-06/I-repo-hygiene.md",
+      "raw_backup": null,
+      "raw_sha256": null
+    },
+    {
+      "path": "docs/audits/full-project-audit-2026-10-06/logs/B10-retry1.log",
+      "raw_backup": "docs/audits/full-project-audit-2026-10-06/logs/B10-retry1.log.raw.gz",
+      "raw_sha256": "9de80201db6f928ac8045f1e74fc5506d5d125b83a35482e2e788a1c0c50f631"
+    },
+    {
+      "path": "docs/audits/full-project-audit-2026-10-06/logs/B13-backend-locked-correct-cwd.log",
+      "raw_backup": "docs/audits/full-project-audit-2026-10-06/logs/B13-backend-locked-correct-cwd.log.raw.gz",
+      "raw_sha256": "ae24528f28c6134f312f2869315ffe38e0e278f64973c49d25267a93aef9f994"
+    },
+    {
+      "path": "docs/audits/full-project-audit-2026-10-06/logs/B13-backend-locked-retry1.log",
+      "raw_backup": "docs/audits/full-project-audit-2026-10-06/logs/B13-backend-locked-retry1.log.raw.gz",
+      "raw_sha256": "4ffb8abc9f56a3d21a332032b185fe4806d1ba14a8d4f49ae24a6a23634b4af7"
+    },
+    {
+      "path": "docs/audits/full-project-audit-2026-10-06/logs/B13-frontend-retry1.log",
+      "raw_backup": "docs/audits/full-project-audit-2026-10-06/logs/B13-frontend-retry1.log.raw.gz",
+      "raw_sha256": "7fdd510cd0a3f86713925d95dea337b6392de998771b3e1e99832a6237a821cb"
+    },
+    {
+      "path": "docs/audits/full-project-audit-2026-10-06/logs/B13-frontend.log",
+      "raw_backup": "docs/audits/full-project-audit-2026-10-06/logs/B13-frontend.log.raw.gz",
+      "raw_sha256": "f5098f7307f58e07ca28e4409a5a2187cb13d86649c9d7ff8eb6d97a6d2011ef"
+    },
+    {
+      "path": "docs/audits/full-project-audit-2026-10-06/logs/B14-diff.log",
+      "raw_backup": "docs/audits/full-project-audit-2026-10-06/logs/B14-diff.log.raw.gz",
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/audits/full-project-audit-2026-10-06/logs/B14-ignore.log",
+      "raw_backup": "docs/audits/full-project-audit-2026-10-06/logs/B14-ignore.log.raw.gz",
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/audits/full-project-audit-2026-10-06/logs/B5.log",
+      "raw_backup": "docs/audits/full-project-audit-2026-10-06/logs/B5.log.raw.gz",
+      "raw_sha256": "4b4241ddfbf72b64f83b3ba67db9cfa5beb553861ce9b47e725391d08661a547"
+    },
+    {
+      "path": "docs/audits/full-project-audit-2026-10-06/logs/B9-retry1.log",
+      "raw_backup": "docs/audits/full-project-audit-2026-10-06/logs/B9-retry1.log.raw.gz",
+      "raw_sha256": "43ad9de9a37a272b57006b6e401eea5889bfda65a63c7d335609a9bfd9825675"
+    },
+    {
+      "path": "docs/audits/full-project-audit-2026-10-06/logs/D-probes.mjs",
+      "raw_backup": null,
+      "raw_sha256": null
+    }
+  ],
+  "recheck": "pending staged diff check; actual outcome reported by final handoff"
+}

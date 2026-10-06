@@ -1,0 +1,158 @@
+[
+  {
+    "id": "H-01", "workstream": "H", "title": "Human Gate dùng nhãn tự khai thay cho bằng chứng về người phê duyệt",
+    "severity": "HIGH", "classification": "NEEDS_HUMAN_DECISION", "verification": "CONFIRMED",
+    "evidence": [
+      {"kind": "F", "ref": ".agents/scripts/complete-story.mjs:298", "note": "CLI approve tự tạo approve_exact_scope/disclosures_acknowledged; không nhận bằng chứng actor từ kênh human."},
+      {"kind": "F", "ref": ".agents/scripts/check-story-completion.mjs:324", "note": "approvalRecordForSnapshot gán approver_type:human, decision:APPROVED từ snapshot và SHA do caller cung cấp."},
+      {"kind": "F", "ref": "docs/audits/full-project-audit-2026-10-06/logs/H-failclosed-probes.json", "note": "node logs/H-failclosed-probes.mjs, exit 0: gọi factory thuần sinh nhãn human; không chạy approve/action mutate."}
+    ],
+    "failure_scenario": "Caller có quyền gọi CLI approve và commit metadata có thể tự ghi nhãn human cho exact snapshot dù không có chứng cứ repo về người ra quyết định; các digest chỉ chứng minh scope. Không phát hiện lạm dụng trong phiên audit.",
+    "affected_paths": [".agents/scripts/complete-story.mjs", ".agents/scripts/check-story-completion.mjs", ".agents/scripts/v4-story-runner.mjs"],
+    "related_prior_finding": "2026-09-30:H1; 2026-10-06:F-13",
+    "proposed_fix": "Human chọn mức assurance: ghi rõ reliance vào trusted human conversation, hoặc yêu cầu bằng chứng approval được xác thực bên ngoài quyền ghi metadata của agent; giữ exact-scope binding.",
+    "proposed_lane": "human decision", "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "H-02", "workstream": "H", "title": "Loại trừ V3/V4 vẫn chỉ có một chiều",
+    "severity": "HIGH", "classification": "VALID", "verification": "CONFIRMED",
+    "evidence": [
+      {"kind": "F", "ref": ".agents/scripts/v4-story-runner.mjs:61", "note": "V4 đọc canonical V3 pointer và chỉ chấp nhận IDLE/null; không đăng ký ownership Story V4 trong pointer."},
+      {"kind": "F", "ref": ".agents/policies/orchestration-v3.md:218", "note": "Bootstrap V3 dựa vào canonical pointer/run/lease; toàn bộ policy và story-development không có reservation hay kiểm tra Story V4."},
+      {"kind": "F", "ref": "AGENTS.md:9", "note": "V4 không được mutate V3 runtime; runtime V3 và lock V4 không thành cùng một reservation protocol."}
+    ],
+    "failure_scenario": "Một Story V4 đã in-progress nhưng pointer V3 vẫn IDLE; một phiên V3 bootstrap trên cùng Story/path không có tín hiệu ownership V4 để chặn. Đây là khả năng overlap theo policy/source, không phải run đang xảy ra trong audit.",
+    "affected_paths": [".agents/scripts/v4-story-runner.mjs", ".agents/scripts/v4-slice-transaction.mjs", ".agents/policies/orchestration-v3.md", ".agents/skills/story-development/SKILL.md"],
+    "related_prior_finding": "2026-09-30:H2",
+    "proposed_fix": "Thiết kế reservation chung có read-only admission cho cả hai lane hoặc một quy tắc overlap rõ ràng; không tự sửa leases/generations/pointer V3 trong audit.",
+    "proposed_lane": "V4 migration", "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "H-03", "workstream": "H", "title": "Helper lifecycle gọi trực tiếp bỏ qua pointer, checkout guard và transaction lock",
+    "severity": "HIGH", "classification": "VALID", "verification": "CONFIRMED",
+    "evidence": [
+      {"kind": "F", "ref": ".agents/skills/v4-story-runner/actions/finalize-story.md:18", "note": "Action contract vẫn hướng dẫn chạy finalize-story.mjs trực tiếp."},
+      {"kind": "F", "ref": ".agents/scripts/finalize-story.mjs:424", "note": "applyFinalization rechecks source/HEAD nhưng không kiểm canonical pointer/Story checkout owner và không dùng normal V4 transaction lock/journal."},
+      {"kind": "F", "ref": ".agents/scripts/complete-story.mjs:294", "note": "CLI approve/complete gọi helper trực tiếp; helper không có pointer/checkout ownership/transaction lock admission."},
+      {"kind": "F", "ref": ".agents/scripts/reconcile-story-lifecycle.mjs:152", "note": "Reconcile có pointer check ở inspect nhưng apply không acquire shared lock/journal, trong khi action doc hứa giữ lock/journal khi partial."}
+    ],
+    "failure_scenario": "Caller dùng lệnh helper mà action doc hướng dẫn khi pointer V3 không IDLE hoặc từ checkout khác Story owner: helper không thực thi các admission guards của Runner. Hai caller đồng thời cũng không có lock lifecycle chung. Không tái hiện mutate trong audit.",
+    "affected_paths": [".agents/scripts/finalize-story.mjs", ".agents/scripts/complete-story.mjs", ".agents/scripts/reconcile-story-lifecycle.mjs", ".agents/skills/v4-story-runner/actions/finalize-story.md", ".agents/skills/v4-story-runner/actions/complete-story.md", ".agents/skills/v4-story-runner/actions/reconcile-lifecycle.md"],
+    "related_prior_finding": "2026-09-30:H3; 2026-10-06:F-14",
+    "proposed_fix": "Đồng nhất mọi durable lifecycle entry qua admission/lock/journal; bảo vệ helper export/CLI để không bỏ qua Runner guard; sửa action docs tương ứng và test direct-entry negative/concurrency.",
+    "proposed_lane": "V4 migration", "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "H-04", "workstream": "H", "title": "Caller có thể hạ Plan risk HIGH/MEDIUM xuống LOW và chọn đường không review",
+    "severity": "HIGH", "classification": "VALID", "verification": "CONFIRMED",
+    "evidence": [
+      {"kind": "F", "ref": ".agents/scripts/v4-action-kernel.mjs:878", "note": "riskLevel ưu tiên request.risk trước plan.risk.level, không kiểm downgrade."},
+      {"kind": "F", "ref": ".agents/scripts/v4-action-kernel.mjs:987", "note": "Verification descriptor giữ risk đã được caller override; judgment_flags cũng nhận [] ở:1171."},
+      {"kind": "F", "ref": ".agents/scripts/v4-action-kernel.mjs:1498", "note": "Review-required chỉ dùng escalation và descriptorPreview.risk; LOW complete PASS đi persistVerification(...,'verified') ở:1512."},
+      {"kind": "F", "ref": "docs/audits/full-project-audit-2026-10-06/logs/H-failclosed-probes.json", "note": "node docs/audits/full-project-audit-2026-10-06/logs/H-failclosed-probes.mjs exit 0; actual source risk selector + actual read-only escalation + isolated production branch chọn stub persistence cho HIGH/MEDIUM->LOW. HIGH nguyên trạng yêu cầu review."}
+    ],
+    "failure_scenario": "Plan HIGH/MEDIUM, checkpoint nằm trong recipe coverage, checks complete PASS, request.risk='LOW', judgment_flags=[] -> descriptor LOW -> actual escalation NO_REVIEW exit 0 -> kernel chọn persistence verified không review. Finalization vẫn đòi reviewed slices; không claim đường false done.",
+    "affected_paths": [".agents/scripts/v4-action-kernel.mjs", ".agents/scripts/v4-verification-flow.test.mjs"],
+    "related_prior_finding": null,
+    "proposed_fix": "Bind risk vào validated Plan; chỉ cho phép nâng risk, hoặc reject mọi caller risk khác Plan. Derive mandatory flags từ authoritative risk context. Thêm regression HIGH/MEDIUM Plan với request LOW, rồi full npm run test:v4 trên exact fix commit.",
+    "proposed_lane": "V4 migration", "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "H-05", "workstream": "H", "title": "Instruction context hiện tại vượt lại ngân sách acceptance 30%",
+    "severity": "MEDIUM", "classification": "VALID", "verification": "CONFIRMED",
+    "evidence": [
+      {"kind": "F", "ref": "docs/audits/full-project-audit-2026-10-06/logs/H-source-inspect.json", "note": "Exported measureInstructionPair/Context, evidenceRoot:null; script exit 0. Cùng basis d8e8136->98def53:65359->50461/50490 bytes, giảm22.7941%/22.7497%; historical0e4c6b9 tái hiện45551/45580 bytes."},
+      {"kind": "F", "ref": ".agents/scripts/compile-v4-context.mjs:75", "note": "COMMON_INSTRUCTION_PATHS vẫn luôn thêm control-plane.md và artifact-contract.md dù context-routing đòi một L1 mặc định."},
+      {"kind": "F", "ref": "docs/agent-architecture/reviews/v4-acceptance-2026-09-28/final-decision.md:11", "note": "Original deterministic acceptance là giảm ít nhất30% cho cả hai action trên locked common basis."}
+    ],
+    "failure_scenario": "Replay cùng measurement basis tại current code commit -> cả implement_slice và verify_slice dưới mục tiêu30%; full unit suite xanh không kiểm lại budget thực của code hiện tại. Không suy ra provider tokens hay actual Story projection bytes.",
+    "affected_paths": [".agents/docs/v4-artifact-contract.md", ".agents/scripts/compile-v4-context.mjs", ".agents/scripts/fixtures/v4-architecture/instruction-basis.json", ".agents/skills/v4-story-runner/SKILL.md", "AGENTS.md"],
+    "related_prior_finding": "2026-09-30:M3; acceptance:F02 (historically resolved; current regression separate)",
+    "proposed_fix": "Tách contract/context theo action và lazy boundary, giữ nguyên basis/criterion hoặc ghi human decision riêng nếu đổi acceptance. Chạy measurement bound exact revision trong regression gate.",
+    "proposed_lane": "V4 migration", "risk_of_fix": "MEDIUM"
+  },
+  {
+    "id": "H-06", "workstream": "H", "title": "Canonical registry chỉ phủ10/192 tracked product paths",
+    "severity": "MEDIUM", "classification": "VALID", "verification": "CONFIRMED",
+    "evidence": [
+      {"kind": "F", "ref": ".agents/verification/registry.json:1", "note": "Chỉ ba enabled recipes challenge-list,journal-frontend,today-view; v1 map dùng anchors làm effective coverage, v2 dùng covered_paths."},
+      {"kind": "F", "ref": "docs/audits/full-project-audit-2026-10-06/logs/H-source-inspect.json", "note": "Exit0 inventory toàn bộ192 tracked product/config/test/deploy paths theo universe định nghĩa;182 uncovered, kể cả105/105 backend paths, auth/sync/conflict/account/migrations. Full path lists có trong evidence và H report."},
+      {"kind": "F", "ref": ".agents/scripts/check-verification.mjs:368", "note": "Không recipe -> NOT_APPLICABLE/INCOMPLETE/no checks; pure unmatched probes confirm không PASS hoặc executor invocation."}
+    ],
+    "failure_scenario": "Slice chỉ sửa auth, backend persistence, migrations, sync store hoặc conflict dialog -> canonical coverage không hoàn chỉnh, phải dựa focused evidence+semantic review/disclosure. Gap là coverage; checker vẫn fail-closed.",
+    "affected_paths": [".agents/features/", ".agents/verification/", "backend/", "frontend/src/stores/", "frontend/src/components/ContentConflictDialog.vue", "contracts/openapi.yaml"],
+    "related_prior_finding": "2026-10-06:F-06 (coverage portion)",
+    "proposed_fix": "Mở rộng registry theo boundaries auth/time/state/contract/backend đã duyệt, giữ covered_paths riêng dependency anchors, chứng minh recipe evidence thật trước active; không gọi tên recipe là evidence.",
+    "proposed_lane": "V4 migration", "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "H-07", "workstream": "H", "title": "Cả ba enabled feature maps đều STALE trên baseline hiện tại",
+    "severity": "MEDIUM", "classification": "VALID", "verification": "CONFIRMED",
+    "evidence": [
+      {"kind": "F", "ref": "docs/audits/full-project-audit-2026-10-06/logs/H-map-checks.meta.json", "note": "check-feature-map.mjs check từng map exit1; retry1 exit1 cảba. challenge-list mismatchapi+api test, journal-frontend mismatchsync.ts,today-view mismatchapi."},
+      {"kind": "F", "ref": ".agents/scripts/check-verification.mjs:243", "note": "Mismatch ngoài changed_paths là unexplainedDrift; kết quả giữ INCOMPLETE. Kernel known coverage reasons ở:836-838 không chứa UNEXPLAINED_DRIFT."}
+    ],
+    "failure_scenario": "Slice mới sửa pathcovered nhưng không gồm các stale anchors hiện có -> UNEXPLAINED_DRIFT -> kernel chặn thay vì dùng canonical evidence; phải giải quyết governance drift trước. Không có falsePASS.",
+    "affected_paths": [".agents/features/challenge-list.json", ".agents/features/journal-frontend.json", ".agents/features/today-view.json"],
+    "related_prior_finding": "2026-10-06:F-06 (anchor portion)",
+    "proposed_fix": "Review thay đổi anchor theo exact product revision rồi cập nhật bằng migration riêng; xác định quy trình upkeep theo slice để dependency drift có disposition minh bạch.",
+    "proposed_lane": "V4 migration", "risk_of_fix": "MEDIUM"
+  },
+  {
+    "id": "H-08", "workstream": "H", "title": "CI không chạy full control-plane suite",
+    "severity": "MEDIUM", "classification": "VALID", "verification": "CONFIRMED",
+    "evidence": [
+      {"kind": "F", "ref": ".github/workflows/ci.yml:7", "note": "Jobs backend/frontend/browser-smoke/deployment-config không gọi npm run test:v4 hoặc .agents/scripts tests."},
+      {"kind": "F", "ref": "package.json:7", "note": "Full suite chính thức node --test .agents/scripts/*.test.mjs chỉ có root script test:v4."},
+      {"kind": "F", "ref": "docs/audits/full-project-audit-2026-10-06/logs/B1.meta.json", "note": "Lead chạy local full suite tại auditHEAD03dbd098 exit0,532PASS/1SKIP; điều này không tạo CI job."}
+    ],
+    "failure_scenario": "PR đổi control-plane có regression nhưng product jobs xanh -> CI không phát hiện; policy yêu cầu full exact-commit suite vẫn phải dựa thao tác Lead.",
+    "affected_paths": [".github/workflows/ci.yml", "package.json"],
+    "related_prior_finding": "2026-09-30:M6; 2026-10-06:F-10 (process portion)",
+    "proposed_fix": "Thêm job CI full test:v4 trên exact checked-out PR commit, bảo toàn documented Windows-specific skip và không dùng focused subset thay full suite.",
+    "proposed_lane": "V4 migration", "risk_of_fix": "MEDIUM"
+  },
+  {
+    "id": "H-09", "workstream": "H", "title": "Runner CLI, status exits và missing-Plan contract còn lệch API",
+    "severity": "MEDIUM", "classification": "VALID", "verification": "CONFIRMED",
+    "evidence": [
+      {"kind": "F", "ref": ".agents/scripts/v4-story-runner.mjs:33", "note": "CODES thiếu DONE,APPROVAL_DURABLE_PENDING_COMPLETION,NOOP,APPLIED,REVIEW_REQUIRED; CLI fallback ERROR5 tại:420."},
+      {"kind": "F", "ref": ".agents/scripts/v4-story-runner.mjs:394", "note": "CLI không parse --operation/--input mặc dù API options.operation/options.input route kernel ở:239-268."},
+      {"kind": "F", "ref": ".agents/scripts/v4-story-runner.mjs:219", "note": "Runner readFileSync Plan trước validateStoryPlan, missing file trở thành ERROR ở catch thay PLAN_MISSING mà skill đòi."},
+      {"kind": "F", "ref": "docs/audits/full-project-audit-2026-10-06/logs/H-failclosed-probes.json", "note": "Pure source CODES evaluation exit0 ghi đúng selected fallback exit5. Runner CLI không chạy vì đọc pointer/ghi observation."}
+    ],
+    "failure_scenario": "API trả DONE/APPROVAL_DURABLE_PENDING_COMPLETION nhưng CLI trảexit5; automation có thể coi thành công là lỗi. Agent muốn implement/verify phải tự dựng JS payload vì CLI thiếu operation/input; missingPlan mất reason chuyên biệt. Không chạy mutation để tái hiện.",
+    "affected_paths": [".agents/scripts/v4-story-runner.mjs", ".agents/skills/v4-story-runner/actions/implement-slice.md", ".agents/skills/v4-story-runner/actions/verify-slice.md"],
+    "related_prior_finding": "2026-09-30:M1,M2,M8",
+    "proposed_fix": "Định nghĩa CLI operation/input file + exhaustive exit meanings; kiểm Plan existence trước read; test CLI status contract qua isolated fixtures và full suite.",
+    "proposed_lane": "V4 migration", "risk_of_fix": "MEDIUM"
+  },
+  {
+    "id": "H-10", "workstream": "H", "title": "Metadata transaction vẫn bị chặn bởi unrelated untracked docs và HEAD-bound pending",
+    "severity": "MEDIUM", "classification": "NEEDS_HUMAN_DECISION", "verification": "CONFIRMED",
+    "evidence": [
+      {"kind": "F", "ref": ".agents/scripts/v4-action-kernel.mjs:1079", "note": "Verification recheck từ chối inventory có bất kỳ staged/unstaged/untracked path; không lọc unrelated docs."},
+      {"kind": "F", "ref": ".agents/scripts/v4-action-kernel.mjs:1072", "note": "Preview recheck đòi exact HEAD; commit unrelated docs làm stale verification input."},
+      {"kind": "F", "ref": "docs/agent-architecture/reviews/story-1-5-vs-1-6-audit-2026-10-06/audit-report.md:186", "note": "PriorF05 ghi incidents docs noise chặn review; current strict inventory guard vẫn tồn tại."}
+    ],
+    "failure_scenario": "Verify đã tạo pending; người dùng thêm docs untracked -> record-review recheck DIRTY_SCOPE_MISMATCH. Commit docs -> expected HEAD stale và phải verify lại. Đây là guard có chủ ý với tradeoff chưa được human disposition.",
+    "affected_paths": [".agents/scripts/v4-action-kernel.mjs", ".agents/scripts/v4-slice-transaction.mjs"],
+    "related_prior_finding": "2026-10-06:F-05",
+    "proposed_fix": "Human chọn whole-worktree clean hoặc scope clean; nếu scope clean thì fingerprint/immutable authority paths và exact index staging phải vẫn chặn relevant drift, foreign metadata và hooks.",
+    "proposed_lane": "human decision", "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "H-11", "workstream": "H", "title": "BMAD menu gọi legacy Story lane và tám skill chưa được cài",
+    "severity": "MEDIUM", "classification": "VALID", "verification": "CONFIRMED",
+    "evidence": [
+      {"kind": "F", "ref": ".agents/skills/bmad-agent-dev/customize.toml:58", "note": "BD description implement feature/fix/story dispatches bmad-build; bmad-build SKILL:3 chỉ cho explicit legacy/freeform, approvedStory phải story-development."},
+      {"kind": "F", "ref": "docs/audits/full-project-audit-2026-10-06/logs/H-source-inspect.json", "note": "16 BMAD menu skill references;8 absent local targets: bmad-brainstorming,product-brief,prfaq,project-context,qa-generate-e2e-tests,retrospective,prd,ux. Current exposed skill catalog cũng không có tám id này."},
+      {"kind": "F", "ref": ".agents/skills/bmad-agent-dev/SKILL.md:66", "note": "Persona menu dispatches intent trực tiếp sau activation; no _bmad/custom team overrides được track/hiện diện trong worktree."}
+    ],
+    "failure_scenario": "User chọn Amelia BD cho approvedStory -> menu chỉ legacy bmad-build, root routing phải override. User chọn John PRD/Sally UX hoặc các menu thiếu khác -> named skill không available, phải dừng hoặc tìm fallback. Không activation/install trong audit.",
+    "affected_paths": [".agents/skills/bmad-agent-dev/customize.toml", ".agents/skills/bmad-agent-pm/customize.toml", ".agents/skills/bmad-agent-analyst/customize.toml", ".agents/skills/bmad-agent-ux-designer/customize.toml", "skills-lock.json"],
+    "related_prior_finding": null,
+    "proposed_fix": "Dùng team menu overrides để Story approved route story-development/V4 opt-in đúng policy; ẩn/ghi unavailable các menu targets chưa cài hoặc human chọn cài những capability thực cần. Không sửa upstream customize overwritten-on-update để tạo drift.",
+    "proposed_lane": "V4 migration", "risk_of_fix": "MEDIUM"
+  }
+]

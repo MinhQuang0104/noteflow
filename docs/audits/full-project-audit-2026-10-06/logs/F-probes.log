@@ -1,0 +1,438 @@
+{
+  "kind": "inventory",
+  "method": "source declarations, not executed tests or coverage",
+  "groups": {
+    "backend_unit": [
+      {
+        "file": "backend/tests/Unit/AccountTimeContextTest.php",
+        "declarations": 2
+      }
+    ],
+    "backend_feature": [
+      {
+        "file": "backend/tests/Feature/AccountContextTest.php",
+        "declarations": 4
+      },
+      {
+        "file": "backend/tests/Feature/ChallengeApiTest.php",
+        "declarations": 11
+      },
+      {
+        "file": "backend/tests/Feature/ChallengeConcurrencyTest.php",
+        "declarations": 4
+      },
+      {
+        "file": "backend/tests/Feature/ChallengeJournalApiTest.php",
+        "declarations": 4
+      },
+      {
+        "file": "backend/tests/Feature/ChallengeJournalTest.php",
+        "declarations": 11
+      },
+      {
+        "file": "backend/tests/Feature/ChallengePersistenceTest.php",
+        "declarations": 5
+      },
+      {
+        "file": "backend/tests/Feature/ChallengeUseCasesTest.php",
+        "declarations": 10
+      },
+      {
+        "file": "backend/tests/Feature/FoundationHealthTest.php",
+        "declarations": 1
+      },
+      {
+        "file": "backend/tests/Feature/JournalConflictConcurrencyTest.php",
+        "declarations": 1
+      },
+      {
+        "file": "backend/tests/Feature/OwnerAuthenticationTest.php",
+        "declarations": 11
+      },
+      {
+        "file": "backend/tests/Feature/ProvisionOwnerCommandTest.php",
+        "declarations": 5
+      },
+      {
+        "file": "backend/tests/Feature/Story14IntegrationSeamTest.php",
+        "declarations": 2
+      }
+    ],
+    "backend_contract": [
+      {
+        "file": "backend/tests/Contract/AccountContextContractTest.php",
+        "declarations": 2
+      },
+      {
+        "file": "backend/tests/Contract/AuthResponseContractTest.php",
+        "declarations": 5
+      },
+      {
+        "file": "backend/tests/Contract/ChallengeContractTest.php",
+        "declarations": 3
+      },
+      {
+        "file": "backend/tests/Contract/FoundationResponseContractTest.php",
+        "declarations": 2
+      }
+    ],
+    "frontend": [
+      {
+        "file": "frontend/src/api/__tests__/account.spec.ts",
+        "declarations": 2
+      },
+      {
+        "file": "frontend/src/api/__tests__/auth.spec.ts",
+        "declarations": 4
+      },
+      {
+        "file": "frontend/src/api/__tests__/challenges.spec.ts",
+        "declarations": 11
+      },
+      {
+        "file": "frontend/src/api/__tests__/http.spec.ts",
+        "declarations": 2
+      },
+      {
+        "file": "frontend/src/components/__tests__/ContentConflictDialog.spec.ts",
+        "declarations": 7
+      },
+      {
+        "file": "frontend/src/router/__tests__/router.spec.ts",
+        "declarations": 3
+      },
+      {
+        "file": "frontend/src/stores/__tests__/account.spec.ts",
+        "declarations": 3
+      },
+      {
+        "file": "frontend/src/stores/__tests__/auth.spec.ts",
+        "declarations": 6
+      },
+      {
+        "file": "frontend/src/stores/__tests__/journalDrafts.spec.ts",
+        "declarations": 29
+      },
+      {
+        "file": "frontend/src/stores/__tests__/sync.spec.ts",
+        "declarations": 34
+      },
+      {
+        "file": "frontend/src/views/__tests__/account-time.spec.ts",
+        "declarations": 2
+      },
+      {
+        "file": "frontend/src/views/__tests__/challenges.spec.ts",
+        "declarations": 13
+      },
+      {
+        "file": "frontend/src/views/__tests__/journal-draft-lifecycle.spec.ts",
+        "declarations": 5
+      },
+      {
+        "file": "frontend/src/views/__tests__/journal.spec.ts",
+        "declarations": 11
+      },
+      {
+        "file": "frontend/src/views/__tests__/today.spec.ts",
+        "declarations": 2
+      },
+      {
+        "file": "frontend/src/__tests__/App.spec.ts",
+        "declarations": 9
+      }
+    ],
+    "e2e": [
+      {
+        "file": "tests/e2e/account-time.spec.ts",
+        "declarations": 1
+      },
+      {
+        "file": "tests/e2e/challenges.spec.ts",
+        "declarations": 1
+      },
+      {
+        "file": "tests/e2e/content-conflict.spec.ts",
+        "declarations": 5
+      },
+      {
+        "file": "tests/e2e/cross-device-sync.spec.ts",
+        "declarations": 5
+      },
+      {
+        "file": "tests/e2e/foundation.spec.ts",
+        "declarations": 2
+      },
+      {
+        "file": "tests/e2e/responsive.spec.ts",
+        "declarations": 1
+      },
+      {
+        "file": "tests/e2e/routing.spec.ts",
+        "declarations": 6
+      }
+    ],
+    "e2e_helpers": [
+      {
+        "file": "tests/e2e/helpers/db-helper-guard.test.ts",
+        "declarations": 2
+      },
+      {
+        "file": "tests/e2e/helpers/php-runtime.test.ts",
+        "declarations": 4
+      }
+    ],
+    "bmad": [
+      {
+        "file": "_bmad/scripts/tests/test_agent_architecture.py",
+        "declarations": 46
+      },
+      {
+        "file": "_bmad/scripts/tests/test_config_utils.py",
+        "declarations": 5
+      },
+      {
+        "file": "_bmad/scripts/tests/test_memlog.py",
+        "declarations": 30
+      },
+      {
+        "file": "_bmad/scripts/tests/test_render_skill.py",
+        "declarations": 21
+      },
+      {
+        "file": "_bmad/scripts/tests/test_resolve_config.py",
+        "declarations": 4
+      },
+      {
+        "file": "_bmad/scripts/tests/test_resolve_customization.py",
+        "declarations": 7
+      }
+    ],
+    "control_plane": [
+      {
+        "file": ".agents/scripts/benchmark-v4.test.mjs",
+        "declarations": 9
+      },
+      {
+        "file": ".agents/scripts/check-artifact-contract.test.mjs",
+        "declarations": 11
+      },
+      {
+        "file": ".agents/scripts/check-slice-implementation.test.mjs",
+        "declarations": 24
+      },
+      {
+        "file": ".agents/scripts/check-slice-verification.test.mjs",
+        "declarations": 29
+      },
+      {
+        "file": ".agents/scripts/check-story-completion.test.mjs",
+        "declarations": 16
+      },
+      {
+        "file": ".agents/scripts/check-story-finalization.architecture.test.mjs",
+        "declarations": 4
+      },
+      {
+        "file": ".agents/scripts/check-story-finalization.test.mjs",
+        "declarations": 37
+      },
+      {
+        "file": ".agents/scripts/check-story-plan.test.mjs",
+        "declarations": 28
+      },
+      {
+        "file": ".agents/scripts/check-verification.test.mjs",
+        "declarations": 5
+      },
+      {
+        "file": ".agents/scripts/compile-v4-context.test.mjs",
+        "declarations": 3
+      },
+      {
+        "file": ".agents/scripts/complete-story.test.mjs",
+        "declarations": 7
+      },
+      {
+        "file": ".agents/scripts/dual-schema.test.mjs",
+        "declarations": 24
+      },
+      {
+        "file": ".agents/scripts/finalization-contract.test.mjs",
+        "declarations": 4
+      },
+      {
+        "file": ".agents/scripts/finalization-plan-state.test.mjs",
+        "declarations": 1
+      },
+      {
+        "file": ".agents/scripts/finalization-recovery.test.mjs",
+        "declarations": 10
+      },
+      {
+        "file": ".agents/scripts/finalize-story.test.mjs",
+        "declarations": 13
+      },
+      {
+        "file": ".agents/scripts/measure-v4-instruction-context.test.mjs",
+        "declarations": 5
+      },
+      {
+        "file": ".agents/scripts/prepare-change-evidence.test.mjs",
+        "declarations": 18
+      },
+      {
+        "file": ".agents/scripts/reconcile-story-lifecycle.test.mjs",
+        "declarations": 37
+      },
+      {
+        "file": ".agents/scripts/run-v4-architecture-corpus.test.mjs",
+        "declarations": 2
+      },
+      {
+        "file": ".agents/scripts/start-story.test.mjs",
+        "declarations": 13
+      },
+      {
+        "file": ".agents/scripts/v4-action-kernel.test.mjs",
+        "declarations": 10
+      },
+      {
+        "file": ".agents/scripts/v4-architecture-baseline.test.mjs",
+        "declarations": 6
+      },
+      {
+        "file": ".agents/scripts/v4-check-executor.test.mjs",
+        "declarations": 5
+      },
+      {
+        "file": ".agents/scripts/v4-context-invariants.architecture.test.mjs",
+        "declarations": 2
+      },
+      {
+        "file": ".agents/scripts/v4-evolution.test.mjs",
+        "declarations": 6
+      },
+      {
+        "file": ".agents/scripts/v4-experience.test.mjs",
+        "declarations": 6
+      },
+      {
+        "file": ".agents/scripts/v4-finalization-contract.test.mjs",
+        "declarations": 6
+      },
+      {
+        "file": ".agents/scripts/v4-observation-hooks.test.mjs",
+        "declarations": 4
+      },
+      {
+        "file": ".agents/scripts/v4-observations.test.mjs",
+        "declarations": 6
+      },
+      {
+        "file": ".agents/scripts/v4-rework.test.mjs",
+        "declarations": 6
+      },
+      {
+        "file": ".agents/scripts/v4-slice-transaction.test.mjs",
+        "declarations": 12
+      },
+      {
+        "file": ".agents/scripts/v4-story-runner.test.mjs",
+        "declarations": 10
+      },
+      {
+        "file": ".agents/scripts/v4-verification-flow.test.mjs",
+        "declarations": 15
+      }
+    ]
+  },
+  "totals": {
+    "backend_unit": {
+      "files": 1,
+      "declarations": 2
+    },
+    "backend_feature": {
+      "files": 12,
+      "declarations": 69
+    },
+    "backend_contract": {
+      "files": 4,
+      "declarations": 12
+    },
+    "frontend": {
+      "files": 16,
+      "declarations": 143
+    },
+    "e2e": {
+      "files": 7,
+      "declarations": 21
+    },
+    "e2e_helpers": {
+      "files": 2,
+      "declarations": 6
+    },
+    "bmad": {
+      "files": 6,
+      "declarations": 113
+    },
+    "control_plane": {
+      "files": 34,
+      "declarations": 394
+    }
+  }
+}
+{
+  "kind": "configuration_probe",
+  "actual_source_evaluated": true,
+  "defineConfig_and_devices_stubbed": true,
+  "browser_started": false,
+  "database_connected": false,
+  "native": {
+    "fullyParallel": true,
+    "workerLimitExplicit": false,
+    "appEnv": "testing",
+    "inheritedDatabase": "audit_non_test_fixture",
+    "inheritedDbUrl": "postgresql://audit.invalid/audit_non_test_fixture"
+  },
+  "compose": {
+    "fullyParallel": false,
+    "workers": 1
+  },
+  "nativePhpInvocationPreservesDbUrl": true,
+  "phpunitEnvironmentForceAttributes": [
+    {
+      "name": "APP_ENV",
+      "force": false
+    },
+    {
+      "name": "DB_CONNECTION",
+      "force": false
+    },
+    {
+      "name": "DB_HOST",
+      "force": false
+    },
+    {
+      "name": "DB_PORT",
+      "force": false
+    },
+    {
+      "name": "DB_DATABASE",
+      "force": false
+    },
+    {
+      "name": "DB_USERNAME",
+      "force": false
+    },
+    {
+      "name": "DB_PASSWORD",
+      "force": false
+    },
+    {
+      "name": "DB_URL",
+      "force": false
+    }
+  ],
+  "baseTestCaseHasSafetyGuard": false
+}

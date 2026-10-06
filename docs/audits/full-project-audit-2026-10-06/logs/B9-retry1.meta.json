@@ -1,0 +1,9 @@
+{
+  "id": "B9-retry1",
+  "command": "composer test",
+  "cwd": "D:\\Workspace\\Tu_Hoc\\New_Project_My_Note\\.worktrees\\full-project-audit\\frontend\\backend",
+  "started_utc": "2026-10-06T03:58:09.8204376Z",
+  "seconds": 4.561029,
+  "exit_code": 1,
+  "log": "B9-retry1.log"
+}

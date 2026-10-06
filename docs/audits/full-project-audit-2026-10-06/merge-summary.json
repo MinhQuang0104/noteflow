@@ -1,0 +1,64 @@
+{
+  "original": 42,
+  "merged": 41,
+  "severity": {
+    "CRITICAL": 2,
+    "HIGH": 10,
+    "MEDIUM": 26,
+    "LOW": 2,
+    "INFO": 1
+  },
+  "classification": {
+    "VALID": 31,
+    "NEEDS_HUMAN_DECISION": 6,
+    "SPEC_AMBIGUITY": 3,
+    "FALSE_POSITIVE": 1
+  },
+  "high_critical_confirmed": [
+    "E-04",
+    "F-02",
+    "A-01",
+    "E-01",
+    "E-02",
+    "E-03",
+    "E-05",
+    "F-00",
+    "H-01",
+    "H-02",
+    "H-03",
+    "H-04"
+  ],
+  "human_decisions": [
+    {
+      "id": "A-01",
+      "title": "Story done chưa có đủ manual AT/native browser unload evidence theo AC"
+    },
+    {
+      "id": "F-00",
+      "title": "B9 không khởi động được; backend integration chưa được xác minh tại code audit"
+    },
+    {
+      "id": "H-01",
+      "title": "Human Gate dùng nhãn tự khai thay cho bằng chứng về người phê duyệt"
+    },
+    {
+      "id": "C-05",
+      "title": "Reprovision A→B→A giữ dataset/ledger nhưng tái tạo revision/epoch mặc định"
+    },
+    {
+      "id": "G-01",
+      "title": "Chưa xác định nơi chịu trách nhiệm header bảo mật tại production edge"
+    },
+    {
+      "id": "H-10",
+      "title": "Metadata transaction vẫn bị chặn bởi unrelated untracked docs và HEAD-bound pending"
+    }
+  ],
+  "dedupe": [
+    {
+      "from": "A-02",
+      "to": "A-01",
+      "reason": "missing actual browser/AT evidence obligations; both independent Lead traces retained"
+    }
+  ]
+}

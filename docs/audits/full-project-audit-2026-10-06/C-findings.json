@@ -1,0 +1,107 @@
+[
+  {
+    "id": "C-01",
+    "workstream": "C",
+    "title": "NUL nội bộ qua text validation rồi lỗi persistence PostgreSQL/jsonb",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {"kind": "F", "ref": "backend/app/Http/Controllers/ChallengeJournalController.php:65", "note": "Journal chỉ required/string; không chặn NUL nội bộ."},
+      {"kind": "F", "ref": "backend/app/Modules/Challenges/Application/UseCases/SaveJournalUseCase.php:84", "note": "Chỉ kiểm blank; text nguyên bản được hash/lưu/đưa vào response ledger ở :117/:145/:158."},
+      {"kind": "F", "ref": "backend/database/migrations/2026_09_19_030000_create_mutation_commands_table.php:19", "note": "Response ledger là jsonb; PostgreSQL jsonb từ chối Unicode NUL theo official PostgreSQL 17 datatype-json docs."},
+      {"kind": "F", "ref": "C-backend.md:C-EXEC-02; php -r $auditSnippet; cwd=.worktrees/full-project-audit; exit=0", "note": "PHP không coi sample chứa NUL nội bộ là blank; json_encode và SHA-256 vẫn chấp nhận. Không chạy HTTP/DB."},
+      {"kind": "I", "ref": "backend/app/Http/Controllers/ChallengeJournalController.php:86", "note": "Persistence exception nằm ngoài domain catches → rollback và framework generic 500; integrated repro NOT_RUN/ENV."}
+    ],
+    "failure_scenario": "Owner gửi PUT journal ngày hợp lệ, command UUID mới, đúng epoch/base, journal chứa private-example\\u0000tail → validation/hash đi qua → PostgreSQL text hoặc ledger jsonb không thể lưu NUL → transaction không commit, response generic 500 thay validation. Name/description có cùng gap. Chưa chứng minh log leak/partial commit.",
+    "affected_paths": ["backend/app/Http/Controllers/ChallengeJournalController.php", "backend/app/Modules/Challenges/Application/UseCases/SaveJournalUseCase.php", "backend/app/Http/Controllers/ChallengeController.php", "backend/app/Modules/Challenges/Application/UseCases/CreateChallengeUseCase.php", "backend/app/Modules/Challenges/Application/UseCases/UpdateChallengeMetadataUseCase.php", "backend/database/migrations/2026_09_19_030000_create_mutation_commands_table.php"],
+    "related_prior_finding": null,
+    "proposed_fix": "Reject NUL/giá trị PostgreSQL không thể biểu diễn trước write, trả 422 có field error; thêm HTTP+PostgreSQL negative tests, rollback và log-redaction assertion. Không tự thêm arbitrary journal length limit.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "C-02",
+    "workstream": "C",
+    "title": "Email array bị cast trước login validation và gây ErrorException",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {"kind": "F", "ref": "backend/app/Providers/AppServiceProvider.php:28", "note": "Throttle key cast raw email sang string trước FormRequest validation."},
+      {"kind": "F", "ref": "backend/app/Http/Requests/LoginRequest.php:17", "note": "prepareForValidation cũng cast input sang string trước rule email ở :25."},
+      {"kind": "F", "ref": "backend/composer.lock:1068", "note": "Laravel v13.32.0 pin cdd8b33c246719acdd118c705ce8c7ab5ef48a96. Official HandleExceptions source tại ref này đổi PHP warning thành ErrorException."},
+      {"kind": "F", "ref": "C-backend.md:C-EXEC-01; php -r $auditSnippet; cwd=.worktrees/full-project-audit; exit=0", "note": "Exact normalization expression với array và warning handler tương đương ném Array to string conversion/ErrorException trên PHP 8.5.9. HTTP NOT_RUN."},
+      {"kind": "I", "ref": "backend/routes/web.php:7", "note": "Valid-CSRF unauthenticated login với email array đến throttle callback rồi generic 500, chưa đến email validation."}
+    ],
+    "failure_scenario": "POST /login với CSRF hợp lệ, email=[\"x\"], password string → throttle callback cast array → ErrorException trước validation → generic 500. Không cần owner credentials; không có bằng chứng auth bypass hoặc DoS.",
+    "affected_paths": ["backend/app/Providers/AppServiceProvider.php", "backend/app/Http/Requests/LoginRequest.php", "backend/tests/Feature/OwnerAuthenticationTest.php"],
+    "related_prior_finding": null,
+    "proposed_fix": "Kiểm type trước normalization ở cả rate limiter/FormRequest, giữ dữ liệu invalid cho validation trả 422; thêm array/object/null regressions cùng case email normalization và existing throttle.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "C-03",
+    "workstream": "C",
+    "title": "Duplicate-command concurrency Challenge mới được kiểm bằng execute tuần tự",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {"kind": "F", "ref": "backend/tests/Feature/ChallengeConcurrencyTest.php:226", "note": "First execute hoàn tất trước second execute ở :231; không có hai use case overlap."},
+      {"kind": "F", "ref": "backend/tests/Feature/ChallengeConcurrencyTest.php:170", "note": "Lost-update case thực thi A hoàn tất rồi B tại :184."},
+      {"kind": "F", "ref": "backend/tests/Feature/ChallengeConcurrencyTest.php:64", "note": "Primitive account lock contention ở :64/:112 là thật nhưng query lock trực tiếp; không chứng minh CreateChallengeUseCase giữ lock đến ledger commit."},
+      {"kind": "F", "ref": "backend/app/Modules/Challenges/Application/UseCases/CreateChallengeUseCase.php:43", "note": "Lock hiện tại có trong code. Finding là coverage gap, không cáo buộc current mutation race đã tái hiện."}
+    ],
+    "failure_scenario": "Regression bỏ account lock riêng khỏi CreateChallengeUseCase → primitive lock test và sequential duplicate test có thể vẫn xanh; hai create cùng key đọc ledger rỗng, writer sau có thể trả unique-index exception thay replay ACK. Đây là concrete test blind spot; không phải runtime bug đã chứng minh tại HEAD.",
+    "affected_paths": ["backend/tests/Feature/ChallengeConcurrencyTest.php", "backend/app/Modules/Challenges/Application/UseCases/CreateChallengeUseCase.php"],
+    "related_prior_finding": null,
+    "proposed_fix": "Thêm hai-connection application contention test: A giữ outer transaction khi use case đã ghi, B cùng immutable command bị lock, sau A commit replay cùng ACK và assert đúng một challenge/ledger/revision. Giữ primitive tests hiện có.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "C-04",
+    "workstream": "C",
+    "title": "HTTP journal bị trim biên bởi framework mặc định; intent giữ whitespace chưa chốt",
+    "severity": "MEDIUM",
+    "classification": "SPEC_AMBIGUITY",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {"kind": "F", "ref": "backend/bootstrap/app.php:21", "note": "Middleware configuration :21–:28 không exclude journal khỏi default TrimStrings."},
+      {"kind": "F", "ref": "backend/composer.lock:1068", "note": "Official source cdd8b33… Middleware::getGlobalMiddleware có TrimStrings; TrimStrings except chỉ password fields và gọi Str::trim. Primary-source links nằm trong C-backend.md."},
+      {"kind": "F", "ref": "backend/app/Modules/Challenges/Application/UseCases/SaveJournalUseCase.php:117", "note": "Use case giữ text command nguyên bản; HTTP normalization xảy ra trước đó."},
+      {"kind": "F", "ref": "frontend/src/stores/journalDrafts.ts:611", "note": "ACK snapshot cập nhật acknowledged text và latest editor text ở :621."},
+      {"kind": "F", "ref": "_bmad-output/implementation-artifacts/2-3-ghi-và-sửa-journal-tùy-chọn.md:50", "note": "Chỉ chốt whitespace-only invalid/no clear/no arbitrary limit; chưa chốt preservation của biên text."}
+    ],
+    "failure_scenario": "Owner gửi journal có indentation/blank lines ở biên, ví dụ hai spaces + dòng đầu + hai newline → global middleware trim trước save → ACK/editor chỉ còn dòng đầu. Hành vi được xác định bằng framework/code trace; mức sai so với product intent chưa được chốt, integrated HTTP NOT_RUN.",
+    "affected_paths": ["backend/bootstrap/app.php", "backend/app/Http/Controllers/ChallengeJournalController.php", "backend/app/Modules/Challenges/Application/UseCases/SaveJournalUseCase.php", "backend/tests/Feature/ChallengeJournalApiTest.php", "frontend/src/stores/journalDrafts.ts"],
+    "related_prior_finding": null,
+    "proposed_fix": "Human chốt preserve hoặc normalize; align HTTP/domain/FE ACK với quyết định và thêm round-trip tests cho multiline/indent/blank lines. Không tự coi whitespace trim là requirement violation đã được phê duyệt.",
+    "proposed_lane": "human decision",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "C-05",
+    "workstream": "C",
+    "title": "Reprovision A→B→A giữ dataset/ledger nhưng tái tạo revision/epoch mặc định",
+    "severity": "MEDIUM",
+    "classification": "NEEDS_HUMAN_DECISION",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {"kind": "F", "ref": "backend/app/Console/Commands/ProvisionOwner.php:47", "note": "Xóa account_states owner khác rồi updateOrInsert timezone; không xóa users/product/ledger."},
+      {"kind": "F", "ref": "backend/database/migrations/2026_09_19_010000_add_revision_fields_to_account_states_table.php:13", "note": "State tái tạo nhận revision=0, epoch=1 theo :13/:14."},
+      {"kind": "F", "ref": "backend/database/migrations/2026_09_19_020000_create_challenges_and_target_periods_tables.php:14", "note": "Challenge FK tới user, không tới account_state; dataset không cascade theo việc xóa state."},
+      {"kind": "F", "ref": "backend/database/migrations/2026_09_19_030000_create_mutation_commands_table.php:13", "note": "Ledger cũng FK tới user nên vẫn giữ old ACK/revision."},
+      {"kind": "F", "ref": "backend/tests/Feature/ProvisionOwnerCommandTest.php:30", "note": "Reprovision test :30–:52 chưa kiểm scenario owner quay lại cùng dataset/revision/ledger."},
+      {"kind": "H", "ref": "backend/app/Http/Controllers/AccountContextController.php:30", "note": "Client revision-floor/draft hậu quả cần xác minh WS-E; không claim stale-cache corruption đã confirm."}
+    ],
+    "failure_scenario": "A có product data và account_revision=10; provision B xóa state A; provision lại cùng email A tạo state revision=0/epoch=1 nhưng challenges và old command ACK revision=10 vẫn tồn tại. Cơ chế được xác định bằng code; retention intent và client impact chưa chốt, command/DB NOT_RUN.",
+    "affected_paths": ["backend/app/Console/Commands/ProvisionOwner.php", "backend/tests/Feature/ProvisionOwnerCommandTest.php", "backend/database/migrations/2026_09_19_010000_add_revision_fields_to_account_states_table.php", "backend/app/Http/Controllers/AccountContextController.php"],
+    "related_prior_finding": null,
+    "proposed_fix": "Chốt retention semantics khi chuyển/quay lại owner; bảo toàn state cho retained dataset hoặc retire dataset đúng chính sách. Test A→B→A, cùng owner đổi password, old ACK và in-flight writes; không tự xóa/transfer dữ liệu trong audit.",
+    "proposed_lane": "human decision",
+    "risk_of_fix": "HIGH"
+  }
+]

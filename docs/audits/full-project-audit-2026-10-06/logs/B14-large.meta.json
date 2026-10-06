@@ -1,0 +1,8 @@
+{
+  "id": "B14-large",
+  "command": "git -c core.quotepath=false ls-files; Get-Item (size >=1MiB)",
+  "cwd": "D:\\Workspace\\Tu_Hoc\\New_Project_My_Note\\.worktrees\\full-project-audit",
+  "seconds": 0,
+  "exit_code": 0,
+  "log": "B14-large.log"
+}

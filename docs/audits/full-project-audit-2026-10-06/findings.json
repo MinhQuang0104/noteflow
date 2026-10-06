@@ -1,0 +1,1730 @@
+[
+  {
+    "id": "E-04",
+    "workstream": "E",
+    "title": "Metadata draft của A được gửi sang B nếu đổi selection trong preflight",
+    "severity": "CRITICAL",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "frontend/src/views/ChallengesView.vue:349",
+        "note": "Tên draft được đọc trước await; preflight ở 356, target ID được đọc lại ở 375/394, baseVersion vẫn từ editBaseVersion ở 398."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/views/ChallengesView.vue:215",
+        "note": "selectChallenge đổi selection/mode nhưng không reset editForm/baseVersion; list item 505-514 vẫn click trong preflight, isPending chỉ dùng ở 820."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/crossverify-frontend.mjs:19",
+        "note": "Lead trích actual selectChallenge/submitEdit với state/transport stubs; assert target B nhưng payload edited A tại 44-45."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/phase3-frontend-probes.log:6",
+        "note": "Output ghi id B, base_version 1, name edited A; source-extracted probe, integration_test=false, Lead báo exit 0."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/app/Modules/Challenges/Application/UseCases/UpdateChallengeMetadataUseCase.php:102",
+        "note": "Version check so với target challenge; command target đúng owner query ở 86-88, update name/description ở 162-169."
+      }
+    ],
+    "failure_scenario": "A và B cùng owner/epoch, row_version=1. Mở edit A, nhập A', submit và defer preflight. Click B trước khi preflight trả open. Handler gửi PATCH B với A'/description A và base_version=1. Probe xác nhận request sai đích; server consumer cho phép nếu B version=1. DB integration chưa chạy.",
+    "affected_paths": [
+      "frontend/src/views/ChallengesView.vue",
+      "backend/app/Http/Controllers/ChallengeController.php",
+      "backend/app/Modules/Challenges/Application/UseCases/UpdateChallengeMetadataUseCase.php"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Capture immutable target/base version/payload/auth generation/epoch trước await; lock submission từ preflight, re-fence trước dispatch/callback. Thêm UI→API→DB regression asserting cả A/B và epoch/double-submit.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "F-02",
+    "workstream": "F",
+    "title": "BE/native E2E chưa khóa danh tính DB ngoài test; hook BE có thể xóa toàn bảng",
+    "severity": "CRITICAL",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "backend/phpunit.xml:30",
+        "note": "DB_CONNECTION/HOST/PORT/DATABASE/USERNAME/PASSWORD/URL (30–36), APP_ENV (24) không có force=true; APP_DEBUG (25) có force=true."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/tests/TestCase.php:7",
+        "note": "Base test class không thêm guard database hoặc bootstrap safety; search app/bootstrap/config/tests không thấy guard noteflow_test."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/tests/Feature/ChallengeConcurrencyTest.php:17",
+        "note": "beforeEach delete mutation_commands, challenge_target_periods, challenges, account_states, users không có owner/filter (17–21); afterEach lặp lại36–40."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/tests/Feature/JournalConflictConcurrencyTest.php:22",
+        "note": "Chọn connection pgsql rồi xóa toàn mutation_commands/daily_records/challenges/account_states/users (23–27)."
+      },
+      {
+        "kind": "F",
+        "ref": "tests/e2e/playwright.config.ts:42",
+        "note": "Native app server giữ process.env, nhận DB_DATABASE bất kỳ ở49, không xóa DB_URL; db-state.ts:16 cũng giữ DB_URL native dù PDO helper pin database."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/config/database.php:89",
+        "note": "PostgreSQL config dùng env(DB_URL) cùng env(DB_DATABASE). Laravel version/reference được khóa trong composer.lock:1063–1068."
+      },
+      {
+        "kind": "F",
+        "ref": "https://raw.githubusercontent.com/laravel/framework/cdd8b33c246719acdd118c705ce8c7ab5ef48a96/src/Illuminate/Support/ConfigurationUrlParser.php",
+        "note": "Pinned Laravel13.32.0 source lines51–55 merges URL primary/query after config; URL database/host thắng values tương ứng."
+      },
+      {
+        "kind": "F",
+        "ref": "https://docs.phpunit.de/en/13.4/xml-configuration-file.html#the-env-element",
+        "note": "Official PHPUnit docs: env hiện có được giữ nếu force không bật. Lock là13.3.3; pinned13.3.3 source/doc fetch cache miss, không claim vendor runtime đã chạy."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/F-probes.log:386",
+        "note": "node docs/audits/full-project-audit-2026-10-06/logs/F-probes.mjs, cwd worktree, exit0: actual config keeps non-test DB fixture+DB_URL, actual buildPhpInvocation keeps native URL; no browser/DB/subprocess invocation."
+      },
+      {
+        "kind": "H",
+        "ref": "backend/tests/Feature/ChallengeConcurrencyTest.php:17",
+        "note": "Khả năng host/credential từ môi trường trỏ tới DB thật và bảng tương thích chưa kiểm tra; không có bằng chứng DB thật đã bị chạm trong audit."
+      }
+    ],
+    "failure_scenario": "[I] Ngoài Compose/CI môi trường cố định, shell có DB_DATABASE=DB dùng thật (hoặc DB_URL tới DB đó), endpoint truy cập được và quyền SQL hợp lệ. PHPUnit nonforce defaults giữ identity đó; TestCase không chặn; hook concurrency đầu tiên delete toàn bảng trên selected connection. Với native E2E, helper reset noteflow_test nhưng app server có thể trỏ DB khác qua inherited DB_DATABASE/URL. [F] Surface guard gap/destructive statements được xác nhận bằng trace và pure config probe; không chạy Pest/Laravel/DB để tái hiện xóa dữ liệu.",
+    "affected_paths": [
+      "backend/phpunit.xml",
+      "backend/tests/TestCase.php",
+      "backend/tests/Feature/ChallengeConcurrencyTest.php",
+      "backend/tests/Feature/JournalConflictConcurrencyTest.php",
+      "tests/e2e/playwright.config.ts",
+      "tests/e2e/helpers/db-state.ts",
+      "tests/e2e/helpers/php-runtime.ts"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Tách một danh tính DB test rõ ràng, từ chối input mâu thuẫn trước bootstrap/connect/SQL, kiểm tra effective config sau URL resolution cho cả BE và native E2E, kể cả secondary connection. Không chỉ dựa vào APP_ENV hoặc nhãn database. Thêm probes pure xác nhận unsafe DB_DATABASE/DB_URL/host không tạo connection hay chạy query; sau đó kiểm chứng trên disposable test DB.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "A-01",
+    "workstream": "A",
+    "title": "Story done chưa có đủ manual AT/native browser unload evidence theo AC",
+    "severity": "HIGH",
+    "classification": "NEEDS_HUMAN_DECISION",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/1-6-giai-quyet-xung-dot-noi-dung-giua-hai-thiet-bi.md:29",
+        "note": "AC4 bao gồm keyboard, touch và screen reader, focus/labels/scroll/focus return."
+      },
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/1-6-giai-quyet-xung-dot-noi-dung-giua-hai-thiet-bi.md:41",
+        "note": "T7 yêu cầu actual platform/browser/AT; dòng42 không cho coi missing browser/AT evidence là PASS."
+      },
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/receipts/story-1-6/E-verification.json:228",
+        "note": "manual_screen_reader được ghi NOT_RUN, không phải PASS."
+      },
+      {
+        "kind": "F",
+        "ref": "tests/e2e/content-conflict.spec.ts:202",
+        "note": "Assertions tới246 kiểm semantics/focus/touch/reflow/scroll; dòng240 tự giới hạn không claim manual AT."
+      },
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/story-1-6-plan.md:285",
+        "note": "Historical Human approval ở285–301 APPROVED và disclosures_acknowledged=true; finalization là SATISFIED_WITH_DISCLOSURES ở280. Finding không cáo buộc giả approval."
+      },
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/1-6-giai-quyet-xung-dot-noi-dung-giua-hai-thiet-bi.md:100",
+        "note": "AC4 được tổng hợp COVERED bằng fallback receipt, trong khi actual AT obligation vẫn NOT_RUN."
+      },
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/1-5-giu-ban-dang-nhap-va-thu-luu-lai-sau-gian-doan.md:25",
+        "note": "AC4 yêu cầu warning khi unload/logout có dirty draft và clear theo logout outcome."
+      },
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/1-5-giu-ban-dang-nhap-va-thu-luu-lai-sau-gian-doan.md:37",
+        "note": "T7 yêu cầu real browser unload/logout; dòng70–71 nhắc lại không lấy mock làm actual native unload acceptance."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/__tests__/App.spec.ts:80",
+        "note": "Test tới110 dispatch jsdom beforeunload Event và assert defaultPrevented/listener cleanup; đây không phải native browser dialog. Các logout cancel/fail/success unit paths được assert ở238–355."
+      },
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/receipts/story-1-5/D-verification-finalization-repair.json:226",
+        "note": "Commands tới289 là FE focused/unit/type/lint/build/contract/diff; backend NOT_RUN và canonical INCOMPLETE, không có real-browser unload run."
+      },
+      {
+        "kind": "F",
+        "ref": "rg -n 'beforeunload|runBeforeUnload|page\\.reload|pageA\\.reload|pageB\\.reload' tests/e2e -g '*.spec.ts' (worktree; exit 1)",
+        "note": "Inventory không có native unload/page-reload assertion trong E2E spec sources."
+      },
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/story-1-5-plan.md:183",
+        "note": "Historical Human approval ở183–199 APPROVED với disclosures_acknowledged=true; AC4 COVERED fallback được ghi trong Story ở117."
+      }
+    ],
+    "failure_scenario": "[F] Conflict dialog được mở với local/server text, AC4 đòi actual screen reader nhưng lịch sử receipt ghi NOT_RUN. [I] Keyboard/touch/ARIA assertions chưa chứng minh toàn AC; audit coverage là PARTIAL dù lifecycle done có disclosed approval. [H] Việc AT đọc snapshot/choice/announcement và trả focus đúng trên platform thật chưa kiểm chứng; không khẳng định lỗi AT đã xảy ra. Nhóm A-02: [F] Người dùng đã tương tác với dirty journal rồi reload/close tab; AC4 yêu cầu browser warning, evidence hiện có chỉ synthetic unit dispatch và disclosed fallback. [I] Không thể suy từ defaultPrevented trong jsdom rằng native browser/platform hiển thị prompt đúng. [H] Browser warning/cancel behavior thật chưa kiểm chứng; không cáo buộc đã mất dữ liệu.",
+    "affected_paths": [
+      "_bmad-output/implementation-artifacts/1-6-giai-quyet-xung-dot-noi-dung-giua-hai-thiet-bi.md",
+      "_bmad-output/implementation-artifacts/story-1-6-plan.md",
+      "_bmad-output/implementation-artifacts/receipts/story-1-6/E-verification.json",
+      "frontend/src/components/ContentConflictDialog.vue",
+      "tests/e2e/content-conflict.spec.ts",
+      "_bmad-output/implementation-artifacts/1-5-giu-ban-dang-nhap-va-thu-luu-lai-sau-gian-doan.md",
+      "_bmad-output/implementation-artifacts/story-1-5-plan.md",
+      "_bmad-output/implementation-artifacts/receipts/story-1-5/D-verification-finalization-repair.json",
+      "frontend/src/App.vue",
+      "frontend/src/__tests__/App.spec.ts",
+      "tests/e2e"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Thu manual screen-reader evidence Story1.6AC4 và native browser dirty/clean unload/logout Story1.5AC4 trên OS/browser/AT cụ thể, hoặc formal human disposition/amendment nghĩa vụ; giữ NOT_RUN/disclosures lịch sử, không giả PASS từ unit fallback.",
+    "proposed_lane": "human decision",
+    "risk_of_fix": "LOW"
+  },
+  {
+    "id": "E-01",
+    "workstream": "E",
+    "title": "ACK resolve conflict của A ghi snapshot vào cache key hiện tại B",
+    "severity": "HIGH",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "frontend/src/components/ChallengeJournalEditor.vue:149",
+        "note": "Capture A challengeId/localDate trước await; setQueryData ở 164 dùng journalQueryKey.value hiện tại; context guard ở 165 xảy ra sau write."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/views/ChallengesView.vue:878",
+        "note": "Editor không có key theo resource; selectChallenge ở 215-220 có thể đổi props khi resolution đang pending."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/crossverify-frontend.mjs:49",
+        "note": "Lead trích actual confirmConflict, đổi props sang B trước ACK, assert snapshot A vào key B tại 70-71."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/phase3-frontend-probes.log:21",
+        "note": "Output cache key B chứa journal.challenge_id A; source-extracted/stubbed, không phải Vue navigation integration."
+      }
+    ],
+    "failure_scenario": "Resolve conflict A, giữ PUT pending, đóng dialog rồi chọn B/đổi ngày. ACK A hợp lệ về, handler ghi snapshot A vào query cache đang trỏ B trước guard props. Probe tái hiện sai identity cache; không claim DB B bị sửa từ finding này.",
+    "affected_paths": [
+      "frontend/src/components/ChallengeJournalEditor.vue",
+      "frontend/src/views/ChallengesView.vue"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Dùng captured ['challenge-journal', challengeId, localDate] cho cache ACK và fence snapshot/auth/epoch. Regression resolution ACK crossing challenge/date với B clean và dirty.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "E-02",
+    "workstream": "E",
+    "title": "UI không replay pending conflict resolution sau khi gõ client revision mới",
+    "severity": "HIGH",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "frontend/src/stores/journalDrafts.ts:94",
+        "note": "sameResolution so sánh expectedClientRevision; pending branch 685-692 return no-op nếu requested revision khác frozen pending revision."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/components/ChallengeJournalEditor.vue:296",
+        "note": "Dialog nhận current client revision; ContentConflictDialog.vue:112-118 emit revision đó; Save thường disabled khi có conflictSnapshot ở Editor:338."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/stores/__tests__/journalDrafts.spec.ts:735",
+        "note": "Existing uncertain-resolution/newer-edit test gọi drafts.save trực tiếp, trong khi UI Save disabled; lifecycle UI retry test 298-344 không gõ tiếp."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/crossverify-frontend.mjs:75",
+        "note": "Actual pending-resolution handler: current UI revision2 gọi save 0 lần; frozen revision1 gọi 1 lần."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/phase3-frontend-probes.log:40",
+        "note": "Probe outcome current UI revision cannot replay pending resolution; source-extracted stubs, integration_test=false."
+      }
+    ],
+    "failure_scenario": "Conflict version2/client revision1 → chọn local → timeout hoặc mất response sau commit, pending resolution giữ expected revision1. Để sau, gõ tiếp revision2, mở lại chọn local/confirm. UI emit revision2, store return no-op. Chọn server cũng không khớp, Save thường disabled nên pending command không có đường replay qua UI.",
+    "affected_paths": [
+      "frontend/src/stores/journalDrafts.ts",
+      "frontend/src/components/ChallengeJournalEditor.vue",
+      "frontend/src/components/ContentConflictDialog.vue",
+      "frontend/src/views/__tests__/journal-draft-lifecycle.spec.ts"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Action retry frozen pending resolution độc lập current selection/revision; chỉ nhận choice mới sau khi outcome cũ rõ. UI regression timeout→edit→retry exact command→old ACK giữ latest dirty.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "E-03",
+    "workstream": "E",
+    "title": "Timer poll bỏ qua single-flight và có thể mất nghĩa vụ hội tụ query",
+    "severity": "HIGH",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "frontend/src/stores/sync.ts:242",
+        "note": "poll gọi reconcileInternal trực tiếp; activeReconcileInfo chỉ do reconcile 268-299 đăng ký."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/stores/sync.ts:113",
+        "note": "needsConvergence chỉ dựa revision/epoch/pending; revision cập nhật trước refetch 124, debt chưa được bật trước await. Equal-revision request có thể set synced 193-201; stale refetch catch return ở 181."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/architecture/architecture-noteflow-2026-09-12/ARCHITECTURE-SPINE.md:99",
+        "note": "AD-8 yêu cầu single non-overlapping polling loop, explicit sync error và lifecycle pause."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/crossverify-frontend.mjs:90",
+        "note": "Lead trích actual poll/reconcile internals; deferred refetch reject sau foreground reconcile."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/phase3-frontend-probes.log:48",
+        "note": "account_reads=2, foreground_allowed=true, failed_refetch_sync_status=synced, pending=false. Stubbed query client, chưa TanStack integration."
+      }
+    ],
+    "failure_scenario": "Timer P1 nhận revision2, update context/revision rồi treo refetch. Focus/preflight P2 vào slot trống, đọc equal revision2, pending=false, bỏ refetch và set synced/return true. P1 refetch reject; request generation mới khiến callback bỏ error/debt. Các poll equal revision sau đó không retry query dù chưa hội tụ.",
+    "affected_paths": [
+      "frontend/src/stores/sync.ts",
+      "frontend/src/stores/__tests__/sync.spec.ts"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Dùng cùng serialized entry point cho timer/focus/preflight/login và mark/carry convergence debt trước await. Regression bắt đầu từ actual timer poll, equal-revision foreground request và late refetch failure với real QueryClient.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "E-05",
+    "workstream": "E",
+    "title": "Session expiry không khóa private route/form đang mở",
+    "severity": "HIGH",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "frontend/src/stores/auth.ts:34",
+        "note": "Session null tăng generation/reset private state rồi guest; clearPrivateState chỉ registered stores/cache/owner."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/components/AppShell.vue:188",
+        "note": "RouterView render vô điều kiện theo auth; nav/status được ẩn nhưng private destination không có rendering gate."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/router/index.ts:35",
+        "note": "Auth protection là beforeEach; không watch expiry để navigate/lock khi không có navigation."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/views/ChallengesView.vue:540",
+        "note": "Create pane condition chỉ mode=create; form refs 42-48 không register/reset theo auth và inputs 584-615 vẫn render."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/architecture/architecture-noteflow-2026-09-12/ARCHITECTURE-SPINE.md:141",
+        "note": "Session expiry phải lock private UI; retained drafts invisible đến reauthentication/reconciliation."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/phase3-frontend-probes-final.meta.json",
+        "note": "Independent Lead actual-source auth/reset probe + App/AppShell/ChallengesView rendering trace, exit0. Source function reaches guest while form refs persist and rendering conditions remain reachable; no real Vue/browser rendered."
+      }
+    ],
+    "failure_scenario": "Đang /challenges mode=create với draft riêng tư; /account401 rồi /session401/null chuyển auth guest/account reset. Component không navigation/remount mới, local form refs còn nguyên và RouterView/create pane vẫn thỏa điều kiện render. Lead source-extracted probe và independent rendering trace confirm missing gate; không claim server auth bypass/cross-owner DB leak.",
+    "affected_paths": [
+      "frontend/src/components/AppShell.vue",
+      "frontend/src/router/index.ts",
+      "frontend/src/views/ChallengesView.vue",
+      "frontend/src/stores/auth.ts"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Private rendering gate và reauth affordance trên expiry, giữ đúng journal memory-retention policy. Full App/router tests khi expiry trong create/edit/today/detail không router.push.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "F-00",
+    "workstream": "F",
+    "title": "B9 không khởi động được; backend integration chưa được xác minh tại code audit",
+    "severity": "HIGH",
+    "classification": "NEEDS_HUMAN_DECISION",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/B9.meta.json",
+        "note": "composer test ở backend exit255; vendor/autoload.php thiếu; chưa khởi động Pest."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/B9-retry2-correct-cwd.meta.json",
+        "note": "Lặp lại ở đúng cwd backend exit255."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/AUDIT-PLAN.md:92",
+        "note": "Plan yêu cầu tối thiểu HIGH khi B1/B9 fail; đây là startup/environment failure, không phải chứng minh test sản phẩm fail."
+      }
+    ],
+    "failure_scenario": "Worktree chưa có vendor; composer test gọi artisan và dừng trước test runner → audit không có kết quả Unit/Feature/Contract của backend; không đủ evidence nghiệm thu persistence/concurrency.",
+    "affected_paths": [
+      "backend/composer.json",
+      "backend/tests",
+      "docs/audits/full-project-audit-2026-10-06/logs/B9.log"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Chọn môi trường verification được phép cài dependencies/ghi artifact ngoài audit, có kiểm tra DB identity trước kết nối theo F-02; chạy lại B9–B11 và full stack canonical trên source SHA phù hợp. Giữ nguyên NOT_RUN của phiên audit này.",
+    "proposed_lane": "human decision",
+    "risk_of_fix": "MEDIUM"
+  },
+  {
+    "id": "H-01",
+    "workstream": "H",
+    "title": "Human Gate dùng nhãn tự khai thay cho bằng chứng về người phê duyệt",
+    "severity": "HIGH",
+    "classification": "NEEDS_HUMAN_DECISION",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": ".agents/scripts/complete-story.mjs:298",
+        "note": "CLI approve tự tạo approve_exact_scope/disclosures_acknowledged; không nhận bằng chứng actor từ kênh human."
+      },
+      {
+        "kind": "F",
+        "ref": ".agents/scripts/check-story-completion.mjs:324",
+        "note": "approvalRecordForSnapshot gán approver_type:human, decision:APPROVED từ snapshot và SHA do caller cung cấp."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/H-failclosed-probes.json",
+        "note": "node logs/H-failclosed-probes.mjs, exit 0: gọi factory thuần sinh nhãn human; không chạy approve/action mutate."
+      }
+    ],
+    "failure_scenario": "Caller có quyền gọi CLI approve và commit metadata có thể tự ghi nhãn human cho exact snapshot dù không có chứng cứ repo về người ra quyết định; các digest chỉ chứng minh scope. Không phát hiện lạm dụng trong phiên audit.",
+    "affected_paths": [
+      ".agents/scripts/complete-story.mjs",
+      ".agents/scripts/check-story-completion.mjs",
+      ".agents/scripts/v4-story-runner.mjs"
+    ],
+    "related_prior_finding": "2026-09-30:H1; 2026-10-06:F-13",
+    "proposed_fix": "Human chọn mức assurance: ghi rõ reliance vào trusted human conversation, hoặc yêu cầu bằng chứng approval được xác thực bên ngoài quyền ghi metadata của agent; giữ exact-scope binding.",
+    "proposed_lane": "human decision",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "H-02",
+    "workstream": "H",
+    "title": "Loại trừ V3/V4 vẫn chỉ có một chiều",
+    "severity": "HIGH",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": ".agents/scripts/v4-story-runner.mjs:61",
+        "note": "V4 đọc canonical V3 pointer và chỉ chấp nhận IDLE/null; không đăng ký ownership Story V4 trong pointer."
+      },
+      {
+        "kind": "F",
+        "ref": ".agents/policies/orchestration-v3.md:218",
+        "note": "Bootstrap V3 dựa vào canonical pointer/run/lease; toàn bộ policy và story-development không có reservation hay kiểm tra Story V4."
+      },
+      {
+        "kind": "F",
+        "ref": "AGENTS.md:9",
+        "note": "V4 không được mutate V3 runtime; runtime V3 và lock V4 không thành cùng một reservation protocol."
+      }
+    ],
+    "failure_scenario": "Một Story V4 đã in-progress nhưng pointer V3 vẫn IDLE; một phiên V3 bootstrap trên cùng Story/path không có tín hiệu ownership V4 để chặn. Đây là khả năng overlap theo policy/source, không phải run đang xảy ra trong audit.",
+    "affected_paths": [
+      ".agents/scripts/v4-story-runner.mjs",
+      ".agents/scripts/v4-slice-transaction.mjs",
+      ".agents/policies/orchestration-v3.md",
+      ".agents/skills/story-development/SKILL.md"
+    ],
+    "related_prior_finding": "2026-09-30:H2",
+    "proposed_fix": "Thiết kế reservation chung có read-only admission cho cả hai lane hoặc một quy tắc overlap rõ ràng; không tự sửa leases/generations/pointer V3 trong audit.",
+    "proposed_lane": "V4 migration",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "H-03",
+    "workstream": "H",
+    "title": "Helper lifecycle gọi trực tiếp bỏ qua pointer, checkout guard và transaction lock",
+    "severity": "HIGH",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": ".agents/skills/v4-story-runner/actions/finalize-story.md:18",
+        "note": "Action contract vẫn hướng dẫn chạy finalize-story.mjs trực tiếp."
+      },
+      {
+        "kind": "F",
+        "ref": ".agents/scripts/finalize-story.mjs:424",
+        "note": "applyFinalization rechecks source/HEAD nhưng không kiểm canonical pointer/Story checkout owner và không dùng normal V4 transaction lock/journal."
+      },
+      {
+        "kind": "F",
+        "ref": ".agents/scripts/complete-story.mjs:294",
+        "note": "CLI approve/complete gọi helper trực tiếp; helper không có pointer/checkout ownership/transaction lock admission."
+      },
+      {
+        "kind": "F",
+        "ref": ".agents/scripts/reconcile-story-lifecycle.mjs:152",
+        "note": "Reconcile có pointer check ở inspect nhưng apply không acquire shared lock/journal, trong khi action doc hứa giữ lock/journal khi partial."
+      }
+    ],
+    "failure_scenario": "Caller dùng lệnh helper mà action doc hướng dẫn khi pointer V3 không IDLE hoặc từ checkout khác Story owner: helper không thực thi các admission guards của Runner. Hai caller đồng thời cũng không có lock lifecycle chung. Không tái hiện mutate trong audit.",
+    "affected_paths": [
+      ".agents/scripts/finalize-story.mjs",
+      ".agents/scripts/complete-story.mjs",
+      ".agents/scripts/reconcile-story-lifecycle.mjs",
+      ".agents/skills/v4-story-runner/actions/finalize-story.md",
+      ".agents/skills/v4-story-runner/actions/complete-story.md",
+      ".agents/skills/v4-story-runner/actions/reconcile-lifecycle.md"
+    ],
+    "related_prior_finding": "2026-09-30:H3; 2026-10-06:F-14",
+    "proposed_fix": "Đồng nhất mọi durable lifecycle entry qua admission/lock/journal; bảo vệ helper export/CLI để không bỏ qua Runner guard; sửa action docs tương ứng và test direct-entry negative/concurrency.",
+    "proposed_lane": "V4 migration",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "H-04",
+    "workstream": "H",
+    "title": "Caller có thể hạ Plan risk HIGH/MEDIUM xuống LOW và chọn đường không review",
+    "severity": "HIGH",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": ".agents/scripts/v4-action-kernel.mjs:878",
+        "note": "riskLevel ưu tiên request.risk trước plan.risk.level, không kiểm downgrade."
+      },
+      {
+        "kind": "F",
+        "ref": ".agents/scripts/v4-action-kernel.mjs:987",
+        "note": "Verification descriptor giữ risk đã được caller override; judgment_flags cũng nhận [] ở:1171."
+      },
+      {
+        "kind": "F",
+        "ref": ".agents/scripts/v4-action-kernel.mjs:1498",
+        "note": "Review-required chỉ dùng escalation và descriptorPreview.risk; LOW complete PASS đi persistVerification(...,'verified') ở:1512."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/H-failclosed-probes.json",
+        "note": "node docs/audits/full-project-audit-2026-10-06/logs/H-failclosed-probes.mjs exit 0; actual source risk selector + actual read-only escalation + isolated production branch chọn stub persistence cho HIGH/MEDIUM->LOW. HIGH nguyên trạng yêu cầu review."
+      }
+    ],
+    "failure_scenario": "Plan HIGH/MEDIUM, checkpoint nằm trong recipe coverage, checks complete PASS, request.risk='LOW', judgment_flags=[] -> descriptor LOW -> actual escalation NO_REVIEW exit 0 -> kernel chọn persistence verified không review. Finalization vẫn đòi reviewed slices; không claim đường false done.",
+    "affected_paths": [
+      ".agents/scripts/v4-action-kernel.mjs",
+      ".agents/scripts/v4-verification-flow.test.mjs"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Bind risk vào validated Plan; chỉ cho phép nâng risk, hoặc reject mọi caller risk khác Plan. Derive mandatory flags từ authoritative risk context. Thêm regression HIGH/MEDIUM Plan với request LOW, rồi full npm run test:v4 trên exact fix commit.",
+    "proposed_lane": "V4 migration",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "A-03",
+    "workstream": "A",
+    "title": "Story 2.3 AC3 chưa chốt acceptance split với future completion consumer",
+    "severity": "MEDIUM",
+    "classification": "SPEC_AMBIGUITY",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/2-3-ghi-và-sửa-journal-tùy-chọn.md:29",
+        "note": "AC3 nói completion/journal độc lập, thay một thành phần giữ thành phần còn lại và không false conflict."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/product/epics.md:345",
+        "note": "Dependency 2.3 chỉ là2.1; 2.2 ở327–339 sở hữu Done/current-week progress. Sprint-status.yaml:49 ghi2.2 backlog."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/tests/Feature/ChallengeJournalTest.php:91",
+        "note": "91–114 journal command giữ completion fixture;117–134 direct DB completion update rồi journal save, assert không false journal conflict. Không thực thi production completion command."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/tests/Feature/ChallengeJournalApiTest.php:77",
+        "note": "77–89 cũng dùng direct DB completion update trước PUT journal và assert completion preserved."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/routes/api.php:21",
+        "note": "21–43 có Challenge và journal routes, chưa có completion/Done mutation route."
+      },
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/2-3-ghi-và-sửa-journal-tùy-chọn.md:80",
+        "note": "AC3 được ghi COVERED bằng independent typed-conflict component behavior; source evidence hiện tại chưa chạy reverse production consumer."
+      }
+    ],
+    "failure_scenario": "[F] Journal edit với completion state có sẵn và completion-only fixture change được assert. [I] Future Done command có thể tác động cùng daily record nhưng chưa được các test này thực thi; breadth của AC3 hai chiều chưa có acceptance split rõ. [H] Future completion có overwrite journal hay không chưa biết. Không yêu cầu 2.2 phải implement trước2.3 và không kết luận dependency vi phạm.",
+    "affected_paths": [
+      "docs/product/epics.md",
+      "_bmad-output/implementation-artifacts/2-3-ghi-và-sửa-journal-tùy-chọn.md",
+      "_bmad-output/implementation-artifacts/story-2-3-plan.md",
+      "backend/tests/Feature/ChallengeJournalTest.php",
+      "backend/tests/Feature/ChallengeJournalApiTest.php"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "[I] BMAD/human chốt2.3 acceptance là journal producer direction với completion fixture, và giao reverse consumer proof cho2.2 nếu đó là intended split. Khi2.2 tồn tại, dùng hai production commands cùng daily record để assert independent versions/preserved state/no false conflict. Không tự thêm dependency hoặc coi future feature absence là bug hiện tại.",
+    "proposed_lane": "human decision",
+    "risk_of_fix": "LOW"
+  },
+  {
+    "id": "C-01",
+    "workstream": "C",
+    "title": "NUL nội bộ qua text validation rồi lỗi persistence PostgreSQL/jsonb",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "backend/app/Http/Controllers/ChallengeJournalController.php:65",
+        "note": "Journal chỉ required/string; không chặn NUL nội bộ."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/app/Modules/Challenges/Application/UseCases/SaveJournalUseCase.php:84",
+        "note": "Chỉ kiểm blank; text nguyên bản được hash/lưu/đưa vào response ledger ở :117/:145/:158."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/database/migrations/2026_09_19_030000_create_mutation_commands_table.php:19",
+        "note": "Response ledger là jsonb; PostgreSQL jsonb từ chối Unicode NUL theo official PostgreSQL 17 datatype-json docs."
+      },
+      {
+        "kind": "F",
+        "ref": "C-backend.md:C-EXEC-02; php -r $auditSnippet; cwd=.worktrees/full-project-audit; exit=0",
+        "note": "PHP không coi sample chứa NUL nội bộ là blank; json_encode và SHA-256 vẫn chấp nhận. Không chạy HTTP/DB."
+      },
+      {
+        "kind": "I",
+        "ref": "backend/app/Http/Controllers/ChallengeJournalController.php:86",
+        "note": "Persistence exception nằm ngoài domain catches → rollback và framework generic 500; integrated repro NOT_RUN/ENV."
+      }
+    ],
+    "failure_scenario": "Owner gửi PUT journal ngày hợp lệ, command UUID mới, đúng epoch/base, journal chứa private-example\\u0000tail → validation/hash đi qua → PostgreSQL text hoặc ledger jsonb không thể lưu NUL → transaction không commit, response generic 500 thay validation. Name/description có cùng gap. Chưa chứng minh log leak/partial commit.",
+    "affected_paths": [
+      "backend/app/Http/Controllers/ChallengeJournalController.php",
+      "backend/app/Modules/Challenges/Application/UseCases/SaveJournalUseCase.php",
+      "backend/app/Http/Controllers/ChallengeController.php",
+      "backend/app/Modules/Challenges/Application/UseCases/CreateChallengeUseCase.php",
+      "backend/app/Modules/Challenges/Application/UseCases/UpdateChallengeMetadataUseCase.php",
+      "backend/database/migrations/2026_09_19_030000_create_mutation_commands_table.php"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Reject NUL/giá trị PostgreSQL không thể biểu diễn trước write, trả 422 có field error; thêm HTTP+PostgreSQL negative tests, rollback và log-redaction assertion. Không tự thêm arbitrary journal length limit.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "C-02",
+    "workstream": "C",
+    "title": "Email array bị cast trước login validation và gây ErrorException",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "backend/app/Providers/AppServiceProvider.php:28",
+        "note": "Throttle key cast raw email sang string trước FormRequest validation."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/app/Http/Requests/LoginRequest.php:17",
+        "note": "prepareForValidation cũng cast input sang string trước rule email ở :25."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/composer.lock:1068",
+        "note": "Laravel v13.32.0 pin cdd8b33c246719acdd118c705ce8c7ab5ef48a96. Official HandleExceptions source tại ref này đổi PHP warning thành ErrorException."
+      },
+      {
+        "kind": "F",
+        "ref": "C-backend.md:C-EXEC-01; php -r $auditSnippet; cwd=.worktrees/full-project-audit; exit=0",
+        "note": "Exact normalization expression với array và warning handler tương đương ném Array to string conversion/ErrorException trên PHP 8.5.9. HTTP NOT_RUN."
+      },
+      {
+        "kind": "I",
+        "ref": "backend/routes/web.php:7",
+        "note": "Valid-CSRF unauthenticated login với email array đến throttle callback rồi generic 500, chưa đến email validation."
+      }
+    ],
+    "failure_scenario": "POST /login với CSRF hợp lệ, email=[\"x\"], password string → throttle callback cast array → ErrorException trước validation → generic 500. Không cần owner credentials; không có bằng chứng auth bypass hoặc DoS.",
+    "affected_paths": [
+      "backend/app/Providers/AppServiceProvider.php",
+      "backend/app/Http/Requests/LoginRequest.php",
+      "backend/tests/Feature/OwnerAuthenticationTest.php"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Kiểm type trước normalization ở cả rate limiter/FormRequest, giữ dữ liệu invalid cho validation trả 422; thêm array/object/null regressions cùng case email normalization và existing throttle.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "C-03",
+    "workstream": "C",
+    "title": "Duplicate-command concurrency Challenge mới được kiểm bằng execute tuần tự",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "backend/tests/Feature/ChallengeConcurrencyTest.php:226",
+        "note": "First execute hoàn tất trước second execute ở :231; không có hai use case overlap."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/tests/Feature/ChallengeConcurrencyTest.php:170",
+        "note": "Lost-update case thực thi A hoàn tất rồi B tại :184."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/tests/Feature/ChallengeConcurrencyTest.php:64",
+        "note": "Primitive account lock contention ở :64/:112 là thật nhưng query lock trực tiếp; không chứng minh CreateChallengeUseCase giữ lock đến ledger commit."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/app/Modules/Challenges/Application/UseCases/CreateChallengeUseCase.php:43",
+        "note": "Lock hiện tại có trong code. Finding là coverage gap, không cáo buộc current mutation race đã tái hiện."
+      }
+    ],
+    "failure_scenario": "Regression bỏ account lock riêng khỏi CreateChallengeUseCase → primitive lock test và sequential duplicate test có thể vẫn xanh; hai create cùng key đọc ledger rỗng, writer sau có thể trả unique-index exception thay replay ACK. Đây là concrete test blind spot; không phải runtime bug đã chứng minh tại HEAD.",
+    "affected_paths": [
+      "backend/tests/Feature/ChallengeConcurrencyTest.php",
+      "backend/app/Modules/Challenges/Application/UseCases/CreateChallengeUseCase.php"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Thêm hai-connection application contention test: A giữ outer transaction khi use case đã ghi, B cùng immutable command bị lock, sau A commit replay cùng ACK và assert đúng một challenge/ledger/revision. Giữ primitive tests hiện có.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "C-04",
+    "workstream": "C",
+    "title": "HTTP journal bị trim biên bởi framework mặc định; intent giữ whitespace chưa chốt",
+    "severity": "MEDIUM",
+    "classification": "SPEC_AMBIGUITY",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "backend/bootstrap/app.php:21",
+        "note": "Middleware configuration :21–:28 không exclude journal khỏi default TrimStrings."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/composer.lock:1068",
+        "note": "Official source cdd8b33… Middleware::getGlobalMiddleware có TrimStrings; TrimStrings except chỉ password fields và gọi Str::trim. Primary-source links nằm trong C-backend.md."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/app/Modules/Challenges/Application/UseCases/SaveJournalUseCase.php:117",
+        "note": "Use case giữ text command nguyên bản; HTTP normalization xảy ra trước đó."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/stores/journalDrafts.ts:611",
+        "note": "ACK snapshot cập nhật acknowledged text và latest editor text ở :621."
+      },
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/2-3-ghi-và-sửa-journal-tùy-chọn.md:50",
+        "note": "Chỉ chốt whitespace-only invalid/no clear/no arbitrary limit; chưa chốt preservation của biên text."
+      }
+    ],
+    "failure_scenario": "Owner gửi journal có indentation/blank lines ở biên, ví dụ hai spaces + dòng đầu + hai newline → global middleware trim trước save → ACK/editor chỉ còn dòng đầu. Hành vi được xác định bằng framework/code trace; mức sai so với product intent chưa được chốt, integrated HTTP NOT_RUN.",
+    "affected_paths": [
+      "backend/bootstrap/app.php",
+      "backend/app/Http/Controllers/ChallengeJournalController.php",
+      "backend/app/Modules/Challenges/Application/UseCases/SaveJournalUseCase.php",
+      "backend/tests/Feature/ChallengeJournalApiTest.php",
+      "frontend/src/stores/journalDrafts.ts"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Human chốt preserve hoặc normalize; align HTTP/domain/FE ACK với quyết định và thêm round-trip tests cho multiline/indent/blank lines. Không tự coi whitespace trim là requirement violation đã được phê duyệt.",
+    "proposed_lane": "human decision",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "C-05",
+    "workstream": "C",
+    "title": "Reprovision A→B→A giữ dataset/ledger nhưng tái tạo revision/epoch mặc định",
+    "severity": "MEDIUM",
+    "classification": "NEEDS_HUMAN_DECISION",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "backend/app/Console/Commands/ProvisionOwner.php:47",
+        "note": "Xóa account_states owner khác rồi updateOrInsert timezone; không xóa users/product/ledger."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/database/migrations/2026_09_19_010000_add_revision_fields_to_account_states_table.php:13",
+        "note": "State tái tạo nhận revision=0, epoch=1 theo :13/:14."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/database/migrations/2026_09_19_020000_create_challenges_and_target_periods_tables.php:14",
+        "note": "Challenge FK tới user, không tới account_state; dataset không cascade theo việc xóa state."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/database/migrations/2026_09_19_030000_create_mutation_commands_table.php:13",
+        "note": "Ledger cũng FK tới user nên vẫn giữ old ACK/revision."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/tests/Feature/ProvisionOwnerCommandTest.php:30",
+        "note": "Reprovision test :30–:52 chưa kiểm scenario owner quay lại cùng dataset/revision/ledger."
+      },
+      {
+        "kind": "H",
+        "ref": "backend/app/Http/Controllers/AccountContextController.php:30",
+        "note": "Client revision-floor/draft hậu quả cần xác minh WS-E; không claim stale-cache corruption đã confirm."
+      }
+    ],
+    "failure_scenario": "A có product data và account_revision=10; provision B xóa state A; provision lại cùng email A tạo state revision=0/epoch=1 nhưng challenges và old command ACK revision=10 vẫn tồn tại. Cơ chế được xác định bằng code; retention intent và client impact chưa chốt, command/DB NOT_RUN.",
+    "affected_paths": [
+      "backend/app/Console/Commands/ProvisionOwner.php",
+      "backend/tests/Feature/ProvisionOwnerCommandTest.php",
+      "backend/database/migrations/2026_09_19_010000_add_revision_fields_to_account_states_table.php",
+      "backend/app/Http/Controllers/AccountContextController.php"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Chốt retention semantics khi chuyển/quay lại owner; bảo toàn state cho retained dataset hoặc retire dataset đúng chính sách. Test A→B→A, cùng owner đổi password, old ACK và in-flight writes; không tự xóa/transfer dữ liệu trong audit.",
+    "proposed_lane": "human decision",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "D-01",
+    "workstream": "D",
+    "title": "Contract tests thiếu 22 nhánh status và chưa khóa đầy đủ kịch bản dự kiến",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "contracts/openapi.yaml:9",
+        "note": "Inventory PowerShell chỉ đọc, exit 0: 8 path, 11 operation, 46 operation-status pairs."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/tests/Contract/ChallengeContractTest.php:43",
+        "note": "Đối chiếu toàn bộ Contract source cho thấy kịch bản hiện diện cho 24/46 pairs; stale epoch/key reuse chưa được contract validator kiểm tra."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/tests/Contract/OpenApiResponseValidator.php:16",
+        "note": "Chỉ dựng response validator; không có request contract validator."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/tests/Contract/AuthResponseContractTest.php:43",
+        "note": "Một số test validate response rồi expect(true), không assert status chính xác của từng kịch bản."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/api/__tests__/account.spec.ts:10",
+        "note": "Fixture account thiếu account_revision/data_epoch/write_state mà OpenAPI required ở dòng 504-510."
+      }
+    ],
+    "failure_scenario": "[I] Một nhánh lỗi chưa có contract case đổi body/media type/header, hoặc một kịch bản trả nhầm status khác vẫn được spec khai báo; riêng Contract suite có thể không phát hiện. Feature tests hiện có có thể phát hiện một phần.",
+    "affected_paths": [
+      "backend/tests/Contract/",
+      "frontend/src/api/__tests__/account.spec.ts",
+      "contracts/openapi.yaml"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Bổ sung 22 operation-status cases còn thiếu, các error-code/replay/no-op cases, assert status trước response validator, kiểm tra request contract và dùng FE fixtures đủ generated type.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "MEDIUM"
+  },
+  {
+    "id": "D-02",
+    "workstream": "D",
+    "title": "ProblemDetails cho phép conflict payload mà consumer journal từ chối",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "contracts/openapi.yaml:791",
+        "note": "Required chỉ có message/code; snapshot optional và union ChallengeSnapshot/JournalSnapshot được dùng chung."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/api/challenges.ts:47",
+        "note": "Parser journal bắt buộc resource_id/current_version/JournalSnapshot và version đồng nhất cho version_conflict."
+      },
+      {
+        "kind": "F",
+        "ref": "WS-D parser probe: node --experimental-transform-types --input-type=module -e <inline>; exit 0",
+        "note": "Import actual challenges.ts, mocked fetch trong bộ nhớ: minimal conflict và wrong-family snapshot đều problemPreserved=false; actual journal shape=true. Bản tái chạy: logs/D-probes.mjs; transcript: logs/D-probes.log."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/app/Http/Controllers/ChallengeJournalController.php:92",
+        "note": "Backend hiện tại phát đủ field; chưa chứng minh response hiện hành gây lỗi."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/stores/journalDrafts.ts:380",
+        "note": "Consumer chọn luồng conflict theo machine code/snapshot; problem undefined không vào nhánh version_conflict."
+      }
+    ],
+    "failure_scenario": "[I] Server regression trả 409 version_conflict chỉ có message/code hoặc ChallengeSnapshot trên journal endpoint; schema hiện tại cho phép nhưng parser loại problem, consumer chuyển sang unexpected error thay vì luồng đối chiếu conflict.",
+    "affected_paths": [
+      "contracts/openapi.yaml",
+      "frontend/src/api/schema.generated.ts",
+      "frontend/src/api/challenges.ts",
+      "backend/tests/Contract/ChallengeContractTest.php"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Tách schema theo code/resource operation, required các field conflict consumer đang cần và thêm negative contract tests cho missing/wrong-family snapshot.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "D-03",
+    "workstream": "D",
+    "title": "Request contract thiếu constraint backend đang thực thi",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "contracts/openapi.yaml:759",
+        "note": "Create name chỉ là string; PATCH name ở dòng 786 cũng không có length/nonblank constraint."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/app/Http/Controllers/ChallengeController.php:69",
+        "note": "Trim name và trả 422 khi empty hoặc dài hơn 255; PATCH có cùng kiểm tra tại dòng 171."
+      },
+      {
+        "kind": "F",
+        "ref": "contracts/openapi.yaml:499",
+        "note": "Journal chỉ là string; date path chỉ có format date tại dòng 295-300."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/app/Modules/Challenges/Application/UseCases/SaveJournalUseCase.php:74",
+        "note": "Từ chối ngày trước start_date/sau accountToday và journal blank sau trim."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/app/Modules/Challenges/Application/UseCases/GetJournalQuery.php:27",
+        "note": "GET journal cũng thực thi giới hạn ngày."
+      }
+    ],
+    "failure_scenario": "[I] Client gửi name 256 ký tự, journal blank hoặc date đúng format nhưng ngoài cửa sổ cho phép; request tuân constraint schema hiện tại nhưng backend trả 422. Status 422 đã được khai báo; đây là thiếu mô tả constraint.",
+    "affected_paths": [
+      "contracts/openapi.yaml",
+      "frontend/src/api/schema.generated.ts",
+      "backend/tests/Contract/"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Bổ sung constraint length/nonblank phù hợp trim hiện hành, mô tả cửa sổ ngày phụ thuộc server và thêm request contract tests; không tự thay validation nghiệp vụ.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "D-04",
+    "workstream": "D",
+    "title": "Biên contract của chuỗi Sanctum và CSRF chưa rõ",
+    "severity": "MEDIUM",
+    "classification": "SPEC_AMBIGUITY",
+    "verification": "PLAUSIBLE",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "frontend/src/api/auth.ts:57",
+        "note": "Frontend bắt buộc gọi /sanctum/csrf-cookie trước login; endpoint không có trong OpenAPI paths hoặc backend Contract tests."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/bootstrap/app.php:22",
+        "note": "Bật stateful API; config/sanctum.php:84 chọn ValidateCsrfToken."
+      },
+      {
+        "kind": "F",
+        "ref": "contracts/openapi.yaml:163",
+        "note": "POST challenge không có 419; PATCH/PUT ở dòng 251/349 cũng không có 419, trong khi login/logout có."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/architecture/architecture-noteflow-2026-09-12/ARCHITECTURE-PROPOSAL.md:261",
+        "note": "Architecture mô tả khởi tạo CSRF qua endpoint Sanctum."
+      },
+      {
+        "kind": "H",
+        "ref": "backend/config/sanctum.php:84",
+        "note": "HTTP status/body/header của API CSRF mismatch chưa chạy runtime vì vendor vắng."
+      }
+    ],
+    "failure_scenario": "[I] Client chỉ dựa vào OpenAPI không có operation khởi tạo XSRF. [H] Unsafe same-origin API request thiếu hoặc sai CSRF token có thể nhận 419 ngoài response set được khai báo.",
+    "affected_paths": [
+      "contracts/openapi.yaml",
+      "backend/tests/Contract/",
+      "frontend/src/api/auth.ts",
+      "frontend/src/api/challenges.ts",
+      "backend/bootstrap/app.php",
+      "backend/config/sanctum.php"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Xác định published contract có bao gồm framework authentication endpoints và middleware errors; sau đó xác minh HTTP thực và bổ sung CSRF initialization, XSRF header và 419 cases theo phạm vi được chọn.",
+    "proposed_lane": "human decision",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "D-05",
+    "workstream": "D",
+    "title": "PrivateNoStore schema chấp nhận header thiếu một directive bắt buộc",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "contracts/openapi.yaml:397",
+        "note": "Pattern dùng alternation private|no-store, không yêu cầu đồng thời hai directive."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/architecture/architecture-noteflow-2026-09-12/ARCHITECTURE-PROPOSAL.md:269",
+        "note": "Architecture yêu cầu Cache-Control: private, no-store."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/app/Http/Middleware/PrivateNoStore.php:14",
+        "note": "Implementation hiện tại set cả private và no-store."
+      },
+      {
+        "kind": "F",
+        "ref": "WS-D regex probe: node --input-type=module -e <inline>; exit 0",
+        "note": "Pattern chấp nhận private, no-store và public, no-store. Bản tái chạy: logs/D-probes.mjs; transcript: logs/D-probes.log."
+      }
+    ],
+    "failure_scenario": "[I] Regression loại no-store khỏi private API header nhưng giữ private; header vẫn thỏa schema, nên contract schema không bảo vệ đầy đủ invariant cache.",
+    "affected_paths": [
+      "contracts/openapi.yaml",
+      "backend/tests/Contract/"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Kiểm tra đồng thời private và no-store, bổ sung negative contract tests cho từng directive bị thiếu và giá trị public.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "MEDIUM"
+  },
+  {
+    "id": "D-06",
+    "workstream": "D",
+    "title": "contract:check không phát hiện drift path, HTTP verb hoặc requestBody binding",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "frontend/scripts/generate-openapi-types.mjs:92",
+        "note": "Generator dùng Object.values cho paths và methods, chỉ emit operationId/responses."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/scripts/generate-openapi-types.mjs:132",
+        "note": "Generated source chỉ chứa components/operations projection; --check so sánh source ở dòng 147-158."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/api/schema.generated.ts:119",
+        "note": "Generated operations không có path, verb hoặc requestBody binding."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/api/challenges.ts:158",
+        "note": "Frontend wrappers hard-code path/HTTP method."
+      },
+      {
+        "kind": "F",
+        "ref": "WS-D generator projection probe: node --input-type=module -e <inline>; exit 0",
+        "note": "Gọi actual generateOperations từ source bằng document synthetic: đổi path, đổi POST thành PUT, thêm required requestBody đều giữ nguyên output projection. Bản tái chạy: logs/D-probes.mjs; transcript: logs/D-probes.log."
+      }
+    ],
+    "failure_scenario": "[I] Spec đổi URL/verb/requestBody binding trong khi components và responses giữ nguyên; generated source không đổi, contract:check không phát hiện và frontend wrapper có thể tiếp tục gửi contract cũ. Đây là khoảng trống guard, chưa phải drift đang xảy ra tại HEAD.",
+    "affected_paths": [
+      "frontend/scripts/generate-openapi-types.mjs",
+      "frontend/src/api/schema.generated.ts",
+      "frontend/src/api/challenges.ts",
+      "frontend/src/api/auth.ts",
+      "contracts/openapi.yaml"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Generate paths/parameters/requestBody bindings và dùng typed mappings ở consumer, hoặc thêm checker/test riêng bảo vệ các phần contract chưa được projection.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "E-06",
+    "workstream": "E",
+    "title": "Refresh session reject giữ auth ở loading và dừng automatic recovery",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "PLAUSIBLE",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "frontend/src/stores/auth.ts:28",
+        "note": "status loading rồi await getSession, không catch/finally terminal state ở refreshSession 24-43."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/api/auth.ts:45",
+        "note": "getSession trả null chỉ401/403, throw khi unsuccessful khác hoặc transport reject."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/stores/sync.ts:214",
+        "note": "stop trước await auth.refreshSession; focus/reconnect 470-485 chỉ chạy authenticated/isStarted."
+      }
+    ],
+    "failure_scenario": "/account401 → /session503 hoặc reject mạng. auth.refreshSession throw để status=loading; coordinator đã stop và focus/reconnect không restart. Promise từ void entry point có thể reject không handler. Không tự hồi phục dù kết nối trở lại; runtime NOT_RUN.",
+    "affected_paths": [
+      "frontend/src/stores/auth.ts",
+      "frontend/src/stores/sync.ts",
+      "frontend/src/api/auth.ts",
+      "frontend/src/components/AppShell.vue"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Terminal session-check error/recovery state fenced generation, giữ retained drafts; handle rejection ở void timer/event callers. Regression401→session503→retry/reconnect, không tự coi logout đã hoàn tất.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "E-07",
+    "workstream": "E",
+    "title": "Outer account catch ghi đè paused hoặc state của request mới",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "PLAUSIBLE",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "frontend/src/stores/sync.ts:202",
+        "note": "Outer catch fence auth nhưng không visible/online/request generation/isStarted; 219-221 luôn đặt error."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/stores/sync.ts:477",
+        "note": "Offline đặt paused ở481; hidden đặt paused ở462-468. Inner refetch catch đã có lifecycle/current convergence guard180-191."
+      }
+    ],
+    "failure_scenario": "Authenticated GET/account pending → offline/hidden đặt paused → GET reject giữ cùng auth generation → outer catch set error. Qua overlap E-03, delayed old GET rejection sau newer success cũng có thể set error lên state mới. Static trace, runtime NOT_RUN.",
+    "affected_paths": [
+      "frontend/src/stores/sync.ts",
+      "frontend/src/stores/__tests__/sync.spec.ts"
+    ],
+    "related_prior_finding": "D-F2",
+    "proposed_fix": "Fence outer account success/error/finally bằng request/lifecycle/session và giữ paused offline/hidden; thêm deferred account GET reject regressions riêng khỏi journal refetch.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "E-08",
+    "workstream": "E",
+    "title": "Cờ epoch của editor không theo draft qua remount làm mất explicit rebase affordance",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "PLAUSIBLE",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "frontend/src/components/ChallengeJournalEditor.vue:54",
+        "note": "epochChangeBlocked ref(false) cục bộ; epoch watcher95-105 không immediate; explicit rebase button247-263 chỉ theo cờ."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/stores/journalDrafts.ts:219",
+        "note": "Dirty same-generation hydrate return existing trước epoch check. Save epoch mismatch486-489 quarantine; future save632 return no-op."
+      }
+    ],
+    "failure_scenario": "Dirty epoch1 journal → editor unmount do route/metadata mode → coordinator nhận epoch2 → remount cùng journal. Cờ mới=false không thấy transition; hydrate giữ old draft. Save quarantine, lần sau no-op, nhưng button explicit rebase không xuất hiện. Guard ngăn replay đúng; consumer UX thiếu đường explicit đang tồn tại. Static trace, runtime NOT_RUN.",
+    "affected_paths": [
+      "frontend/src/components/ChallengeJournalEditor.vue",
+      "frontend/src/stores/journalDrafts.ts"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Derive blocked state từ persisted draft epoch/current context và đưa ra cùng action explicit rebase đã có. Không auto replay/merge hoặc mở rộng restore protocol; regression epoch transition khi unmounted rồi remount.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "E-09",
+    "workstream": "E",
+    "title": "Danh sách challenge không thể mở bằng keyboard",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "PLAUSIBLE",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "frontend/src/views/ChallengesView.vue:505",
+        "note": "Interactive row là li @click ở513, không native link/button/tabindex/key handler trong505-529."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/ux/ux-spec.md:23",
+        "note": "UG-08 yêu cầu dùng keyboard/touch; acceptance UX474 yêu cầu luồng chính bằng Tab/Enter."
+      }
+    ],
+    "failure_scenario": "Mở /challenges có item và dùng Tab/Enter: row không vào tab order nên không chọn/open detail/editor từ màn hình danh sách. Static markup chứng minh thiếu interaction semantics; browser keyboard test NOT_RUN.",
+    "affected_paths": [
+      "frontend/src/views/ChallengesView.vue"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Dùng native link/button có accessible name/selected state, giữ selection/route behavior; browser regression keyboard navigation từ /challenges.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "LOW"
+  },
+  {
+    "id": "F-01",
+    "workstream": "F",
+    "title": "Native/CI Playwright chạy các reset DB toàn cục song song giữa file và project",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "tests/e2e/playwright.config.ts:8",
+        "note": "Native fullyParallel=true, workers unset; Compose fullyParallel=false/workers1; laptop/phone projects18–30."
+      },
+      {
+        "kind": "F",
+        "ref": "tests/e2e/content-conflict.spec.ts:67",
+        "note": "describe serial chỉ nhóm file này; beforeEach69 resetTestDatabase; both project runs share fixture."
+      },
+      {
+        "kind": "F",
+        "ref": "tests/e2e/cross-device-sync.spec.ts:20",
+        "note": "describe serial và laptop-only skip23; beforeEach27 cũng resetTestDatabase. Nó không khóa file content-conflict."
+      },
+      {
+        "kind": "F",
+        "ref": "tests/e2e/helpers/db-state.ts:13",
+        "note": "Mọi worker/project dùng noteflow_test, cùng owner; reset19–21 gọi global reset và cache clear."
+      },
+      {
+        "kind": "F",
+        "ref": "tests/e2e/helpers/db-helper.php:49",
+        "note": "reset49–53 delete toàn mutation_commands, challenge_target_periods, challenges và sessions; account context owner reset revision0/epoch1 ở73–75."
+      },
+      {
+        "kind": "F",
+        "ref": ".github/workflows/ci.yml:123",
+        "note": "Browser job gọi npm test không --workers=1/Compose override; CI test DB explicit an toàn về endpoint nhưng shared across workers."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/F-probes.log:392",
+        "note": "Pure actual-source config probe exit0 confirms native fullyParallel and no explicit worker limit, Compose workers1."
+      }
+    ],
+    "failure_scenario": "[I] Worker A đang content-conflict (laptop), đã login/tạo journal; worker B bắt đầu cross-device-sync hoặc content-conflict(phone), beforeEach global reset xóa challenge/session của A và reset account_revision. A nhận401/404 hoặc revision/command_count khác expected; test correctness evidence phụ thuộc scheduling. [F] Scope shared/parallel được xác nhận; chưa đo tần suất flaky và không claim CI đã fail.",
+    "affected_paths": [
+      "tests/e2e/playwright.config.ts",
+      "tests/e2e/content-conflict.spec.ts",
+      "tests/e2e/cross-device-sync.spec.ts",
+      "tests/e2e/helpers/db-helper.php",
+      ".github/workflows/ci.yml"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Chọn global workers1/serial cho tất cả real-DB suites hoặc isolate DB/schema/owner theo worker+project với teardown có scope. Giữ mock-only suites parallel nếu ownership tài nguyên rõ. Future check: list runnable project cases, run native/CI twice with repeat-each và chứng minh reset của B không ảnh hưởng A.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "G-01",
+    "workstream": "G",
+    "title": "Chưa xác định nơi chịu trách nhiệm header bảo mật tại production edge",
+    "severity": "MEDIUM",
+    "classification": "NEEDS_HUMAN_DECISION",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "deploy/nginx/noteflow.conf:1",
+        "note": "Server template 24 dòng không khai báo CSP/frame-ancestors, X-Frame-Options hay HSTS."
+      },
+      {
+        "kind": "F",
+        "ref": "deploy/README.md:9",
+        "note": "TLS có thể terminate tại Nginx hoặc upstream; chưa mô tả header policy hay acceptance check tại boundary đó."
+      },
+      {
+        "kind": "H",
+        "ref": "production edge chưa được cung cấp",
+        "note": "Edge bên ngoài có thể đã cấu hình headers; chưa xác minh deployment thật."
+      }
+    ],
+    "failure_scenario": "Dùng riêng template để triển khai → thiếu chính sách frame/CSP và TLS headers tại boundary được kiểm soát trong repo; ảnh hưởng deployment thật phụ thuộc edge chưa biết.",
+    "affected_paths": [
+      "deploy/nginx/noteflow.conf",
+      "deploy/README.md"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Owner xác định boundary chịu trách nhiệm TLS/header; ghi policy và kiểm response tại edge đó. Không thêm HSTS vào local HTTP một cách mặc định.",
+    "proposed_lane": "human decision",
+    "risk_of_fix": "MEDIUM"
+  },
+  {
+    "id": "H-05",
+    "workstream": "H",
+    "title": "Instruction context hiện tại vượt lại ngân sách acceptance 30%",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/H-source-inspect.json",
+        "note": "Exported measureInstructionPair/Context, evidenceRoot:null; script exit 0. Cùng basis d8e8136->98def53:65359->50461/50490 bytes, giảm22.7941%/22.7497%; historical0e4c6b9 tái hiện45551/45580 bytes."
+      },
+      {
+        "kind": "F",
+        "ref": ".agents/scripts/compile-v4-context.mjs:75",
+        "note": "COMMON_INSTRUCTION_PATHS vẫn luôn thêm control-plane.md và artifact-contract.md dù context-routing đòi một L1 mặc định."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/agent-architecture/reviews/v4-acceptance-2026-09-28/final-decision.md:11",
+        "note": "Original deterministic acceptance là giảm ít nhất30% cho cả hai action trên locked common basis."
+      }
+    ],
+    "failure_scenario": "Replay cùng measurement basis tại current code commit -> cả implement_slice và verify_slice dưới mục tiêu30%; full unit suite xanh không kiểm lại budget thực của code hiện tại. Không suy ra provider tokens hay actual Story projection bytes.",
+    "affected_paths": [
+      ".agents/docs/v4-artifact-contract.md",
+      ".agents/scripts/compile-v4-context.mjs",
+      ".agents/scripts/fixtures/v4-architecture/instruction-basis.json",
+      ".agents/skills/v4-story-runner/SKILL.md",
+      "AGENTS.md"
+    ],
+    "related_prior_finding": "2026-09-30:M3; acceptance:F02 (historically resolved; current regression separate)",
+    "proposed_fix": "Tách contract/context theo action và lazy boundary, giữ nguyên basis/criterion hoặc ghi human decision riêng nếu đổi acceptance. Chạy measurement bound exact revision trong regression gate.",
+    "proposed_lane": "V4 migration",
+    "risk_of_fix": "MEDIUM"
+  },
+  {
+    "id": "H-06",
+    "workstream": "H",
+    "title": "Canonical registry chỉ phủ10/192 tracked product paths",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": ".agents/verification/registry.json:1",
+        "note": "Chỉ ba enabled recipes challenge-list,journal-frontend,today-view; v1 map dùng anchors làm effective coverage, v2 dùng covered_paths."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/H-source-inspect.json",
+        "note": "Exit0 inventory toàn bộ192 tracked product/config/test/deploy paths theo universe định nghĩa;182 uncovered, kể cả105/105 backend paths, auth/sync/conflict/account/migrations. Full path lists có trong evidence và H report."
+      },
+      {
+        "kind": "F",
+        "ref": ".agents/scripts/check-verification.mjs:368",
+        "note": "Không recipe -> NOT_APPLICABLE/INCOMPLETE/no checks; pure unmatched probes confirm không PASS hoặc executor invocation."
+      }
+    ],
+    "failure_scenario": "Slice chỉ sửa auth, backend persistence, migrations, sync store hoặc conflict dialog -> canonical coverage không hoàn chỉnh, phải dựa focused evidence+semantic review/disclosure. Gap là coverage; checker vẫn fail-closed.",
+    "affected_paths": [
+      ".agents/features/",
+      ".agents/verification/",
+      "backend/",
+      "frontend/src/stores/",
+      "frontend/src/components/ContentConflictDialog.vue",
+      "contracts/openapi.yaml"
+    ],
+    "related_prior_finding": "2026-10-06:F-06 (coverage portion)",
+    "proposed_fix": "Mở rộng registry theo boundaries auth/time/state/contract/backend đã duyệt, giữ covered_paths riêng dependency anchors, chứng minh recipe evidence thật trước active; không gọi tên recipe là evidence.",
+    "proposed_lane": "V4 migration",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "H-07",
+    "workstream": "H",
+    "title": "Cả ba enabled feature maps đều STALE trên baseline hiện tại",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/H-map-checks.meta.json",
+        "note": "check-feature-map.mjs check từng map exit1; retry1 exit1 cảba. challenge-list mismatchapi+api test, journal-frontend mismatchsync.ts,today-view mismatchapi."
+      },
+      {
+        "kind": "F",
+        "ref": ".agents/scripts/check-verification.mjs:243",
+        "note": "Mismatch ngoài changed_paths là unexplainedDrift; kết quả giữ INCOMPLETE. Kernel known coverage reasons ở:836-838 không chứa UNEXPLAINED_DRIFT."
+      }
+    ],
+    "failure_scenario": "Slice mới sửa pathcovered nhưng không gồm các stale anchors hiện có -> UNEXPLAINED_DRIFT -> kernel chặn thay vì dùng canonical evidence; phải giải quyết governance drift trước. Không có falsePASS.",
+    "affected_paths": [
+      ".agents/features/challenge-list.json",
+      ".agents/features/journal-frontend.json",
+      ".agents/features/today-view.json"
+    ],
+    "related_prior_finding": "2026-10-06:F-06 (anchor portion)",
+    "proposed_fix": "Review thay đổi anchor theo exact product revision rồi cập nhật bằng migration riêng; xác định quy trình upkeep theo slice để dependency drift có disposition minh bạch.",
+    "proposed_lane": "V4 migration",
+    "risk_of_fix": "MEDIUM"
+  },
+  {
+    "id": "H-08",
+    "workstream": "H",
+    "title": "CI không chạy full control-plane suite",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": ".github/workflows/ci.yml:7",
+        "note": "Jobs backend/frontend/browser-smoke/deployment-config không gọi npm run test:v4 hoặc .agents/scripts tests."
+      },
+      {
+        "kind": "F",
+        "ref": "package.json:7",
+        "note": "Full suite chính thức node --test .agents/scripts/*.test.mjs chỉ có root script test:v4."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/B1.meta.json",
+        "note": "Lead chạy local full suite tại auditHEAD03dbd098 exit0,532PASS/1SKIP; điều này không tạo CI job."
+      }
+    ],
+    "failure_scenario": "PR đổi control-plane có regression nhưng product jobs xanh -> CI không phát hiện; policy yêu cầu full exact-commit suite vẫn phải dựa thao tác Lead.",
+    "affected_paths": [
+      ".github/workflows/ci.yml",
+      "package.json"
+    ],
+    "related_prior_finding": "2026-09-30:M6; 2026-10-06:F-10 (process portion)",
+    "proposed_fix": "Thêm job CI full test:v4 trên exact checked-out PR commit, bảo toàn documented Windows-specific skip và không dùng focused subset thay full suite.",
+    "proposed_lane": "V4 migration",
+    "risk_of_fix": "MEDIUM"
+  },
+  {
+    "id": "H-09",
+    "workstream": "H",
+    "title": "Runner CLI, status exits và missing-Plan contract còn lệch API",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": ".agents/scripts/v4-story-runner.mjs:33",
+        "note": "CODES thiếu DONE,APPROVAL_DURABLE_PENDING_COMPLETION,NOOP,APPLIED,REVIEW_REQUIRED; CLI fallback ERROR5 tại:420."
+      },
+      {
+        "kind": "F",
+        "ref": ".agents/scripts/v4-story-runner.mjs:394",
+        "note": "CLI không parse --operation/--input mặc dù API options.operation/options.input route kernel ở:239-268."
+      },
+      {
+        "kind": "F",
+        "ref": ".agents/scripts/v4-story-runner.mjs:219",
+        "note": "Runner readFileSync Plan trước validateStoryPlan, missing file trở thành ERROR ở catch thay PLAN_MISSING mà skill đòi."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/H-failclosed-probes.json",
+        "note": "Pure source CODES evaluation exit0 ghi đúng selected fallback exit5. Runner CLI không chạy vì đọc pointer/ghi observation."
+      }
+    ],
+    "failure_scenario": "API trả DONE/APPROVAL_DURABLE_PENDING_COMPLETION nhưng CLI trảexit5; automation có thể coi thành công là lỗi. Agent muốn implement/verify phải tự dựng JS payload vì CLI thiếu operation/input; missingPlan mất reason chuyên biệt. Không chạy mutation để tái hiện.",
+    "affected_paths": [
+      ".agents/scripts/v4-story-runner.mjs",
+      ".agents/skills/v4-story-runner/actions/implement-slice.md",
+      ".agents/skills/v4-story-runner/actions/verify-slice.md"
+    ],
+    "related_prior_finding": "2026-09-30:M1,M2,M8",
+    "proposed_fix": "Định nghĩa CLI operation/input file + exhaustive exit meanings; kiểm Plan existence trước read; test CLI status contract qua isolated fixtures và full suite.",
+    "proposed_lane": "V4 migration",
+    "risk_of_fix": "MEDIUM"
+  },
+  {
+    "id": "H-10",
+    "workstream": "H",
+    "title": "Metadata transaction vẫn bị chặn bởi unrelated untracked docs và HEAD-bound pending",
+    "severity": "MEDIUM",
+    "classification": "NEEDS_HUMAN_DECISION",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": ".agents/scripts/v4-action-kernel.mjs:1079",
+        "note": "Verification recheck từ chối inventory có bất kỳ staged/unstaged/untracked path; không lọc unrelated docs."
+      },
+      {
+        "kind": "F",
+        "ref": ".agents/scripts/v4-action-kernel.mjs:1072",
+        "note": "Preview recheck đòi exact HEAD; commit unrelated docs làm stale verification input."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/agent-architecture/reviews/story-1-5-vs-1-6-audit-2026-10-06/audit-report.md:186",
+        "note": "PriorF05 ghi incidents docs noise chặn review; current strict inventory guard vẫn tồn tại."
+      }
+    ],
+    "failure_scenario": "Verify đã tạo pending; người dùng thêm docs untracked -> record-review recheck DIRTY_SCOPE_MISMATCH. Commit docs -> expected HEAD stale và phải verify lại. Đây là guard có chủ ý với tradeoff chưa được human disposition.",
+    "affected_paths": [
+      ".agents/scripts/v4-action-kernel.mjs",
+      ".agents/scripts/v4-slice-transaction.mjs"
+    ],
+    "related_prior_finding": "2026-10-06:F-05",
+    "proposed_fix": "Human chọn whole-worktree clean hoặc scope clean; nếu scope clean thì fingerprint/immutable authority paths và exact index staging phải vẫn chặn relevant drift, foreign metadata và hooks.",
+    "proposed_lane": "human decision",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "H-11",
+    "workstream": "H",
+    "title": "BMAD menu gọi legacy Story lane và tám skill chưa được cài",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": ".agents/skills/bmad-agent-dev/customize.toml:58",
+        "note": "BD description implement feature/fix/story dispatches bmad-build; bmad-build SKILL:3 chỉ cho explicit legacy/freeform, approvedStory phải story-development."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/H-source-inspect.json",
+        "note": "16 BMAD menu skill references;8 absent local targets: bmad-brainstorming,product-brief,prfaq,project-context,qa-generate-e2e-tests,retrospective,prd,ux. Current exposed skill catalog cũng không có tám id này."
+      },
+      {
+        "kind": "F",
+        "ref": ".agents/skills/bmad-agent-dev/SKILL.md:66",
+        "note": "Persona menu dispatches intent trực tiếp sau activation; no _bmad/custom team overrides được track/hiện diện trong worktree."
+      }
+    ],
+    "failure_scenario": "User chọn Amelia BD cho approvedStory -> menu chỉ legacy bmad-build, root routing phải override. User chọn John PRD/Sally UX hoặc các menu thiếu khác -> named skill không available, phải dừng hoặc tìm fallback. Không activation/install trong audit.",
+    "affected_paths": [
+      ".agents/skills/bmad-agent-dev/customize.toml",
+      ".agents/skills/bmad-agent-pm/customize.toml",
+      ".agents/skills/bmad-agent-analyst/customize.toml",
+      ".agents/skills/bmad-agent-ux-designer/customize.toml",
+      "skills-lock.json"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Dùng team menu overrides để Story approved route story-development/V4 opt-in đúng policy; ẩn/ghi unavailable các menu targets chưa cài hoặc human chọn cài những capability thực cần. Không sửa upstream customize overwritten-on-update để tạo drift.",
+    "proposed_lane": "V4 migration",
+    "risk_of_fix": "MEDIUM"
+  },
+  {
+    "id": "I-01",
+    "workstream": "I",
+    "title": "README vẫn mô tả dự án chưa có domain Challenge/Today",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "README.md:150",
+        "note": "Tài liệu hiện nói foundation chưa có Challenge/Today/domain behavior."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/routes/api.php:21",
+        "note": "Routes sản phẩm Challenge/Journal tồn tại."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/views/TodayView.vue:1",
+        "note": "Today view đã có product behavior."
+      }
+    ],
+    "failure_scenario": "Người onboarding dùng README để xác định phạm vi hiện tại → bỏ qua module và quality gates sản phẩm đã tồn tại.",
+    "affected_paths": [
+      "README.md"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Cập nhật current-capabilities section và liên kết tới sprint/architecture; giữ lịch sử Story 1.1 trong tài liệu riêng.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "LOW"
+  },
+  {
+    "id": "G-02",
+    "workstream": "G",
+    "title": "Docker base image và runtime tags chưa được pin bằng digest",
+    "severity": "LOW",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "deploy/local/Dockerfile:1",
+        "note": "PHP base dùng tag release line; composer stage dùng major tag ở dòng 3."
+      },
+      {
+        "kind": "F",
+        "ref": "compose.local.yaml:5",
+        "note": "PostgreSQL dùng major tag; backend dùng dev tag (25); test profile tương tự (79,100)."
+      }
+    ],
+    "failure_scenario": "Hai lần pull/build cùng source ở thời điểm khác nhau → có thể dùng image bytes khác dù source/lockfile không đổi.",
+    "affected_paths": [
+      "deploy/local/Dockerfile",
+      "compose.local.yaml"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Khi cần release reproducible, lưu resolved digest và quy trình cập nhật; vẫn giữ lockfile/check-platform-reqs.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "LOW"
+  },
+  {
+    "id": "I-02",
+    "workstream": "I",
+    "title": "Timestamp sprint-status cũ hơn các lifecycle commit đã ghi nhận",
+    "severity": "LOW",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/sprint-status.yaml:32",
+        "note": "last_updated vẫn 2026-09-19, trong khi Story 1.5/1.6 đã done ở 43-44."
+      },
+      {
+        "kind": "F",
+        "ref": "30778c7",
+        "note": "Story 1.6 completion commit tồn tại tháng 10; timestamp metadata không phản ánh lifecycle hiện tại."
+      }
+    ],
+    "failure_scenario": "Dùng last_updated để đánh giá freshness hoặc chọn tài liệu tiến độ → kết luận sprint chưa được cập nhật sau 19/09 dù trạng thái đã đổi.",
+    "affected_paths": [
+      "_bmad-output/implementation-artifacts/sprint-status.yaml"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Cập nhật timestamp qua workflow lifecycle được chọn ở lần sửa sau; không sửa state trong audit.",
+    "proposed_lane": "V4 migration",
+    "risk_of_fix": "LOW"
+  },
+  {
+    "id": "A-04",
+    "workstream": "A",
+    "title": "Plan tách story_path khỏi sprint_key và xử lý biến thể dấu hiện tại",
+    "severity": "INFO",
+    "classification": "FALSE_POSITIVE",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/sprint-status.yaml:43",
+        "note": "43–44 dùng accented keys cho1.5/1.6; actual Story filenames không dấu."
+      },
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/story-1-5-plan.md:5",
+        "note": "Actual story.path không dấu được lưu riêng với sprint_key có dấu ở10. story-1-6-plan.md:5/:10 dùng cùng cấu trúc."
+      },
+      {
+        "kind": "F",
+        "ref": ".agents/scripts/v4-separated-plan.mjs:169",
+        "note": "Safe path resolver dùng plan.story.path; không suy path từ sprint_key."
+      },
+      {
+        "kind": "F",
+        "ref": ".agents/scripts/complete-story.mjs:183",
+        "note": "183 rewrite Story theo resolved path;186 replace sprint entry theo plan.sprint_key. Hai identifier được tiêu thụ độc lập."
+      },
+      {
+        "kind": "F",
+        "ref": ".agents/skills/bmad-sprint-planning/scripts/sprint_plan.py:278",
+        "note": "Legacy disk-ready heuristic chỉ khớp exact key.md;280 merge current done status. Không chạy regeneration và không xác nhận current failure."
+      }
+    ],
+    "failure_scenario": "[I] Candidate cho rằng accented sprint key phải bằng filename nên current V4 completion lỗi bị bác bởi explicit Plan.path/key consumers. [F] Hai current entries done và terminal Plan complete có historical completion records. [I] Legacy exact-filename heuristic chỉ là watchpoint khi rebuild absent/backlog entries, không phải finding current pipeline.",
+    "affected_paths": [
+      "_bmad-output/implementation-artifacts/sprint-status.yaml",
+      "_bmad-output/implementation-artifacts/story-1-5-plan.md",
+      "_bmad-output/implementation-artifacts/story-1-6-plan.md",
+      ".agents/scripts/v4-separated-plan.mjs",
+      ".agents/scripts/complete-story.mjs",
+      ".agents/skills/bmad-sprint-planning/scripts/sprint_plan.py"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "[I] Không cần sửa current V4 pipeline hoặc rename Story. Nếu sau này thay legacy sprint regeneration, xác minh ID/path mapping cho cả accented/ASCII fixtures và preserve existing lifecycle; chỉ chọn V4 migration nếu human yêu cầu thay control-plane.",
+    "proposed_lane": "human decision",
+    "risk_of_fix": "LOW"
+  }
+]

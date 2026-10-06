@@ -1,0 +1,17 @@
+[
+  {
+    "command": "node .agents/scripts/check-feature-map.mjs check .agents/features/challenge-list.json",
+    "exit_code": 1,
+    "output_path": "logs/H-map-challenge-list-retry1.log"
+  },
+  {
+    "command": "node .agents/scripts/check-feature-map.mjs check .agents/features/journal-frontend.json",
+    "exit_code": 1,
+    "output_path": "logs/H-map-journal-frontend-retry1.log"
+  },
+  {
+    "command": "node .agents/scripts/check-feature-map.mjs check .agents/features/today-view.json",
+    "exit_code": 1,
+    "output_path": "logs/H-map-today-view-retry1.log"
+  }
+]

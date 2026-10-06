@@ -1,0 +1,14 @@
+✔ db-helper rejects a non-testing database before PostgreSQL connection (565.6267ms)
+✔ db-helper rejects missing identity variables before PostgreSQL connection (296.6765ms)
+✔ native mode invokes PHP with argv and the selected working directory (2.6281ms)
+✔ compose mode invokes the fixed backend-test service without a shell (0.6871ms)
+✔ arguments containing spaces remain one argument (0.2569ms)
+✔ invalid mode and mixed compose identity are rejected before execution (0.8722ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1216.4913

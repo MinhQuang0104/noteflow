@@ -1,0 +1,9 @@
+{
+  "id": "B14-ignore",
+  "command": "git ls-files -i -c --exclude-standard",
+  "cwd": "D:\\Workspace\\Tu_Hoc\\New_Project_My_Note\\.worktrees\\full-project-audit",
+  "started_utc": "2026-10-06T03:56:32.5440404Z",
+  "seconds": 0.2014784,
+  "exit_code": 0,
+  "log": "B14-ignore.log"
+}

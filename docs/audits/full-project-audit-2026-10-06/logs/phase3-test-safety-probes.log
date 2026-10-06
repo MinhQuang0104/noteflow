@@ -1,0 +1,52 @@
+{
+  "independent_lead_probe": true,
+  "native": {
+    "parallel": true,
+    "workers": "default",
+    "non_test_database_inherited": true,
+    "url_inherited": true
+  },
+  "compose": {
+    "parallel": false,
+    "workers": 1
+  },
+  "phpunit_db_entries": [
+    {
+      "name": "APP_ENV",
+      "force": false
+    },
+    {
+      "name": "DB_CONNECTION",
+      "force": false
+    },
+    {
+      "name": "DB_HOST",
+      "force": false
+    },
+    {
+      "name": "DB_PORT",
+      "force": false
+    },
+    {
+      "name": "DB_DATABASE",
+      "force": false
+    },
+    {
+      "name": "DB_USERNAME",
+      "force": false
+    },
+    {
+      "name": "DB_PASSWORD",
+      "force": false
+    },
+    {
+      "name": "DB_URL",
+      "force": false
+    }
+  ],
+  "test_case_preconnection_guard": false,
+  "unscoped_delete_setup": true,
+  "runtime": "actual Playwright config evaluated with config/device/process stubs; PHPUnit XML/static destructive call trace",
+  "limits": "No Playwright, PHPUnit, Laravel app or database invoked. PHPUnit env retention sourced from official13.4 docs, exact13.3.3 handler unavailable; Laravel pinned URL merge source independently read.",
+  "kernel_or_browser_or_database_invoked": false
+}

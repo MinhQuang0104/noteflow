@@ -1,0 +1,1250 @@
+{
+  "command": "git ls-files -- <WS-H scope>; static UTF-8 source inventory (no execution)",
+  "exit_code": 0,
+  "scope_files": 99,
+  "top_level_mjs": 67,
+  "top_level_test_mjs": 34,
+  "files": [
+    {
+      "path": ".agents/context/context-routing.md",
+      "bytes": 1039,
+      "lines": 20,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/context/control-plane.md",
+      "bytes": 752,
+      "lines": 8,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": true,
+      "exports": null
+    },
+    {
+      "path": ".agents/context/verification-context.md",
+      "bytes": 2038,
+      "lines": 18,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/features/challenge-list.json",
+      "bytes": 1558,
+      "lines": 49,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/features/journal-frontend.json",
+      "bytes": 1651,
+      "lines": 33,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/features/today-view.json",
+      "bytes": 1130,
+      "lines": 25,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/policies/orchestration-v3.md",
+      "bytes": 43332,
+      "lines": 615,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": true,
+      "exports": null
+    },
+    {
+      "path": ".agents/policies/v3-telemetry.md",
+      "bytes": 9853,
+      "lines": 105,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/routing/task-router.md",
+      "bytes": 1718,
+      "lines": 16,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": true,
+      "exports": null
+    },
+    {
+      "path": ".agents/schemas/run-state.schema.json",
+      "bytes": 9003,
+      "lines": 262,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/schemas/worker-report.schema.json",
+      "bytes": 6525,
+      "lines": 113,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/schemas/worker-state.schema.json",
+      "bytes": 5391,
+      "lines": 157,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/benchmark-v4-v2.mjs",
+      "bytes": 30698,
+      "lines": 467,
+      "test": false,
+      "direct_write_apis": [
+        "mkdirSync",
+        "renameSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": true,
+      "exports": [
+        "BUNDLE_SCHEMA_VERSION",
+        "CODES",
+        "DEFAULT_SOURCE_PATHS",
+        "digestText",
+        "digestBytes",
+        "normalizeComparisonBundle",
+        "compareBundles",
+        "buildCandidateBundle",
+        "writeCandidateBundle"
+      ]
+    },
+    {
+      "path": ".agents/scripts/benchmark-v4.mjs",
+      "bytes": 2133,
+      "lines": 46,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": [
+        "BUNDLE_SCHEMA_VERSION",
+        "CODES",
+        "normalizeComparisonBundle",
+        "compareBundles",
+        "buildCandidateBundle",
+        "writeCandidateBundle"
+      ]
+    },
+    {
+      "path": ".agents/scripts/benchmark-v4.test.mjs",
+      "bytes": 17327,
+      "lines": 359,
+      "test": true,
+      "direct_write_apis": [
+        "mkdirSync",
+        "mkdtempSync",
+        "rmSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/check-artifact-contract.mjs",
+      "bytes": 10577,
+      "lines": 171,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": [
+        "receiptDigest",
+        "inspectStory",
+        "normativeDigest",
+        "validateTaskSlices",
+        "attemptReceiptPath",
+        "readReceipt",
+        "readReceiptForAttempt",
+        "validateReceipt"
+      ]
+    },
+    {
+      "path": ".agents/scripts/check-artifact-contract.test.mjs",
+      "bytes": 7769,
+      "lines": 129,
+      "test": true,
+      "direct_write_apis": [
+        "mkdtempSync",
+        "rmSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/check-escalation.mjs",
+      "bytes": 3348,
+      "lines": 90,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/check-feature-map.mjs",
+      "bytes": 4054,
+      "lines": 108,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/check-slice-implementation.mjs",
+      "bytes": 21067,
+      "lines": 449,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": "inspect"
+    },
+    {
+      "path": ".agents/scripts/check-slice-implementation.test.mjs",
+      "bytes": 13519,
+      "lines": 311,
+      "test": true,
+      "direct_write_apis": [
+        "mkdirSync",
+        "mkdtempSync",
+        "rmSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/check-slice-verification.mjs",
+      "bytes": 18088,
+      "lines": 349,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": [
+        "canonicalPaths",
+        "pathListDigest",
+        "stableDigest",
+        "inspect"
+      ]
+    },
+    {
+      "path": ".agents/scripts/check-slice-verification.test.mjs",
+      "bytes": 14988,
+      "lines": 322,
+      "test": true,
+      "direct_write_apis": [
+        "mkdirSync",
+        "mkdtempSync",
+        "rmSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/check-story-completion.mjs",
+      "bytes": 27260,
+      "lines": 488,
+      "test": false,
+      "direct_write_apis": [
+        "mkdtempSync",
+        "rmSync"
+      ],
+      "runtime_state_source_references": true,
+      "exports": [
+        "doneGateSummaryDigest",
+        "explicitApprovalInput",
+        "approvalRecordForSnapshot",
+        "inspectCompletion",
+        "completionSnapshot"
+      ]
+    },
+    {
+      "path": ".agents/scripts/check-story-completion.test.mjs",
+      "bytes": 15666,
+      "lines": 363,
+      "test": true,
+      "direct_write_apis": "rmSync",
+      "runtime_state_source_references": true,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/check-story-finalization.architecture.test.mjs",
+      "bytes": 1956,
+      "lines": 42,
+      "test": true,
+      "direct_write_apis": [
+        "appendFileSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/check-story-finalization.mjs",
+      "bytes": 49052,
+      "lines": 931,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": true,
+      "exports": [
+        "stableDigest",
+        "pathListDigest",
+        "classifyFinalizationRecovery",
+        "deriveScope",
+        "inspectFinalization"
+      ]
+    },
+    {
+      "path": ".agents/scripts/check-story-finalization.test.mjs",
+      "bytes": 27306,
+      "lines": 592,
+      "test": true,
+      "direct_write_apis": [
+        "mkdirSync",
+        "mkdtempSync",
+        "rmSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": true,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/check-story-plan.mjs",
+      "bytes": 16275,
+      "lines": 290,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": [
+        "frontmatter",
+        "validate"
+      ]
+    },
+    {
+      "path": ".agents/scripts/check-story-plan.test.mjs",
+      "bytes": 15552,
+      "lines": 327,
+      "test": true,
+      "direct_write_apis": [
+        "mkdirSync",
+        "mkdtempSync",
+        "rmSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/check-verification.mjs",
+      "bytes": 18131,
+      "lines": 420,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": [
+        "classifyMapResult",
+        "verifyChangedPaths"
+      ]
+    },
+    {
+      "path": ".agents/scripts/check-verification.test.mjs",
+      "bytes": 7595,
+      "lines": 164,
+      "test": true,
+      "direct_write_apis": [
+        "mkdirSync",
+        "mkdtempSync",
+        "rmSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/compile-v4-context.mjs",
+      "bytes": 21056,
+      "lines": 479,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": true,
+      "exports": "compileActionContext"
+    },
+    {
+      "path": ".agents/scripts/compile-v4-context.test.mjs",
+      "bytes": 7754,
+      "lines": 190,
+      "test": true,
+      "direct_write_apis": [
+        "mkdirSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/complete-story.mjs",
+      "bytes": 15071,
+      "lines": 312,
+      "test": false,
+      "direct_write_apis": [
+        "mkdirSync",
+        "renameSync",
+        "unlinkSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": true,
+      "exports": [
+        "prepareCompletion",
+        "recordHumanApproval",
+        "applyCompletion"
+      ]
+    },
+    {
+      "path": ".agents/scripts/complete-story.test.mjs",
+      "bytes": 4833,
+      "lines": 115,
+      "test": true,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/completion-fixture.mjs",
+      "bytes": 11686,
+      "lines": 265,
+      "test": false,
+      "direct_write_apis": [
+        "mkdirSync",
+        "mkdtempSync",
+        "rmSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": true,
+      "exports": [
+        "STORY",
+        "PLAN",
+        "EPIC",
+        "SPRINT",
+        "FINALIZATION",
+        "reviewEvidenceRefs",
+        "reviewScopeDigest",
+        "createCompletionFixture"
+      ]
+    },
+    {
+      "path": ".agents/scripts/dual-schema.test.mjs",
+      "bytes": 17201,
+      "lines": 372,
+      "test": true,
+      "direct_write_apis": [
+        "mkdirSync",
+        "mkdtempSync",
+        "rmSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/finalization-contract.mjs",
+      "bytes": 8110,
+      "lines": 165,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": [
+        "stableFinalizationDigest",
+        "finalizationDisposition",
+        "validateFinalizationReceipt",
+        "renderCompletionBlock"
+      ]
+    },
+    {
+      "path": ".agents/scripts/finalization-contract.test.mjs",
+      "bytes": 5110,
+      "lines": 143,
+      "test": true,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/finalization-plan-state.test.mjs",
+      "bytes": 8370,
+      "lines": 229,
+      "test": true,
+      "direct_write_apis": [
+        "mkdirSync",
+        "mkdtempSync",
+        "rmSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": true,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/finalization-recovery.mjs",
+      "bytes": 23872,
+      "lines": 395,
+      "test": false,
+      "direct_write_apis": [
+        "mkdirSync",
+        "renameSync",
+        "unlinkSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": true,
+      "exports": [
+        "prepareFinalizationRecovery",
+        "applyFinalizationRecovery"
+      ]
+    },
+    {
+      "path": ".agents/scripts/finalization-recovery.test.mjs",
+      "bytes": 12868,
+      "lines": 275,
+      "test": true,
+      "direct_write_apis": [
+        "mkdirSync",
+        "mkdtempSync",
+        "rmSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": true,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/finalize-story.mjs",
+      "bytes": 20234,
+      "lines": 516,
+      "test": false,
+      "direct_write_apis": [
+        "mkdirSync",
+        "renameSync",
+        "unlinkSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": false,
+      "exports": [
+        "runFinalizationGit",
+        "gitFailure",
+        "parseGitPaths",
+        "buildFinalizationPreview",
+        "projectFinalization",
+        "prepareFinalization",
+        "applyFinalization"
+      ]
+    },
+    {
+      "path": ".agents/scripts/finalize-story.test.mjs",
+      "bytes": 29244,
+      "lines": 556,
+      "test": true,
+      "direct_write_apis": [
+        "mkdirSync",
+        "mkdtempSync",
+        "rmSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": true,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/fixtures/artifact-contract/plan.json",
+      "bytes": 1023,
+      "lines": 13,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/fixtures/artifact-contract/receipt.json",
+      "bytes": 631,
+      "lines": 15,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/fixtures/artifact-contract/story-9-1.md",
+      "bytes": 1127,
+      "lines": 57,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/fixtures/v4-architecture/corpus.json",
+      "bytes": 1144,
+      "lines": 45,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/fixtures/v4-architecture/instruction-basis.json",
+      "bytes": 1553,
+      "lines": 20,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/measure-v4-instruction-context.mjs",
+      "bytes": 9455,
+      "lines": 180,
+      "test": false,
+      "direct_write_apis": [
+        "mkdirSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": false,
+      "exports": [
+        "digestText",
+        "digestBytes",
+        "measureInstructionContext",
+        "measureInstructionPair"
+      ]
+    },
+    {
+      "path": ".agents/scripts/measure-v4-instruction-context.test.mjs",
+      "bytes": 6401,
+      "lines": 136,
+      "test": true,
+      "direct_write_apis": [
+        "mkdirSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/prepare-change-evidence.mjs",
+      "bytes": 17602,
+      "lines": 403,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": "validateEvidenceSet"
+    },
+    {
+      "path": ".agents/scripts/prepare-change-evidence.test.mjs",
+      "bytes": 14782,
+      "lines": 274,
+      "test": true,
+      "direct_write_apis": [
+        "mkdtempSync",
+        "rmSync",
+        "unlinkSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/reconcile-story-lifecycle.mjs",
+      "bytes": 15261,
+      "lines": 206,
+      "test": false,
+      "direct_write_apis": [
+        "renameSync",
+        "unlinkSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": true,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/reconcile-story-lifecycle.test.mjs",
+      "bytes": 15202,
+      "lines": 179,
+      "test": true,
+      "direct_write_apis": [
+        "mkdirSync",
+        "mkdtempSync",
+        "rmSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": true,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/run-v4-architecture-corpus.mjs",
+      "bytes": 20198,
+      "lines": 346,
+      "test": false,
+      "direct_write_apis": [
+        "mkdirSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": false,
+      "exports": "runArchitectureCorpus"
+    },
+    {
+      "path": ".agents/scripts/run-v4-architecture-corpus.test.mjs",
+      "bytes": 4463,
+      "lines": 90,
+      "test": true,
+      "direct_write_apis": [
+        "mkdtempSync",
+        "rmSync"
+      ],
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/start-story.mjs",
+      "bytes": 17802,
+      "lines": 224,
+      "test": false,
+      "direct_write_apis": [
+        "renameSync",
+        "unlinkSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": true,
+      "exports": [
+        "inspectStart",
+        "applyStart"
+      ]
+    },
+    {
+      "path": ".agents/scripts/start-story.test.mjs",
+      "bytes": 15022,
+      "lines": 243,
+      "test": true,
+      "direct_write_apis": [
+        "mkdirSync",
+        "mkdtempSync",
+        "rmSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": true,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/v4-action-kernel.mjs",
+      "bytes": 104841,
+      "lines": 1747,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": true,
+      "exports": [
+        "prepareRework",
+        "applyRework",
+        "verifySlice",
+        "recordSliceReview",
+        "prepareAction",
+        "checkpointImplementation",
+        "prepareStagedRecovery",
+        "applyStagedRecovery",
+        "inspectActionTransactionPublic",
+        "actionFingerprint"
+      ]
+    },
+    {
+      "path": ".agents/scripts/v4-action-kernel.test.mjs",
+      "bytes": 26254,
+      "lines": 424,
+      "test": true,
+      "direct_write_apis": [
+        "mkdirSync",
+        "mkdtempSync",
+        "rmSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": true,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/v4-architecture-baseline.test.mjs",
+      "bytes": 5663,
+      "lines": 137,
+      "test": true,
+      "direct_write_apis": "writeFileSync",
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/v4-architecture-fixture.mjs",
+      "bytes": 10619,
+      "lines": 287,
+      "test": false,
+      "direct_write_apis": [
+        "mkdirSync",
+        "mkdtempSync",
+        "rmSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": true,
+      "exports": [
+        "createV4Fixture",
+        "gitIdentity",
+        "buildComparisonBundle"
+      ]
+    },
+    {
+      "path": ".agents/scripts/v4-check-executor.mjs",
+      "bytes": 16351,
+      "lines": 387,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": [
+        "captureWorktreeSubject",
+        "executeCheck",
+        "validateCheckEvidence"
+      ]
+    },
+    {
+      "path": ".agents/scripts/v4-check-executor.test.mjs",
+      "bytes": 6761,
+      "lines": 160,
+      "test": true,
+      "direct_write_apis": [
+        "mkdirSync",
+        "mkdtempSync",
+        "rmSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/v4-context-invariants.architecture.test.mjs",
+      "bytes": 3832,
+      "lines": 91,
+      "test": true,
+      "direct_write_apis": [
+        "mkdirSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/v4-evolution.mjs",
+      "bytes": 20918,
+      "lines": 401,
+      "test": false,
+      "direct_write_apis": [
+        "mkdirSync",
+        "renameSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": true,
+      "exports": [
+        "evolutionDigest",
+        "validateEvolutionCandidate",
+        "proposeEvolution",
+        "evaluateEvolution",
+        "validateAdoption",
+        "readEvolutionCandidates"
+      ]
+    },
+    {
+      "path": ".agents/scripts/v4-evolution.test.mjs",
+      "bytes": 10310,
+      "lines": 192,
+      "test": true,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/v4-experience.mjs",
+      "bytes": 20575,
+      "lines": 461,
+      "test": false,
+      "direct_write_apis": [
+        "mkdirSync",
+        "renameSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": true,
+      "exports": [
+        "validateExperience",
+        "extractExperience",
+        "selectExperience"
+      ]
+    },
+    {
+      "path": ".agents/scripts/v4-experience.test.mjs",
+      "bytes": 8874,
+      "lines": 179,
+      "test": true,
+      "direct_write_apis": [
+        "mkdirSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/v4-finalization-contract.mjs",
+      "bytes": 7994,
+      "lines": 132,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": [
+        "digestValue",
+        "canonicalPaths",
+        "reviewDecision",
+        "receiptKindsForAttemptStatus",
+        "reviewEvidenceFreshness",
+        "REVIEW_RECEIPT_SCHEMA_VERSION",
+        "LEGACY_REVIEW_RECEIPT_CUTOFF",
+        "reviewReceiptDialect",
+        "legacyReviewFreshness",
+        "inferCanonicalApplicability"
+      ]
+    },
+    {
+      "path": ".agents/scripts/v4-finalization-contract.test.mjs",
+      "bytes": 4602,
+      "lines": 63,
+      "test": true,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/v4-metadata-recovery.mjs",
+      "bytes": 10833,
+      "lines": 161,
+      "test": false,
+      "direct_write_apis": [
+        "mkdirSync",
+        "renameSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": true,
+      "exports": [
+        "prepareMetadataAbort",
+        "applyMetadataAbort"
+      ]
+    },
+    {
+      "path": ".agents/scripts/v4-observation-hooks.test.mjs",
+      "bytes": 7266,
+      "lines": 133,
+      "test": true,
+      "direct_write_apis": [
+        "mkdirSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/v4-observations.mjs",
+      "bytes": 22400,
+      "lines": 513,
+      "test": false,
+      "direct_write_apis": "mkdirSync",
+      "runtime_state_source_references": true,
+      "exports": [
+        "normalizeUsage",
+        "createObservation",
+        "recordHookObservation",
+        "recordActionStarted",
+        "recordActionFinished",
+        "recordCheckFinished",
+        "recordContextDelivered",
+        "recordReflectionRequested",
+        "recordSessionCheckpoint",
+        "recordSessionClosed",
+        "recordStoryReviewSnapshot",
+        "recordStoryCompleted",
+        "recordObservation",
+        "readObservationEvents",
+        "summarizeObservations"
+      ]
+    },
+    {
+      "path": ".agents/scripts/v4-observations.test.mjs",
+      "bytes": 8006,
+      "lines": 187,
+      "test": true,
+      "direct_write_apis": "writeFileSync",
+      "runtime_state_source_references": true,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/v4-rework.test.mjs",
+      "bytes": 21310,
+      "lines": 381,
+      "test": true,
+      "direct_write_apis": [
+        "mkdirSync",
+        "mkdtempSync",
+        "rmSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": true,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/v4-separated-plan.mjs",
+      "bytes": 21537,
+      "lines": 325,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": [
+        "separatedStory",
+        "validateSeparatedPlan"
+      ]
+    },
+    {
+      "path": ".agents/scripts/v4-slice-transaction.mjs",
+      "bytes": 59326,
+      "lines": 1093,
+      "test": false,
+      "direct_write_apis": [
+        "mkdirSync",
+        "renameSync",
+        "unlinkSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": true,
+      "exports": [
+        "gitTransformContext",
+        "snapshotWorkingFiles",
+        "matchesWorkingSnapshot",
+        "transactionIdentity",
+        "inspectActionTransaction",
+        "executeSliceTransaction",
+        "prepareStagedRecoveryTransaction",
+        "executeStagedRecoveryTransaction",
+        "executeMetadataTransaction",
+        "transactionPathDigest",
+        "transactionHash"
+      ]
+    },
+    {
+      "path": ".agents/scripts/v4-slice-transaction.test.mjs",
+      "bytes": 16619,
+      "lines": 315,
+      "test": true,
+      "direct_write_apis": [
+        "mkdirSync",
+        "mkdtempSync",
+        "rmSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/v4-story-runner.mjs",
+      "bytes": 21469,
+      "lines": 426,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": true,
+      "exports": [
+        "V4_AUTHORIZED_ACTIONS",
+        "storyCheckoutState",
+        "humanApprovalIntent",
+        "routeAction",
+        "runV4Story",
+        "authorizeAction",
+        "runAction"
+      ]
+    },
+    {
+      "path": ".agents/scripts/v4-story-runner.test.mjs",
+      "bytes": 7468,
+      "lines": 178,
+      "test": true,
+      "direct_write_apis": [
+        "mkdtempSync",
+        "rmSync"
+      ],
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/scripts/v4-verification-flow.test.mjs",
+      "bytes": 35517,
+      "lines": 562,
+      "test": true,
+      "direct_write_apis": [
+        "mkdirSync",
+        "mkdtempSync",
+        "rmSync",
+        "writeFileSync"
+      ],
+      "runtime_state_source_references": true,
+      "exports": null
+    },
+    {
+      "path": ".agents/skills/v4-story-runner/actions/complete-story.md",
+      "bytes": 1563,
+      "lines": 37,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/skills/v4-story-runner/actions/finalize-story.md",
+      "bytes": 2026,
+      "lines": 39,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/skills/v4-story-runner/actions/implement-slice.md",
+      "bytes": 2237,
+      "lines": 28,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/skills/v4-story-runner/actions/reconcile-lifecycle.md",
+      "bytes": 1263,
+      "lines": 24,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/skills/v4-story-runner/actions/start-story.md",
+      "bytes": 2281,
+      "lines": 53,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": true,
+      "exports": null
+    },
+    {
+      "path": ".agents/skills/v4-story-runner/actions/verify-slice.md",
+      "bytes": 2264,
+      "lines": 26,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/skills/v4-story-runner/references/implementation-techniques.md",
+      "bytes": 1259,
+      "lines": 23,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/skills/v4-story-runner/references/recovery.md",
+      "bytes": 9340,
+      "lines": 136,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/skills/v4-story-runner/SKILL.md",
+      "bytes": 3508,
+      "lines": 37,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": true,
+      "exports": null
+    },
+    {
+      "path": ".agents/verification/challenge-list.json",
+      "bytes": 672,
+      "lines": 22,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/verification/journal-frontend.json",
+      "bytes": 871,
+      "lines": 27,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/verification/registry.json",
+      "bytes": 451,
+      "lines": 21,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": ".agents/verification/today-view.json",
+      "bytes": 697,
+      "lines": 23,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    },
+    {
+      "path": "AGENTS.md",
+      "bytes": 3318,
+      "lines": 30,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": true,
+      "exports": null
+    },
+    {
+      "path": "CLAUDE.md",
+      "bytes": 232,
+      "lines": 4,
+      "test": false,
+      "direct_write_apis": null,
+      "runtime_state_source_references": false,
+      "exports": null
+    }
+  ]
+}

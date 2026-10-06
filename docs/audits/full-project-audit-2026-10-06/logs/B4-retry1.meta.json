@@ -1,0 +1,9 @@
+{
+  "id": "B4-retry1",
+  "command": "npm run lint",
+  "cwd": "D:\\Workspace\\Tu_Hoc\\New_Project_My_Note\\.worktrees\\full-project-audit\\frontend",
+  "started_utc": "2026-10-06T03:57:57.0327007Z",
+  "seconds": 1.5403493,
+  "exit_code": 1,
+  "log": "B4-retry1.log"
+}

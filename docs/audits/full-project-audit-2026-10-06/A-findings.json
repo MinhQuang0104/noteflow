@@ -1,0 +1,207 @@
+[
+  {
+    "id": "A-01",
+    "workstream": "A",
+    "title": "Story 1.6 AC4 thiếu actual screen-reader acceptance evidence",
+    "severity": "HIGH",
+    "classification": "NEEDS_HUMAN_DECISION",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/1-6-giai-quyet-xung-dot-noi-dung-giua-hai-thiet-bi.md:29",
+        "note": "AC4 bao gồm keyboard, touch và screen reader, focus/labels/scroll/focus return."
+      },
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/1-6-giai-quyet-xung-dot-noi-dung-giua-hai-thiet-bi.md:41",
+        "note": "T7 yêu cầu actual platform/browser/AT; dòng42 không cho coi missing browser/AT evidence là PASS."
+      },
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/receipts/story-1-6/E-verification.json:228",
+        "note": "manual_screen_reader được ghi NOT_RUN, không phải PASS."
+      },
+      {
+        "kind": "F",
+        "ref": "tests/e2e/content-conflict.spec.ts:202",
+        "note": "Assertions tới246 kiểm semantics/focus/touch/reflow/scroll; dòng240 tự giới hạn không claim manual AT."
+      },
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/story-1-6-plan.md:285",
+        "note": "Historical Human approval ở285–301 APPROVED và disclosures_acknowledged=true; finalization là SATISFIED_WITH_DISCLOSURES ở280. Finding không cáo buộc giả approval."
+      },
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/1-6-giai-quyet-xung-dot-noi-dung-giua-hai-thiet-bi.md:100",
+        "note": "AC4 được tổng hợp COVERED bằng fallback receipt, trong khi actual AT obligation vẫn NOT_RUN."
+      }
+    ],
+    "failure_scenario": "[F] Conflict dialog được mở với local/server text, AC4 đòi actual screen reader nhưng lịch sử receipt ghi NOT_RUN. [I] Keyboard/touch/ARIA assertions chưa chứng minh toàn AC; audit coverage là PARTIAL dù lifecycle done có disclosed approval. [H] Việc AT đọc snapshot/choice/announcement và trả focus đúng trên platform thật chưa kiểm chứng; không khẳng định lỗi AT đã xảy ra.",
+    "affected_paths": [
+      "_bmad-output/implementation-artifacts/1-6-giai-quyet-xung-dot-noi-dung-giua-hai-thiet-bi.md",
+      "_bmad-output/implementation-artifacts/story-1-6-plan.md",
+      "_bmad-output/implementation-artifacts/receipts/story-1-6/E-verification.json",
+      "frontend/src/components/ContentConflictDialog.vue",
+      "tests/e2e/content-conflict.spec.ts"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "[I] Thu actual AT acceptance trên platform/browser/screen-reader được ghi rõ: hai snapshot dài, chọn local/server, announcement, keyboard navigation, close/Escape và focus return. Human/BMAD chốt nghĩa vụ còn lại và cách nhận evidence; giữ audit AC4 PARTIAL cho tới khi evidence đủ. Không đổi historical approval hay fabricate PASS.",
+    "proposed_lane": "human decision",
+    "risk_of_fix": "LOW"
+  },
+  {
+    "id": "A-02",
+    "workstream": "A",
+    "title": "Story 1.5 AC4 thiếu real native-browser unload evidence",
+    "severity": "HIGH",
+    "classification": "NEEDS_HUMAN_DECISION",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/1-5-giu-ban-dang-nhap-va-thu-luu-lai-sau-gian-doan.md:25",
+        "note": "AC4 yêu cầu warning khi unload/logout có dirty draft và clear theo logout outcome."
+      },
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/1-5-giu-ban-dang-nhap-va-thu-luu-lai-sau-gian-doan.md:37",
+        "note": "T7 yêu cầu real browser unload/logout; dòng70–71 nhắc lại không lấy mock làm actual native unload acceptance."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/__tests__/App.spec.ts:80",
+        "note": "Test tới110 dispatch jsdom beforeunload Event và assert defaultPrevented/listener cleanup; đây không phải native browser dialog. Các logout cancel/fail/success unit paths được assert ở238–355."
+      },
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/receipts/story-1-5/D-verification-finalization-repair.json:226",
+        "note": "Commands tới289 là FE focused/unit/type/lint/build/contract/diff; backend NOT_RUN và canonical INCOMPLETE, không có real-browser unload run."
+      },
+      {
+        "kind": "F",
+        "ref": "rg -n 'beforeunload|runBeforeUnload|page\\.reload|pageA\\.reload|pageB\\.reload' tests/e2e -g '*.spec.ts' (worktree; exit 1)",
+        "note": "Inventory không có native unload/page-reload assertion trong E2E spec sources."
+      },
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/story-1-5-plan.md:183",
+        "note": "Historical Human approval ở183–199 APPROVED với disclosures_acknowledged=true; AC4 COVERED fallback được ghi trong Story ở117."
+      }
+    ],
+    "failure_scenario": "[F] Người dùng đã tương tác với dirty journal rồi reload/close tab; AC4 yêu cầu browser warning, evidence hiện có chỉ synthetic unit dispatch và disclosed fallback. [I] Không thể suy từ defaultPrevented trong jsdom rằng native browser/platform hiển thị prompt đúng. [H] Browser warning/cancel behavior thật chưa kiểm chứng; không cáo buộc đã mất dữ liệu.",
+    "affected_paths": [
+      "_bmad-output/implementation-artifacts/1-5-giu-ban-dang-nhap-va-thu-luu-lai-sau-gian-doan.md",
+      "_bmad-output/implementation-artifacts/story-1-5-plan.md",
+      "_bmad-output/implementation-artifacts/receipts/story-1-5/D-verification-finalization-repair.json",
+      "frontend/src/App.vue",
+      "frontend/src/__tests__/App.spec.ts",
+      "tests/e2e"
+    ],
+    "related_prior_finding": "A-01",
+    "proposed_fix": "[I] Thu real-browser dirty/clean unload acceptance sau user interaction, cancel/confirm, cùng logout cancel/failure/success và ghi supported platform limitations theo spec. Human/BMAD xác nhận nghĩa vụ còn lại; AC4 source coverage giữ PARTIAL. Consolidated report có thể gom cùng A-01 vì chung root thiếu manual/browser obligation evidence, giữ cả AC links.",
+    "proposed_lane": "human decision",
+    "risk_of_fix": "LOW"
+  },
+  {
+    "id": "A-03",
+    "workstream": "A",
+    "title": "Story 2.3 AC3 chưa chốt acceptance split với future completion consumer",
+    "severity": "MEDIUM",
+    "classification": "SPEC_AMBIGUITY",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/2-3-ghi-và-sửa-journal-tùy-chọn.md:29",
+        "note": "AC3 nói completion/journal độc lập, thay một thành phần giữ thành phần còn lại và không false conflict."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/product/epics.md:345",
+        "note": "Dependency 2.3 chỉ là2.1; 2.2 ở327–339 sở hữu Done/current-week progress. Sprint-status.yaml:49 ghi2.2 backlog."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/tests/Feature/ChallengeJournalTest.php:91",
+        "note": "91–114 journal command giữ completion fixture;117–134 direct DB completion update rồi journal save, assert không false journal conflict. Không thực thi production completion command."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/tests/Feature/ChallengeJournalApiTest.php:77",
+        "note": "77–89 cũng dùng direct DB completion update trước PUT journal và assert completion preserved."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/routes/api.php:21",
+        "note": "21–43 có Challenge và journal routes, chưa có completion/Done mutation route."
+      },
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/2-3-ghi-và-sửa-journal-tùy-chọn.md:80",
+        "note": "AC3 được ghi COVERED bằng independent typed-conflict component behavior; source evidence hiện tại chưa chạy reverse production consumer."
+      }
+    ],
+    "failure_scenario": "[F] Journal edit với completion state có sẵn và completion-only fixture change được assert. [I] Future Done command có thể tác động cùng daily record nhưng chưa được các test này thực thi; breadth của AC3 hai chiều chưa có acceptance split rõ. [H] Future completion có overwrite journal hay không chưa biết. Không yêu cầu 2.2 phải implement trước2.3 và không kết luận dependency vi phạm.",
+    "affected_paths": [
+      "docs/product/epics.md",
+      "_bmad-output/implementation-artifacts/2-3-ghi-và-sửa-journal-tùy-chọn.md",
+      "_bmad-output/implementation-artifacts/story-2-3-plan.md",
+      "backend/tests/Feature/ChallengeJournalTest.php",
+      "backend/tests/Feature/ChallengeJournalApiTest.php"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "[I] BMAD/human chốt2.3 acceptance là journal producer direction với completion fixture, và giao reverse consumer proof cho2.2 nếu đó là intended split. Khi2.2 tồn tại, dùng hai production commands cùng daily record để assert independent versions/preserved state/no false conflict. Không tự thêm dependency hoặc coi future feature absence là bug hiện tại.",
+    "proposed_lane": "human decision",
+    "risk_of_fix": "LOW"
+  },
+  {
+    "id": "A-04",
+    "workstream": "A",
+    "title": "Plan tách story_path khỏi sprint_key và xử lý biến thể dấu hiện tại",
+    "severity": "INFO",
+    "classification": "FALSE_POSITIVE",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/sprint-status.yaml:43",
+        "note": "43–44 dùng accented keys cho1.5/1.6; actual Story filenames không dấu."
+      },
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/story-1-5-plan.md:5",
+        "note": "Actual story.path không dấu được lưu riêng với sprint_key có dấu ở10. story-1-6-plan.md:5/:10 dùng cùng cấu trúc."
+      },
+      {
+        "kind": "F",
+        "ref": ".agents/scripts/v4-separated-plan.mjs:169",
+        "note": "Safe path resolver dùng plan.story.path; không suy path từ sprint_key."
+      },
+      {
+        "kind": "F",
+        "ref": ".agents/scripts/complete-story.mjs:183",
+        "note": "183 rewrite Story theo resolved path;186 replace sprint entry theo plan.sprint_key. Hai identifier được tiêu thụ độc lập."
+      },
+      {
+        "kind": "F",
+        "ref": ".agents/skills/bmad-sprint-planning/scripts/sprint_plan.py:278",
+        "note": "Legacy disk-ready heuristic chỉ khớp exact key.md;280 merge current done status. Không chạy regeneration và không xác nhận current failure."
+      }
+    ],
+    "failure_scenario": "[I] Candidate cho rằng accented sprint key phải bằng filename nên current V4 completion lỗi bị bác bởi explicit Plan.path/key consumers. [F] Hai current entries done và terminal Plan complete có historical completion records. [I] Legacy exact-filename heuristic chỉ là watchpoint khi rebuild absent/backlog entries, không phải finding current pipeline.",
+    "affected_paths": [
+      "_bmad-output/implementation-artifacts/sprint-status.yaml",
+      "_bmad-output/implementation-artifacts/story-1-5-plan.md",
+      "_bmad-output/implementation-artifacts/story-1-6-plan.md",
+      ".agents/scripts/v4-separated-plan.mjs",
+      ".agents/scripts/complete-story.mjs",
+      ".agents/skills/bmad-sprint-planning/scripts/sprint_plan.py"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "[I] Không cần sửa current V4 pipeline hoặc rename Story. Nếu sau này thay legacy sprint regeneration, xác minh ID/path mapping cho cả accented/ASCII fixtures và preserve existing lifecycle; chỉ chọn V4 migration nếu human yêu cầu thay control-plane.",
+    "proposed_lane": "human decision",
+    "risk_of_fix": "LOW"
+  }
+]

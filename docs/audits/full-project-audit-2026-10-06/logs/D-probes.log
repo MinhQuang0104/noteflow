@@ -1,0 +1,17 @@
+command: node --experimental-transform-types docs/audits/full-project-audit-2026-10-06/logs/D-probes.mjs
+cwd: D:\Workspace\Tu_Hoc\New_Project_My_Note\.worktrees\full-project-audit
+exit_code: 0
+output:
+{"probe":"journal-parser","label":"minimal-version-conflict","status":409,"problemPreserved":false}
+{"probe":"journal-parser","label":"wrong-family-snapshot","status":409,"problemPreserved":false}
+{"probe":"journal-parser","label":"actual-journal-conflict-shape","status":409,"problemPreserved":true}
+{"probe":"private-no-store-pattern","value":"private","accepts":true}
+{"probe":"private-no-store-pattern","value":"no-store","accepts":true}
+{"probe":"private-no-store-pattern","value":"private, no-store","accepts":true}
+{"probe":"private-no-store-pattern","value":"public, no-store","accepts":true}
+{"probe":"generator-projection","label":"path-only-change","generatedOperationsUnchanged":true}
+{"probe":"generator-projection","label":"method-only-change","generatedOperationsUnchanged":true}
+{"probe":"generator-projection","label":"request-body-only-change","generatedOperationsUnchanged":true}
+READ_ONLY_PROBES_COMPLETE
+(node:12740) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)

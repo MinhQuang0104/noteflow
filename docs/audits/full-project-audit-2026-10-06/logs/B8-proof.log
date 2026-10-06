@@ -1,0 +1,1 @@
+[F] NOT_RUN/READ_ONLY_CONFLICT. No command executed, exit code not applicable. Source: frontend/scripts/prove-contract-drift.mjs:15 and25 write/restore contracts/openapi.yaml.

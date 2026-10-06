@@ -1,0 +1,4 @@
+.npm-cache/
+.composer-cache/
+pytest-cache/
+!*.log

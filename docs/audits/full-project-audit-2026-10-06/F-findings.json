@@ -1,0 +1,133 @@
+[
+  {
+    "id": "F-02",
+    "workstream": "F",
+    "title": "BE/native E2E chưa khóa danh tính DB ngoài test; hook BE có thể xóa toàn bảng",
+    "severity": "CRITICAL",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "backend/phpunit.xml:30",
+        "note": "DB_CONNECTION/HOST/PORT/DATABASE/USERNAME/PASSWORD/URL (30–36), APP_ENV (24) không có force=true; APP_DEBUG (25) có force=true."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/tests/TestCase.php:7",
+        "note": "Base test class không thêm guard database hoặc bootstrap safety; search app/bootstrap/config/tests không thấy guard noteflow_test."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/tests/Feature/ChallengeConcurrencyTest.php:17",
+        "note": "beforeEach delete mutation_commands, challenge_target_periods, challenges, account_states, users không có owner/filter (17–21); afterEach lặp lại36–40."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/tests/Feature/JournalConflictConcurrencyTest.php:22",
+        "note": "Chọn connection pgsql rồi xóa toàn mutation_commands/daily_records/challenges/account_states/users (23–27)."
+      },
+      {
+        "kind": "F",
+        "ref": "tests/e2e/playwright.config.ts:42",
+        "note": "Native app server giữ process.env, nhận DB_DATABASE bất kỳ ở49, không xóa DB_URL; db-state.ts:16 cũng giữ DB_URL native dù PDO helper pin database."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/config/database.php:89",
+        "note": "PostgreSQL config dùng env(DB_URL) cùng env(DB_DATABASE). Laravel version/reference được khóa trong composer.lock:1063–1068."
+      },
+      {
+        "kind": "F",
+        "ref": "https://raw.githubusercontent.com/laravel/framework/cdd8b33c246719acdd118c705ce8c7ab5ef48a96/src/Illuminate/Support/ConfigurationUrlParser.php",
+        "note": "Pinned Laravel13.32.0 source lines51–55 merges URL primary/query after config; URL database/host thắng values tương ứng."
+      },
+      {
+        "kind": "F",
+        "ref": "https://docs.phpunit.de/en/13.4/xml-configuration-file.html#the-env-element",
+        "note": "Official PHPUnit docs: env hiện có được giữ nếu force không bật. Lock là13.3.3; pinned13.3.3 source/doc fetch cache miss, không claim vendor runtime đã chạy."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/F-probes.log:386",
+        "note": "node docs/audits/full-project-audit-2026-10-06/logs/F-probes.mjs, cwd worktree, exit0: actual config keeps non-test DB fixture+DB_URL, actual buildPhpInvocation keeps native URL; no browser/DB/subprocess invocation."
+      },
+      {
+        "kind": "H",
+        "ref": "backend/tests/Feature/ChallengeConcurrencyTest.php:17",
+        "note": "Khả năng host/credential từ môi trường trỏ tới DB thật và bảng tương thích chưa kiểm tra; không có bằng chứng DB thật đã bị chạm trong audit."
+      }
+    ],
+    "failure_scenario": "[I] Ngoài Compose/CI môi trường cố định, shell có DB_DATABASE=DB dùng thật (hoặc DB_URL tới DB đó), endpoint truy cập được và quyền SQL hợp lệ. PHPUnit nonforce defaults giữ identity đó; TestCase không chặn; hook concurrency đầu tiên delete toàn bảng trên selected connection. Với native E2E, helper reset noteflow_test nhưng app server có thể trỏ DB khác qua inherited DB_DATABASE/URL. [F] Surface guard gap/destructive statements được xác nhận bằng trace và pure config probe; không chạy Pest/Laravel/DB để tái hiện xóa dữ liệu.",
+    "affected_paths": [
+      "backend/phpunit.xml",
+      "backend/tests/TestCase.php",
+      "backend/tests/Feature/ChallengeConcurrencyTest.php",
+      "backend/tests/Feature/JournalConflictConcurrencyTest.php",
+      "tests/e2e/playwright.config.ts",
+      "tests/e2e/helpers/db-state.ts",
+      "tests/e2e/helpers/php-runtime.ts"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Tách một danh tính DB test rõ ràng, từ chối input mâu thuẫn trước bootstrap/connect/SQL, kiểm tra effective config sau URL resolution cho cả BE và native E2E, kể cả secondary connection. Không chỉ dựa vào APP_ENV hoặc nhãn database. Thêm probes pure xác nhận unsafe DB_DATABASE/DB_URL/host không tạo connection hay chạy query; sau đó kiểm chứng trên disposable test DB.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "F-01",
+    "workstream": "F",
+    "title": "Native/CI Playwright chạy các reset DB toàn cục song song giữa file và project",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "tests/e2e/playwright.config.ts:8",
+        "note": "Native fullyParallel=true, workers unset; Compose fullyParallel=false/workers1; laptop/phone projects18–30."
+      },
+      {
+        "kind": "F",
+        "ref": "tests/e2e/content-conflict.spec.ts:67",
+        "note": "describe serial chỉ nhóm file này; beforeEach69 resetTestDatabase; both project runs share fixture."
+      },
+      {
+        "kind": "F",
+        "ref": "tests/e2e/cross-device-sync.spec.ts:20",
+        "note": "describe serial và laptop-only skip23; beforeEach27 cũng resetTestDatabase. Nó không khóa file content-conflict."
+      },
+      {
+        "kind": "F",
+        "ref": "tests/e2e/helpers/db-state.ts:13",
+        "note": "Mọi worker/project dùng noteflow_test, cùng owner; reset19–21 gọi global reset và cache clear."
+      },
+      {
+        "kind": "F",
+        "ref": "tests/e2e/helpers/db-helper.php:49",
+        "note": "reset49–53 delete toàn mutation_commands, challenge_target_periods, challenges và sessions; account context owner reset revision0/epoch1 ở73–75."
+      },
+      {
+        "kind": "F",
+        "ref": ".github/workflows/ci.yml:123",
+        "note": "Browser job gọi npm test không --workers=1/Compose override; CI test DB explicit an toàn về endpoint nhưng shared across workers."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/F-probes.log:392",
+        "note": "Pure actual-source config probe exit0 confirms native fullyParallel and no explicit worker limit, Compose workers1."
+      }
+    ],
+    "failure_scenario": "[I] Worker A đang content-conflict (laptop), đã login/tạo journal; worker B bắt đầu cross-device-sync hoặc content-conflict(phone), beforeEach global reset xóa challenge/session của A và reset account_revision. A nhận401/404 hoặc revision/command_count khác expected; test correctness evidence phụ thuộc scheduling. [F] Scope shared/parallel được xác nhận; chưa đo tần suất flaky và không claim CI đã fail.",
+    "affected_paths": [
+      "tests/e2e/playwright.config.ts",
+      "tests/e2e/content-conflict.spec.ts",
+      "tests/e2e/cross-device-sync.spec.ts",
+      "tests/e2e/helpers/db-helper.php",
+      ".github/workflows/ci.yml"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Chọn global workers1/serial cho tất cả real-DB suites hoặc isolate DB/schema/owner theo worker+project với teardown có scope. Giữ mock-only suites parallel nếu ownership tài nguyên rõ. Future check: list runnable project cases, run native/CI twice with repeat-each và chứng minh reset của B không ảnh hưởng A.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "HIGH"
+  }
+]

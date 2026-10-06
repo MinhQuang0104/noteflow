@@ -1,0 +1,272 @@
+[
+  {
+    "id": "D-01",
+    "workstream": "D",
+    "title": "Contract tests thiếu 22 nhánh status và chưa khóa đầy đủ kịch bản dự kiến",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "contracts/openapi.yaml:9",
+        "note": "Inventory PowerShell chỉ đọc, exit 0: 8 path, 11 operation, 46 operation-status pairs."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/tests/Contract/ChallengeContractTest.php:43",
+        "note": "Đối chiếu toàn bộ Contract source cho thấy kịch bản hiện diện cho 24/46 pairs; stale epoch/key reuse chưa được contract validator kiểm tra."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/tests/Contract/OpenApiResponseValidator.php:16",
+        "note": "Chỉ dựng response validator; không có request contract validator."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/tests/Contract/AuthResponseContractTest.php:43",
+        "note": "Một số test validate response rồi expect(true), không assert status chính xác của từng kịch bản."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/api/__tests__/account.spec.ts:10",
+        "note": "Fixture account thiếu account_revision/data_epoch/write_state mà OpenAPI required ở dòng 504-510."
+      }
+    ],
+    "failure_scenario": "[I] Một nhánh lỗi chưa có contract case đổi body/media type/header, hoặc một kịch bản trả nhầm status khác vẫn được spec khai báo; riêng Contract suite có thể không phát hiện. Feature tests hiện có có thể phát hiện một phần.",
+    "affected_paths": [
+      "backend/tests/Contract/",
+      "frontend/src/api/__tests__/account.spec.ts",
+      "contracts/openapi.yaml"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Bổ sung 22 operation-status cases còn thiếu, các error-code/replay/no-op cases, assert status trước response validator, kiểm tra request contract và dùng FE fixtures đủ generated type.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "MEDIUM"
+  },
+  {
+    "id": "D-02",
+    "workstream": "D",
+    "title": "ProblemDetails cho phép conflict payload mà consumer journal từ chối",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "contracts/openapi.yaml:791",
+        "note": "Required chỉ có message/code; snapshot optional và union ChallengeSnapshot/JournalSnapshot được dùng chung."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/api/challenges.ts:47",
+        "note": "Parser journal bắt buộc resource_id/current_version/JournalSnapshot và version đồng nhất cho version_conflict."
+      },
+      {
+        "kind": "F",
+        "ref": "WS-D parser probe: node --experimental-transform-types --input-type=module -e <inline>; exit 0",
+        "note": "Import actual challenges.ts, mocked fetch trong bộ nhớ: minimal conflict và wrong-family snapshot đều problemPreserved=false; actual journal shape=true. Bản tái chạy: logs/D-probes.mjs; transcript: logs/D-probes.log."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/app/Http/Controllers/ChallengeJournalController.php:92",
+        "note": "Backend hiện tại phát đủ field; chưa chứng minh response hiện hành gây lỗi."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/stores/journalDrafts.ts:380",
+        "note": "Consumer chọn luồng conflict theo machine code/snapshot; problem undefined không vào nhánh version_conflict."
+      }
+    ],
+    "failure_scenario": "[I] Server regression trả 409 version_conflict chỉ có message/code hoặc ChallengeSnapshot trên journal endpoint; schema hiện tại cho phép nhưng parser loại problem, consumer chuyển sang unexpected error thay vì luồng đối chiếu conflict.",
+    "affected_paths": [
+      "contracts/openapi.yaml",
+      "frontend/src/api/schema.generated.ts",
+      "frontend/src/api/challenges.ts",
+      "backend/tests/Contract/ChallengeContractTest.php"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Tách schema theo code/resource operation, required các field conflict consumer đang cần và thêm negative contract tests cho missing/wrong-family snapshot.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "D-03",
+    "workstream": "D",
+    "title": "Request contract thiếu constraint backend đang thực thi",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "contracts/openapi.yaml:759",
+        "note": "Create name chỉ là string; PATCH name ở dòng 786 cũng không có length/nonblank constraint."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/app/Http/Controllers/ChallengeController.php:69",
+        "note": "Trim name và trả 422 khi empty hoặc dài hơn 255; PATCH có cùng kiểm tra tại dòng 171."
+      },
+      {
+        "kind": "F",
+        "ref": "contracts/openapi.yaml:499",
+        "note": "Journal chỉ là string; date path chỉ có format date tại dòng 295-300."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/app/Modules/Challenges/Application/UseCases/SaveJournalUseCase.php:74",
+        "note": "Từ chối ngày trước start_date/sau accountToday và journal blank sau trim."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/app/Modules/Challenges/Application/UseCases/GetJournalQuery.php:27",
+        "note": "GET journal cũng thực thi giới hạn ngày."
+      }
+    ],
+    "failure_scenario": "[I] Client gửi name 256 ký tự, journal blank hoặc date đúng format nhưng ngoài cửa sổ cho phép; request tuân constraint schema hiện tại nhưng backend trả 422. Status 422 đã được khai báo; đây là thiếu mô tả constraint.",
+    "affected_paths": [
+      "contracts/openapi.yaml",
+      "frontend/src/api/schema.generated.ts",
+      "backend/tests/Contract/"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Bổ sung constraint length/nonblank phù hợp trim hiện hành, mô tả cửa sổ ngày phụ thuộc server và thêm request contract tests; không tự thay validation nghiệp vụ.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "D-04",
+    "workstream": "D",
+    "title": "Biên contract của chuỗi Sanctum và CSRF chưa rõ",
+    "severity": "MEDIUM",
+    "classification": "SPEC_AMBIGUITY",
+    "verification": "PLAUSIBLE",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "frontend/src/api/auth.ts:57",
+        "note": "Frontend bắt buộc gọi /sanctum/csrf-cookie trước login; endpoint không có trong OpenAPI paths hoặc backend Contract tests."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/bootstrap/app.php:22",
+        "note": "Bật stateful API; config/sanctum.php:84 chọn ValidateCsrfToken."
+      },
+      {
+        "kind": "F",
+        "ref": "contracts/openapi.yaml:163",
+        "note": "POST challenge không có 419; PATCH/PUT ở dòng 251/349 cũng không có 419, trong khi login/logout có."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/architecture/architecture-noteflow-2026-09-12/ARCHITECTURE-PROPOSAL.md:261",
+        "note": "Architecture mô tả khởi tạo CSRF qua endpoint Sanctum."
+      },
+      {
+        "kind": "H",
+        "ref": "backend/config/sanctum.php:84",
+        "note": "HTTP status/body/header của API CSRF mismatch chưa chạy runtime vì vendor vắng."
+      }
+    ],
+    "failure_scenario": "[I] Client chỉ dựa vào OpenAPI không có operation khởi tạo XSRF. [H] Unsafe same-origin API request thiếu hoặc sai CSRF token có thể nhận 419 ngoài response set được khai báo.",
+    "affected_paths": [
+      "contracts/openapi.yaml",
+      "backend/tests/Contract/",
+      "frontend/src/api/auth.ts",
+      "frontend/src/api/challenges.ts",
+      "backend/bootstrap/app.php",
+      "backend/config/sanctum.php"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Xác định published contract có bao gồm framework authentication endpoints và middleware errors; sau đó xác minh HTTP thực và bổ sung CSRF initialization, XSRF header và 419 cases theo phạm vi được chọn.",
+    "proposed_lane": "human decision",
+    "risk_of_fix": "HIGH"
+  },
+  {
+    "id": "D-05",
+    "workstream": "D",
+    "title": "PrivateNoStore schema chấp nhận header thiếu một directive bắt buộc",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "contracts/openapi.yaml:397",
+        "note": "Pattern dùng alternation private|no-store, không yêu cầu đồng thời hai directive."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/architecture/architecture-noteflow-2026-09-12/ARCHITECTURE-PROPOSAL.md:269",
+        "note": "Architecture yêu cầu Cache-Control: private, no-store."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/app/Http/Middleware/PrivateNoStore.php:14",
+        "note": "Implementation hiện tại set cả private và no-store."
+      },
+      {
+        "kind": "F",
+        "ref": "WS-D regex probe: node --input-type=module -e <inline>; exit 0",
+        "note": "Pattern chấp nhận private, no-store và public, no-store. Bản tái chạy: logs/D-probes.mjs; transcript: logs/D-probes.log."
+      }
+    ],
+    "failure_scenario": "[I] Regression loại no-store khỏi private API header nhưng giữ private; header vẫn thỏa schema, nên contract schema không bảo vệ đầy đủ invariant cache.",
+    "affected_paths": [
+      "contracts/openapi.yaml",
+      "backend/tests/Contract/"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Kiểm tra đồng thời private và no-store, bổ sung negative contract tests cho từng directive bị thiếu và giá trị public.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "MEDIUM"
+  },
+  {
+    "id": "D-06",
+    "workstream": "D",
+    "title": "contract:check không phát hiện drift path, HTTP verb hoặc requestBody binding",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "frontend/scripts/generate-openapi-types.mjs:92",
+        "note": "Generator dùng Object.values cho paths và methods, chỉ emit operationId/responses."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/scripts/generate-openapi-types.mjs:132",
+        "note": "Generated source chỉ chứa components/operations projection; --check so sánh source ở dòng 147-158."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/api/schema.generated.ts:119",
+        "note": "Generated operations không có path, verb hoặc requestBody binding."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/api/challenges.ts:158",
+        "note": "Frontend wrappers hard-code path/HTTP method."
+      },
+      {
+        "kind": "F",
+        "ref": "WS-D generator projection probe: node --input-type=module -e <inline>; exit 0",
+        "note": "Gọi actual generateOperations từ source bằng document synthetic: đổi path, đổi POST thành PUT, thêm required requestBody đều giữ nguyên output projection. Bản tái chạy: logs/D-probes.mjs; transcript: logs/D-probes.log."
+      }
+    ],
+    "failure_scenario": "[I] Spec đổi URL/verb/requestBody binding trong khi components và responses giữ nguyên; generated source không đổi, contract:check không phát hiện và frontend wrapper có thể tiếp tục gửi contract cũ. Đây là khoảng trống guard, chưa phải drift đang xảy ra tại HEAD.",
+    "affected_paths": [
+      "frontend/scripts/generate-openapi-types.mjs",
+      "frontend/src/api/schema.generated.ts",
+      "frontend/src/api/challenges.ts",
+      "frontend/src/api/auth.ts",
+      "contracts/openapi.yaml"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Generate paths/parameters/requestBody bindings và dùng typed mappings ở consumer, hoặc thêm checker/test riêng bảo vệ các phần contract chưa được projection.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "HIGH"
+  }
+]

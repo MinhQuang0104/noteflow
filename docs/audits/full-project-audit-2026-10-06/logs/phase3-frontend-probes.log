@@ -1,0 +1,56 @@
+{
+  "mode": "SOURCE_EXTRACTED_WITH_STUBS",
+  "integration_test": false,
+  "findings": [
+    {
+      "id": "E-04",
+      "input": "edit A, select B during awaited preflight, equal row_version=1",
+      "sent": {
+        "id": "B",
+        "payload": {
+          "command_id": "00000000-0000-4000-8000-000000000001",
+          "data_epoch": 1,
+          "base_version": 1,
+          "name": "edited A",
+          "description": "A description"
+        }
+      },
+      "outcome": "A content sent to B"
+    },
+    {
+      "id": "E-01",
+      "writes": [
+        {
+          "key": [
+            "challenge-journal",
+            "B",
+            "2026-10-06"
+          ],
+          "value": {
+            "journal": {
+              "challenge_id": "A",
+              "journal": "after"
+            }
+          }
+        }
+      ],
+      "outcome": "A snapshot stored under B query key"
+    },
+    {
+      "id": "E-02",
+      "current_revision_request_saves": 0,
+      "pending_revision_request_saves": 1,
+(node:16520) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+      "outcome": "current UI revision cannot replay pending resolution"
+    },
+    {
+      "id": "E-03",
+      "account_reads": 2,
+      "foreground_allowed": true,
+      "failed_refetch_sync_status": "synced",
+      "pending": false,
+      "outcome": "failed refetch obligation lost"
+    }
+  ]
+}

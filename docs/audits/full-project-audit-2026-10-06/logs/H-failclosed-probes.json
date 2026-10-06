@@ -1,0 +1,464 @@
+{
+  "source_revision": "98def5358983072216a28754e87b1cd5f884d258",
+  "escalation_cases": [
+    {
+      "label": "missing evidence",
+      "command": [
+        "node",
+        ".agents/scripts/check-escalation.mjs"
+      ],
+      "stdin": {},
+      "exit_code": 2,
+      "stdout": "{\"decision\":\"REVIEW_REQUIRED\",\"risk\":null,\"reasons\":[\"INVALID_INPUT\"]}",
+      "parsed": {
+        "decision": "REVIEW_REQUIRED",
+        "risk": null,
+        "reasons": [
+          "INVALID_INPUT"
+        ]
+      }
+    },
+    {
+      "label": "missing checks",
+      "command": [
+        "node",
+        ".agents/scripts/check-escalation.mjs"
+      ],
+      "stdin": {
+        "risk": "LOW",
+        "verification": {
+          "status": "PASS",
+          "complete": true,
+          "escalationReasons": []
+        },
+        "judgmentFlags": []
+      },
+      "exit_code": 2,
+      "stdout": "{\"decision\":\"REVIEW_REQUIRED\",\"risk\":\"LOW\",\"reasons\":[\"INVALID_INPUT\"]}",
+      "parsed": {
+        "decision": "REVIEW_REQUIRED",
+        "risk": "LOW",
+        "reasons": [
+          "INVALID_INPUT"
+        ]
+      }
+    },
+    {
+      "label": "empty PASS checks",
+      "command": [
+        "node",
+        ".agents/scripts/check-escalation.mjs"
+      ],
+      "stdin": {
+        "risk": "LOW",
+        "verification": {
+          "status": "PASS",
+          "complete": true,
+          "escalationReasons": [],
+          "checks": []
+        },
+        "judgmentFlags": []
+      },
+      "exit_code": 2,
+      "stdout": "{\"decision\":\"REVIEW_REQUIRED\",\"risk\":\"LOW\",\"reasons\":[\"CONFLICTING_VERIFICATION_EVIDENCE\"]}",
+      "parsed": {
+        "decision": "REVIEW_REQUIRED",
+        "risk": "LOW",
+        "reasons": [
+          "CONFLICTING_VERIFICATION_EVIDENCE"
+        ]
+      }
+    },
+    {
+      "label": "conflicting PASS",
+      "command": [
+        "node",
+        ".agents/scripts/check-escalation.mjs"
+      ],
+      "stdin": {
+        "risk": "LOW",
+        "verification": {
+          "status": "PASS",
+          "complete": true,
+          "escalationReasons": [],
+          "checks": [
+            {
+              "status": "SKIPPED"
+            }
+          ]
+        },
+        "judgmentFlags": []
+      },
+      "exit_code": 2,
+      "stdout": "{\"decision\":\"REVIEW_REQUIRED\",\"risk\":\"LOW\",\"reasons\":[\"CONFLICTING_VERIFICATION_EVIDENCE\"]}",
+      "parsed": {
+        "decision": "REVIEW_REQUIRED",
+        "risk": "LOW",
+        "reasons": [
+          "CONFLICTING_VERIFICATION_EVIDENCE"
+        ]
+      }
+    },
+    {
+      "label": "unknown flag",
+      "command": [
+        "node",
+        ".agents/scripts/check-escalation.mjs"
+      ],
+      "stdin": {
+        "risk": "LOW",
+        "verification": {
+          "status": "PASS",
+          "complete": true,
+          "escalationReasons": [],
+          "checks": [
+            {
+              "id": "fixture-summary",
+              "status": "PASS"
+            }
+          ]
+        },
+        "judgmentFlags": [
+          "UNRECOGNIZED"
+        ]
+      },
+      "exit_code": 2,
+      "stdout": "{\"decision\":\"REVIEW_REQUIRED\",\"risk\":\"LOW\",\"reasons\":[\"UNKNOWN_JUDGMENT_FLAG\"]}",
+      "parsed": {
+        "decision": "REVIEW_REQUIRED",
+        "risk": "LOW",
+        "reasons": [
+          "UNKNOWN_JUDGMENT_FLAG"
+        ]
+      }
+    },
+    {
+      "label": "raw INCOMPLETE preserved",
+      "command": [
+        "node",
+        ".agents/scripts/check-escalation.mjs"
+      ],
+      "stdin": {
+        "risk": "LOW",
+        "verification": {
+          "status": "INCOMPLETE",
+          "complete": false,
+          "escalationReasons": [
+            "NO_APPLICABLE_RECIPE"
+          ],
+          "checks": []
+        },
+        "judgmentFlags": []
+      },
+      "exit_code": 1,
+      "stdout": "{\"decision\":\"REVIEW_REQUIRED\",\"risk\":\"LOW\",\"reasons\":[\"VERIFICATION_INCOMPLETE\",\"VERIFICATION_NO_APPLICABLE_RECIPE\"]}",
+      "parsed": {
+        "decision": "REVIEW_REQUIRED",
+        "risk": "LOW",
+        "reasons": [
+          "VERIFICATION_INCOMPLETE",
+          "VERIFICATION_NO_APPLICABLE_RECIPE"
+        ]
+      }
+    },
+    {
+      "label": "MEDIUM PASS",
+      "command": [
+        "node",
+        ".agents/scripts/check-escalation.mjs"
+      ],
+      "stdin": {
+        "risk": "MEDIUM",
+        "verification": {
+          "status": "PASS",
+          "complete": true,
+          "escalationReasons": [],
+          "checks": [
+            {
+              "id": "fixture-summary",
+              "status": "PASS"
+            }
+          ]
+        },
+        "judgmentFlags": []
+      },
+      "exit_code": 1,
+      "stdout": "{\"decision\":\"REVIEW_REQUIRED\",\"risk\":\"MEDIUM\",\"reasons\":[\"MEDIUM_COVERAGE_JUDGMENT\"]}",
+      "parsed": {
+        "decision": "REVIEW_REQUIRED",
+        "risk": "MEDIUM",
+        "reasons": [
+          "MEDIUM_COVERAGE_JUDGMENT"
+        ]
+      }
+    },
+    {
+      "label": "HIGH PASS",
+      "command": [
+        "node",
+        ".agents/scripts/check-escalation.mjs"
+      ],
+      "stdin": {
+        "risk": "HIGH",
+        "verification": {
+          "status": "PASS",
+          "complete": true,
+          "escalationReasons": [],
+          "checks": [
+            {
+              "id": "fixture-summary",
+              "status": "PASS"
+            }
+          ]
+        },
+        "judgmentFlags": []
+      },
+      "exit_code": 1,
+      "stdout": "{\"decision\":\"REVIEW_REQUIRED\",\"risk\":\"HIGH\",\"reasons\":[\"HIGH_RISK_REVIEW\"]}",
+      "parsed": {
+        "decision": "REVIEW_REQUIRED",
+        "risk": "HIGH",
+        "reasons": [
+          "HIGH_RISK_REVIEW"
+        ]
+      }
+    },
+    {
+      "label": "LOW PASS control",
+      "command": [
+        "node",
+        ".agents/scripts/check-escalation.mjs"
+      ],
+      "stdin": {
+        "risk": "LOW",
+        "verification": {
+          "status": "PASS",
+          "complete": true,
+          "escalationReasons": [],
+          "checks": [
+            {
+              "id": "fixture-summary",
+              "status": "PASS"
+            }
+          ]
+        },
+        "judgmentFlags": []
+      },
+      "exit_code": 0,
+      "stdout": "{\"decision\":\"NO_REVIEW\",\"risk\":\"LOW\",\"reasons\":[]}",
+      "parsed": {
+        "decision": "NO_REVIEW",
+        "risk": "LOW",
+        "reasons": []
+      }
+    }
+  ],
+  "risk_downgrade_cases": [
+    {
+      "label": "unchanged Plan HIGH",
+      "plan_risk": "HIGH",
+      "selected_risk": "HIGH",
+      "actual_escalation": {
+        "command": [
+          "node",
+          ".agents/scripts/check-escalation.mjs"
+        ],
+        "stdin": {
+          "risk": "HIGH",
+          "verification": {
+            "status": "PASS",
+            "complete": true,
+            "escalationReasons": [],
+            "checks": [
+              {
+                "id": "fixture-summary",
+                "status": "PASS"
+              }
+            ]
+          },
+          "judgmentFlags": []
+        },
+        "exit_code": 1,
+        "stdout": "{\"decision\":\"REVIEW_REQUIRED\",\"risk\":\"HIGH\",\"reasons\":[\"HIGH_RISK_REVIEW\"]}",
+        "parsed": {
+          "decision": "REVIEW_REQUIRED",
+          "risk": "HIGH",
+          "reasons": [
+            "HIGH_RISK_REVIEW"
+          ]
+        }
+      },
+      "isolated_production_branch_result": {
+        "status": "REVIEW_REQUIRED",
+        "ready": false,
+        "valid": true,
+        "reasons": [
+          "HIGH_RISK_REVIEW"
+        ],
+        "action": "verify_slice",
+        "operation": "verify",
+        "escalation": {
+          "decision": "REVIEW_REQUIRED",
+          "risk": "HIGH",
+          "reasons": [
+            "HIGH_RISK_REVIEW"
+          ]
+        },
+        "verification": {
+          "status": "PASS",
+          "complete": true,
+          "escalationReasons": [],
+          "checks": [
+            {
+              "id": "fixture-summary",
+              "status": "PASS"
+            }
+          ]
+        },
+        "pending": {
+          "scope": "isolated"
+        },
+        "stop_condition": "SAME_LEAD_REVIEW_REQUIRED"
+      },
+      "stubbed_persistence_called": false,
+      "limitation": "Production risk selector and verifySliceCore branch; descriptor/check/persistence dependencies stubbed. No durable action, product check, pointer read, receipt, or Plan mutation."
+    },
+    {
+      "label": "Plan HIGH downgraded by caller",
+      "plan_risk": "HIGH",
+      "request_risk": "LOW",
+      "selected_risk": "LOW",
+      "actual_escalation": {
+        "command": [
+          "node",
+          ".agents/scripts/check-escalation.mjs"
+        ],
+        "stdin": {
+          "risk": "LOW",
+          "verification": {
+            "status": "PASS",
+            "complete": true,
+            "escalationReasons": [],
+            "checks": [
+              {
+                "id": "fixture-summary",
+                "status": "PASS"
+              }
+            ]
+          },
+          "judgmentFlags": []
+        },
+        "exit_code": 0,
+        "stdout": "{\"decision\":\"NO_REVIEW\",\"risk\":\"LOW\",\"reasons\":[]}",
+        "parsed": {
+          "decision": "NO_REVIEW",
+          "risk": "LOW",
+          "reasons": []
+        }
+      },
+      "isolated_production_branch_result": {
+        "status": "STUBBED_PERSISTENCE_BRANCH_SELECTED",
+        "target_status": "verified"
+      },
+      "stubbed_persistence_called": true,
+      "limitation": "Production risk selector and verifySliceCore branch; descriptor/check/persistence dependencies stubbed. No durable action, product check, pointer read, receipt, or Plan mutation."
+    },
+    {
+      "label": "Plan MEDIUM downgraded by caller",
+      "plan_risk": "MEDIUM",
+      "request_risk": "LOW",
+      "selected_risk": "LOW",
+      "actual_escalation": {
+        "command": [
+          "node",
+          ".agents/scripts/check-escalation.mjs"
+        ],
+        "stdin": {
+          "risk": "LOW",
+          "verification": {
+            "status": "PASS",
+            "complete": true,
+            "escalationReasons": [],
+            "checks": [
+              {
+                "id": "fixture-summary",
+                "status": "PASS"
+              }
+            ]
+          },
+          "judgmentFlags": []
+        },
+        "exit_code": 0,
+        "stdout": "{\"decision\":\"NO_REVIEW\",\"risk\":\"LOW\",\"reasons\":[]}",
+        "parsed": {
+          "decision": "NO_REVIEW",
+          "risk": "LOW",
+          "reasons": []
+        }
+      },
+      "isolated_production_branch_result": {
+        "status": "STUBBED_PERSISTENCE_BRANCH_SELECTED",
+        "target_status": "verified"
+      },
+      "stubbed_persistence_called": true,
+      "limitation": "Production risk selector and verifySliceCore branch; descriptor/check/persistence dependencies stubbed. No durable action, product check, pointer read, receipt, or Plan mutation."
+    }
+  ],
+  "runner_status_exit_mapping": [
+    {
+      "status": "READY",
+      "selected_exit_code": 0
+    },
+    {
+      "status": "DONE",
+      "selected_exit_code": 5
+    },
+    {
+      "status": "APPROVAL_DURABLE_PENDING_COMPLETION",
+      "selected_exit_code": 5
+    },
+    {
+      "status": "NOOP",
+      "selected_exit_code": 5
+    },
+    {
+      "status": "APPLIED",
+      "selected_exit_code": 5
+    },
+    {
+      "status": "REVIEW_REQUIRED",
+      "selected_exit_code": 5
+    },
+    {
+      "status": "UNAUTHORIZED_ACTION",
+      "selected_exit_code": 5
+    }
+  ],
+  "pure_approval_record": {
+    "schema_version": 1,
+    "story_id": "9.9",
+    "approver_type": "human",
+    "decision": "APPROVED",
+    "approved_at": "2026-10-06T00:00:00Z",
+    "story_normative_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "finalization_receipt_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "done_gate_summary_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "scope_paths_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "implementation_commit_set_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "final_scope_digest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "final_scoped_tree_digest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "approved_review_head": "1111111111111111111111111111111111111111",
+    "approved_commit": "1111111111111111111111111111111111111111",
+    "approved_action": "complete_story",
+    "disclosures_acknowledged": true
+  },
+  "assertions": {
+    "invalid_and_missing_cases_require_review": true,
+    "medium_and_high_require_review_when_preserved": true,
+    "low_clean_control_no_review": true,
+    "caller_high_to_low_reaches_no_review_branch": true,
+    "caller_medium_to_low_reaches_no_review_branch": true,
+    "approval_label_is_human_from_pure_factory": true
+  },
+  "safety": "Only stdin/stdout check-escalation subprocesses and pure/extracted functions; no Runner/action/persistence/clone/observation function invoked."
+}

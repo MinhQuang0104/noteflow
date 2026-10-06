@@ -1,0 +1,9 @@
+{
+  "id": "phase3-control-plane-probes",
+  "command": "node docs/audits/full-project-audit-2026-10-06/logs/crossverify-control-plane.mjs",
+  "cwd": "D:\\Workspace\\Tu_Hoc\\New_Project_My_Note\\.worktrees\\full-project-audit",
+  "started_utc": "2026-10-06T04:16:55.0594759Z",
+  "seconds": 0.2435063,
+  "exit_code": 0,
+  "log": "phase3-control-plane-probes.log"
+}

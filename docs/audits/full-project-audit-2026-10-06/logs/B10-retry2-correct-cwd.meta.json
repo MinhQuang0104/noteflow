@@ -1,0 +1,9 @@
+{
+  "id": "B10-retry2-correct-cwd",
+  "command": "composer analyse",
+  "cwd": "D:\\Workspace\\Tu_Hoc\\New_Project_My_Note\\.worktrees\\full-project-audit\\backend",
+  "started_utc": "2026-10-06T04:00:09.7463690Z",
+  "seconds": 1.1499122,
+  "exit_code": 1,
+  "log": "B10-retry2-correct-cwd.log"
+}

@@ -1,0 +1,24 @@
+{
+  "finding": "H-04",
+  "observations": [
+    {
+      "planned_risk": "HIGH",
+      "request_risk": null,
+      "effective_risk": "HIGH",
+      "escalation_exit": 1,
+      "decision": "REVIEW_REQUIRED"
+    },
+    {
+      "planned_risk": "HIGH",
+      "request_risk": "LOW",
+      "effective_risk": "LOW",
+      "escalation_exit": 0,
+      "decision": "NO_REVIEW"
+    }
+  ],
+  "branch_verified_by_source_trace": true,
+  "kernel_invoked": false,
+  "action_invoked": false,
+  "runtime_writes": false,
+  "scope": "actual pure risk function and read-only escalation CLI; verification persistence branch statically traced"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "B13-backend-locked-correct-cwd",
+  "command": "composer audit --locked",
+  "cwd": "D:\\Workspace\\Tu_Hoc\\New_Project_My_Note\\.worktrees\\full-project-audit\\backend",
+  "started_utc": "2026-10-06T04:00:11.9075250Z",
+  "seconds": 1.7120746,
+  "exit_code": 100,
+  "log": "B13-backend-locked-correct-cwd.log"
+}

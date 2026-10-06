@@ -1,0 +1,161 @@
+[
+  {
+    "id": "G-01",
+    "workstream": "G",
+    "title": "Chưa xác định nơi chịu trách nhiệm header bảo mật tại production edge",
+    "severity": "MEDIUM",
+    "classification": "NEEDS_HUMAN_DECISION",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "deploy/nginx/noteflow.conf:1",
+        "note": "Server template 24 dòng không khai báo CSP/frame-ancestors, X-Frame-Options hay HSTS."
+      },
+      {
+        "kind": "F",
+        "ref": "deploy/README.md:9",
+        "note": "TLS có thể terminate tại Nginx hoặc upstream; chưa mô tả header policy hay acceptance check tại boundary đó."
+      },
+      {
+        "kind": "H",
+        "ref": "production edge chưa được cung cấp",
+        "note": "Edge bên ngoài có thể đã cấu hình headers; chưa xác minh deployment thật."
+      }
+    ],
+    "failure_scenario": "Dùng riêng template để triển khai → thiếu chính sách frame/CSP và TLS headers tại boundary được kiểm soát trong repo; ảnh hưởng deployment thật phụ thuộc edge chưa biết.",
+    "affected_paths": [
+      "deploy/nginx/noteflow.conf",
+      "deploy/README.md"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Owner xác định boundary chịu trách nhiệm TLS/header; ghi policy và kiểm response tại edge đó. Không thêm HSTS vào local HTTP một cách mặc định.",
+    "proposed_lane": "human decision",
+    "risk_of_fix": "MEDIUM"
+  },
+  {
+    "id": "G-02",
+    "workstream": "G",
+    "title": "Docker base image và runtime tags chưa được pin bằng digest",
+    "severity": "LOW",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "deploy/local/Dockerfile:1",
+        "note": "PHP base dùng tag release line; composer stage dùng major tag ở dòng 3."
+      },
+      {
+        "kind": "F",
+        "ref": "compose.local.yaml:5",
+        "note": "PostgreSQL dùng major tag; backend dùng dev tag (25); test profile tương tự (79,100)."
+      }
+    ],
+    "failure_scenario": "Hai lần pull/build cùng source ở thời điểm khác nhau → có thể dùng image bytes khác dù source/lockfile không đổi.",
+    "affected_paths": [
+      "deploy/local/Dockerfile",
+      "compose.local.yaml"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Khi cần release reproducible, lưu resolved digest và quy trình cập nhật; vẫn giữ lockfile/check-platform-reqs.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "LOW"
+  },
+  {
+    "id": "I-01",
+    "workstream": "I",
+    "title": "README vẫn mô tả dự án chưa có domain Challenge/Today",
+    "severity": "MEDIUM",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "README.md:150",
+        "note": "Tài liệu hiện nói foundation chưa có Challenge/Today/domain behavior."
+      },
+      {
+        "kind": "F",
+        "ref": "backend/routes/api.php:21",
+        "note": "Routes sản phẩm Challenge/Journal tồn tại."
+      },
+      {
+        "kind": "F",
+        "ref": "frontend/src/views/TodayView.vue:1",
+        "note": "Today view đã có product behavior."
+      }
+    ],
+    "failure_scenario": "Người onboarding dùng README để xác định phạm vi hiện tại → bỏ qua module và quality gates sản phẩm đã tồn tại.",
+    "affected_paths": [
+      "README.md"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Cập nhật current-capabilities section và liên kết tới sprint/architecture; giữ lịch sử Story 1.1 trong tài liệu riêng.",
+    "proposed_lane": "bugfix thường",
+    "risk_of_fix": "LOW"
+  },
+  {
+    "id": "I-02",
+    "workstream": "I",
+    "title": "Timestamp sprint-status cũ hơn các lifecycle commit đã ghi nhận",
+    "severity": "LOW",
+    "classification": "VALID",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "_bmad-output/implementation-artifacts/sprint-status.yaml:32",
+        "note": "last_updated vẫn 2026-09-19, trong khi Story 1.5/1.6 đã done ở 43-44."
+      },
+      {
+        "kind": "F",
+        "ref": "30778c7",
+        "note": "Story 1.6 completion commit tồn tại tháng 10; timestamp metadata không phản ánh lifecycle hiện tại."
+      }
+    ],
+    "failure_scenario": "Dùng last_updated để đánh giá freshness hoặc chọn tài liệu tiến độ → kết luận sprint chưa được cập nhật sau 19/09 dù trạng thái đã đổi.",
+    "affected_paths": [
+      "_bmad-output/implementation-artifacts/sprint-status.yaml"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Cập nhật timestamp qua workflow lifecycle được chọn ở lần sửa sau; không sửa state trong audit.",
+    "proposed_lane": "V4 migration",
+    "risk_of_fix": "LOW"
+  },
+  {
+    "id": "F-00",
+    "workstream": "F",
+    "title": "B9 không khởi động được; backend integration chưa được xác minh tại code audit",
+    "severity": "HIGH",
+    "classification": "NEEDS_HUMAN_DECISION",
+    "verification": "CONFIRMED",
+    "evidence": [
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/B9.meta.json",
+        "note": "composer test ở backend exit255; vendor/autoload.php thiếu; chưa khởi động Pest."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/logs/B9-retry2-correct-cwd.meta.json",
+        "note": "Lặp lại ở đúng cwd backend exit255."
+      },
+      {
+        "kind": "F",
+        "ref": "docs/audits/full-project-audit-2026-10-06/AUDIT-PLAN.md:92",
+        "note": "Plan yêu cầu tối thiểu HIGH khi B1/B9 fail; đây là startup/environment failure, không phải chứng minh test sản phẩm fail."
+      }
+    ],
+    "failure_scenario": "Worktree chưa có vendor; composer test gọi artisan và dừng trước test runner → audit không có kết quả Unit/Feature/Contract của backend; không đủ evidence nghiệm thu persistence/concurrency.",
+    "affected_paths": [
+      "backend/composer.json",
+      "backend/tests",
+      "docs/audits/full-project-audit-2026-10-06/logs/B9.log"
+    ],
+    "related_prior_finding": null,
+    "proposed_fix": "Chọn môi trường verification được phép cài dependencies/ghi artifact ngoài audit, có kiểm tra DB identity trước kết nối theo F-02; chạy lại B9–B11 và full stack canonical trên source SHA phù hợp. Giữ nguyên NOT_RUN của phiên audit này.",
+    "proposed_lane": "human decision",
+    "risk_of_fix": "MEDIUM"
+  }
+]

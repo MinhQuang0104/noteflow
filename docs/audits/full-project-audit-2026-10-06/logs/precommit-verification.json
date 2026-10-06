@@ -1,0 +1,75 @@
+{
+  "verified_at_utc": "2026-10-06T04:36:32.542Z",
+  "head": "03dbd098e36245f51a4b8e875e89c1c0bb21acc6",
+  "branch": "audit/full-project-2026-10-06",
+  "code": "98def5358983072216a28754e87b1cd5f884d258",
+  "source_paths": 634,
+  "source_byte_changes": [],
+  "canonical_pointer": {
+    "schemaVersion": 1,
+    "status": "IDLE",
+    "activeRunId": null,
+    "storyId": null
+  },
+  "outside_audit_status_paths": [],
+  "workstreams": 9,
+  "findings": 41,
+  "high_critical": 12,
+  "evidence_refs_existing": 166,
+  "external_sources": [
+    "https://raw.githubusercontent.com/laravel/framework/cdd8b33c246719acdd118c705ce8c7ab5ef48a96/src/Illuminate/Support/ConfigurationUrlParser.php",
+    "https://docs.phpunit.de/en/13.4/xml-configuration-file.html#the-env-element"
+  ],
+  "nonfile_evidence": [
+    {
+      "finding": "A-01",
+      "kind": "F",
+      "ref": "rg -n 'beforeunload|runBeforeUnload|page\\.reload|pageA\\.reload|pageB\\.reload' tests/e2e -g '*.spec.ts' (worktree; exit 1)",
+      "note": "Inventory không có native unload/page-reload assertion trong E2E spec sources."
+    },
+    {
+      "finding": "C-01",
+      "kind": "F",
+      "ref": "C-backend.md:C-EXEC-02; php -r $auditSnippet; cwd=.worktrees/full-project-audit; exit=0",
+      "note": "PHP không coi sample chứa NUL nội bộ là blank; json_encode và SHA-256 vẫn chấp nhận. Không chạy HTTP/DB."
+    },
+    {
+      "finding": "C-02",
+      "kind": "F",
+      "ref": "C-backend.md:C-EXEC-01; php -r $auditSnippet; cwd=.worktrees/full-project-audit; exit=0",
+      "note": "Exact normalization expression với array và warning handler tương đương ném Array to string conversion/ErrorException trên PHP 8.5.9. HTTP NOT_RUN."
+    },
+    {
+      "finding": "D-02",
+      "kind": "F",
+      "ref": "WS-D parser probe: node --experimental-transform-types --input-type=module -e <inline>; exit 0",
+      "note": "Import actual challenges.ts, mocked fetch trong bộ nhớ: minimal conflict và wrong-family snapshot đều problemPreserved=false; actual journal shape=true. Bản tái chạy: logs/D-probes.mjs; transcript: logs/D-probes.log."
+    },
+    {
+      "finding": "D-05",
+      "kind": "F",
+      "ref": "WS-D regex probe: node --input-type=module -e <inline>; exit 0",
+      "note": "Pattern chấp nhận private, no-store và public, no-store. Bản tái chạy: logs/D-probes.mjs; transcript: logs/D-probes.log."
+    },
+    {
+      "finding": "D-06",
+      "kind": "F",
+      "ref": "WS-D generator projection probe: node --input-type=module -e <inline>; exit 0",
+      "note": "Gọi actual generateOperations từ source bằng document synthetic: đổi path, đổi POST thành PUT, thêm required requestBody đều giữ nguyên output projection. Bản tái chạy: logs/D-probes.mjs; transcript: logs/D-probes.log."
+    },
+    {
+      "finding": "G-01",
+      "kind": "H",
+      "ref": "production edge chưa được cung cấp",
+      "note": "Edge bên ngoài có thể đã cấu hình headers; chưa xác minh deployment thật."
+    }
+  ],
+  "prior_findings": 35,
+  "prior_statuses": {
+    "OPEN": 16,
+    "PARTIAL": 9,
+    "RESOLVED": 10
+  },
+  "git_diff_check_exit": 0,
+  "post_commit_verification": "required in final handoff; no commit claimed by this precommit record"
+}
