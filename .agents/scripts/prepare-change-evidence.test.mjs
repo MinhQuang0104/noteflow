@@ -129,7 +129,7 @@ test('multiple hunks on one oversized path retain complete ordered coverage', t 
   assert.doesNotThrow(() => validateEvidenceSet(set))
 })
 
-test('more than six hunks yield complete ordered evidence units while oversized multi-path groups require a path split', t => {
+test('more than six hunks and oversized multi-path groups yield complete ordered evidence sets', t => {
   const { root, evidence } = fixture(t)
   const original = Array.from({ length: 140 }, (_, i) => `line ${i}`)
   writeFileSync(path.join(root, 'tracked.txt'), `${original.join('\n')}\n`)
@@ -150,18 +150,76 @@ test('more than six hunks yield complete ordered evidence units while oversized 
 
   writeFileSync(path.join(root, 'small.txt'), 'small change\n')
   const multiPathHunkGroup = evidence('working-tree-vs-HEAD', 'tracked.txt', ['--path', 'small.txt'])
-  assert.equal(multiPathHunkGroup.code, 2)
-  assert.equal(multiPathHunkGroup.body.status, 'SPLIT_REQUIRED')
+  assert.equal(multiPathHunkGroup.code, 0, JSON.stringify(multiPathHunkGroup.body))
+  assert.equal(multiPathHunkGroup.body.status, 'OK')
+  assert.deepEqual(multiPathHunkGroup.body.changeEvidence.evidenceSet.paths.map(item => item.path), ['small.txt', 'tracked.txt'])
+  assert.doesNotThrow(() => validateEvidenceSet(multiPathHunkGroup.body.changeEvidence.evidenceSet))
 
   writeFileSync(path.join(root, 'a.txt'), Array.from({length: 130}, (_, i) => `a ${i}\n`).join(''))
   writeFileSync(path.join(root, 'b.txt'), Array.from({length: 130}, (_, i) => `b ${i}\n`).join(''))
   const group = evidence('working-tree-vs-HEAD', 'a.txt', ['--path', 'b.txt'])
-  assert.equal(group.code, 2)
-  assert.equal(group.body.status, 'SPLIT_REQUIRED')
+  assert.equal(group.code, 0, JSON.stringify(group.body))
+  assert.equal(group.body.status, 'OK')
+  assert.deepEqual(group.body.changeEvidence.evidenceSet.paths.map(item => item.path), ['a.txt', 'b.txt'])
+  assert.ok(group.body.changeEvidence.evidenceSet.units.every(unit => unit.diffLineCount <= 240))
+  assert.doesNotThrow(() => validateEvidenceSet(group.body.changeEvidence.evidenceSet))
   for (const name of ['c.txt', 'd.txt', 'e.txt']) writeFileSync(path.join(root, name), 'new\n')
-  const tooMany = evidence('working-tree-vs-HEAD', 'a.txt',
+  const fivePaths = evidence('working-tree-vs-HEAD', 'a.txt',
     ['--path', 'b.txt', '--path', 'c.txt', '--path', 'd.txt', '--path', 'e.txt'])
-  assert.equal(tooMany.code, 2)
+  assert.equal(fivePaths.code, 0, JSON.stringify(fivePaths.body))
+  assert.equal(fivePaths.body.status, 'OK')
+  const fivePathSet = fivePaths.body.changeEvidence.evidenceSet
+  assert.deepEqual(fivePathSet.requestedPaths, ['a.txt', 'b.txt', 'c.txt', 'd.txt', 'e.txt'])
+  assert.deepEqual(fivePathSet.paths.map(item => item.path), fivePathSet.requestedPaths)
+  assert.ok(fivePathSet.units.length >= 5)
+  assert.doesNotThrow(() => validateEvidenceSet(fivePathSet))
+  const mutate = fn => {
+    const copy = structuredClone(fivePathSet)
+    fn(copy)
+    assert.throws(() => validateEvidenceSet(copy))
+  }
+  mutate(copy => copy.paths.pop())
+  mutate(copy => copy.paths.push({ path: 'extra.txt', hunks: [] }))
+  mutate(copy => { copy.paths[1].path = copy.paths[0].path })
+  mutate(copy => { copy.paths.reverse(); copy.requestedPaths.reverse() })
+  mutate(copy => { copy.paths[0].path = 'other.txt' })
+  mutate(copy => { copy.sourceDigest = '0'.repeat(64) })
+  mutate(copy => { copy.units.reverse() })
+})
+
+test('duplicate requested paths are rejected instead of silently deduplicated', t => {
+  const { evidence } = fixture(t)
+  const result = evidence('working-tree-vs-HEAD', 'tracked.txt', ['--path', 'tracked.txt'])
+  assert.equal(result.code, 4)
+  assert.equal(result.body.status, 'INVALID_INPUT')
+})
+
+test('evidence sets enforce a bounded path count', t => {
+  const { root, evidence } = fixture(t)
+  const names = Array.from({ length: 17 }, (_, index) => `path-${String(index).padStart(2, '0')}.txt`)
+  for (const name of names) writeFileSync(path.join(root, name), `${name}\n`)
+  const result = evidence('working-tree-vs-HEAD', names[0], names.slice(1).flatMap(name => ['--path', name]))
+  assert.equal(result.code, 2)
+  assert.equal(result.body.status, 'SPLIT_REQUIRED')
+  assert.match(result.body.reason, /evidence set path limit/i)
+})
+
+test('multi-path evidence generation is idempotent and never mutates the index or commits', t => {
+  const { root, evidence } = fixture(t)
+  const names = ['a.txt', 'b.txt', 'c.txt', 'd.txt', 'e.txt']
+  for (const name of names) writeFileSync(path.join(root, name), `${name}\n`)
+  const beforeHead = run('git', ['rev-parse', 'HEAD'], root).stdout.trim()
+  const beforeIndex = run('git', ['ls-files', '--stage', '-z'], root).stdout
+  const beforeStatus = run('git', ['status', '--porcelain'], root).stdout
+  const args = names.slice(1).flatMap(name => ['--path', name])
+  const first = evidence('working-tree-vs-HEAD', names[0], args)
+  const second = evidence('working-tree-vs-HEAD', names[0], args)
+  assert.equal(first.code, 0, JSON.stringify(first.body))
+  assert.equal(second.code, 0, JSON.stringify(second.body))
+  assert.deepEqual(second.body.changeEvidence, first.body.changeEvidence)
+  assert.equal(run('git', ['rev-parse', 'HEAD'], root).stdout.trim(), beforeHead)
+  assert.equal(run('git', ['ls-files', '--stage', '-z'], root).stdout, beforeIndex)
+  assert.equal(run('git', ['status', '--porcelain'], root).stdout, beforeStatus)
 })
 
 test('new empty text file still has an added file delta', t => {

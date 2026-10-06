@@ -104,8 +104,12 @@ function verificationTemplate(fixture, includeReview) {
   return lines.join('\n')
 }
 
-function verificationRegistry() {
-  const map = { schema_version: 2, id: 'fixture-feature', covered_paths: ['src/feature.txt'], anchor_blobs: { 'src/feature.txt': '0'.repeat(40) } }
+function verificationRegistry(changedPaths = ['src/feature.txt']) {
+  const coveredPaths = [...changedPaths].sort()
+  const map = {
+    schema_version: 2, id: 'fixture-feature', covered_paths: coveredPaths,
+    anchor_blobs: Object.fromEntries(coveredPaths.map(item => [item, '0'.repeat(40)]))
+  }
   const recipe = {
     schema_version: 1,
     featureId: 'fixture-feature',
@@ -119,11 +123,13 @@ function verificationRegistry() {
   return { map, recipe, registry }
 }
 
-function fixture(risk) {
+function fixture(risk, options = {}) {
   const root = mkdtempSync(path.join(tmpdir(), 'v4-verification-'))
   const cleanup = () => rmSync(root, { recursive: true, force: true })
+  const changedPaths = [...(options.changedPaths ?? ['src/feature.txt'])].sort()
   const story = storySource(risk)
   const storyDigest = normativeDigest(inspectStory(story))
+  const verification = verificationRegistry(changedPaths)
   const files = {
     '.gitignore': '.agent-state/\n',
     'AGENTS.md': '# fixture policy\n', 'CLAUDE.md': '# provider policy\n',
@@ -136,9 +142,9 @@ function fixture(risk) {
     '.agents/scripts/prepare-change-evidence.mjs': readFileSync(path.resolve(process.cwd(), '.agents/scripts/prepare-change-evidence.mjs'), 'utf8'),
     '.agent-state/active-run.json': JSON.stringify({ schemaVersion: 1, activeRunId: null, storyId: null, status: 'IDLE' }) + '\n',
     'src/base.txt': 'base\n', [STORY]: story, [PLAN]: v2Plan(storyDigest, risk),
-    '.agents/verification/registry.json': JSON.stringify(verificationRegistry().registry, null, 2) + '\n',
-    '.agents/verification/fixture-feature.json': JSON.stringify(verificationRegistry().recipe, null, 2) + '\n',
-    '.agents/features/fixture-feature.json': JSON.stringify(verificationRegistry().map, null, 2) + '\n',
+    '.agents/verification/registry.json': JSON.stringify(verification.registry, null, 2) + '\n',
+    '.agents/verification/fixture-feature.json': JSON.stringify(verification.recipe, null, 2) + '\n',
+    '.agents/features/fixture-feature.json': JSON.stringify(verification.map, null, 2) + '\n',
     '_bmad-output/implementation-artifacts/sprint-status.yaml': 'development_status:\n  9-1-fixture: in-progress\n'
   }
   for (const [file, value] of Object.entries(files)) write(root, file, value)
@@ -150,10 +156,10 @@ function fixture(risk) {
   git(root, 'add', '.')
   git(root, 'commit', '-qm', 'fixture baseline')
   const initialHead = git(root, 'rev-parse', 'HEAD')
-  write(root, 'src/feature.txt', 'implemented\n')
+  for (const file of changedPaths) write(root, file, `implemented ${file}\n`)
   const implementationRequest = {
     action: 'implement_slice', operation: 'prepare', story_id: '9.1', slice_id: 'A', expected_head: initialHead,
-    transaction_id: `implementation-${risk.toLowerCase()}`, owned_paths: ['src/feature.txt'],
+    transaction_id: `implementation-${risk.toLowerCase()}`, owned_paths: changedPaths,
     plan_template: implementationTemplate(risk),
     policy_paths: ['AGENTS.md', 'CLAUDE.md', '.agents/routing/task-router.md', '.agents/context/control-plane.md',
       '.agents/context/context-routing.md', '.agents/skills/v4-story-runner/SKILL.md'],
@@ -173,7 +179,7 @@ function fixture(risk) {
     id: 'focused-fixture', classification: 'behavioral', required: true,
     argv: ['node', '-e', 'process.exit(0)'], cwd: '.', environment_identity: { name: 'fixture' },
     source: { kind: 'focused-manifest', path: '.agents/skills/v4-story-runner/actions/verify-slice.md' },
-    referenced_paths: ['src/feature.txt']
+    referenced_paths: changedPaths
   }]
   const verifyRequest = {
     action: 'verify_slice', operation: 'prepare', story_id: '9.1', slice_id: 'A', expected_head: head,
@@ -181,7 +187,7 @@ function fixture(risk) {
     policy_paths: implementationRequest.policy_paths,
     recipe_paths: ['.agents/skills/v4-story-runner/actions/verify-slice.md', '.agents/skills/v4-story-runner/references/implementation-techniques.md', '.agents/verification/registry.json'],
   }
-  return { root, cleanup, risk, storyDigest, implementationDigest, head, verifyRequest, checkSpecs }
+  return { root, cleanup, risk, storyDigest, implementationDigest, head, verifyRequest, checkSpecs, changedPaths }
 }
 
 function prepareVerification(f) {
@@ -193,12 +199,18 @@ function prepareVerification(f) {
 function makeReviewEvidence(f, preview) {
   const script = path.resolve(process.cwd(), '.agents/scripts/prepare-change-evidence.mjs')
   const result = spawnSync(process.execPath, [script, '--comparison', 'explicit-pair', '--base', preview.baseline_commit,
-    '--head', preview.checkpoint_commit, '--path', 'src/feature.txt'], { cwd: f.root, encoding: 'utf8', windowsHide: true })
+    '--head', preview.checkpoint_commit, ...preview.changed_paths.flatMap(relative => ['--path', relative])], {
+    cwd: f.root, encoding: 'utf8', windowsHide: true
+  })
   assert.equal(result.status, 0, result.stderr)
   return JSON.parse(result.stdout.trim()).changeEvidence
 }
 
 function scopeDigest(changeEvidence) {
+  if (changeEvidence.evidenceSet) {
+    const paths = changeEvidence.evidenceSet.paths.map(item => item.path)
+    return actionFingerprint({ paths, source: changeEvidence.evidenceSet.sourceDigest })
+  }
   const refs = changeEvidence.paths[0].hunks.map((hunk, hunkIndex) => {
     const body = typeof hunk.diffText === 'string' ? hunk.diffText : hunk.diffText.join('\n')
     return { path: 'src/feature.txt', hunk_index: hunkIndex, body_digest: actionFingerprint(body) }
@@ -270,6 +282,38 @@ test('same-Lead APPROVE requires exact bounded evidence and persists verificatio
     assert.deepEqual(validateReceipt(f.root, plan, 'A', 'verification'), [])
     assert.deepEqual(validateReceipt(f.root, plan, 'A', 'review'), [])
     assert.equal(validateStoryPlan(f.root, '9.1').status, 'READY')
+  } finally { f.cleanup() }
+})
+
+test('same-Lead APPROVE accepts one ordered evidence set covering five changed paths', () => {
+  const changedPaths = [
+    'src/feature.txt', 'src/feature-a.txt', 'src/feature-b.txt', 'src/feature-c.txt', 'src/feature-d.txt'
+  ].sort()
+  const f = fixture('HIGH', { changedPaths })
+  try {
+    const prepared = prepareVerification(f)
+    const pendingResult = verifySlice(f.root, { ...f.verifyRequest, operation: 'verify', preview: prepared.preview })
+    assert.equal(pendingResult.status, 'REVIEW_REQUIRED', JSON.stringify(pendingResult))
+    const evidence = makeReviewEvidence(f, prepared.preview)
+    assert.ok(evidence.evidenceSet)
+    assert.deepEqual(evidence.evidenceSet.paths.map(item => item.path), changedPaths)
+    assert.deepEqual(evidence.evidenceSet.requestedPaths, changedPaths)
+    const review = {
+      judgment: 'APPROVE', reviewer: 'same-lead', pending_fingerprint: pendingResult.pending.fingerprint,
+      scope_paths: changedPaths, scope_digest: scopeDigest(evidence), change_evidence: evidence,
+      answers: pendingResult.pending.review_questions.map(item => ({ id: item.id, answer: 'confirmed' })),
+      commands: [{ command: 'same-lead five-path review', exit_code: 0, tool: 'reviewer', environment: 'fixture' }]
+    }
+    const result = recordSliceReview(f.root, {
+      ...f.verifyRequest, operation: 'record-review', preview: prepared.preview, pending: pendingResult.pending,
+      plan_template: verificationTemplate(f, true), review
+    })
+    assert.equal(result.status, 'APPLIED', JSON.stringify(result))
+    const receipt = JSON.parse(readFileSync(path.join(f.root, REVIEW_RECEIPT), 'utf8'))
+    assert.deepEqual(receipt.evidence_refs.map(item => item.path), evidence.evidenceSet.units.map(item => item.path))
+    assert.deepEqual(receipt.evidence_refs.map(item => item.unit_index), evidence.evidenceSet.units.map(item => item.unitIndex))
+    assert.equal(receipt.scope_digest, scopeDigest(evidence))
+    assert.equal(frontmatter(readFileSync(path.join(f.root, PLAN), 'utf8')).slices[0].status, 'reviewed')
   } finally { f.cleanup() }
 })
 
