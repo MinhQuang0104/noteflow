@@ -2,4 +2,8 @@
 
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature', 'Contract');
+uses(TestCase::class)
+    ->beforeEach(function () {
+        TestCase::assertSafeTestDatabase();
+    })
+    ->in('Feature', 'Contract');

@@ -10,9 +10,11 @@ use App\Modules\Challenges\Domain\Exceptions\VersionConflictException;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Tests\TestCase;
 
 beforeEach(function () {
     config(['database.connections.pgsql_second' => config('database.connections.pgsql')]);
+    TestCase::assertSafeTestDatabase('pgsql_second');
 
     DB::table('mutation_commands')->delete();
     DB::table('challenge_target_periods')->delete();
@@ -22,6 +24,8 @@ beforeEach(function () {
 });
 
 afterEach(function () {
+    TestCase::assertSafeTestDatabase('pgsql_second');
+
     try {
         DB::connection('pgsql')->rollBack();
     } catch (Throwable) {

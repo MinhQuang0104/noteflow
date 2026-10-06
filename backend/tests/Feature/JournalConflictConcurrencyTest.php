@@ -8,9 +8,12 @@ use App\Modules\Identity\Contracts\Clock;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Tests\TestCase;
 
 beforeEach(function () {
     config(['database.connections.pgsql_second' => config('database.connections.pgsql')]);
+    TestCase::assertSafeTestDatabase('pgsql_second');
+
     $this->app->instance(Clock::class, new class implements Clock
     {
         public function now(): DateTimeImmutable
@@ -28,6 +31,8 @@ beforeEach(function () {
 });
 
 afterEach(function () {
+    TestCase::assertSafeTestDatabase('pgsql_second');
+
     try {
         DB::connection('pgsql')->rollBack();
     } catch (Throwable) {
