@@ -11,6 +11,7 @@ import { verifyChangedPaths } from './check-verification.mjs'
 import { validateEvidenceSet } from './prepare-change-evidence.mjs'
 import { executeCheck, validateCheckEvidence } from './v4-check-executor.mjs'
 import { recordActionFinished, recordActionStarted, recordCheckFinished } from './v4-observations.mjs'
+import { REVIEW_RECEIPT_SCHEMA_VERSION } from './v4-finalization-contract.mjs'
 import {
   canonicalPaths,
   executeMetadataTransaction,
@@ -1284,7 +1285,7 @@ function buildVerificationMetadata(root, preview, outcome, targetStatus, review 
   if (review) {
     const reviewCommands = reviewCommandRecords(review)
     reviewReceipt = {
-      schema_version: 1,
+      schema_version: REVIEW_RECEIPT_SCHEMA_VERSION,
       story_id: preview.story_id,
       slice_id: preview.slice_id,
       kind: 'review',

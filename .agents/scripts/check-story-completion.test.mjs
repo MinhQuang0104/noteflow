@@ -275,3 +275,88 @@ test('review receipt edited after Plan binding fails closed', () => {
     f.cleanup()
   }
 })
+
+async function completedFixture() {
+  const { runAction } = await import('./v4-story-runner.mjs')
+  const f = createCompletionFixture()
+  const approval = runAction(f.root, '9.1', f.head, {
+    approval: { action: 'approve_exact_scope', disclosures_acknowledged: true, approved_at: '2026-09-26T12:00:00.000Z' }
+  })
+  assert.equal(approval.status, 'APPROVAL_DURABLE_PENDING_COMPLETION', JSON.stringify(approval))
+  const completed = runAction(f.root, '9.1', approval.commit)
+  assert.equal(completed.status, 'DONE', JSON.stringify(completed))
+  f.completion = f.refreshHead()
+  return f
+}
+
+function integrateUnrelatedWork(f) {
+  f.git('checkout', '-q', '-b', 'integration', f.completion + '~3')
+  f.write('docs/unrelated.md', 'work integrated alongside the Story\n')
+  f.git('add', 'docs/unrelated.md')
+  f.git('commit', '-qm', 'unrelated work')
+  f.git('merge', '-q', '--no-ff', '-m', 'merge Story into integration', f.completion)
+  return f.refreshHead()
+}
+
+test('terminal Story stays healthy after an integration merge and is evaluated at its completion commit', async () => {
+  const f = await completedFixture()
+  try {
+    const head = integrateUnrelatedWork(f)
+    assert.notEqual(head, f.completion)
+    const result = inspectCompletion(f.root, '9.1', head)
+    assert.equal(result.status, 'READY', JSON.stringify(result))
+    assert.equal(result.approval_fresh, true)
+    assert.equal(result.evaluation, 'TERMINAL_AT_COMPLETION_COMMIT')
+    assert.equal(result.evaluated_commit, f.completion)
+    assert.equal(result.head, head)
+    assert.deepEqual(f.git('status', '--porcelain').split('\n').filter(line => line && !line.includes('.agent-state/v4-observations/')), [])
+  } finally {
+    f.cleanup()
+  }
+})
+
+test('terminal Story metadata edited after completion is stale even behind a merge', async () => {
+  const f = await completedFixture()
+  try {
+    integrateUnrelatedWork(f)
+    const review = JSON.parse(f.read('receipts/review.json'))
+    f.write('receipts/review.json', JSON.stringify({ ...review, findings_blocking: 0, note: 'edited later' }))
+    f.git('add', 'receipts/review.json')
+    f.git('commit', '-qm', 'edit review receipt after completion')
+    const result = inspectCompletion(f.root, '9.1', f.refreshHead())
+    assert.equal(result.status, 'STALE', JSON.stringify(result))
+    assert.equal(result.approval_fresh, false)
+    assert.ok(result.reasons.includes('STORY_METADATA_DRIFT_AFTER_COMPLETION'))
+  } finally {
+    f.cleanup()
+  }
+})
+
+test('uncommitted terminal Plan edits are stale and a wrong expected head is reported', async () => {
+  const f = await completedFixture()
+  try {
+    const head = integrateUnrelatedWork(f)
+    f.write(PLAN, f.readPlan() + '\n')
+    const dirty = inspectCompletion(f.root, '9.1', head)
+    assert.equal(dirty.status, 'STALE', JSON.stringify(dirty))
+    assert.ok(dirty.reasons.includes('STORY_METADATA_DIRTY_AFTER_COMPLETION'))
+    f.git('checkout', '--', PLAN)
+    const wrongHead = inspectCompletion(f.root, '9.1', f.completion)
+    assert.equal(wrongHead.status, 'STALE', JSON.stringify(wrongHead))
+    assert.ok(wrongHead.reasons.includes('EXPECTED_HEAD_MISMATCH'))
+  } finally {
+    f.cleanup()
+  }
+})
+
+test('terminal check at the completion commit itself keeps the direct parent-chain binding', async () => {
+  const f = await completedFixture()
+  try {
+    const result = inspectCompletion(f.root, '9.1', f.completion)
+    assert.equal(result.status, 'READY', JSON.stringify(result))
+    assert.equal(result.evaluation, undefined)
+    assert.equal(result.recovery_classification, 'TERMINAL_HEALTHY')
+  } finally {
+    f.cleanup()
+  }
+})

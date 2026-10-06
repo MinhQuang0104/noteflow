@@ -13,7 +13,15 @@ import {
   validateTaskSlices
 } from './check-artifact-contract.mjs'
 import { stableFinalizationDigest, validateFinalizationReceipt } from './finalization-contract.mjs'
-import { inferCanonicalApplicability, receiptKindsForAttemptStatus, reviewDecision, reviewEvidenceFreshness } from './v4-finalization-contract.mjs'
+import {
+  inferCanonicalApplicability,
+  LEGACY_REVIEW_RECEIPT_CUTOFF,
+  legacyReviewFreshness,
+  receiptKindsForAttemptStatus,
+  reviewDecision,
+  reviewEvidenceFreshness,
+  reviewReceiptDialect
+} from './v4-finalization-contract.mjs'
 
 const CODES = { READY: 0, RECONCILIATION_REQUIRED: 1, STALE: 2, BLOCKED: 3, INVALID: 4, ERROR: 5 }
 const SHA = /^[0-9a-f]{40,64}$/
@@ -178,8 +186,12 @@ function gitText(root, ref) {
 
 function canonicalEpicSection(root, storyId, upstream, expectedHead, result) {
   const headSection = storySection(normalizeLineEndings(gitText(root, `${expectedHead}:${upstream.path}`)), storyId)
-  const expectedDigest = `sha256:${createHash('sha256').update(headSection, 'utf8').digest('hex')}`
-  if (expectedDigest !== upstream.section_digest) issue(result, 'UPSTREAM_EPIC_DIGEST_STALE', 'stale')
+  // The committed section is hashed with LF endings. Plans finalized before
+  // EOL normalization hashed the CRLF rendering of the same committed text; both
+  // renderings bind identical content.
+  const sectionDigest = text => `sha256:${createHash('sha256').update(text, 'utf8').digest('hex')}`
+  const accepted = [sectionDigest(headSection), sectionDigest(headSection.replaceAll('\n', '\r\n'))]
+  if (!accepted.includes(upstream.section_digest)) issue(result, 'UPSTREAM_EPIC_DIGEST_STALE', 'stale')
   const indexSection = storySection(normalizeLineEndings(gitText(root, `:${upstream.path}`)), storyId)
   if (indexSection !== headSection) issue(result, 'UPSTREAM_EPIC_INDEX_DRIFT', 'stale')
   const workingFile = safePath(root, upstream.path)
@@ -476,13 +488,39 @@ function receiptErrorKind(error) {
   return 'invalid'
 }
 
-function reviewFreshness(receipt, slice = null, verification = null, plan = null, expectedPaths = []) {
+// A legacy review receipt is admissible only when the exact blob already
+// existed at the binding-contract commit; a receipt written later cannot
+// satisfy this, whatever shape it takes.
+function legacyReceiptAdmissible(root, relative) {
+  if (typeof relative !== 'string' || !safePath(root, relative)) return false
+  const atCutoff = git(root, ['rev-parse', '--verify', '--quiet', `${LEGACY_REVIEW_RECEIPT_CUTOFF}:${relative}`])
+  const atHead = git(root, ['rev-parse', '--verify', '--quiet', `HEAD:${relative}`])
+  return atCutoff.status === 0 && atHead.status === 0 && atCutoff.stdout.trim() === atHead.stdout.trim()
+}
+
+function reviewFreshness(receipt, slice = null, verification = null, plan = null, expectedPaths = [], legacyAdmissible = false) {
   if (slice && verification && plan) {
-    return reviewEvidenceFreshness(receipt, expectedPaths, slice.checkpoint_commit, stableDigest(plan.risk ?? null)).status
+    const dialect = reviewReceiptDialect(receipt)
+    const riskDigest = stableDigest(plan.risk ?? null)
+    if (dialect === 'legacy') return legacyAdmissible ? legacyReviewFreshness(receipt, slice.checkpoint_commit, riskDigest).status : 'INVALID'
+    if (dialect !== 'bound') return 'INVALID'
+    return reviewEvidenceFreshness(receipt, expectedPaths, slice.checkpoint_commit, riskDigest).status
   }
   const freshness = receipt?.freshness
   if (typeof freshness === 'string') return freshness
   return freshness?.status ?? null
+}
+
+// The Plan projection may name the decision `judgment` (kernel template) or
+// `verdict` (earlier templates). MEDIUM/HIGH slices and any slice that binds a
+// review receipt always require that receipt.
+function planReviewDecision(slice) {
+  return reviewDecision(slice.review ?? {})
+}
+
+function sliceReviewRequired(plan, slice) {
+  return slice.review?.required === true || Boolean(slice.receipt_refs?.review) ||
+    ['MEDIUM', 'HIGH'].includes(String(plan.risk?.level ?? '').toUpperCase())
 }
 
 function loadSliceReceipts(root, plan, result) {
@@ -534,7 +572,7 @@ function loadSliceReceipts(root, plan, result) {
       detail.attempts.push(historical)
     }
     for (const kind of RECEIPT_KINDS) {
-      const required = kind === 'implementation' || kind === 'verification' || slice.review?.required === true
+      const required = kind === 'implementation' || kind === 'verification' || sliceReviewRequired(plan, slice)
       const ref = slice.receipt_refs?.[kind]
       if (!required) continue
       if (!ref) {
@@ -560,6 +598,8 @@ function loadSliceReceipts(root, plan, result) {
     const expectedPaths = canonicalPaths(Array.isArray(implementation?.changed_paths) ? implementation.changed_paths :
       gitPaths(root, ['diff', '--name-only', '--diff-filter=ACDMRTUXB', `${slice.baseline_commit}..${slice.checkpoint_commit}`, '--'], 'GIT_REVIEW_SCOPE_FAILED'))
     detail.review_scope_paths = expectedPaths
+    detail.legacy_review_admissible = Boolean(review && reviewReceiptDialect(review) === 'legacy' &&
+      legacyReceiptAdmissible(root, slice.receipt_refs?.review?.path))
     if (verification && verification.progression_eligible !== true) issue(result, `PROGRESSION_NOT_ELIGIBLE:${slice.id}`, 'blocked')
     if (slice.verification?.progression_eligible !== true) issue(result, `PLAN_PROGRESSION_NOT_ELIGIBLE:${slice.id}`, 'blocked')
     if (verification && (!Array.isArray(verification.focused_checks) || !verification.focused_checks.length) &&
@@ -567,10 +607,10 @@ function loadSliceReceipts(root, plan, result) {
     if (review) {
       const decision = reviewDecision(review)
       if (decision.error === 'REVIEW_DECISION_CONFLICT') issue(result, `REVIEW_DECISION_CONFLICT:${slice.id}`, 'blocked')
-      else if (decision.error || decision.value !== 'APPROVE' || slice.review?.verdict !== 'APPROVE') issue(result, `REVIEW_NOT_APPROVED:${slice.id}`, 'blocked')
+      else if (decision.error || decision.value !== 'APPROVE' || planReviewDecision(slice).value !== 'APPROVE') issue(result, `REVIEW_NOT_APPROVED:${slice.id}`, 'blocked')
       if ((review.findings_blocking ?? 0) !== 0) issue(result, `REVIEW_BLOCKING_FINDINGS:${slice.id}`, 'blocked')
       if (review.reviewed_commit !== slice.checkpoint_commit) issue(result, `REVIEWED_COMMIT_MISMATCH:${slice.id}`, 'stale')
-      const freshness = reviewFreshness(review, slice, verification, plan, expectedPaths)
+      const freshness = reviewFreshness(review, slice, verification, plan, expectedPaths, detail.legacy_review_admissible)
       if (!['FRESH_CANDIDATE', 'FRESH_REUSED', 'FRESH'].includes(freshness)) issue(result, `REVIEW_FRESHNESS_INVALID:${slice.id}`, 'blocked')
     }
     const canonical = canonicalDetails(slice, verification, expectedPaths)
@@ -827,7 +867,7 @@ export function inspectFinalization(root, storyId, expectedHead) {
       progression_eligible: slice.verification?.progression_eligible === true,
       review_required: slice.review?.required === true,
       review_verdict: slice.review?.verdict ?? detail?.receipts.review?.judgment ?? null,
-      review_freshness: detail ? reviewFreshness(detail.receipts.review, slice, detail.receipts.verification, plan, detail.review_scope_paths ?? []) : null
+      review_freshness: detail ? reviewFreshness(detail.receipts.review, slice, detail.receipts.verification, plan, detail.review_scope_paths ?? [], detail.legacy_review_admissible) : null
     }
   })
   result.slices = sliceSummary

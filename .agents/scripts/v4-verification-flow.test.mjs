@@ -531,3 +531,31 @@ test('retirement resumes interrupted owned-lock archival without replacing evide
     assert.equal(git(f.root, 'status', '--porcelain'), '')
   } finally { f.cleanup() }
 })
+
+test('kernel-written review receipts round-trip through the finalization gate', async () => {
+  const { inspectFinalization } = await import('./check-story-finalization.mjs')
+  const f = fixture('HIGH')
+  try {
+    const prepared = prepareVerification(f)
+    const pendingResult = verifySlice(f.root, { ...f.verifyRequest, operation: 'verify', preview: prepared.preview })
+    const evidence = makeReviewEvidence(f, prepared.preview)
+    const result = recordSliceReview(f.root, {
+      ...f.verifyRequest, operation: 'record-review', preview: prepared.preview, pending: pendingResult.pending,
+      plan_template: verificationTemplate(f, true),
+      review: {
+        judgment: 'APPROVE', reviewer: 'same-lead', pending_fingerprint: pendingResult.pending.fingerprint,
+        scope_paths: ['src/feature.txt'], scope_digest: scopeDigest(evidence), change_evidence: evidence,
+        answers: pendingResult.pending.review_questions.map(item => ({ id: item.id, answer: 'confirmed' })),
+        commands: [{ command: 'same-lead review', exit_code: 0, tool: 'reviewer', environment: 'fixture' }]
+      }
+    })
+    assert.equal(result.status, 'APPLIED', JSON.stringify(result))
+    assert.equal(result.next_action.kind, 'finalize_story')
+    const receipt = JSON.parse(readFileSync(path.join(f.root, REVIEW_RECEIPT), 'utf8'))
+    assert.equal(receipt.schema_version, 2)
+    const gate = inspectFinalization(f.root, '9.1', git(f.root, 'rev-parse', 'HEAD'))
+    const reviewReasons = gate.reasons.filter(reason => /REVIEW|RECEIPT|PROGRESSION/.test(reason))
+    assert.deepEqual(reviewReasons, [], JSON.stringify(gate.reasons))
+    assert.ok(['FRESH_CANDIDATE', 'FRESH_REUSED', 'FRESH'].includes(gate.slices[0].review_freshness), JSON.stringify(gate.slices))
+  } finally { f.cleanup() }
+})

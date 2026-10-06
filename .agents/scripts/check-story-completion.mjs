@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
+import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
@@ -235,6 +236,78 @@ function dirtyPaths(root) {
   ])].filter(item => !NOISE.has(item) && !item.startsWith('.agent-state/v4-observations/')).sort()
 }
 
+function receiptDirectory(storyId) {
+  return '_bmad-output/implementation-artifacts/receipts/story-' + storyId.replace('.', '-')
+}
+
+function storyMetadataPaths(storyId, plan, planPath) {
+  const paths = [planPath, plan.story?.path, receiptDirectory(storyId), plan.finalization?.receipt_ref]
+  for (const slice of plan.slices ?? []) {
+    for (const ref of Object.values(slice.receipt_refs ?? {})) paths.push(ref?.path)
+    for (const attempt of slice.attempt_history ?? []) for (const ref of Object.values(attempt.receipt_refs ?? {})) paths.push(ref?.path)
+    for (const ref of Object.values(slice.current_attempt?.receipt_refs ?? {})) paths.push(ref?.path)
+  }
+  return [...new Set(paths.filter(item => typeof item === 'string' && item))].sort()
+}
+
+function snapshotCheckout(root, commit) {
+  const parent = mkdtempSync(path.join(tmpdir(), 'v4-completion-snapshot-'))
+  const clone = path.join(parent, 'repo')
+  const run = (cwd, args) => spawnSync('git', args, { cwd, encoding: 'utf8', windowsHide: true, timeout: 300000 })
+  // --shared borrows the source object store through alternates; the source
+  // repository, its index and its worktrees are never written.
+  const cloned = run(parent, ['clone', '--quiet', '--shared', '--no-checkout', root, clone])
+  const checkedOut = cloned.status === 0 ? run(clone, ['-c', 'advice.detachedHead=false', 'checkout', '--quiet', '--detach', commit]) : cloned
+  if (cloned.status !== 0 || checkedOut.status !== 0) {
+    rmSync(parent, { recursive: true, force: true })
+    throw new Error('COMPLETION_SNAPSHOT_UNAVAILABLE')
+  }
+  return { root: clone, cleanup: () => rmSync(parent, { recursive: true, force: true }) }
+}
+
+// A terminal Story stays verifiable after later commits (an integration merge,
+// later Stories). The full Done/Human Gate check runs against the completion
+// commit itself, and the Story's own Plan, Story file and receipts must be
+// byte-identical from that commit to HEAD. Product files may evolve afterwards;
+// that is later work, not drift of the approved snapshot.
+function inspectTerminalAtCompletion(root, storyId, plan, planPath, result, expectedHead, options) {
+  const completion = gitOutput(root, ['log', '-1', '--format=%H', result.head, '--', planPath], 'COMPLETION_COMMIT_UNAVAILABLE')
+  if (!SHA.test(completion) || completion === result.head) return null
+  const atCompletion = git(root, ['show', `${completion}:${planPath}`])
+  if (atCompletion.status !== 0) return null
+  const completedPlan = frontmatter(atCompletion.stdout)
+  if (completedPlan.lifecycle_snapshot !== 'done' || completedPlan.next_action !== null) return null
+
+  const flags = { invalid: false, stale: false, reconciliation: false, blocked: false }
+  const outer = { reasons: [] }
+  if (result.head !== expectedHead) issue(outer, flags, 'EXPECTED_HEAD_MISMATCH', 'stale')
+  const protectedPaths = storyMetadataPaths(storyId, plan, planPath)
+  const changed = gitPaths(root, ['diff', '--name-only', '--diff-filter=ACDMRTUXB', `${completion}..${result.head}`, '--', ...protectedPaths], 'GIT_COMPLETION_DIFF_FAILED')
+  if (changed.length) issue(outer, flags, 'STORY_METADATA_DRIFT_AFTER_COMPLETION', 'stale')
+  const dirty = dirtyPaths(root)
+  if (dirty.some(item => protectedPaths.some(prefix => item === prefix || item.startsWith(prefix + '/')))) issue(outer, flags, 'STORY_METADATA_DIRTY_AFTER_COMPLETION', 'stale')
+  if (readLifecycle(root, plan.sprint_key) !== 'done') issue(outer, flags, 'SPRINT_LIFECYCLE_NOT_DONE', 'reconciliation')
+
+  const snapshot = snapshotCheckout(root, completion)
+  let inner
+  try { inner = inspectCompletion(snapshot.root, storyId, completion, { ...options, atCompletionCommit: true }) } finally { snapshot.cleanup() }
+  for (const [status, kind] of [['INVALID', 'invalid'], ['ERROR', 'invalid'], ['STALE', 'stale'], ['RECONCILIATION_REQUIRED', 'reconciliation'], ['BLOCKED', 'blocked']]) {
+    if (inner.status === status) flags[kind] = true
+  }
+  const combined = {
+    ...inner,
+    expected_head: expectedHead,
+    head: result.head,
+    evaluated_commit: completion,
+    evaluation: 'TERMINAL_AT_COMPLETION_COMMIT',
+    reasons: [...inner.reasons, ...outer.reasons]
+  }
+  classify(combined, flags)
+  combined.approval_fresh = combined.status === 'READY' && inner.approval_fresh === true
+  if (combined.status !== 'READY') combined.recovery_classification = inner.status === 'READY' ? 'TERMINAL_DRIFT_AFTER_COMPLETION' : inner.recovery_classification
+  return combined
+}
+
 export function doneGateSummaryDigest(snapshot) {
   return stableDigest({
     done_gate_disposition: snapshot.done_gate_disposition,
@@ -285,6 +358,10 @@ export function inspectCompletion(root, storyId, expectedHead, options = {}) {
     result.lifecycle = plan.lifecycle_snapshot ?? null
     result.execution_status = plan.execution_status ?? null
     result.next_action = plan.next_action ?? null
+    if (!options.atCompletionCommit && plan.lifecycle_snapshot === 'done' && plan.next_action === null) {
+      const terminal = inspectTerminalAtCompletion(root, storyId, plan, planPath, result, expectedHead, options)
+      if (terminal) return terminal
+    }
     const storyFile = safePath(root, plan.story?.path)
     if (!storyFile || !existsSync(storyFile)) return classify(result, { ...flags, invalid: true })
     const story = inspectStory(readFileSync(storyFile, 'utf8'))

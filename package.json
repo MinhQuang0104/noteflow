@@ -2,5 +2,8 @@
   "name": "noteflow-repository",
   "version": "1.0.0",
   "private": true,
-  "description": "Repository metadata only; application commands live in frontend/ and backend/."
+  "description": "Repository metadata only; application commands live in frontend/ and backend/.",
+  "scripts": {
+    "test:v4": "node --test .agents/scripts/*.test.mjs"
+  }
 }

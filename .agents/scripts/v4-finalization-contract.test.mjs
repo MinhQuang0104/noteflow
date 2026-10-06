@@ -34,3 +34,29 @@ test('canonical applicability is inferred only from complete validated recipe pr
   assert.equal(inferCanonicalApplicability({ featureId: 'fixture-feature', changedPaths: paths, matchedPaths: ['src/a.txt'], unmatchedPaths: ['src/b.txt'], dependencyOnlyPaths: [] }, paths), 'APPLICABLE')
   assert.equal(inferCanonicalApplicability({ featureId: null, changedPaths: paths, matchedPaths: [], unmatchedPaths: paths, dependencyOnlyPaths: [] }, paths), null)
 })
+
+test('review receipt dialect separates schema 2, bound schema 1 and legacy schema 1 receipts', async () => {
+  const { reviewReceiptDialect, REVIEW_RECEIPT_SCHEMA_VERSION } = await import('./v4-finalization-contract.mjs')
+  assert.equal(REVIEW_RECEIPT_SCHEMA_VERSION, 2)
+  const bound = { judgment: 'APPROVE', evidence_refs: [], scope_digest: 'sha256:' + '0'.repeat(64) }
+  assert.equal(reviewReceiptDialect({ schema_version: 2, ...bound }), 'bound')
+  assert.equal(reviewReceiptDialect({ schema_version: 1, ...bound }), 'bound')
+  assert.equal(reviewReceiptDialect({ schema_version: 1, judgment: 'APPROVE', scope_digest: null }), 'bound', 'a null scope_digest still binds and must fail evidence checks')
+  assert.equal(reviewReceiptDialect({ schema_version: 1, verdict: 'APPROVE', freshness: 'FRESH', evidence_refs: [] }), 'legacy')
+  assert.equal(reviewReceiptDialect({ schema_version: 2, verdict: 'APPROVE', freshness: 'FRESH' }), 'invalid')
+  assert.equal(reviewReceiptDialect({ schema_version: 2, ...bound, verdict: 'APPROVE' }), 'invalid')
+  assert.equal(reviewReceiptDialect({ schema_version: 1, verdict: 'APPROVE' }), 'invalid')
+  assert.equal(reviewReceiptDialect({ schema_version: 3, ...bound }), 'invalid')
+  assert.equal(reviewReceiptDialect(null), 'invalid')
+})
+
+test('legacy review freshness still binds approval, checkpoint, risk and declared freshness', async () => {
+  const { legacyReviewFreshness } = await import('./v4-finalization-contract.mjs')
+  const risk = 'sha256:' + 'a'.repeat(64)
+  const legacy = { schema_version: 1, verdict: 'APPROVE', reviewed_commit: 'c'.repeat(40), risk_context_digest: risk, freshness: { status: 'FRESH_CANDIDATE' } }
+  assert.equal(legacyReviewFreshness(legacy, 'c'.repeat(40), risk).status, 'FRESH_CANDIDATE')
+  assert.equal(legacyReviewFreshness({ ...legacy, verdict: 'CHANGES_REQUIRED' }, 'c'.repeat(40), risk).status, 'INVALID')
+  assert.equal(legacyReviewFreshness(legacy, 'd'.repeat(40), risk).reason, 'REVIEWED_COMMIT_MISMATCH')
+  assert.equal(legacyReviewFreshness(legacy, 'c'.repeat(40), 'sha256:' + 'b'.repeat(64)).reason, 'RISK_CONTEXT_DIGEST_MISMATCH')
+  assert.equal(legacyReviewFreshness({ ...legacy, freshness: 'STALE' }, 'c'.repeat(40), risk).reason, 'REVIEW_FRESHNESS_INVALID')
+})

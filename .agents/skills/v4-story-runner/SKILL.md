@@ -15,7 +15,7 @@ Read the validated Plan action and exactly one contract: `start_story` → `acti
 
 ## Shared bootstrap
 
-1. Inspect Git status/branch/HEAD/common directories/worktree/inventory without mutation; failure is an error.
+1. Inspect Git status/branch/HEAD/common directories/worktree/inventory without mutation; failure is an error. When a linked worktree's branch names the Story (`story-<epic>-<story>`), act only from that worktree; the Runner returns `WRONG_CHECKOUT` elsewhere.
 2. For an existing Plan run `check-story-plan.mjs check <epic.story>` and preserve JSON/status. Only `READY`/`RECONCILIATION_REQUIRED` are usable; `STALE`/`INVALID`/`ERROR` stop.
 3. Read only referenced Story, Plan, sprint entry, action, and anchors; bind source, checkpoint, receipt, lifecycle, freshness, and exact scope. Load recovery only for partial/locked/recovery and techniques only for the selected recipe.
 

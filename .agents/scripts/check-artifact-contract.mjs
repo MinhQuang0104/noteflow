@@ -140,7 +140,8 @@ function readReceiptRecord(root, plan, sliceId, kind, ref, expected, attemptId =
   if (receipt.subject_digest !== expected.subject_digest) errors.push('SUBJECT_MISMATCH')
   if (receipt.changed_paths_sha256 !== expected.changed_paths_sha256) errors.push('CHANGED_PATHS_MISMATCH')
   if (attemptId !== null && receipt.attempt_id !== attemptId) errors.push('ATTEMPT_ID_MISMATCH')
-  if (receipt.schema_version !== 1 || receipt.kind !== kind || !SHA.test(receipt.checkpoint_commit ?? '') ||
+  const schemaSupported = receipt.schema_version === 1 || (kind === 'review' && receipt.schema_version === 2)
+  if (!schemaSupported || receipt.kind !== kind || !SHA.test(receipt.checkpoint_commit ?? '') ||
       !SHA.test(receipt.baseline_commit ?? '') || !SHA.test(receipt.created_from_head ?? '') ||
       receipt.created_from_head !== receipt.checkpoint_commit || !DIGEST.test(receipt.subject_digest ?? '') ||
       !DIGEST.test(receipt.changed_paths_sha256 ?? '')) errors.push('INVALID_RECEIPT_IDENTITY')

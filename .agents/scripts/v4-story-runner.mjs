@@ -72,6 +72,40 @@ function pointerIdle(root) {
   }
 }
 
+function comparablePath(value) {
+  const resolved = path.resolve(value).replaceAll('\\', '/').replace(/\/+$/, '')
+  return process.platform === 'win32' ? resolved.toLowerCase() : resolved
+}
+
+// A Story that owns a linked worktree must be driven from that worktree.
+// Branch names carry the Story as `story-<epic>-<story>` (for example
+// codex/story-1-6 or codex/story-1-5-v4).
+export function storyCheckoutState(root, storyId) {
+  const token = 'story-' + storyId.replace('.', '-')
+  const owner = new RegExp('(^|[/_-])' + token + '($|[/_-])')
+  const entries = []
+  let current = null
+  for (const line of gitOutput(root, ['worktree', 'list', '--porcelain'], 'WORKTREE_LIST_UNAVAILABLE').split(/\r?\n/)) {
+    if (line.startsWith('worktree ')) entries.push(current = { worktree: line.slice('worktree '.length).trim(), branch: null })
+    else if (line.startsWith('branch ') && current) current.branch = line.slice('branch '.length).trim().replace(/^refs\/heads\//, '')
+  }
+  const owners = entries.filter(entry => entry.branch && owner.test(entry.branch))
+  if (!owners.length) return { status: 'READY', owners: [] }
+  const here = comparablePath(root)
+  if (owners.some(entry => comparablePath(entry.worktree) === here)) return { status: 'READY', owners: owners.map(entry => entry.worktree) }
+  return { status: 'BLOCKED', authorized: false, reasons: ['WRONG_CHECKOUT'], owners: owners.map(entry => entry.worktree) }
+}
+
+function storyLifecycle(root, storyId) {
+  try { return frontmatter(readFileSync(path.join(root, planRelative(storyId)), 'utf8')).lifecycle_snapshot ?? null } catch { return null }
+}
+
+function checkoutBlock(root, storyId) {
+  if (storyLifecycle(root, storyId) === 'done') return null
+  const state = storyCheckoutState(root, storyId)
+  return state.status === 'READY' ? null : state
+}
+
 function invalidResult(reason) {
   return { status: 'INVALID', authorized: false, valid: false, reasons: [reason] }
 }
@@ -169,6 +203,8 @@ export function runV4Story(root, storyId, options = {}) {
     const expectedHead = options.expectedHead ?? head
     if (!SHA.test(expectedHead)) return invalidResult('INVALID_EXPECTED_HEAD')
     if (head !== expectedHead) return { status: 'STALE', authorized: false, reasons: ['EXPECTED_HEAD_MISMATCH'] }
+    const wrongCheckout = checkoutBlock(root, storyId)
+    if (wrongCheckout) return wrongCheckout
     const recoveryOperation = options.operation ?? options.kernel?.operation
     if (['prepare-staged-recovery', 'apply-staged-recovery'].includes(recoveryOperation)) {
       const input = options.input ?? options.kernel?.input
@@ -306,6 +342,8 @@ export function runV4Story(root, storyId, options = {}) {
 export function authorizeAction(root, storyId, action, expectedHead, options = {}) {
   try {
     if (!pointerIdle(root)) return { status: 'BLOCKED', authorized: false, reasons: ['V3_POINTER_NOT_IDLE'] }
+    const wrongCheckout = checkoutBlock(root, storyId)
+    if (wrongCheckout) return wrongCheckout
     const planPath = planRelative(storyId)
     const plan = frontmatter(readFileSync(path.join(root, planPath), 'utf8'))
     if (plan.next_action?.kind !== action) {

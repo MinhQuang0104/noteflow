@@ -84,6 +84,38 @@ export function reviewEvidenceFreshness(review, expectedPaths, expectedCommit, e
   return { status: declared ?? 'FRESH_REUSED', reason: null }
 }
 
+// Review receipts written by the V4 action kernel carry exact-scope bindings
+// (`judgment`, ordered `evidence_refs`, `scope_digest`) and are schema 2.
+// Schema 1 receipts exist in two shapes: kernel-era receipts that already carry
+// those bindings, and legacy receipts (`verdict` plus declared `freshness`, no
+// `scope_digest` key) written before the binding contract. Legacy receipts are admissible only when
+// Git ancestry proves they predate that contract; callers enforce the ancestry.
+export const REVIEW_RECEIPT_SCHEMA_VERSION = 2
+export const LEGACY_REVIEW_RECEIPT_CUTOFF = 'f58969aadad06163d35169ed8cbfb58264103122'
+
+export function reviewReceiptDialect(review) {
+  if (!review || typeof review !== 'object' || Array.isArray(review)) return 'invalid'
+  // The kernel always writes the scope_digest key; legacy producers never did.
+  const bound = Object.hasOwn(review, 'scope_digest')
+  if (review.schema_version === REVIEW_RECEIPT_SCHEMA_VERSION) {
+    return review.judgment !== undefined && review.verdict === undefined && Array.isArray(review.evidence_refs) &&
+      typeof review.scope_digest === 'string' ? 'bound' : 'invalid'
+  }
+  if (review.schema_version !== 1) return 'invalid'
+  if (bound) return 'bound'
+  return review.verdict !== undefined && review.freshness !== undefined ? 'legacy' : 'invalid'
+}
+
+export function legacyReviewFreshness(review, expectedCommit, expectedRiskDigest) {
+  const decision = reviewDecision(review)
+  if (decision.error || decision.value !== 'APPROVE') return { status: 'INVALID', reason: decision.error ?? 'REVIEW_NOT_APPROVED' }
+  if (review.reviewed_commit !== expectedCommit) return { status: 'STALE', reason: 'REVIEWED_COMMIT_MISMATCH' }
+  if (!DIGEST.test(expectedRiskDigest ?? '') || review.risk_context_digest !== expectedRiskDigest) return { status: 'STALE', reason: 'RISK_CONTEXT_DIGEST_MISMATCH' }
+  const declared = typeof review.freshness === 'string' ? review.freshness : review.freshness?.status
+  if (!['FRESH_CANDIDATE', 'FRESH_REUSED', 'FRESH'].includes(declared)) return { status: 'INVALID', reason: 'REVIEW_FRESHNESS_INVALID' }
+  return { status: declared, reason: null }
+}
+
 export function inferCanonicalApplicability(canonical, expectedPaths) {
   if (canonical?.applicability === 'APPLICABLE' || canonical?.applicability === 'NOT_APPLICABLE') return canonical.applicability
   const paths = canonicalPaths(expectedPaths)

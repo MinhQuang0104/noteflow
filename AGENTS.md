@@ -6,7 +6,7 @@ Explicit human direction binds. BMAD owns approved product intent; Codex and Cla
 
 ## V4 Lite migration lane
 
-Only an explicit human request may use this lane for agent instructions, routing, feature maps, verification/worker contracts, or orchestration architecture; it excludes product, normal bugs/features, Story execution, and V3.1 workers. Before migration read only `.agent-state/active-run.json`, without mutation; continue only on clear `IDLE` with no contradiction, then read the router. Otherwise stop/report. Do not resume, reconcile, take over, mutate V3 runtime, or invoke Orca, AGY, V3 workers, or recovery. This lane does not change V3.1 leases, generations, recovery, reconciliation, Human Gate, or Story rules.
+Only an explicit human request may use this lane for agent instructions, routing, feature maps, verification/worker contracts, or orchestration architecture; it excludes product, normal bugs/features, Story execution, and V3.1 workers. Before migration read only `.agent-state/active-run.json`, without mutation; continue only on clear `IDLE` with no contradiction, then read the router. Otherwise stop/report. Do not resume, reconcile, take over, mutate V3 runtime, or invoke Orca, AGY, V3 workers, or recovery. This lane does not change V3.1 leases, generations, recovery, reconciliation, Human Gate, or Story rules. A control-plane change may drive a Story only after the full `npm run test:v4` suite passes on its exact commit; focused subsets are not enough.
 
 ## Story and provider routing
 

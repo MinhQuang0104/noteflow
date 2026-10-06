@@ -139,3 +139,39 @@ test('Runner does not invoke the kernel without an explicit current implement ac
     f.cleanup()
   }
 })
+
+test('Runner refuses a Story action outside the linked worktree that owns the Story branch', async () => {
+  const { spawnSync } = await import('node:child_process')
+  const { mkdtempSync, rmSync } = await import('node:fs')
+  const { tmpdir } = await import('node:os')
+  const path = (await import('node:path')).default
+  const { storyCheckoutState } = await import('./v4-story-runner.mjs')
+  const f = createCompletionFixture()
+  const parent = mkdtempSync(path.join(tmpdir(), 'v4-checkout-'))
+  const linked = path.join(parent, 'story')
+  const unrelated = path.join(parent, 'unrelated')
+  const git = (...args) => {
+    const result = spawnSync('git', args, { cwd: f.root, encoding: 'utf8', windowsHide: true })
+    assert.equal(result.status, 0, result.stderr)
+  }
+  try {
+    git('worktree', 'add', '-q', '-b', 'codex/story-9-10', unrelated, f.head)
+    assert.equal(storyCheckoutState(f.root, '9.1').status, 'READY', 'story-9-10 must not claim Story 9.1')
+    git('worktree', 'add', '-q', '-b', 'codex/story-9-1-v4', linked, f.head)
+    const before = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: f.root, encoding: 'utf8' }).stdout.trim()
+    const blocked = runAction(f.root, '9.1', f.head, {
+      approval: { action: 'approve_exact_scope', disclosures_acknowledged: true, approved_at: '2026-09-26T12:00:00.000Z' }
+    })
+    assert.equal(blocked.status, 'BLOCKED', JSON.stringify(blocked))
+    assert.deepEqual(blocked.reasons, ['WRONG_CHECKOUT'])
+    assert.equal(spawnSync('git', ['rev-parse', 'HEAD'], { cwd: f.root, encoding: 'utf8' }).stdout.trim(), before)
+    const authorization = authorizeAction(f.root, '9.1', 'complete_story', f.head)
+    assert.deepEqual(authorization.reasons, ['WRONG_CHECKOUT'])
+    assert.equal(storyCheckoutState(linked, '9.1').status, 'READY')
+  } finally {
+    spawnSync('git', ['worktree', 'remove', '--force', linked], { cwd: f.root })
+    spawnSync('git', ['worktree', 'remove', '--force', unrelated], { cwd: f.root })
+    rmSync(parent, { recursive: true, force: true })
+    f.cleanup()
+  }
+})
