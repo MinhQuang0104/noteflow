@@ -10,6 +10,7 @@ import { spawnSync } from 'node:child_process'
 import { inspectStory, normativeDigest, receiptDigest, validateReceipt } from './check-artifact-contract.mjs'
 import { frontmatter, validate as validateStoryPlan } from './check-story-plan.mjs'
 import { actionFingerprint, checkpointImplementation, prepareAction, recordSliceReview, verifySlice } from './v4-action-kernel.mjs'
+import { digestValue, reviewEvidenceFreshness } from './v4-finalization-contract.mjs'
 import { inspectActionTransaction, transactionIdentity } from './v4-slice-transaction.mjs'
 import { runV4Story } from './v4-story-runner.mjs'
 
@@ -260,6 +261,11 @@ test('same-Lead APPROVE requires exact bounded evidence and persists verificatio
     assert.deepEqual(git(f.root, 'diff-tree', '--no-commit-id', '--name-only', '-r', result.metadata_commit).split(/\r?\n/).sort(), [PLAN, VERIFICATION_RECEIPT, REVIEW_RECEIPT].sort())
     const plan = frontmatter(readFileSync(path.join(f.root, PLAN), 'utf8'))
     assert.equal(plan.slices[0].status, 'reviewed')
+    const reviewReceipt = JSON.parse(readFileSync(path.join(f.root, REVIEW_RECEIPT), 'utf8'))
+    assert.equal(reviewReceipt.judgment, 'APPROVE')
+    assert.equal(reviewReceipt.verdict, undefined)
+    assert.equal(reviewReceipt.freshness, undefined)
+    assert.equal(reviewEvidenceFreshness(reviewReceipt, ['src/feature.txt'], plan.slices[0].checkpoint_commit, digestValue(plan.risk)).status, 'FRESH_REUSED')
     assert.ok(plan.slices[0].receipt_refs.review.digest)
     assert.deepEqual(validateReceipt(f.root, plan, 'A', 'verification'), [])
     assert.deepEqual(validateReceipt(f.root, plan, 'A', 'review'), [])

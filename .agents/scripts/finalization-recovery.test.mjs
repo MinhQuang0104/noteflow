@@ -7,6 +7,14 @@ import { spawnSync } from 'node:child_process'
 
 import { classifyFinalizationRecovery } from './check-story-finalization.mjs'
 import { stableFinalizationDigest } from './finalization-contract.mjs'
+import { gitFailure } from './finalize-story.mjs'
+
+test('Git timeout diagnostics preserve timeout phase, status, signal and subprocess output', () => {
+  const failure = gitFailure({ command: ['git', 'add', '--', 'docs/đọc.md'], status: null, signal: 'SIGTERM',
+    error: Object.assign(new Error('timed out'), { code: 'ETIMEDOUT' }), stdout: 'partial out', stderr: 'partial err', timeout_ms: 10000 }, 'stage')
+  assert.deepEqual(failure, { phase: 'stage', command: ['git', 'add', '--', 'docs/đọc.md'], status: null, signal: 'SIGTERM',
+    error: { name: 'Error', code: 'ETIMEDOUT', message: 'timed out' }, stdout: 'partial out', stderr: 'partial err', timeout_ms: 10000, timeout_phase: 'stage' })
+})
 
 const STORY = 'docs/story.md'
 const PLAN = '_bmad-output/implementation-artifacts/story-9-1-plan.md'

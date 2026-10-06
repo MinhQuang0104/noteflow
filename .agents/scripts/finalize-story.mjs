@@ -50,24 +50,56 @@ function safePath(root, relative) {
 }
 
 function git(root, args) {
-  const result = spawnSync('git', args, {
+  const result = runFinalizationGit(root, args)
+  if (result.error || result.status === null) {
+    const error = new Error('GIT_UNAVAILABLE')
+    error.git_failure = gitFailure(result, 'read')
+    throw error
+  }
+  return result
+}
+
+export function runFinalizationGit(root, args) {
+  const result = spawnSync('git', ['--no-optional-locks', ...args], {
     cwd: root,
     encoding: 'utf8',
     windowsHide: true,
     timeout: 10000
   })
-  if (result.error || result.status === null) throw new Error('GIT_UNAVAILABLE')
-  return result
+  return { ...result, command: ['git', '--no-optional-locks', ...args], timeout_ms: 10000 }
+}
+
+export function gitFailure(result, phase) {
+  return {
+    phase, command: result.command, status: result.status, signal: result.signal,
+    error: result.error ? { ...result.error, name: result.error.name, code: result.error.code ?? null, message: result.error.message } : null,
+    stdout: result.stdout ?? null, stderr: result.stderr ?? null, timeout_ms: result.timeout_ms,
+    timeout_phase: result.error?.code === 'ETIMEDOUT' ? phase : null
+  }
 }
 
 function gitOutput(root, args, failure) {
   const result = git(root, args)
-  if (result.status !== 0) throw new Error(failure)
+  if (result.status !== 0) {
+    const error = new Error(failure)
+    error.git_failure = gitFailure(result, 'read')
+    throw error
+  }
   return result.stdout.trim()
 }
 
 function gitPaths(root, args, failure) {
-  return gitOutput(root, args, failure).split(/\r?\n/).filter(Boolean).sort()
+  const result = git(root, args)
+  if (result.status !== 0) {
+    const error = new Error(failure)
+    error.git_failure = gitFailure(result, 'read')
+    throw error
+  }
+  return parseGitPaths(result.stdout)
+}
+
+export function parseGitPaths(output) {
+  return output.split('\0').filter(Boolean).sort()
 }
 
 function hashBytes(bytes) {
@@ -187,13 +219,13 @@ function protectedPaths(storyId, storyPath, scopePaths) {
 
 function preconditionDirtyPaths(root, protectedSet) {
   const staged = gitPaths(root,
-    ['diff', '--cached', '--name-only', '--diff-filter=ACDMRTUXB', 'HEAD', '--'],
+    ['diff', '--cached', '--name-only', '-z', '--diff-filter=ACDMRTUXB', 'HEAD', '--'],
     'GIT_STAGED_PATHS_FAILED')
   const unstaged = gitPaths(root,
-    ['diff', '--name-only', '--diff-filter=ACDMRTUXB', 'HEAD', '--'],
+    ['diff', '--name-only', '-z', '--diff-filter=ACDMRTUXB', 'HEAD', '--'],
     'GIT_UNSTAGED_PATHS_FAILED')
   const untracked = gitPaths(root,
-    ['ls-files', '--others', '--exclude-standard', '--'],
+    ['ls-files', '-z', '--others', '--exclude-standard', '--'],
     'GIT_UNTRACKED_PATHS_FAILED')
   return {
     staged,
@@ -237,10 +269,22 @@ export function buildFinalizationPreview(root, storyId, expectedHead) {
     throw error
   }
   const planPath = planRelative(storyId)
-  const receiptPath = finalizationRelative(storyId)
   const planText = readText(root, planPath)
   const plan = frontmatter(planText)
   const storyText = readText(root, plan.story.path)
+  return projectFinalization(root, storyId, expectedHead, helper, {
+    plan: planText, story: storyText, sprint: readText(root, SPRINT)
+  })
+}
+
+// Pure projection of explicitly supplied baseline sources. Recovery only compares
+// this output with existing candidates; it never writes or re-signs them.
+export function projectFinalization(root, storyId, expectedHead, helper, sources) {
+  const planPath = planRelative(storyId)
+  const receiptPath = finalizationRelative(storyId)
+  const planText = sources.plan
+  const plan = frontmatter(planText)
+  const storyText = sources.story
   const story = inspectStory(storyText)
   const receipt = receiptFor(helper, plan, expectedHead)
   const completion = completionBody({
@@ -252,7 +296,7 @@ export function buildFinalizationPreview(root, storyId, expectedHead) {
   }, story, storyText)
   const nextStoryBytes = updateStoryCompletion(updateStoryStatus(storyText), completion)
   const nextPlanBytes = updatePlanBytes(planText, receipt, receiptPath, expectedHead)
-  const nextSprintBytes = replaceSprintLifecycle(readText(root, SPRINT), plan.sprint_key)
+  const nextSprintBytes = replaceSprintLifecycle(sources.sprint, plan.sprint_key)
   const nextPlan = frontmatter(nextPlanBytes)
   const receiptValidation = validateFinalizationReceipt(root, nextPlan, receiptPath, receipt)
   if (receiptValidation.errors.length) throw new Error('FINALIZATION_RECEIPT_INVALID:' + receiptValidation.errors.join(','))
@@ -273,7 +317,7 @@ export function buildFinalizationPreview(root, storyId, expectedHead) {
       expectedHead,
       story: hashBytes(Buffer.from(storyText)),
       plan: hashBytes(Buffer.from(planText)),
-      sprint: hashBytes(Buffer.from(readText(root, SPRINT))),
+      sprint: hashBytes(Buffer.from(sources.sprint)),
       helper: {
         story_normative_digest: helper.story_normative_digest,
         slice_set_digest: helper.slice_set_digest,
@@ -333,7 +377,7 @@ export function prepareFinalization(root, storyId, expectedHead) {
       fingerprint: preview.fingerprint
     }
   } catch (error) {
-    return prepareFailure('ERROR', [error.message])
+    return prepareFailure('ERROR', [error.message], error.git_failure ? { git_failure: error.git_failure } : {})
   }
 }
 
@@ -352,10 +396,10 @@ function writeTempThenRename(root, relative, bytes) {
 }
 
 function exactStagedPaths(root, expected) {
-  return gitPaths(root,
-    ['diff', '--cached', '--name-only', '--diff-filter=ACDMRTUXB', 'HEAD', '--'],
-    'GIT_STAGED_PATHS_FAILED').sort()
-    .join('\n') === [...expected].sort().join('\n')
+  const actual = gitPaths(root,
+    ['diff', '--cached', '--name-only', '-z', '--diff-filter=ACDMRTUXB', 'HEAD', '--'],
+    'GIT_STAGED_PATHS_FAILED')
+  return JSON.stringify(actual) === JSON.stringify([...expected].sort())
 }
 
 function humanGateSnapshot(preview, commit) {
@@ -405,11 +449,20 @@ export function applyFinalization(root, storyId, expectedHead) {
     if (!checkedPlan.valid || checkedPlan.status !== 'READY') {
       throw new Error('POST_WRITE_VALIDATION_FAILED:' + checkedPlan.reasons.join(','))
     }
-    const add = git(root, ['add', '--', ...paths])
-    if (add.status !== 0 || !exactStagedPaths(root, paths)) throw new Error('STAGED_SCOPE_MISMATCH')
+    const add = runFinalizationGit(root, ['add', '--', ...paths])
+    if (add.status !== 0 || add.error) {
+      const error = new Error('GIT_ADD_FAILED')
+      error.git_failure = gitFailure(add, 'stage')
+      throw error
+    }
+    if (!exactStagedPaths(root, paths)) throw new Error('STAGED_SCOPE_MISMATCH')
     const commitMessage = 'docs(story-' + storyId + '): finalize for Human Gate'
-    const commit = git(root, ['commit', '-m', commitMessage, '--only', '--', ...paths])
-    if (commit.status !== 0) throw new Error('COMMIT_FAILED')
+    const commit = runFinalizationGit(root, ['commit', '-m', commitMessage, '--only', '--', ...paths])
+    if (commit.status !== 0 || commit.error) {
+      const error = new Error('COMMIT_FAILED')
+      error.git_failure = gitFailure(commit, 'commit')
+      throw error
+    }
     const commitSha = gitOutput(root, ['rev-parse', 'HEAD'], 'HEAD_UNAVAILABLE')
     return {
       status: 'HUMAN_GATE_REQUIRED',
@@ -428,6 +481,7 @@ export function applyFinalization(root, storyId, expectedHead) {
       ready: false,
       valid: false,
       reasons: [error.message],
+      ...(error.git_failure ? { git_failure: error.git_failure } : {}),
       recovery: classifyFinalizationRecovery(root, storyId, expectedHead)
     }
   }

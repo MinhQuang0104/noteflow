@@ -13,6 +13,7 @@ import {
   validateTaskSlices
 } from './check-artifact-contract.mjs'
 import { stableFinalizationDigest, validateFinalizationReceipt } from './finalization-contract.mjs'
+import { inferCanonicalApplicability, receiptKindsForAttemptStatus, reviewDecision, reviewEvidenceFreshness } from './v4-finalization-contract.mjs'
 
 const CODES = { READY: 0, RECONCILIATION_REQUIRED: 1, STALE: 2, BLOCKED: 3, INVALID: 4, ERROR: 5 }
 const SHA = /^[0-9a-f]{40,64}$/
@@ -163,6 +164,28 @@ function storySection(source, id) {
   if (!found) throw new Error('UPSTREAM_EPIC_SECTION_MISSING')
   const next = matches.find(match => match.index > found.index)
   return source.slice(found.index, next?.index ?? source.length)
+}
+
+function normalizeLineEndings(source) {
+  return source.replaceAll('\r\n', '\n')
+}
+
+function gitText(root, ref) {
+  const result = git(root, ['show', ref])
+  if (result.status !== 0) throw new Error('UPSTREAM_EPIC_BLOB_UNAVAILABLE')
+  return result.stdout
+}
+
+function canonicalEpicSection(root, storyId, upstream, expectedHead, result) {
+  const headSection = storySection(normalizeLineEndings(gitText(root, `${expectedHead}:${upstream.path}`)), storyId)
+  const expectedDigest = `sha256:${createHash('sha256').update(headSection, 'utf8').digest('hex')}`
+  if (expectedDigest !== upstream.section_digest) issue(result, 'UPSTREAM_EPIC_DIGEST_STALE', 'stale')
+  const indexSection = storySection(normalizeLineEndings(gitText(root, `:${upstream.path}`)), storyId)
+  if (indexSection !== headSection) issue(result, 'UPSTREAM_EPIC_INDEX_DRIFT', 'stale')
+  const workingFile = safePath(root, upstream.path)
+  if (!workingFile || !existsSync(workingFile)) throw new Error('UPSTREAM_EPIC_SECTION_MISSING')
+  const workingSection = storySection(normalizeLineEndings(readFileSync(workingFile, 'utf8')), storyId)
+  if (workingSection !== headSection) issue(result, 'UPSTREAM_EPIC_WORKTREE_DRIFT', 'stale')
 }
 
 function readLifecycle(root, sprintKey) {
@@ -427,9 +450,10 @@ function classifyPlanValidation(result, validation) {
   }
 }
 
-function canonicalDetails(planSlice, verification) {
+function canonicalDetails(planSlice, verification, expectedPaths) {
   const canonical = verification?.canonical ?? {}
-  const applicability = canonical.applicability ?? canonical.canonical_applicability ?? planSlice.verification?.canonical_applicability ?? null
+  const applicability = canonical.applicability ?? canonical.canonical_applicability ??
+    planSlice.verification?.canonical_applicability ?? inferCanonicalApplicability(canonical, expectedPaths)
   const status = canonical.status ?? canonical.canonical_status ?? planSlice.verification?.canonical_status ?? null
   const complete = canonical.complete ?? (status === 'PASS')
   const reasons = canonical.escalationReasons ?? canonical.escalation_reasons ??
@@ -452,7 +476,10 @@ function receiptErrorKind(error) {
   return 'invalid'
 }
 
-function reviewFreshness(receipt) {
+function reviewFreshness(receipt, slice = null, verification = null, plan = null, expectedPaths = []) {
+  if (slice && verification && plan) {
+    return reviewEvidenceFreshness(receipt, expectedPaths, slice.checkpoint_commit, stableDigest(plan.risk ?? null)).status
+  }
   const freshness = receipt?.freshness
   if (typeof freshness === 'string') return freshness
   return freshness?.status ?? null
@@ -466,7 +493,7 @@ function loadSliceReceipts(root, plan, result) {
     for (const attempt of slice.attempt_history ?? []) {
       const historical = { ...attempt, receipts: {}, receipt_refs: [] }
       for (const kind of RECEIPT_KINDS) {
-        const required = kind === 'implementation' || kind === 'verification' || attempt.status === 'reviewed'
+        const required = receiptKindsForAttemptStatus(attempt.status).includes(kind)
         const ref = attempt.receipt_refs?.[kind]
         if (!required) continue
         if (!ref) {
@@ -485,6 +512,23 @@ function loadSliceReceipts(root, plan, result) {
           continue
         }
         historical.receipts[kind] = loaded.receipt
+      }
+      for (const kind of RECEIPT_KINDS) {
+        if (receiptKindsForAttemptStatus(attempt.status).includes(kind)) continue
+        const ref = attempt.receipt_refs?.[kind]
+        if (!ref) continue
+        if (!safePath(root, ref.path) || !existsSync(path.resolve(root, ref.path))) {
+          issue(result, `HISTORICAL_${kind.toUpperCase()}_RECEIPT_MISSING:${slice.id}:${attempt.attempt_id}`, 'blocked')
+          continue
+        }
+        const loaded = readReceiptForAttempt(root, plan, slice.id, attempt, kind)
+        historical.receipt_refs.push({ kind, path: ref.path, digest: ref.digest, attempt_id: attempt.attempt_id })
+        detail.historical_receipt_refs.push({ kind, path: ref.path, digest: ref.digest, attempt_id: attempt.attempt_id })
+        if (loaded.errors.length) {
+          for (const error of loaded.errors) issue(result, `HISTORICAL_${error}:${slice.id}:${attempt.attempt_id}`, receiptErrorKind(error))
+        } else {
+          historical.receipts[kind] = loaded.receipt
+        }
       }
       historical.receipt = historical.receipts.implementation ?? null
       detail.attempts.push(historical)
@@ -513,18 +557,23 @@ function loadSliceReceipts(root, plan, result) {
     const implementation = detail.receipts.implementation
     const verification = detail.receipts.verification
     const review = detail.receipts.review
+    const expectedPaths = canonicalPaths(Array.isArray(implementation?.changed_paths) ? implementation.changed_paths :
+      gitPaths(root, ['diff', '--name-only', '--diff-filter=ACDMRTUXB', `${slice.baseline_commit}..${slice.checkpoint_commit}`, '--'], 'GIT_REVIEW_SCOPE_FAILED'))
+    detail.review_scope_paths = expectedPaths
     if (verification && verification.progression_eligible !== true) issue(result, `PROGRESSION_NOT_ELIGIBLE:${slice.id}`, 'blocked')
     if (slice.verification?.progression_eligible !== true) issue(result, `PLAN_PROGRESSION_NOT_ELIGIBLE:${slice.id}`, 'blocked')
     if (verification && (!Array.isArray(verification.focused_checks) || !verification.focused_checks.length) &&
         !Array.isArray(verification.commands)) issue(result, `FOCUSED_EVIDENCE_MISSING:${slice.id}`, 'blocked')
     if (review) {
-      if (review.verdict !== 'APPROVE' || slice.review?.verdict !== 'APPROVE') issue(result, `REVIEW_NOT_APPROVED:${slice.id}`, 'blocked')
+      const decision = reviewDecision(review)
+      if (decision.error === 'REVIEW_DECISION_CONFLICT') issue(result, `REVIEW_DECISION_CONFLICT:${slice.id}`, 'blocked')
+      else if (decision.error || decision.value !== 'APPROVE' || slice.review?.verdict !== 'APPROVE') issue(result, `REVIEW_NOT_APPROVED:${slice.id}`, 'blocked')
       if ((review.findings_blocking ?? 0) !== 0) issue(result, `REVIEW_BLOCKING_FINDINGS:${slice.id}`, 'blocked')
       if (review.reviewed_commit !== slice.checkpoint_commit) issue(result, `REVIEWED_COMMIT_MISMATCH:${slice.id}`, 'stale')
-      const freshness = reviewFreshness(review)
+      const freshness = reviewFreshness(review, slice, verification, plan, expectedPaths)
       if (!['FRESH_CANDIDATE', 'FRESH_REUSED', 'FRESH'].includes(freshness)) issue(result, `REVIEW_FRESHNESS_INVALID:${slice.id}`, 'blocked')
     }
-    const canonical = canonicalDetails(slice, verification)
+    const canonical = canonicalDetails(slice, verification, expectedPaths)
     if (verification?.canonical?.applicability && slice.verification?.canonical_applicability &&
         verification.canonical.applicability !== slice.verification.canonical_applicability) {
       issue(result, `CANONICAL_APPLICABILITY_MISMATCH:${slice.id}`, 'blocked')
@@ -769,15 +818,18 @@ export function inspectFinalization(root, storyId, expectedHead) {
   }
 
   const details = loadSliceReceipts(root, plan, result)
-  const sliceSummary = slices.map(slice => ({
-    id: slice.id,
-    status: slice.status,
-    checkpoint: slice.checkpoint_commit,
-    progression_eligible: slice.verification?.progression_eligible === true,
-    review_required: slice.review?.required === true,
-    review_verdict: slice.review?.verdict ?? null,
-    review_freshness: reviewFreshness(details.find(detail => detail.id === slice.id)?.receipts.review)
-  }))
+  const sliceSummary = slices.map(slice => {
+    const detail = details.find(item => item.id === slice.id)
+    return {
+      id: slice.id,
+      status: slice.status,
+      checkpoint: slice.checkpoint_commit,
+      progression_eligible: slice.verification?.progression_eligible === true,
+      review_required: slice.review?.required === true,
+      review_verdict: slice.review?.verdict ?? detail?.receipts.review?.judgment ?? null,
+      review_freshness: detail ? reviewFreshness(detail.receipts.review, slice, detail.receipts.verification, plan, detail.review_scope_paths ?? []) : null
+    }
+  })
   result.slices = sliceSummary
   result.slice_set_digest = stableDigest(sliceSummary)
   result.receipt_set_digest = stableDigest(details.flatMap(detail => [...detail.historical_receipt_refs, ...detail.receipt_refs]))
@@ -786,10 +838,9 @@ export function inspectFinalization(root, storyId, expectedHead) {
   if (!upstream || !safePath(root, upstream.path) || !DIGEST.test(upstream.section_digest ?? '')) issue(result, 'INVALID_UPSTREAM_EPIC_REF', 'invalid')
   else {
     try {
-      const actual = `sha256:${createHash('sha256').update(storySection(readFileSync(path.join(root, upstream.path), 'utf8'), storyId), 'utf8').digest('hex')}`
-      if (actual !== upstream.section_digest) issue(result, 'UPSTREAM_EPIC_DIGEST_STALE', 'stale')
-    } catch (error) { issue(result, error.message, 'invalid') }
-  }
+      canonicalEpicSection(root, storyId, upstream, expectedHead, result)
+   } catch (error) { issue(result, error.message, 'invalid') }
+ }
   checkReferences(root, story, plan, result)
   aggregateAcEvidence(story, plan, details, result)
 
