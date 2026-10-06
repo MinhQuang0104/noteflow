@@ -9,7 +9,7 @@ import { applyFinalization } from './finalize-story.mjs'
 import { explicitApprovalInput, inspectCompletion } from './check-story-completion.mjs'
 import { applyCompletion, recordHumanApproval } from './complete-story.mjs'
 import { inspectStart, applyStart } from './start-story.mjs'
-import { applyRework, checkpointImplementation, prepareAction, prepareRework, recordSliceReview, verifySlice } from './v4-action-kernel.mjs'
+import { applyRework, checkpointImplementation, prepareAction, prepareRework, recordSliceReview, verifySlice, prepareStagedRecovery, applyStagedRecovery } from './v4-action-kernel.mjs'
 import { prepareMetadataAbort, applyMetadataAbort } from './v4-metadata-recovery.mjs'
 import { recordActionFinished, recordActionStarted, recordStoryCompleted, recordStoryReviewSnapshot } from './v4-observations.mjs'
 
@@ -47,7 +47,7 @@ function planRelative(storyId) {
 }
 
 function git(root, args) {
-  const result = spawnSync('git', args, { cwd: root, encoding: 'utf8', windowsHide: true, timeout: 10000 })
+  const result = spawnSync('git', ['--no-optional-locks', ...args], { cwd: root, encoding: 'utf8', windowsHide: true, timeout: 10000 })
   if (result.error || result.status === null) throw new Error('GIT_UNAVAILABLE')
   return result
 }
@@ -169,6 +169,16 @@ export function runV4Story(root, storyId, options = {}) {
     const expectedHead = options.expectedHead ?? head
     if (!SHA.test(expectedHead)) return invalidResult('INVALID_EXPECTED_HEAD')
     if (head !== expectedHead) return { status: 'STALE', authorized: false, reasons: ['EXPECTED_HEAD_MISMATCH'] }
+    const recoveryOperation = options.operation ?? options.kernel?.operation
+    if (['prepare-staged-recovery', 'apply-staged-recovery'].includes(recoveryOperation)) {
+      const input = options.input ?? options.kernel?.input
+      if (options.approval || options.approveExactScope || !input || input.story_id !== storyId || input.action !== 'implement_slice') return invalidResult('MAINTENANCE_INPUT_MISMATCH')
+      // Partial Plan metadata is not a new Story action. The recovery kernel
+      // validates the original Plan and exact journal-derived projection.
+      return recoveryOperation === 'prepare-staged-recovery'
+        ? prepareStagedRecovery(root, { ...input, operation: recoveryOperation })
+        : applyStagedRecovery(root, { ...input, operation: recoveryOperation })
+    }
     const planPath = planRelative(storyId)
     const plan = frontmatter(readFileSync(path.join(root, planPath), 'utf8'))
     const planCheck = validateStoryPlan(root, storyId)

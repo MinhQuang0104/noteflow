@@ -31,7 +31,7 @@ function safeRelative(value) {
 }
 
 function git(root, args, options = {}) {
-  const result = spawnSync('git', args, {
+  const result = spawnSync('git', ['--no-optional-locks', ...args], {
     cwd: root,
     encoding: options.encoding ?? 'utf8',
     windowsHide: true,
@@ -184,14 +184,46 @@ function fileSnapshot(root, relative) {
   }
 }
 
+export function gitTransformContext(root, paths) {
+  const attributes = gitOutput(root, ['check-attr', '-z', '-a', '--', ...canonicalPaths(paths)])
+  const fields = attributes.split('\0')
+  for (let i = 0; i + 2 < fields.length; i += 3) {
+    if (['filter', 'working-tree-encoding', 'ident'].includes(fields[i + 1]) &&
+        !['unspecified', 'unset'].includes(fields[i + 2])) throw new Error('UNSUPPORTED_GIT_TRANSFORM')
+  }
+  const config = gitOutput(root, ['config', '--null', '--list', '--show-origin'])
+  const identity = repositoryIdentity(root)
+  const attributeFiles = new Set([path.join(identity.common, 'info/attributes')])
+  const global = git(root, ['config', '--path', '--get', 'core.attributesfile'])
+  if (global.status === 0) attributeFiles.add(path.resolve(root, global.stdout.trim()))
+  for (const relative of paths) {
+    let dir = path.dirname(relative)
+    attributeFiles.add(path.join(root, '.gitattributes'))
+    while (dir !== '.') { attributeFiles.add(path.join(root, dir, '.gitattributes')); dir = path.dirname(dir) }
+  }
+  const files = [...attributeFiles].sort().map(file => [file, existsSync(file) ? hash(readFileSync(file)) : null])
+  return hash(JSON.stringify({ attributes, config, files }))
+}
+
 export function snapshotWorkingFiles(root, paths) {
-  return Object.fromEntries(canonicalPaths(paths).map(relative => [relative, fileSnapshot(root, relative)]))
+  const canonical = canonicalPaths(paths)
+  if (!canonical.length) return {}
+  const context = gitTransformContext(root, canonical)
+  return Object.fromEntries(canonical.map(relative => {
+    const snapshot = fileSnapshot(root, relative)
+    const blob = snapshot.exists ? gitOutput(root, ['hash-object', `--path=${relative}`, '--', relative]).trim() : null
+    return [relative, { ...snapshot, git_blob: blob, git_context: context }]
+  }))
 }
 
 function sameSnapshot(expected, actual) {
   return expected.path === actual.path && expected.exists === actual.exists && expected.kind === actual.kind &&
-    expected.sha256 === actual.sha256 && expected.mode === actual.mode
+    expected.sha256 === actual.sha256 && expected.mode === actual.mode &&
+    (expected.git_blob === undefined || expected.git_blob === actual.git_blob) &&
+    (expected.git_context === undefined || expected.git_context === actual.git_context)
 }
+
+export function matchesWorkingSnapshot(expected, actual) { return sameSnapshot(expected, actual) }
 
 function pathDigest(paths) {
   const canonical = canonicalPaths(paths)
@@ -214,7 +246,8 @@ function verifyIndexSnapshot(root, paths, snapshot) {
     }
     if (!stagedMode || stagedMode !== expected.mode) throw new Error('STAGED_MODE_MISMATCH')
     const bytes = treeBytes(root, ':', relative)
-    if (!bytes || hash(bytes) !== expected.sha256) throw new Error(`STAGED_CONTENT_MISMATCH:${relative}`)
+    const blob = gitOutput(root, ['rev-parse', `:${relative}`]).trim()
+    if (!bytes || (expected.git_blob ? blob !== expected.git_blob : hash(bytes) !== expected.sha256)) throw new Error(`STAGED_CONTENT_MISMATCH:${relative}`)
   }
 }
 
@@ -228,7 +261,8 @@ function verifyCommitSnapshot(root, commit, paths, snapshot) {
     }
     if (mode !== expected.mode) throw new Error('COMMITTED_MODE_MISMATCH')
     const bytes = treeBytes(root, commit, relative)
-    if (!bytes || hash(bytes) !== expected.sha256) throw new Error('COMMITTED_CONTENT_MISMATCH')
+    const blob = gitOutput(root, ['rev-parse', `${commit}:${relative}`]).trim()
+    if (!bytes || (expected.git_blob ? blob !== expected.git_blob : hash(bytes) !== expected.sha256)) throw new Error('COMMITTED_CONTENT_MISMATCH')
   }
 }
 
@@ -377,7 +411,8 @@ function metadataFiles(descriptor, checkpoint) {
   return result
 }
 
-function writeMetadata(root, result) {
+function writeMetadata(root, result, afterWrite = null) {
+  let written = 0
   for (const [relative, value] of Object.entries(result.files)) {
     const normalized = safeRelative(relative)
     if (!normalized) throw new Error(`INVALID_PATH:${relative}`)
@@ -387,6 +422,7 @@ function writeMetadata(root, result) {
     const temporary = `${file}.${randomUUID()}.tmp`
     try { writeFileSync(temporary, value, { flag: 'wx' }); renameSync(temporary, file) }
     finally { if (existsSync(temporary)) unlinkSync(temporary) }
+    if (afterWrite) afterWrite(++written)
   }
 }
 
@@ -416,8 +452,8 @@ function verifyClean(root) {
   if (inventory.staged.length || inventory.unstaged.length || inventory.untracked.length) throw new Error('WORKTREE_SCOPE_MISMATCH')
 }
 
-function checkpointRecord(root, descriptor, baseline) {
-  const checkpoint = gitOutput(root, ['rev-parse', 'HEAD']).trim()
+function checkpointRecord(root, descriptor, baseline, explicitCommit = null) {
+  const checkpoint = explicitCommit ?? gitOutput(root, ['rev-parse', 'HEAD']).trim()
   if (!SHA.test(checkpoint)) throw new Error('CHECKPOINT_COMMIT_INVALID')
   if (commitParent(root, checkpoint) !== baseline) throw new Error('CHECKPOINT_PARENT_MISMATCH')
   const changedPaths = commitPaths(root, checkpoint)
@@ -564,6 +600,262 @@ function runTransaction(root, rawDescriptor) {
 export function executeSliceTransaction(root, descriptor) {
   try { return runTransaction(root, descriptor) }
   catch (error) { return statusResult('ERROR', [error.message], { transaction_id: descriptor?.transaction_id ?? null }) }
+}
+
+// Explicit pre-checkpoint recovery is deliberately separate from ordinary
+// checkpoint/recovery. It consumes an already-owned index; it never git-adds
+// implementation paths or rewrites the original preview fingerprint.
+const STAGED_RECOVERY_AUTHORIZATION = 'V4_LITE_STAGED_RECOVERY'
+const jsonEqual = (left, right) => JSON.stringify(left) === JSON.stringify(right)
+function recoveryFingerprint(preview) {
+  const unsigned = { ...preview }; delete unsigned.fingerprint
+  return hash(JSON.stringify(unsigned))
+}
+
+function recoveryIndex(root) {
+  const indexPath = path.resolve(root, gitOutput(root, ['rev-parse', '--git-path', 'index']).trim())
+  return { entries: gitOutput(root, ['ls-files', '--stage', '-z']), bytes: hash(readFileSync(indexPath)) }
+}
+
+function metadataSnapshot(root, paths) {
+  return Object.fromEntries(paths.map(relative => [relative, fileSnapshot(root, relative)]))
+}
+
+function recoveryHooks(root) {
+  const hooks = path.resolve(root, gitOutput(root, ['rev-parse', '--git-path', 'hooks']).trim())
+  return existsSync(hooks) ? hash(JSON.stringify(readdirSync(hooks).sort().map(name => {
+    const file = path.join(hooks, name)
+    if (!lstatSync(file).isFile()) throw new Error('UNSUPPORTED_GIT_HOOK_PATH')
+    return [name, hash(readFileSync(file))]
+  }))) : hash('no-hooks')
+}
+
+function stagedRecoveryDescriptor(raw) {
+  const descriptor = normalizeDescriptor(raw)
+  if (descriptor.action !== 'implement_slice') throw new Error('RECOVERY_ACTION_MISMATCH')
+  if (descriptor.staged_recovery_authorization !== STAGED_RECOVERY_AUTHORIZATION) throw new Error('STAGED_RECOVERY_AUTHORIZATION_REQUIRED')
+  if (descriptor.recovery || descriptor.recovery_checkpoint) throw new Error('MIXED_RECOVERY_OPERATION')
+  return descriptor
+}
+
+function assertRecoveryOwnership(journal, descriptor, identity, paths, complete = false) {
+  if (!matchesDescriptor(journal, descriptor, identity) || journal.expected_head !== descriptor.expected_head ||
+      journal.scope_key !== paths.scopeKey || journal.lock_path !== paths.lockPath || journal.journal_path !== paths.journalPath ||
+      !jsonEqual(canonicalPaths(journal.implementation_paths), descriptor.implementation_paths) ||
+      !jsonEqual(canonicalPaths(journal.metadata_paths), descriptor.metadata_paths)) throw new Error('RECOVERY_BINDING_MISMATCH')
+  if (complete && !existsSync(paths.lockPath)) return
+  if (!existsSync(paths.lockPath) || !jsonEqual(readJson(paths.lockPath), journal.lock_identity)) throw new Error('RECOVERY_LOCK_MISMATCH')
+  const lock = readJson(paths.lockPath)
+  if (!matchesDescriptor({ ...lock, preview_fingerprint: journal.preview_fingerprint }, descriptor, identity) ||
+      lock.scope_key !== paths.scopeKey) throw new Error('RECOVERY_LOCK_MISMATCH')
+}
+
+function assertRecoveryWorking(root, descriptor, snapshot) {
+  const actual = snapshotWorkingFiles(root, descriptor.implementation_paths)
+  for (const relative of descriptor.implementation_paths) {
+    if (!sameSnapshot(descriptor.snapshot[relative], actual[relative]) ||
+        (snapshot && !sameSnapshot(snapshot[relative], actual[relative]))) throw new Error('STALE_WORKTREE_PREVIEW')
+  }
+  return actual
+}
+
+export function prepareStagedRecoveryTransaction(root, rawDescriptor) {
+  try {
+    const descriptor = stagedRecoveryDescriptor(rawDescriptor)
+    const identity = repositoryIdentity(root)
+    const paths = transactionPaths(root, identity, descriptor)
+    const journal = loadExistingJournal(paths)
+    if (!journal || journal.phase !== 'RECOVERY_REQUIRED' || journal.checkpoint_commit || journal.staged_recovery || journal.metadata_commit) throw new Error('PRE_CHECKPOINT_STAGED_STATE_REQUIRED')
+    assertRecoveryOwnership(journal, descriptor, identity, paths)
+    if (gitOutput(root, ['rev-parse', 'HEAD']).trim() !== descriptor.expected_head) throw new Error('STALE_HEAD')
+    const gitContext = gitTransformContext(root, [...descriptor.implementation_paths, ...descriptor.metadata_paths])
+    const snapshot = assertRecoveryWorking(root, descriptor)
+    if (descriptor.validateRecoveryAuthority) descriptor.validateRecoveryAuthority(root)
+    const inventory = worktreeInventory(root)
+    ensureExactSet(inventory.staged, descriptor.implementation_paths, 'STAGED_SCOPE_MISMATCH')
+    ensureExactSet(dirtyPaths(inventory), descriptor.implementation_paths, 'DIRTY_SCOPE_MISMATCH')
+    verifyIndexSnapshot(root, descriptor.implementation_paths, snapshot)
+    const metadata = metadataSnapshot(root, descriptor.metadata_paths)
+    if (descriptor.metadata_paths.some(relative => metadata[relative].exists &&
+        git(root, ['cat-file', '-e', `${descriptor.expected_head}:${relative}`]).status !== 0)) throw new Error('RECOVERY_METADATA_ALREADY_EXISTS')
+    const preview = {
+      schema_version: 1, operation: 'apply-staged-recovery',
+      repository: identity.repository, worktree: identity.worktree,
+      story_id: descriptor.story_id, slice_id: descriptor.slice_id,
+      transaction_id: descriptor.transaction_id, expected_head: descriptor.expected_head,
+      original_preview_fingerprint: descriptor.preview_fingerprint,
+      original_journal_base64: readFileSync(paths.journalPath).toString('base64'),
+      original_lock_base64: readFileSync(paths.lockPath).toString('base64'),
+      implementation_paths: descriptor.implementation_paths, metadata_paths: descriptor.metadata_paths,
+      snapshot, git_context: gitContext, metadata_snapshot: metadata, index: recoveryIndex(root), hooks_digest: recoveryHooks(root),
+      authority_binding: descriptor.authority_binding ?? null
+    }
+    preview.fingerprint = recoveryFingerprint(preview)
+    return statusResult('READY', [], { preview, fingerprint: preview.fingerprint })
+  } catch (error) { return statusResult('BLOCKED', [error.message]) }
+}
+
+function sealedRecoveryJournal(journal, patch) {
+  const next = { ...journal, ...patch, updated_at: new Date().toISOString() }
+  delete next.recovery_state_digest
+  next.recovery_state_digest = hash(JSON.stringify(next))
+  atomicJson(next._path, next)
+  return next
+}
+
+function assertRecoverySeal(journal) {
+  const unsigned = { ...journal }; delete unsigned.recovery_state_digest
+  if (journal.recovery_state_digest !== hash(JSON.stringify(unsigned))) throw new Error('STALE_RECOVERY_JOURNAL')
+}
+
+function recoveryCommitMessage(descriptor, preview, metadata = false) {
+  const base = metadata ? descriptor.metadata_message ?? `chore(story-${descriptor.story_id}): record implementation checkpoint`
+    : descriptor.implementation_message ?? `chore(story-${descriptor.story_id}): implementation checkpoint`
+  return `${base} [v4-staged-recovery:${preview.fingerprint}]`
+}
+
+function assertCandidateCommit(root, commit, parent, message, paths, snapshot) {
+  if (commitParent(root, commit) !== parent || commitSubject(root, commit) !== message.split(/\r?\n/)[0]) throw new Error('RECOVERY_COMMIT_IDENTITY_MISMATCH')
+  ensureExactSet(commitPaths(root, commit), paths, 'RECOVERY_COMMIT_SCOPE_MISMATCH')
+  if (snapshot) verifyCommitSnapshot(root, commit, paths, snapshot)
+}
+
+function assertMetadataResume(root, descriptor, preview, metadata, checkpoint, head) {
+  const inventory = worktreeInventory(root)
+  if (dirtyPaths(inventory).some(relative => !descriptor.metadata_paths.includes(relative))) throw new Error('RECOVERY_METADATA_SCOPE_MISMATCH')
+  for (const relative of descriptor.metadata_paths) {
+    const current = fileSnapshot(root, relative)
+    const expected = hash(Buffer.from(metadata.files[relative]))
+    const expectedMode = preview.metadata_snapshot[relative].mode ?? '100644'
+    if (!(current.exists && current.sha256 === expected && current.mode === expectedMode) && !sameSnapshot(preview.metadata_snapshot[relative], current)) throw new Error('RECOVERY_METADATA_CONTENT_MISMATCH')
+    if (inventory.staged.includes(relative)) {
+      const bytes = treeBytes(root, ':', relative)
+      if (!bytes || hash(bytes) !== expected) throw new Error('RECOVERY_METADATA_INDEX_MISMATCH')
+      if (indexMode(root, relative) !== expectedMode) throw new Error('RECOVERY_METADATA_INDEX_MODE_MISMATCH')
+    }
+    if (head !== checkpoint) {
+      const committed = treeBytes(root, head, relative)
+      if (!committed || hash(committed) !== expected || !current.exists || current.sha256 !== expected) throw new Error('RECOVERY_COMMITTED_METADATA_MISMATCH')
+      if (treeMode(root, head, relative) !== expectedMode) throw new Error('RECOVERY_COMMITTED_METADATA_MODE_MISMATCH')
+    }
+  }
+}
+
+export function executeStagedRecoveryTransaction(root, rawDescriptor, preview) {
+  let journal, paths, mutated = false
+  try {
+    const descriptor = stagedRecoveryDescriptor(rawDescriptor)
+    if (!preview || preview.fingerprint !== recoveryFingerprint(preview)) throw new Error('STALE_RECOVERY_PREVIEW')
+    const identity = repositoryIdentity(root)
+    paths = transactionPaths(root, identity, descriptor)
+    journal = loadExistingJournal(paths)
+    const complete = journal?.phase === 'COMPLETE'
+    assertRecoveryOwnership(journal, descriptor, identity, paths, complete)
+    if (preview.repository !== identity.repository || preview.worktree !== identity.worktree ||
+        preview.transaction_id !== descriptor.transaction_id || preview.story_id !== descriptor.story_id || preview.slice_id !== descriptor.slice_id ||
+        preview.expected_head !== descriptor.expected_head || preview.original_preview_fingerprint !== descriptor.preview_fingerprint ||
+        !jsonEqual(preview.authority_binding, descriptor.authority_binding ?? null) ||
+        !jsonEqual(preview.implementation_paths, descriptor.implementation_paths) || !jsonEqual(preview.metadata_paths, descriptor.metadata_paths)) throw new Error('RECOVERY_PREVIEW_BINDING_MISMATCH')
+    assertRecoveryWorking(root, descriptor, preview.snapshot)
+    if (gitTransformContext(root, [...descriptor.implementation_paths, ...descriptor.metadata_paths]) !== preview.git_context) throw new Error('STALE_GIT_CONTEXT')
+    if (recoveryHooks(root) !== preview.hooks_digest) throw new Error('STALE_GIT_HOOKS')
+    if (descriptor.validateRecoveryAuthority) descriptor.validateRecoveryAuthority(root)
+    let head = gitOutput(root, ['rev-parse', 'HEAD']).trim()
+    const started = journal.staged_recovery
+    if (!started) {
+      const current = prepareStagedRecoveryTransaction(root, descriptor)
+      if (current.status !== 'READY' || current.fingerprint !== preview.fingerprint) throw new Error('STALE_RECOVERY_STATE')
+    } else {
+      assertRecoverySeal(journal)
+      if (!jsonEqual(started, preview)) throw new Error('STALE_RECOVERY_BINDING')
+    }
+    // All rejection checks happen before the first journal or Git mutation.
+    let checkpointCommit = journal.checkpoint_commit
+    if (!checkpointCommit && head !== descriptor.expected_head) {
+      if (!started || journal.resume_phase !== 'COMMIT1_STARTED') throw new Error('STALE_HEAD')
+      assertCandidateCommit(root, head, descriptor.expected_head, recoveryCommitMessage(descriptor, preview), descriptor.implementation_paths, preview.snapshot)
+      checkpointCommit = head
+    }
+    if (!checkpointCommit) {
+      if (head !== descriptor.expected_head) throw new Error('STALE_HEAD')
+      const inventory = worktreeInventory(root)
+      ensureExactSet(inventory.staged, descriptor.implementation_paths, 'STAGED_SCOPE_MISMATCH')
+      ensureExactSet(dirtyPaths(inventory), descriptor.implementation_paths, 'DIRTY_SCOPE_MISMATCH')
+      if (recoveryIndex(root).entries !== preview.index.entries) throw new Error('STALE_RECOVERY_INDEX')
+      verifyIndexSnapshot(root, descriptor.implementation_paths, preview.snapshot)
+      if (!jsonEqual(metadataSnapshot(root, descriptor.metadata_paths), preview.metadata_snapshot)) throw new Error('STALE_RECOVERY_METADATA')
+    } else {
+      assertCandidateCommit(root, checkpointCommit, descriptor.expected_head, recoveryCommitMessage(descriptor, preview), descriptor.implementation_paths, preview.snapshot)
+    }
+    const hypothetical = {
+      baseline_commit: descriptor.expected_head, checkpoint_commit: checkpointCommit ?? descriptor.expected_head,
+      changed_paths: descriptor.implementation_paths, changed_paths_sha256: pathDigest(descriptor.implementation_paths),
+      subject: recoveryCommitMessage(descriptor, preview), subject_digest: hash(recoveryCommitMessage(descriptor, preview).split(/\r?\n/)[0])
+    }
+    // Check the metadata projection before committing implementation.
+    let metadata = metadataFiles(descriptor, hypothetical)
+    if (checkpointCommit) {
+      if (head !== checkpointCommit) {
+        if (!started || (!complete && !['COMMIT2_STARTED', 'COMMIT2_COMMITTED'].includes(journal.resume_phase))) throw new Error('STALE_HEAD')
+        assertCandidateCommit(root, head, checkpointCommit, recoveryCommitMessage(descriptor, preview, true), descriptor.metadata_paths)
+      }
+      assertMetadataResume(root, descriptor, preview, metadata, checkpointCommit, head)
+      if (complete) {
+        if (head !== journal.metadata_commit) throw new Error('STALE_HEAD')
+        if (descriptor.validateFinal) descriptor.validateFinal(metadata)
+        verifyClean(root)
+        release(paths.lockPath, descriptor.transaction_id)
+        return statusResult('NOOP', [], { checkpoint_commit: checkpointCommit, metadata_commit: head, next_action: journal.next_action, durable_action_count: 0 })
+      }
+    }
+    mutated = true
+    if (!started) journal = sealedRecoveryJournal(journal, { staged_recovery: preview, recovery_required: true })
+    if (!checkpointCommit) {
+      journal = sealedRecoveryJournal(journal, { phase: 'RECOVERY_REQUIRED', resume_phase: 'COMMIT1_STARTED' })
+      maybeFail(descriptor, 'BEFORE_COMMIT1')
+      checkpointCommit = commitExact(root, recoveryCommitMessage(descriptor, preview), descriptor.implementation_paths)
+      maybeFail(descriptor, 'AFTER_COMMIT1_BEFORE_JOURNAL')
+      assertCandidateCommit(root, checkpointCommit, descriptor.expected_head, recoveryCommitMessage(descriptor, preview), descriptor.implementation_paths, preview.snapshot)
+    }
+    const checkpoint = checkpointRecord(root, descriptor, descriptor.expected_head, checkpointCommit)
+    journal = sealedRecoveryJournal(journal, { ...checkpoint, checkpoint_commit: checkpointCommit, resume_phase: head !== checkpointCommit && head !== descriptor.expected_head ? journal.resume_phase : 'COMMIT1_COMMITTED' })
+    maybeFail(descriptor, 'AFTER_COMMIT1')
+    metadata = metadataFiles(descriptor, { ...hypothetical, checkpoint_commit: checkpointCommit })
+    head = gitOutput(root, ['rev-parse', 'HEAD']).trim()
+    if (head === checkpointCommit) {
+      journal = sealedRecoveryJournal(journal, { resume_phase: 'METADATA_WRITE_STARTED' })
+      // A schema-v2 receipt sorts before the Plan. Keeping the Plan last means
+      // an interrupted single-file write never references a missing receipt;
+      // ordinary Plan validation remains enabled even during recovery.
+      writeMetadata(root, { ...metadata, files: Object.fromEntries(metadata.paths.map(relative => [relative, metadata.files[relative]])) },
+        written => { if (written === 1) maybeFail(descriptor, 'AFTER_FIRST_METADATA_WRITE') })
+      maybeFail(descriptor, 'AFTER_WRITE')
+      if (descriptor.validateMetadata) descriptor.validateMetadata(metadata)
+      stageExact(root, descriptor.metadata_paths, snapshotWorkingFiles(root, descriptor.metadata_paths), 'metadata')
+      journal = sealedRecoveryJournal(journal, { resume_phase: 'COMMIT2_STARTED' })
+      maybeFail(descriptor, 'AFTER_METADATA_STAGE')
+      head = commitExact(root, recoveryCommitMessage(descriptor, preview, true), descriptor.metadata_paths)
+      maybeFail(descriptor, 'AFTER_COMMIT2_BEFORE_JOURNAL')
+      journal = sealedRecoveryJournal(journal, { metadata_commit: head, resume_phase: 'COMMIT2_COMMITTED' })
+      maybeFail(descriptor, 'AFTER_COMMIT2_HOOK')
+    }
+    assertCandidateCommit(root, head, checkpointCommit, recoveryCommitMessage(descriptor, preview, true), descriptor.metadata_paths)
+    assertMetadataResume(root, descriptor, preview, metadata, checkpointCommit, head)
+    if (descriptor.validateFinal) descriptor.validateFinal(metadata)
+    verifyClean(root)
+    const nextAction = { kind: 'verify_slice', target: descriptor.slice_id }
+    journal = sealedRecoveryJournal(journal, { phase: 'COMPLETE', metadata_commit: head, recovery_required: false, next_action: nextAction })
+    maybeFail(descriptor, 'AFTER_COMPLETE_BEFORE_RELEASE')
+    release(paths.lockPath, descriptor.transaction_id)
+    return statusResult('CHECKPOINTED', [], { transaction_id: descriptor.transaction_id, baseline_commit: descriptor.expected_head,
+      checkpoint_commit: checkpointCommit, metadata_commit: head, next_action: nextAction, durable_action_count: 1, stop_condition: 'VERIFY_SLICE_SAME_SLICE' })
+  } catch (error) {
+    if (mutated && journal) {
+      if (journal.phase !== 'COMPLETE') sealedRecoveryJournal(journal, { phase: 'RECOVERY_REQUIRED', recovery_required: true, error: error.message })
+      return statusResult('RECOVERY_REQUIRED', [error.message], { journal_path: paths.journalPath, lock_path: paths.lockPath, checkpoint_commit: journal.checkpoint_commit ?? null })
+    }
+    return statusResult(error.message.startsWith('STALE') ? 'STALE' : 'BLOCKED', [error.message])
+  }
 }
 
 // Verification and review actions are metadata-only transactions.  They use
