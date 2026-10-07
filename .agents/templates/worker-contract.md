@@ -34,8 +34,16 @@
   never copy previous report bodies or claim old checks were rerun.
 - Blocked artifact: status BLOCKED; blocker, preserved worktree/scope, last step,
   verification state, required decision/dependency and worker activity.
-- Notification: `DONE report=<assigned-path> attempt=<N> sha256=<file-digest>`
-  (use BLOCKED when blocked). Do not emit a report body to the terminal.
+- Notification: exactly one structured `worker_done` using the preamble command,
+  with both lifecycle IDs, explicit `--outcome`, real `--files-modified` and
+  `--report-path <assigned-path>`; the body carries
+  `DONE report=<assigned-path> attempt=<N> sha256=<file-digest>`. Blocked before
+  completion: write the blocked report, then `escalation` with the `BLOCKED`
+  reference. Do not emit a report body to the terminal.
+- Coordinator channel: questions only via `orca orchestration ask`, never local
+  question UI (`ask_question`); heartbeat at the preamble cadence; check
+  coordinator follow-ups before each new file, after each check run, and before
+  `worker_done`. Never answer or bypass a local permission, trust or sign-in prompt.
 - External logs: <attempt-specific log paths>; raw terminal capture is separate
   observability/recovery evidence, never the semantic report or resultPath.
 

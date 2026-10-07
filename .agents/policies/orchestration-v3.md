@@ -412,14 +412,16 @@ an observed Orca/provider compatibility limitation. An Orca Run and Task must
 already exist and remain coordinator-owned. Create or identify an isolated
 Orca-managed child worktree with durable explicit repo/worktree identifiers and an
 explicit parent; never depend on UI focus or whichever workspace is visually active.
-Start or identify one healthy Antigravity terminal there, send the bounded contract
-with `orca terminal send`, and observe the compact completion reference with
-`orca terminal read --screen`. Store any raw capture separately from the structured
+Start or identify one healthy Antigravity terminal there and deliver the bounded
+contract per the V3.2 delivery recipe below. Completion, questions and escalations
+arrive as structured Orca messages; `orca terminal read --screen` is diagnostic
+only. Store any raw capture separately from the structured
 report; never redirect terminal output into `resultPath`. Apply the report ingestion
 boundary below. Then independently inspect the worker Git status,
 diff, scope, and acceptance evidence before the coordinator uses
 `orca orchestration task-update`. Store `executionMode: "compat-terminal"`, the
-terminal and worktree IDs, and a null Dispatch ID when no Dispatch succeeded.
+terminal and worktree IDs, and the context-only Dispatch ID, or null when none was
+created.
 
 This compatibility path is still Orca runtime execution, not a second orchestrator.
 It never authorizes Lead-checkout implementation, Codex/Claude worker substitution,
@@ -442,6 +444,63 @@ logically distinct scope. Follow root retry/reassessment rules. Antigravity fail
 -> WORKER_FAILED -> diagnosis -> safe resume, otherwise NEEDS_HUMAN. Only a human
 may authorize a worker-engine exception; stop and record its scope/authority before
 changing the fixed schema/policy. No silent Codex/Claude worker fallback.
+
+### V3.2 Antigravity loop operations
+
+Observed 2026-10-07 (Orca 1.4.222, AGY 1.3.1): supervised `worker-start` signed in
+without a trust prompt but failed at prompt input three times (`terminal_handle_stale`,
+then `agent_prompt_blocked` twice, including a pre-warmed `tui-idle` terminal reused
+with `--terminal`). `compat-terminal` with a context-only Dispatch delivered one
+structured question/reply and one `worker_done` with matching Task/Dispatch IDs,
+then independently verified. Re-test supervised dispatch after Orca/AGY upgrades;
+until a supervised smoke passes, that failure is the recorded compatibility limitation.
+
+Delivery recipe, one attempt:
+
+1. In the isolated worktree, start `agy` with `orca terminal create --worktree
+   <explicit selector>` and wait `orca terminal wait --for tui-idle`.
+2. Create the Task from the bounded contract if absent, then
+   `orca orchestration dispatch --task <id> --to <handle> --return-preamble` without
+   `--inject`. Record the context-only Dispatch ID; Orca does not supervise it.
+3. Write the preamble plus bounded contract to `.orca-contract/contract.md` in the
+   worker worktree (outside expected scope, never committed). Its SHA-256 is the
+   `contractIdentity`.
+4. Send exactly one line with `orca terminal send --enter`: read and follow that
+   file. Input acceptance is not delivery; confirm through the first structured
+   message or one bounded screen read before any resend. Never resend blindly.
+5. Loop `orca orchestration check --wait --types worker_done,escalation,question`;
+   process every message, reply, then acknowledge.
+
+Permissions: Orca launches Antigravity with `--dangerously-skip-permissions`, so AGY
+permission prompts and allowlists are not a guardrail under Orca. The guardrails are
+the isolated worktree, the contract's write scope and prohibited actions, and Lead
+inspection of the exact diff and changed-file scope. The worker never uses local
+question UI (`ask_question`); only `orca orchestration ask`. The coordinator never
+answers an observed local, trust or sign-in prompt by keystroke: record the blocker
+and enter NEEDS_HUMAN. Workspace trust is a human-provisioned user setting.
+
+Liveness: a context-only Dispatch has no Orca liveness projection. The contract
+requires the preamble heartbeat cadence. After three consecutive empty waits or 15
+minutes without a heartbeat or message, read one bounded screen. Visible progress
+means keep waiting; a local prompt, crash or exited agent means WORKER_FAILED or
+NEEDS_HUMAN per the table below. Screen output is diagnosis, never completion.
+
+| Signal | Owner | Action |
+|---|---|---|
+| Operational question answerable from the contract, BMAD, code or tests without changing AC/scope | Lead | Reply with the cited source |
+| Product/AC ambiguity, BMAD conflict, or an answer that would change scope | Human | Reply "stop and report blocked"; classify SPEC_AMBIGUITY or NEEDS_HUMAN_DECISION; `gate-create` where a dependent Task waits |
+| Technical failure (`escalation`, `worker_done --outcome failed`, failing checks) | Lead | Diagnose from report, diff and rerun checks; correction attempt on the same Task |
+| Security, destructive, irreversible, credential, network-install or out-of-scope write need | Human | NEEDS_HUMAN; no correction attempt |
+| Local permission, trust or sign-in prompt | Human | NEEDS_HUMAN |
+| Message for a stale or non-current Dispatch | Lead | Ignore for lifecycle; duplicates follow DUPLICATE_WORKERS |
+
+Bounded implement/review loop: worker attempt -> Lead review (independent diff,
+scope, AC and check evidence; findings classified per root) -> correction contract
+on the same Task with incremented attempt and a new context-only Dispatch. At most
+three correction attempts per Task; stop earlier when the same failure repeats
+without progress. Exhaustion -> NEEDS_HUMAN. A passing review ends the loop at the
+existing finalization/Human Gate; the loop never approves, merges, integrates or
+marks a Story done, and worker reports never substitute for Lead review.
 
 ### V3.1 structured worker evidence (A1)
 
@@ -474,8 +533,9 @@ Producer boundary (both supervised and compat-terminal):
    filename and retain the earlier artifact/digest. Do not overwrite evidence.
 3. Emit only a compact notification, for example
    `DONE report=workers/<TASK-ID>/report-attempt-<N>.json attempt=<N> sha256=<hex>`;
-   blocked uses `BLOCKED` with the same reference fields. Supervised completion
-   payloads carry this reference too. Notifications never grant acceptance.
+   blocked uses `BLOCKED` with the same reference fields. Structured `worker_done`
+   or `escalation` bodies carry this reference in both modes, including V3.2
+   context-only Dispatches. Notifications never grant acceptance.
 4. Keep terminal capture at `capture-attempt-<N>.log` and check stdout at referenced
    log paths. Neither is the canonical report. Missing/incomplete report is missing
    evidence; preserve runtime/Git facts and investigate, never synthesize DONE.

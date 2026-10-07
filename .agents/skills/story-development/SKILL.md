@@ -90,7 +90,8 @@ Preserve Run/Task/Dispatch/worker/worktree IDs and use same-task
 corrections. Prefer supervised dispatch. Use V3's `compat-terminal` path only for
 an observed Orca/Antigravity compatibility failure, with an existing coordinator-
 owned Run and Task, explicit isolated worktree identifiers, fixed Antigravity,
-rendered terminal evidence, independent Git verification, and coordinator Task
+V3.2 contract-file delivery with structured Orca messages, the V3.2 block-routing
+and bounded correction rules, independent Git verification, and coordinator Task
 update. New dispatches require the V3.1 structured report contract in
 `.agents/schemas/worker-report.schema.json`. Worker writes the artifact before a
 compact completion reference; terminal capture stays separate from `resultPath`.
