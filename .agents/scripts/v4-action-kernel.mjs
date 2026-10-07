@@ -832,6 +832,16 @@ function buildRequestFromPreview(preview, request, operation) {
 
 const VERIFICATION_STATUSES = new Set(['PASS', 'FAIL', 'INCOMPLETE', 'ERROR'])
 const RISK_LEVELS = new Set(['LOW', 'MEDIUM', 'HIGH'])
+const RISK_ORDER = { LOW: 0, MEDIUM: 1, HIGH: 2 }
+const RISK_FLAG_ALIASES = new Map([
+  ['PUBLIC_CONTRACT', 'PUBLIC_CONTRACT'], ['PUBLIC', 'PUBLIC_CONTRACT'], ['CONTRACT', 'PUBLIC_CONTRACT'],
+  ['SECURITY_AUTH', 'SECURITY_AUTH'], ['SECURITY', 'SECURITY_AUTH'], ['AUTH', 'SECURITY_AUTH'],
+  ['MIGRATION_DESTRUCTIVE', 'MIGRATION_DESTRUCTIVE'], ['MIGRATION', 'MIGRATION_DESTRUCTIVE'], ['DESTRUCTIVE', 'MIGRATION_DESTRUCTIVE'],
+  ['CONCURRENCY_STATE', 'CONCURRENCY_STATE'], ['CONCURRENCY', 'CONCURRENCY_STATE'], ['STATE', 'CONCURRENCY_STATE'],
+  ['IDEMPOTENCY', 'CONCURRENCY_STATE'], ['UNEXPLAINED_SCOPE', 'UNEXPLAINED_SCOPE'], ['SCOPE', 'UNEXPLAINED_SCOPE'],
+  ['AMBIGUOUS_REQUIREMENTS', 'AMBIGUOUS_REQUIREMENTS'], ['AMBIGUOUS', 'AMBIGUOUS_REQUIREMENTS'], ['REQUIREMENTS', 'AMBIGUOUS_REQUIREMENTS'],
+  ['SHARED_BOUNDARY', 'PUBLIC_CONTRACT']
+])
 const REVIEW_JUDGMENTS = new Set(['APPROVE', 'CHANGES_REQUIRED', 'NEED_MORE_EVIDENCE'])
 const KNOWN_COVERAGE_REASONS = new Set([
   'NO_APPLICABLE_RECIPE', 'NO_MAPPED_CHANGE', 'UNMAPPED_CHANGED_PATH',
@@ -875,11 +885,37 @@ function planAtHead(root, storyId) {
   return { planPath, text, plan: frontmatter(text), digest: hash(Buffer.from(text)) }
 }
 
-function riskLevel(plan, request) {
-  const value = request.risk ?? plan.risk?.level ?? plan.risk
+function normalizedRisk(value) {
   const risk = typeof value === 'string' ? value.toUpperCase() : null
   if (!RISK_LEVELS.has(risk)) throw new Error('RISK_LEVEL_REQUIRED')
   return risk
+}
+
+function mandatoryJudgmentFlags(plan) {
+  const source = plan?.risk?.flags
+  if (source === undefined) return []
+  if (!Array.isArray(source)) throw new Error('RISK_FLAGS_INVALID')
+  return [...new Set(source.map(value => {
+    if (typeof value !== 'string' || !value.trim()) throw new Error('RISK_FLAG_INVALID')
+    const key = value.trim().toUpperCase().replace(/[^A-Z0-9]+/g, '_').replace(/^_+|_+$/g, '')
+    const flag = RISK_FLAG_ALIASES.get(key)
+    if (!flag) throw new Error(`RISK_FLAG_UNMAPPED:${value}`)
+    return flag
+  }))].sort()
+}
+
+function selectRisk(plan, request = {}) {
+  const planRisk = normalizedRisk(plan?.risk?.level ?? plan?.risk)
+  const requestedRisk = request.risk === undefined || request.risk === null ? null : normalizedRisk(request.risk)
+  if (requestedRisk && RISK_ORDER[requestedRisk] < RISK_ORDER[planRisk]) throw new Error('RISK_DOWNGRADE_FORBIDDEN')
+  return {
+    risk: requestedRisk && RISK_ORDER[requestedRisk] > RISK_ORDER[planRisk] ? requestedRisk : planRisk,
+    mandatory_judgment_flags: mandatoryJudgmentFlags(plan)
+  }
+}
+
+function riskLevel(plan, request) {
+  return selectRisk(plan, request).risk
 }
 
 function validateReviewQuestions(value, fallbackReasons = []) {
@@ -984,7 +1020,8 @@ function buildVerificationPreview(root, request) {
   const recipePaths = normalizePaths(root, request.recipe_paths ?? DEFAULT_VERIFICATION_RECIPE_PATHS, 'RECIPE_PATHS')
   const policy = digestFiles(root, policyPaths)
   const recipes = digestFiles(root, recipePaths)
-  const risk = riskLevel(plan, request)
+  const selectedRisk = selectRisk(plan, request)
+  const risk = selectedRisk.risk
   const checkSpecs = verificationCheckSpecs(request)
   const semanticCoverage = request.semantic_coverage ?? null
   const expectedVerificationReceipt = verificationReceiptPath(request.story_id, request.slice_id, 'verification', slice)
@@ -1022,6 +1059,7 @@ function buildVerificationPreview(root, request) {
     checkpoint_commit: manifest.checkpointCommit,
     subject_digest: slice.subject_digest,
     risk,
+    mandatory_judgment_flags: selectedRisk.mandatory_judgment_flags,
     canonical_selector: request.canonical_selector ?? 'auto',
     check_specs: checkSpecs,
     semantic_coverage: semanticCoverage,
@@ -1034,7 +1072,8 @@ function buildVerificationPreview(root, request) {
   }
   preview.context_digest = digestValue({
     action: 'verify_slice', story_id: request.story_id, slice_id: request.slice_id,
-    risk, canonical_selector: preview.canonical_selector, changed_paths: changed,
+    risk, mandatory_judgment_flags: preview.mandatory_judgment_flags,
+    canonical_selector: preview.canonical_selector, changed_paths: changed,
     check_specs: checkSpecs, semantic_coverage: semanticCoverage, next_action: nextAction
   })
   preview.fingerprint = previewFingerprint(preview)
@@ -1049,6 +1088,10 @@ function verificationDescriptorFromPreview(root, request, preview, recovery = fa
   if (pointer.digest !== preview.pointer_digest) throw new Error('STALE_POINTER_PREVIEW')
   if (!recovery && gitOutput(root, ['rev-parse', 'HEAD']) !== preview.expected_head) throw new Error('STALE_HEAD')
   if (!recovery && hash(Buffer.from(readText(root, preview.plan_path))) !== preview.plan_digest) throw new Error('STALE_PLAN_PREVIEW')
+  const currentPlan = frontmatter(readText(root, preview.plan_path))
+  const requestedRisk = selectRisk(currentPlan, request)
+  if (!RISK_LEVELS.has(preview.risk) || RISK_ORDER[preview.risk] < RISK_ORDER[requestedRisk.risk] ||
+      !sameJson(preview.mandatory_judgment_flags ?? [], mandatoryJudgmentFlags(currentPlan))) throw new Error('STALE_RISK_PREVIEW')
   if (digestFiles(root, preview.policy.paths).digest !== preview.policy.digest) throw new Error('STALE_POLICY_PREVIEW')
   if (digestFiles(root, preview.recipes.paths).digest !== preview.recipes.digest) throw new Error('STALE_RECIPE_PREVIEW')
   if (hash(readFileSync(safeFile(root, preview.story_path))) !== preview.story_digest) throw new Error('STALE_STORY_PREVIEW')
@@ -1168,8 +1211,9 @@ function runVerificationBundle(root, preview, request) {
       return { blocked: true, reasons: ['SEMANTIC_COVERAGE_REQUIRED'], manifest, verification }
     }
   }
-  const judgmentFlags = request.judgment_flags ?? []
-  if (!Array.isArray(judgmentFlags) || judgmentFlags.some(item => typeof item !== 'string')) return { invalid: true, reasons: ['JUDGMENT_FLAGS_INVALID'], manifest, verification }
+  const requestedJudgmentFlags = request.judgment_flags ?? []
+  if (!Array.isArray(requestedJudgmentFlags) || requestedJudgmentFlags.some(item => typeof item !== 'string')) return { invalid: true, reasons: ['JUDGMENT_FLAGS_INVALID'], manifest, verification }
+  const judgmentFlags = [...new Set([...(preview.mandatory_judgment_flags ?? []), ...requestedJudgmentFlags])]
   let escalation
   try { escalation = runEscalation(root, preview.risk, verification, judgmentFlags) }
   catch (error) { return { blocked: true, reasons: [error.message], manifest, verification } }
@@ -1477,7 +1521,9 @@ function verificationError(error) {
   if (error.message.includes('STALE') || error.message.includes('MISMATCH') || error.message === 'EXPECTED_HEAD_MISMATCH') return stale(error.message)
   if (error.message.includes('PLAN_NOT_READY') || error.message.includes('MANIFEST_') || error.message.includes('SLICE_') ||
       error.message.includes('DIRTY_') || error.message.includes('SUCCESSOR_') || error.message.includes('AMBIGUOUS_')) return blocked(error.message)
-  if (['INPUT_REQUIRED', 'INVALID_STORY_ID', 'INVALID_SLICE_ID', 'INVALID_EXPECTED_HEAD', 'ACTION_MISMATCH', 'OPERATION_MISMATCH', 'RISK_LEVEL_REQUIRED'].includes(error.message) ||
+  if (['INPUT_REQUIRED', 'INVALID_STORY_ID', 'INVALID_SLICE_ID', 'INVALID_EXPECTED_HEAD', 'ACTION_MISMATCH', 'OPERATION_MISMATCH',
+    'RISK_LEVEL_REQUIRED', 'RISK_FLAGS_INVALID', 'RISK_FLAG_INVALID', 'RISK_DOWNGRADE_FORBIDDEN'].includes(error.message) ||
+      error.message.startsWith('RISK_FLAG_UNMAPPED:') ||
       error.message.startsWith('MIXED_CONTROL_FLAG:')) return invalid(error.message)
   return errorResult(error)
 }
@@ -1743,4 +1789,4 @@ export { inspectActionTransactionPublic as inspectActionTransaction }
 
 export function actionFingerprint(value) { return digestValue(value) }
 
-export { transactionHash, transactionIdentity, transactionPathDigest }
+export { mandatoryJudgmentFlags, riskLevel, transactionHash, transactionIdentity, transactionPathDigest }

@@ -253,6 +253,16 @@ test('HIGH PASS stops at REVIEW_REQUIRED with immutable pending evidence and no 
   } finally { f.cleanup() }
 })
 
+for (const plannedRisk of ['MEDIUM', 'HIGH']) test(`caller cannot lower a ${plannedRisk} Plan risk before verification preview`, () => {
+  const f = fixture(plannedRisk)
+  try {
+    const result = prepareAction(f.root, { ...f.verifyRequest, risk: 'LOW' })
+    assert.notEqual(result.status, 'READY', JSON.stringify(result))
+    assert.ok(result.reasons.includes('RISK_DOWNGRADE_FORBIDDEN'), JSON.stringify(result))
+    assert.equal(git(f.root, 'rev-parse', 'HEAD'), f.head)
+  } finally { f.cleanup() }
+})
+
 test('same-Lead APPROVE requires exact bounded evidence and persists verification plus review receipts', () => {
   const f = fixture('HIGH')
   try {
