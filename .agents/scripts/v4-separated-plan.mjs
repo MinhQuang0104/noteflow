@@ -229,7 +229,7 @@ export function validateSeparatedPlan(root, id, plan, result) {
   for (const slice of slices) {
     if (!slice || typeof slice !== 'object' || Array.isArray(slice)) { invalid('INVALID_SLICES'); continue }
     if (!STATUSES.has(slice.status)) invalid('INVALID_SLICE_STATUS')
-    if (slice.purpose !== undefined || slice.scope !== undefined || slice.implementation !== undefined ||
+    if (slice.purpose !== undefined || slice.implementation !== undefined ||
         slice.verification?.focused_checks !== undefined) invalid('MIXED_SCHEMA_PLAN')
     if (slice.receipt_refs !== undefined && (!slice.receipt_refs || typeof slice.receipt_refs !== 'object' || Array.isArray(slice.receipt_refs) ||
         Object.keys(slice.receipt_refs).some(kind => !['implementation', 'verification', 'review'].includes(kind)))) invalid('INVALID_RECEIPT_REF')

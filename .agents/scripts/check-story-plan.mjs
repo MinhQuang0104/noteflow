@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto'
 import { spawnSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
 import { validateSeparatedPlan } from './v4-separated-plan.mjs'
+import { normalizeAllowed } from './check-worker-scope.mjs'
 
 // Exit codes: READY=0, RECONCILIATION_REQUIRED=1, STALE=2, INVALID=3, ERROR=4.
 const CODES = { READY: 0, RECONCILIATION_REQUIRED: 1, STALE: 2, INVALID: 3, ERROR: 4 }
@@ -115,6 +116,49 @@ function hasForbidden(value) {
 
 function isObject(value) { return value !== null && typeof value === 'object' && !Array.isArray(value) }
 
+const AUTHORITY_PATHS = [
+  'AGENTS.md',
+  'CLAUDE.md',
+  '.agents/',
+  '.agent-state/',
+  '.orca-contract/',
+  '_bmad-output/implementation-artifacts/',
+]
+
+function authorityScopePath(value) {
+  const entry = value.endsWith('/') ? value.slice(0, -1) : value
+  return AUTHORITY_PATHS.some(authority => {
+    const authorityBase = authority.endsWith('/') ? authority.slice(0, -1) : authority
+    return entry === authorityBase || value.startsWith(authority) || authority.startsWith(value)
+  })
+}
+
+export function validateSliceExecutionContract(slice) {
+  const reasons = []
+  const executor = slice?.executor === undefined ? 'lead' : slice.executor
+  if (!['lead', 'agy'].includes(executor)) reasons.push('SLICE_EXECUTOR_INVALID')
+  if (executor !== 'agy') return reasons
+
+  const paths = isObject(slice.scope) ? slice.scope.paths : null
+  if (!Array.isArray(paths) || !paths.length) reasons.push('AGY_SCOPE_REQUIRED')
+  else {
+    for (const entry of paths) {
+      const normalized = normalizeAllowed(entry)
+      if (normalized === null || entry !== normalized) {
+        reasons.push('AGY_SCOPE_INVALID')
+        break
+      }
+    }
+    if (!reasons.includes('AGY_SCOPE_INVALID') && paths.some(authorityScopePath)) {
+      reasons.push('AGY_SCOPE_AUTHORITY_PATH')
+    }
+  }
+  if (!Array.isArray(slice.verification_obligations) || !slice.verification_obligations.length) {
+    reasons.push('AGY_CHECKS_REQUIRED')
+  }
+  return reasons
+}
+
 function validVerificationSchema(slice) {
   const verification = slice.verification
   if (verification !== undefined && !isObject(verification)) return false
@@ -152,7 +196,19 @@ export function validate(root, id) {
   result.currentSlice = plan.current_slice ?? null
   result.nextAction = plan.next_action ?? null
   result.sourceDigest = plan.source?.section_digest ?? null
-  if (plan.schema_version === 2) return validateSeparatedPlan(root, id, plan, result)
+  if (plan.schema_version === 2) {
+    const separated = validateSeparatedPlan(root, id, plan, result)
+    for (const slice of plan.slices ?? []) separated.reasons.push(...validateSliceExecutionContract(slice))
+    separated.reasons = [...new Set(separated.reasons)]
+    if (separated.reasons.some(reason => [
+      'SLICE_EXECUTOR_INVALID', 'AGY_SCOPE_REQUIRED', 'AGY_SCOPE_INVALID',
+      'AGY_SCOPE_AUTHORITY_PATH', 'AGY_CHECKS_REQUIRED',
+    ].includes(reason))) {
+      separated.status = 'INVALID'
+      separated.valid = false
+    }
+    return separated
+  }
   if (plan.schema_version !== 1) invalid('UNSUPPORTED_SCHEMA')
   if (plan.story_id !== id) invalid('STORY_ID_MISMATCH')
   if (hasForbidden(plan)) invalid('FORBIDDEN_V3_STATE')
@@ -198,6 +254,7 @@ export function validate(root, id) {
     if (!ids.includes(plan.current_slice)) invalid('INVALID_CURRENT_SLICE')
     const graph = new Map()
     for (const slice of slices) {
+      result.reasons.push(...validateSliceExecutionContract(slice))
       const legacyInProgress = slice.status === 'in-progress' && plan.schema_version === 1 &&
         Boolean(slice.checkpoint_commit) && slice.id === plan.current_slice &&
         plan.next_action?.kind === 'verify_slice' && plan.next_action?.target === slice.id &&

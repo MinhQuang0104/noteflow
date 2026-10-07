@@ -6,6 +6,7 @@ import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { inspectStory, normativeDigest, receiptDigest } from './check-artifact-contract.mjs'
+import { createV4Fixture } from './v4-architecture-fixture.mjs'
 
 const script = path.resolve('.agents/scripts/check-story-plan.mjs')
 
@@ -230,6 +231,54 @@ test('schema-v2 fixture remains readable before finalization', () => {
     rmSync(f.root, { recursive: true, force: true })
   }
 })
+
+function agyPlanFixture(edit = text => text) {
+  const fixture = createV4Fixture({ schemaVersion: 2, state: 'pending' })
+  const original = readFileSync(fixture.paths.plan, 'utf8')
+  writeFileSync(fixture.paths.plan, edit(original.replace(
+    '    depends_on: []',
+    '    depends_on: []\n    executor: agy\n    scope:\n      paths: [src/]\n    verification_obligations: [node --test src/a.test.js]',
+  )))
+  return fixture
+}
+
+test('schema-v2 AGY slice requires and accepts a normalized product scope and checks', () => {
+  const fixture = agyPlanFixture()
+  try {
+    const result = check(fixture.root, '9.1')
+    assert.equal(result.code, 0, JSON.stringify(result.json))
+    assert.equal(result.json.status, 'READY')
+  } finally { fixture.cleanup() }
+})
+
+for (const [name, edit, reason] of [
+  ['invalid executor', text => text.replace('executor: agy', 'executor: robot'), 'SLICE_EXECUTOR_INVALID'],
+  ['missing AGY scope', text => text.replace('    scope:\n      paths: [src/]\n', ''), 'AGY_SCOPE_REQUIRED'],
+  ['invalid AGY scope entry', text => text.replace('paths: [src/]', 'paths: [./src/]'), 'AGY_SCOPE_INVALID'],
+  ['authority AGY scope entry', text => text.replace('paths: [src/]', 'paths: [.agents/]'), 'AGY_SCOPE_AUTHORITY_PATH'],
+  ['missing AGY checks', text => text.replace('verification_obligations: [node --test src/a.test.js]', 'verification_obligations: []'), 'AGY_CHECKS_REQUIRED'],
+]) test(`schema-v2 AGY slice rejects ${name}`, () => {
+  const fixture = agyPlanFixture(edit)
+  try {
+    const result = check(fixture.root, '9.1')
+    assert.equal(result.code, 3, JSON.stringify(result.json))
+    assert.equal(result.json.status, 'INVALID')
+    assert.ok(result.json.reasons.includes(reason), JSON.stringify(result.json))
+  } finally { fixture.cleanup() }
+})
+
+test('schema-v2 lead slice keeps accepting an unvalidated scope field', () => {
+  const fixture = agyPlanFixture(text => text
+    .replace('executor: agy', 'executor: lead')
+    .replace('paths: [src/]', 'paths: [./not-normalized/]')
+    .replace('verification_obligations: [node --test src/a.test.js]', 'verification_obligations: []'))
+  try {
+    const result = check(fixture.root, '9.1')
+    assert.equal(result.code, 0, JSON.stringify(result.json))
+    assert.equal(result.json.status, 'READY')
+  } finally { fixture.cleanup() }
+})
+
 test('unsupported schema', () => withFixture(f => editPlan(f, 'schema_version: 1', 'schema_version: 3'), 'INVALID', 3, 'UNSUPPORTED_SCHEMA'))
 test('story ID mismatch', () => withFixture(f => editPlan(f, 'story_id: "9.1"', 'story_id: "9.2"'), 'INVALID', 3, 'STORY_ID_MISMATCH'))
 test('missing Plan', () => { const f = fixture(); try { assert.equal(check(f.root, '9.2').json.status, 'INVALID') } finally { rmSync(f.root, { recursive: true, force: true }) } })
