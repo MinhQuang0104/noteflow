@@ -29,6 +29,28 @@ Scope gồm typed conflict, resolution state, dialog accessible, journal query c
 - AC-4: **Given** conflict dialog **When** dùng keyboard/touch/screen reader **Then** focus trap, labels, scrolling và focus return hoạt động.
 <!-- v4:ac:end -->
 
+## AC Amendment 2026-10-07
+
+AC4 được thay thế cho mục đích kiểm chứng remediation bằng điều kiện tự động
+và keyboard sau đây; AC4 gốc vẫn được giữ nguyên trong lịch sử artifact và
+không được tuyên bố là đã đạt chỉ từ các test này:
+
+- Conflict dialog phải hiển thị labels/mô tả đúng, không chọn mặc định, giữ
+  focus trong dialog khi dùng Tab/Shift+Tab, đóng bằng Escape, và trả focus về
+  trigger sau khi đóng. Bằng chứng unit hiện có là các test
+  `shows both complete snapshots without a default choice and emits the
+  acknowledged choice`, `keeps close available while saving, disables
+  confirmation, and reports close and Escape`, `snapshot and error
+  announcements do not steal focus from an enabled control`, và `focus
+  recovery does not consume IME Escape or restore focus into a closed dialog`
+  trong `frontend/src/components/__tests__/ContentConflictDialog.spec.ts`.
+- Bằng chứng browser tự động bổ sung là test
+  `AC4 — real modal keyboard/touch, literal long text, scroll, 200% text
+  zoom/reflow and focus return` trong `tests/e2e/content-conflict.spec.ts`.
+- Disposition: kiểm chứng bằng screen reader thật với AT/platform cụ thể
+  **chưa được kiểm chứng**. Accessibility assertions và keyboard automation
+  không thay thế bằng chứng screen reader thật.
+
 ## Tasks / Subtasks
 
 <!-- v4:tasks:start -->

@@ -25,6 +25,22 @@ Phạm vi: trạng thái lưu trung thực, giữ draft, retry an toàn, ACK đ�
 - AC-4: **Given** còn draft chưa lưu **When** reload/close/logout **Then** cảnh báo mất draft khi môi trường hỗ trợ.
 <!-- v4:ac:end -->
 
+## AC Amendment 2026-10-07
+
+AC4 được thay thế cho mục đích kiểm chứng remediation bằng điều kiện tự động
+sau đây; AC4 gốc vẫn được giữ nguyên trong lịch sử artifact và không được tuyên
+bố là đã đạt chỉ từ các test này:
+
+- Khi bản nháp journal còn dirty, listener `beforeunload` phải gọi
+  `preventDefault`; khi record sạch thì không cảnh báo, và listener phải được
+  tháo khi `App` unmount. Bằng chứng tự động hiện có là test
+  `beforeunload warns when an in-memory journal draft is unsaved` và
+  `a clean journal record does not warn before unload` trong
+  `frontend/src/__tests__/App.spec.ts`.
+- Disposition: test hiện tại mô phỏng DOM event trong jsdom. Cảnh báo unload
+  trên trình duyệt thật, gồm cách từng trình duyệt hiển thị hoặc bỏ qua native
+  prompt, **chưa được kiểm chứng**.
+
 ## Tasks / Subtasks
 
 <!-- v4:tasks:start -->
