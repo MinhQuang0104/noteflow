@@ -12,6 +12,7 @@ import { validateEvidenceSet } from './prepare-change-evidence.mjs'
 import { executeCheck, validateCheckEvidence } from './v4-check-executor.mjs'
 import { recordActionFinished, recordActionStarted, recordCheckFinished } from './v4-observations.mjs'
 import { REVIEW_RECEIPT_SCHEMA_VERSION } from './v4-finalization-contract.mjs'
+import { inspectScope, isAllowed } from './check-worker-scope.mjs'
 import {
   canonicalPaths,
   executeMetadataTransaction,
@@ -29,6 +30,7 @@ import {
 } from './v4-slice-transaction.mjs'
 
 const SHA = /^[0-9a-f]{40,64}$/
+const SHA256_HEX = /^[0-9a-f]{64}$/i
 const DIGEST = /^sha256:[0-9a-f]{64}$/
 const STORY_ID = /^\d+\.\d+$/
 const SLICE_ID = /^[A-Za-z0-9][A-Za-z0-9._-]*$/
@@ -220,6 +222,67 @@ function normalizePaths(root, values, label) {
   return result
 }
 
+class AgyScopeGateError extends Error {
+  constructor(reason, gate) {
+    super(reason)
+    this.scope_gate = gate
+  }
+}
+
+function workerText(value) {
+  return typeof value === 'string' && value.length > 0 && !/[\r\n]/.test(value)
+}
+
+function cloneJson(value) {
+  return JSON.parse(JSON.stringify(value))
+}
+
+function validateWorkerEvidence(request, executor) {
+  const hasWorker = Object.hasOwn(request, 'worker')
+  if (executor !== 'agy') {
+    if (hasWorker) throw new Error('WORKER_EVIDENCE_FORBIDDEN')
+    return null
+  }
+  if (!hasWorker || request.worker === undefined) throw new Error('WORKER_EVIDENCE_REQUIRED')
+  const worker = request.worker
+  const allowedKeys = new Set(['executor', 'orca', 'attempt', 'contract_sha256', 'worker_report_sha256', 'lead_vendor'])
+  const orcaKeys = new Set(['run_id', 'task_id', 'dispatch_ids'])
+  const valid = worker && typeof worker === 'object' && !Array.isArray(worker) &&
+    Object.keys(worker).every(key => allowedKeys.has(key)) &&
+    worker.executor === 'agy' && worker.orca && typeof worker.orca === 'object' && !Array.isArray(worker.orca) &&
+    Object.keys(worker.orca).every(key => orcaKeys.has(key)) &&
+    workerText(worker.orca.run_id) && workerText(worker.orca.task_id) &&
+    Array.isArray(worker.orca.dispatch_ids) && worker.orca.dispatch_ids.length > 0 &&
+    worker.orca.dispatch_ids.every(item => typeof item === 'string' && /^ctx_[A-Za-z0-9._:-]+$/.test(item)) &&
+    Number.isSafeInteger(worker.attempt) && worker.attempt > 0 &&
+    SHA256_HEX.test(worker.contract_sha256 ?? '') &&
+    SHA256_HEX.test(worker.worker_report_sha256 ?? '') &&
+    ['codex', 'claude'].includes(worker.lead_vendor)
+  if (!valid) throw new Error('WORKER_EVIDENCE_INVALID')
+  return cloneJson(worker)
+}
+
+function compactScopeGate(gate) {
+  return {
+    schema: gate.schema,
+    status: gate.status,
+    base: gate.base,
+    allowed: [...gate.allowed].sort(),
+    changed: gate.changed.map(item => item.path).filter(Boolean).sort()
+  }
+}
+
+function scopeGateDiagnostic(gate) {
+  return { ...compactScopeGate(gate), violations: cloneJson(gate.violations), reasons: [...gate.reasons] }
+}
+
+function inspectAgyScope(root, base, allowed) {
+  const gate = inspectScope(root, base, allowed, { forbidCommits: true })
+  if (gate.status !== 'PASS') throw new AgyScopeGateError(`AGY_SCOPE_GATE_${gate.status}`, gate)
+  if (gate.changed.some(item => item.sources.includes('deleted'))) throw new Error('AGY_DELETE_UNSUPPORTED')
+  return { raw: gate, compact: compactScopeGate(gate) }
+}
+
 function commandRecords(request) {
   const source = request.commands ?? request.focused_checks
   if (!Array.isArray(source) || !source.length) throw new Error('FOCUSED_EVIDENCE_REQUIRED')
@@ -300,6 +363,11 @@ function validateMetadataProjection(root, descriptor, checkpoint, metadata) {
     if (original.id !== descriptor.slice_id && !sameJson(original, next)) throw new Error('OTHER_SLICE_METADATA_CHANGED')
   }
   const slice = sliceById(generated, descriptor.slice_id)
+  if (!sameJson(slice.executor, descriptor.original_slice.executor) ||
+      !sameJson(slice.scope, descriptor.original_slice.scope) ||
+      !sameJson(slice.verification_obligations, descriptor.original_slice.verification_obligations)) {
+    throw new Error('SLICE_EXECUTION_CONTRACT_CHANGED')
+  }
   if (!sameJson(slice.attempt_history, descriptor.original_slice.attempt_history) ||
       !sameJson(slice.current_attempt, descriptor.original_slice.current_attempt)) throw new Error('ATTEMPT_HISTORY_CHANGED')
   const changedDigest = descriptor.schema_version === 2
@@ -332,7 +400,6 @@ function buildPreview(root, request) {
       /^\s*(?:human_approval|finalization):/m.test(request.plan_template)) throw new Error('COMPLETION_AUTHORITY_FORBIDDEN')
   const pointer = assertPointerIdle(root)
   const head = gitOutput(root, ['rev-parse', 'HEAD'])
-  if (head !== request.expected_head) throw new Error('EXPECTED_HEAD_MISMATCH')
   const planPath = planRelative(request.story_id)
   const planText = readText(root, planPath)
   const plan = frontmatter(planText)
@@ -342,9 +409,18 @@ function buildPreview(root, request) {
   const slice = sliceById(plan, request.slice_id)
   if (plan.current_slice !== request.slice_id || plan.next_action?.kind !== 'implement_slice' || plan.next_action?.target !== request.slice_id) throw new Error('PLAN_ACTION_SLICE_MISMATCH')
   if (slice.status !== 'pending') throw new Error('SLICE_NOT_PENDING')
+  const executor = slice.executor ?? 'lead'
+  const worker = validateWorkerEvidence(request, executor)
+  if (executor !== 'agy' && head !== request.expected_head) throw new Error('EXPECTED_HEAD_MISMATCH')
   const storyPath = plan.schema_version === 2 ? plan.story?.path : 'docs/product/epics.md'
   if (!safeRelative(storyPath)) throw new Error('STORY_PATH_INVALID')
   const owned = normalizePaths(root, request.owned_paths, 'IMPLEMENTATION_SCOPE')
+  let scopeGate = null
+  if (executor === 'agy') {
+    if (owned.some(relative => !isAllowed(relative, slice.scope.paths))) throw new Error('AGY_OWNED_PATH_OUT_OF_SCOPE')
+    scopeGate = inspectAgyScope(root, request.expected_head, slice.scope.paths).compact
+    if (head !== request.expected_head) throw new Error('EXPECTED_HEAD_MISMATCH')
+  }
   const expectedReceiptPath = plan.schema_version === 2 ? implementationReceiptPath(request.story_id, slice) : null
   const receiptPath = plan.schema_version === 2
     ? (request.receipt_path ?? expectedReceiptPath)
@@ -396,6 +472,8 @@ function buildPreview(root, request) {
     plan_digest: hash(Buffer.from(planText)),
     story_digest: story.files[storyPath],
     story_normative_digest: plan.story?.normative_digest ?? null,
+    executor,
+    ...(executor === 'agy' ? { worker, scope_gate: scopeGate } : {}),
     policy: { paths: policy.paths, files: policy.files, digest: policy.digest },
     recipes: { paths: recipes.paths, files: recipes.files, digest: recipes.digest },
     pointer_digest: hash(pointerBytes),
@@ -450,6 +528,8 @@ function descriptorFromPreview(root, request, preview, recovery = false) {
   if (request.selected_tasks !== undefined && !sameJson(request.selected_tasks, preview.selected_tasks)) throw new Error('SELECTED_TASKS_CHANGED')
   if (request.selected_acceptance_criteria !== undefined && !sameJson(request.selected_acceptance_criteria, preview.selected_acceptance_criteria)) throw new Error('SELECTED_AC_CHANGED')
   if (request.red_green !== undefined && !sameJson(request.red_green, preview.red_green)) throw new Error('RED_GREEN_CHANGED')
+  if (preview.executor === 'agy' && !sameJson(request.worker, preview.worker)) throw new Error('WORKER_EVIDENCE_CHANGED')
+  if (preview.executor !== 'agy' && Object.hasOwn(request, 'worker')) throw new Error('WORKER_EVIDENCE_FORBIDDEN')
   const metadataPaths = preview.metadata_paths
   return {
     action: 'implement_slice',
@@ -466,6 +546,8 @@ function descriptorFromPreview(root, request, preview, recovery = false) {
     schema_version: preview.schema_version_plan,
     original_plan: preview.original_plan,
     original_slice: preview.original_slice,
+    executor: preview.executor,
+    ...(preview.executor === 'agy' ? { worker: preview.worker, scope_gate: preview.scope_gate } : {}),
     commands: preview.commands,
     semantic_coverage: preview.semantic_coverage,
     red_green: preview.red_green,
@@ -473,6 +555,13 @@ function descriptorFromPreview(root, request, preview, recovery = false) {
     metadata_message: preview.metadata_message,
     buildMetadata: checkpoint => buildMetadata(root, preview, checkpoint),
     recheck: freshRoot => {
+      if (preview.executor === 'agy') {
+        let current
+        try { current = inspectScope(freshRoot, preview.expected_head, preview.original_slice.scope.paths, { forbidCommits: true }) }
+        catch { throw new Error('STALE_AGY_SCOPE_GATE_CHANGED') }
+        if (current.changed.some(item => item.sources.includes('deleted')) ||
+            !sameJson(compactScopeGate(current), preview.scope_gate)) throw new Error('STALE_AGY_SCOPE_GATE_CHANGED')
+      }
       if (gitOutput(freshRoot, ['rev-parse', 'HEAD']) !== preview.expected_head) throw new Error('STALE_HEAD')
       const pointer = assertPointerIdle(freshRoot)
       if (pointer.digest !== preview.pointer_digest) throw new Error('STALE_POINTER_PREVIEW')
@@ -534,7 +623,8 @@ function buildMetadata(root, preview, checkpoint) {
     subject_digest: checkpoint.subject_digest,
     created_from_head: checkpoint.checkpoint_commit,
     changed_paths_sha256: checkpoint.changed_paths_sha256,
-    commands: preview.commands
+    commands: preview.commands,
+    ...(preview.executor === 'agy' ? { worker: { ...preview.worker, scope_gate: preview.scope_gate } } : {})
   } : null
   const receiptBytes = receipt ? `${JSON.stringify(receipt, null, 2)}\n` : null
   const receiptDigestValue = receipt ? receiptDigest(receipt) : null
@@ -811,7 +901,7 @@ export function applyRework(root, request = {}) {
 }
 
 function buildRequestFromPreview(preview, request, operation) {
-  return {
+  const result = {
     ...request,
     operation,
     action: 'implement_slice',
@@ -824,6 +914,8 @@ function buildRequestFromPreview(preview, request, operation) {
     semantic_coverage: request.semantic_coverage ?? preview.semantic_coverage,
     plan_template: request.plan_template ?? preview.plan_template
   }
+  if (preview.executor === 'agy') result.worker = request.worker ?? preview.worker
+  return result
 }
 
 // ---------------------------------------------------------------------------
@@ -1651,6 +1743,9 @@ export function prepareAction(root, request = {}) {
   }
   catch (error) {
     if (request?.action === 'verify_slice') return verificationError(error)
+    if (error instanceof AgyScopeGateError) return blocked(error.message, { scope_gate: scopeGateDiagnostic(error.scope_gate) })
+    if (['AGY_OWNED_PATH_OUT_OF_SCOPE', 'AGY_DELETE_UNSUPPORTED'].includes(error.message)) return blocked(error.message)
+    if (['WORKER_EVIDENCE_REQUIRED', 'WORKER_EVIDENCE_FORBIDDEN', 'WORKER_EVIDENCE_INVALID'].includes(error.message)) return invalid(error.message)
     if (error.message.includes('MISMATCH') || error.message.includes('STALE') || error.message === 'EXPECTED_HEAD_MISMATCH') return stale(error.message)
     if (error.message.includes('NOT_READY') || error.message.startsWith('PLAN_NOT_READY')) return blocked(error.message)
     if (['INPUT_REQUIRED', 'INVALID_STORY_ID', 'INVALID_SLICE_ID', 'INVALID_EXPECTED_HEAD', 'ACTION_MISMATCH', 'OPERATION_MISMATCH'].includes(error.message)) return invalid(error.message)
@@ -1692,6 +1787,9 @@ function checkpointImplementationCore(root, request = {}) {
     descriptor.recovery_checkpoint = input.recovery_checkpoint
     descriptor.fail_at = request.fail_at ?? request.failure_phase
     const result = executeSliceTransaction(root, descriptor)
+    if (result.status === 'STALE' && result.reasons?.includes('STALE_AGY_SCOPE_GATE_CHANGED')) {
+      return { ...result, reasons: ['AGY_SCOPE_GATE_CHANGED'] }
+    }
     if (result.status === 'CHECKPOINTED' || result.status === 'NOOP') {
       return { ...result, action: 'implement_slice', operation: 'checkpoint', next_action: result.next_action ?? { kind: 'verify_slice', target: preview.slice_id } }
     }
