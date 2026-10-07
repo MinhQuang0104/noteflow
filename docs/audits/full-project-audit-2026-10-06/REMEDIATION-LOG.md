@@ -88,3 +88,48 @@ Review các commit và `DECISIONS-NEEDED.md`, sau đó cherry-pick hoặc merge
 branch vào `main` theo quy trình của repository. Sau khi tích hợp, chạy
 `scripts/verify-local.ps1` từ canonical worktree với `frontend/node_modules`
 đã cài; không chạy script đó từ linked worktree nếu guard của repo từ chối.
+
+## Part D execution — 2026-10-07
+
+This section records the Part D execution requested from base `ed47054`. The
+code and documentation packages were executed in the new worktree
+`audit-decisions` on branch `fix/audit-decisions-2026-10`; no merge, push,
+stash, reset, clean, worktree deletion, or branch deletion was performed.
+The code HEAD before this evidence-only log update was `2043cf9`.
+
+| Package | Commit | Finding / decision | Evidence and disposition |
+|---|---|---|---|
+| D1 | `ab579d3` | A-01/A-02 | Historical Story 1.5/1.6 AC4 amendments preserve the original AC, point to existing automatic/keyboard coverage, and record real screen-reader and browser-unload checks as unverified. No historical manual acceptance was claimed. |
+| D2 | `2ded46b` | A-03 | Added the daily-record field-ownership matrix from the real migration and writer. No current writer violation was found; no Story 2.2 artifact was created. |
+| D3 | `1873a39` | D-04 | Added the Sanctum CSRF/419 integration document and linked it from OpenAPI `externalDocs`; no endpoint or 419 response was added. `contract:validate`, `contract:check`, and `contract:proof` each exited 0. |
+| D4 | `12f9e51` | G-01 | Added the shared edge/app security checklist with blank sign-off cells. Only the app-owned `private, no-store` header was evidenced from code; no edge configuration was claimed. |
+| D5 | `66cdd5e` | C-04 | RED focused journal API test exited 1 because `TrimStrings` removed boundary whitespace. GREEN focused test exited 0 with 10 assertions; full `ChallengeJournalApiTest.php` exited 0 with 75 assertions; `ChallengeJournalTest.php` exited 0 with 69 assertions; focused Pint exited 0. The route/key-specific middleware preserves `journal`, keeps other fields trimmed, keeps NUL rejection, and preserves digest/revision. |
+| D6 | `2043cf9` | C-05 | RED first exposed the missing Sanctum token capability (exit 1), then the existing deletion of A's account state (exit 1). GREEN focused A-to-B-to-A test exited 0 with 35 assertions. The full provisioning file exited 0 with 60 assertions; auth exited 0 with 63; challenge API exited 0 with 111. The implementation preserves owner datasets and state, increments the reactivated owner's epoch, keeps owner scoping, and revokes old sessions/tokens. The test includes stale-epoch replay and authorization negatives. |
+
+## Final checks on code HEAD `2043cf9`
+
+The following checks were run sequentially against the code HEAD named above,
+using `backend-test` and `postgres-test` only. Container identity was verified
+as `APP_ENV=testing`, `DB_HOST=postgres-test`, `DB_PORT=5432`,
+`DB_DATABASE=noteflow_test`, and empty `DB_URL`.
+
+| Area | Command | Exit | Result |
+|---|---|---:|---|
+| Backend | `docker exec noteflow-local-backend-test-1 php artisan test` | 0 | 3 passed, 99 warnings, 629 assertions. |
+| PHPStan | `docker exec noteflow-local-backend-test-1 composer analyse` | 0 | No errors. |
+| Pint | `docker exec noteflow-local-backend-test-1 vendor/bin/pint --test` | 0 | 83 files passed. |
+| Contract | `npm.cmd run contract:validate` | 0 | OpenAPI valid. |
+| Contract | `npm.cmd run contract:check` | 0 | Generated types have no drift. |
+| Contract | `npm.cmd run contract:proof` | 0 | Drift proof passed. |
+| Frontend | `npx.cmd vitest run` | 0 | 16 files, 172 tests passed. |
+| Frontend | `npm.cmd run type-check` | 0 | Vue type-check passed. |
+| Frontend | `npm.cmd run lint` | 0 | oxlint and eslint passed. |
+| Frontend | `npm.cmd run build-only` | 0 | Vite production build passed. |
+| E2E | `$env:NOTEFLOW_E2E_MODE='compose'; npx.cmd playwright test --repeat-each=2` | 0 | 90 passed, 10 intentional skips, 1 worker. A first attempt exited 1 because the ignored worktree `deploy/local/.env` path was absent; a temporary hard-link to the canonical env path was created without printing its contents, then the exact command passed. |
+| Diff | `git diff --check` | 0 | No whitespace errors before this docs-only update. |
+| Local wrapper | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/verify-local.ps1` | 1 | Explicit linked-worktree guard: the script requires canonical checkout. It was not run against canonical `main`, because that would verify a different code HEAD and could affect the dev workload. |
+
+The remaining manual evidence is the real screen-reader and real-browser
+unload coverage recorded in D1. H-01, H-02, and H-10 remain outside this Part D
+execution and retain their recorded owner decisions/status. No new product
+finding was introduced by this execution.

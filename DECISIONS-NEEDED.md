@@ -222,3 +222,20 @@ contract và không tự nới scope.
 Người có thẩm quyền cần ghi lựa chọn, owner, ngày hiệu lực và artifact/AC bị
 ảnh hưởng cho từng ID. Chỉ sau đó mới mở gói bị chặn tương ứng; các gói B6 và
 H-02 không được suy ra là đã được phê duyệt từ tài liệu này.
+
+## Part D execution status — 2026-10-07
+
+The recorded choices above are unchanged. This table records execution status
+and commit identity only; it does not reopen or replace any owner choice.
+
+| ID | Status | Commit | Evidence |
+|---|---|---|---|
+| A-01 (+A-02) | Executed with manual gap retained | `ab579d3` | AC amendments and dispositions recorded; real screen-reader and browser-unload evidence remains unverified. |
+| A-03 | Executed | `2ded46b` | Daily-record ownership matrix added from the real schema and writers; no Story 2.2 artifact created. |
+| C-04 | Executed | `66cdd5e` | Journal boundary whitespace, field-specific trimming, NUL rejection, digest, and revision covered by tests. |
+| C-05 | Executed | `2043cf9` | A-to-B-to-A dataset reattachment, owner scoping, session/token revocation, monotonic epoch, and stale replay covered by tests. |
+| D-04 | Executed | `1873a39` | CSRF/419 integration document linked from OpenAPI; API surface unchanged; validate/check/proof passed. |
+| G-01 | Executed with sign-off pending | `12f9e51` | Shared edge/app checklist added; sign-off cells intentionally remain blank for the responsible owners. |
+| H-01 | Outside Part D; unchanged | — | Recorded decision and Human Gate evidence status retained. |
+| H-02 | Outside Part D; unchanged | — | Recorded co-location decision retained; `.agent-state` was not mutated. |
+| H-10 | Outside Part D; unchanged | — | Existing worktree guard retained. |
