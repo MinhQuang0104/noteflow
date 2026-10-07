@@ -37,6 +37,7 @@ const lastCreateCanonicalPayload = ref<string | null>(null)
 
 const activeEditCommandId = ref<string | null>(null)
 const lastEditCanonicalPayload = ref<string | null>(null)
+const editSubmitInFlight = ref(false)
 
 // Form states
 const createForm = ref({
@@ -173,12 +174,15 @@ const createMutation = useMutation({
 const updateMutation = useMutation({
   mutationFn: ({ id, payload }: { id: string; payload: Parameters<typeof updateChallengeMetadata>[1] }) =>
     updateChallengeMetadata(id, payload),
-  onSuccess: async (result) => {
+  onSuccess: async (result, variables) => {
     const accepted = await sync.recordMutationAck(result.account_revision, result.data_epoch, activeEditAuthGen.value)
     if (!accepted) {
       return
     }
     if (auth.status !== 'authenticated' || (activeEditAuthGen.value !== undefined && auth.generation !== activeEditAuthGen.value)) {
+      return
+    }
+    if (selectedId.value !== variables.id || mode.value !== 'edit') {
       return
     }
     activeEditCommandId.value = null
@@ -329,8 +333,20 @@ async function submitCreate() {
   }
 }
 
-async function submitEdit() {
-  if (!selectedChallenge.value) return
+async function submitEdit(): Promise<void> {
+  if (editSubmitInFlight.value) return
+  editSubmitInFlight.value = true
+
+  try {
+    await submitEditInternal()
+  } finally {
+    editSubmitInFlight.value = false
+  }
+}
+
+async function submitEditInternal(): Promise<void> {
+  const target = selectedChallenge.value
+  if (!target) return
   editErrors.value = {}
   editGeneralError.value = null
 
@@ -352,29 +368,27 @@ async function submitEdit() {
     return
   }
 
-  // Reconcile account revision, epoch, and write_state before write (AC3, AD-8)
-  const writeCheck = await sync.reconcileBeforeWrite()
-  if (!writeCheck.allowed) {
-    editGeneralError.value = writeCheck.reason ?? 'Chưa thể lưu thay đổi: Ngữ cảnh tài khoản chưa sẵn sàng. Vui lòng thử lại sau.'
-    return
-  }
-
-  if (account.status !== 'ready' || !account.context) {
+  const targetId = target.id
+  const baseVersion = editBaseVersion.value
+  const context = account.context
+  if (account.status !== 'ready' || !context) {
     editGeneralError.value = 'Chưa thể lưu thay đổi: Ngữ cảnh tài khoản chưa sẵn sàng. Vui lòng thử lại sau.'
     return
   }
-  if (account.context.write_state !== 'open') {
-    editGeneralError.value = `Chưa thể lưu thay đổi: Tài khoản đang tạm khóa ghi (${account.context.write_state}).`
+  if (context.write_state !== 'open') {
+    editGeneralError.value = `Chưa thể lưu thay đổi: Tài khoản đang tạm khóa ghi (${context.write_state}).`
     return
   }
 
+  const authGeneration = auth.generation
+  const dataEpoch = context.data_epoch
   const normalizedDescription = editForm.value.description.trim() || null
 
-  // Canonical payload representation for idempotency tracking (Finding 3)
+  // Capture the complete write identity before preflight can change selection or account context.
   const canonicalPayload = JSON.stringify({
-    id: selectedChallenge.value.id,
-    base_version: editBaseVersion.value,
-    data_epoch: account.context.data_epoch,
+    id: targetId,
+    base_version: baseVersion,
+    data_epoch: dataEpoch,
     name: trimmedName,
     description: normalizedDescription,
   })
@@ -386,19 +400,42 @@ async function submitEdit() {
     lastEditCanonicalPayload.value = canonicalPayload
   }
 
-  // S14-F02: Capture auth generation at mutation dispatch
-  activeEditAuthGen.value = auth.generation
+  const payload: Parameters<typeof updateChallengeMetadata>[1] = {
+    command_id: commandId,
+    data_epoch: dataEpoch,
+    base_version: baseVersion,
+    name: trimmedName,
+    description: normalizedDescription,
+  }
+
+  activeEditAuthGen.value = authGeneration
+
+  // Reconcile account revision, epoch, and write_state before write (AC3, AD-8)
+  const writeCheck = await sync.reconcileBeforeWrite()
+  if (!writeCheck.allowed) {
+    editGeneralError.value = writeCheck.reason ?? 'Chưa thể lưu thay đổi: Ngữ cảnh tài khoản chưa sẵn sàng. Vui lòng thử lại sau.'
+    return
+  }
+
+  const targetStillCurrent =
+    auth.status === 'authenticated' &&
+    auth.generation === authGeneration &&
+    account.status === 'ready' &&
+    account.context?.data_epoch === dataEpoch &&
+    selectedId.value === targetId &&
+    mode.value === 'edit' &&
+    editBaseVersion.value === baseVersion &&
+    selectedChallenge.value?.id === targetId
+
+  if (!targetStillCurrent) {
+    editGeneralError.value = 'Dữ liệu challenge đã thay đổi trong lúc chuẩn bị lưu. Vui lòng mở lại rồi thử lại.'
+    return
+  }
 
   try {
     await updateMutation.mutateAsync({
-      id: selectedChallenge.value.id,
-      payload: {
-        command_id: commandId,
-        data_epoch: account.context.data_epoch,
-        base_version: editBaseVersion.value,
-        name: trimmedName,
-        description: normalizedDescription,
-      },
+      id: targetId,
+      payload,
     })
   } catch (error) {
     if (error instanceof ChallengeApiError) {
@@ -817,7 +854,7 @@ async function submitEdit() {
               <button
                 type="submit"
                 id="edit-submit-btn"
-                :disabled="updateMutation.isPending.value || isMutationBlocked || !!editConflictSnapshot || epochChangeBlocked"
+                :disabled="editSubmitInFlight || updateMutation.isPending.value || isMutationBlocked || !!editConflictSnapshot || epochChangeBlocked"
                 class="inline-flex items-center rounded-lg bg-indigo-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-indigo-600"
               >
                 {{ updateMutation.isPending.value ? 'Đang lưu…' : 'Lưu thay đổi' }}

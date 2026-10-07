@@ -1,7 +1,13 @@
 import { expect, test } from '@playwright/test'
 
 test.describe('Challenges User Journey', () => {
+  let blockNextAccountRequest: (() => Promise<void>) | null = null
+  let signalAccountRequestBlocked: (() => void) | null = null
+
   test.beforeEach(async ({ page }) => {
+    blockNextAccountRequest = null
+    signalAccountRequestBlocked = null
+
     // Mock authenticated owner session
     await page.route('**/api/v1/session', (route) =>
       route.fulfill({
@@ -13,8 +19,16 @@ test.describe('Challenges User Journey', () => {
     )
 
     // Mock account context
-    await page.route('**/api/v1/account', (route) =>
-      route.fulfill({
+    await page.route('**/api/v1/account', async (route) => {
+      if (blockNextAccountRequest) {
+        const block = blockNextAccountRequest
+        blockNextAccountRequest = null
+        signalAccountRequestBlocked?.()
+        signalAccountRequestBlocked = null
+        await block()
+      }
+
+      return route.fulfill({
         status: 200,
         contentType: 'application/json',
         headers: { 'Cache-Control': 'private, no-store' },
@@ -26,8 +40,88 @@ test.describe('Challenges User Journey', () => {
           data_epoch: 1,
           write_state: 'open',
         }),
-      }),
-    )
+      })
+    })
+  })
+
+  test('does not write challenge A after the editor is switched to challenge B during preflight', async ({ page }) => {
+    const challengeA = {
+      id: 'c1000000-0000-4000-8000-000000000001',
+      name: 'Challenge A',
+      description: 'Mô tả A',
+      start_date: '2026-09-19',
+      target_days: 3,
+      row_version: 1,
+      created_at: '2026-09-19T08:00:00Z',
+      updated_at: '2026-09-19T08:00:00Z',
+    }
+    const challengeB = {
+      ...challengeA,
+      id: 'c1000000-0000-4000-8000-000000000002',
+      name: 'Challenge B',
+      description: 'Mô tả B',
+    }
+    const challenges = [challengeA, challengeB]
+    const patchRequests: Array<{ id: string; body: Record<string, unknown> }> = []
+
+    await page.route('**/api/v1/challenges', async (route) => {
+      if (route.request().method() === 'GET') {
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          headers: { 'Cache-Control': 'private, no-store' },
+          body: JSON.stringify({ challenges }),
+        })
+      }
+
+      return route.fallback()
+    })
+
+    await page.route('**/api/v1/challenges/*', async (route) => {
+      if (route.request().method() !== 'PATCH') {
+        return route.fallback()
+      }
+
+      const id = route.request().url().split('/').pop()?.split('?')[0] ?? ''
+      const body = JSON.parse(route.request().postData() ?? '{}') as Record<string, unknown>
+      patchRequests.push({ id, body })
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          challenge: { ...challengeA, name: body.name, description: body.description, row_version: 2 },
+          account_revision: 2,
+          data_epoch: 1,
+        }),
+      })
+    })
+
+    await page.goto('/challenges')
+    const list = page.getByRole('region', { name: 'Danh sách Challenge' })
+    await expect(list.getByText('Challenge A', { exact: true })).toBeVisible()
+    await expect(list.getByText('Challenge B', { exact: true })).toBeVisible()
+
+    await list.getByText('Challenge A', { exact: true }).click()
+    await page.getByRole('button', { name: 'Chỉnh sửa' }).click()
+    await page.locator('#edit-name').fill('Challenge A đã sửa')
+
+    let releasePreflight!: () => void
+    const preflightStarted = new Promise<void>((resolve) => {
+      signalAccountRequestBlocked = resolve
+    })
+    blockNextAccountRequest = () => new Promise<void>((resolve) => {
+      releasePreflight = resolve
+    })
+
+    const submit = page.locator('#edit-submit-btn').click()
+    await preflightStarted
+
+    await list.getByText('Challenge B', { exact: true }).click()
+    releasePreflight()
+    await submit
+
+    await page.waitForTimeout(300)
+    expect(patchRequests).toEqual([])
   })
 
   test('AC1, AC2, AC3 — complete challenge lifecycle on desktop and mobile viewports', async ({ page }) => {

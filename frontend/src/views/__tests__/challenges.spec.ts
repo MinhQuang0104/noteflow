@@ -340,6 +340,115 @@ test('update command_id: retains command_id across unknown-outcome retry of iden
   expect(fourthCommandId).not.toBe(firstCommandId)
 })
 
+test('does not retarget an edit to a newly selected challenge while preflight is pending', async () => {
+  const challengeA = {
+    id: 'c1111111-2026-4444-9999-000000000001',
+    name: 'Challenge A',
+    description: 'Mô tả A',
+    start_date: '2026-09-19',
+    target_days: 3,
+    row_version: 1,
+    created_at: '2026-09-19T10:00:00Z',
+    updated_at: '2026-09-19T10:00:00Z',
+  }
+  const challengeB = {
+    ...challengeA,
+    id: 'c2222222-2026-4444-9999-000000000002',
+    name: 'Challenge B',
+    description: 'Mô tả B',
+  }
+
+  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: [challengeA, challengeB] })
+  const updateSpy = vi.spyOn(challengesApi, 'updateChallengeMetadata').mockResolvedValue({
+    challenge: { ...challengeA, name: 'A đã sửa', row_version: 2 },
+    account_revision: 2,
+    data_epoch: 1,
+  })
+
+  let releasePreflight!: (result: { allowed: boolean; reason?: string }) => void
+  const preflight = new Promise<{ allowed: boolean; reason?: string }>(resolve => { releasePreflight = resolve })
+  const sync = useSyncStore()
+  const reconcile = vi.spyOn(sync, 'reconcileBeforeWrite').mockReturnValue(preflight)
+
+  const router = createTestRouter()
+  await router.push('/challenges')
+  const wrapper = mount(ChallengesView, {
+    global: {
+      plugins: [[VueQueryPlugin, { queryClient }], router],
+    },
+  })
+  await flushPromises()
+
+  const rows = wrapper.findAll('li')
+  await rows[0]!.trigger('click')
+  await flushPromises()
+  await wrapper.get('#edit-challenge-btn').trigger('click')
+  await wrapper.get('#edit-name').setValue('A đã sửa')
+
+  const submit = wrapper.get('form').trigger('submit.prevent')
+  await vi.waitFor(() => expect(reconcile).toHaveBeenCalledOnce())
+
+  await wrapper.findAll('li')[1]!.trigger('click')
+  releasePreflight({ allowed: true })
+  await submit
+  await flushPromises()
+
+  expect(updateSpy).not.toHaveBeenCalled()
+  wrapper.unmount()
+})
+
+test('sends only one edit command when submit is repeated during preflight', async () => {
+  const challenge = {
+    id: 'c1111111-2026-4444-9999-000000000001',
+    name: 'Challenge A',
+    description: 'Mô tả A',
+    start_date: '2026-09-19',
+    target_days: 3,
+    row_version: 1,
+    created_at: '2026-09-19T10:00:00Z',
+    updated_at: '2026-09-19T10:00:00Z',
+  }
+
+  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: [challenge] })
+  const updateSpy = vi.spyOn(challengesApi, 'updateChallengeMetadata').mockResolvedValue({
+    challenge: { ...challenge, name: 'A đã sửa', row_version: 2 },
+    account_revision: 2,
+    data_epoch: 1,
+  })
+
+  let releasePreflight!: (result: { allowed: boolean; reason?: string }) => void
+  const preflight = new Promise<{ allowed: boolean; reason?: string }>(resolve => { releasePreflight = resolve })
+  const sync = useSyncStore()
+  const reconcile = vi.spyOn(sync, 'reconcileBeforeWrite').mockReturnValue(preflight)
+  vi.spyOn(sync, 'recordMutationAck').mockResolvedValue(true)
+
+  const router = createTestRouter()
+  await router.push('/challenges')
+  const wrapper = mount(ChallengesView, {
+    global: {
+      plugins: [[VueQueryPlugin, { queryClient }], router],
+    },
+  })
+  await flushPromises()
+  await wrapper.get('li').trigger('click')
+  await flushPromises()
+  await wrapper.get('#edit-challenge-btn').trigger('click')
+  await wrapper.get('#edit-name').setValue('A đã sửa')
+
+  const firstSubmit = wrapper.get('form').trigger('submit.prevent')
+  await vi.waitFor(() => expect(reconcile).toHaveBeenCalledOnce())
+  const secondSubmit = wrapper.get('form').trigger('submit.prevent')
+  await Promise.resolve()
+  expect(reconcile).toHaveBeenCalledOnce()
+
+  releasePreflight({ allowed: true })
+  await Promise.all([firstSubmit, secondSubmit])
+  await flushPromises()
+
+  expect(updateSpy).toHaveBeenCalledTimes(1)
+  wrapper.unmount()
+})
+
 test('finding 4: on version conflict, preserves dirty inputs, does not advance editBaseVersion, and disables repeated save', async () => {
   const mockChallenge = {
     id: 'c1111111-2026-4444-9999-000000000001',

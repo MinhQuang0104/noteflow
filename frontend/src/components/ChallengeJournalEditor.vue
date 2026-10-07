@@ -80,6 +80,12 @@ const conflictResourceLabel = computed(() => `Challenge ${props.challengeId} · 
 const conflictClientRevision = computed(() => record.value?.clientRevision ?? 0)
 const conflictDialogError = computed(() => localActionError.value ?? record.value?.error?.message ?? null)
 
+function isCurrentJournalWrite(authGeneration: number, dataEpoch: number | undefined): boolean {
+  return auth.status === 'authenticated' &&
+    auth.generation === authGeneration &&
+    account.context?.data_epoch === dataEpoch
+}
+
 watch(journalData, (result) => {
   if (result) journalDrafts.hydrate(result.journal)
 }, { immediate: true })
@@ -148,6 +154,9 @@ async function confirmConflict(payload: {
 }): Promise<void> {
   const challengeId = props.challengeId
   const localDate = props.localDate
+  const targetQueryKey = ['challenge-journal', challengeId, localDate] as const
+  const authGeneration = auth.generation
+  const dataEpoch = account.context?.data_epoch
   const beforeSnapshot = journalDrafts.getDraft(challengeId, localDate)?.acknowledgedSnapshot
   localActionError.value = null
   await journalDrafts.resolveConflict(
@@ -161,7 +170,9 @@ async function confirmConflict(payload: {
   const updated = journalDrafts.getDraft(challengeId, localDate)
   if (!updated || updated.acknowledgedSnapshot === beforeSnapshot) return
 
-  queryClient.setQueryData<JournalReadResult>(journalQueryKey.value, { journal: updated.acknowledgedSnapshot })
+  if (!isCurrentJournalWrite(authGeneration, dataEpoch)) return
+
+  queryClient.setQueryData<JournalReadResult>(targetQueryKey, { journal: updated.acknowledgedSnapshot })
   if (!updated.conflictSnapshot && props.challengeId === challengeId && props.localDate === localDate) {
     isConflictDialogOpen.value = false
     showSaveStatus.value = true
@@ -187,12 +198,15 @@ async function saveJournal(): Promise<void> {
 
   const challengeId = props.challengeId
   const localDate = props.localDate
+  const targetQueryKey = ['challenge-journal', challengeId, localDate] as const
+  const authGeneration = auth.generation
+  const dataEpoch = account.context?.data_epoch
   const beforeSnapshot = journalDrafts.getDraft(challengeId, localDate)?.acknowledgedSnapshot
   await journalDrafts.save(challengeId, localDate)
 
   const updated = journalDrafts.getDraft(challengeId, localDate)
-  if (updated && updated.acknowledgedSnapshot !== beforeSnapshot) {
-    queryClient.setQueryData<JournalReadResult>(['challenge-journal', challengeId, localDate], {
+  if (updated && updated.acknowledgedSnapshot !== beforeSnapshot && isCurrentJournalWrite(authGeneration, dataEpoch)) {
+    queryClient.setQueryData<JournalReadResult>(targetQueryKey, {
       journal: updated.acknowledgedSnapshot,
     })
   }

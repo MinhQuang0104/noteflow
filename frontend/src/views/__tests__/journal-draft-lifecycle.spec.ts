@@ -269,6 +269,55 @@ test('keeps the conflict and draft across close/reopen, and does not cancel a pe
   wrapper.unmount()
 })
 
+test.each([false, true] as const)('does not write a late ACK for A into B journal cache when B is %s', async (dirtyB) => {
+  const serverSnapshotA: challengesApi.JournalSnapshot = {
+    ...emptyJournal,
+    journal: 'Bản lưu trên máy chủ A',
+    journal_version: 2,
+  }
+  const serverSnapshotB: challengesApi.JournalSnapshot = {
+    challenge_id: otherChallengeId,
+    local_date: otherDate,
+    journal: 'Nội dung B trên máy chủ',
+    journal_version: 4,
+  }
+  serverJournals.set(resourceKey(otherChallengeId, otherDate), serverSnapshotB)
+  const cacheKeyB = ['challenge-journal', otherChallengeId, otherDate] as const
+  queryClient.setQueryData<challengesApi.JournalReadResult>(cacheKeyB, { journal: serverSnapshotB })
+
+  let acknowledgeResolution!: (result: challengesApi.JournalMutationResult) => void
+  const save = vi.spyOn(challengesApi, 'saveChallengeJournal')
+    .mockRejectedValueOnce(conflictError(challengeId, localDate, serverSnapshotA.journal!, 2))
+    .mockImplementationOnce(() => new Promise(resolve => { acknowledgeResolution = resolve }))
+
+  const wrapper = await mountEditor()
+  await wrapper.get('#journal-editor').setValue('Bản nháp A')
+  await wrapper.get('#journal-form').trigger('submit.prevent')
+  await flushPromises()
+  await wrapper.get('#journal-conflict-open').trigger('click')
+  await wrapper.get('#conflict-local').setValue()
+  const confirm = wrapper.get('#content-conflict-confirm').trigger('click')
+  await vi.waitFor(() => expect(save).toHaveBeenCalledTimes(2))
+
+  await wrapper.setProps({ challengeId: otherChallengeId, localDate: otherDate })
+  await flushPromises()
+  if (dirtyB) {
+    await wrapper.get('#journal-editor').setValue('Bản nháp B chưa lưu')
+  }
+  const cacheBeforeAck = queryClient.getQueryData(cacheKeyB)
+
+  acknowledgeResolution({
+    journal: { ...serverSnapshotA, journal: 'Bản nháp A đã ACK', journal_version: 3 },
+    account_revision: 2,
+    data_epoch: 1,
+  })
+  await confirm
+  await flushPromises()
+
+  expect(queryClient.getQueryData(cacheKeyB)).toEqual(cacheBeforeAck)
+  wrapper.unmount()
+})
+
 test('requires a new choice when another device changes the server snapshot again', async () => {
   const drafts = useJournalDraftsStore()
   const save = vi.spyOn(challengesApi, 'saveChallengeJournal')
