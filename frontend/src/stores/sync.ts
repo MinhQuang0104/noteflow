@@ -141,6 +141,8 @@ export const useSyncStore = defineStore('sync', () => {
 
       // Observable query convergence (S14-F03, S14-F04)
       if (needsConvergence) {
+        // Carry the debt across any async boundary; clear it only after both query refetches succeed.
+        pendingConvergence.value = true
         const capturedAckGeneration = ackConvergenceGeneration
         const isCurrentConvergence = () =>
           auth.generation === capturedAuthGen && auth.status === 'authenticated' &&
@@ -200,8 +202,17 @@ export const useSyncStore = defineStore('sync', () => {
 
       return true
     } catch (error: unknown) {
-      // Fencing check: auth changed during flight
-      if (auth.generation !== capturedAuthGen || auth.status !== 'authenticated') {
+      // Fencing check: auth/session/request changed during flight
+      if (
+        auth.generation !== capturedAuthGen ||
+        auth.status !== 'authenticated' ||
+        currentReqGen !== requestGeneration.value
+      ) {
+        return false
+      }
+
+      if (!isVisible.value || !isOnline.value) {
+        syncStatus.value = 'paused'
         return false
       }
 
@@ -211,8 +222,23 @@ export const useSyncStore = defineStore('sync', () => {
           : null
 
       if (responseStatus === 401 || responseStatus === 403) {
-        stop()
-        await auth.refreshSession()
+        try {
+          const refreshed = await auth.refreshSession()
+          if (!refreshed || auth.status !== 'authenticated') {
+            stop()
+            return false
+          }
+        } catch {
+          if (auth.generation !== capturedAuthGen || auth.status !== 'authenticated') {
+            stop()
+            return false
+          }
+        }
+
+        consecutiveFailures.value++
+        syncError.value = 'Không thể kiểm tra phiên đăng nhập. Đang thử lại...'
+        syncStatus.value = 'error'
+        scheduleNextPoll(getBackoffDelay())
         return false
       }
 
@@ -227,25 +253,15 @@ export const useSyncStore = defineStore('sync', () => {
 
       return false
     } finally {
-      inFlight.value = false
+      if (currentReqGen === requestGeneration.value) {
+        inFlight.value = false
+      }
     }
   }
 
   async function poll(): Promise<void> {
     if (!isStarted || auth.status !== 'authenticated') return
-    if (!isVisible.value || !isOnline.value) {
-      syncStatus.value = 'paused'
-      return
-    }
-
-    const capturedAuthGen = auth.generation
-    const success = await reconcileInternal()
-
-    if (auth.generation !== capturedAuthGen || !isStarted || auth.status !== 'authenticated') return
-
-    if (isVisible.value && isOnline.value) {
-      scheduleNextPoll(success ? BASE_POLL_INTERVAL_MS : getBackoffDelay())
-    }
+    await reconcile()
   }
 
   async function reconcile(force = false): Promise<boolean> {

@@ -25,8 +25,19 @@ export const useAuthStore = defineStore('auth', () => {
     if (explicitLogoutPending) return false
 
     const requestGeneration = generation.value
+    const previousStatus: AuthStatus = owner.value ? 'authenticated' : 'guest'
     status.value = 'loading'
-    const session = await authApi.getSession()
+    let session: Awaited<ReturnType<typeof authApi.getSession>>
+    try {
+      session = await authApi.getSession()
+    } catch (error) {
+      // A transport/5xx failure is not proof of expiry. Restore a usable state so
+      // the coordinator can keep its retained private state and retry later.
+      if (!explicitLogoutPending && requestGeneration === generation.value) {
+        status.value = previousStatus
+      }
+      throw error
+    }
 
     if (explicitLogoutPending) return false
     if (requestGeneration !== generation.value) return false

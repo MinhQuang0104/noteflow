@@ -280,6 +280,95 @@ describe('useSyncStore', () => {
     sync.stop()
   })
 
+  it('serializes a timer poll and foreground reconcile through one account request', async () => {
+    const auth = useAuthStore()
+    const sync = useSyncStore()
+    sync.setQueryClient(queryClient)
+    auth.status = 'authenticated'
+
+    await sync.start()
+
+    let resolveTimerRequest!: (value: accountApi.AccountContext) => void
+    vi.mocked(accountApi.getAccountContext).mockImplementationOnce(
+      () => new Promise(resolve => { resolveTimerRequest = resolve }),
+    )
+    vi.spyOn(queryClient, 'refetchQueries').mockResolvedValue()
+
+    vi.advanceTimersByTime(5000)
+    await Promise.resolve()
+    expect(accountApi.getAccountContext).toHaveBeenCalledTimes(2)
+
+    const foreground = sync.reconcile()
+    await Promise.resolve()
+    expect(accountApi.getAccountContext).toHaveBeenCalledTimes(2)
+
+    resolveTimerRequest({
+      timezone: 'Asia/Ho_Chi_Minh',
+      account_date: '2026-09-19',
+      week: { start_date: '2026-09-15', end_date: '2026-09-21' },
+      account_revision: 2,
+      data_epoch: 1,
+      write_state: 'open',
+    })
+
+    expect(await foreground).toBe(true)
+    sync.stop()
+  })
+
+  it('preserves paused state when an account request fails after going offline', async () => {
+    const auth = useAuthStore()
+    const sync = useSyncStore()
+    sync.setQueryClient(queryClient)
+    auth.status = 'authenticated'
+
+    let rejectAccount!: (error: Error) => void
+    vi.mocked(accountApi.getAccountContext).mockImplementationOnce(
+      () => new Promise((_, reject) => { rejectAccount = reject }),
+    )
+
+    const pending = sync.start()
+    sync.handleOnlineStatusChange(false)
+    rejectAccount(new Error('network disconnected'))
+
+    expect(await pending).toBe(false)
+    expect(sync.syncStatus).toBe('paused')
+    expect(sync.syncError).toBeNull()
+    expect(sync.consecutiveFailures).toBe(0)
+    sync.stop()
+  })
+
+  it('keeps auth recoverable and retries after session refresh rejects', async () => {
+    const auth = useAuthStore()
+    const sync = useSyncStore()
+    sync.setQueryClient(queryClient)
+    auth.status = 'authenticated'
+    auth.owner = { id: 1, name: 'Owner', email: 'owner@example.test' }
+
+    vi.mocked(accountApi.getAccountContext).mockRejectedValueOnce({ status: 401 })
+    vi.spyOn(authApi, 'getSession').mockRejectedValueOnce(new Error('session endpoint unavailable'))
+
+    const firstAttempt = sync.start()
+    expect(await firstAttempt).toBe(false)
+    expect(auth.status).toBe('authenticated')
+    expect(sync.syncStatus).toBe('error')
+    expect(sync.syncError).toContain('phiên')
+
+    vi.mocked(accountApi.getAccountContext).mockResolvedValueOnce({
+      timezone: 'Asia/Ho_Chi_Minh',
+      account_date: '2026-09-19',
+      week: { start_date: '2026-09-15', end_date: '2026-09-21' },
+      account_revision: 1,
+      data_epoch: 1,
+      write_state: 'open',
+    })
+    await vi.advanceTimersByTimeAsync(10000)
+
+    expect(auth.status).toBe('authenticated')
+    expect(sync.syncStatus).toBe('synced')
+    expect(accountApi.getAccountContext).toHaveBeenCalledTimes(2)
+    sync.stop()
+  })
+
   it('detects higher revision, refetches query caches, and does not regress revision', async () => {
     const auth = useAuthStore()
     const sync = useSyncStore()
