@@ -62,7 +62,7 @@ final class ChallengeJournalController extends Controller
             'command_id' => ['required', 'string', 'uuid'],
             'data_epoch' => ['required', 'integer', 'min:1'],
             'base_version' => ['required', 'integer', 'min:0'],
-            'journal' => ['required', 'string'],
+            'journal' => ['required', 'string', 'not_regex:/\x00/'],
         ]);
         if ($validator->fails()) {
             return response()->json(['message' => 'Validation failed', 'errors' => $validator->errors()->toArray()], 422);

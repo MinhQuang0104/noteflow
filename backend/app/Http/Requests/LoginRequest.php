@@ -13,8 +13,10 @@ final class LoginRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        $email = $this->input('email');
+
         $this->merge([
-            'email' => mb_strtolower(trim((string) $this->input('email'))),
+            'email' => is_string($email) ? mb_strtolower(trim($email)) : $email,
         ]);
     }
 
@@ -22,7 +24,7 @@ final class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'email'],
+            'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
             'redirect_to' => ['nullable', 'string'],
         ];

@@ -76,6 +76,25 @@ test('valid credentials for a non owner are rejected without creating a session'
     $this->assertGuest();
 });
 
+test('login rejects non-string email payloads with validation errors', function () {
+    User::factory()->owner()->create([
+        'email' => 'owner@example.test',
+        'password' => 'correct-password',
+    ]);
+
+    foreach ([
+        ['email' => ['owner@example.test']],
+        ['email' => ['value' => 'owner@example.test']],
+        ['email' => null],
+    ] as $emailPayload) {
+        $this->postJson('/login', $emailPayload + ['password' => 'correct-password'])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['email']);
+    }
+
+    $this->assertGuest();
+});
+
 test('private session data is protected and never cacheable', function () {
     $guestResponse = $this->getJson('/api/v1/session');
     $guestResponse

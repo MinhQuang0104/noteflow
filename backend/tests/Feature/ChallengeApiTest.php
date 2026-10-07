@@ -142,6 +142,55 @@ test('AC2 — reject invalid target days and attach error to target_days field',
     expect(DB::table('challenges')->count())->toBe(0);
 });
 
+test('challenge text fields reject NUL bytes before writing', function () {
+    $owner = setupChallengeOwner();
+
+    $created = $this->actingAs($owner)->postJson('/api/v1/challenges', [
+        'command_id' => (string) Str::uuid(),
+        'data_epoch' => 1,
+        'name' => 'Original challenge',
+        'description' => 'Original description',
+        'target_days' => 3,
+    ])->assertCreated();
+    $challengeId = $created->json('challenge.id');
+
+    $this->actingAs($owner)->postJson('/api/v1/challenges', [
+        'command_id' => (string) Str::uuid(),
+        'data_epoch' => 1,
+        'name' => "Name\0with NUL",
+        'description' => 'Valid description',
+        'target_days' => 3,
+    ])->assertStatus(422)->assertJsonValidationErrors(['name']);
+
+    $this->actingAs($owner)->postJson('/api/v1/challenges', [
+        'command_id' => (string) Str::uuid(),
+        'data_epoch' => 1,
+        'name' => 'Valid name',
+        'description' => "Description\0with NUL",
+        'target_days' => 3,
+    ])->assertStatus(422)->assertJsonValidationErrors(['description']);
+
+    $this->actingAs($owner)->patchJson('/api/v1/challenges/'.$challengeId, [
+        'command_id' => (string) Str::uuid(),
+        'data_epoch' => 1,
+        'base_version' => 1,
+        'name' => "Updated\0name",
+        'description' => 'Valid description',
+    ])->assertStatus(422)->assertJsonValidationErrors(['name']);
+
+    $this->actingAs($owner)->patchJson('/api/v1/challenges/'.$challengeId, [
+        'command_id' => (string) Str::uuid(),
+        'data_epoch' => 1,
+        'base_version' => 1,
+        'name' => 'Valid update',
+        'description' => "Updated\0description",
+    ])->assertStatus(422)->assertJsonValidationErrors(['description']);
+
+    expect(DB::table('challenges')->count())->toBe(1)
+        ->and(DB::table('challenges')->where('id', $challengeId)->value('name'))->toBe('Original challenge')
+        ->and(DB::table('challenges')->where('id', $challengeId)->value('description'))->toBe('Original description');
+});
+
 test('AC3 — update metadata modifies name/description without changing start_date or target', function () {
     $owner = setupChallengeOwner();
 

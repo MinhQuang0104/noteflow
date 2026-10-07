@@ -54,8 +54,8 @@ final class ChallengeController extends Controller
         $validator = Validator::make($request->all(), [
             'command_id' => ['required', 'string', 'uuid'],
             'data_epoch' => ['required', 'integer', 'min:1'],
-            'name' => ['required', 'string'],
-            'description' => ['nullable', 'string'],
+            'name' => ['required', 'string', 'not_regex:/\x00/'],
+            'description' => ['nullable', 'string', 'not_regex:/\x00/'],
             'target_days' => ['required', 'integer', 'min:1', 'max:7'],
         ]);
 
@@ -157,8 +157,8 @@ final class ChallengeController extends Controller
             'command_id' => ['required', 'string', 'uuid'],
             'data_epoch' => ['required', 'integer', 'min:1'],
             'base_version' => ['required', 'integer', 'min:1'],
-            'name' => ['required', 'string'],
-            'description' => ['nullable', 'string'],
+            'name' => ['required', 'string', 'not_regex:/\x00/'],
+            'description' => ['nullable', 'string', 'not_regex:/\x00/'],
         ]);
 
         if ($validator->fails()) {

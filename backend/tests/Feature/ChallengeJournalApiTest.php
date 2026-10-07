@@ -141,6 +141,8 @@ test('journal HTTP rejects invalid day, blank text, unknown fields, fence, and s
     $this->actingAs($owner)->putJson($url, journalApiPayload('Saved'))->assertOk();
     $this->actingAs($owner)->putJson($url, journalApiPayload(" \n ", 1))
         ->assertStatus(422)->assertJsonValidationErrors(['journal']);
+    $this->actingAs($owner)->putJson($url, journalApiPayload("NUL\0text", 1))
+        ->assertStatus(422)->assertJsonValidationErrors(['journal']);
     $this->actingAs($owner)->putJson($url, journalApiPayload('Wrong day', 1) + ['is_done' => true])
         ->assertStatus(422)->assertJsonValidationErrors(['is_done']);
     $this->actingAs($owner)->putJson("/api/v1/challenges/{$id}/journals/2026-09-22", journalApiPayload('Future'))
