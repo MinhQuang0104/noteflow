@@ -97,6 +97,10 @@ function sameResolution(left: PendingJournalResolution | undefined, right: Pendi
     left.expectedClientRevision === right.expectedClientRevision
 }
 
+function sameFrozenResolution(left: PendingJournalResolution | undefined, right: PendingJournalResolution): boolean {
+  return left?.choice === right.choice && left.expectedServerVersion === right.expectedServerVersion
+}
+
 export const useJournalDraftsStore = defineStore('journalDrafts', () => {
   const auth = useAuthStore()
   const account = useAccountStore()
@@ -689,7 +693,8 @@ export const useJournalDraftsStore = defineStore('journalDrafts', () => {
       expectedClientRevision,
     }
     if (pendingResolution) {
-      return sameResolution(pendingResolution, requestedResolution) ? save(challengeId, localDate) : Promise.resolve()
+      // Replay the frozen command even when the user has typed a newer local revision.
+      return sameFrozenResolution(pendingResolution, requestedResolution) ? save(challengeId, localDate) : Promise.resolve()
     }
 
     if (!resolutionContextMatches(record, challengeId, localDate, expectedServerVersion, expectedClientRevision)) {

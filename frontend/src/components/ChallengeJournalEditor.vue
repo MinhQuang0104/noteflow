@@ -47,11 +47,16 @@ const draft = computed({
 const savedText = computed(() => record.value?.acknowledgedText ?? '')
 const conflictSnapshot = computed(() => record.value?.conflictSnapshot ?? null)
 const isDirty = computed(() => journalDrafts.isDirty(props.challengeId, props.localDate))
+const hasStaleDraftEpoch = computed(() => {
+  const currentEpoch = account.context?.data_epoch
+  return Boolean(record.value && isDirty.value && currentEpoch !== undefined && record.value.dataEpoch !== currentEpoch)
+})
 const isSaving = computed(() => record.value?.status === 'saving')
 const localValidationError = ref<string | null>(null)
 const localActionError = ref<string | null>(null)
 const showSaveStatus = ref(false)
 const epochChangeBlocked = ref(false)
+const isEpochBlocked = computed(() => epochChangeBlocked.value || hasStaleDraftEpoch.value)
 const isConflictDialogOpen = ref(false)
 const journalEditor = ref<HTMLTextAreaElement | null>(null)
 const isMutationBlocked = computed(() => {
@@ -144,7 +149,7 @@ async function retryJournalLoad(): Promise<void> {
 }
 
 function openConflictDialog(): void {
-  if (conflictSnapshot.value && !epochChangeBlocked.value) isConflictDialogOpen.value = true
+  if (conflictSnapshot.value && !isEpochBlocked.value) isConflictDialogOpen.value = true
 }
 
 async function confirmConflict(payload: {
@@ -186,7 +191,7 @@ async function saveJournal(): Promise<void> {
   localActionError.value = null
   showSaveStatus.value = true
 
-  if (epochChangeBlocked.value) {
+  if (isEpochBlocked.value) {
     localActionError.value = 'Dữ liệu máy chủ đã chuyển chu kỳ mới (epoch). Vui lòng bấm Tải lại dữ liệu mới nhất trước khi tiếp tục.'
     return
   }
@@ -259,7 +264,7 @@ async function saveJournal(): Promise<void> {
       </div>
 
       <div
-        v-if="epochChangeBlocked"
+        v-if="isEpochBlocked"
         id="journal-epoch-alert"
         role="alert"
         class="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900"
@@ -294,7 +299,7 @@ async function saveJournal(): Promise<void> {
           aria-controls="content-conflict-dialog"
           :aria-expanded="isConflictDialogOpen ? 'true' : 'false'"
           class="mt-3 rounded-md border border-amber-400 bg-white px-3 py-1.5 text-xs font-semibold hover:bg-amber-100"
-          :disabled="epochChangeBlocked"
+          :disabled="isEpochBlocked"
           @click="openConflictDialog"
         >
           Xem và giải quyết
@@ -349,7 +354,7 @@ async function saveJournal(): Promise<void> {
         <button
           id="journal-save-btn"
           type="submit"
-          :disabled="isSaving || isMutationBlocked || epochChangeBlocked || !!conflictSnapshot"
+          :disabled="isSaving || isMutationBlocked || isEpochBlocked || !!conflictSnapshot"
           :aria-busy="isSaving ? 'true' : 'false'"
           class="inline-flex items-center rounded-lg bg-indigo-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-indigo-600"
         >

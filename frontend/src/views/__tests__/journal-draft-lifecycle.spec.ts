@@ -376,6 +376,7 @@ test('shows a resolution error and retries the same pending command after the di
   expect(wrapper.get('#content-conflict-dialog [role="alert"]').text()).toContain('Chưa xác định được kết quả lưu')
   const pendingRequest = save.mock.calls[1]?.[2]
 
+  await wrapper.get('#journal-editor').setValue('Bản nháp cục bộ có gõ thêm')
   await wrapper.get('#content-conflict-close').trigger('click')
   await wrapper.get('#journal-conflict-open').trigger('click')
   expect(wrapper.findAll('#content-conflict-dialog input:checked')).toHaveLength(0)
@@ -386,12 +387,42 @@ test('shows a resolution error and retries the same pending command after the di
   expect(save).toHaveBeenCalledTimes(3)
   expect(save.mock.calls[2]?.[2]).toEqual(pendingRequest)
   expect(drafts.getDraft(challengeId, localDate)).toMatchObject({
-    status: 'saved',
+    text: 'Bản nháp cục bộ có gõ thêm',
+    status: 'dirty',
     acknowledgedText: 'Bản nháp cục bộ',
     pendingCommand: null,
     conflictSnapshot: null,
   })
   wrapper.unmount()
+})
+
+test('shows epoch rebase action when a dirty draft is remounted after the account epoch changes', async () => {
+  const drafts = useJournalDraftsStore()
+  const wrapper = await mountEditor()
+  await wrapper.get('#journal-editor').setValue('Bản nháp epoch cũ')
+  expect(drafts.getDraft(challengeId, localDate)).toMatchObject({ dataEpoch: 1, text: 'Bản nháp epoch cũ' })
+  wrapper.unmount()
+
+  queryClient.removeQueries({ queryKey: ['challenge-journal', challengeId, localDate] })
+  const account = useAccountStore()
+  account.context = { ...account.context!, account_revision: 2, data_epoch: 2 }
+
+  const remounted = await mountEditor()
+  expect((remounted.get('#journal-editor').element as HTMLTextAreaElement).value).toBe('Bản nháp epoch cũ')
+  expect(remounted.find('#journal-epoch-alert').exists()).toBe(true)
+  expect(remounted.find('#journal-epoch-rebase-btn').exists()).toBe(true)
+
+  await remounted.get('#journal-epoch-rebase-btn').trigger('click')
+  await flushPromises()
+
+  expect(remounted.find('#journal-epoch-alert').exists()).toBe(false)
+  expect(drafts.getDraft(challengeId, localDate)).toMatchObject({
+    dataEpoch: 2,
+    text: 'Bản nháp epoch cũ',
+    acknowledgedText: '',
+    status: 'dirty',
+  })
+  remounted.unmount()
 })
 
 test.each(['resource switch', 'session expiry', 'logout'] as const)(
