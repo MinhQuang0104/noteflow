@@ -8,7 +8,10 @@
 - Source Story: <repo-relative path>@<pinned Git commit>; Ref: <optional ref>
 - Relevant ACs: <IDs and precise section references; bounded excerpts only>
 - Required context: <minimal paths/sections>
-- Expected scope: <allowed files/modules and worktree>
+- Expected scope: <worktree; repo-relative exact files or `dir/` entries, one per
+  line, passed verbatim as `--allow` to `.agents/scripts/check-worker-scope.mjs`>
+- Dispatch base: <full commit SHA the scope gate compares against>; commits
+  allowed: <yes|no>; writes outside expected scope are an `escalation`
 - Architecture constraints: <approved decision references and invariants>
 - Prohibited changes: <scope exclusions; no policy/requirement/integration changes>
 - Placement: explicit Orca repo/worktree ID and parent; isolated child worktree; no merge or integration

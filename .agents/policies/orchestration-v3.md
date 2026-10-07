@@ -494,6 +494,19 @@ NEEDS_HUMAN per the table below. Screen output is diagnosis, never completion.
 | Local permission, trust or sign-in prompt | Human | NEEDS_HUMAN |
 | Message for a stale or non-current Dispatch | Lead | Ignore for lifecycle; duplicates follow DUPLICATE_WORKERS |
 
+Mechanical scope gate: after every `worker_done` and before semantic review, run
+`node .agents/scripts/check-worker-scope.mjs check --worktree <worker path> --base
+<dispatch base commit> --allow <entry>...` with the contract's expected-scope
+entries (exact files or `dir/`), plus `--contract-sha256 <contractIdentity hex>`
+and `--forbid-commits` when the contract forbids commits. It compares base to the
+working tree, including worker commits, staged, unstaged, deleted and untracked
+paths, and reports both sides of renames. `FAIL` rejects the attempt before
+review: out-of-scope edits get a correction contract that names the paths to
+restore; `HISTORY_REWRITTEN`, `CONTRACT_MODIFIED`, or an out-of-scope delete enter
+NEEDS_HUMAN with the worktree preserved. `INVALID`/`ERROR` are never `PASS`.
+`PASS` only means no out-of-scope path was seen; gitignored paths are not
+inspected, and Lead review is still required.
+
 Bounded implement/review loop: worker attempt -> Lead review (independent diff,
 scope, AC and check evidence; findings classified per root) -> correction contract
 on the same Task with incremented attempt and a new context-only Dispatch. At most

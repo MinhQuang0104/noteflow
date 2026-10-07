@@ -4,6 +4,10 @@
 
 Explicit human direction binds. BMAD owns approved product intent; Codex and Claude are replaceable Leads. Canonical `.agent-state/` is runtime state; V3 policy governs V3 work over incompatible generic guidance.
 
+## Worker role
+
+A prompt carrying an Orca worker preamble or a V3 worker contract makes the agent a worker, never a Lead. Follow only that contract plus the safety rules below: skip Lead routing, lanes, bootstrap, `.agent-state/`, and Story lifecycle. The contract's expected scope bounds every write; anything outside it, or destructive, irreversible, or credential-bearing, is an `escalation`, never an attempt. Questions go through `orca orchestration ask`; never a local prompt. Worker DONE never claims acceptance.
+
 ## V4 Lite migration lane
 
 Only an explicit human request may use this lane for agent instructions, routing, feature maps, verification/worker contracts, or orchestration architecture; it excludes product, normal bugs/features, Story execution, and V3.1 workers. Before migration read only `.agent-state/active-run.json`, without mutation; continue only on clear `IDLE` with no contradiction, then read the router. Otherwise stop/report. Do not resume, reconcile, take over, mutate V3 runtime, or invoke Orca, AGY, V3 workers, or recovery. This lane does not change V3.1 leases, generations, recovery, reconciliation, Human Gate, or Story rules. A control-plane change may drive a Story only after the full `npm run test:v4` suite passes on its exact commit; focused subsets are not enough.
