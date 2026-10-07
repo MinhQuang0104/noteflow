@@ -452,14 +452,21 @@ without a trust prompt but failed at prompt input three times (`terminal_handle_
 then `agent_prompt_blocked` twice, including a pre-warmed `tui-idle` terminal reused
 with `--terminal`). `compat-terminal` with a context-only Dispatch delivered one
 structured question/reply and one `worker_done` with matching Task/Dispatch IDs,
-then independently verified. Re-test supervised dispatch after Orca/AGY upgrades;
+then independently verified. A follow-up fixture trial ran the bounded loop end to
+end: attempt 1 passed the scope gate, Lead review found one VALID unrequested
+behaviour, and a correction attempt on the reopened Task fixed it without new scope
+changes. Re-test supervised dispatch after Orca/AGY upgrades;
 until a supervised smoke passes, that failure is the recorded compatibility limitation.
 
 Delivery recipe, one attempt:
 
 1. In the isolated worktree, start `agy` with `orca terminal create --worktree
    <explicit selector>` and wait `orca terminal wait --for tui-idle`.
-2. Create the Task from the bounded contract if absent, then
+2. Before writing the contract, run every verification command once in the worker
+   worktree at the dispatch base and record command, directory and exit code. It
+   must execute the intended checks; failing assertions are acceptable at base, a
+   usage/load error (for example `node --test <dir>/` on Windows) is a contract
+   defect to fix first. Create the Task from the bounded contract if absent, then
    `orca orchestration dispatch --task <id> --to <handle> --return-preamble` without
    `--inject`. Record the context-only Dispatch ID; Orca does not supervise it.
 3. Write the preamble plus bounded contract to `.orca-contract/contract.md` in the
@@ -509,7 +516,16 @@ inspected, and Lead review is still required.
 
 Bounded implement/review loop: worker attempt -> Lead review (independent diff,
 scope, AC and check evidence; findings classified per root) -> correction contract
-on the same Task with incremented attempt and a new context-only Dispatch. At most
+on the same Task with incremented attempt and a new context-only Dispatch. A
+`worker_done` sets the Orca Task `completed`, which only records the worker's
+claim, and Orca refuses to dispatch a completed Task (`task_not_startable`). After
+the review decision, the Lead reopens it with `orca orchestration task-update
+--status ready --result "<review finding IDs>"`, dispatches the correction
+attempt, rewrites `.orca-contract/contract.md` with the new preamble (pinning the
+new `contractIdentity` and keeping the prior attempt's contract as evidence), and
+sends one line into the same Antigravity session. Correction contracts carry only
+VALID findings; SPEC_AMBIGUITY and NEEDS_HUMAN_DECISION findings go to the human
+and are named to the worker only as out of bounds. At most
 three correction attempts per Task; stop earlier when the same failure repeats
 without progress. Exhaustion -> NEEDS_HUMAN. A passing review ends the loop at the
 existing finalization/Human Gate; the loop never approves, merges, integrates or

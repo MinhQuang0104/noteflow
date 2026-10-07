@@ -15,7 +15,8 @@
 - Architecture constraints: <approved decision references and invariants>
 - Prohibited changes: <scope exclusions; no policy/requirement/integration changes>
 - Placement: explicit Orca repo/worktree ID and parent; isolated child worktree; no merge or integration
-- Verification commands: <existing exact commands and working directories>
+- Verification commands: <existing exact commands and working directories; each
+  dry-run by the Lead at the dispatch base, with its observed exit code>
 - Escalation conditions: <ambiguity, scope conflict, missing dependency, repeated failure>
 - Report protocol: `.agents/schemas/worker-report.schema.json`, schemaVersion 1;
   follow V3 policy's structured worker evidence producer/ingestion boundary.
