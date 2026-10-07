@@ -152,7 +152,7 @@ test.each(['today', 'detail', 'edit'] as const)('session expiry hides private %s
   })
   await flushPromises()
   if (surface !== 'today') {
-    await wrapper.get('li').trigger('click')
+    await wrapper.get('li a').trigger('click')
     await flushPromises()
     if (surface === 'edit') await wrapper.get('#edit-challenge-btn').trigger('click')
   }

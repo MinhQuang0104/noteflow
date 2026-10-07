@@ -224,6 +224,10 @@ function selectChallenge(challenge: Challenge) {
   router.replace({ path: `/challenges/${challenge.id}` }).catch(() => {})
 }
 
+function challengePath(id: string): string {
+  return `/challenges/${encodeURIComponent(id)}`
+}
+
 function startEdit() {
   if (!selectedChallenge.value) return
   editForm.value = {
@@ -543,26 +547,34 @@ async function submitEditInternal(): Promise<void> {
           <li
             v-for="challenge in challenges"
             :key="challenge.id"
-            class="group cursor-pointer rounded-xl p-3 transition hover:bg-slate-50"
-            :class="{
-              'bg-indigo-50/80 ring-1 ring-indigo-200': selectedId === challenge.id && mode !== 'create',
-            }"
-            @click="selectChallenge(challenge)"
+            class="rounded-xl"
           >
-            <div class="flex items-start justify-between gap-2">
-              <span class="font-medium text-slate-900 group-hover:text-indigo-700">
-                {{ challenge.name }}
-              </span>
-              <span
-                class="inline-flex shrink-0 items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20"
-              >
-                Đang theo dõi
-              </span>
-            </div>
-            <div class="mt-1 flex items-center justify-between text-xs text-slate-500">
-              <span>Mục tiêu: {{ challenge.target_days }} ngày/tuần</span>
-              <span>Từ {{ challenge.start_date }}</span>
-            </div>
+            <a
+              :href="challengePath(challenge.id)"
+              :aria-label="`Mở challenge ${challenge.name}`"
+              :aria-current="selectedId === challenge.id && mode !== 'create' ? 'page' : undefined"
+              class="group block rounded-xl p-3 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-700"
+              :class="{
+                'bg-indigo-50/80 ring-1 ring-indigo-200': selectedId === challenge.id && mode !== 'create',
+              }"
+              @click.prevent="selectChallenge(challenge)"
+              @keydown.enter.prevent="selectChallenge(challenge)"
+            >
+              <div class="flex items-start justify-between gap-2">
+                <span class="font-medium text-slate-900 group-hover:text-indigo-700">
+                  {{ challenge.name }}
+                </span>
+                <span
+                  class="inline-flex shrink-0 items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20"
+                >
+                  Đang theo dõi
+                </span>
+              </div>
+              <div class="mt-1 flex items-center justify-between text-xs text-slate-500">
+                <span>Mục tiêu: {{ challenge.target_days }} ngày/tuần</span>
+                <span>Từ {{ challenge.start_date }}</span>
+              </div>
+            </a>
           </li>
         </ul>
       </div>

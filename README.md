@@ -133,6 +133,23 @@ Linux/CI dependencies are left unchanged.
 The GitHub Actions workflow supplies the authoritative Node 24.12, PHP 8.4,
 PostgreSQL 17, browser, and Nginx verification environments.
 
+## Current capabilities
+
+- **Challenge:** create and update weekly goals, view the list/detail state, and
+  keep the server-owned start date and target days unchanged during metadata edits.
+- **Today:** show the owner’s server-authoritative account date and the current
+  challenge progress for that day.
+- **Journal:** read and save a daily journal without changing completion state,
+  with version-aware conflict resolution for concurrent edits.
+- **Sync and conflict handling:** reconcile account context, data epoch,
+  idempotent writes, write fences, authentication expiry, and journal drafts
+  across refreshes and device-like sessions.
+
+The current delivery record is the
+[`sprint status`](_bmad-output/implementation-artifacts/sprint-status.yaml),
+and the system boundaries are documented in the
+[`architecture spine`](docs/architecture/architecture-noteflow-2026-09-12/ARCHITECTURE-SPINE.md).
+
 ## Structure and boundaries
 
 ```text
@@ -147,7 +164,7 @@ The dependency direction is `Vue UI → JSON API → Application → Domain`.
 Future PHP domain code must remain independent of Laravel, Eloquent, network,
 database, and system-clock APIs.
 
-This foundation contains no Challenge, Notes, Today, Calendar, Search, or Backup
+The current MVP scope does not include Notes, Calendar, Search, or Backup
 domain behavior. It also introduces no public signup, Redis, queue worker,
 WebSocket/Reverb service, SSR, external search service, deployment provider, or
 production release action.

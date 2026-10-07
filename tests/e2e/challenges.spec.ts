@@ -44,6 +44,40 @@ test.describe('Challenges User Journey', () => {
     })
   })
 
+  test('challenge list can be reached and selected with Tab and Enter', async ({ page }) => {
+    const challenge = {
+      id: 'c1000000-0000-4000-8000-000000000099',
+      name: 'Keyboard Challenge',
+      description: null,
+      start_date: '2026-09-19',
+      target_days: 3,
+      row_version: 1,
+      created_at: '2026-09-19T08:00:00Z',
+      updated_at: '2026-09-19T08:00:00Z',
+    }
+
+    await page.route('**/api/v1/challenges', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      headers: { 'Cache-Control': 'private, no-store' },
+      body: JSON.stringify({ challenges: [challenge] }),
+    }))
+
+    await page.goto('/challenges')
+    const list = page.getByRole('region', { name: 'Danh sách Challenge' })
+    const link = list.getByRole('link', { name: 'Mở challenge Keyboard Challenge' })
+
+    await expect(link).toBeVisible()
+    for (let tabCount = 0; tabCount < 20 && !(await link.evaluate((element) => element === document.activeElement)); tabCount += 1) {
+      await page.keyboard.press('Tab')
+    }
+    await expect(link).toBeFocused()
+    await page.keyboard.press('Enter')
+
+    await expect(page).toHaveURL(new RegExp(`/challenges/${challenge.id}$`))
+    await expect(link).toHaveAttribute('aria-current', 'page')
+  })
+
   test('does not write challenge A after the editor is switched to challenge B during preflight', async ({ page }) => {
     const challengeA = {
       id: 'c1000000-0000-4000-8000-000000000001',

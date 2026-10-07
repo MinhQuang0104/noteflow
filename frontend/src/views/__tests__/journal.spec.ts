@@ -54,7 +54,7 @@ async function mountChallengeDetail() {
   })
 
   await flushPromises()
-  await wrapper.get('li').trigger('click')
+  await wrapper.get('li a').trigger('click')
   await flushPromises()
   return wrapper
 }

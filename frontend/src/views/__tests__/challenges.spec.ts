@@ -79,6 +79,43 @@ test('renders challenges list and empty state when none exist', async () => {
   expect(wrapper.text()).toContain('0 challenge')
 })
 
+test('challenge list exposes keyboard-operable named links and selected state', async () => {
+  const challenges = [
+    {
+      id: 'c1111111-2026-4444-9999-000000000001',
+      name: 'Đọc sách mỗi ngày',
+      description: null,
+      start_date: '2026-09-19',
+      target_days: 5,
+      row_version: 1,
+      created_at: '2026-09-19T10:00:00Z',
+      updated_at: '2026-09-19T10:00:00Z',
+    },
+  ]
+  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges })
+  const router = createTestRouter()
+  await router.push('/challenges')
+
+  const wrapper = mount(ChallengesView, {
+    global: {
+      plugins: [[VueQueryPlugin, { queryClient }], router],
+    },
+  })
+
+  await flushPromises()
+
+  const link = wrapper.get('li a')
+  expect(link.attributes('href')).toBe(`/challenges/${challenges[0]!.id}`)
+  expect(link.attributes('aria-label')).toBe('Mở challenge Đọc sách mỗi ngày')
+  expect(link.attributes('aria-current')).toBeUndefined()
+
+  await link.trigger('keydown.enter')
+  await flushPromises()
+
+  expect(router.currentRoute.value.path).toBe(`/challenges/${challenges[0]!.id}`)
+  expect(link.attributes('aria-current')).toBe('page')
+})
+
 test('AC1 — create form captures account-today and does not have weekday or start-date picker', async () => {
   vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: [] })
   const router = createTestRouter()
@@ -175,7 +212,7 @@ test('AC1 & AC3 — creates valid challenge and allows editing name/description 
   await flushPromises()
 
   // Select challenge
-  await wrapper.get('li').trigger('click')
+  await wrapper.get('li a').trigger('click')
   await flushPromises()
 
   // Detail view check
@@ -284,7 +321,7 @@ test('update command_id: retains command_id across unknown-outcome retry of iden
   })
 
   await flushPromises()
-  await wrapper.get('li').trigger('click')
+  await wrapper.get('li a').trigger('click')
   await flushPromises()
   await wrapper.get('#edit-challenge-btn').trigger('click')
 
@@ -379,7 +416,7 @@ test('does not retarget an edit to a newly selected challenge while preflight is
   })
   await flushPromises()
 
-  const rows = wrapper.findAll('li')
+  const rows = wrapper.findAll('li a')
   await rows[0]!.trigger('click')
   await flushPromises()
   await wrapper.get('#edit-challenge-btn').trigger('click')
@@ -388,7 +425,7 @@ test('does not retarget an edit to a newly selected challenge while preflight is
   const submit = wrapper.get('form').trigger('submit.prevent')
   await vi.waitFor(() => expect(reconcile).toHaveBeenCalledOnce())
 
-  await wrapper.findAll('li')[1]!.trigger('click')
+  await wrapper.findAll('li a')[1]!.trigger('click')
   releasePreflight({ allowed: true })
   await submit
   await flushPromises()
@@ -430,7 +467,7 @@ test('sends only one edit command when submit is repeated during preflight', asy
     },
   })
   await flushPromises()
-  await wrapper.get('li').trigger('click')
+  await wrapper.get('li a').trigger('click')
   await flushPromises()
   await wrapper.get('#edit-challenge-btn').trigger('click')
   await wrapper.get('#edit-name').setValue('A đã sửa')
@@ -494,7 +531,7 @@ test('finding 4: on version conflict, preserves dirty inputs, does not advance e
   })
 
   await flushPromises()
-  await wrapper.get('li').trigger('click')
+  await wrapper.get('li a').trigger('click')
   await flushPromises()
   await wrapper.get('#edit-challenge-btn').trigger('click')
 
