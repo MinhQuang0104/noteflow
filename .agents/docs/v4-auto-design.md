@@ -133,8 +133,11 @@ at `start_story` (fingerprinted), never lowered at runtime.
 
 ## 5. Story registry (Phase P5)
 
-`.agent-state/` is gitignored and therefore **per checkout**; the single
-`active-run.json` pointer cannot coordinate Stories in different worktrees. The
+V4 code reads `active-run.json` from the canonical checkout (`pointer()` in
+`v4-lifecycle-transaction.mjs`), so it is global, but it records a single V3 run
+(`activeRunId`, `storyId`) and V4 only requires it to be `IDLE`; it cannot hold
+several V4 Stories. Branch naming (`storyCheckoutState`, `WRONG_CHECKOUT`) already
+ties a Story to one worktree, but records no Lead, generation or state. The
 registry lives beside the existing V4 transaction locks in the Git common
 directory, shared by every worktree:
 
@@ -231,6 +234,8 @@ active Story, current slice, state, waiting-for-owner flags, stale/orphaned.
   the old version without that path. Non-breaking changes merge anytime.
 
 ## 8. Phases
+
+Per-phase implementation plans: `.agents/docs/v4-auto/README.md`.
 
 | Phase | Deliverable | Exit evidence |
 |---|---|---|

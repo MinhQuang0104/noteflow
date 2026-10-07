@@ -1,0 +1,115 @@
+# V4 Auto P5 — implementation plan: Story registry, claim, fencing
+
+Design: `.agents/docs/v4-auto-design.md` §5 and §7 (pinned control plane).
+Requires P3 and owner gate G3. Status: **READY AFTER G3**.
+
+## 0. Phase rules
+
+Follow `README.md` common rules. Registry state is runtime data in the Git
+common directory, never committed.
+
+## 1. Facts established from the code (do not re-derive)
+
+- The V3 pointer is read from the **canonical** checkout
+  (`pointer()` in `.agents/scripts/v4-lifecycle-transaction.mjs:56`), so it is
+  already global; V4 only requires it `IDLE`. It holds one V3 run, not several
+  V4 Stories. Keep using it unchanged as the V3 exclusion check.
+- `storyCheckoutState` (same file, ~line 73) already binds a Story to the
+  worktree whose branch contains `story-<epic>-<story>` (`WRONG_CHECKOUT`).
+  The registry adds Lead identity, generation, state and pinned policy; it does
+  not replace this check.
+- Existing Git-common runtime directories and the atomic-create pattern:
+  `noteflow-v4-transactions/` (`v4-slice-transaction.mjs:62–82`, lock created
+  with `{ flag: 'wx' }` at ~line 337) and `noteflow-v4-lifecycle/`. Reuse the
+  same `identity()`/common-dir resolution and `wx` creation.
+
+## 2. Target behaviour
+
+Registry root: `<git-common-dir>/noteflow-v4-runs/` with `stories/<story-id>.json`
+(schema `story-run-v1`, fields per design §5) and `aborted/`. Claims are atomic;
+every durable Lead write is fenced by `generation`; takeover is owner-only; the
+Story runs on a pinned control-plane commit.
+
+## 3. Tasks
+
+### T1 — Registry library and CLI
+
+New: `.agents/scripts/story-registry.mjs`, `story-registry.test.mjs`.
+
+Commands (Runner exit table; one JSON object on stdout):
+
+```text
+claim <story-id> --worktree <path> --lead-vendor codex|claude --session <id>
+      [--orca-run <id>] [--lead-terminal <h>] [--agy-terminal <h>]
+claim <story-id> --takeover --lead-vendor <v> --session <id>     # owner only
+heartbeat <story-id> --generation <n> --state <STATE>
+status [--json]
+release <story-id> --generation <n> --merged | --abort | --orphaned
+```
+
+- `claim`: requires pointer `IDLE`, `storyCheckoutState` READY for that
+  worktree, a valid Plan; writes the record with `wx`; existing record →
+  `CONFLICT` `STORY_ALREADY_CLAIMED` (with the holder). Records
+  `controlPlaneCommit` = the worktree HEAD commit at claim, and `declaredScope` (P6 fills validation; in P5
+  store the union of `slices[].scope.paths`, or `[]` when undeclared).
+- `--takeover`: increments `generation`, records `{previous: {vendor, session,
+  generation}, at}`; never automatic. Documented as owner-only.
+- Writes after creation use write-to-temp + rename in the same directory, and
+  compare-and-swap on `generation` (re-read, compare, write, re-read verify);
+  mismatch → `STALE` `GENERATION_FENCED`.
+- `heartbeat` updates `state`/`heartbeatAt` only; states as design §5.
+- `status`: every record with derived flags `STALE?` (heartbeat older than the
+  slice time budget), `ORPHANED` (worktree path missing), `WAITING_OWNER`
+  (state `WAITING_HUMAN` or last autopilot-status STOP needing owner).
+- `release --merged|--abort|--orphaned`: delete, move to `aborted/`, or (owner)
+  remove an orphan. Abort never touches the worktree.
+- Tests: concurrent claim race (two processes, one wins), takeover fences the
+  old generation, orphan detection, malformed record → `INVALID` without
+  deleting it, Windows paths.
+
+### T2 — Fencing in the Runner and kernel
+
+Files: `v4-story-runner.mjs`, `v4-action-kernel.mjs`, `v4-slice-transaction.mjs`
+(+tests).
+
+- When the Plan carries an autopilot authorization (P3), Runner operations
+  require `--lead-generation <n>` and a registry record for the Story whose
+  `generation` matches and whose `worktree` equals the current top level →
+  else `BLOCKED` `REGISTRY_CLAIM_REQUIRED` / `STALE` `GENERATION_FENCED`.
+- Transactions re-check the generation after acquiring their lock (same place
+  P1 re-runs the scope gate).
+- Without autopilot, the registry is not consulted (existing tests unchanged).
+- `autopilot-status` reports `REGISTRY_CLAIM_REQUIRED` / `GENERATION_FENCED`
+  as STOP reasons.
+
+### T3 — Pinned control plane
+
+Files: `AGENTS.md` (Checkout safety paragraph), `references/autopilot.md`,
+a helper in `story-registry.mjs` (+tests).
+
+- `policy-drift <story-id>`: compares `AGENTS.md`, router, runner skill and
+  `.agents/policies/orchestration-v3.md` at the Story's `controlPlaneCommit`
+  with canonical `main`; returns `NONE` or `INFO_DRIFT` with paths. Never a stop.
+- `AGENTS.md` Checkout safety: one sentence — a claimed V4 Auto Story compares
+  against its pinned `controlPlaneCommit`; drift from canonical main is reported
+  as information until integration. The existing rule stays for every other case.
+- Keep Python-asserted strings; stop and report if one conflicts.
+
+### T4 — Schema compatibility guard
+
+- `story-registry.mjs` refuses records with an unknown `schemaVersion`
+  (`INVALID` `REGISTRY_SCHEMA_UNSUPPORTED`) and keeps a reader table keyed by
+  version, so a future v2 must add a reader or migration (design §7).
+- Add an architecture test asserting every `schemaVersion` constant written by
+  registry, receipts and Plan helpers has a reader.
+
+### T5 — Docs
+
+`references/autopilot.md`: claim before `authorize_autopilot`, pass
+`--lead-generation`, heartbeat on state changes, release after merge, takeover
+procedure. `v4-auto-design.md` §5: mark implemented.
+
+## 4. Done
+
+T1–T5 committed, full `test:v4` + Python green, README status updated. Do not
+start P6.
