@@ -68,8 +68,13 @@ class AgentArchitectureTests(unittest.TestCase):
         self.assertIn("No external model review is required", active_policy)
 
     def test_both_leads_share_canonical_bootstrap(self):
-        for path in ("AGENTS.md", "CLAUDE.md"):
-            self.assertIn(".agents/policies/orchestration-v3.md", read(path))
+        # V4 Lite: CLAUDE.md is a thin entry point that defers to AGENTS.md and
+        # the router; AGENTS.md alone names the V3 policy path.
+        claude = read("CLAUDE.md")
+        self.assertIn("`AGENTS.md`", claude)
+        self.assertIn("`task-router.md`", claude)
+        self.assertTrue((REPO / ".agents/routing/task-router.md").is_file())
+        self.assertIn(".agents/policies/orchestration-v3.md", read("AGENTS.md"))
         policy = read(".agents/policies/orchestration-v3.md")
         self.assertIn("Do NOT read `events.jsonl` during ordinary resume", policy)
         self.assertIn("Antigravity", policy)
@@ -227,10 +232,9 @@ class AgentArchitectureTests(unittest.TestCase):
 
     def test_phase_2b_codex_and_claude_share_lease_and_reconciliation(self):
         policy = read(".agents/policies/orchestration-v3.md")
-        claude = read("CLAUDE.md")
         self.assertIn("Codex and Claude follow exactly this protocol", policy)
         self.assertRegex(policy, r"Codex -> Claude / Claude -> Codex")
-        self.assertIn("same replaceable Lead role as Codex", claude)
+        self.assertIn("Codex and Claude are replaceable Leads", read("AGENTS.md"))
 
     def test_phase_2a_uses_project_local_orca_orchestration(self):
         policy = read(".agents/policies/orchestration-v3.md")
@@ -284,7 +288,7 @@ class AgentArchitectureTests(unittest.TestCase):
         self.assertIn("MEDIUM", policy)
         self.assertIn("HIGH", policy)
         self.assertIn("Deterministic Done Gate", policy)
-        self.assertIn("AC-to-evidence", policy)
+        self.assertIn("every AC evidenced", policy)
         self.assertIn("SPEC_AMBIGUITY", combined)
         self.assertRegex(combined, r"(?i)three.*same.*failure|same.*failure.*three")
 
