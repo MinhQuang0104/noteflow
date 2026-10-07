@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Middleware\EnsureOwner;
+use App\Http\Middleware\PreserveJournalWhitespace;
 use App\Http\Middleware\PrivateNoStore;
 use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Foundation\Http\Middleware\TrimStrings;
 use Illuminate\Http\Request;
 use Illuminate\Session\TokenMismatchException;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
+        $middleware->replace(TrimStrings::class, PreserveJournalWhitespace::class);
         $middleware->alias([
             'owner' => EnsureOwner::class,
             'private.no-store' => PrivateNoStore::class,

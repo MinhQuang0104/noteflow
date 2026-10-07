@@ -155,3 +155,42 @@ test('journal HTTP rejects invalid day, blank text, unknown fields, fence, and s
         ->assertStatus(409)->assertJsonPath('code', 'stale_data_epoch');
     expect(DB::table('challenge_daily_records')->where('challenge_id', $id)->value('journal'))->toBe('Saved');
 });
+
+test('journal HTTP preserves boundary whitespace without changing other field normalization or digest', function () {
+    $owner = journalApiOwner();
+    $id = journalApiChallenge($owner);
+    $url = "/api/v1/challenges/{$id}/journals/2026-09-20";
+    $commandId = (string) Str::uuid();
+    $journal = " \n  Keep this text exactly  \n\t";
+
+    $response = $this->actingAs($owner)->putJson($url, [
+        'command_id' => "  {$commandId}  ",
+        'data_epoch' => 1,
+        'base_version' => 0,
+        'journal' => $journal,
+    ]);
+
+    $response->assertOk();
+    expect($response->json('journal.journal'))->toBe($journal)
+        ->and(DB::table('challenge_daily_records')->where('challenge_id', $id)->value('journal'))->toBe($journal)
+        ->and(DB::table('mutation_commands')->where('owner_id', $owner->id)->value('command_id'))->toBe($commandId)
+        ->and((int) DB::table('challenge_daily_records')->where('challenge_id', $id)->value('journal_version'))->toBe(1)
+        ->and((int) DB::table('account_states')->where('owner_id', $owner->id)->value('account_revision'))->toBe(1);
+
+    $canonicalData = [
+        'base_version' => 0,
+        'challenge_id' => $id,
+        'journal' => $journal,
+        'local_date' => '2026-09-20',
+    ];
+    ksort($canonicalData);
+    expect(DB::table('mutation_commands')->where('owner_id', $owner->id)->value('request_hash'))
+        ->toBe(hash('sha256', (string) json_encode($canonicalData, JSON_THROW_ON_ERROR)));
+
+    $this->actingAs($owner)->putJson($url, [
+        'command_id' => (string) Str::uuid(),
+        'data_epoch' => 1,
+        'base_version' => 1,
+        'journal' => " \nNUL\0text\n ",
+    ])->assertStatus(422)->assertJsonValidationErrors(['journal']);
+});
