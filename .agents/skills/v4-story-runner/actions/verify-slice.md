@@ -14,6 +14,19 @@ node .agents/scripts/compile-v4-context.mjs check <story-id> --action verify_sli
 
 Continue only on `READY`; preserve projected tasks/AC/risk/dependencies. Unknown scope/checks stays unknown and never becomes an empty allowlist.
 
+The CLI form uses the same exact payload contract for verification operations:
+
+```text
+node .agents/scripts/v4-story-runner.mjs run <story-id> \
+  --expected-head <head> --operation verify --input <payload.json>
+node .agents/scripts/v4-story-runner.mjs run <story-id> \
+  --expected-head <head> --operation record-review --input <payload.json>
+```
+
+`--operation` and `--input` must be supplied together. The Runner validates
+the Plan and binds Story/action/slice/head before reading the payload into the
+kernel; a missing or malformed file is `INVALID`, never a successful review.
+
 ## Evidence flow
 
 ```text

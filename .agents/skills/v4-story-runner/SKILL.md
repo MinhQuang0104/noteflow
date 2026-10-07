@@ -21,6 +21,37 @@ Read the validated Plan action and exactly one contract: `start_story` → `acti
 
 Resume from Plan, Git graph/worktree/index, sprint status, and product source, never chat. Product artifacts own Story/AC, Plan continuity, Git implementation, and sprint lifecycle. Missing Plan is `PLAN_MISSING` and stops mutation.
 
+## CLI contract
+
+The executable Runner accepts a named operation and a JSON file for kernel
+payloads; it does not require an ad-hoc JavaScript harness:
+
+```text
+node .agents/scripts/v4-story-runner.mjs run <epic.story> \
+  --expected-head <sha> --operation <operation> --input <payload.json>
+```
+
+Supported operations are `prepare`, `checkpoint`, `verify`, `record-review`
+(`record_review` is accepted as an alias), `prepare-rework`, `apply-rework`,
+`prepare-recovery-abort`, `abort-unwritten-metadata`,
+`prepare-staged-recovery`, and `apply-staged-recovery`. The JSON file must
+contain one object payload; the Runner binds its Story/action/slice/head to the
+validated Plan before dispatch. `--operation` and `--input` are a pair. A
+missing Plan is reported as `INVALID` with `PLAN_MISSING` before the Plan is
+read.
+
+The CLI exit-code table is exhaustive for Runner results. Unknown statuses use
+the `ERROR` code and never become success:
+
+| Exit | Statuses | Meaning |
+|---:|---|---|
+| 0 | `STARTED`, `DONE`, `APPROVAL_DURABLE_PENDING_COMPLETION`, `NOOP`, `APPLIED`, `HUMAN_GATE_REQUIRED`, `REVIEW_REQUIRED`, `READY`, `AUTHORIZED`, `TERMINAL`, `NO_CHANGE` | Durable action or valid stop/preview |
+| 2 | `STALE`, `CONFLICT` | Bound state changed or conflicts with the preview |
+| 3 | `BLOCKED`, `UNAUTHORIZED_ACTION`, `HUMAN_REQUIRED`, `RECONCILIATION_REQUIRED`, `HUMAN_GATE_PENDING`, `APPROVAL_PREVIEW_ONLY`, `CHECKPOINT_UNRECORDED`, `PLAN_UPDATE_PENDING`, `RESUME_WORKTREE`, `RERUN_REQUIRED`, `INCONCLUSIVE` | Safe refusal or more authority/evidence required |
+| 4 | `INVALID` | Invalid command, input, or artifact |
+| 5 | `ERROR` | Operational failure; unknown statuses also use this code |
+| 6 | `RECOVERY_REQUIRED` | Explicit recovery is required before retry |
+
 ## Shared invariants
 
 * One durable action per invocation; persist at most one explicit successor and never execute it in the same invocation.

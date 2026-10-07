@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
@@ -33,17 +33,54 @@ const STORY_ACTIONS = new Set([
   'complete_story'
 ])
 const SHA = /^[0-9a-f]{40,64}$/
-const CODES = {
+export const CODES = Object.freeze({
   STARTED: 0,
-  RECOVERY_REQUIRED: 6,
+  DONE: 0,
+  APPROVAL_DURABLE_PENDING_COMPLETION: 0,
+  NOOP: 0,
+  APPLIED: 0,
   HUMAN_GATE_REQUIRED: 0,
-  AUTHORIZED: 0,
+  REVIEW_REQUIRED: 0,
   READY: 0,
+  AUTHORIZED: 0,
+  TERMINAL: 0,
+  NO_CHANGE: 0,
+  RECOVERY_REQUIRED: 6,
   STALE: 2,
+  CONFLICT: 2,
   BLOCKED: 3,
+  UNAUTHORIZED_ACTION: 3,
+  HUMAN_REQUIRED: 3,
+  RECONCILIATION_REQUIRED: 3,
+  HUMAN_GATE_PENDING: 3,
+  APPROVAL_PREVIEW_ONLY: 3,
+  CHECKPOINT_UNRECORDED: 3,
+  PLAN_UPDATE_PENDING: 3,
+  RESUME_WORKTREE: 3,
+  RERUN_REQUIRED: 3,
+  INCONCLUSIVE: 3,
   INVALID: 4,
   ERROR: 5
+})
+
+export function exitCodeForStatus(status) {
+  return CODES[status] ?? CODES.ERROR
 }
+
+const CLI_OPERATIONS = new Set([
+  'prepare',
+  'checkpoint',
+  'verify',
+  'record-review',
+  'record_review',
+  'prepare-rework',
+  'apply-rework',
+  'prepare-recovery-abort',
+  'abort-unwritten-metadata',
+  'prepare-staged-recovery',
+  'apply-staged-recovery'
+])
+const CLI_USAGE = 'USAGE: run <epic.story> [--expected-head <sha>] [--operation <operation> --input <file>] [--approve-exact-scope]'
 
 function planRelative(storyId) {
   return '_bmad-output/implementation-artifacts/story-' + storyId.replace('.', '-') + '-plan.md'
@@ -163,6 +200,7 @@ export function routeAction(input = {}) {
 export function runV4Story(root, storyId, options = {}) {
   try {
     if (!/^\d+\.\d+$/.test(storyId ?? '')) return invalidResult('INVALID_STORY_ID')
+    if (!existsSync(path.join(root, planRelative(storyId)))) return invalidResult('PLAN_MISSING')
     if (!pointerIdle(root)) return { status: 'BLOCKED', authorized: false, reasons: ['V3_POINTER_NOT_IDLE'] }
     const head = gitOutput(root, ['rev-parse', 'HEAD'], 'HEAD_UNAVAILABLE')
     const expectedHead = options.expectedHead ?? head
@@ -306,6 +344,7 @@ export function runV4Story(root, storyId, options = {}) {
 
 export function authorizeAction(root, storyId, action, expectedHead, options = {}) {
   try {
+    if (!existsSync(path.join(root, planRelative(storyId)))) return invalidResult('PLAN_MISSING')
     if (!pointerIdle(root)) return { status: 'BLOCKED', authorized: false, reasons: ['V3_POINTER_NOT_IDLE'] }
     const wrongCheckout = checkoutBlock(root, storyId)
     if (wrongCheckout) return wrongCheckout
@@ -356,9 +395,11 @@ export function runAction(root, storyId, expectedHead, options = {}) {
 
 function parseArguments(argv) {
   const [verb, storyId, ...tail] = argv
-  if (!['run', 'execute'].includes(verb) || !/^\d+\.\d+$/.test(storyId ?? '')) return { error: 'USAGE: run <epic.story> [--expected-head <sha>] [--approve-exact-scope]' }
+  if (!['run', 'execute'].includes(verb) || !/^\d+\.\d+$/.test(storyId ?? '')) return { error: CLI_USAGE }
   let expectedHead
   let startFingerprint
+  let operation
+  let inputFile
   const excludeUnrelated = []
   let approveExactScope = false
   for (let index = 0; index < tail.length; index += 1) {
@@ -366,23 +407,48 @@ function parseArguments(argv) {
     else if (tail[index] === '--expected-head' && SHA.test(tail[index + 1] ?? '')) { expectedHead = tail[++index] }
     else if (tail[index] === '--start-fingerprint' && /^sha256:[0-9a-f]{64}$/.test(tail[index + 1] ?? '') && !startFingerprint) { startFingerprint = tail[++index] }
     else if (tail[index] === '--exclude-unrelated' && tail[index + 1]) { excludeUnrelated.push(tail[++index]) }
-    else return { error: 'USAGE: run <epic.story> [--expected-head <sha>] [--approve-exact-scope]' }
+    else if (tail[index] === '--operation' && CLI_OPERATIONS.has(tail[index + 1] ?? '') && !operation) { operation = tail[++index] }
+    else if (tail[index] === '--input' && tail[index + 1] && !inputFile) { inputFile = tail[++index] }
+    else return { error: CLI_USAGE }
   }
-  return { storyId, expectedHead, approveExactScope, startFingerprint, excludeUnrelated }
+  if ((operation && !inputFile) || (!operation && inputFile)) return { error: CLI_USAGE }
+  return { storyId, expectedHead, operation, inputFile, approveExactScope, startFingerprint, excludeUnrelated }
+}
+
+function readCliInput(root, inputFile) {
+  const file = path.resolve(root, inputFile)
+  if (!existsSync(file)) return { error: 'INPUT_MISSING' }
+  try {
+    const value = JSON.parse(readFileSync(file, 'utf8'))
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return { error: 'INPUT_OBJECT_REQUIRED' }
+    return { value }
+  } catch {
+    return { error: 'INPUT_JSON_INVALID' }
+  }
 }
 
 function main() {
   const parsed = parseArguments(process.argv.slice(2))
   if (parsed.error) return invalidResult(parsed.error)
   const root = path.resolve(gitOutput(process.cwd(), ['rev-parse', '--show-toplevel'], 'GIT_ROOT_UNAVAILABLE'))
-  return runV4Story(root, parsed.storyId, { expectedHead: parsed.expectedHead, approveExactScope: parsed.approveExactScope, startFingerprint: parsed.startFingerprint, excludeUnrelated: parsed.excludeUnrelated })
+  if (!existsSync(path.join(root, planRelative(parsed.storyId)))) return invalidResult('PLAN_MISSING')
+  const loaded = parsed.inputFile ? readCliInput(root, parsed.inputFile) : { value: undefined }
+  if (loaded.error) return invalidResult(loaded.error)
+  return runV4Story(root, parsed.storyId, {
+    expectedHead: parsed.expectedHead,
+    operation: parsed.operation,
+    input: loaded.value,
+    approveExactScope: parsed.approveExactScope,
+    startFingerprint: parsed.startFingerprint,
+    excludeUnrelated: parsed.excludeUnrelated
+  })
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
   try {
     const result = main()
     process.stdout.write(JSON.stringify(result) + '\n')
-    process.exitCode = CODES[result.status] ?? CODES.ERROR
+    process.exitCode = exitCodeForStatus(result.status)
   } catch (error) {
     process.stdout.write(JSON.stringify({ status: 'ERROR', authorized: false, reasons: [error.message] }) + '\n')
     process.exitCode = CODES.ERROR

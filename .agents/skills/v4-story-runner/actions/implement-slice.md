@@ -18,6 +18,19 @@ node .agents/scripts/compile-v4-context.mjs check <story-id> --action implement_
 
 Use projected tasks/AC/risk/dependencies exactly. `UNKNOWN` scope/consumers/checks is not an empty allowlist. HIGH risk needs applicable negative/security/concurrency/contract/recovery evidence; never lower risk or turn canonical `INCOMPLETE` into `PASS`.
 
+For the CLI Runner, persist the exact context payload as JSON and name the
+operation explicitly:
+
+```text
+node .agents/scripts/v4-story-runner.mjs run <story-id> \
+  --expected-head <head> --operation prepare --input <payload.json>
+node .agents/scripts/v4-story-runner.mjs run <story-id> \
+  --expected-head <head> --operation checkpoint --input <payload.json>
+```
+
+The payload file is one JSON object and is bound to the current Plan before
+dispatch. Do not substitute chat text or an inline JavaScript harness.
+
 ## Two-commit durability
 
 Stage exact paths only; never `git add .`/`-A`. The checkpoint excludes Plan, receipts, lifecycle files, and unrelated noise. A separate metadata commit records baseline/checkpoint, changed-path digest, fresh check/red-green evidence (or a reason), the receipt contract, and `verify_slice`; schema-v2 contains exactly the current Plan and new receipt, while schema-v1 keeps its Plan-only contract.

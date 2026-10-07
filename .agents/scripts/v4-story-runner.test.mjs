@@ -1,14 +1,47 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { spawnSync } from 'node:child_process'
+import { rmSync, writeFileSync } from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import {
   routeAction,
   humanApprovalIntent,
   V4_AUTHORIZED_ACTIONS,
-  authorizeAction
+  authorizeAction,
+  exitCodeForStatus
 } from './v4-story-runner.mjs'
 import { runAction } from './v4-story-runner.mjs'
 import { createCompletionFixture } from './completion-fixture.mjs'
+
+const RUNNER = fileURLToPath(new URL('./v4-story-runner.mjs', import.meta.url))
+
+function runCli(root, args) {
+  return spawnSync(process.execPath, [RUNNER, ...args], {
+    cwd: root,
+    encoding: 'utf8',
+    windowsHide: true
+  })
+}
+
+test('CLI exit-code table covers every documented result class', () => {
+  for (const status of [
+    'STARTED', 'DONE', 'APPROVAL_DURABLE_PENDING_COMPLETION', 'NOOP', 'APPLIED',
+    'HUMAN_GATE_REQUIRED', 'REVIEW_REQUIRED', 'READY', 'AUTHORIZED', 'TERMINAL',
+    'NO_CHANGE'
+  ]) assert.equal(exitCodeForStatus(status), 0, status)
+  for (const status of ['STALE', 'CONFLICT']) assert.equal(exitCodeForStatus(status), 2, status)
+  for (const status of [
+    'BLOCKED', 'UNAUTHORIZED_ACTION', 'HUMAN_REQUIRED', 'RECONCILIATION_REQUIRED',
+    'HUMAN_GATE_PENDING', 'APPROVAL_PREVIEW_ONLY', 'CHECKPOINT_UNRECORDED',
+    'PLAN_UPDATE_PENDING', 'RESUME_WORKTREE', 'RERUN_REQUIRED', 'INCONCLUSIVE'
+  ]) assert.equal(exitCodeForStatus(status), 3, status)
+  assert.equal(exitCodeForStatus('INVALID'), 4)
+  assert.equal(exitCodeForStatus('ERROR'), 5)
+  assert.equal(exitCodeForStatus('RECOVERY_REQUIRED'), 6)
+  assert.equal(exitCodeForStatus('UNRECOGNIZED_STATUS'), 5)
+})
 
 test('fresh start routes only a ready preview and stops before implementing its successor', () => {
   const input = { nextAction: { kind: 'start_story', target: 'story' }, helperStatus: 'READY' }
@@ -172,6 +205,50 @@ test('Runner refuses a Story action outside the linked worktree that owns the St
     spawnSync('git', ['worktree', 'remove', '--force', linked], { cwd: f.root })
     spawnSync('git', ['worktree', 'remove', '--force', unrelated], { cwd: f.root })
     rmSync(parent, { recursive: true, force: true })
+    f.cleanup()
+  }
+})
+
+test('CLI accepts an explicit operation and JSON input file', () => {
+  const f = createCompletionFixture()
+  const input = path.join(f.root, 'runner-input.json')
+  try {
+    writeFileSync(input, JSON.stringify({ story_id: '9.1', action: 'implement_slice', slice_id: 'A' }))
+    const result = runCli(f.root, [
+      'run', '9.1', '--expected-head', f.head,
+      '--operation', 'checkpoint', '--input', input
+    ])
+    const output = JSON.parse(result.stdout)
+    assert.equal(output.status, 'UNAUTHORIZED_ACTION', result.stdout)
+    assert.equal(result.status, exitCodeForStatus('UNAUTHORIZED_ACTION'))
+  } finally {
+    f.cleanup()
+  }
+})
+
+test('CLI maps durable approval success to exit code zero', () => {
+  const f = createCompletionFixture()
+  try {
+    const result = runCli(f.root, ['run', '9.1', '--expected-head', f.head, '--approve-exact-scope'])
+    const output = JSON.parse(result.stdout)
+    assert.equal(output.status, 'APPROVAL_DURABLE_PENDING_COMPLETION', result.stdout)
+    assert.equal(result.status, 0)
+  } finally {
+    f.cleanup()
+  }
+})
+
+test('CLI reports PLAN_MISSING before attempting to read a missing Plan', () => {
+  const f = createCompletionFixture()
+  const plan = path.join(f.root, '_bmad-output', 'implementation-artifacts', 'story-9-1-plan.md')
+  try {
+    rmSync(plan)
+    const result = runCli(f.root, ['run', '9.1', '--expected-head', f.head])
+    const output = JSON.parse(result.stdout)
+    assert.equal(output.status, 'INVALID', result.stdout)
+    assert.deepEqual(output.reasons, ['PLAN_MISSING'])
+    assert.equal(result.status, 4)
+  } finally {
     f.cleanup()
   }
 })
