@@ -1,0 +1,8 @@
+# Python dependencies for the project-owned BMAD control-plane test
+# (test_agent_architecture.py). The other tests in this folder are copies of
+# the upstream BMAD skill suite; run those from .agents/skills/bmad/scripts/tests.
+#
+#   python -m pip install -r _bmad/scripts/tests/requirements.txt
+#   python -m pytest _bmad/scripts/tests/test_agent_architecture.py -q
+pytest==9.1.1
+jsonschema==4.26.0
