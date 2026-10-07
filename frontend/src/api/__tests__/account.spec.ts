@@ -11,6 +11,9 @@ test('account context uses the private same-origin API and preserves canonical d
     timezone: 'Asia/Ho_Chi_Minh' as const,
     account_date: '2026-09-21',
     week: { start_date: '2026-09-21', end_date: '2026-09-27' },
+    account_revision: 0,
+    data_epoch: 1,
+    write_state: 'open' as const,
   }
   const fetchSpy = vi
     .fn<typeof fetch>()

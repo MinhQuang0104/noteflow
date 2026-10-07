@@ -50,3 +50,11 @@ test('the unauthenticated account response satisfies the OpenAPI contract', func
     accountContractValidator()->validate('GET', '/api/v1/account', accountPsrResponse($response));
     expect(true)->toBeTrue();
 });
+
+test('the non-owner account response satisfies the OpenAPI contract', function () {
+    $nonOwner = User::factory()->create();
+    $response = $this->actingAs($nonOwner)->getJson('/api/v1/account');
+
+    $response->assertStatus(403);
+    accountContractValidator()->validate('GET', '/api/v1/account', accountPsrResponse($response));
+});

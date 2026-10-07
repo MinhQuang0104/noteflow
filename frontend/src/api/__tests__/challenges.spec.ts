@@ -247,6 +247,54 @@ test('updateChallengeMetadata throws ChallengeApiError with problem details on 4
   })
 })
 
+test('updateChallengeMetadata rejects a journal-shaped conflict at the API boundary', async () => {
+  vi.stubGlobal('fetch', vi.fn<typeof fetch>().mockResolvedValue(
+    new Response(JSON.stringify({
+      message: 'Version conflict',
+      code: 'version_conflict',
+      resource_id: 'challenge-1',
+      current_version: 2,
+      current_snapshot: {
+        challenge_id: 'challenge-1',
+        local_date: '2026-09-19',
+        journal: 'Saved text',
+        journal_version: 2,
+      },
+    }), { status: 409, headers: { 'Content-Type': 'application/problem+json' } }),
+  ))
+
+  const error = await updateChallengeMetadata('challenge-1', {
+    command_id: 'command-wrong-family',
+    data_epoch: 1,
+    base_version: 1,
+    name: 'Challenge',
+  }).then(() => null, (reason: ChallengeApiError) => reason)
+
+  expect(error).toMatchObject({ status: 409, message: 'Version conflict' })
+  expect(error?.problem).toBeUndefined()
+})
+
+test('challenge mutations accept a state problem only without resource fields', async () => {
+  vi.stubGlobal('fetch', vi.fn<typeof fetch>().mockResolvedValue(
+    new Response(JSON.stringify({
+      message: 'The account data epoch is stale.',
+      code: 'stale_data_epoch',
+    }), { status: 423, headers: { 'Content-Type': 'application/problem+json' } }),
+  ))
+
+  const error = await updateChallengeMetadata('challenge-1', {
+    command_id: 'command-state-problem',
+    data_epoch: 1,
+    base_version: 1,
+    name: 'Challenge',
+  }).then(() => null, (reason: ChallengeApiError) => reason)
+
+  expect(error).toMatchObject({
+    status: 423,
+    problem: { code: 'stale_data_epoch' },
+  })
+})
+
 test('getChallengeJournal reads an absent journal and version zero for the requested day', async () => {
   const journal = {
     challenge_id: 'challenge-1',
@@ -337,7 +385,9 @@ test('saveChallengeJournal exposes stale journal version and snapshot without ec
     problem: { code: 'version_conflict', current_version: 2, current_snapshot: snapshot },
   })
   expect(error?.message).not.toContain('Unsubmitted text')
-  const current = error?.problem?.current_snapshot
+  const current = error?.problem?.code === 'version_conflict'
+    ? error.problem.current_snapshot
+    : undefined
   if (!current || !('journal_version' in current)) throw new Error('Journal conflict snapshot missing')
   const journalSnapshot: JournalSnapshot = current
   expect(journalSnapshot.journal_version).toBe(2)

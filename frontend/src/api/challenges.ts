@@ -11,17 +11,15 @@ export type JournalMutationResult = components['schemas']['JournalMutationResult
 export type SaveJournalRequest = components['schemas']['SaveJournalRequest']
 export type CreateChallengeRequest = components['schemas']['CreateChallengeRequest']
 export type UpdateChallengeMetadataRequest = components['schemas']['UpdateChallengeMetadataRequest']
-export type ProblemDetails = components['schemas']['ProblemDetails']
+export type StateProblemDetails = components['schemas']['StateProblemDetails']
+export type ChallengeConflictProblemDetails = components['schemas']['ChallengeConflictProblemDetails']
+export type JournalConflictProblemDetails = components['schemas']['JournalConflictProblemDetails']
+export type ProblemDetails = StateProblemDetails | ChallengeConflictProblemDetails | JournalConflictProblemDetails
 export type ValidationError = components['schemas']['ValidationError']
-export type ChallengeProblemDetails = Omit<ProblemDetails, 'current_snapshot'> & {
-  current_snapshot?: ChallengeSnapshot
-}
-export type JournalProblemDetails = Omit<ProblemDetails, 'current_snapshot'> & {
-  current_snapshot?: JournalSnapshot
-}
+export type ChallengeProblemDetails = components['schemas']['ChallengeProblemDetails']
+export type JournalProblemDetails = components['schemas']['JournalProblemDetails']
 
-const problemCodes: ReadonlySet<ProblemDetails['code']> = new Set([
-  'version_conflict',
+const stateProblemCodes: ReadonlySet<StateProblemDetails['code']> = new Set([
   'stale_data_epoch',
   'idempotency_key_reused',
   'write_fence_active',
@@ -35,37 +33,106 @@ function isNonNegativeInteger(value: unknown): value is number {
   return typeof value === 'number' && Number.isInteger(value) && value >= 0
 }
 
+function isPositiveInteger(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 1
+}
+
+function hasExactKeys(value: Record<string, unknown>, keys: readonly string[]): boolean {
+  const allowed = new Set(keys)
+  return Object.keys(value).every((key) => allowed.has(key)) && keys.every((key) => key in value)
+}
+
+function parseStateProblemDetails(value: unknown): StateProblemDetails | undefined {
+  if (!isRecord(value) || !hasExactKeys(value, ['message', 'code']) ||
+    typeof value.message !== 'string' || typeof value.code !== 'string' ||
+    !stateProblemCodes.has(value.code as StateProblemDetails['code'])) {
+    return undefined
+  }
+
+  return {
+    message: value.message,
+    code: value.code as StateProblemDetails['code'],
+  }
+}
+
+export function isChallengeSnapshot(value: unknown): value is ChallengeSnapshot {
+  if (!isRecord(value) || !hasExactKeys(value, [
+    'id',
+    'name',
+    'description',
+    'start_date',
+    'target_days',
+    'row_version',
+  ])) return false
+
+  return typeof value.id === 'string' && value.id.length > 0 &&
+    typeof value.name === 'string' &&
+    (typeof value.description === 'string' || value.description === null) &&
+    typeof value.start_date === 'string' && value.start_date.length > 0 &&
+    typeof value.target_days === 'number' && Number.isInteger(value.target_days) &&
+    value.target_days >= 1 && value.target_days <= 7 &&
+    isPositiveInteger(value.row_version)
+}
+
+function parseChallengeConflictProblemDetails(value: unknown): ChallengeConflictProblemDetails | undefined {
+  if (!isRecord(value) || !hasExactKeys(value, [
+    'message',
+    'code',
+    'resource_id',
+    'current_version',
+    'current_snapshot',
+  ]) || value.code !== 'version_conflict' || typeof value.message !== 'string' ||
+    typeof value.resource_id !== 'string' || value.resource_id.length === 0 ||
+    !isPositiveInteger(value.current_version) || !isChallengeSnapshot(value.current_snapshot)) {
+    return undefined
+  }
+
+  return {
+    message: value.message,
+    code: 'version_conflict',
+    resource_id: value.resource_id,
+    current_version: value.current_version,
+    current_snapshot: value.current_snapshot,
+  }
+}
+
+export function parseChallengeProblemDetails(value: unknown): ChallengeProblemDetails | undefined {
+  return parseStateProblemDetails(value) ?? parseChallengeConflictProblemDetails(value)
+}
+
 export function isJournalSnapshot(value: unknown): value is JournalSnapshot {
-  if (!isRecord(value)) return false
-  if (Object.keys(value).some((key) => !['challenge_id', 'local_date', 'journal', 'journal_version'].includes(key))) return false
+  if (!isRecord(value) || !hasExactKeys(value, ['challenge_id', 'local_date', 'journal', 'journal_version'])) return false
   return typeof value.challenge_id === 'string' && value.challenge_id.length > 0 &&
     typeof value.local_date === 'string' && value.local_date.length > 0 &&
     (typeof value.journal === 'string' || value.journal === null) &&
     isNonNegativeInteger(value.journal_version)
 }
 
-function parseJournalProblemDetails(value: unknown): JournalProblemDetails | undefined {
-  if (!isRecord(value) || typeof value.message !== 'string' ||
-    typeof value.code !== 'string' || !problemCodes.has(value.code as ProblemDetails['code'])) return undefined
-
-  if (value.resource_id !== undefined && (typeof value.resource_id !== 'string' || value.resource_id.length === 0)) return undefined
-  if (value.current_version !== undefined && !isNonNegativeInteger(value.current_version)) return undefined
-
-  const currentSnapshot = value.current_snapshot
-  if (currentSnapshot !== undefined && !isJournalSnapshot(currentSnapshot)) return undefined
-  if (currentSnapshot !== undefined && value.current_version !== currentSnapshot.journal_version) return undefined
-
-  if (value.code === 'version_conflict' &&
-    (typeof value.resource_id !== 'string' || value.resource_id.length === 0 ||
-      !isNonNegativeInteger(value.current_version) || !isJournalSnapshot(currentSnapshot))) return undefined
+function parseJournalConflictProblemDetails(value: unknown): JournalConflictProblemDetails | undefined {
+  if (!isRecord(value) || !hasExactKeys(value, [
+    'message',
+    'code',
+    'resource_id',
+    'current_version',
+    'current_snapshot',
+  ]) || value.code !== 'version_conflict' || typeof value.message !== 'string' ||
+    typeof value.resource_id !== 'string' || value.resource_id.length === 0 ||
+    !isPositiveInteger(value.current_version) || !isJournalSnapshot(value.current_snapshot) ||
+    value.current_version !== value.current_snapshot.journal_version) {
+    return undefined
+  }
 
   return {
     message: value.message,
-    code: value.code as JournalProblemDetails['code'],
-    ...(value.resource_id !== undefined ? { resource_id: value.resource_id as string } : {}),
-    ...(value.current_version !== undefined ? { current_version: value.current_version } : {}),
-    ...(currentSnapshot !== undefined ? { current_snapshot: currentSnapshot } : {}),
+    code: 'version_conflict',
+    resource_id: value.resource_id,
+    current_version: value.current_version,
+    current_snapshot: value.current_snapshot,
   }
+}
+
+function parseJournalProblemDetails(value: unknown): JournalProblemDetails | undefined {
+  return parseStateProblemDetails(value) ?? parseJournalConflictProblemDetails(value)
 }
 
 export class ChallengeApiError<TProblem extends ProblemDetails = ChallengeProblemDetails> extends Error {
@@ -164,20 +231,20 @@ export async function getChallenge(id: string): Promise<ChallengeDetailResult> {
 }
 
 export async function createChallenge(payload: CreateChallengeRequest): Promise<ChallengeMutationResult> {
-  return requestJson<ChallengeMutationResult>('/api/v1/challenges', {
+  return requestJson<ChallengeMutationResult, ChallengeProblemDetails>('/api/v1/challenges', {
     method: 'POST',
     body: JSON.stringify(payload),
-  })
+  }, parseChallengeProblemDetails)
 }
 
 export async function updateChallengeMetadata(
   id: string,
   payload: UpdateChallengeMetadataRequest,
 ): Promise<ChallengeMutationResult> {
-  return requestJson<ChallengeMutationResult>(`/api/v1/challenges/${encodeURIComponent(id)}`, {
+  return requestJson<ChallengeMutationResult, ChallengeProblemDetails>(`/api/v1/challenges/${encodeURIComponent(id)}`, {
     method: 'PATCH',
     body: JSON.stringify(payload),
-  })
+  }, parseChallengeProblemDetails)
 }
 
 export async function getChallengeJournal(id: string, date: string): Promise<JournalReadResult> {

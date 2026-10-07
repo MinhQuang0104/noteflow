@@ -12,6 +12,8 @@ function quote(value) {
 }
 
 function schemaType(schema) {
+  if (!schema) return 'unknown'
+
   if (schema.$ref) {
     const name = schema.$ref.split('/').at(-1)
     return `components['schemas'][${quote(name)}]`
@@ -89,9 +91,46 @@ function generateComponents(document) {
 function generateOperations(document) {
   const operations = []
 
-  for (const pathItem of Object.values(document.paths ?? {})) {
-    for (const operation of Object.values(pathItem)) {
+  for (const [path, pathItem] of Object.entries(document.paths ?? {})) {
+    for (const [method, operation] of Object.entries(pathItem)) {
+      if (method === 'parameters') continue
       if (!operation?.operationId) continue
+
+      const parameters = [
+        ...(pathItem.parameters ?? []),
+        ...(operation.parameters ?? []),
+      ].map((parameter) => resolveLocalReference(document, parameter))
+
+      const parameterLines = parameters.length === 0
+        ? ['    parameters: Record<string, never>']
+        : [
+            '    parameters: {',
+            ...parameters.flatMap((parameter) => [
+              `      ${quote(`${parameter.in}:${parameter.name}`)}: {`,
+              `        name: ${quote(parameter.name)}`,
+              `        in: ${quote(parameter.in)}`,
+              `        required: ${Boolean(parameter.required || parameter.in === 'path')}`,
+              `        schema: ${schemaType(resolveLocalReference(document, parameter.schema))}`,
+              '      }',
+            ]),
+            '    }',
+          ]
+
+      const requestBody = operation.requestBody
+        ? resolveLocalReference(document, operation.requestBody)
+        : undefined
+      const requestBodyLines = requestBody
+        ? [
+            '    requestBody: {',
+            `      required: ${Boolean(requestBody.required)}`,
+            '      content: {',
+            ...Object.entries(requestBody.content ?? {}).map(([mediaType, media]) => {
+              return `        ${quote(mediaType)}: ${schemaType(resolveLocalReference(document, media.schema))}`
+            }),
+            '      }',
+            '    }',
+          ]
+        : []
 
       const responseLines = Object.entries(operation.responses ?? {}).map(([status, response]) => {
         const resolvedResponse = resolveLocalReference(document, response)
@@ -118,6 +157,10 @@ function generateOperations(document) {
 
       operations.push([
         `  ${quote(operation.operationId)}: {`,
+        `    path: ${quote(path)}`,
+        `    method: ${quote(method.toUpperCase())}`,
+        ...parameterLines,
+        ...requestBodyLines,
         '    responses: {',
         ...responseLines,
         '    }',

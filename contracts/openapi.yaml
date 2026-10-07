@@ -182,11 +182,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
         '409':
-          $ref: '#/components/responses/ProblemDetails'
+          $ref: '#/components/responses/ChallengeProblemDetails'
         '422':
           $ref: '#/components/responses/ValidationError'
         '423':
-          $ref: '#/components/responses/ProblemDetails'
+          $ref: '#/components/responses/StateProblemDetails'
   /api/v1/challenges/{id}:
     get:
       operationId: getChallenge
@@ -279,11 +279,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
         '409':
-          $ref: '#/components/responses/ProblemDetails'
+          $ref: '#/components/responses/ChallengeProblemDetails'
         '422':
           $ref: '#/components/responses/ValidationError'
         '423':
-          $ref: '#/components/responses/ProblemDetails'
+          $ref: '#/components/responses/StateProblemDetails'
   /api/v1/challenges/{id}/journals/{date}:
     parameters:
       - name: id
@@ -295,6 +295,7 @@ paths:
       - name: date
         in: path
         required: true
+        description: The date must be within the challenge start date through the server-authoritative account date.
         schema:
           type: string
           format: date
@@ -377,11 +378,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
         '409':
-          $ref: '#/components/responses/ProblemDetails'
+          $ref: '#/components/responses/JournalProblemDetails'
         '422':
           $ref: '#/components/responses/ValidationError'
         '423':
-          $ref: '#/components/responses/ProblemDetails'
+          $ref: '#/components/responses/StateProblemDetails'
 components:
   securitySchemes:
     sanctumCookie:
@@ -394,7 +395,7 @@ components:
       description: Prevents private owner data from being cached.
       schema:
         type: string
-        pattern: '(^|, ?)(private|no-store)'
+        pattern: '^(private, ?no-store|no-store, ?private)$'
   responses:
     Unauthenticated:
       description: No valid owner session
@@ -414,15 +415,33 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ValidationError'
-    ProblemDetails:
-      description: Domain or state conflict, fence or key reuse
+    StateProblemDetails:
+      description: Domain state conflict, fence or idempotency key reuse without a resource snapshot
       headers:
         Cache-Control:
           $ref: '#/components/headers/PrivateNoStore'
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/ProblemDetails'
+            $ref: '#/components/schemas/StateProblemDetails'
+    ChallengeProblemDetails:
+      description: Challenge mutation conflict or state problem
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/PrivateNoStore'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ChallengeProblemDetails'
+    JournalProblemDetails:
+      description: Journal mutation conflict or state problem
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/PrivateNoStore'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/JournalProblemDetails'
     CsrfExpired:
       description: CSRF session expired or token mismatched
       headers:
@@ -498,6 +517,8 @@ components:
           minimum: 0
         journal:
           type: string
+          minLength: 1
+          pattern: '.*\S.*'
     AccountContext:
       type: object
       additionalProperties: false
@@ -758,6 +779,9 @@ components:
           minimum: 1
         name:
           type: string
+          minLength: 1
+          maxLength: 255
+          pattern: '.*\S.*'
         description:
           type: string
           nullable: true
@@ -785,10 +809,13 @@ components:
           minimum: 1
         name:
           type: string
+          minLength: 1
+          maxLength: 255
+          pattern: '.*\S.*'
         description:
           type: string
           nullable: true
-    ProblemDetails:
+    StateProblemDetails:
       type: object
       additionalProperties: false
       required:
@@ -800,16 +827,62 @@ components:
         code:
           type: string
           enum:
-            - version_conflict
             - stale_data_epoch
             - idempotency_key_reused
             - write_fence_active
+    ChallengeConflictProblemDetails:
+      type: object
+      additionalProperties: false
+      required:
+        - message
+        - code
+        - resource_id
+        - current_version
+        - current_snapshot
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+          enum:
+            - version_conflict
         resource_id:
           type: string
           format: uuid
         current_version:
           type: integer
+          minimum: 1
         current_snapshot:
-          oneOf:
-            - $ref: '#/components/schemas/ChallengeSnapshot'
-            - $ref: '#/components/schemas/JournalSnapshot'
+          $ref: '#/components/schemas/ChallengeSnapshot'
+    JournalConflictProblemDetails:
+      type: object
+      additionalProperties: false
+      required:
+        - message
+        - code
+        - resource_id
+        - current_version
+        - current_snapshot
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+          enum:
+            - version_conflict
+        resource_id:
+          type: string
+          format: uuid
+        current_version:
+          type: integer
+          minimum: 1
+        current_snapshot:
+          $ref: '#/components/schemas/JournalSnapshot'
+    ChallengeProblemDetails:
+      oneOf:
+        - $ref: '#/components/schemas/StateProblemDetails'
+        - $ref: '#/components/schemas/ChallengeConflictProblemDetails'
+    JournalProblemDetails:
+      oneOf:
+        - $ref: '#/components/schemas/StateProblemDetails'
+        - $ref: '#/components/schemas/JournalConflictProblemDetails'

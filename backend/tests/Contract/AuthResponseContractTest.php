@@ -85,6 +85,20 @@ test('the real logout response satisfies the OpenAPI contract', function () {
     expect(true)->toBeTrue();
 });
 
+test('logout unauthenticated and csrf-expired responses satisfy the OpenAPI contract', function () {
+    $unauthenticated = $this->postJson('/logout');
+    $unauthenticated->assertStatus(401);
+    authContractValidator()->validate('POST', '/logout', authPsrResponse($unauthenticated));
+
+    $owner = User::factory()->owner()->create();
+    $this->app->instance('env', 'local');
+    $csrfExpired = $this->actingAs($owner)
+        ->withMiddleware(ValidateCsrfToken::class)
+        ->postJson('/logout');
+    $csrfExpired->assertStatus(419);
+    authContractValidator()->validate('POST', '/logout', authPsrResponse($csrfExpired));
+});
+
 test('the real csrf-expired response satisfies the OpenAPI contract', function () {
     $this->app->instance('env', 'local');
     $response = $this->withMiddleware(ValidateCsrfToken::class)->postJson('/login', [

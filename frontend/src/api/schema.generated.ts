@@ -106,18 +106,44 @@ export interface components {
       "name": string
       "description"?: string | null
     }
-    "ProblemDetails": {
+    "StateProblemDetails": {
       "message": string
-      "code": "version_conflict" | "stale_data_epoch" | "idempotency_key_reused" | "write_fence_active"
-      "resource_id"?: string
-      "current_version"?: number
-      "current_snapshot"?: components['schemas']["ChallengeSnapshot"] | components['schemas']["JournalSnapshot"]
+      "code": "stale_data_epoch" | "idempotency_key_reused" | "write_fence_active"
     }
+    "ChallengeConflictProblemDetails": {
+      "message": string
+      "code": "version_conflict"
+      "resource_id": string
+      "current_version": number
+      "current_snapshot": components['schemas']["ChallengeSnapshot"]
+    }
+    "JournalConflictProblemDetails": {
+      "message": string
+      "code": "version_conflict"
+      "resource_id": string
+      "current_version": number
+      "current_snapshot": components['schemas']["JournalSnapshot"]
+    }
+    "ChallengeProblemDetails": components['schemas']["StateProblemDetails"] | components['schemas']["ChallengeConflictProblemDetails"]
+    "JournalProblemDetails": components['schemas']["StateProblemDetails"] | components['schemas']["JournalConflictProblemDetails"]
   }
 }
 
 export interface operations {
   "loginOwner": {
+    path: "/login"
+    method: "POST"
+    parameters: Record<string, never>
+    requestBody: {
+      required: true
+      content: {
+        "application/json": {
+      "email": string
+      "password": string
+      "redirect_to"?: string | null
+    }
+      }
+    }
     responses: {
       "200": {
         content: {
@@ -142,6 +168,9 @@ export interface operations {
     }
   }
   "logoutOwner": {
+    path: "/logout"
+    method: "POST"
+    parameters: Record<string, never>
     responses: {
       "204": {
         content: Record<string, never>
@@ -159,6 +188,9 @@ export interface operations {
     }
   }
   "getOwnerSession": {
+    path: "/api/v1/session"
+    method: "GET"
+    parameters: Record<string, never>
     responses: {
       "200": {
         content: {
@@ -178,6 +210,9 @@ export interface operations {
     }
   }
   "foundationHealth": {
+    path: "/api/v1/foundation"
+    method: "GET"
+    parameters: Record<string, never>
     responses: {
       "200": {
         content: {
@@ -187,6 +222,9 @@ export interface operations {
     }
   }
   "getAccountContext": {
+    path: "/api/v1/account"
+    method: "GET"
+    parameters: Record<string, never>
     responses: {
       "200": {
         content: {
@@ -206,6 +244,9 @@ export interface operations {
     }
   }
   "getChallenges": {
+    path: "/api/v1/challenges"
+    method: "GET"
+    parameters: Record<string, never>
     responses: {
       "200": {
         content: {
@@ -225,6 +266,21 @@ export interface operations {
     }
   }
   "createChallenge": {
+    path: "/api/v1/challenges"
+    method: "POST"
+    parameters: Record<string, never>
+    requestBody: {
+      required: true
+      content: {
+        "application/json": {
+      "command_id": string
+      "data_epoch": number
+      "name": string
+      "description"?: string | null
+      "target_days": number
+    }
+      }
+    }
     responses: {
       "201": {
         content: {
@@ -243,7 +299,7 @@ export interface operations {
       }
       "409": {
         content: {
-          "application/problem+json": components['schemas']["ProblemDetails"]
+          "application/problem+json": components['schemas']["ChallengeProblemDetails"]
         }
       }
       "422": {
@@ -253,12 +309,22 @@ export interface operations {
       }
       "423": {
         content: {
-          "application/problem+json": components['schemas']["ProblemDetails"]
+          "application/problem+json": components['schemas']["StateProblemDetails"]
         }
       }
     }
   }
   "getChallenge": {
+    path: "/api/v1/challenges/{id}"
+    method: "GET"
+    parameters: {
+      "path:id": {
+        name: "id"
+        in: "path"
+        required: true
+        schema: string
+      }
+    }
     responses: {
       "200": {
         content: {
@@ -283,6 +349,28 @@ export interface operations {
     }
   }
   "updateChallengeMetadata": {
+    path: "/api/v1/challenges/{id}"
+    method: "PATCH"
+    parameters: {
+      "path:id": {
+        name: "id"
+        in: "path"
+        required: true
+        schema: string
+      }
+    }
+    requestBody: {
+      required: true
+      content: {
+        "application/json": {
+      "command_id": string
+      "data_epoch": number
+      "base_version": number
+      "name": string
+      "description"?: string | null
+    }
+      }
+    }
     responses: {
       "200": {
         content: {
@@ -306,7 +394,7 @@ export interface operations {
       }
       "409": {
         content: {
-          "application/problem+json": components['schemas']["ProblemDetails"]
+          "application/problem+json": components['schemas']["ChallengeProblemDetails"]
         }
       }
       "422": {
@@ -316,12 +404,28 @@ export interface operations {
       }
       "423": {
         content: {
-          "application/problem+json": components['schemas']["ProblemDetails"]
+          "application/problem+json": components['schemas']["StateProblemDetails"]
         }
       }
     }
   }
   "getChallengeJournal": {
+    path: "/api/v1/challenges/{id}/journals/{date}"
+    method: "GET"
+    parameters: {
+      "path:id": {
+        name: "id"
+        in: "path"
+        required: true
+        schema: string
+      }
+      "path:date": {
+        name: "date"
+        in: "path"
+        required: true
+        schema: string
+      }
+    }
     responses: {
       "200": {
         content: {
@@ -351,6 +455,33 @@ export interface operations {
     }
   }
   "saveChallengeJournal": {
+    path: "/api/v1/challenges/{id}/journals/{date}"
+    method: "PUT"
+    parameters: {
+      "path:id": {
+        name: "id"
+        in: "path"
+        required: true
+        schema: string
+      }
+      "path:date": {
+        name: "date"
+        in: "path"
+        required: true
+        schema: string
+      }
+    }
+    requestBody: {
+      required: true
+      content: {
+        "application/json": {
+      "command_id": string
+      "data_epoch": number
+      "base_version": number
+      "journal": string
+    }
+      }
+    }
     responses: {
       "200": {
         content: {
@@ -374,7 +505,7 @@ export interface operations {
       }
       "409": {
         content: {
-          "application/problem+json": components['schemas']["ProblemDetails"]
+          "application/problem+json": components['schemas']["JournalProblemDetails"]
         }
       }
       "422": {
@@ -384,7 +515,7 @@ export interface operations {
       }
       "423": {
         content: {
-          "application/problem+json": components['schemas']["ProblemDetails"]
+          "application/problem+json": components['schemas']["StateProblemDetails"]
         }
       }
     }
