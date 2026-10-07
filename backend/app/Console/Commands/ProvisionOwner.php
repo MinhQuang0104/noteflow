@@ -44,14 +44,32 @@ final class ProvisionOwner extends Command
                 ],
             );
 
-            DB::table('account_states')->where('owner_id', '<>', $owner->id)->delete();
-            DB::table('account_states')->updateOrInsert(
-                ['owner_id' => $owner->id],
-                ['timezone' => self::ACCOUNT_TIMEZONE],
-            );
+            $accountState = DB::table('account_states')
+                ->where('owner_id', $owner->id)
+                ->lockForUpdate()
+                ->first();
+            if ($accountState === null) {
+                DB::table('account_states')->insert([
+                    'owner_id' => $owner->id,
+                    'timezone' => self::ACCOUNT_TIMEZONE,
+                    'account_revision' => 0,
+                    'data_epoch' => 1,
+                    'write_state' => 'open',
+                ]);
+            } else {
+                DB::table('account_states')
+                    ->where('owner_id', $owner->id)
+                    ->update([
+                        'timezone' => self::ACCOUNT_TIMEZONE,
+                        'data_epoch' => DB::raw('data_epoch + 1'),
+                    ]);
+            }
 
-            DB::table('sessions')
-                ->whereIn('user_id', $previousOwnerIds->push($owner->id)->unique())
+            $boundaryOwnerIds = $previousOwnerIds->push($owner->id)->unique();
+            DB::table('sessions')->whereIn('user_id', $boundaryOwnerIds)->delete();
+            DB::table('personal_access_tokens')
+                ->where('tokenable_type', User::class)
+                ->whereIn('tokenable_id', $boundaryOwnerIds)
                 ->delete();
         });
 
