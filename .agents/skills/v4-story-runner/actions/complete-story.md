@@ -34,3 +34,12 @@ Story content, and commit exactly the Story/Plan/sprint projection.
 It never alters product files, slice receipts, finalization evidence, V3 state,
 or another Story. Completion is idempotent after a healthy terminal projection;
 it does not create a second commit.
+
+The Runner and both direct completion entrypoints use the same lifecycle
+transaction contract. Before recording approval or completing the Story, they
+require an IDLE canonical V3 pointer, the Story-owned checkout, the expected
+HEAD, and a clean scope. They acquire the shared common-Git-directory
+Story/action lock and append the lifecycle journal before any write. A foreign
+lock returns `BLOCKED` and is preserved. Mid-transaction failures preserve the
+journal and owned lock for separately authorized recovery; callers must not
+remove the lock, reset files, or bypass admission.

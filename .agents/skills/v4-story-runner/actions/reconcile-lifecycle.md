@@ -21,3 +21,12 @@ successor action.
 If the transaction is partial, preserve the observable files, index, lock and
 journal and request separately authorized recovery. Do not reset, clean, stash,
 delete locks, or silently take over another transaction.
+
+The Runner and this direct helper share one lifecycle transaction boundary:
+admission checks the IDLE canonical V3 pointer, Story-owned checkout, expected
+HEAD, and scope before writes; the helper then uses the common Git directory's
+Story/action lock and appends the journal before changing the projections. A
+foreign lock is reported as `BLOCKED` (CLI exit code `3`) and remains intact.
+Apply rechecks admission immediately before the transaction and preserves the
+owned journal and lock on a mid-write or commit failure. No lifecycle
+entrypoint may bypass these checks or clean up another caller's lock.

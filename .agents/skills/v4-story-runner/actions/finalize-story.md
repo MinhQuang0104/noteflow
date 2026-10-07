@@ -21,6 +21,15 @@ lifecycle projection, and sprint Story entry. The transaction ends at
 `review`, sets Plan execution to `complete`, persists
 `next_action: complete_story`, and returns `HUMAN_GATE_REQUIRED`.
 
+The Runner and this direct helper use the same lifecycle transaction contract:
+before any write, admit only an IDLE canonical V3 pointer, the Story-owned
+checkout, the expected HEAD, and a clean scope. They acquire the shared
+common-Git-directory Story/action lock and append an on-disk lifecycle journal
+before mutating files. A foreign lock returns `BLOCKED` and is never removed.
+The journal and owned lock remain available for explicitly authorized recovery
+when a write, stage, or commit fails; a later invocation must revalidate the
+admission and journal rather than bypassing the transaction.
+
 Do not write approval, execute `complete_story`, infer a done transition, alter
 normative Story content, rewrite slice receipts, or change product files. A
 partial write/commit preserves the snapshot and must be handled through the

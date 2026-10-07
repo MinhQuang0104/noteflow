@@ -2,9 +2,11 @@ import { readFileSync, writeFileSync, renameSync, unlinkSync, existsSync } from 
 import { createHash, randomUUID } from 'node:crypto'
 import { spawnSync } from 'node:child_process'
 import path from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { validate, frontmatter } from './check-story-plan.mjs'
+import { lifecycleAdmission, runLifecycleTransaction } from './v4-lifecycle-transaction.mjs'
 
-const CODES = { READY:0, APPLIED:0, NO_CHANGE:0, PRECONDITION_FAILED:2, CONFLICT:3, HUMAN_REQUIRED:4, INVALID:5, ERROR:6 }
+const CODES = { READY:0, APPLIED:0, NO_CHANGE:0, BLOCKED:3, PRECONDITION_FAILED:2, CONFLICT:3, HUMAN_REQUIRED:4, INVALID:5, ERROR:6 }
 const STATES = ['backlog','ready-for-dev','in-progress','review','done']
 const EDGES = new Set(['backlog:ready-for-dev','backlog:in-progress','ready-for-dev:in-progress','in-progress:review','review:done'])
 const REL_SPRINT = '_bmad-output/implementation-artifacts/sprint-status.yaml'
@@ -73,11 +75,6 @@ function changePlan(text,from,to,action,removeBlocker) {
   }
   return next
 }
-function pointer(root) {
-  try { const p=JSON.parse(readFileSync(path.join(root,'.agent-state/active-run.json'),'utf8'))
-    return p.schemaVersion===1 && p.status==='IDLE' && p.activeRunId===null && p.storyId===null
-  } catch { return false }
-}
 function stateClass(sprint,plan,from,to) {
   if(sprint===from && plan===from) return 'CLEAN_BASE'
   if(sprint===to && plan===from) return 'PARTIAL_SPRINT_ONLY'
@@ -93,7 +90,11 @@ function inspect(root,o) {
   if(from==='review'&&to==='done') return {out:fail(out,'HUMAN_REQUIRED','COMPLETE_STORY_REQUIRES_EXPLICIT_APPROVAL')}
   if(from!==to&&!EDGES.has(`${from}:${to}`)) return {out:fail(out,from==='done'?'INVALID':'HUMAN_REQUIRED','UNSUPPORTED_TRANSITION')}
   if(git(root,'rev-parse','HEAD').stdout.trim()!==out.expectedHead) return {out:fail(out,'CONFLICT','EXPECTED_HEAD_MISMATCH')}
-  if(!pointer(root)) return {out:fail(out,'PRECONDITION_FAILED','V3_POINTER_NOT_IDLE')}
+  const admission=lifecycleAdmission(root,{storyId:o.id,action:'reconcile_lifecycle',expectedHead:o['--expected-head']})
+  if(admission.status!=='READY') {
+    const status=admission.status==='STALE'?'CONFLICT':admission.status==='INVALID'?'INVALID':'PRECONDITION_FAILED'
+    return {out:fail(out,status,admission.reasons[0]??'LIFECYCLE_ADMISSION_FAILED')}
+  }
   if(!existsSync(path.join(root,relPlan))) return {out:fail(out,'INVALID','PLAN_MISSING')}
   const planBytes=readFileSync(path.join(root,relPlan)), sprintBytes=readFileSync(path.join(root,REL_SPRINT))
   out.planSha256=sha(planBytes); out.sprintSha256=sha(sprintBytes)
@@ -148,7 +149,7 @@ function inspect(root,o) {
   out.valid=true;out.applicable=true;out.status='READY'
   return {out,relPlan,planBytes,sprintBytes,planNext,sprintNext}
 }
-function apply(root,o,checked) {
+function applyMutation(root,o,checked) {
   const {out,relPlan,planBytes,sprintBytes,planNext,sprintNext}=checked
   if(out.status!=='READY') return out
   const again=inspect(root,o)
@@ -190,16 +191,33 @@ function apply(root,o,checked) {
     return fail(out,error.message==='COMMIT_FAILED'?'ERROR':'CONFLICT',error.message)
   }
 }
-try {
+
+export function inspectLifecycle(root,o) {
+  return inspect(root,o).out
+}
+
+export function applyLifecycle(root,o) {
+  const checked=inspect(root,o)
+  if(checked.out.status!=='READY') return checked.out
+  return runLifecycleTransaction(root,{storyId:o.id,action:'reconcile_lifecycle',expectedHead:o['--expected-head']},()=>applyMutation(root,o,checked))
+}
+
+function main() {
   const o=parseArgs(process.argv.slice(2))
   const rootResult=git(process.cwd(),'rev-parse','--show-toplevel')
   if(rootResult.status!==0) throw new Error('GIT_ROOT_UNAVAILABLE')
   const root=path.resolve(rootResult.stdout.trim())
-  const checked=inspect(root,o)
-  const result=o.verb==='apply'?apply(root,o,checked):checked.out
-  process.stdout.write(`${JSON.stringify(result)}\n`)
-  process.exitCode=CODES[result.status]
-} catch(error) {
-  process.stdout.write(`${JSON.stringify({valid:false,applicable:false,status:error.message==='USAGE'?'INVALID':'ERROR',reasons:[error.message]})}\n`)
-  process.exitCode=CODES[error.message==='USAGE'?'INVALID':'ERROR']
+  return o.verb==='apply'?applyLifecycle(root,o):inspectLifecycle(root,o)
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  try {
+    const result=main()
+    process.stdout.write(`${JSON.stringify(result)}\n`)
+    process.exitCode=CODES[result.status]
+  } catch(error) {
+    const result={valid:false,applicable:false,status:error.message==='USAGE'?'INVALID':'ERROR',reasons:[error.message]}
+    process.stdout.write(`${JSON.stringify(result)}\n`)
+    process.exitCode=CODES[result.status]
+  }
 }

@@ -10,6 +10,7 @@ import {
   explicitApprovalInput,
   inspectCompletion
 } from './check-story-completion.mjs'
+import { lifecycleAdmission, runLifecycleTransaction } from './v4-lifecycle-transaction.mjs'
 
 const SHA = /^[0-9a-f]{40,64}$/
 const NOISE = new Set(['_bmad/scripts/tests/__pycache__/test_agent_architecture.cpython-314.pyc'])
@@ -166,6 +167,8 @@ function failure(status, reasons, extra = {}) {
 export function prepareCompletion(root, storyId, expectedHead) {
   try {
     if (!/^\d+\.\d+$/.test(storyId ?? '') || !SHA.test(expectedHead ?? '')) return failure('INVALID', ['INVALID_INPUT'])
+    const admission = lifecycleAdmission(root, { storyId, action: 'complete_story', expectedHead })
+    if (admission.status !== 'READY') return admission
     const head = gitOutput(root, ['rev-parse', 'HEAD'], 'HEAD_UNAVAILABLE')
     if (head !== expectedHead) return failure('STALE', ['EXPECTED_HEAD_MISMATCH'], { head })
     const gate = inspectCompletion(root, storyId, expectedHead)
@@ -204,9 +207,8 @@ export function prepareCompletion(root, storyId, expectedHead) {
   }
 }
 
-export function recordHumanApproval(root, storyId, expectedHead, approvalInput) {
+function recordHumanApprovalMutation(root, storyId, expectedHead, approvalInput) {
   try {
-    if (!explicitApprovalInput(approvalInput)) return failure('BLOCKED', ['HUMAN_APPROVAL_REQUIRED'])
     if (!/^\d+\.\d+$/.test(storyId ?? '') || !SHA.test(expectedHead ?? '')) return failure('INVALID', ['INVALID_INPUT'])
     const head = gitOutput(root, ['rev-parse', 'HEAD'], 'HEAD_UNAVAILABLE')
     if (head !== expectedHead) return failure('STALE', ['EXPECTED_HEAD_MISMATCH'], { head })
@@ -245,7 +247,15 @@ export function recordHumanApproval(root, storyId, expectedHead, approvalInput) 
   }
 }
 
-export function applyCompletion(root, storyId, expectedHead) {
+export function recordHumanApproval(root, storyId, expectedHead, approvalInput) {
+  if (!explicitApprovalInput(approvalInput)) return failure('BLOCKED', ['HUMAN_APPROVAL_REQUIRED'])
+  const admission = lifecycleAdmission(root, { storyId, action: 'complete_story', expectedHead })
+  if (admission.status !== 'READY') return admission
+  return runLifecycleTransaction(root, { storyId, action: 'complete_story', expectedHead }, () =>
+    recordHumanApprovalMutation(root, storyId, expectedHead, approvalInput))
+}
+
+function applyCompletionMutation(root, storyId, expectedHead) {
   const prepared = prepareCompletion(root, storyId, expectedHead)
   if (prepared.status === 'TERMINAL') return prepared
   if (prepared.status !== 'READY') return prepared
@@ -281,6 +291,13 @@ export function applyCompletion(root, storyId, expectedHead) {
       recovery: inspectCompletion(root, storyId, expectedHead)
     })
   }
+}
+
+export function applyCompletion(root, storyId, expectedHead) {
+  const admission = lifecycleAdmission(root, { storyId, action: 'complete_story', expectedHead })
+  if (admission.status !== 'READY') return admission
+  return runLifecycleTransaction(root, { storyId, action: 'complete_story', expectedHead }, () =>
+    applyCompletionMutation(root, storyId, expectedHead))
 }
 
 function parseArguments(argv) {

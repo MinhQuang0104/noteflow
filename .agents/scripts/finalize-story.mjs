@@ -19,6 +19,7 @@ import {
   renderCompletionBlock,
   validateFinalizationReceipt
 } from './finalization-contract.mjs'
+import { lifecycleAdmission, runLifecycleTransaction } from './v4-lifecycle-transaction.mjs'
 
 const SHA = /^[0-9a-f]{40,64}$/
 const CODES = {
@@ -345,6 +346,8 @@ export function prepareFinalization(root, storyId, expectedHead) {
     if (!/^\d+\.\d+$/.test(storyId ?? '') || !SHA.test(expectedHead ?? '')) {
       return prepareFailure('INVALID', ['INVALID_INPUT'])
     }
+    const admission = lifecycleAdmission(root, { storyId, action: 'finalize_story', expectedHead })
+    if (admission.status !== 'READY') return admission
     const currentHead = gitOutput(root, ['rev-parse', 'HEAD'], 'HEAD_UNAVAILABLE')
     if (currentHead !== expectedHead) return prepareFailure('STALE', ['EXPECTED_HEAD_MISMATCH'], { head: currentHead })
     const recovery = classifyFinalizationRecovery(root, storyId, expectedHead)
@@ -421,7 +424,7 @@ function humanGateSnapshot(preview, commit) {
   }
 }
 
-export function applyFinalization(root, storyId, expectedHead) {
+function applyFinalizationMutation(root, storyId, expectedHead) {
   const prepared = prepareFinalization(root, storyId, expectedHead)
   if (prepared.status !== 'READY') return prepared
   const fresh = prepareFinalization(root, storyId, expectedHead)
@@ -485,6 +488,13 @@ export function applyFinalization(root, storyId, expectedHead) {
       recovery: classifyFinalizationRecovery(root, storyId, expectedHead)
     }
   }
+}
+
+export function applyFinalization(root, storyId, expectedHead) {
+  const admission = lifecycleAdmission(root, { storyId, action: 'finalize_story', expectedHead })
+  if (admission.status !== 'READY') return admission
+  return runLifecycleTransaction(root, { storyId, action: 'finalize_story', expectedHead }, () =>
+    applyFinalizationMutation(root, storyId, expectedHead))
 }
 
 function parseArguments(argv) {

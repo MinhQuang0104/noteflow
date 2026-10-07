@@ -12,6 +12,9 @@ import { inspectStart, applyStart } from './start-story.mjs'
 import { applyRework, checkpointImplementation, prepareAction, prepareRework, recordSliceReview, verifySlice, prepareStagedRecovery, applyStagedRecovery } from './v4-action-kernel.mjs'
 import { prepareMetadataAbort, applyMetadataAbort } from './v4-metadata-recovery.mjs'
 import { recordActionFinished, recordActionStarted, recordStoryCompleted, recordStoryReviewSnapshot } from './v4-observations.mjs'
+import { pointerIdle, storyCheckoutState } from './v4-lifecycle-transaction.mjs'
+
+export { pointerIdle, storyCheckoutState } from './v4-lifecycle-transaction.mjs'
 
 export const V4_AUTHORIZED_ACTIONS = new Set([
   'start_story',
@@ -56,44 +59,6 @@ function gitOutput(root, args, failure) {
   const result = git(root, args)
   if (result.status !== 0) throw new Error(failure)
   return result.stdout.trim()
-}
-
-function pointerIdle(root) {
-  try {
-    const canonical = /^worktree (.+)$/m.exec(gitOutput(root, ['worktree', 'list', '--porcelain'], 'CANONICAL_WORKTREE_UNAVAILABLE'))?.[1]?.trim()
-    if (!canonical) return false
-    const pointer = JSON.parse(readFileSync(path.join(canonical, '.agent-state/active-run.json'), 'utf8'))
-    return pointer.schemaVersion === 1 &&
-      pointer.status === 'IDLE' &&
-      pointer.activeRunId === null &&
-      pointer.storyId === null
-  } catch {
-    return false
-  }
-}
-
-function comparablePath(value) {
-  const resolved = path.resolve(value).replaceAll('\\', '/').replace(/\/+$/, '')
-  return process.platform === 'win32' ? resolved.toLowerCase() : resolved
-}
-
-// A Story that owns a linked worktree must be driven from that worktree.
-// Branch names carry the Story as `story-<epic>-<story>` (for example
-// codex/story-1-6 or codex/story-1-5-v4).
-export function storyCheckoutState(root, storyId) {
-  const token = 'story-' + storyId.replace('.', '-')
-  const owner = new RegExp('(^|[/_-])' + token + '($|[/_-])')
-  const entries = []
-  let current = null
-  for (const line of gitOutput(root, ['worktree', 'list', '--porcelain'], 'WORKTREE_LIST_UNAVAILABLE').split(/\r?\n/)) {
-    if (line.startsWith('worktree ')) entries.push(current = { worktree: line.slice('worktree '.length).trim(), branch: null })
-    else if (line.startsWith('branch ') && current) current.branch = line.slice('branch '.length).trim().replace(/^refs\/heads\//, '')
-  }
-  const owners = entries.filter(entry => entry.branch && owner.test(entry.branch))
-  if (!owners.length) return { status: 'READY', owners: [] }
-  const here = comparablePath(root)
-  if (owners.some(entry => comparablePath(entry.worktree) === here)) return { status: 'READY', owners: owners.map(entry => entry.worktree) }
-  return { status: 'BLOCKED', authorized: false, reasons: ['WRONG_CHECKOUT'], owners: owners.map(entry => entry.worktree) }
 }
 
 function storyLifecycle(root, storyId) {

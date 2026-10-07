@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import path from 'node:path'
 
 import {
   applyCompletion,
@@ -9,6 +10,7 @@ import {
 } from './complete-story.mjs'
 import { inspectCompletion } from './check-story-completion.mjs'
 import { createCompletionFixture, FINALIZATION, PLAN, SPRINT, STORY } from './completion-fixture.mjs'
+import { lifecyclePaths } from './v4-lifecycle-transaction.mjs'
 
 test('completion transaction exports the bounded approval and completion interfaces', () => {
   assert.equal(typeof recordHumanApproval, 'function')
@@ -20,6 +22,31 @@ test('completion preparation fails closed outside a repository', () => {
   const result = prepareCompletion('not-a-repository', '9.1', 'f'.repeat(40))
   assert.equal(result.status, 'ERROR')
   assert.equal(result.valid, false)
+})
+
+test('direct completion approval rejects a non-IDLE canonical pointer before mutation', () => {
+  const f = createCompletionFixture()
+  try {
+    f.write('.agent-state/active-run.json', JSON.stringify({ schemaVersion: 1, activeRunId: 'other', storyId: '9.1', status: 'RUNNING' }))
+    const result = recordHumanApproval(f.root, '9.1', f.head, { action: 'approve_exact_scope', disclosures_acknowledged: true })
+    assert.equal(result.status, 'BLOCKED', JSON.stringify(result))
+    assert.ok(result.reasons.includes('V3_POINTER_NOT_IDLE'), JSON.stringify(result))
+    assert.equal(f.refreshHead(), f.head)
+  } finally { f.cleanup() }
+})
+
+test('direct completion rejects a concurrent lifecycle lock without removing it', () => {
+  const f = createCompletionFixture()
+  try {
+    const locations = lifecyclePaths(f.root, '9.1')
+    mkdirSync(path.dirname(locations.lockPath), { recursive: true })
+    const foreignLock = JSON.stringify({ transaction_id: 'other', story_id: '9.1' }) + '\n'
+    writeFileSync(locations.lockPath, foreignLock)
+    const result = recordHumanApproval(f.root, '9.1', f.head, { action: 'approve_exact_scope', disclosures_acknowledged: true })
+    assert.equal(result.status, 'BLOCKED', JSON.stringify(result))
+    assert.ok(result.reasons.includes('LIFECYCLE_SCOPE_LOCKED'), JSON.stringify(result))
+    assert.equal(readFileSync(locations.lockPath, 'utf8'), foreignLock)
+  } finally { f.cleanup() }
 })
 
 test('exact structured approval is durable and stops before complete_story', () => {

@@ -12,6 +12,7 @@ import { frontmatter } from './check-story-plan.mjs'
 import { pathListDigest, stableDigest } from './check-story-finalization.mjs'
 import * as finalizer from './finalize-story.mjs'
 import { buildFinalizationPreview, applyFinalization, prepareFinalization } from './finalize-story.mjs'
+import { lifecyclePaths } from './v4-lifecycle-transaction.mjs'
 // Exercise a genuinely committed executor, independently of the dirty TDD checkout.
 const executorFixture = mkdtempSync(path.join(tmpdir(), 'finalization-executor-'))
 cpSync(path.dirname(fileURLToPath(import.meta.url)), path.join(executorFixture, '.agents/scripts'), { recursive: true })
@@ -250,6 +251,9 @@ test('Git add failure retains subprocess diagnostics rather than reporting a sco
     assert.equal(result.git_failure.timeout_ms, 10000)
     assert.equal(git(f.root, 'rev-parse', 'HEAD'), f.head)
     assert.equal(git(f.root, 'diff', '--cached', '--name-only'), '')
+    assert.ok(result.lifecycle_transaction?.journal_path, JSON.stringify(result))
+    assert.ok(existsSync(result.lifecycle_transaction.journal_path))
+    assert.ok(existsSync(result.lifecycle_transaction.lock_path))
   } finally { f.cleanup() }
 })
 
@@ -266,6 +270,50 @@ test('prepare is read-only and wrong expected HEAD is rejected', () => {
     assert.equal(prepareFinalization(f.root, '9.1', f.head).status, 'READY')
     assert.equal(git(f.root, 'status', '--porcelain=v1', '--untracked-files=all'), before)
     assert.equal(prepareFinalization(f.root, '9.1', '0'.repeat(40)).status, 'STALE')
+  } finally {
+    f.cleanup()
+  }
+})
+
+test('direct finalization rejects a non-IDLE canonical pointer before mutation', () => {
+  const f = fixture()
+  try {
+    write(f.root, '.agent-state/active-run.json', JSON.stringify({ schemaVersion: 1, activeRunId: 'other', storyId: '9.1', status: 'RUNNING' }))
+    const result = applyFinalization(f.root, '9.1', f.head)
+    assert.equal(result.status, 'BLOCKED', JSON.stringify(result))
+    assert.ok(result.reasons.includes('V3_POINTER_NOT_IDLE'), JSON.stringify(result))
+    assert.equal(git(f.root, 'rev-parse', 'HEAD'), f.head)
+  } finally {
+    f.cleanup()
+  }
+})
+
+test('direct finalization rejects a Story-owned worktree from the wrong checkout', () => {
+  const f = fixture()
+  const linked = path.join(f.root, 'linked-story')
+  try {
+    git(f.root, 'worktree', 'add', '-qb', 'story-9-1-v4', linked, f.head)
+    const result = applyFinalization(f.root, '9.1', f.head)
+    assert.equal(result.status, 'BLOCKED', JSON.stringify(result))
+    assert.ok(result.reasons.includes('WRONG_CHECKOUT'), JSON.stringify(result))
+    assert.equal(git(f.root, 'rev-parse', 'HEAD'), f.head)
+  } finally {
+    git(f.root, 'worktree', 'remove', '--force', linked)
+    f.cleanup()
+  }
+})
+
+test('direct finalization rejects a concurrent lifecycle lock without removing it', () => {
+  const f = fixture()
+  try {
+    const locations = lifecyclePaths(f.root, '9.1')
+    mkdirSync(locations.directory, { recursive: true })
+    const foreignLock = JSON.stringify({ transaction_id: 'other', story_id: '9.1' }) + '\n'
+    writeFileSync(locations.lockPath, foreignLock)
+    const result = applyFinalization(f.root, '9.1', f.head)
+    assert.equal(result.status, 'BLOCKED', JSON.stringify(result))
+    assert.ok(result.reasons.includes('LIFECYCLE_SCOPE_LOCKED'), JSON.stringify(result))
+    assert.equal(readFileSync(locations.lockPath, 'utf8'), foreignLock)
   } finally {
     f.cleanup()
   }

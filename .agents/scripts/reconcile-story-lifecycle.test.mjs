@@ -1,11 +1,12 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs'
+import { existsSync, mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { frontmatter } from './check-story-plan.mjs'
+import { lifecyclePaths } from './v4-lifecycle-transaction.mjs'
 
 const script = path.resolve('.agents/scripts/reconcile-story-lifecycle.mjs')
 const digest = bytes => createHash('sha256').update(bytes).digest('hex')
@@ -95,6 +96,15 @@ test('active V3 pointer blocks preview',()=>withFixture({},f=>{
   writeFileSync(path.join(f.root,'.agent-state/active-run.json'),JSON.stringify({schemaVersion:1,activeRunId:'run',storyId:'9.1',status:'ACTIVE'}))
   assert.equal(run(f,'check','backlog','in-progress').code,2)
 }))
+test('concurrent lifecycle caller is blocked by the shared lock',()=>withFixture({},f=>{
+  const locations=lifecyclePaths(f.root,f.storyId)
+  mkdirSync(locations.directory,{recursive:true})
+  writeFileSync(locations.lockPath,JSON.stringify({transaction_id:'other',story_id:f.storyId})+'\n')
+  const r=apply(f)
+  assert.equal(r.code,3,JSON.stringify(r.json))
+  assert.ok(r.json.reasons.includes('LIFECYCLE_SCOPE_LOCKED'),JSON.stringify(r.json))
+  assert.equal(readFileSync(locations.lockPath,'utf8'),JSON.stringify({transaction_id:'other',story_id:f.storyId})+'\n')
+}))
 test('missing checkpoint reference blocks preview',()=>withFixture({},f=>{
   edit(f,planRel,`checkpoint_commit: ${f.checkpoint}`,'checkpoint_commit: '+ '0'.repeat(40))
   edit(f,planRel,`slice_a_commit: ${f.checkpoint}`,'slice_a_commit: '+ '0'.repeat(40));recommit(f)
@@ -160,6 +170,9 @@ test('concurrent edit prevents rollback overwrite',()=>withFixture({},f=>{
 test('both writes before commit failure remain recoverable',()=>withFixture({},f=>{
   mkdirSync(path.join(f.root,'.githooks'));writeFileSync(path.join(f.root,'.githooks/pre-commit'),'#!/bin/sh\nexit 1\n');git(f.root,'config','core.hooksPath','.githooks')
   const r=apply(f);assert.equal(r.code,6,JSON.stringify(r.json));assert.equal(r.json.recoveryClassification,'BOTH_TARGETS_UNCOMMITTED')
+  assert.ok(r.json.lifecycle_transaction?.journal_path,JSON.stringify(r.json))
+  assert.ok(existsSync(r.json.lifecycle_transaction.journal_path))
+  assert.ok(existsSync(r.json.lifecycle_transaction.lock_path))
   assert.equal(run(f,'check','backlog','in-progress').json.recoveryClassification,'BOTH_TARGETS_UNCOMMITTED')
 }))
 test('partial Plan only is classified without mutation',()=>withFixture({},f=>{
