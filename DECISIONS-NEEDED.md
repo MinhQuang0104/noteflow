@@ -5,6 +5,23 @@ Các mục dưới đây chưa được tự ý quyết định hay triển khai
 kỹ thuật để người có thẩm quyền cân nhắc; đây không phải bằng chứng đã có
 Human Gate hoặc đã đạt acceptance.
 
+## Quyết định đã ghi
+
+Người quyết định: Quang (owner dự án). Ngày hiệu lực: 2026-10-07. Lựa chọn
+đánh số theo mục “Lựa chọn và hệ quả” của từng ID bên dưới.
+
+| ID | Lựa chọn | Artifact/AC bị ảnh hưởng | Gói được mở |
+|---|---|---|---|
+| A-01 (+A-02) | 2 — sửa AC thành điều kiện tự động/keyboard kiểm chứng được; ghi disposition cho phần manual (screen reader thật, unload trên trình duyệt thật) là chưa kiểm chứng | Story 1.6 AC4, Story 1.5 AC4 | Sửa AC + disposition; không tuyên bố AC cũ đã đạt |
+| A-03 | 1 — một `challenge_daily_records` chung; ban hành ma trận field ownership: `is_done`/`completion_version` thuộc Story 2.2, `journal`/`journal_version` thuộc Story 2.3, `row_version` là invariant chung | Story 2.2, Story 2.3, schema daily record | Ma trận ownership trước mọi gói tích hợp 2.2/2.3 |
+| C-04 | 1 — giữ nguyên whitespace journal end-to-end | `TrimStrings` exception, OpenAPI journal, request tests | Remediation C-04 |
+| C-05 | 1 — giữ dataset và gắn lại cho A; bắt buộc owner-scoped authorization, epoch đơn điệu tăng, test A→B→A | Provision owner command, account state/epoch | Remediation reprovision + test |
+| D-04 | 2 — OpenAPI giữ API resource/auth; flow CSRF/419 ghi ở tài liệu browser/deployment riêng, là phần bắt buộc của integration contract và được OpenAPI liên kết | OpenAPI, tài liệu CSRF | D-04 docs/contract |
+| G-01 | 3 — shared ownership: edge/hosting chịu TLS/HSTS, app chịu origin headers; checklist acceptance có sign-off từng property | Deployment docs, security acceptance | Checklist G-01 |
+| H-01 | 3 — hybrid: hội thoại nêu ý định, authority chỉ đến từ evidence ngoài agent; thiếu evidence thì chỉ preview/blocked | V3/V4 Human Gate, completion authority | Thiết kế actor contract; chưa tuyên bố Human Gate đã xác thực |
+| H-02 | 2 — disjoint scope + kiểm tra conflict tại boundary, kèm inventory path chung đầy đủ | V3/V4 co-location policy | H-02 (không mutate `.agent-state`) |
+| H-10 | 1 tạm thời — yêu cầu sạch toàn bộ worktree; chuyển sang 2 chỉ khi đã có scope digest, exact staging, index/hook guards và explicit exclusions | Lifecycle admission | Giữ guard hiện tại; follow-up chuyển sang 2 cần quyết định mới |
+
 ## A-01 (+A-02) — Bằng chứng screen reader và cảnh báo unload
 
 **Câu hỏi:** Có thu bằng chứng thủ công trên screen reader thật (Story 1.6
