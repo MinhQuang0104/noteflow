@@ -17,8 +17,8 @@
     "frontend/src/views/TodayView.vue": "6193970017a41f3af329814407f24e89178cf3c7",
     "frontend/src/views/__tests__/today.spec.ts": "97d3f0b1deac90322ca3eca3f808047efe9f049b",
     "frontend/src/views/__tests__/account-time.spec.ts": "10600cebc826f3896f59f48d6ff8f86356b30898",
-    "frontend/src/api/challenges.ts": "1170868875c493ff954398ddecba122ff6272a79",
+    "frontend/src/api/challenges.ts": "41fd0a1243d94ad519aec0eb988570714d852d04",
     "frontend/src/stores/account.ts": "d182dbf43b69fe5c0c1ee166c1eb427113bfe94e",
-    "frontend/src/stores/auth.ts": "7284c8d280ecdbc7524e3ff5563eb67a4862b163"
+    "frontend/src/stores/auth.ts": "cea30a6f19cc2b404c3bb117d2cfb51417d22c76"
   }
 }

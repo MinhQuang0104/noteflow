@@ -18,15 +18,15 @@
     "frontend/src/api/schema.generated.ts"
   ],
   "anchor_blobs": {
-    "frontend/src/components/ChallengeJournalEditor.vue": "fcd2709bf85d169cba8af266692b7038829b9e9a",
-    "frontend/src/views/ChallengesView.vue": "16de61a9c7077b031225b7f9cffc61349fcacdb1",
-    "frontend/src/api/challenges.ts": "fd2871a941a59f2f59778b2e0d01cfdf26b894a5",
-    "frontend/src/views/__tests__/journal.spec.ts": "d3fda0e9450b2e2432c923420ecb87343753b9b2",
-    "frontend/src/api/__tests__/challenges.spec.ts": "0d233fedaca5a8e88ced34d40189b804657d72a4",
-    "frontend/src/stores/auth.ts": "7284c8d280ecdbc7524e3ff5563eb67a4862b163",
+    "frontend/src/components/ChallengeJournalEditor.vue": "bfc2c5a7d5813e48e1655da7cb686f3b944740de",
+    "frontend/src/views/ChallengesView.vue": "cf9746d69f54ef6ced14b301b101f1db080d91e1",
+    "frontend/src/api/challenges.ts": "41fd0a1243d94ad519aec0eb988570714d852d04",
+    "frontend/src/views/__tests__/journal.spec.ts": "9b87490048270e9ec8d44db6d14c8a46c3708e8d",
+    "frontend/src/api/__tests__/challenges.spec.ts": "8726a4ed7fcaf39a7ec4b7e3861307406859e070",
+    "frontend/src/stores/auth.ts": "cea30a6f19cc2b404c3bb117d2cfb51417d22c76",
     "frontend/src/stores/account.ts": "d182dbf43b69fe5c0c1ee166c1eb427113bfe94e",
-    "frontend/src/stores/sync.ts": "ebfca00bd890b4fd2f44eb528ec6493b9d4d8afe",
-    "contracts/openapi.yaml": "32459059818553a2909d0e15df7b7ad500506f4f",
-    "frontend/src/api/schema.generated.ts": "de616ea8763ab207f6b72e752464da084c206f6b"
+    "frontend/src/stores/sync.ts": "f6c69076e71b496d59ba91aa0f1ce91b10766e0b",
+    "contracts/openapi.yaml": "cab79903d262031d81c19760ca95297dadbe9429",
+    "frontend/src/api/schema.generated.ts": "d78acf0d673322de1705e452bba612409bfec5eb"
   }
 }
