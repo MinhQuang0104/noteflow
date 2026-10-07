@@ -95,9 +95,57 @@ function receiptCase(mutateReceipt = () => {}, mutatePlan = () => {}) {
   return { root, p, cleanup: () => rmSync(root, { recursive: true, force: true }) }
 }
 
+function agyReceiptCase(mutateReceipt = () => {}, mutatePlan = () => {}) {
+  return receiptCase(receipt => {
+    receipt.worker = {
+      executor: 'agy',
+      orca: { run_id: 'run-fixture', task_id: 'task-fixture', dispatch_ids: ['ctx_fixture'] },
+      attempt: 1,
+      contract_sha256: 'a'.repeat(64),
+      worker_report_sha256: 'b'.repeat(64),
+      lead_vendor: 'codex',
+      scope_gate: { schema: 'worker-scope-v1', status: 'PASS', base: receipt.baseline_commit, allowed: ['src/'], changed: ['src/a.js'] }
+    }
+    mutateReceipt(receipt)
+  }, planValue => {
+    planValue.slices[0].executor = 'agy'
+    planValue.slices[0].scope = { paths: ['src/'] }
+    planValue.slices[0].verification_obligations = ['node --check src/a.js']
+    mutatePlan(planValue)
+  })
+}
+
 test('valid receipt binds to checkpoint and referenced content', () => {
   const { root, p, cleanup } = receiptCase()
   try { assert.deepEqual(validateReceipt(root, p, 'A', 'implementation'), []) } finally { cleanup() }
+})
+
+test('valid AGY receipt binds worker evidence and its scope gate', () => {
+  const { root, p, cleanup } = agyReceiptCase()
+  try { assert.deepEqual(validateReceipt(root, p, 'A', 'implementation'), []) } finally { cleanup() }
+})
+
+test('AGY implementation receipt requires worker evidence', () => {
+  const { root, p, cleanup } = agyReceiptCase(receipt => delete receipt.worker)
+  try { assert.ok(validateReceipt(root, p, 'A', 'implementation').includes('WORKER_EVIDENCE_MISSING')) } finally { cleanup() }
+})
+
+for (const [name, mutate] of [
+  ['executor', receipt => receipt.worker.executor = 'lead'],
+  ['scope-gate status', receipt => receipt.worker.scope_gate.status = 'FAIL'],
+  ['scope-gate base', receipt => receipt.worker.scope_gate.base = 'c'.repeat(40)],
+  ['scope-gate allowlist', receipt => receipt.worker.scope_gate.allowed = ['lib/']],
+  ['missing scope gate', receipt => delete receipt.worker.scope_gate],
+]) test(`AGY implementation receipt rejects worker ${name} mismatch`, () => {
+  const { root, p, cleanup } = agyReceiptCase(mutate)
+  try { assert.ok(validateReceipt(root, p, 'A', 'implementation').includes('WORKER_EVIDENCE_MISMATCH')) } finally { cleanup() }
+})
+
+test('lead implementation receipt rejects unexpected worker evidence', () => {
+  const { root, p, cleanup } = receiptCase(receipt => {
+    receipt.worker = { executor: 'agy' }
+  })
+  try { assert.ok(validateReceipt(root, p, 'A', 'implementation').includes('WORKER_EVIDENCE_UNEXPECTED')) } finally { cleanup() }
 })
 
 for (const [name, mutate, reason] of [

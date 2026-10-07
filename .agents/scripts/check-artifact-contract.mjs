@@ -121,6 +121,29 @@ export function attemptReceiptPath(storyId, sliceId, attemptId, kind) {
   return `_bmad-output/implementation-artifacts/receipts/story-${storyId.replace('.', '-')}/${sliceId}-${kind}-attempt-${attemptId}.json`
 }
 
+function equalPathList(left, right) {
+  if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length) return false
+  const a = [...left].sort(), b = [...right].sort()
+  return a.every((value, index) => value === b[index])
+}
+
+function validateWorkerReceiptBinding(slice, receipt, kind, errors) {
+  if (kind !== 'implementation') return
+  if (slice?.executor === 'agy') {
+    const worker = receipt.worker
+    if (!worker || typeof worker !== 'object' || Array.isArray(worker)) {
+      errors.push('WORKER_EVIDENCE_MISSING')
+      return
+    }
+    const gate = worker.scope_gate
+    if (worker.executor !== 'agy' || !gate || typeof gate !== 'object' || Array.isArray(gate) ||
+        gate.status !== 'PASS' || gate.base !== receipt.baseline_commit ||
+        !equalPathList(gate.allowed, slice.scope?.paths)) errors.push('WORKER_EVIDENCE_MISMATCH')
+  } else if (Object.hasOwn(receipt, 'worker')) {
+    errors.push('WORKER_EVIDENCE_UNEXPECTED')
+  }
+}
+
 function readReceiptRecord(root, plan, sliceId, kind, ref, expected, attemptId = null) {
   const errors = []
   if (!['implementation', 'verification', 'review'].includes(kind) || !expected || !ref || typeof ref.path !== 'string' ||
@@ -149,6 +172,7 @@ function readReceiptRecord(root, plan, sliceId, kind, ref, expected, attemptId =
     !item || typeof item !== 'object' || Array.isArray(item) ||
     typeof item.command !== 'string' || !item.command || !Number.isInteger(item.exit_code) ||
     typeof item.tool !== 'string' || !item.tool || typeof item.environment !== 'string' || !item.environment)) errors.push('INVALID_RECEIPT_PAYLOAD')
+  validateWorkerReceiptBinding(expected, receipt, kind, errors)
   return { receipt, errors: [...new Set(errors)] }
 }
 
