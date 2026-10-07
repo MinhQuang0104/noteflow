@@ -203,24 +203,6 @@ function Assert-Topology {
     }
 }
 
-function Assert-OldContainerPreserved {
-    $old = docker --context $script:DockerContext inspect noteflow-backend-ci-postgres --format '{{.Id}}|{{.State.Status}}|{{.Config.Image}}|{{range .Mounts}}{{.Name}}={{.Destination}};{{end}}'
-    $script:LastExternalExitCode = $LASTEXITCODE
-    if ($script:LastExternalExitCode -ne 0) {
-        Fail 'The pre-existing noteflow-backend-ci-postgres container is missing.'
-    }
-
-    if (($old -join '') -notmatch '^8974fcd63265e74e2f669780c2204da958b29b0f59ddfc9000579841bba6a92a\|exited\|postgres:17\|') {
-        Fail ("The pre-existing PostgreSQL container identity changed: {0}" -f ($old -join ''))
-    }
-
-    $volume = docker --context $script:DockerContext volume inspect f9e66a1661ba96ecb617bd340f27f45ed9dff31e6aacb7cbde62fc494d313d0c --format '{{.Name}}|{{.Mountpoint}}'
-    $script:LastExternalExitCode = $LASTEXITCODE
-    if ($script:LastExternalExitCode -ne 0 -or ($volume -join '') -notmatch '^f9e66a1661ba96ecb617bd340f27f45ed9dff31e6aacb7cbde62fc494d313d0c\|') {
-        Fail 'The pre-existing anonymous PostgreSQL volume is missing or changed.'
-    }
-}
-
 try {
     Assert-CanonicalCheckout
     Assert-Docker
@@ -263,7 +245,6 @@ try {
         Invoke-Local @('test-stop')
     }
 
-    Assert-OldContainerPreserved
     $trackedEnv = @(git ls-files -- deploy/local/.env)
     $script:LastExternalExitCode = $LASTEXITCODE
     if ($script:LastExternalExitCode -ne 0) {

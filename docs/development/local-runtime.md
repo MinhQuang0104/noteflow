@@ -115,8 +115,9 @@ The output identifies the canonical checkout, HEAD, project, service state,
 health, ports, mounts, and non-secret database identity. It does not print
 environment secrets.
 
-The existing `noteflow-backend-ci-postgres` container and its anonymous volume
-are outside this project and are preserved. The old SQLite file and
+The legacy `noteflow-backend-ci-postgres` container and its anonymous volume
+were removed by a Docker Desktop factory reset on 2026-10-07, so verification
+no longer checks for them. The old SQLite file and
 `backend/.env` are also preserved; the Docker runtime uses independent
 PostgreSQL data. Importing old SQLite data is a separate migration task.
 
