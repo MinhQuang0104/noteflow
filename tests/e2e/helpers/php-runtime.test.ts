@@ -7,8 +7,19 @@ const rootDir = 'C:\\workspace with spaces\\noteflow'
 const composeEnvironment = {
   NOTEFLOW_E2E_MODE: 'compose',
   APP_ENV: 'testing',
+  DB_CONNECTION: 'pgsql',
   DB_HOST: 'postgres-test',
   DB_PORT: '5432',
+  DB_DATABASE: 'noteflow_test',
+  DB_URL: '',
+}
+
+const nativeEnvironment = {
+  NOTEFLOW_E2E_MODE: 'native',
+  APP_ENV: 'testing',
+  DB_CONNECTION: 'pgsql',
+  DB_HOST: '127.0.0.1',
+  DB_PORT: '55414',
   DB_DATABASE: 'noteflow_test',
   DB_URL: '',
 }
@@ -16,7 +27,7 @@ const composeEnvironment = {
 test('native mode invokes PHP with argv and the selected working directory', () => {
   const invocation = buildPhpInvocation(['db-helper.php', 'set-write-state', 'open'], 'helpers', {
     rootDir,
-    env: { NOTEFLOW_E2E_MODE: 'native', APP_ENV: 'testing' },
+    env: nativeEnvironment,
   })
 
   assert.match(invocation.command, /php(?:\.exe)?$/)
@@ -40,7 +51,7 @@ test('compose mode invokes the fixed backend-test service without a shell', () =
 test('arguments containing spaces remain one argument', () => {
   const invocation = buildPhpInvocation(['artisan', 'test --filter=space value'], 'backend', {
     rootDir,
-    env: { NOTEFLOW_E2E_MODE: 'native' },
+    env: nativeEnvironment,
   })
 
   assert.deepEqual(invocation.args, ['artisan', 'test --filter=space value'])
@@ -54,5 +65,15 @@ test('invalid mode and mixed compose identity are rejected before execution', ()
       env: { ...composeEnvironment, DB_HOST: 'postgres' },
     }),
     /DB_HOST=postgres-test/,
+  )
+})
+
+test('native mode rejects a non-empty DB_URL before execution', () => {
+  assert.throws(
+    () => buildPhpInvocation(['db-helper.php', 'reset'], 'helpers', {
+      rootDir,
+      env: { ...nativeEnvironment, DB_URL: 'postgresql://noteflow/noteflow' },
+    }),
+    /DB_URL=<empty>/,
   )
 })

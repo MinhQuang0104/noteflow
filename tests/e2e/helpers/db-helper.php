@@ -8,6 +8,10 @@ $missingEnvironment = array_values(array_filter(
     static fn (string $name): bool => getenv($name) === false || trim((string) getenv($name)) === '',
 ));
 
+if (getenv('DB_URL') === false) {
+    $missingEnvironment[] = 'DB_URL';
+}
+
 if ($missingEnvironment !== []) {
     fwrite(STDERR, 'FATAL: db-helper requires explicit test identity environment: '.implode(', ', $missingEnvironment)."\n");
     exit(1);
@@ -30,6 +34,24 @@ $host = (string) getenv('DB_HOST');
 $port = (string) getenv('DB_PORT');
 $user = (string) getenv('DB_USERNAME');
 $pass = (string) getenv('DB_PASSWORD');
+$url = trim((string) getenv('DB_URL'));
+
+if ($url !== '') {
+    fwrite(STDERR, "FATAL: db-helper requires DB_URL to be empty; refusing URL-based database identity.\n");
+    exit(1);
+}
+
+$testEndpoints = [
+    'postgres-test:5432',
+    '127.0.0.1:5432',
+    '127.0.0.1:55414',
+    'localhost:5432',
+    'localhost:55414',
+];
+if (! in_array($host.':'.$port, $testEndpoints, true)) {
+    fwrite(STDERR, "FATAL: db-helper requires a test PostgreSQL endpoint; refusing {$host}:{$port}.\n");
+    exit(1);
+}
 
 try {
     $dsn = "pgsql:host={$host};port={$port};dbname={$database}";

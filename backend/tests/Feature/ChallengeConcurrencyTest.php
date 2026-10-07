@@ -254,3 +254,44 @@ test('AD-6: serialized concurrent duplicate commands replay idempotent result wi
 
     expect(fn () => $createUseCase->execute($diffCmd))->toThrow(IdempotencyKeyReusedException::class);
 });
+
+test('C-03: a real second PostgreSQL connection waits on duplicate create and then replays one acknowledgement', function () {
+    $owner = createCommittedOwner('c03-owner@example.com');
+    $command = new CreateChallengeCommand(
+        ownerId: $owner->id,
+        commandId: (string) Str::uuid(),
+        dataEpoch: 1,
+        name: 'Two connection idempotency',
+        description: 'One committed challenge',
+        targetDays: 5,
+    );
+    $conn1 = DB::connection('pgsql');
+    $conn2 = DB::connection('pgsql_second');
+
+    DB::setDefaultConnection('pgsql');
+    $first = app(CreateChallengeUseCase::class)->execute($command);
+
+    $conn1->beginTransaction();
+    $conn1->table('account_states')->where('owner_id', $owner->id)->lockForUpdate()->first();
+
+    $conn2->statement("SET lock_timeout = '200ms'");
+    DB::setDefaultConnection('pgsql_second');
+    try {
+        app(CreateChallengeUseCase::class)->execute($command);
+        $this->fail('Expected the second connection to wait on the account-row lock');
+    } catch (QueryException $exception) {
+        expect($exception->getCode())->toBe('55P03')
+            ->and($exception->getMessage())->toContain('lock timeout');
+    }
+
+    $conn1->commit();
+
+    $replay = app(CreateChallengeUseCase::class)->execute($command);
+
+    expect($replay['challenge']['id'])->toBe($first['challenge']['id'])
+        ->and($replay['account_revision'])->toBe(1)
+        ->and(DB::connection('pgsql_second')->table('challenges')->where('owner_id', $owner->id)->count())->toBe(1)
+        ->and(DB::connection('pgsql_second')->table('challenge_target_periods')->where('owner_id', $owner->id)->count())->toBe(1)
+        ->and(DB::connection('pgsql_second')->table('mutation_commands')->where('owner_id', $owner->id)->count())->toBe(1)
+        ->and((int) DB::connection('pgsql_second')->table('account_states')->where('owner_id', $owner->id)->value('account_revision'))->toBe(1);
+});

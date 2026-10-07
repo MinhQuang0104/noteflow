@@ -5,8 +5,8 @@ const backendOrigin = composeMode ? 'http://127.0.0.1:8001' : 'http://127.0.0.1:
 
 export default defineConfig({
   testDir: '.',
-  fullyParallel: !composeMode,
-  workers: composeMode ? 1 : undefined,
+  fullyParallel: false,
+  workers: 1,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
@@ -46,9 +46,10 @@ export default defineConfig({
           DB_CONNECTION: 'pgsql',
           DB_HOST: process.env.DB_HOST || '127.0.0.1',
           DB_PORT: process.env.DB_PORT || '55414',
-          DB_DATABASE: process.env.DB_DATABASE || 'noteflow_test',
+          DB_DATABASE: 'noteflow_test',
           DB_USERNAME: process.env.DB_USERNAME || 'noteflow',
           DB_PASSWORD: process.env.DB_PASSWORD || 'noteflow',
+          DB_URL: '',
         },
       }]),
     {

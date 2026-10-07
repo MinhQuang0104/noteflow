@@ -22,12 +22,17 @@ const defaultRootDir = path.resolve(currentDir, '../../..')
 const backendDirName = 'backend'
 const helperScriptName = 'db-helper.php'
 
-const composeIdentity: Record<string, string> = {
+const testIdentity: Record<string, string> = {
   APP_ENV: 'testing',
-  DB_HOST: 'postgres-test',
-  DB_PORT: '5432',
+  DB_CONNECTION: 'pgsql',
   DB_DATABASE: 'noteflow_test',
   DB_URL: '',
+}
+
+const composeIdentity: Record<string, string> = {
+  ...testIdentity,
+  DB_HOST: 'postgres-test',
+  DB_PORT: '5432',
 }
 
 export function getRuntimeMode(environment: Record<string, string | undefined> = process.env): PhpRuntimeMode {
@@ -43,10 +48,27 @@ export function getRuntimeMode(environment: Record<string, string | undefined> =
   throw new Error(`NOTEFLOW_E2E_MODE must be 'native' or 'compose'; received '${mode}'.`)
 }
 
-function assertComposeIdentity(environment: Record<string, string | undefined>): void {
-  for (const [name, expected] of Object.entries(composeIdentity)) {
+function assertTestIdentity(environment: Record<string, string | undefined>, mode: PhpRuntimeMode): void {
+  const identity = mode === 'compose' ? composeIdentity : testIdentity
+
+  for (const [name, expected] of Object.entries(identity)) {
     if (environment[name] !== expected) {
-      throw new Error(`Compose test runtime requires ${name}=${expected || "<empty>"}; received ${environment[name] ?? '<missing>'}.`)
+      throw new Error(`Test runtime requires ${name}=${expected || "<empty>"}; received ${environment[name] ?? '<missing>'}.`)
+    }
+  }
+
+  if (mode === 'native') {
+    const host = environment.DB_HOST
+    const port = environment.DB_PORT
+    const nativeEndpoint = `${host ?? '<missing>'}:${port ?? '<missing>'}`
+    const allowedEndpoints = new Set([
+      '127.0.0.1:5432',
+      '127.0.0.1:55414',
+      'localhost:5432',
+      'localhost:55414',
+    ])
+    if (!allowedEndpoints.has(nativeEndpoint)) {
+      throw new Error(`Native test runtime requires a loopback test endpoint; received ${nativeEndpoint}.`)
     }
   }
 }
@@ -98,6 +120,8 @@ export function buildPhpInvocation(
   }
 
   if (mode === 'native') {
+    assertTestIdentity(environment, mode)
+
     return {
       command: process.platform === 'win32' ? 'php.exe' : 'php',
       args: mapPhpArguments(args, workingDirectory, rootDir, mode),
@@ -106,7 +130,7 @@ export function buildPhpInvocation(
     }
   }
 
-  assertComposeIdentity(environment)
+  assertTestIdentity(environment, mode)
 
   return {
     command: process.platform === 'win32' ? 'docker.exe' : 'docker',
