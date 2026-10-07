@@ -5,6 +5,9 @@ info:
 servers:
   - url: /
     description: Same-origin NoteFlow deployment
+externalDocs:
+  description: "Bắt buộc: flow browser CSRF Sanctum và xử lý HTTP 419"
+  url: ../docs/deployment/csrf-and-419.md
 paths:
   /login:
     post:
