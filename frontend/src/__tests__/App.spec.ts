@@ -1,6 +1,6 @@
 import { VueQueryPlugin } from '@tanstack/vue-query'
 import { beforeEach, expect, test, vi } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 
 import * as challengesApi from '../api/challenges'
 import * as authApi from '../api/auth'
@@ -74,6 +74,96 @@ test('authenticated navigation has the approved order and a clear mobile trigger
     'Cài đặt',
   ])
   expect(wrapper.get('button[aria-controls="primary-navigation"]').attributes('aria-expanded')).toBe('false')
+  wrapper.unmount()
+})
+
+test('session expiry removes private route rendering without a navigation round trip', async () => {
+  const auth = useAuthStore(pinia)
+  const account = useAccountStore(pinia)
+  auth.owner = { id: 42, name: 'Owner', email: 'owner@example.test' }
+  auth.status = 'authenticated'
+  auth.generation = 1
+  account.status = 'ready'
+  account.context = {
+    timezone: 'Asia/Ho_Chi_Minh',
+    account_date: DATE,
+    week: { start_date: '2026-09-21', end_date: '2026-09-27' },
+    account_revision: 11,
+    data_epoch: 4,
+    write_state: 'open',
+  }
+  await router.push('/challenges')
+
+  const wrapper = mount(App, {
+    global: { plugins: [pinia, router, [VueQueryPlugin, { queryClient }]] },
+  })
+  await flushPromises()
+  await wrapper.get('#create-challenge-btn').trigger('click')
+  await wrapper.get('#create-name').setValue('Bản nháp riêng tư')
+  expect(wrapper.find('#create-name').exists()).toBe(true)
+
+  vi.spyOn(authApi, 'getSession').mockResolvedValue(null)
+  await auth.refreshSession()
+  await flushPromises()
+
+  expect(auth.status).toBe('guest')
+  expect(wrapper.find('#create-name').exists()).toBe(false)
+  expect(wrapper.find('#session-expired-gate').exists()).toBe(true)
+  expect(wrapper.get('#session-expired-gate').text()).toContain('Phiên làm việc đã hết hạn')
+  expect(wrapper.get('#session-expired-gate a[href="/sign-in"]').text()).toContain('Đăng nhập lại')
+  expect(wrapper.get('#session-expired-gate').text()).not.toContain('Bản nháp riêng tư')
+  wrapper.unmount()
+})
+
+test.each(['today', 'detail', 'edit'] as const)('session expiry hides private %s content without a route change', async (surface) => {
+  const auth = useAuthStore(pinia)
+  const account = useAccountStore(pinia)
+  auth.owner = { id: 42, name: 'Owner', email: 'owner@example.test' }
+  auth.status = 'authenticated'
+  auth.generation = 1
+  account.status = 'ready'
+  account.context = {
+    timezone: 'Asia/Ho_Chi_Minh',
+    account_date: DATE,
+    week: { start_date: '2026-09-21', end_date: '2026-09-27' },
+    account_revision: 11,
+    data_epoch: 4,
+    write_state: 'open',
+  }
+
+  const challenge = {
+    id: 'c1111111-2026-4444-9999-000000000001',
+    name: 'Riêng tư',
+    description: 'Nội dung riêng tư',
+    start_date: DATE,
+    target_days: 3,
+    row_version: 1,
+    created_at: '2026-09-19T10:00:00Z',
+    updated_at: '2026-09-19T10:00:00Z',
+  }
+  const privateSelector = surface === 'today' ? '#today-challenges-heading' : surface === 'detail' ? '#challenge-detail-name' : '#edit-name'
+  if (surface !== 'today') {
+    vi.mocked(challengesApi.getChallenges).mockResolvedValue({ challenges: [challenge] })
+  }
+
+  await router.push(surface === 'today' ? '/today' : '/challenges')
+  const wrapper = mount(App, {
+    global: { plugins: [pinia, router, [VueQueryPlugin, { queryClient }]] },
+  })
+  await flushPromises()
+  if (surface !== 'today') {
+    await wrapper.get('li').trigger('click')
+    await flushPromises()
+    if (surface === 'edit') await wrapper.get('#edit-challenge-btn').trigger('click')
+  }
+  expect(wrapper.find(privateSelector).exists()).toBe(true)
+
+  vi.spyOn(authApi, 'getSession').mockResolvedValue(null)
+  await auth.refreshSession()
+  await flushPromises()
+
+  expect(wrapper.find(privateSelector).exists()).toBe(false)
+  expect(wrapper.find('#session-expired-gate').exists()).toBe(true)
   wrapper.unmount()
 })
 

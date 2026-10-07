@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
-import { RouterLink, RouterView, useRouter } from 'vue-router'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 
 import { useAccountStore } from '../stores/account'
 import { useAuthStore } from '../stores/auth'
@@ -12,9 +12,11 @@ const account = useAccountStore()
 const journalDrafts = useJournalDraftsStore()
 const sync = useSyncStore()
 const router = useRouter()
+const route = useRoute()
 const navigationOpen = ref(false)
 const loggingOut = ref(false)
 const logoutError = ref<string | null>(null)
+const isPrivateRoute = computed(() => route.meta.public !== true)
 
 const navigation = [
   { to: '/today', label: 'Hôm nay' },
@@ -186,7 +188,25 @@ async function logOut(): Promise<void> {
     </div>
 
     <main id="main-content" class="mx-auto w-full min-w-0 max-w-6xl px-4 py-10 sm:px-6" tabindex="-1">
-      <RouterView />
+      <RouterView v-if="!isPrivateRoute || auth.status === 'authenticated'" />
+      <section
+        v-else
+        id="session-expired-gate"
+        role="status"
+        aria-live="polite"
+        class="mx-auto max-w-xl rounded-2xl border border-amber-300 bg-amber-50 p-6 text-center shadow-sm"
+      >
+        <h2 class="text-lg font-semibold text-amber-950">Phiên làm việc đã hết hạn</h2>
+        <p class="mt-2 text-sm text-amber-900">
+          Nội dung riêng tư đã được ẩn. Đăng nhập lại để tiếp tục phiên làm việc của bạn.
+        </p>
+        <RouterLink
+          class="mt-4 inline-flex rounded-lg bg-indigo-700 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-800"
+          to="/sign-in"
+        >
+          Đăng nhập lại
+        </RouterLink>
+      </section>
     </main>
   </div>
 </template>
