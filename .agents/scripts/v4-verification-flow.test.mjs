@@ -345,6 +345,8 @@ test('same-Lead APPROVE requires exact bounded evidence and persists verificatio
     assert.equal(plan.slices[0].status, 'reviewed')
     const reviewReceipt = JSON.parse(readFileSync(path.join(f.root, REVIEW_RECEIPT), 'utf8'))
     assert.equal(reviewReceipt.judgment, 'APPROVE')
+    assert.equal(reviewReceipt.reviewer, 'same-lead')
+    assert.equal(Object.hasOwn(reviewReceipt, 'findings'), false)
     assert.equal(reviewReceipt.verdict, undefined)
     assert.equal(reviewReceipt.freshness, undefined)
     assert.equal(reviewEvidenceFreshness(reviewReceipt, ['src/feature.txt'], plan.slices[0].checkpoint_commit, digestValue(plan.risk)).status, 'FRESH_REUSED')
@@ -627,5 +629,70 @@ test('kernel-written review receipts round-trip through the finalization gate', 
     const reviewReasons = gate.reasons.filter(reason => /REVIEW|RECEIPT|PROGRESSION/.test(reason))
     assert.deepEqual(reviewReasons, [], JSON.stringify(gate.reasons))
     assert.ok(['FRESH_CANDIDATE', 'FRESH_REUSED', 'FRESH'].includes(gate.slices[0].review_freshness), JSON.stringify(gate.slices))
+  } finally { f.cleanup() }
+})
+
+for (const [name, reviewer, findings, reason] of [
+  ['structured lead', { type: 'lead', vendor: 'codex', independent: false }, [], null],
+  ['structured human', { type: 'human', vendor: null, independent: false }, [{ id: 'F1', class: 'FALSE_POSITIVE', summary: 'Disproved by evidence', paths: ['src/feature.txt'] }], null],
+  ['false independence', { type: 'lead', vendor: 'claude', independent: true }, [], 'REVIEWER_INDEPENDENCE_MISMATCH'],
+  ['malformed reviewer', { type: 'lead', vendor: 'other', independent: false }, [], 'REVIEWER_INVALID'],
+  ...['VALID', 'SPEC_AMBIGUITY', 'NEEDS_HUMAN_DECISION'].map(className => [className, { type: 'lead', vendor: 'codex', independent: false }, [{ id: 'F1', class: className, summary: 'Open finding', paths: ['src/feature.txt'] }], 'REVIEW_FINDINGS_OPEN']),
+  ['malformed findings', 'same-lead', [{ id: 'F1', class: 'FALSE_POSITIVE', summary: '', paths: ['../outside'] }], 'REVIEW_FINDINGS_INVALID'],
+  ['conflicting decisions', 'same-lead', [], 'REVIEW_DECISION_CONFLICT']
+]) test(`structured review ${name} validates before persisting`, () => {
+  const f = fixture('HIGH')
+  try {
+    const prepared = prepareVerification(f)
+    const pendingResult = verifySlice(f.root, { ...f.verifyRequest, operation: 'verify', preview: prepared.preview })
+    const evidence = makeReviewEvidence(f, prepared.preview)
+    const review = {
+      judgment: 'APPROVE', reviewer, findings, pending_fingerprint: pendingResult.pending.fingerprint,
+      scope_paths: ['src/feature.txt'], scope_digest: scopeDigest(evidence), change_evidence: evidence,
+      answers: pendingResult.pending.review_questions.map(item => ({ id: item.id, answer: 'confirmed' })),
+      commands: [{ command: 'bounded review', exit_code: 0, tool: 'reviewer', environment: 'fixture' }]
+    }
+    if (name === 'conflicting decisions') review.verdict = 'CHANGES_REQUIRED'
+    const result = recordSliceReview(f.root, {
+      ...f.verifyRequest, operation: 'record-review', preview: prepared.preview, pending: pendingResult.pending,
+      plan_template: verificationTemplate(f, true), review
+    })
+    if (reason) {
+      assert.equal(result.status, reason === 'REVIEW_FINDINGS_OPEN' ? 'BLOCKED' : 'INVALID', JSON.stringify(result))
+      assert.ok(result.reasons.includes(reason), JSON.stringify(result))
+      assert.equal(git(f.root, 'rev-parse', 'HEAD'), f.head)
+      assert.equal(existsSync(path.join(f.root, REVIEW_RECEIPT)), false)
+    } else {
+      assert.equal(result.status, 'APPLIED', JSON.stringify(result))
+      const receipt = JSON.parse(readFileSync(path.join(f.root, REVIEW_RECEIPT), 'utf8'))
+      assert.equal(receipt.schema_version, 2)
+      assert.deepEqual(receipt.reviewer, reviewer)
+      assert.deepEqual(receipt.findings, findings)
+      const plan = frontmatter(readFileSync(path.join(f.root, PLAN), 'utf8'))
+      assert.deepEqual(plan.slices[0].review.reviewer, reviewer)
+      assert.deepEqual(validateReceipt(f.root, plan, 'A', 'review'), [])
+      assert.equal(validateStoryPlan(f.root, '9.1').status, 'READY')
+    }
+  } finally { f.cleanup() }
+})
+
+test('structured alternate verification recovery rejects open findings before transaction mutation', () => {
+  const f = fixture('HIGH')
+  try {
+    const prepared = prepareVerification(f)
+    const identity = transactionIdentity(f.root, f.verifyRequest)
+    const result = verifySlice(f.root, {
+      ...f.verifyRequest, operation: 'verify', preview: prepared.preview,
+      recovery_authorized: true, recovery_checkpoint: f.head,
+      review: { judgment: 'APPROVE', reviewer: { type: 'lead', vendor: 'codex', independent: false },
+        findings: [{ id: 'F1', class: 'VALID', summary: 'Open', paths: ['src/feature.txt'] }] }
+    })
+    assert.equal(result.status, 'BLOCKED', JSON.stringify(result))
+    assert.deepEqual(result.reasons, ['REVIEW_FINDINGS_OPEN'])
+    assert.equal(inspectActionTransaction(f.root, f.verifyRequest.transaction_id).status, 'NOT_FOUND')
+    assert.equal(existsSync(identity.lockPath), false)
+    assert.equal(existsSync(identity.journalPath), false)
+    assert.equal(git(f.root, 'rev-parse', 'HEAD'), f.head)
+    assert.equal(git(f.root, 'status', '--porcelain'), '')
   } finally { f.cleanup() }
 })

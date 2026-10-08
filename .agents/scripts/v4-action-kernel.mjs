@@ -5,7 +5,7 @@ import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
 import { frontmatter, validate as validateStoryPlan } from './check-story-plan.mjs'
-import { attemptReceiptPath, readReceipt, receiptDigest } from './check-artifact-contract.mjs'
+import { attemptReceiptPath, readReceipt, receiptDigest, validateReviewPayload } from './check-artifact-contract.mjs'
 import { inspect as inspectSliceVerification } from './check-slice-verification.mjs'
 import { verifyChangedPaths } from './check-verification.mjs'
 import { validateEvidenceSet } from './prepare-change-evidence.mjs'
@@ -1389,6 +1389,15 @@ function reviewCommandRecords(review) {
   return records.map(item => ({ command: item.command, exit_code: item.exit_code, tool: item.tool, environment: item.environment }))
 }
 
+function validatedSliceReview(review, preview) {
+  const payloadErrors = validateReviewPayload(review, preview.original_slice.executor ?? 'lead')
+  if (payloadErrors.length) throw new Error(payloadErrors[0])
+  return review?.reviewer && typeof review.reviewer === 'object'
+    ? { ...review, reviewer: { ...review.reviewer,
+        independent: review.reviewer.type === 'lead' && preview.original_slice.executor === 'agy' } }
+    : review
+}
+
 function buildVerificationMetadata(root, preview, outcome, targetStatus, review = null) {
   const verificationEvidence = outcome.verification
   const focused = outcome.focusedEvidence ?? verificationEvidence.focused_checks ?? []
@@ -1426,6 +1435,7 @@ function buildVerificationMetadata(root, preview, outcome, targetStatus, review 
   let reviewReceipt = null
   let reviewDigest = null
   if (review) {
+    review = validatedSliceReview(review, preview)
     const reviewCommands = reviewCommandRecords(review)
     reviewReceipt = {
       schema_version: REVIEW_RECEIPT_SCHEMA_VERSION,
@@ -1446,7 +1456,8 @@ function buildVerificationMetadata(root, preview, outcome, targetStatus, review 
       scope_digest: review.scope_digest ?? null,
       risk_context_digest: digestValue(preview.original_plan.risk ?? null),
       reviewed_commit: preview.checkpoint_commit,
-      reviewer: review.reviewer ?? 'same-lead'
+      reviewer: review.reviewer ?? 'same-lead',
+      ...(Object.hasOwn(review, 'findings') ? { findings: review.findings } : {})
     }
     reviewDigest = receiptDigest(reviewReceipt)
   }
@@ -1471,11 +1482,16 @@ function buildVerificationMetadata(root, preview, outcome, targetStatus, review 
     PROGRESSION_ELIGIBLE: 'true',
     REVIEW_JUDGMENT: review?.judgment ?? '',
     REVIEWED_COMMIT: preview.checkpoint_commit,
-    REVIEWER: review?.reviewer ?? '',
+    REVIEWER: typeof review?.reviewer === 'object' ? '' : review?.reviewer ?? '',
     RISK_CONTEXT_DIGEST: digestValue(preview.original_plan.risk ?? null),
     CONTEXT_DIGEST: preview.context_digest
   }
-  const planText = replaceVerificationTemplate(preview.plan_template, values)
+  let planTemplate = preview.plan_template
+  if (review?.reviewer && typeof review.reviewer === 'object') {
+    planTemplate = planTemplate.replace(/^([ \t]*)reviewer: (\{\{(?:REVIEWER|reviewer)\}\})[ \t]*\r?$/gm, (_, indent) =>
+      `${indent}reviewer:\n${indent}  type: ${review.reviewer.type}\n${indent}  vendor: ${review.reviewer.vendor ?? 'null'}\n${indent}  independent: ${review.reviewer.independent}`)
+  }
+  const planText = replaceVerificationTemplate(planTemplate, values)
   const files = {
     [preview.plan_path]: planText,
     [preview.verification_receipt_path]: `${JSON.stringify(verificationReceipt, null, 2)}\n`
@@ -1601,6 +1617,7 @@ function metadataDescriptor(root, preview, outcome, targetStatus, review, transa
 }
 
 function persistVerification(root, preview, outcome, request, targetStatus = 'verified', review = null) {
+  review = validatedSliceReview(review, preview)
   const recovery = request.recovery_authorized === true || request.recovery?.authorized === true
   if (!preview.plan_template && !request.plan_template && !recovery) throw new Error('PLAN_TEMPLATE_REQUIRED')
   const effectivePreview = { ...preview, plan_template: request.plan_template ?? preview.plan_template }
@@ -1619,6 +1636,9 @@ function persistVerification(root, preview, outcome, request, targetStatus = 've
 }
 
 function verificationError(error) {
+  if (['REVIEWER_INVALID', 'REVIEW_FINDINGS_INVALID', 'REVIEWER_INDEPENDENCE_MISMATCH',
+    'REVIEW_DECISION_CONFLICT', 'REVIEW_DECISION_INVALID', 'REVIEW_DECISION_MISSING'].includes(error.message)) return invalid(error.message)
+  if (error.message === 'REVIEW_FINDINGS_OPEN') return blocked(error.message)
   if (error.message.includes('STALE') || error.message.includes('MISMATCH') || error.message === 'EXPECTED_HEAD_MISMATCH') return stale(error.message)
   if (error.message.includes('PLAN_NOT_READY') || error.message.includes('MANIFEST_') || error.message.includes('SLICE_') ||
       error.message.includes('DIRTY_') || error.message.includes('SUCCESSOR_') || error.message.includes('AMBIGUOUS_')) return blocked(error.message)
@@ -1636,7 +1656,7 @@ function verifySliceCore(root, request = {}) {
     const recovery = request.recovery_authorized === true || request.recovery?.authorized === true
     const preview = request.preview
     const descriptorPreview = verificationDescriptorFromPreview(root, request, preview, recovery)
-    if (recovery) return persistVerification(root, descriptorPreview, null, request, request.target_status ?? 'verified', request.review ?? null)
+    if (recovery) return persistVerification(root, descriptorPreview, null, request, request.target_status ?? 'verified', validatedSliceReview(request.review ?? null, descriptorPreview))
     const bundle = runVerificationBundle(root, descriptorPreview, request)
     if (bundle.stale) return stale(bundle.reasons[0], { action: 'verify_slice', operation: 'verify', manifest: bundle.manifest })
     if (bundle.invalid) return invalid(bundle.reasons[0], { action: 'verify_slice', operation: 'verify', verification: bundle.verification })
@@ -1684,14 +1704,15 @@ function recordSliceReviewCore(root, request = {}) {
     const descriptorPreview = verificationDescriptorFromPreview(root, { ...request, action: 'verify_slice' }, preview, recovery)
     if (pending.preview_fingerprint !== descriptorPreview.fingerprint || pending.story_id !== descriptorPreview.story_id || pending.slice_id !== descriptorPreview.slice_id) throw new Error('PENDING_EVIDENCE_STALE')
     if (!exactList(pending.changed_paths, descriptorPreview.changed_paths) || pending.changed_paths_sha256 !== descriptorPreview.changed_paths_sha256) throw new Error('PENDING_SCOPE_MISMATCH')
+    const validatedReview = validatedSliceReview(request.review, descriptorPreview)
     if (recovery) {
       if (!request.review || request.review.judgment !== 'APPROVE') throw new Error('RECOVERY_REVIEW_APPROVAL_REQUIRED')
-      return persistVerification(root, descriptorPreview, null, request, 'reviewed', request.review)
+      return persistVerification(root, descriptorPreview, null, request, 'reviewed', validatedReview)
     }
     const manifest = inspectSliceVerification(root, descriptorPreview.story_id, descriptorPreview.slice_id)
     if (['STALE', 'BLOCKED', 'INVALID', 'ERROR'].includes(manifest.status)) return stale(`VERIFICATION_MANIFEST_${manifest.status}`)
     if (!exactList(changePaths(manifest.changedPaths), descriptorPreview.changed_paths)) return stale('CHANGED_PATH_SCOPE_CHANGED')
-    const review = request.review
+    const review = validatedReview
     if (!review || typeof review !== 'object' || Array.isArray(review) || !REVIEW_JUDGMENTS.has(review.judgment)) throw new Error('REVIEW_JUDGMENT_REQUIRED')
     const questions = pending.review_questions
     if (!Array.isArray(questions) || !questions.length) throw new Error('REVIEW_QUESTIONS_REQUIRED')

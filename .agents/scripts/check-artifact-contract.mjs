@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
+import { reviewDecision } from './v4-finalization-contract.mjs'
 
 const SHA = /^[0-9a-f]{40,64}$/
 const DIGEST = /^sha256:[0-9a-f]{64}$/
@@ -144,6 +145,33 @@ function validateWorkerReceiptBinding(slice, receipt, kind, errors) {
   }
 }
 
+export function validateReviewPayload(review, executor = 'lead') {
+  const errors = []
+  const reviewer = review?.reviewer
+  if (reviewer !== undefined && typeof reviewer !== 'string') {
+    if (!reviewer || typeof reviewer !== 'object' || Array.isArray(reviewer) ||
+        !['lead', 'human'].includes(reviewer.type) || !['codex', 'claude', null].includes(reviewer.vendor) ||
+        typeof reviewer.independent !== 'boolean') errors.push('REVIEWER_INVALID')
+    else if (reviewer.independent !== (reviewer.type === 'lead' && executor === 'agy')) errors.push('REVIEWER_INDEPENDENCE_MISMATCH')
+  }
+  if (Object.hasOwn(review ?? {}, 'findings')) {
+    const findings = review.findings
+    if (!Array.isArray(findings) || findings.some(item => !item || typeof item !== 'object' || Array.isArray(item) ||
+        typeof item.id !== 'string' || !item.id.trim() ||
+        !['VALID', 'FALSE_POSITIVE', 'SPEC_AMBIGUITY', 'NEEDS_HUMAN_DECISION'].includes(item.class) ||
+        typeof item.summary !== 'string' || !item.summary.trim() || !Array.isArray(item.paths) ||
+        item.paths.some(value => typeof value !== 'string' || !value || path.isAbsolute(value) || path.win32.isAbsolute(value) ||
+          value.includes('\\') || value.split('/').some(part => !part || part === '.' || part === '..'))) ||
+        new Set(findings?.map?.(item => item?.id)).size !== findings?.length) errors.push('REVIEW_FINDINGS_INVALID')
+    else {
+      const decision = reviewDecision(review)
+      if (decision.error) errors.push(decision.error)
+      else if (decision.value === 'APPROVE' && findings.some(item => item.class !== 'FALSE_POSITIVE')) errors.push('REVIEW_FINDINGS_OPEN')
+    }
+  }
+  return errors
+}
+
 function readReceiptRecord(root, plan, sliceId, kind, ref, expected, attemptId = null) {
   const errors = []
   if (!['implementation', 'verification', 'review'].includes(kind) || !expected || !ref || typeof ref.path !== 'string' ||
@@ -173,6 +201,10 @@ function readReceiptRecord(root, plan, sliceId, kind, ref, expected, attemptId =
     typeof item.command !== 'string' || !item.command || !Number.isInteger(item.exit_code) ||
     typeof item.tool !== 'string' || !item.tool || typeof item.environment !== 'string' || !item.environment)) errors.push('INVALID_RECEIPT_PAYLOAD')
   validateWorkerReceiptBinding(expected, receipt, kind, errors)
+  if (kind === 'review') {
+    errors.push(...validateReviewPayload(receipt, plan.slices?.find(item => item.id === sliceId)?.executor ?? 'lead'))
+    if (receipt.reviewer && typeof receipt.reviewer === 'object' && receipt.schema_version !== 2) errors.push('INVALID_RECEIPT_IDENTITY')
+  }
   return { receipt, errors: [...new Set(errors)] }
 }
 
