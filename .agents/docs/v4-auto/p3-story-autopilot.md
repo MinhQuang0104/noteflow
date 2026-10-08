@@ -36,7 +36,14 @@ asking a deterministic `autopilot-status` before each step. `complete_story` and
 ### T1 — Authorization record
 
 Files: `v4-story-runner.mjs` (+test), `check-story-plan.mjs` (+test),
-`v4-artifact-contract.md`.
+`v4-action-kernel.mjs` (+`v4-action-kernel.test.mjs`), `v4-artifact-contract.md`.
+
+Owner decision 2026-10-08: the kernel files were missing from this list
+although the last bullet below requires the kernel's metadata validators
+(`validateMetadataProjection`, `validateVerificationMetadata`,
+`validateReworkProjection`) to preserve `autopilot`. Their inclusion is a
+correction of the list, not a scope change; edit the kernel only for that
+preservation check in T1.
 
 - Runner input `{action: 'authorize_autopilot', story_id, budgets:{max_slices,
   max_rework_per_slice, max_minutes_per_slice}, lead_vendor}` via
