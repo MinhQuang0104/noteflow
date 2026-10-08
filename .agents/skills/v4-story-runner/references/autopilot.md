@@ -22,8 +22,9 @@ reasons.
 After compaction, the context threshold, a crash, or a vendor switch, the
 owner opens a fresh session. The fresh session resumes from `autopilot-status`.
 
-Claude reaches the runner by its file path. Both vendors need allowlists for
-`orca orchestration *`, `node .agents/scripts/*`, and `git`.
+Claude reaches the runner by its file path. Both vendors need the allowlists
+below: Orca orchestration and terminal commands, the repository scripts, the
+slice checks, and read-only git.
 
 ## Vendor allowlists
 
@@ -37,17 +38,23 @@ Claude Code `.claude/settings.json` (`permissions.allow`):
   "permissions": {
     "allow": [
       "Bash(orca orchestration *)",
+      "Bash(orca terminal *)",
       "Bash(node .agents/scripts/*)",
-      "Bash(git *)"
+      "Bash(node --test *)",
+      "Bash(git status *)", "Bash(git diff *)", "Bash(git log *)",
+      "Bash(git show *)", "Bash(git rev-parse *)", "Bash(git ls-files *)",
+      "Bash(git merge-base *)", "Bash(git worktree list *)"
     ]
   }
 }
 ```
 
-Codex command-prefix allowlist:
+Codex command-prefix allowlist: the same prefixes (`orca orchestration`,
+`orca terminal`, `node .agents/scripts/`, `node --test`, and the read-only
+`git status|diff|log|show|rev-parse|ls-files|merge-base|worktree list`).
 
-```text
-orca orchestration *
-node .agents/scripts/*
-git
-```
+Git stays read-only: the kernel scripts make every commit, and `AGENTS.md`
+forbids reset, clean and stash, so `git add|commit|push|reset|clean|stash|
+checkout|rebase|branch -D` keep prompting. Add a Story's own declared
+verification commands (for example its `npm`/`php artisan test` lines) per
+Story rather than broad `npm *` or `php *` entries.
