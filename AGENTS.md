@@ -18,7 +18,7 @@ The router selects the lane before bootstrap. A schema-v2 Story explicitly autho
 
 A V4 Story slice whose validated Plan declares `executor: agy` may deliver that slice to Antigravity per `references/agy-executor.md`; this is not V3 fallback, and the Lead still owns scope gate, checkpoint, verification and review.
 
-An explicit Story request **by V4 Lite** uses the Runner and exactly one action. Plan validation, freshness, exact scope, two-commit durability, recovery, review escalation, and Human Gate remain authoritative. `review_slice`, automatic approval, generic continuation, automatic review-to-done, and automatic V3 fallback stay disabled; one invocation may persist one successor but never execute it.
+An explicit Story request **by V4 Lite** uses the Runner and exactly one action. Plan validation, freshness, exact scope, two-commit durability, recovery, review escalation, and Human Gate remain authoritative. Under a valid owner-granted autopilot authorization, the Lead may execute successors that `autopilot-status` returns as `CONTINUE`, per `references/autopilot.md`; `complete_story`, owner review and Human Gate stay manual. `review_slice`, automatic approval, generic continuation, automatic review-to-done, and automatic V3 fallback stay disabled.
 
 Explicit V3.1/Orca requests and Story requests without V4 opt-in use `.agents/policies/orchestration-v3.md` and `story-development`; do not invoke V3 from V4 readiness or migration.
 
