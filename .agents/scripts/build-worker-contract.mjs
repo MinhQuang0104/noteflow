@@ -162,13 +162,14 @@ function requirementLines(projection) {
   return [...tasks, ...acs].join('\n')
 }
 
-function contextLines(projection) {
-  const paths = [
-    ...projection.action_instruction_paths,
-    ...projection.lazy_reference_paths.map(item => item.path),
-    projection.output_contract_ref.path,
-  ]
-  return [...new Set(paths)].join('\n')
+// The worker reads only its Story and the AGENTS.md worker role. The Lead's
+// runner, action and recovery documents are never worker context: they would
+// invite the worker to run Lead-only steps such as prepare or checkpoint.
+function contextLines(source) {
+  return [
+    `${source} (Story; the ACs/Tasks above are its bounded excerpt)`,
+    'AGENTS.md: "Worker role" section only; do not open Lead runner, action or policy documents.',
+  ].join('\n')
 }
 
 function checkText(item) {
@@ -223,7 +224,7 @@ function renderContract(template, projection, options) {
     ['<pinned Git commit>', options.expectedHead],
     ['<optional ref>', 'none'],
     ['<IDs and precise section references; bounded excerpts only>', requirementLines(projection)],
-    ['<minimal paths/sections>', contextLines(projection)],
+    ['<minimal paths/sections>', contextLines(source)],
     ['<approved decision references and invariants>', referenceLines(projection)],
     ['<scope exclusions; no policy/requirement/integration changes>', 'No policy, Story/Plan requirement, lifecycle, receipt, integration, or authority-file changes. Keep all writes within the expected scope.'],
     ['<worktree; repo-relative exact files or `dir/` entries, one per\n  line, passed verbatim as `--allow` to `.agents/scripts/check-worker-scope.mjs`>', scope.join('\n')],
@@ -236,7 +237,10 @@ function renderContract(template, projection, options) {
     ['<assigned-path>', reportPath],
     ['<worker artifact directory>', artifactPath],
     ['<attempt-specific log paths>', `${workerRoot}/logs/attempt-${options.attempt}`],
-    ['<file-digest>', 'supplied in the structured worker_done body'],
+    ['<file-digest>', 'SHA256_HEX_OF_THAT_REPORT_FILE'],
+    // The shared template's trailer points V3 workers at V3 policy; a V4 AGY
+    // worker follows only the AGENTS.md worker role.
+    ['Follow root AGENTS.md and V3 policy.', 'Follow only the AGENTS.md "Worker role" section.'],
   ])
   if (options.correctionOf !== null) {
     values.set('<previous report path/SHA-256/reviewed\n  diffIdentity; stable review finding IDs; delta manifest location>', `${options.correctionOf}; findings: ${options.findings.join(', ')}`)

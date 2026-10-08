@@ -91,6 +91,14 @@ test('builder emits a deterministic AGY contract from projected context', () => 
     assert.ok(bytes.includes(`--report-path ${reportPath}`))
     assert.doesNotMatch(bytes, /(^|[\s>])workers\/task-1\//m)
     assert.doesNotMatch(bytes, /lease/)
+    // Worker context is the Story plus the AGENTS.md worker role, never Lead
+    // runner/action/recovery documents.
+    assert.doesNotMatch(bytes, /\.agents\/skills\//)
+    assert.doesNotMatch(bytes, /v4-artifact-contract/)
+    assert.match(bytes, /Required context: docs\/story-9-1\.md/)
+    assert.match(bytes, /"Worker role" section only/)
+    assert.match(bytes, /sha256=SHA256_HEX_OF_THAT_REPORT_FILE/)
+    assert.doesNotMatch(bytes, /V3 policy\./)
 
     const second = run(fixture, buildArgs(fixture, preamble, out, expectedHead))
     assert.equal(second.status, 0, second.stderr)
