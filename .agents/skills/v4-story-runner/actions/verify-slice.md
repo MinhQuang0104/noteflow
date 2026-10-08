@@ -27,6 +27,8 @@ node .agents/scripts/v4-story-runner.mjs run <story-id> \
 the Plan and binds Story/action/slice/head before reading the payload into the
 kernel; a missing or malformed file is `INVALID`, never a successful review.
 
+`record-owner-review` uses the same payload and forces a structured human reviewer, with authority from the owner's explicit structured input like `approve_exact_scope`; a Lead must never call it on its own initiative. Ordinary `record-review` (including `record_review`) rejects `reviewer.type: human` with `INVALID` / `OWNER_REVIEW_OPERATION_REQUIRED`.
+
 ## Evidence flow
 
 ```text

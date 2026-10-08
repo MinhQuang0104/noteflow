@@ -74,6 +74,7 @@ const CLI_OPERATIONS = new Set([
   'verify',
   'record-review',
   'record_review',
+  'record-owner-review',
   'prepare-rework',
   'apply-rework',
   'prepare-recovery-abort',
@@ -269,7 +270,17 @@ export function runV4Story(root, storyId, options = {}) {
         if (explicitKernelOperation === 'abort-unwritten-metadata') return applyMetadataAbort(root, input)
         if (explicitKernelOperation === 'prepare') return prepareAction(root, { ...input, operation: 'prepare' })
         if (explicitKernelOperation === 'verify') return verifySlice(root, { ...input, operation: 'verify' })
-        if (explicitKernelOperation === 'record-review' || explicitKernelOperation === 'record_review') return recordSliceReview(root, { ...input, operation: 'record-review' })
+        if (explicitKernelOperation === 'record-review' || explicitKernelOperation === 'record_review') {
+          if (input.review?.reviewer?.type === 'human') return invalidResult('OWNER_REVIEW_OPERATION_REQUIRED')
+          return recordSliceReview(root, { ...input, operation: 'record-review' })
+        }
+        if (explicitKernelOperation === 'record-owner-review') {
+          const reviewer = input.review?.reviewer
+          return recordSliceReview(root, { ...input, operation: 'record-review', review: {
+            ...input.review,
+            reviewer: { ...(reviewer && typeof reviewer === 'object' ? reviewer : { vendor: null, independent: false }), type: 'human' }
+          } })
+        }
         return invalidResult('KERNEL_OPERATION_UNSUPPORTED')
       }
       return { status: 'UNAUTHORIZED_ACTION', authorized: false, reasons: ['KERNEL_ACTION_NOT_CURRENT'] }

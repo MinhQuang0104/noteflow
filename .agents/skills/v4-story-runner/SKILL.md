@@ -31,7 +31,7 @@ node .agents/scripts/v4-story-runner.mjs run <epic.story> \
   --expected-head <sha> --operation <operation> --input <payload.json>
 ```
 
-Supported operations are `prepare`, `checkpoint`, `verify`, `record-review`
+Supported operations are `prepare`, `checkpoint`, `verify`, `record-owner-review`, `record-review`
 (`record_review` is accepted as an alias), `prepare-rework`, `apply-rework`,
 `prepare-recovery-abort`, `abort-unwritten-metadata`,
 `prepare-staged-recovery`, and `apply-staged-recovery`. The JSON file must
@@ -39,6 +39,8 @@ contain one object payload; the Runner binds its Story/action/slice/head to the
 validated Plan before dispatch. `--operation` and `--input` are a pair. A
 missing Plan is reported as `INVALID` with `PLAN_MISSING` before the Plan is
 read.
+
+`record-owner-review` takes the same payload as `record-review` and forces a structured human reviewer, with authority from the owner's explicit structured input like `approve_exact_scope`; a Lead must never call it on its own initiative. Ordinary `record-review` (including `record_review`) rejects `reviewer.type: human` with `INVALID` / `OWNER_REVIEW_OPERATION_REQUIRED`.
 
 The CLI exit-code table is exhaustive for Runner results. Unknown statuses use
 the `ERROR` code and never become success:
