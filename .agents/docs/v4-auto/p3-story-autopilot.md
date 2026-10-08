@@ -70,10 +70,34 @@ New Runner command: `node .agents/scripts/v4-story-runner.mjs autopilot-status <
   committer timestamp of the slice's first commit after authorization to now.
   Never from session memory.
 - Stop reasons include `NO_AUTHORIZATION`, `REVOKED`, `BUDGET_SLICES`,
-  `BUDGET_REWORK`, `BUDGET_TIME`, `HUMAN_GATE`, `HUMAN_REVIEW_REQUIRED`,
-  `HUMAN_REQUIRED`, `RECOVERY_REQUIRED`, `STALE`, and any Runner refusal.
+  `BUDGET_REWORK`, `BUDGET_TIME`, `HUMAN_GATE`, `RECOVERY_REQUIRED`, `STALE`,
+  and any Runner refusal.
 - Tests: each reason; continue after each allowed action kind; `complete_story`
   always STOP.
+
+**Owner decision 2026-10-08 (D-P3-a): a step is one whole action, run to its
+next durable state.** `verify` returning `REVIEW_REQUIRED` keeps its `pending`
+evidence in memory only, and `prepare-rework` is a read-only preview, so the
+Plan stays at `verify_slice` through them; `autopilot-status` must not try to
+tell these apart and must never infer or persist them.
+
+- `autopilot-status` decides only from durable state: authorization, budgets,
+  Runner/Plan/Git checks and `next_action.kind`. `next_action: verify_slice`
+  is `CONTINUE` with step `verify_slice`; it carries no review or rework
+  sub-state.
+- One `verify_slice` step runs, in a single Lead invocation: `verify`; when it
+  returns `REVIEW_REQUIRED`, the Lead review and `record-review`; when the P2
+  policy decision is `REWORK`, `prepare-rework` then `apply-rework`. The step
+  ends at the first durable result (`verified`/`reviewed` successor, applied
+  rework routing to `implement_slice`) or at a stop.
+- A step interrupted before its durable result is rerun from the start: checks
+  rerun and `pending` is regenerated. This is the intended recovery; it may
+  repeat checks and review but never skips them.
+- `HUMAN_REVIEW_REQUIRED` and `HUMAN_REQUIRED` are in-step policy outcomes
+  reported by the action (enforced in the kernel by T3), not `autopilot-status`
+  reasons; the Lead stops and reports them. `BUDGET_REWORK` is still derived
+  from the durable `attempt_id`.
+- No kernel, schema or transaction change is part of T2.
 
 ### T3 — Policy binding under autopilot
 
@@ -98,7 +122,9 @@ extend the same way for `agy-executor.md`. Owner decision 2026-10-08: listed
 explicitly so the registration does not stop on a file-scope conflict.
 
 Content: the loop (`autopilot-status` → load the one action contract → run it →
-repeat); every action still re-reads Plan/Git/receipts and never uses chat
+repeat), with D-P3-a's step definition (a `verify_slice` step covers verify,
+review/`record-review` and policy rework up to the next durable state, and an
+interrupted step is rerun from the start); every action still re-reads Plan/Git/receipts and never uses chat
 memory as evidence; session replacement (on compaction, context threshold,
 crash or vendor switch the owner opens a fresh session, which resumes from
 `autopilot-status`); stop handling (report the stop reason and the exact owner
