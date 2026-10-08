@@ -51,9 +51,36 @@ Claude Code `.claude/settings.json` (`permissions.allow`):
 }
 ```
 
-Codex command-prefix allowlist: the same prefixes (`orca orchestration`,
-`orca terminal`, `node .agents/scripts/`, `node --test`, and the read-only
-`git status|diff|log|show|rev-parse|ls-files|merge-base|worktree list`).
+Codex (checked on codex-cli 0.161.0): append to the user-level rules file
+`~/.codex/rules/default.rules`, once for every worktree. Rules match whole
+leading argv tokens, so scripts are listed one by one instead of a wildcard:
+
+```python
+prefix_rule(pattern=["orca", "orchestration"], decision="allow")
+prefix_rule(pattern=["orca", "terminal"], decision="allow")
+prefix_rule(pattern=["node", "--test"], decision="allow")
+prefix_rule(pattern=["node", ".agents/scripts/v4-story-runner.mjs"], decision="allow")
+prefix_rule(pattern=["node", ".agents/scripts/check-story-plan.mjs"], decision="allow")
+prefix_rule(pattern=["node", ".agents/scripts/compile-v4-context.mjs"], decision="allow")
+prefix_rule(pattern=["node", ".agents/scripts/check-slice-implementation.mjs"], decision="allow")
+prefix_rule(pattern=["node", ".agents/scripts/check-slice-verification.mjs"], decision="allow")
+prefix_rule(pattern=["node", ".agents/scripts/build-worker-contract.mjs"], decision="allow")
+prefix_rule(pattern=["node", ".agents/scripts/check-worker-scope.mjs"], decision="allow")
+prefix_rule(pattern=["node", ".agents/scripts/check-story-finalization.mjs"], decision="allow")
+prefix_rule(pattern=["node", ".agents/scripts/check-story-completion.mjs"], decision="allow")
+prefix_rule(pattern=["node", ".agents/scripts/start-story.mjs"], decision="allow")
+prefix_rule(pattern=["git", "status"], decision="allow")
+prefix_rule(pattern=["git", "diff"], decision="allow")
+prefix_rule(pattern=["git", "log"], decision="allow")
+prefix_rule(pattern=["git", "show"], decision="allow")
+prefix_rule(pattern=["git", "rev-parse"], decision="allow")
+prefix_rule(pattern=["git", "ls-files"], decision="allow")
+prefix_rule(pattern=["git", "merge-base"], decision="allow")
+prefix_rule(pattern=["git", "worktree", "list"], decision="allow")
+```
+
+A command written with backslashes (`.agents\scripts\...`) or through `node -e`
+does not match and still prompts.
 
 Git stays read-only: the kernel scripts make every commit, and `AGENTS.md`
 forbids reset, clean and stash, so `git add|commit|push|reset|clean|stash|

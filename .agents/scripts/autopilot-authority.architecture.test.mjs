@@ -21,6 +21,12 @@ test('autopilot allowlist keeps git read-only', () => {
     assert.doesNotMatch(reference, new RegExp(`"Bash\\(git ${command}`), command)
   }
   assert.match(reference, /"Bash\(orca terminal \*\)"/)
+  const codexGit = [...reference.matchAll(/prefix_rule\(pattern=\["git", ([^\]]*)\]/g)].map(match => match[1])
+  assert.ok(codexGit.length > 0)
+  for (const tail of codexGit) {
+    assert.match(tail, /^"(status|diff|log|show|rev-parse|ls-files|merge-base)"$|^"worktree", "list"$/, tail)
+  }
+  assert.match(reference, /prefix_rule\(pattern=\["orca", "terminal"\], decision="allow"\)/)
 })
 
 test('committed Claude settings equal the documented autopilot allowlist', () => {

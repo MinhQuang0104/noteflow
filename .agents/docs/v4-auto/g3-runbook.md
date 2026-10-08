@@ -46,7 +46,8 @@ chuẩn `PASS`).
 3. Allowlist (`.agents/skills/v4-story-runner/references/autopilot.md`):
    - Claude: không cần làm gì. `.claude/settings.json` đã được commit trên nhánh
      kiến trúc, nên worktree smoke tạo từ nhánh đó tự có allowlist.
-   - Codex: thêm cùng các prefix một lần vào cấu hình cấp user của Codex.
+   - Codex: chép khối `prefix_rule(...)` trong `autopilot.md` vào cuối
+     `~/.codex/rules/default.rules` (một lần, áp dụng cho mọi worktree).
 
 ## Bước 1: Claude dựng worktree (khi owner nói "chuẩn bị G3")
 
