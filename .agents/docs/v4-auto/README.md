@@ -74,7 +74,7 @@ architecture worktree named there. Stop at the end of the phase and report.
 
 | Phase | State | Commit range | Notes |
 |---|---|---|---|
-| P1 | not started | | |
+| P1 | complete | 66940c2–d31e223 | T1–T7 complete; full `test:v4` 584/583/0/1; T8 owner gate pending |
 | G1 | not run | | owner |
 | P2 | not started | | |
 | P3 | not started | | |
