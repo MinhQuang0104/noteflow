@@ -448,7 +448,7 @@ function inspectWorkingTree(root, result, scopePaths, metadataPaths = []) {
   if (unexpected.length) issue(result, `UNRELATED_WORKTREE_DRIFT:${unexpected[0]}`, 'blocked')
 }
 
-function classifyPlanValidation(result, validation, root, plan) {
+function classifyPlanValidation(result, validation) {
   const blockedEvidence = new Set(['IMPLEMENTATION_RECEIPT_REQUIRED', 'VERIFICATION_RECEIPT_REQUIRED',
     'REVIEW_RECEIPT_REQUIRED', 'INVALID_RECEIPT_FILE'])
   const stale = new Set(['STORY_NORMATIVE_DIGEST_MISMATCH', 'CHECKPOINT_MISSING', 'CHECKPOINT_NOT_ANCESTOR',
@@ -458,13 +458,6 @@ function classifyPlanValidation(result, validation, root, plan) {
   for (const reason of validation.reasons ?? []) {
     if (reason === 'SNAPSHOT_MISMATCH' || reason === 'EXECUTION_AHEAD_OF_LIFECYCLE') continue
     if (reason === 'INVALID_PLAN_STORY_BINDING' && result.reasons.includes('STORY_NORMATIVE_DIGEST_STALE')) continue
-    if (reason === 'REVIEW_RECEIPT_REQUIRED') {
-      const missing = (plan.slices ?? []).filter(slice => slice.status === 'reviewed' && !slice.receipt_refs?.review)
-      if (missing.length && missing.every(slice => {
-        const loaded = readReceipt(root, plan, slice.id, 'verification')
-        return !loaded.errors.length && sliceReviewRequired(plan, slice, loaded.receipt) === false
-      })) continue
-    }
     if (blockedEvidence.has(reason)) issue(result, reason, 'blocked')
     else if (stale.has(reason)) issue(result, reason, 'stale')
     else issue(result, reason, 'invalid')
@@ -816,7 +809,7 @@ export function inspectFinalization(root, storyId, expectedHead) {
   if (story.story_id !== storyId) issue(result, 'STORY_ID_MISMATCH', 'invalid')
 
   const validation = validateStoryPlan(root, storyId)
-  classifyPlanValidation(result, validation, root, plan)
+  classifyPlanValidation(result, validation)
   if (validation.lifecycleSnapshot && validation.actualLifecycle && validation.lifecycleSnapshot !== validation.actualLifecycle) {
     issue(result, 'LIFECYCLE_PROJECTION_MISMATCH', 'reconciliation')
   }
@@ -826,9 +819,6 @@ export function inspectFinalization(root, storyId, expectedHead) {
   const ids = slices.map(slice => slice?.id)
   if (ids.some(id => typeof id !== 'string' || !id) || new Set(ids).size !== ids.length) issue(result, 'DUPLICATE_OR_MALFORMED_SLICE', 'invalid')
   if (plan.current_slice !== ids.at(-1)) issue(result, 'CURRENT_SLICE_NOT_FINAL', 'blocked')
-  for (const slice of slices) {
-    if (slice?.status !== 'reviewed') issue(result, `SLICE_NOT_REVIEWED:${slice?.id ?? 'unknown'}`, 'blocked')
-  }
   if (!Array.isArray(plan.blockers)) issue(result, 'INVALID_BLOCKERS', 'invalid')
   else if (plan.blockers.length) issue(result, 'BLOCKERS_PRESENT', 'blocked')
   if (!Array.isArray(plan.unresolved_questions)) issue(result, 'INVALID_UNRESOLVED_QUESTIONS', 'invalid')
@@ -863,6 +853,17 @@ export function inspectFinalization(root, storyId, expectedHead) {
   }
 
   const details = loadSliceReceipts(root, plan, result)
+  // Final-ready: reviewed, or verified on the receipt-recorded LOW NO_REVIEW
+  // path (P2.2). A verified slice whose evidence calls for review stays
+  // SLICE_NOT_REVIEWED; one with missing or inconsistent evidence is not final-ready.
+  for (const slice of slices) {
+    if (slice?.status === 'reviewed') continue
+    const verification = details.find(detail => detail.id === slice?.id)?.receipts.verification
+    const finalReady = noReviewFinalReady(plan, slice, verification)
+    if (finalReady.ready) continue
+    const reason = finalReady.reason === 'NO_REVIEW_EVIDENCE_INVALID' ? 'SLICE_NOT_FINAL_READY' : 'SLICE_NOT_REVIEWED'
+    issue(result, `${reason}:${slice?.id ?? 'unknown'}`, 'blocked')
+  }
   const sliceSummary = slices.map(slice => {
     const detail = details.find(item => item.id === slice.id)
     return {

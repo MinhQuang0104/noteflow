@@ -2,7 +2,9 @@ import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import { test } from 'node:test'
 
-import { inferCanonicalApplicability, receiptKindsForAttemptStatus, reviewDecision, reviewEvidenceFreshness } from './v4-finalization-contract.mjs'
+import {
+  inferCanonicalApplicability, noReviewFinalReady, receiptKindsForAttemptStatus, reviewDecision, reviewEvidenceFreshness
+} from './v4-finalization-contract.mjs'
 
 const digest = value => 'sha256:' + createHash('sha256').update(JSON.stringify(value), 'utf8').digest('hex')
 
@@ -59,4 +61,26 @@ test('legacy review freshness still binds approval, checkpoint, risk and declare
   assert.equal(legacyReviewFreshness(legacy, 'd'.repeat(40), risk).reason, 'REVIEWED_COMMIT_MISMATCH')
   assert.equal(legacyReviewFreshness(legacy, 'c'.repeat(40), 'sha256:' + 'b'.repeat(64)).reason, 'RISK_CONTEXT_DIGEST_MISMATCH')
   assert.equal(legacyReviewFreshness({ ...legacy, freshness: 'STALE' }, 'c'.repeat(40), risk).reason, 'REVIEW_FRESHNESS_INVALID')
+})
+
+test('a verified slice is final-ready without review only on receipt-recorded LOW NO_REVIEW', () => {
+  const noReview = { decision: 'NO_REVIEW', risk: 'LOW', reasons: [] }
+  const plan = risk => ({ risk: { level: risk } })
+  const slice = extra => ({ id: 'A', status: 'verified', receipt_refs: { verification: {} }, ...extra })
+  const lowSlice = slice({ risk: { level: 'LOW' } })
+  assert.deepEqual(noReviewFinalReady(plan('MEDIUM'), lowSlice, { escalation: noReview }), { ready: true, reason: null })
+  assert.deepEqual(noReviewFinalReady(plan('LOW'), slice(), { escalation: noReview }), { ready: true, reason: null })
+  for (const [label, args, reason] of [
+    ['reviewed status', [plan('LOW'), { ...lowSlice, status: 'reviewed' }, { escalation: noReview }], 'NOT_VERIFIED'],
+    ['MEDIUM Story without slice risk', [plan('MEDIUM'), slice(), { escalation: noReview }], 'REVIEW_REQUIRED'],
+    ['MEDIUM slice', [plan('LOW'), slice({ risk: { level: 'MEDIUM' } }), { escalation: { ...noReview, risk: 'MEDIUM' } }], 'REVIEW_REQUIRED'],
+    ['Plan review.required true', [plan('MEDIUM'), { ...lowSlice, review: { required: true } }, { escalation: noReview }], 'REVIEW_REQUIRED'],
+    ['bound review receipt', [plan('MEDIUM'), { ...lowSlice, receipt_refs: { review: {} } }, { escalation: noReview }], 'REVIEW_REQUIRED'],
+    ['receipt REVIEW_REQUIRED', [plan('MEDIUM'), lowSlice, { escalation: { ...noReview, decision: 'REVIEW_REQUIRED' } }], 'REVIEW_REQUIRED'],
+    ['receipt REVIEW_REQUIRED without slice risk', [plan('LOW'), slice(), { escalation: { ...noReview, decision: 'REVIEW_REQUIRED' } }], 'REVIEW_REQUIRED'],
+    ['raised receipt risk without slice risk', [plan('LOW'), slice(), { escalation: { ...noReview, risk: 'HIGH' } }], 'REVIEW_REQUIRED'],
+    ['missing receipt', [plan('MEDIUM'), lowSlice, undefined], 'NO_REVIEW_EVIDENCE_INVALID'],
+    ['missing escalation without slice risk', [plan('LOW'), slice(), {}], 'NO_REVIEW_EVIDENCE_INVALID'],
+    ['malformed escalation', [plan('MEDIUM'), lowSlice, { escalation: { decision: 'SKIP', risk: 'LOW' } }], 'NO_REVIEW_EVIDENCE_INVALID']
+  ]) assert.deepEqual(noReviewFinalReady(...args), { ready: false, reason }, label)
 })

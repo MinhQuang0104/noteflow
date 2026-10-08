@@ -231,7 +231,7 @@ function fixture(options = {}) {
 
     const disclosure = canonical.status !== 'PASS'
     sliceYaml.push(`  - id: ${slice.id}
-    status: ${options.sliceStatus ?? 'reviewed'}
+    status: ${slice.status ?? options.sliceStatus ?? 'reviewed'}
     depends_on: [${slice.dependsOn ?? ''}]
     task_refs: [T-1]
     baseline_commit: ${slice.baseline}
@@ -253,12 +253,12 @@ ${refs.review ? `      review:
 ${slice.risk.flags ? `      flags: [${slice.risk.flags.join(', ')}]
 ` : ''}` : ''}    verification:
       ${canonical.applicability === undefined ? 'canonical_status: INCOMPLETE\n      ' : 'canonical_applicability: ' + canonical.applicability + '\n      canonical_status: ' + canonical.status + '\n      '}progression_eligible: ${verification.progression_eligible}
-      done_gate_disclosure_required: ${options.canonicalProvenance ? 'true' : disclosure}
+      done_gate_disclosure_required: ${options.canonicalProvenance ? 'true' : disclosure}${slice.reviewBlock === false ? '' : `
     review:
       required: ${slice.reviewRequired ?? true}
       verdict: ${review.verdict ?? 'APPROVE'}
       reviewed_commit: ${review.reviewed_commit}
-      ${options.kernelReview ? '' : 'freshness: ' + (options.reviewFreshness ?? 'FRESH_CANDIDATE')}`)
+      ${options.kernelReview ? '' : 'freshness: ' + (options.reviewFreshness ?? 'FRESH_CANDIDATE')}`}`)
   }
 
   const plan = `---
@@ -381,19 +381,40 @@ test('missing required review receipt is blocked', () => withFixture({}, f => {
   assert.ok(result.json.reasons.some(reason => reason.includes('REVIEW_RECEIPT')))
 }))
 
-test('LOW slice in MEDIUM Story with NO_REVIEW does not require a review receipt', () => withFixture({
-  slices: [{ id: 'A', path: 'src/a.txt', risk: { level: 'LOW' }, reviewRequired: false, reviewReceipt: false }]
+// The persisted NO_REVIEW shape (P2.2): `verified`, no review receipt, no Plan
+// review block; only the verification receipt records the escalation.
+const noReviewSlice = extra => ({ id: 'A', path: 'src/a.txt', status: 'verified', reviewReceipt: false, reviewBlock: false, ...extra })
+
+test('verified LOW slice in MEDIUM Story with a NO_REVIEW receipt is final-ready', () => withFixture({
+  slices: [noReviewSlice({ risk: { level: 'LOW' } })]
 }, f => {
   const result = run(f)
   expectStatus(result, 'READY', 0)
-  assert.ok(!result.json.reasons.some(reason => reason.startsWith('REVIEW_RECEIPT_REQUIRED')))
+  assert.deepEqual(result.json.reasons, [])
+  assert.equal(result.json.slices[0].status, 'verified')
+  assert.equal(result.json.slices[0].review_required, false)
+}))
+
+test('reviewed slice without its review receipt is blocked even when no review was due', () => withFixture({
+  slices: [{ id: 'A', path: 'src/a.txt', risk: { level: 'LOW' }, reviewRequired: false, reviewReceipt: false }]
+}, f => {
+  expectStatus(run(f), 'BLOCKED', 3, 'REVIEW_RECEIPT_REQUIRED')
+}))
+
+test('verified slice whose Plan adds review.required true is not final-ready', () => withFixture({
+  slices: [noReviewSlice({ risk: { level: 'LOW' }, reviewBlock: true, reviewRequired: true })]
+}, f => {
+  const result = run(f)
+  expectStatus(result, 'BLOCKED', 3, 'SLICE_NOT_REVIEWED:A')
+  assert.ok(result.json.reasons.includes('REVIEW_RECEIPT_REQUIRED:A'), JSON.stringify(result.json))
 }))
 
 test('MEDIUM slice in MEDIUM Story still requires a review receipt', () => withFixture({
-  slices: [{ id: 'A', path: 'src/a.txt', risk: { level: 'MEDIUM' }, reviewRequired: false, reviewReceipt: false,
-    escalation: { decision: 'NO_REVIEW', risk: 'MEDIUM', reasons: [] } }]
+  slices: [noReviewSlice({ risk: { level: 'MEDIUM' }, escalation: { decision: 'NO_REVIEW', risk: 'MEDIUM', reasons: [] } })]
 }, f => {
-  expectStatus(run(f), 'BLOCKED', 3, 'REVIEW_RECEIPT_REQUIRED:A')
+  const result = run(f)
+  expectStatus(result, 'BLOCKED', 3, 'REVIEW_RECEIPT_REQUIRED:A')
+  assert.ok(result.json.reasons.includes('SLICE_NOT_REVIEWED:A'), JSON.stringify(result.json))
 }))
 
 test('absent slice risk retains Story risk review requirement and digest', () => withFixture({ kernelReview: true }, f => {
@@ -404,9 +425,11 @@ test('absent slice risk retains Story risk review requirement and digest', () =>
 }))
 
 test('absent slice risk still requires Story risk review without explicit review clauses', () => withFixture({
-  slices: [{ id: 'A', path: 'src/a.txt', reviewRequired: false, reviewReceipt: false }]
+  slices: [noReviewSlice()]
 }, f => {
-  expectStatus(run(f), 'BLOCKED', 3, 'REVIEW_RECEIPT_REQUIRED:A')
+  const result = run(f)
+  expectStatus(result, 'BLOCKED', 3, 'REVIEW_RECEIPT_REQUIRED:A')
+  assert.ok(result.json.reasons.includes('SLICE_NOT_REVIEWED:A'), JSON.stringify(result.json))
 }))
 
 test('LOW slice with a bound review still validates its Story risk digest', () => withFixture({
@@ -432,18 +455,20 @@ for (const [label, escalation] of [
   ['raised MEDIUM risk', { decision: 'NO_REVIEW', risk: 'MEDIUM', reasons: [] }]
 ]) {
   test(`LOW slice with ${label} requires review`, () => withFixture({
-    slices: [{ id: 'A', path: 'src/a.txt', risk: { level: 'LOW' }, reviewRequired: false,
-      reviewReceipt: false, escalation }]
+    slices: [noReviewSlice({ risk: { level: 'LOW' }, escalation })]
   }, f => {
-    expectStatus(run(f), 'BLOCKED', 3, 'REVIEW_RECEIPT_REQUIRED:A')
+    const result = run(f)
+    expectStatus(result, 'BLOCKED', 3, 'REVIEW_RECEIPT_REQUIRED:A')
+    assert.ok(result.json.reasons.includes('SLICE_NOT_REVIEWED:A'), JSON.stringify(result.json))
   }))
 }
 
 test('declared slice risk without persisted escalation stops finalization', () => withFixture({
-  slices: [{ id: 'A', path: 'src/a.txt', risk: { level: 'LOW' }, reviewRequired: false,
-    reviewReceipt: false, escalation: null }]
+  slices: [noReviewSlice({ risk: { level: 'LOW' }, escalation: null })]
 }, f => {
-  expectStatus(run(f), 'BLOCKED', 3, 'ESCALATION_EVIDENCE_MISSING:A')
+  const result = run(f)
+  expectStatus(result, 'BLOCKED', 3, 'ESCALATION_EVIDENCE_MISSING:A')
+  assert.ok(result.json.reasons.includes('SLICE_NOT_FINAL_READY:A'), JSON.stringify(result.json))
 }))
 
 test('review verdict and blocking findings are enforced', () => withFixture({ reviewVerdict: 'REQUEST_CHANGES', findingsTotal: 1, findingsBlocking: 1 }, f => {
