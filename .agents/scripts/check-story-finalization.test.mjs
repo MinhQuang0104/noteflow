@@ -181,6 +181,8 @@ function fixture(options = {}) {
       canonical_disposition: canonical.status,
       coverage_authority: 'focused checks'
     }
+    if (slice.risk) verification.escalation = slice.escalation === null ? undefined :
+      (slice.escalation ?? { decision: 'NO_REVIEW', risk: slice.risk.level, reasons: [] })
     if (options.structuredAc !== false) {
       verification.ac_evidence = [
         { id: `${slice.id.toLowerCase()}-ac-1`, ac: 'AC-1', result: 'PASS', summary: 'fixture AC-1' },
@@ -213,12 +215,14 @@ function fixture(options = {}) {
       review.scope_digest = stableDigest({ paths: [...slice.changedPaths].sort(), refs: evidenceRefs })
     }
     review.risk_context_digest ??= digest(JSON.stringify({ level: 'MEDIUM' }))
+    if (slice.reviewRiskDigest) review.risk_context_digest = slice.reviewRiskDigest
     review.findings_total = options.findingsTotal ?? 0
     review.findings_blocking = options.findingsBlocking ?? 0
     review.reviewed_commit = slice.checkpoint
 
     const refs = {}
-    for (const [kind, receipt] of [['implementation', implementation], ['verification', verification], ['review', review]]) {
+    for (const [kind, receipt] of [['implementation', implementation], ['verification', verification],
+      ...(slice.reviewReceipt === false ? [] : [['review', review]])]) {
       const relative = `${receiptDir}/${slice.id}-${kind}.json`
       write(root, relative, `${JSON.stringify(receipt, null, 2)}\n`)
       refs[kind] = { path: relative, digest: receiptDigest(receipt) }
@@ -241,14 +245,17 @@ function fixture(options = {}) {
       verification:
         path: ${refs.verification.path}
         digest: ${refs.verification.digest}
-      review:
+${refs.review ? `      review:
         path: ${refs.review.path}
         digest: ${refs.review.digest}
-    verification:
+` : ''}${slice.risk ? `    risk:
+      level: ${slice.risk.level}
+${slice.risk.flags ? `      flags: [${slice.risk.flags.join(', ')}]
+` : ''}` : ''}    verification:
       ${canonical.applicability === undefined ? 'canonical_status: INCOMPLETE\n      ' : 'canonical_applicability: ' + canonical.applicability + '\n      canonical_status: ' + canonical.status + '\n      '}progression_eligible: ${verification.progression_eligible}
       done_gate_disclosure_required: ${options.canonicalProvenance ? 'true' : disclosure}
     review:
-      required: true
+      required: ${slice.reviewRequired ?? true}
       verdict: ${review.verdict ?? 'APPROVE'}
       reviewed_commit: ${review.reviewed_commit}
       ${options.kernelReview ? '' : 'freshness: ' + (options.reviewFreshness ?? 'FRESH_CANDIDATE')}`)
@@ -372,6 +379,71 @@ test('missing required review receipt is blocked', () => withFixture({}, f => {
   assert.equal(result.code, 3)
   assert.equal(result.json.status, 'BLOCKED')
   assert.ok(result.json.reasons.some(reason => reason.includes('REVIEW_RECEIPT')))
+}))
+
+test('LOW slice in MEDIUM Story with NO_REVIEW does not require a review receipt', () => withFixture({
+  slices: [{ id: 'A', path: 'src/a.txt', risk: { level: 'LOW' }, reviewRequired: false, reviewReceipt: false }]
+}, f => {
+  const result = run(f)
+  expectStatus(result, 'READY', 0)
+  assert.ok(!result.json.reasons.some(reason => reason.startsWith('REVIEW_RECEIPT_REQUIRED')))
+}))
+
+test('MEDIUM slice in MEDIUM Story still requires a review receipt', () => withFixture({
+  slices: [{ id: 'A', path: 'src/a.txt', risk: { level: 'MEDIUM' }, reviewRequired: false, reviewReceipt: false,
+    escalation: { decision: 'NO_REVIEW', risk: 'MEDIUM', reasons: [] } }]
+}, f => {
+  expectStatus(run(f), 'BLOCKED', 3, 'REVIEW_RECEIPT_REQUIRED:A')
+}))
+
+test('absent slice risk retains Story risk review requirement and digest', () => withFixture({ kernelReview: true }, f => {
+  const review = JSON.parse(readFileSync(path.join(f.root,
+    '_bmad-output/implementation-artifacts/receipts/story-9-1/A-review.json'), 'utf8'))
+  assert.equal(review.risk_context_digest, stableDigest({ level: 'MEDIUM' }))
+  expectStatus(run(f), 'READY', 0)
+}))
+
+test('absent slice risk still requires Story risk review without explicit review clauses', () => withFixture({
+  slices: [{ id: 'A', path: 'src/a.txt', reviewRequired: false, reviewReceipt: false }]
+}, f => {
+  expectStatus(run(f), 'BLOCKED', 3, 'REVIEW_RECEIPT_REQUIRED:A')
+}))
+
+test('LOW slice with a bound review still validates its Story risk digest', () => withFixture({
+  kernelReview: true,
+  slices: [{ id: 'A', path: 'src/a.txt', risk: { level: 'LOW' }, reviewRequired: false }]
+}, f => {
+  const review = JSON.parse(readFileSync(path.join(f.root,
+    '_bmad-output/implementation-artifacts/receipts/story-9-1/A-review.json'), 'utf8'))
+  assert.equal(review.risk_context_digest, stableDigest({ level: 'MEDIUM' }))
+  expectStatus(run(f), 'READY', 0)
+}))
+
+test('LOW slice review bound to slice risk digest fails Story risk freshness', () => withFixture({
+  kernelReview: true,
+  slices: [{ id: 'A', path: 'src/a.txt', risk: { level: 'LOW' }, reviewRequired: false,
+    reviewRiskDigest: stableDigest({ level: 'LOW' }) }]
+}, f => {
+  expectStatus(run(f), 'BLOCKED', 3, 'REVIEW_FRESHNESS_INVALID:A')
+}))
+
+for (const [label, escalation] of [
+  ['REVIEW_REQUIRED decision', { decision: 'REVIEW_REQUIRED', risk: 'LOW', reasons: ['JUDGMENT_PUBLIC_CONTRACT'] }],
+  ['raised MEDIUM risk', { decision: 'NO_REVIEW', risk: 'MEDIUM', reasons: [] }]
+]) {
+  test(`LOW slice with ${label} requires review`, () => withFixture({
+    slices: [{ id: 'A', path: 'src/a.txt', risk: { level: 'LOW' }, reviewRequired: false,
+      reviewReceipt: false, escalation }]
+  }, f => {
+    expectStatus(run(f), 'BLOCKED', 3, 'REVIEW_RECEIPT_REQUIRED:A')
+  }))
+}
+
+test('declared slice risk without persisted escalation stops finalization', () => withFixture({
+  slices: [{ id: 'A', path: 'src/a.txt', risk: { level: 'LOW' }, reviewRequired: false,
+    reviewReceipt: false, escalation: null }]
+}, f => {
+  expectStatus(run(f), 'BLOCKED', 3, 'ESCALATION_EVIDENCE_MISSING:A')
 }))
 
 test('review verdict and blocking findings are enforced', () => withFixture({ reviewVerdict: 'REQUEST_CHANGES', findingsTotal: 1, findingsBlocking: 1 }, f => {

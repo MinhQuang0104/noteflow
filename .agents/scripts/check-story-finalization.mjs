@@ -446,7 +446,7 @@ function inspectWorkingTree(root, result, scopePaths, metadataPaths = []) {
   if (unexpected.length) issue(result, `UNRELATED_WORKTREE_DRIFT:${unexpected[0]}`, 'blocked')
 }
 
-function classifyPlanValidation(result, validation) {
+function classifyPlanValidation(result, validation, root, plan) {
   const blockedEvidence = new Set(['IMPLEMENTATION_RECEIPT_REQUIRED', 'VERIFICATION_RECEIPT_REQUIRED',
     'REVIEW_RECEIPT_REQUIRED', 'INVALID_RECEIPT_FILE'])
   const stale = new Set(['STORY_NORMATIVE_DIGEST_MISMATCH', 'CHECKPOINT_MISSING', 'CHECKPOINT_NOT_ANCESTOR',
@@ -456,6 +456,13 @@ function classifyPlanValidation(result, validation) {
   for (const reason of validation.reasons ?? []) {
     if (reason === 'SNAPSHOT_MISMATCH' || reason === 'EXECUTION_AHEAD_OF_LIFECYCLE') continue
     if (reason === 'INVALID_PLAN_STORY_BINDING' && result.reasons.includes('STORY_NORMATIVE_DIGEST_STALE')) continue
+    if (reason === 'REVIEW_RECEIPT_REQUIRED') {
+      const missing = (plan.slices ?? []).filter(slice => slice.status === 'reviewed' && !slice.receipt_refs?.review)
+      if (missing.length && missing.every(slice => {
+        const loaded = readReceipt(root, plan, slice.id, 'verification')
+        return !loaded.errors.length && sliceReviewRequired(plan, slice, loaded.receipt) === false
+      })) continue
+    }
     if (blockedEvidence.has(reason)) issue(result, reason, 'blocked')
     else if (stale.has(reason)) issue(result, reason, 'stale')
     else issue(result, reason, 'invalid')
@@ -518,9 +525,16 @@ function planReviewDecision(slice) {
   return reviewDecision(slice.review ?? {})
 }
 
-function sliceReviewRequired(plan, slice) {
-  return slice.review?.required === true || Boolean(slice.receipt_refs?.review) ||
-    ['MEDIUM', 'HIGH'].includes(String(plan.risk?.level ?? '').toUpperCase())
+function sliceReviewRequired(plan, slice, verification) {
+  if (slice.review?.required === true || Boolean(slice.receipt_refs?.review)) return true
+  if (slice.risk === undefined) return ['MEDIUM', 'HIGH'].includes(String(plan.risk?.level ?? '').toUpperCase())
+
+  const escalation = verification?.escalation
+  const levels = ['LOW', 'MEDIUM', 'HIGH']
+  if (!levels.includes(slice.risk?.level) || !levels.includes(escalation?.risk) ||
+      !['NO_REVIEW', 'REVIEW_REQUIRED'].includes(escalation?.decision)) return null
+  return escalation.decision === 'REVIEW_REQUIRED' ||
+    Math.max(levels.indexOf(slice.risk.level), levels.indexOf(escalation.risk)) > 0
 }
 
 function loadSliceReceipts(root, plan, result) {
@@ -572,7 +586,9 @@ function loadSliceReceipts(root, plan, result) {
       detail.attempts.push(historical)
     }
     for (const kind of RECEIPT_KINDS) {
-      const required = kind === 'implementation' || kind === 'verification' || sliceReviewRequired(plan, slice)
+      const reviewRequired = kind === 'review' ? sliceReviewRequired(plan, slice, detail.receipts.verification) : false
+      if (kind === 'review' && reviewRequired === null) issue(result, `ESCALATION_EVIDENCE_MISSING:${slice.id}`, 'blocked')
+      const required = kind === 'implementation' || kind === 'verification' || reviewRequired === true
       const ref = slice.receipt_refs?.[kind]
       if (!required) continue
       if (!ref) {
@@ -811,7 +827,7 @@ export function inspectFinalization(root, storyId, expectedHead) {
   if (story.story_id !== storyId) issue(result, 'STORY_ID_MISMATCH', 'invalid')
 
   const validation = validateStoryPlan(root, storyId)
-  classifyPlanValidation(result, validation)
+  classifyPlanValidation(result, validation, root, plan)
   if (validation.lifecycleSnapshot && validation.actualLifecycle && validation.lifecycleSnapshot !== validation.actualLifecycle) {
     issue(result, 'LIFECYCLE_PROJECTION_MISMATCH', 'reconciliation')
   }
