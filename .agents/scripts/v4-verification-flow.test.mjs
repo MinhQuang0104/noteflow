@@ -682,7 +682,7 @@ test('kernel-written review receipts round-trip through the finalization gate', 
     })
     assert.equal(result.status, 'APPLIED', JSON.stringify(result))
     assert.equal(result.next_action.kind, 'finalize_story')
-    assert.deepEqual(result.policy, { decision: 'HUMAN_REQUIRED', reasons: ['POLICY_CASE_UNSPECIFIED'] })
+    assert.deepEqual(result.policy, { decision: 'HUMAN_REQUIRED', reasons: ['LEGACY_REVIEWER_UNCLASSIFIED'] })
     const { policy, ...legacyResult } = result
     assert.equal(legacyResult.status, 'APPLIED')
     assert.equal(Object.hasOwn(legacyResult, 'policy'), false)

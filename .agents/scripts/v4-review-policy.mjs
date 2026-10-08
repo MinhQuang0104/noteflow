@@ -24,14 +24,24 @@ export function decideReviewOutcome({ risk, executor, reviewer, findings = [], v
     return attemptId < 4 ? outcome('REWORK', 'VALID_FINDINGS_CORRECTION_ALLOWED')
       : outcome('HUMAN_REQUIRED', 'REWORK_ATTEMPTS_EXHAUSTED')
   }
-  if (level === 'LOW' && reviewer == null && Array.isArray(flags) && flags.length === 0) {
+  if (typeof reviewer === 'string') return outcome('HUMAN_REQUIRED', 'LEGACY_REVIEWER_UNCLASSIFIED')
+  const effectiveLevel = level === 'LOW' && Array.isArray(flags) && flags.length > 0 ? 'MEDIUM' : level
+  if (effectiveLevel === 'LOW' && reviewer == null && Array.isArray(flags) && flags.length === 0) {
     return outcome('PROGRESS', 'LOW_CANONICAL_PASS_NO_FLAGS')
   }
-  if (level === 'MEDIUM' && reviewer?.type === 'lead') {
+  if (effectiveLevel === 'LOW' && (reviewer?.type === 'lead' || reviewer?.type === 'human')) {
+    return outcome('APPROVE_ALLOWED', 'LOW_REVIEWED')
+  }
+  if (effectiveLevel === 'MEDIUM' && reviewer == null) return outcome('BLOCKED', 'REVIEW_MISSING')
+  if (effectiveLevel === 'MEDIUM' && reviewer?.type === 'human') {
+    return outcome('APPROVE_ALLOWED', 'HUMAN_MEDIUM_RISK_REVIEW')
+  }
+  if (effectiveLevel === 'MEDIUM' && reviewer?.type === 'lead') {
     return executor === 'agy' ? outcome('APPROVE_ALLOWED', 'INDEPENDENT_LEAD_REVIEW')
       : outcome('HUMAN_REVIEW_REQUIRED', 'SAME_LEAD_REVIEW')
   }
-  if (level === 'HIGH' && reviewer?.type === 'lead') return outcome('HUMAN_REVIEW_REQUIRED', 'HIGH_RISK_REQUIRES_HUMAN_REVIEW')
-  if (level === 'HIGH' && reviewer?.type === 'human') return outcome('APPROVE_ALLOWED', 'HUMAN_HIGH_RISK_REVIEW')
+  if (effectiveLevel === 'HIGH' && reviewer == null) return outcome('BLOCKED', 'REVIEW_MISSING')
+  if (effectiveLevel === 'HIGH' && reviewer?.type === 'lead') return outcome('HUMAN_REVIEW_REQUIRED', 'HIGH_RISK_REQUIRES_HUMAN_REVIEW')
+  if (effectiveLevel === 'HIGH' && reviewer?.type === 'human') return outcome('APPROVE_ALLOWED', 'HUMAN_HIGH_RISK_REVIEW')
   return outcome('HUMAN_REQUIRED', 'POLICY_CASE_UNSPECIFIED')
 }

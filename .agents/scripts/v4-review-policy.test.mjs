@@ -32,10 +32,10 @@ for (const [name, input, decision] of [
   ['focused empty', { risk: 'MEDIUM', executor: 'agy', reviewer: lead, focusedEvidence: [] }, 'BLOCKED'],
   ['focused omitted', { risk: 'MEDIUM', executor: 'agy', reviewer: lead, focusedEvidence: undefined }, 'BLOCKED'],
   ['failed checks outrank rework', { verification: { ...pass, status: 'FAIL' }, findings: [{ class: 'VALID' }] }, 'BLOCKED'],
-  ['MEDIUM human unspecified', { risk: 'MEDIUM', reviewer: human }, 'HUMAN_REQUIRED'],
-  ['LOW flagged unspecified', { risk: { level: 'LOW', flags: ['PUBLIC_CONTRACT'] } }, 'HUMAN_REQUIRED'],
-  ['LOW reviewed unspecified', { reviewer: lead, executor: 'agy' }, 'HUMAN_REQUIRED'],
-  ['MEDIUM no reviewer unspecified', { risk: 'MEDIUM' }, 'HUMAN_REQUIRED'],
+  ['MEDIUM human review', { risk: 'MEDIUM', reviewer: human }, 'APPROVE_ALLOWED'],
+  ['LOW flagged without reviewer', { risk: { level: 'LOW', flags: ['PUBLIC_CONTRACT'] } }, 'BLOCKED'],
+  ['LOW structured review', { reviewer: lead, executor: 'agy' }, 'APPROVE_ALLOWED'],
+  ['MEDIUM no reviewer', { risk: 'MEDIUM' }, 'BLOCKED'],
 ]) test(`review policy: ${name}`, () => {
   const request = { ...defaults, ...input }
   const before = JSON.stringify(request)
@@ -43,7 +43,6 @@ for (const [name, input, decision] of [
   assert.equal(result.decision, decision)
   assert.deepEqual(Object.keys(result).sort(), ['decision', 'reasons'])
   assert.ok(result.reasons.length)
-  if (name.includes('unspecified')) assert.deepEqual(result.reasons, ['POLICY_CASE_UNSPECIFIED'])
   assert.deepEqual(decideReviewOutcome(request), result)
   assert.equal(JSON.stringify(request), before)
 })
@@ -51,4 +50,30 @@ for (const [name, input, decision] of [
 test('independence is computed from executor, never asserted by the caller', () => {
   assert.equal(decideReviewOutcome({ ...defaults, risk: 'MEDIUM', reviewer: lead }).decision, 'HUMAN_REVIEW_REQUIRED')
   assert.equal(decideReviewOutcome({ ...defaults, risk: 'MEDIUM', executor: 'agy', reviewer: { ...lead, independent: false } }).decision, 'APPROVE_ALLOWED')
+})
+
+const policyRows = [
+  ['LOW no flags without reviewer', { risk: { level: 'LOW', flags: [] }, reviewer: null }, 'PROGRESS', 'LOW_CANONICAL_PASS_NO_FLAGS'],
+  ['LOW no flags with lead', { risk: { level: 'LOW', flags: [] }, reviewer: lead }, 'APPROVE_ALLOWED', 'LOW_REVIEWED'],
+  ['LOW no flags with human', { risk: { level: 'LOW', flags: [] }, reviewer: human }, 'APPROVE_ALLOWED', 'LOW_REVIEWED'],
+  ['MEDIUM without reviewer', { risk: 'MEDIUM', reviewer: null }, 'BLOCKED', 'REVIEW_MISSING'],
+  ['MEDIUM independent lead', { risk: 'MEDIUM', executor: 'agy', reviewer: lead }, 'APPROVE_ALLOWED', 'INDEPENDENT_LEAD_REVIEW'],
+  ['MEDIUM same lead', { risk: 'MEDIUM', executor: 'lead', reviewer: { ...lead, independent: false } }, 'HUMAN_REVIEW_REQUIRED', 'SAME_LEAD_REVIEW'],
+  ['MEDIUM human', { risk: 'MEDIUM', reviewer: human }, 'APPROVE_ALLOWED', 'HUMAN_MEDIUM_RISK_REVIEW'],
+  ['HIGH without reviewer', { risk: 'HIGH', reviewer: null }, 'BLOCKED', 'REVIEW_MISSING'],
+  ['HIGH lead', { risk: 'HIGH', reviewer: lead }, 'HUMAN_REVIEW_REQUIRED', 'HIGH_RISK_REQUIRES_HUMAN_REVIEW'],
+  ['HIGH human', { risk: 'HIGH', reviewer: human }, 'APPROVE_ALLOWED', 'HUMAN_HIGH_RISK_REVIEW'],
+  ...['LOW', 'MEDIUM', 'HIGH'].map(level => [`legacy string ${level}`, { risk: level, reviewer: 'reviewer' }, 'HUMAN_REQUIRED', 'LEGACY_REVIEWER_UNCLASSIFIED']),
+  ['flagged LOW without reviewer', { risk: { level: 'LOW', flags: ['PUBLIC_CONTRACT'] }, reviewer: null }, 'BLOCKED', 'REVIEW_MISSING'],
+  ['flagged LOW independent lead', { risk: { level: 'LOW', flags: ['PUBLIC_CONTRACT'] }, executor: 'agy', reviewer: lead }, 'APPROVE_ALLOWED', 'INDEPENDENT_LEAD_REVIEW'],
+  ['flagged LOW same lead', { risk: { level: 'LOW', flags: ['PUBLIC_CONTRACT'] }, executor: 'lead', reviewer: { ...lead, independent: false } }, 'HUMAN_REVIEW_REQUIRED', 'SAME_LEAD_REVIEW'],
+  ['flagged LOW human', { risk: { level: 'LOW', flags: ['PUBLIC_CONTRACT'] }, reviewer: human }, 'APPROVE_ALLOWED', 'HUMAN_MEDIUM_RISK_REVIEW'],
+  ['unknown risk', { risk: 'CRITICAL', reviewer: human }, 'HUMAN_REQUIRED', 'POLICY_CASE_UNSPECIFIED'],
+  ['unknown reviewer type', { risk: 'MEDIUM', reviewer: { type: 'other' } }, 'HUMAN_REQUIRED', 'POLICY_CASE_UNSPECIFIED'],
+  ['invalid attempt id', { findings: [{ class: 'VALID' }], attemptId: 0 }, 'HUMAN_REQUIRED', 'POLICY_CASE_UNSPECIFIED'],
+  ['unknown finding class', { findings: [{ class: 'UNKNOWN' }] }, 'HUMAN_REQUIRED', 'POLICY_CASE_UNSPECIFIED'],
+]
+
+for (const [name, input, decision, reason] of policyRows) test(`completed review policy table: ${name}`, () => {
+  assert.deepEqual(decideReviewOutcome({ ...defaults, ...input }), { decision, reasons: [reason] })
 })
