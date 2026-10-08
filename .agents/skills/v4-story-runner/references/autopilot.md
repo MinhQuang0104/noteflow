@@ -24,3 +24,30 @@ owner opens a fresh session. The fresh session resumes from `autopilot-status`.
 
 Claude reaches the runner by its file path. Both vendors need allowlists for
 `orca orchestration *`, `node .agents/scripts/*`, and `git`.
+
+## Vendor allowlists
+
+The owner applies these entries before G3. This reference does not edit either
+vendor's settings.
+
+Claude Code `.claude/settings.json` (`permissions.allow`):
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(orca orchestration *)",
+      "Bash(node .agents/scripts/*)",
+      "Bash(git *)"
+    ]
+  }
+}
+```
+
+Codex command-prefix allowlist:
+
+```text
+orca orchestration *
+node .agents/scripts/*
+git
+```
