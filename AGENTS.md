@@ -16,6 +16,8 @@ Only an explicit human request may use this lane for agent instructions, routing
 
 The router selects the lane before bootstrap. A schema-v2 Story explicitly authorized by V4 Lite uses `start-story.md`: read-only readiness, fingerprint-bound apply, one lifecycle commit, then `implement_slice`; it never implements the successor or fabricates evidence.
 
+A V4 Story slice whose validated Plan declares `executor: agy` may deliver that slice to Antigravity per `references/agy-executor.md`; this is not V3 fallback, and the Lead still owns scope gate, checkpoint, verification and review.
+
 An explicit Story request **by V4 Lite** uses the Runner and exactly one action. Plan validation, freshness, exact scope, two-commit durability, recovery, review escalation, and Human Gate remain authoritative. `review_slice`, automatic approval, generic continuation, automatic review-to-done, and automatic V3 fallback stay disabled; one invocation may persist one successor but never execute it.
 
 Explicit V3.1/Orca requests and Story requests without V4 opt-in use `.agents/policies/orchestration-v3.md` and `story-development`; do not invoke V3 from V4 readiness or migration.
