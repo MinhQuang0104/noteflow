@@ -128,7 +128,9 @@ human identity with `OWNER_REVIEW_OPERATION_REQUIRED`.
 **P2 deviation and owner questions:** combinations omitted from the approved
 table (including MEDIUM human reviews, flagged/reviewed LOW slices, and legacy
 reviewer strings) conservatively return `HUMAN_REQUIRED` with
-`POLICY_CASE_UNSPECIFIED`; the owner must settle these before binding policy.
+`POLICY_CASE_UNSPECIFIED`. **Settled by the owner on 2026-10-08:** see
+[`v4-auto/p2-1-policy-completion.md`](v4-auto/p2-1-policy-completion.md) §1
+(D-P2.1-a, D-P2.1-b), implemented in P2.1 before P3.
 Also, `sliceReviewRequired` in `check-story-finalization.mjs` still uses Story
 risk, so finalization requires review for a declared LOW slice in a
 MEDIUM/HIGH Story even when verification used NO_REVIEW. That file is outside
