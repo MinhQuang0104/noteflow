@@ -31,6 +31,7 @@ function seedInstructionSources(fixture) {
     '.agents/docs/v4-artifact-contract.md',
     '.agents/skills/v4-story-runner/actions/implement-slice.md',
     '.agents/skills/v4-story-runner/references/implementation-techniques.md',
+    '.agents/skills/v4-story-runner/references/agy-executor.md',
     '.agents/skills/v4-story-runner/references/recovery.md',
   ]
   for (const relative of paths) {
@@ -87,6 +88,21 @@ test('projects only the selected slice with provenance and explicit unknown scop
     assert.equal(Object.hasOwn(result.projection, 'historical_receipts'), false)
 
     assert.deepEqual(snapshot(fixture), before)
+  })
+})
+
+test('AGY executor guidance is lazy and trigger-bound', () => {
+  runWithFixture({ schemaVersion: 2, state: 'pending' }, fixture => {
+    seedInstructionSources(fixture)
+    const expectedHead = head(fixture)
+    const result = compileActionContext(fixture.root, fixture.storyId, 'implement_slice', 'A', { expectedHead })
+    assert.equal(result.status, 'READY', JSON.stringify(result))
+    const reference = '.agents/skills/v4-story-runner/references/agy-executor.md'
+    assert.ok(result.projection.lazy_reference_paths.some(item => item.path === reference && item.trigger === 'Load only when the current slice declares executor: agy.'))
+    const binding = result.projection.source_bindings.find(item => item.path === reference)
+    assert.equal(binding.loaded, false)
+    assert.equal(result.projection.byte_counters.lazy_reference_bytes, 0)
+    assert.match(readFileSync('.agents/skills/v4-story-runner/actions/implement-slice.md', 'utf8'), /executor: agy[\s\S]{0,100}agy-executor\.md/)
   })
 })
 

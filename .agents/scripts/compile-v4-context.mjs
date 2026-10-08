@@ -35,6 +35,7 @@ const ACTIONS = new Map([
     document: '.agents/skills/v4-story-runner/actions/implement-slice.md',
     lazy: [
       '.agents/skills/v4-story-runner/references/implementation-techniques.md',
+      '.agents/skills/v4-story-runner/references/agy-executor.md',
       '.agents/skills/v4-story-runner/references/recovery.md',
     ],
     stop: [
@@ -225,7 +226,9 @@ function actionSources(root, action) {
   const spec = ACTIONS.get(action)
   const lazy = spec.lazy.map(relative => ({
     path: relative,
-    trigger: relative.endsWith('recovery.md')
+    trigger: relative.endsWith('agy-executor.md')
+      ? 'Load only when the current slice declares executor: agy.'
+      : relative.endsWith('recovery.md')
       ? 'Load only when a partial, locked, or recovery-required transaction is observed.'
       : 'Load only when the selected action requires its compact implementation technique or review recipe.',
   }))

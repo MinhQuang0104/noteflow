@@ -19,6 +19,7 @@ function seedInstructionSources(fixture) {
     '.agents/docs/v4-artifact-contract.md',
     '.agents/skills/v4-story-runner/actions/implement-slice.md',
     '.agents/skills/v4-story-runner/references/implementation-techniques.md',
+    '.agents/skills/v4-story-runner/references/agy-executor.md',
     '.agents/skills/v4-story-runner/references/recovery.md',
   ]
   for (const relative of paths) {
