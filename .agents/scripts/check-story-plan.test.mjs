@@ -267,15 +267,45 @@ for (const [name, edit, reason] of [
   } finally { fixture.cleanup() }
 })
 
-test('schema-v2 lead slice keeps accepting an unvalidated scope field', () => {
+test('AGY scope accepts files whose names merely prefix an authority path', () => {
+  const fixture = agyPlanFixture(text => text.replace('paths: [src/]', 'paths: [src/, .agent, AGENTS]'))
+  try {
+    const result = check(fixture.root, '9.1')
+    assert.equal(result.json.status, 'READY', JSON.stringify(result.json))
+  } finally { fixture.cleanup() }
+})
+
+for (const entry of ['_bmad-output/', 'AGENTS.md', '.agents/skills/x.md', '.agent-state/']) {
+  test(`AGY scope rejects authority-bearing entry ${entry}`, () => {
+    const fixture = agyPlanFixture(text => text.replace('paths: [src/]', `paths: [src/, ${entry}]`))
+    try {
+      const result = check(fixture.root, '9.1')
+      assert.ok(result.json.reasons.includes('AGY_SCOPE_AUTHORITY_PATH'), JSON.stringify(result.json))
+    } finally { fixture.cleanup() }
+  })
+}
+
+test('schema-v2 lead slice accepts a normalized allowlist scope without AGY checks', () => {
   const fixture = agyPlanFixture(text => text
     .replace('executor: agy', 'executor: lead')
-    .replace('paths: [src/]', 'paths: [./not-normalized/]')
     .replace('verification_obligations: [node --test src/a.test.js]', 'verification_obligations: []'))
   try {
     const result = check(fixture.root, '9.1')
     assert.equal(result.code, 0, JSON.stringify(result.json))
     assert.equal(result.json.status, 'READY')
+  } finally { fixture.cleanup() }
+})
+
+for (const [name, edit, reason] of [
+  ['non-normalized lead scope entry', text => text.replace('executor: agy', 'executor: lead').replace('paths: [src/]', 'paths: [./src/]'), 'SLICE_SCOPE_INVALID'],
+  ['schema-v1 scope object on a lead slice', text => text.replace('executor: agy', 'executor: lead').replace('    scope:\n      paths: [src/]\n', '    scope:\n      paths: [src/]\n      purpose: legacy\n'), 'MIXED_SCHEMA_PLAN'],
+  ['schema-v1 scope object on an AGY slice', text => text.replace('    scope:\n      paths: [src/]\n', '    scope:\n      paths: [src/]\n      purpose: legacy\n'), 'MIXED_SCHEMA_PLAN'],
+]) test(`schema-v2 slice scope rejects ${name}`, () => {
+  const fixture = agyPlanFixture(edit)
+  try {
+    const result = check(fixture.root, '9.1')
+    assert.equal(result.json.status, 'INVALID', JSON.stringify(result.json))
+    assert.ok(result.json.reasons.includes(reason), JSON.stringify(result.json))
   } finally { fixture.cleanup() }
 })
 

@@ -129,7 +129,10 @@ function authorityScopePath(value) {
   const entry = value.endsWith('/') ? value.slice(0, -1) : value
   return AUTHORITY_PATHS.some(authority => {
     const authorityBase = authority.endsWith('/') ? authority.slice(0, -1) : authority
-    return entry === authorityBase || value.startsWith(authority) || authority.startsWith(value)
+    // A directory entry that contains an authority path is rejected; a file
+    // entry is rejected only when it is, or sits inside, an authority path.
+    return entry === authorityBase || value.startsWith(authority) ||
+      (value.endsWith('/') && authority.startsWith(value))
   })
 }
 

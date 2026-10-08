@@ -3,6 +3,7 @@ import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { attemptReceiptPath, inspectStory, normativeDigest, readReceiptForAttempt, validateTaskSlices, validateReceipt } from './check-artifact-contract.mjs'
 import { validateFinalizationReceipt } from './finalization-contract.mjs'
+import { normalizeAllowed } from './check-worker-scope.mjs'
 
 const DIGEST = /^sha256:[0-9a-f]{64}$/
 const SHA = /^[0-9a-f]{40,64}$/
@@ -231,6 +232,15 @@ export function validateSeparatedPlan(root, id, plan, result) {
     if (!STATUSES.has(slice.status)) invalid('INVALID_SLICE_STATUS')
     if (slice.purpose !== undefined || slice.implementation !== undefined ||
         slice.verification?.focused_checks !== undefined) invalid('MIXED_SCHEMA_PLAN')
+    // Schema-v2 scope is only the V4 allowlist shape `{paths: [...]}`; any other
+    // shape is a schema-v1 scope object. AGY entries get their own reasons.
+    if (slice.scope !== undefined) {
+      const scope = slice.scope
+      if (!scope || typeof scope !== 'object' || Array.isArray(scope) ||
+          Object.keys(scope).length !== 1 || !Array.isArray(scope.paths)) invalid('MIXED_SCHEMA_PLAN')
+      else if (slice.executor !== 'agy' && (!scope.paths.length ||
+          scope.paths.some(entry => normalizeAllowed(entry) !== entry))) invalid('SLICE_SCOPE_INVALID')
+    }
     if (slice.receipt_refs !== undefined && (!slice.receipt_refs || typeof slice.receipt_refs !== 'object' || Array.isArray(slice.receipt_refs) ||
         Object.keys(slice.receipt_refs).some(kind => !['implementation', 'verification', 'review'].includes(kind)))) invalid('INVALID_RECEIPT_REF')
     if (slice.status === 'checkpointed' || slice.status === 'verified' || slice.status === 'reviewed') {
