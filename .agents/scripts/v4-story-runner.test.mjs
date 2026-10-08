@@ -11,6 +11,7 @@ import {
   humanApprovalIntent,
   V4_AUTHORIZED_ACTIONS,
   authorizeAction,
+  autopilotStatus,
   exitCodeForStatus,
   CODES
 } from './v4-story-runner.mjs'
@@ -32,6 +33,15 @@ const PLAN = '_bmad-output/implementation-artifacts/story-9-1-plan.md'
 
 const autopilotInput = (budgets = { max_slices: 2, max_rework_per_slice: 1, max_minutes_per_slice: 30 }) =>
   ({ action: 'authorize_autopilot', story_id: '9.1', budgets, lead_vendor: 'codex' })
+
+function prepareFinalizeAutopilotFixture() {
+  const f = createCompletionFixture()
+  f.write(PLAN, f.readPlan().replace('kind: "complete_story"', 'kind: "finalize_story"'))
+  f.git('add', PLAN)
+  f.git('commit', '-qm', 'prepare autopilot status fixture')
+  f.refreshHead()
+  return f
+}
 
 test('structured autopilot authority is Plan-bound in one exact-path commit and can be revoked', () => {
   const f = createCompletionFixture()
@@ -130,6 +140,65 @@ test('autopilot authority rejects free text, invalid budgets, and stale HEAD wit
     const stale = runCli(f.root, ['run', '9.1', '--expected-head', '0'.repeat(40), '--authorize-autopilot', JSON.stringify(autopilotInput())])
     assert.equal(JSON.parse(stale.stdout).status, 'STALE')
     assert.equal(f.git('rev-parse', 'HEAD'), f.head)
+  } finally { f.cleanup() }
+})
+
+test('autopilot-status is read-only, requires authorization, and stops at the Human Gate', () => {
+  const f = createCompletionFixture()
+  try {
+    const beforeHead = f.git('rev-parse', 'HEAD')
+    const beforePlan = f.readPlan()
+    const beforeStatus = f.git('status', '--porcelain')
+    const result = runCli(f.root, ['autopilot-status', '9.1', '--expected-head', beforeHead])
+    const output = JSON.parse(result.stdout)
+    assert.equal(result.status, 3, result.stdout)
+    assert.equal(output.status, 'STOP')
+    assert.deepEqual(output.reasons, ['NO_AUTHORIZATION'])
+    assert.equal(output.next_action.kind, 'complete_story')
+    assert.equal(f.git('rev-parse', 'HEAD'), beforeHead)
+    assert.equal(f.readPlan(), beforePlan)
+    assert.equal(f.git('status', '--porcelain'), beforeStatus)
+  } finally { f.cleanup() }
+
+  const authorized = prepareFinalizeAutopilotFixture()
+  try {
+    const recorded = runCli(authorized.root, ['run', '9.1', '--expected-head', authorized.head,
+      '--authorize-autopilot', JSON.stringify(autopilotInput())])
+    assert.equal(recorded.status, 0, recorded.stdout)
+    const head = authorized.git('rev-parse', 'HEAD')
+    const status = runCli(authorized.root, ['autopilot-status', '9.1', '--expected-head', head])
+    const output = JSON.parse(status.stdout)
+    assert.equal(status.status, 0, status.stdout)
+    assert.equal(output.status, 'CONTINUE')
+    assert.equal(output.next_action.kind, 'finalize_story')
+    assert.deepEqual(output.reasons, [])
+    assert.equal(output.budgets_remaining.slices.used, 0)
+  } finally { authorized.cleanup() }
+})
+
+test('autopilot-status reports revoked, stale, and recovery stop reasons', () => {
+  const f = prepareFinalizeAutopilotFixture()
+  try {
+    const recorded = runCli(f.root, ['run', '9.1', '--expected-head', f.head,
+      '--authorize-autopilot', JSON.stringify(autopilotInput())])
+    assert.equal(recorded.status, 0, recorded.stdout)
+    const authorizedHead = f.git('rev-parse', 'HEAD')
+    const stale = runCli(f.root, ['autopilot-status', '9.1', '--expected-head', f.head])
+    assert.equal(stale.status, 3, stale.stdout)
+    assert.deepEqual(JSON.parse(stale.stdout).reasons, ['STALE'])
+
+    const revoked = runCli(f.root, ['run', '9.1', '--expected-head', authorizedHead, '--revoke-autopilot'])
+    assert.equal(revoked.status, 0, revoked.stdout)
+    const revokedHead = f.git('rev-parse', 'HEAD')
+    const stopped = runCli(f.root, ['autopilot-status', '9.1', '--expected-head', revokedHead])
+    assert.equal(stopped.status, 3, stopped.stdout)
+    assert.deepEqual(JSON.parse(stopped.stdout).reasons, ['REVOKED'])
+
+    const lock = path.join(f.root, '.git', 'v4-autopilot-authority.lock')
+    writeFileSync(lock, 'recovery\n')
+    const recovery = runCli(f.root, ['autopilot-status', '9.1', '--expected-head', revokedHead])
+    assert.equal(recovery.status, 3, recovery.stdout)
+    assert.deepEqual(JSON.parse(recovery.stdout).reasons, ['RECOVERY_REQUIRED'])
   } finally { f.cleanup() }
 })
 

@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, renameSync, unlinkSync, writeFileSync } from 'node:fs'
 import { createHash, randomUUID } from 'node:crypto'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
@@ -35,6 +35,8 @@ const STORY_ACTIONS = new Set([
 ])
 const SHA = /^[0-9a-f]{40,64}$/
 export const CODES = Object.freeze({
+  CONTINUE: 0,
+  STOP: 3,
   STARTED: 0,
   DONE: 0,
   APPROVAL_DURABLE_PENDING_COMPLETION: 0,
@@ -84,6 +86,7 @@ const CLI_OPERATIONS = new Set([
   'apply-staged-recovery'
 ])
 const CLI_USAGE = 'USAGE: run <epic.story> [--expected-head <sha>] [--operation <operation> --input <file>] [--approve-exact-scope] [--authorize-autopilot <json> | --revoke-autopilot]'
+const AUTOPILOT_STATUS_ACTIONS = new Set(['implement_slice', 'verify_slice', 'finalize_story'])
 
 function planRelative(storyId) {
   return '_bmad-output/implementation-artifacts/story-' + storyId.replace('.', '-') + '-plan.md'
@@ -496,6 +499,161 @@ export function runV4Story(root, storyId, options = {}) {
   }
 }
 
+function isAncestor(root, ancestor, descendant) {
+  if (!SHA.test(ancestor ?? '') || !SHA.test(descendant ?? '')) return false
+  return git(root, ['merge-base', '--is-ancestor', ancestor, descendant]).status === 0
+}
+
+function currentAttempt(slice) {
+  if (Number.isInteger(slice?.current_attempt?.attempt_id) && slice.current_attempt.attempt_id > 0) {
+    return slice.current_attempt.attempt_id
+  }
+  const history = Array.isArray(slice?.attempt_history) ? slice.attempt_history : []
+  const latest = history.at(-1)?.attempt_id
+  return Number.isInteger(latest) && latest > 0 ? latest : 1
+}
+
+function sliceScope(slice) {
+  const paths = slice?.scope?.paths
+  if (Array.isArray(paths)) return paths.filter(value => typeof value === 'string' && value.length > 0)
+  return []
+}
+
+function firstSliceCommit(root, authorizedHead, slice) {
+  const end = SHA.test(slice?.checkpoint_commit ?? '') ? slice.checkpoint_commit : 'HEAD'
+  if (!isAncestor(root, authorizedHead, end) || authorizedHead === end) return null
+  const args = ['log', '--format=%H%x09%ct', '--reverse', `${authorizedHead}..${end}`]
+  const paths = sliceScope(slice)
+  if (paths.length) args.push('--', ...paths)
+  const result = git(root, args)
+  if (result.status !== 0) throw new Error('SLICE_COMMIT_HISTORY_UNAVAILABLE')
+  const line = result.stdout.trim().split(/\r?\n/).find(Boolean)
+  if (!line) return null
+  const match = /^([0-9a-f]{40,64})\t(\d+)$/.exec(line.trim())
+  if (!match) throw new Error('SLICE_COMMIT_TIMESTAMP_INVALID')
+  return { commit: match[1], timestamp: Number(match[2]) }
+}
+
+function recoveryPending(root, storyId) {
+  const common = path.resolve(root, gitOutput(root, ['rev-parse', '--git-common-dir'], 'GIT_COMMON_DIR_UNAVAILABLE'))
+  if (existsSync(path.join(common, 'v4-autopilot-authority.lock'))) return true
+  for (const directory of ['noteflow-v4-transactions', 'noteflow-v4-lifecycle']) {
+    const folder = path.join(common, directory)
+    if (!existsSync(folder)) continue
+    for (const name of readdirSync(folder)) {
+      if (!name.endsWith('.json')) continue
+      try {
+        const record = JSON.parse(readFileSync(path.join(folder, name), 'utf8'))
+        if (record.story_id === storyId && (record.phase === 'RECOVERY_REQUIRED' || record.recovery_required === true)) return true
+      } catch {
+        // A malformed transaction is itself a recovery condition for this
+        // Story only when its filename cannot be read as an unrelated file.
+      }
+    }
+  }
+  return false
+}
+
+function autopilotBudgetSnapshot(root, plan) {
+  const authority = plan.autopilot
+  const maxSlices = authority.budgets.max_slices
+  const maxRework = authority.budgets.max_rework_per_slice
+  const maxMinutes = authority.budgets.max_minutes_per_slice
+  const checkpointedSlices = (Array.isArray(plan.slices) ? plan.slices : [])
+    .filter(slice => SHA.test(slice?.checkpoint_commit ?? '') &&
+      slice.checkpoint_commit !== authority.authorized_head &&
+      isAncestor(root, authority.authorized_head, slice.checkpoint_commit)).length
+  const slice = (plan.slices ?? []).find(item => item?.id === plan.current_slice)
+  const attemptId = currentAttempt(slice)
+  const reworkUsed = Math.max(0, attemptId - 1)
+  const first = firstSliceCommit(root, authority.authorized_head, slice)
+  const elapsedMinutes = first
+    ? Math.max(0, (Date.now() - first.timestamp * 1000) / 60000)
+    : 0
+  return {
+    slices: {
+      used: checkpointedSlices,
+      max: maxSlices,
+      remaining: Math.max(0, maxSlices - checkpointedSlices)
+    },
+    rework: {
+      used: reworkUsed,
+      max: maxRework,
+      remaining: Math.max(0, maxRework - reworkUsed)
+    },
+    time: {
+      elapsed_minutes: elapsedMinutes,
+      max_minutes: maxMinutes,
+      remaining_minutes: Math.max(0, maxMinutes - elapsedMinutes),
+      first_commit: first?.commit ?? null
+    }
+  }
+}
+
+function autopilotStatusStop(nextAction, reasons, budgetsRemaining = null) {
+  return { status: 'STOP', next_action: nextAction ?? null, reasons, budgets_remaining: budgetsRemaining }
+}
+
+/**
+ * Read the durable Story state that governs the next autopilot step. This
+ * intentionally does not call runV4Story: status is a read-only admission
+ * check and must not create observations or infer in-memory verification
+ * substates.
+ */
+export function autopilotStatus(root, storyId, expectedHead) {
+  let plan = null
+  try {
+    if (!/^\d+\.\d+$/.test(storyId ?? '')) return autopilotStatusStop(null, ['INVALID_STORY_ID'])
+    if (!SHA.test(expectedHead ?? '')) return autopilotStatusStop(null, ['INVALID_EXPECTED_HEAD'])
+    const relative = planRelative(storyId)
+    if (!existsSync(path.join(root, relative))) return autopilotStatusStop(null, ['PLAN_MISSING'])
+    if (!pointerIdle(root)) return autopilotStatusStop(null, ['V3_POINTER_NOT_IDLE'])
+    const head = gitOutput(root, ['rev-parse', 'HEAD'], 'HEAD_UNAVAILABLE')
+    if (head !== expectedHead) return autopilotStatusStop(null, ['STALE'])
+    const checkout = checkoutBlock(root, storyId)
+    if (checkout) return autopilotStatusStop(null, checkout.reasons ?? [checkout.status ?? 'RUNNER_REFUSAL'])
+    if (recoveryPending(root, storyId)) return autopilotStatusStop(null, ['RECOVERY_REQUIRED'])
+    plan = frontmatter(readFileSync(path.join(root, relative), 'utf8'))
+    const nextAction = plan.next_action ?? null
+    if (!plan.autopilot) return autopilotStatusStop(nextAction, ['NO_AUTHORIZATION'])
+    if (plan.autopilot.revoked === true) return autopilotStatusStop(nextAction, ['REVOKED'])
+
+    const planCheck = validateStoryPlan(root, storyId)
+    const autopilotReasons = planCheck.reasons.filter(reason => reason.startsWith('AUTOPILOT_'))
+    if (autopilotReasons.length) {
+      return autopilotStatusStop(nextAction,
+        autopilotReasons.includes('AUTOPILOT_PLAN_BINDING_MISMATCH') ? ['STALE'] : autopilotReasons)
+    }
+    if (!planCheck.valid) {
+      return autopilotStatusStop(nextAction,
+        planCheck.status === 'STALE' ? ['STALE'] : planCheck.reasons)
+    }
+
+    const budgetsRemaining = autopilotBudgetSnapshot(root, plan)
+    if (nextAction?.kind === 'complete_story') return autopilotStatusStop(nextAction, ['HUMAN_GATE'], budgetsRemaining)
+    if (!AUTOPILOT_STATUS_ACTIONS.has(nextAction?.kind)) {
+      return autopilotStatusStop(nextAction, ['ACTION_NOT_AUTOPILOT_ALLOWED'], budgetsRemaining)
+    }
+    const current = (plan.slices ?? []).find(slice => slice?.id === plan.current_slice)
+    const currentCheckpointed = SHA.test(current?.checkpoint_commit ?? '') &&
+      current.checkpoint_commit !== plan.autopilot.authorized_head &&
+      isAncestor(root, plan.autopilot.authorized_head, current.checkpoint_commit)
+    if (budgetsRemaining.slices.used >= budgetsRemaining.slices.max &&
+        nextAction.kind === 'implement_slice' && !currentCheckpointed) {
+      return autopilotStatusStop(nextAction, ['BUDGET_SLICES'], budgetsRemaining)
+    }
+    if (budgetsRemaining.rework.used > budgetsRemaining.rework.max) {
+      return autopilotStatusStop(nextAction, ['BUDGET_REWORK'], budgetsRemaining)
+    }
+    if (budgetsRemaining.time.elapsed_minutes >= budgetsRemaining.time.max_minutes) {
+      return autopilotStatusStop(nextAction, ['BUDGET_TIME'], budgetsRemaining)
+    }
+    return { status: 'CONTINUE', next_action: nextAction, reasons: [], budgets_remaining: budgetsRemaining }
+  } catch (error) {
+    return autopilotStatusStop(plan?.next_action ?? null, [error.message])
+  }
+}
+
 export function authorizeAction(root, storyId, action, expectedHead, options = {}) {
   try {
     if (!existsSync(path.join(root, planRelative(storyId)))) return invalidResult('PLAN_MISSING')
@@ -549,6 +707,12 @@ export function runAction(root, storyId, expectedHead, options = {}) {
 
 function parseArguments(argv) {
   const [verb, storyId, ...tail] = argv
+  if (verb === 'autopilot-status') {
+    if (!/^\d+\.\d+$/.test(storyId ?? '') || tail.length !== 2 || tail[0] !== '--expected-head' || !SHA.test(tail[1])) {
+      return { error: 'USAGE: autopilot-status <epic.story> --expected-head <sha>' }
+    }
+    return { command: 'autopilot-status', storyId, expectedHead: tail[1] }
+  }
   if (!['run', 'execute'].includes(verb) || !/^\d+\.\d+$/.test(storyId ?? '')) return { error: CLI_USAGE }
   let expectedHead
   let startFingerprint
@@ -575,7 +739,7 @@ function parseArguments(argv) {
   if ((operation && !inputFile) || (!operation && inputFile)) return { error: CLI_USAGE }
   if ((autopilotAuthorization !== undefined && revokeAutopilot) ||
       ((autopilotAuthorization !== undefined || revokeAutopilot) && (operation || approveExactScope || startFingerprint || excludeUnrelated.length))) return { error: CLI_USAGE }
-  return { storyId, expectedHead, operation, inputFile, approveExactScope, startFingerprint, excludeUnrelated, autopilotAuthorization, revokeAutopilot }
+  return { command: 'run', storyId, expectedHead, operation, inputFile, approveExactScope, startFingerprint, excludeUnrelated, autopilotAuthorization, revokeAutopilot }
 }
 
 function readCliInput(root, inputFile) {
@@ -594,6 +758,7 @@ function main() {
   const parsed = parseArguments(process.argv.slice(2))
   if (parsed.error) return invalidResult(parsed.error)
   const root = path.resolve(gitOutput(process.cwd(), ['rev-parse', '--show-toplevel'], 'GIT_ROOT_UNAVAILABLE'))
+  if (parsed.command === 'autopilot-status') return autopilotStatus(root, parsed.storyId, parsed.expectedHead)
   if (!existsSync(path.join(root, planRelative(parsed.storyId)))) return invalidResult('PLAN_MISSING')
   const loaded = parsed.inputFile ? readCliInput(root, parsed.inputFile) : { value: undefined }
   if (loaded.error) return invalidResult(loaded.error)
