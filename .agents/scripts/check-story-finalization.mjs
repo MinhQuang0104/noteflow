@@ -17,10 +17,12 @@ import {
   inferCanonicalApplicability,
   LEGACY_REVIEW_RECEIPT_CUTOFF,
   legacyReviewFreshness,
+  noReviewFinalReady,
   receiptKindsForAttemptStatus,
   reviewDecision,
   reviewEvidenceFreshness,
-  reviewReceiptDialect
+  reviewReceiptDialect,
+  sliceReviewRequired
 } from './v4-finalization-contract.mjs'
 
 const CODES = { READY: 0, RECONCILIATION_REQUIRED: 1, STALE: 2, BLOCKED: 3, INVALID: 4, ERROR: 5 }
@@ -519,22 +521,9 @@ function reviewFreshness(receipt, slice = null, verification = null, plan = null
 }
 
 // The Plan projection may name the decision `judgment` (kernel template) or
-// `verdict` (earlier templates). MEDIUM/HIGH slices and any slice that binds a
-// review receipt always require that receipt.
+// `verdict` (earlier templates).
 function planReviewDecision(slice) {
   return reviewDecision(slice.review ?? {})
-}
-
-function sliceReviewRequired(plan, slice, verification) {
-  if (slice.review?.required === true || Boolean(slice.receipt_refs?.review)) return true
-  if (slice.risk === undefined) return ['MEDIUM', 'HIGH'].includes(String(plan.risk?.level ?? '').toUpperCase())
-
-  const escalation = verification?.escalation
-  const levels = ['LOW', 'MEDIUM', 'HIGH']
-  if (!levels.includes(slice.risk?.level) || !levels.includes(escalation?.risk) ||
-      !['NO_REVIEW', 'REVIEW_REQUIRED'].includes(escalation?.decision)) return null
-  return escalation.decision === 'REVIEW_REQUIRED' ||
-    Math.max(levels.indexOf(slice.risk.level), levels.indexOf(escalation.risk)) > 0
 }
 
 function loadSliceReceipts(root, plan, result) {

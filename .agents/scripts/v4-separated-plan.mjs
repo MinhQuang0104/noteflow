@@ -1,9 +1,10 @@
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
-import { attemptReceiptPath, inspectStory, normativeDigest, readReceiptForAttempt, validateTaskSlices, validateReceipt } from './check-artifact-contract.mjs'
+import { attemptReceiptPath, inspectStory, normativeDigest, readReceipt, readReceiptForAttempt, validateTaskSlices, validateReceipt } from './check-artifact-contract.mjs'
 import { validateFinalizationReceipt } from './finalization-contract.mjs'
 import { normalizeAllowed } from './check-worker-scope.mjs'
+import { noReviewFinalReady } from './v4-finalization-contract.mjs'
 
 const DIGEST = /^sha256:[0-9a-f]{64}$/
 const SHA = /^[0-9a-f]{40,64}$/
@@ -174,6 +175,15 @@ export function separatedStory(root, plan) {
   return { story, error: null }
 }
 
+// A slice is final-ready when reviewed, or verified on the receipt-recorded
+// LOW NO_REVIEW path (P2.2); the receipt must also load without errors.
+function finalReady(root, plan, slice) {
+  if (slice?.status === 'reviewed') return true
+  if (slice?.status !== 'verified' || !slice.receipt_refs?.verification) return false
+  const loaded = readReceipt(root, plan, slice.id, 'verification')
+  return !loaded.errors.length && noReviewFinalReady(plan, slice, loaded.receipt).ready
+}
+
 export function validateSeparatedPlan(root, id, plan, result) {
   const invalid = reason => result.reasons.push(reason)
   const stale = reason => result.reasons.push(reason)
@@ -287,7 +297,7 @@ export function validateSeparatedPlan(root, id, plan, result) {
   const reviewState = plan.lifecycle_snapshot === 'review' && plan.execution_status === 'complete'
   if (plan.next_action?.kind === 'complete_story' && !reviewState) invalid('COMPLETE_STORY_REQUIRES_REVIEW')
   if (reviewState && result.storyStatus !== 'review') invalid('STORY_STATUS_MISMATCH')
-  if (reviewState && !slices.every(slice => slice?.status === 'reviewed')) invalid('REVIEW_SLICES_INCOMPLETE')
+  if (reviewState && !slices.every(slice => finalReady(root, plan, slice))) invalid('REVIEW_SLICES_INCOMPLETE')
   if (terminalState && result.storyStatus !== 'done') invalid('STORY_STATUS_MISMATCH')
   if ((reviewState || terminalState) && plan.human_approval !== undefined && plan.human_approval !== null) {
     validateHumanApproval(root, plan, result, plan.finalization)

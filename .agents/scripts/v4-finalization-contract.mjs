@@ -32,6 +32,36 @@ export function reviewDecision(review) {
   return { value: judgment ?? verdict, error: null }
 }
 
+// MEDIUM/HIGH slices and any slice that binds a review receipt always require
+// that receipt. A slice with its own risk follows the escalation persisted in
+// its verification receipt; null means that evidence is missing or malformed.
+export function sliceReviewRequired(plan, slice, verification) {
+  if (slice.review?.required === true || Boolean(slice.receipt_refs?.review)) return true
+  if (slice.risk === undefined) return ['MEDIUM', 'HIGH'].includes(String(plan.risk?.level ?? '').toUpperCase())
+
+  const escalation = verification?.escalation
+  const levels = ['LOW', 'MEDIUM', 'HIGH']
+  if (!levels.includes(slice.risk?.level) || !levels.includes(escalation?.risk) ||
+      !['NO_REVIEW', 'REVIEW_REQUIRED'].includes(escalation?.decision)) return null
+  return escalation.decision === 'REVIEW_REQUIRED' ||
+    Math.max(levels.indexOf(slice.risk.level), levels.indexOf(escalation.risk)) > 0
+}
+
+// A `verified` slice is final-ready without review only when its verification
+// receipt recorded the LOW NO_REVIEW path (P2.2). The Plan projection comes from
+// the Lead's template, so it can add a review requirement but never waive one.
+export function noReviewFinalReady(plan, slice, verification) {
+  if (slice?.status !== 'verified') return { ready: false, reason: 'NOT_VERIFIED' }
+  const required = sliceReviewRequired(plan, slice, verification)
+  const escalation = verification?.escalation
+  if (required === true || escalation?.decision === 'REVIEW_REQUIRED' ||
+      ['MEDIUM', 'HIGH'].includes(escalation?.risk)) return { ready: false, reason: 'REVIEW_REQUIRED' }
+  if (required !== false || escalation?.decision !== 'NO_REVIEW' || escalation?.risk !== 'LOW') {
+    return { ready: false, reason: 'NO_REVIEW_EVIDENCE_INVALID' }
+  }
+  return { ready: true, reason: null }
+}
+
 export function receiptKindsForAttemptStatus(status) {
   if (status === 'reviewed') return ['implementation', 'verification', 'review']
   if (status === 'verified') return ['implementation', 'verification']
