@@ -125,17 +125,7 @@ identity and requires the owner's explicit structured input; a Lead must
 never call it on its own initiative. Ordinary `record-review` rejects a
 human identity with `OWNER_REVIEW_OPERATION_REQUIRED`.
 
-**P2 deviation and owner questions:** combinations omitted from the approved
-table (including MEDIUM human reviews, flagged/reviewed LOW slices, and legacy
-reviewer strings) conservatively return `HUMAN_REQUIRED` with
-`POLICY_CASE_UNSPECIFIED`. **Settled by the owner on 2026-10-08:** see
-[`v4-auto/p2-1-policy-completion.md`](v4-auto/p2-1-policy-completion.md) §1
-(D-P2.1-a, D-P2.1-b), implemented in P2.1 before P3.
-Also, `sliceReviewRequired` in `check-story-finalization.mjs` still uses Story
-risk, so finalization requires review for a declared LOW slice in a
-MEDIUM/HIGH Story even when verification used NO_REVIEW. That file is outside
-P2's scope and remains unchanged. P3 is not started pending resolution.
-
+**P2.1 complete.** The owner decisions in [the P2.1 completion record](v4-auto/p2-1-policy-completion.md) §1 are binding; the completed policy table there records the resolved review cases and finalization behavior.
 ## 4. Lead session and loop (Phases P3–P4)
 
 - **One Lead session per Story** (D3). Context is kept for continuity; every
