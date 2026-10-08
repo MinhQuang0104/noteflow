@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { rmSync, writeFileSync } from 'node:fs'
+import { readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -10,7 +10,8 @@ import {
   humanApprovalIntent,
   V4_AUTHORIZED_ACTIONS,
   authorizeAction,
-  exitCodeForStatus
+  exitCodeForStatus,
+  CODES
 } from './v4-story-runner.mjs'
 import { runAction } from './v4-story-runner.mjs'
 import { createCompletionFixture } from './completion-fixture.mjs'
@@ -29,7 +30,7 @@ test('CLI exit-code table covers every documented result class', () => {
   for (const status of [
     'STARTED', 'DONE', 'APPROVAL_DURABLE_PENDING_COMPLETION', 'NOOP', 'APPLIED',
     'HUMAN_GATE_REQUIRED', 'REVIEW_REQUIRED', 'READY', 'AUTHORIZED', 'TERMINAL',
-    'NO_CHANGE'
+    'NO_CHANGE', 'CHECKPOINTED'
   ]) assert.equal(exitCodeForStatus(status), 0, status)
   for (const status of ['STALE', 'CONFLICT']) assert.equal(exitCodeForStatus(status), 2, status)
   for (const status of [
@@ -41,6 +42,19 @@ test('CLI exit-code table covers every documented result class', () => {
   assert.equal(exitCodeForStatus('ERROR'), 5)
   assert.equal(exitCodeForStatus('RECOVERY_REQUIRED'), 6)
   assert.equal(exitCodeForStatus('UNRECOGNIZED_STATUS'), 5)
+})
+
+test('every status the action kernel or transactions emit has a Runner exit code', () => {
+  // G1 found a successful checkpoint (CHECKPOINTED) exiting 5 because the table
+  // missed it. NOT_FOUND is internal to transaction inspection and never
+  // leaves the Runner.
+  const internalOnly = new Set(['NOT_FOUND'])
+  const sources = ['v4-action-kernel.mjs', 'v4-slice-transaction.mjs']
+    .map(name => readFileSync(new URL(`./${name}`, import.meta.url), 'utf8')).join('\n')
+  const statuses = new Set([...sources.matchAll(/status: '([A-Z_]+)'|statusResult\('([A-Z_]+)'/g)]
+    .map(match => match[1] ?? match[2]))
+  const missing = [...statuses].filter(status => !internalOnly.has(status) && !Object.hasOwn(CODES, status))
+  assert.deepEqual(missing, [])
 })
 
 test('fresh start routes only a ready preview and stops before implementing its successor', () => {

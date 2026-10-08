@@ -45,6 +45,7 @@ export const CODES = Object.freeze({
   AUTHORIZED: 0,
   TERMINAL: 0,
   NO_CHANGE: 0,
+  CHECKPOINTED: 0,
   RECOVERY_REQUIRED: 6,
   STALE: 2,
   CONFLICT: 2,
