@@ -87,6 +87,16 @@ function editPlan(f, from, to) {
   writeFileSync(file, f.plan.replace(from, to))
 }
 
+test('autopilot record rejects malformed budgets and vendors', () => {
+  const f = fixture()
+  try {
+    editPlan(f, 'blockers: []', `autopilot:\n  schema_version: 1\n  authorized_at: "2026-10-08T00:00:00.000Z"\n  authorized_plan_digest: sha256:${'a'.repeat(64)}\n  authorized_head: ${f.sha}\n  budgets:\n    max_slices: 0\n    max_rework_per_slice: 4\n    max_minutes_per_slice: 4\n  lead_vendor: unknown\n  revoked: false\nblockers: []`)
+    const result = check(f.root)
+    assert.equal(result.json.status, 'INVALID')
+    assert.ok(result.json.reasons.includes('AUTOPILOT_INVALID'), JSON.stringify(result.json))
+  } finally { rmSync(f.root, { recursive: true, force: true }) }
+})
+
 function schemaV2Fixture() {
   const root = mkdtempSync(path.join(tmpdir(), 'story-plan-v2-'))
   const storyPath = 'docs/story-9-1.md'

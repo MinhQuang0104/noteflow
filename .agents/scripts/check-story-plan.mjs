@@ -12,6 +12,7 @@ const ACTIONS = new Set(['plan_slice', 'implement_slice', 'verify_slice', 'revie
 const SLICE_STATUSES = new Set(['pending', 'active', 'checkpointed', 'verified', 'reviewed', 'blocked'])
 const V3_KEYS = new Set(['run_id', 'runId', 'activeRunId', 'task_id', 'taskId', 'taskIds', 'workerId', 'lease', 'generation', 'humanGateRequired', 'dispatchId'])
 const SHA256 = /^sha256:[0-9a-f]{64}$/
+const COMMIT_SHA = /^[0-9a-f]{40,64}$/
 
 function scalar(raw) {
   const value = raw.trim()
@@ -116,6 +117,30 @@ function hasForbidden(value) {
 
 function isObject(value) { return value !== null && typeof value === 'object' && !Array.isArray(value) }
 
+export function validateAutopilot(root, planPath, value) {
+  if (value === undefined) return []
+  const expected = ['schema_version', 'authorized_at', 'authorized_plan_digest', 'authorized_head', 'budgets', 'lead_vendor', 'revoked']
+  const budgetKeys = ['max_slices', 'max_rework_per_slice', 'max_minutes_per_slice']
+  if (!isObject(value) || Object.keys(value).length !== expected.length || expected.some(key => !Object.hasOwn(value, key)) ||
+      value.schema_version !== 1 || typeof value.authorized_at !== 'string' ||
+      !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(value.authorized_at) ||
+      !Number.isFinite(Date.parse(value.authorized_at)) || !SHA256.test(value.authorized_plan_digest) ||
+      !COMMIT_SHA.test(value.authorized_head) || !['codex', 'claude'].includes(value.lead_vendor) ||
+      typeof value.revoked !== 'boolean' || !isObject(value.budgets) ||
+      Object.keys(value.budgets).length !== budgetKeys.length || budgetKeys.some(key => !Object.hasOwn(value.budgets, key)) ||
+      !Number.isInteger(value.budgets.max_slices) || value.budgets.max_slices < 1 ||
+      !Number.isInteger(value.budgets.max_rework_per_slice) || value.budgets.max_rework_per_slice < 0 || value.budgets.max_rework_per_slice > 3 ||
+      !Number.isInteger(value.budgets.max_minutes_per_slice) || value.budgets.max_minutes_per_slice < 5 || value.budgets.max_minutes_per_slice > 240) {
+    return ['AUTOPILOT_INVALID']
+  }
+  const original = git(root, ['show', `${value.authorized_head}:${planPath}`])
+  if (original.status !== 0 ||
+      `sha256:${createHash('sha256').update(original.stdout, 'utf8').digest('hex')}` !== value.authorized_plan_digest) {
+    return ['AUTOPILOT_PLAN_BINDING_MISMATCH']
+  }
+  return []
+}
+
 const AUTHORITY_PATHS = [
   'AGENTS.md',
   'CLAUDE.md',
@@ -215,6 +240,7 @@ export function validate(root, id) {
   result.currentSlice = plan.current_slice ?? null
   result.nextAction = plan.next_action ?? null
   result.sourceDigest = plan.source?.section_digest ?? null
+  result.reasons.push(...validateAutopilot(root, planPath, plan.autopilot))
   if (plan.schema_version === 2) {
     const separated = validateSeparatedPlan(root, id, plan, result)
     for (const slice of plan.slices ?? []) separated.reasons.push(...validateSliceExecutionContract(slice), ...validateSliceRisk(slice, plan.risk))

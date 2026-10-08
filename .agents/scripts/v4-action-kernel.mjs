@@ -327,6 +327,10 @@ function assertUnchanged(original, generated, keys) {
   for (const key of keys) if (!sameJson(original[key], generated[key])) throw new Error(`PLAN_FIELD_CHANGED:${key}`)
 }
 
+function assertAutopilotUnchanged(original, generated) {
+  if (!sameJson(original.autopilot, generated.autopilot)) throw new Error('AUTOPILOT_AUTHORITY_CHANGED')
+}
+
 function sliceById(plan, sliceId) {
   const slice = plan.slices?.find(item => item?.id === sliceId)
   if (!slice) throw new Error('TARGET_SLICE_MISSING')
@@ -347,6 +351,7 @@ function currentAttemptId(slice) {
 function validateMetadataProjection(root, descriptor, checkpoint, metadata) {
   const planText = metadata.files[descriptor.plan_path]
   const generated = frontmatter(planText)
+  assertAutopilotUnchanged(descriptor.original_plan, generated)
   if (generated.schema_version !== descriptor.schema_version || generated.story_id !== descriptor.story_id) throw new Error('PLAN_IDENTITY_CHANGED')
   if (generated.lifecycle_snapshot !== descriptor.original_plan.lifecycle_snapshot || generated.execution_status !== descriptor.original_plan.execution_status) throw new Error('PLAN_LIFECYCLE_CHANGED')
   if (generated.current_slice !== descriptor.slice_id || generated.next_action?.kind !== 'verify_slice' || generated.next_action?.target !== descriptor.slice_id) throw new Error('VERIFY_SUCCESSOR_REQUIRED')
@@ -715,6 +720,7 @@ function expectedReworkAttempt(storyId, sliceId, attemptId) {
 }
 
 function validateReworkProjection(root, request, originalPlan, generated, oldSnapshot, newAttempt) {
+  assertAutopilotUnchanged(originalPlan, generated)
   if (generated.schema_version !== originalPlan.schema_version || generated.story_id !== request.story_id) throw new Error('PLAN_IDENTITY_CHANGED')
   if (generated.lifecycle_snapshot !== originalPlan.lifecycle_snapshot || generated.execution_status !== originalPlan.execution_status) throw new Error('PLAN_LIFECYCLE_CHANGED')
   if (generated.current_slice !== request.slice_id || generated.next_action?.kind !== 'implement_slice' || generated.next_action?.target !== request.slice_id) throw new Error('REWORK_SAME_SLICE_IMPLEMENTATION_REQUIRED')
@@ -1521,6 +1527,7 @@ function buildVerificationMetadata(root, preview, outcome, targetStatus, review 
 
 function validateVerificationMetadata(root, preview, metadata) {
   const generated = frontmatter(metadata.files[preview.plan_path])
+  assertAutopilotUnchanged(preview.original_plan, generated)
   if (generated.schema_version !== preview.original_plan.schema_version || generated.story_id !== preview.story_id) throw new Error('PLAN_IDENTITY_CHANGED')
   if (generated.lifecycle_snapshot !== preview.original_plan.lifecycle_snapshot || generated.execution_status !== preview.original_plan.execution_status) throw new Error('PLAN_LIFECYCLE_CHANGED')
   const expectedCurrent = metadata.next_action.kind === 'implement_slice' ? metadata.next_action.target : preview.slice_id

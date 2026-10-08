@@ -156,6 +156,31 @@ The transaction ends at `review`: Plan execution becomes `complete`, `next_actio
 
 ## Explicit Human approval and terminal state
 
+The Plan may carry a separate owner-granted `autopilot` record. The Runner accepts only
+`--authorize-autopilot <json>` with `{action:"authorize_autopilot", story_id,
+budgets, lead_vendor}` and writes a single Plan metadata commit. The record has
+`schema_version: 1`, an ISO UTC `authorized_at`, the SHA-256 digest of the Plan
+blob at `authorized_head`, the exact pre-authorization HEAD, resolved `budgets`,
+`lead_vendor` (`codex` or `claude`), and `revoked: false`. Budgets are integer
+`max_slices` (at least 1), `max_rework_per_slice` (0–3), and
+`max_minutes_per_slice` (5–240); omitted entries default respectively to the
+Plan's slice count, 0, and 60. Out-of-range input is invalid. The owner may use
+`--revoke-autopilot` to set `revoked: true` in another Plan-only commit.
+Action metadata projections preserve the record exactly. It grants no Human
+approval or completion authority; finalization and completion continue to use
+their own gates.
+
+The authorization transaction stages the exact Plan bytes, checks the index
+blob and one-path tree, and advances HEAD only to that tree with an expected-HEAD
+compare-and-swap. It checks the committed blob before returning success. A
+conflicting or retained `v4-autopilot-authority.lock` returns
+`RECOVERY_REQUIRED` with the lock, Plan, and index paths. After a post-write
+failure the lock and partial files remain. The owner inspects the reported
+lock plus HEAD, Plan worktree, and index blobs; preserves any divergent
+evidence; reconciles Plan and index to the intended committed state or the
+unchanged prior HEAD; then removes that exact lock and retries with the current
+HEAD. The Runner never clears an unknown lock or retries a partial write.
+
 The Plan's optional `human_approval` object is the machine-readable authority. It contains `schema_version: 1`, `story_id`, `approver_type: human`, `decision: APPROVED`, `approved_at`, `story_normative_digest`, `finalization_receipt_digest`, `done_gate_summary_digest`, `scope_paths_digest`, `implementation_commit_set_digest`, `final_scope_digest`, `final_scoped_tree_digest`, `approved_review_head`, `approved_commit`, `approved_action: complete_story`, and `disclosures_acknowledged: true`. It contains no account identity or transcript. `approved_review_head` and `approved_commit` identify the exact reviewed HEAD; all receipt, Done Gate, implementation scope, and Story bindings must match the recomputed preview. Any product blob, checkpoint/scope, receipt, disclosure, review-head, or normative-digest drift makes the record stale. The only accepted approval input is the structured action `{ action: approve_exact_scope, disclosures_acknowledged: true }`; strings such as `continue`, `next`, `go on`, `proceed`, and `ok` have no authority.
 
 The read-only `.agents/scripts/check-story-completion.mjs` helper emits `READY`, `RECONCILIATION_REQUIRED`, `STALE`, `BLOCKED`, `INVALID`, or `ERROR` and never writes or infers approval. It presents the exact Story/review snapshot, including AC coverage, canonical disclosures, Done Gate summary, path count, scope/path/tree digests, implementation commit-set digest, and approved review HEAD. Completion requires `lifecycle_snapshot: done`, `execution_status: complete`, `next_action: null`, Story and sprint lifecycle `done`, the same durable approval, and the unchanged finalization receipt. Completion writes only the Story status/completion note, Plan lifecycle/terminal action, and sprint lifecycle; it does not alter normative Story content, evidence, slice receipts, or the finalization receipt.

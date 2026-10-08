@@ -180,6 +180,26 @@ function fixture(kind, options = {}) {
   return { root, head, request, cleanup }
 }
 
+test('implementation metadata cannot remove or alter autopilot authority', () => {
+  const f = fixture('v2')
+  try {
+    const plan = readFileSync(path.join(f.root, PLAN), 'utf8')
+    const authority = ['autopilot:', '  schema_version: 1', '  authorized_at: "2026-10-08T00:00:00.000Z"',
+      `  authorized_plan_digest: ${digest(plan)}`, `  authorized_head: ${f.head}`,
+      '  budgets:', '    max_slices: 1', '    max_rework_per_slice: 0', '    max_minutes_per_slice: 30',
+      '  lead_vendor: codex', '  revoked: false', ''].join('\n')
+    write(f.root, PLAN, plan.replace('blockers: []', authority + 'blockers: []'))
+    git(f.root, 'add', PLAN)
+    git(f.root, 'commit', '-qm', 'fixture autopilot authority')
+    f.request.expected_head = git(f.root, 'rev-parse', 'HEAD')
+    const prepared = prepareAction(f.root, f.request)
+    assert.equal(prepared.status, 'READY', JSON.stringify(prepared))
+    const result = checkpointImplementation(f.root, checkpointRequest(f, prepared.preview))
+    assert.notEqual(result.status, 'CHECKPOINTED', JSON.stringify(result))
+    assert.ok(result.reasons.includes('AUTOPILOT_AUTHORITY_CHANGED'), JSON.stringify(result))
+  } finally { f.cleanup() }
+})
+
 function agyWorker() {
   return {
     executor: 'agy',
