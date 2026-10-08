@@ -126,6 +126,9 @@ never call it on its own initiative. Ordinary `record-review` rejects a
 human identity with `OWNER_REVIEW_OPERATION_REQUIRED`.
 
 **P2.1 complete.** The owner decisions in [the P2.1 completion record](v4-auto/p2-1-policy-completion.md) §1 are binding; the completed policy table there records the resolved review cases and finalization behavior.
+
+**D-P2.1-b complete end to end in [P2.2](v4-auto/p2-2-no-review-finalization.md).** A `verified` slice is final-ready without review only when its verification receipt records `NO_REVIEW` at `LOW` and the Plan adds no review requirement; the schema-v2 review state, finalization and completion accept it, and a regression test drives it from implement to `done` through the real kernel and Runner.
+
 ## 4. Lead session and loop (Phases P3–P4)
 
 - **One Lead session per Story** (D3). Context is kept for continuity; every
