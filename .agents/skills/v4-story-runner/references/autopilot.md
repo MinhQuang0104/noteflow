@@ -28,8 +28,10 @@ slice checks, and read-only git.
 
 ## Vendor allowlists
 
-The owner applies these entries before G3. This reference does not edit either
-vendor's settings.
+The repository's `.claude/settings.json` carries the Claude Code entries (owner
+decision, 2026-10-08), so every Story worktree has them; a test keeps that file
+equal to the block below. The owner applies the Codex entries once in Codex's
+user configuration.
 
 Claude Code `.claude/settings.json` (`permissions.allow`):
 

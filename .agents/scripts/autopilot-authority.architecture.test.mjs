@@ -22,3 +22,16 @@ test('autopilot allowlist keeps git read-only', () => {
   }
   assert.match(reference, /"Bash\(orca terminal \*\)"/)
 })
+
+test('committed Claude settings equal the documented autopilot allowlist', () => {
+  const raw = relative => readFileSync(new URL(`../../${relative}`, import.meta.url), 'utf8')
+  const documented = JSON.parse(/Claude Code `\.claude\/settings\.json`[\s\S]*?```json\s*([\s\S]*?)```/
+    .exec(raw('.agents/skills/v4-story-runner/references/autopilot.md'))[1])
+  const settings = JSON.parse(raw('.claude/settings.json'))
+  assert.deepEqual(settings, documented)
+  for (const entry of settings.permissions.allow) {
+    if (entry.startsWith('Bash(git ')) {
+      assert.match(entry, /^Bash\(git (status|diff|log|show|rev-parse|ls-files|merge-base|worktree list) \*\)$/, entry)
+    }
+  }
+})

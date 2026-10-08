@@ -44,10 +44,9 @@ chuẩn `PASS`).
 1. Pointer canonical `D:/Workspace/Tu_Hoc/New_Project_My_Note/.agent-state/active-run.json` là `IDLE`.
 2. AGY sẵn sàng như G1: đã đăng nhập, model Gemini 3.8 Flash (Medium).
 3. Allowlist (`.agents/skills/v4-story-runner/references/autopilot.md`):
-   - Claude: ghi khối `permissions.allow` vào
-     `<worktree 99.3>/.claude/settings.local.json`. File này nằm trong
-     `.git/info/exclude`, nên không làm bẩn cây làm việc của Story. Làm sau bước 1.
-   - Codex: thêm cùng các prefix vào cấu hình duyệt lệnh của Codex.
+   - Claude: không cần làm gì. `.claude/settings.json` đã được commit trên nhánh
+     kiến trúc, nên worktree smoke tạo từ nhánh đó tự có allowlist.
+   - Codex: thêm cùng các prefix một lần vào cấu hình cấp user của Codex.
 
 ## Bước 1: Claude dựng worktree (khi owner nói "chuẩn bị G3")
 
