@@ -46,6 +46,32 @@ verification receipt, or an unrecoverable escalation is `BLOCKED`, never
 final-ready. A `MEDIUM`/`HIGH` effective slice can never be final-ready
 through rule 2.
 
+**Amended by T1 (2026-10-08).** The kernel never persists
+`review.required: false`: the Plan text comes from the Lead's `plan_template`,
+and no template or action contract writes a `review` block on the NO_REVIEW
+path. The verification receipt does persist `escalation: {decision, risk,
+reasons}` from `check-escalation.mjs`. Rule 2 therefore reads, with no new
+persisted field:
+
+2. `status: verified`, no review receipt ref, `review.required` not `true`,
+   the verification receipt's `escalation.decision === 'NO_REVIEW'` **and**
+   `escalation.risk === 'LOW'`, and `sliceReviewRequired(plan, slice,
+   verificationReceipt) === false`.
+
+The receipt is digest-bound to the Plan, so it is the authority; the Plan can
+only add a review requirement (`review.required: true`), never waive one. This
+is stricter than the original wording for Stories without slice risk, where
+`sliceReviewRequired` alone never reads the receipt. Shared helper:
+`noReviewFinalReady` in `v4-finalization-contract.mjs` (with
+`sliceReviewRequired` moved there).
+
+T1 observation (real `prepareAction` → `checkpointImplementation` →
+`verifySlice`, MEDIUM Story, slice `risk: {level: LOW}`, executor `lead`):
+result `APPLIED`, policy `PROGRESS / LOW_CANONICAL_PASS_NO_FLAGS`, successor
+`finalize_story`; slice `status: verified`, no `review` block, Plan
+`verification.escalation.decision: NO_REVIEW`; receipt `escalation:
+{decision: NO_REVIEW, risk: LOW, reasons: []}`.
+
 ## 3. Tasks
 
 ### T1 — Confirm the persisted NO_REVIEW shape (read-only first)
