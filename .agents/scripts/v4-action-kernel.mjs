@@ -12,6 +12,7 @@ import { validateEvidenceSet } from './prepare-change-evidence.mjs'
 import { executeCheck, validateCheckEvidence } from './v4-check-executor.mjs'
 import { recordActionFinished, recordActionStarted, recordCheckFinished } from './v4-observations.mjs'
 import { REVIEW_RECEIPT_SCHEMA_VERSION } from './v4-finalization-contract.mjs'
+import { decideReviewOutcome } from './v4-review-policy.mjs'
 import { inspectScope, isAllowed } from './check-worker-scope.mjs'
 import {
   canonicalPaths,
@@ -1616,7 +1617,7 @@ function metadataDescriptor(root, preview, outcome, targetStatus, review, transa
   }
 }
 
-function persistVerification(root, preview, outcome, request, targetStatus = 'verified', review = null) {
+function persistVerification(root, preview, outcome, request, targetStatus = 'verified', review = null, reportPolicy = () => {}) {
   review = validatedSliceReview(review, preview)
   const recovery = request.recovery_authorized === true || request.recovery?.authorized === true
   if (!preview.plan_template && !request.plan_template && !recovery) throw new Error('PLAN_TEMPLATE_REQUIRED')
@@ -1629,6 +1630,16 @@ function persistVerification(root, preview, outcome, request, targetStatus = 've
     descriptor.recovery_checkpoint = request.recovery_checkpoint ?? request.recovery?.checkpoint_commit
     if (!descriptor.recovery_checkpoint) throw new Error('RECOVERY_CHECKPOINT_REQUIRED')
     descriptor.recheck = undefined
+    const validateFinal = descriptor.validateFinal
+    descriptor.validateFinal = metadata => {
+      validateFinal(metadata)
+      const receipt = metadata.verification_receipt
+      reportPolicy(reviewPolicy(preview, {
+        verification: { status: receipt.status, complete: receipt.status === 'PASS',
+          canonical: receipt.canonical, checks: receipt.raw_focused_checks },
+        focusedEvidence: receipt.raw_focused_checks
+      }, review))
+    }
   }
   const result = executeMetadataTransaction(root, descriptor)
   if (result.status === 'APPLIED' || result.status === 'NOOP') return { ...result, action: 'verify_slice', operation: review ? 'record-review' : 'verify', next_action: result.next_action }
@@ -1649,15 +1660,26 @@ function verificationError(error) {
   return errorResult(error)
 }
 
-function verifySliceCore(root, request = {}) {
+function reviewPolicy(preview, bundle, review = null) {
+  return decideReviewOutcome({
+    risk: { level: preview?.risk, flags: bundle?.judgmentFlags ?? preview?.mandatory_judgment_flags ?? [] },
+    executor: preview?.original_slice?.executor ?? 'lead', reviewer: review?.reviewer ?? null,
+    findings: review?.findings ?? [], verification: bundle?.verification,
+    focusedEvidence: bundle?.focusedEvidence ?? bundle?.verification?.focused_checks ?? [],
+    attemptId: preview?.attempt_id ?? 1, autopilot: false
+  })
+}
+
+function verifySliceCore(root, request = {}, reportPolicy = () => {}) {
   try {
     root = path.resolve(root)
     assertVerificationRequestShape(request, 'verify')
     const recovery = request.recovery_authorized === true || request.recovery?.authorized === true
     const preview = request.preview
     const descriptorPreview = verificationDescriptorFromPreview(root, request, preview, recovery)
-    if (recovery) return persistVerification(root, descriptorPreview, null, request, request.target_status ?? 'verified', validatedSliceReview(request.review ?? null, descriptorPreview))
+    if (recovery) return persistVerification(root, descriptorPreview, null, request, request.target_status ?? 'verified', validatedSliceReview(request.review ?? null, descriptorPreview), reportPolicy)
     const bundle = runVerificationBundle(root, descriptorPreview, request)
+    reportPolicy(reviewPolicy(descriptorPreview, bundle))
     if (bundle.stale) return stale(bundle.reasons[0], { action: 'verify_slice', operation: 'verify', manifest: bundle.manifest })
     if (bundle.invalid) return invalid(bundle.reasons[0], { action: 'verify_slice', operation: 'verify', verification: bundle.verification })
     if (bundle.blocked) return blocked(bundle.reasons[0], { action: 'verify_slice', operation: 'verify', manifest: bundle.manifest, verification: bundle.verification ?? null })
@@ -1693,7 +1715,7 @@ function validateReviewAnswers(review, questions) {
   throw new Error('REVIEW_ANSWERS_INCOMPLETE')
 }
 
-function recordSliceReviewCore(root, request = {}) {
+function recordSliceReviewCore(root, request = {}, reportPolicy = () => {}) {
   try {
     root = path.resolve(root)
     assertVerificationRequestShape({ ...request, action: 'verify_slice' }, 'record-review')
@@ -1705,9 +1727,13 @@ function recordSliceReviewCore(root, request = {}) {
     if (pending.preview_fingerprint !== descriptorPreview.fingerprint || pending.story_id !== descriptorPreview.story_id || pending.slice_id !== descriptorPreview.slice_id) throw new Error('PENDING_EVIDENCE_STALE')
     if (!exactList(pending.changed_paths, descriptorPreview.changed_paths) || pending.changed_paths_sha256 !== descriptorPreview.changed_paths_sha256) throw new Error('PENDING_SCOPE_MISMATCH')
     const validatedReview = validatedSliceReview(request.review, descriptorPreview)
+    reportPolicy(reviewPolicy(descriptorPreview, {
+      verification: pending.verification, focusedEvidence: pending.focused_evidence,
+      judgmentFlags: pending.judgment_flags
+    }, validatedReview))
     if (recovery) {
       if (!request.review || request.review.judgment !== 'APPROVE') throw new Error('RECOVERY_REVIEW_APPROVAL_REQUIRED')
-      return persistVerification(root, descriptorPreview, null, request, 'reviewed', validatedReview)
+      return persistVerification(root, descriptorPreview, null, request, 'reviewed', validatedReview, reportPolicy)
     }
     const manifest = inspectSliceVerification(root, descriptorPreview.story_id, descriptorPreview.slice_id)
     if (['STALE', 'BLOCKED', 'INVALID', 'ERROR'].includes(manifest.status)) return stale(`VERIFICATION_MANIFEST_${manifest.status}`)
@@ -1749,8 +1775,10 @@ function recordSliceReviewCore(root, request = {}) {
 export function verifySlice(root, request = {}) {
   observeActionStarted(path.resolve(root), request, 'verify')
   let result
-  try { result = verifySliceCore(root, request) }
+  let policy = reviewPolicy(null, null)
+  try { result = verifySliceCore(root, request, value => { policy = value }) }
   catch (error) { result = errorResult(error) }
+  result = { ...result, policy }
   observeActionFinished(path.resolve(root), request, 'verify', result)
   return result
 }
@@ -1758,8 +1786,10 @@ export function verifySlice(root, request = {}) {
 export function recordSliceReview(root, request = {}) {
   observeActionStarted(path.resolve(root), request, 'record-review')
   let result
-  try { result = recordSliceReviewCore(root, request) }
+  let policy = reviewPolicy(null, null)
+  try { result = recordSliceReviewCore(root, request, value => { policy = value }) }
   catch (error) { result = errorResult(error) }
+  result = { ...result, policy }
   observeActionFinished(path.resolve(root), request, 'record-review', result)
   return result
 }

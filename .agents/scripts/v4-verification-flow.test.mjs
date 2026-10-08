@@ -231,12 +231,15 @@ test('LOW PASS runs canonical and focused checks then persists only verification
       plan_template: verificationTemplate(f, false)
     })
     assert.equal(result.status, 'APPLIED', JSON.stringify(result))
+    assert.deepEqual(result.policy, { decision: 'PROGRESS', reasons: ['LOW_CANONICAL_PASS_NO_FLAGS'] })
     assert.equal(result.next_action.kind, 'finalize_story')
     assert.deepEqual(git(f.root, 'diff-tree', '--no-commit-id', '--name-only', '-r', result.metadata_commit).split(/\r?\n/).sort(), [PLAN, VERIFICATION_RECEIPT].sort())
     const plan = frontmatter(readFileSync(path.join(f.root, PLAN), 'utf8'))
     const receipt = JSON.parse(readFileSync(path.join(f.root, VERIFICATION_RECEIPT), 'utf8'))
     assert.equal(plan.slices[0].status, 'verified')
     assert.equal(plan.slices[0].receipt_refs.verification.digest, receiptDigest(receipt))
+    assert.equal(Object.hasOwn(receipt, 'policy'), false)
+    assert.equal(Object.hasOwn(plan.slices[0], 'policy'), false)
     assert.deepEqual(validateReceipt(f.root, plan, 'A', 'verification'), [])
     assert.equal(validateStoryPlan(f.root, '9.1').status, 'READY')
     assert.equal(git(f.root, 'status', '--porcelain'), '')
@@ -408,6 +411,13 @@ test('CHANGES_REQUIRED blocks and stale policy rejects continuation without muta
     assert.equal(blockedResult.status, 'BLOCKED', JSON.stringify(blockedResult))
     assert.equal(blockedResult.reasons[0], 'CHANGES_REQUIRED')
     assert.equal(git(f.root, 'rev-parse', 'HEAD'), f.head)
+    const reworkResult = recordSliceReview(f.root, { ...common, review: { ...common.review,
+      findings: [{ id: 'F1', class: 'VALID', summary: 'Correction needed', paths: ['src/feature.txt'] }] } })
+    assert.equal(reworkResult.status, blockedResult.status)
+    assert.deepEqual(reworkResult.reasons, blockedResult.reasons)
+    assert.equal(reworkResult.stop_condition, blockedResult.stop_condition)
+    assert.deepEqual(reworkResult.policy, { decision: 'REWORK', reasons: ['VALID_FINDINGS_CORRECTION_ALLOWED'] })
+    assert.equal(existsSync(path.join(f.root, REVIEW_RECEIPT)), false)
     write(f.root, 'AGENTS.md', '# changed policy\n')
     const staleResult = recordSliceReview(f.root, common)
     assert.equal(staleResult.status, 'STALE', JSON.stringify(staleResult))
@@ -453,6 +463,7 @@ test('verification metadata recovery resumes an interrupted commit without repla
       recovery_checkpoint: first.checkpoint_commit
     })
     assert.equal(recovered.status, 'NOOP', JSON.stringify(recovered))
+    assert.equal(recovered.policy.decision, 'PROGRESS')
     assert.equal(git(f.root, 'rev-list', '--count', 'HEAD'), '4')
     assert.equal(git(f.root, 'status', '--porcelain'), '')
   } finally { f.cleanup() }
@@ -486,6 +497,7 @@ for (const failure of ['after-write', 'after-metadata-stage']) {
       const receiptBytes = readFileSync(path.join(f.root, VERIFICATION_RECEIPT), 'utf8')
       const recovered = verifySlice(f.root, { ...input, recovery_authorized: true, recovery_checkpoint: first.checkpoint_commit })
       assert.equal(recovered.status, 'APPLIED', JSON.stringify(recovered))
+      assert.equal(recovered.policy.decision, 'PROGRESS')
       assert.equal(readFileSync(path.join(f.root, VERIFICATION_RECEIPT), 'utf8'), receiptBytes)
       assert.equal(git(f.root, 'rev-list', '--count', 'HEAD'), '4')
       assert.equal(git(f.root, 'status', '--porcelain'), '')
@@ -610,6 +622,7 @@ test('kernel-written review receipts round-trip through the finalization gate', 
   try {
     const prepared = prepareVerification(f)
     const pendingResult = verifySlice(f.root, { ...f.verifyRequest, operation: 'verify', preview: prepared.preview })
+    const pendingBefore = JSON.stringify(pendingResult.pending)
     const evidence = makeReviewEvidence(f, prepared.preview)
     const result = recordSliceReview(f.root, {
       ...f.verifyRequest, operation: 'record-review', preview: prepared.preview, pending: pendingResult.pending,
@@ -623,8 +636,50 @@ test('kernel-written review receipts round-trip through the finalization gate', 
     })
     assert.equal(result.status, 'APPLIED', JSON.stringify(result))
     assert.equal(result.next_action.kind, 'finalize_story')
+    assert.deepEqual(result.policy, { decision: 'HUMAN_REQUIRED', reasons: ['POLICY_CASE_UNSPECIFIED'] })
+    const { policy, ...legacyResult } = result
+    assert.equal(legacyResult.status, 'APPLIED')
+    assert.equal(Object.hasOwn(legacyResult, 'policy'), false)
+    const identity = transactionIdentity(f.root, f.verifyRequest)
+    assert.deepEqual(legacyResult, {
+      status: 'APPLIED', ready: false, valid: true, reasons: [],
+      transaction_id: f.verifyRequest.transaction_id, checkpoint_commit: f.head,
+      metadata_commit: git(f.root, 'rev-parse', 'HEAD'), changed_paths: prepared.preview.changed_paths,
+      changed_paths_sha256: prepared.preview.changed_paths_sha256,
+      next_action: { kind: 'finalize_story', target: 'story' },
+      journal_path: identity.journalPath, lock_path: identity.lockPath, durable_action_count: 1,
+      stop_condition: 'NEXT_ACTION_EXPLICIT_AFTER_REVIEW', action: 'verify_slice', operation: 'record-review'
+    })
+    assert.equal(JSON.stringify(pendingResult.pending), pendingBefore)
+
     const receipt = JSON.parse(readFileSync(path.join(f.root, REVIEW_RECEIPT), 'utf8'))
     assert.equal(receipt.schema_version, 2)
+    assert.deepEqual(Object.keys(receipt).sort(), ['schema_version', 'story_id', 'slice_id', 'kind',
+      'checkpoint_commit', 'baseline_commit', 'subject_digest', 'created_from_head', 'changed_paths_sha256',
+      'commands', 'judgment', 'questions', 'answers', 'evidence_refs', 'scope_digest',
+      'risk_context_digest', 'reviewed_commit', 'reviewer'].sort())
+
+    // The pre-policy receipt contract, with only fixture-bound identities/evidence substituted.
+    const legacyReceipt = {
+      schema_version: 2, story_id: '9.1', slice_id: 'A', kind: 'review',
+      checkpoint_commit: prepared.preview.checkpoint_commit, baseline_commit: prepared.preview.baseline_commit,
+      subject_digest: prepared.preview.subject_digest, created_from_head: prepared.preview.checkpoint_commit,
+      changed_paths_sha256: prepared.preview.changed_paths_sha256,
+      commands: [{ command: 'same-lead review', exit_code: 0, tool: 'reviewer', environment: 'fixture' }],
+      judgment: 'APPROVE', questions: pendingResult.pending.review_questions,
+      answers: pendingResult.pending.review_questions.map(item => ({ id: item.id, answer: 'confirmed' })),
+      evidence_refs: pendingResult.pending.requested_evidence.refs, scope_digest: scopeDigest(evidence),
+      risk_context_digest: digestValue(prepared.preview.original_plan.risk),
+      reviewed_commit: prepared.preview.checkpoint_commit, reviewer: 'same-lead'
+    }
+    assert.equal(readFileSync(path.join(f.root, REVIEW_RECEIPT), 'utf8'), `${JSON.stringify(legacyReceipt, null, 2)}\n`)
+    assert.equal(receiptDigest(receipt), receiptDigest(legacyReceipt))
+    const plan = frontmatter(readFileSync(path.join(f.root, PLAN), 'utf8'))
+    assert.equal(plan.slices[0].receipt_refs.review.digest, receiptDigest(receipt))
+    assert.notEqual(receiptDigest({ ...receipt, policy }), receiptDigest(receipt))
+    const verification = JSON.parse(readFileSync(path.join(f.root, VERIFICATION_RECEIPT), 'utf8'))
+    assert.equal(Object.hasOwn(verification, 'policy'), false)
+    assert.equal(plan.slices[0].receipt_refs.verification.digest, receiptDigest(verification))
     const gate = inspectFinalization(f.root, '9.1', git(f.root, 'rev-parse', 'HEAD'))
     const reviewReasons = gate.reasons.filter(reason => /REVIEW|RECEIPT|PROGRESSION/.test(reason))
     assert.deepEqual(reviewReasons, [], JSON.stringify(gate.reasons))
@@ -645,6 +700,10 @@ for (const [name, reviewer, findings, reason] of [
   try {
     const prepared = prepareVerification(f)
     const pendingResult = verifySlice(f.root, { ...f.verifyRequest, operation: 'verify', preview: prepared.preview })
+    assert.equal(pendingResult.status, 'REVIEW_REQUIRED')
+    assert.equal(Object.hasOwn(pendingResult.pending, 'policy'), false)
+    assert.equal(pendingResult.pending.fingerprint, digestValue(Object.fromEntries(
+      Object.entries(pendingResult.pending).filter(([key]) => key !== 'fingerprint'))))
     const evidence = makeReviewEvidence(f, prepared.preview)
     const review = {
       judgment: 'APPROVE', reviewer, findings, pending_fingerprint: pendingResult.pending.fingerprint,
@@ -660,6 +719,7 @@ for (const [name, reviewer, findings, reason] of [
     if (reason) {
       assert.equal(result.status, reason === 'REVIEW_FINDINGS_OPEN' ? 'BLOCKED' : 'INVALID', JSON.stringify(result))
       assert.ok(result.reasons.includes(reason), JSON.stringify(result))
+      assert.notEqual(result.policy.decision, 'APPROVE_ALLOWED')
       assert.equal(git(f.root, 'rev-parse', 'HEAD'), f.head)
       assert.equal(existsSync(path.join(f.root, REVIEW_RECEIPT)), false)
     } else {
