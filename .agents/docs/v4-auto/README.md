@@ -48,7 +48,9 @@ stops after each phase with a report.
    behaviour and existing fixture/receipt digests stay byte-for-byte identical,
    proven by tests.
 6. **Commits.** One Conventional Commit per task, each passing `npm run test:v4`.
-   End commit messages with the attribution line your environment requires. No
+   Attribute commits only to the agent and model actually doing the work (your
+   own tool's attribution rule, if any); never copy another agent's
+   `Co-Authored-By` line from existing history. No
    merge into main, no push.
 7. **Context budget.** New instruction text goes into lazy references loaded
    only when needed; always-loaded files (`AGENTS.md`, router, runner
@@ -74,7 +76,7 @@ architecture worktree named there. Stop at the end of the phase and report.
 
 | Phase | State | Commit range | Notes |
 |---|---|---|---|
-| P1 | complete | 66940c2–d31e223 | T1–T7 complete; full `test:v4` 584/583/0/1; T8 owner gate pending |
+| P1 | complete | 66940c2–d31e223, review fixes 6582db7.. | T1–T7 complete (Codex, GPT-6 Luna Max; commits mis-attributed to Claude). Review fixes by Claude: worker report path under `.agent-state/v4-auto/`, schema-v2 scope shape, authority prefix rule, shell-neutral contract move |
 | G1 | not run | | owner |
 | P2 | not started | | |
 | P3 | not started | | |
