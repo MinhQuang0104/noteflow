@@ -77,7 +77,7 @@ architecture worktree named there. Stop at the end of the phase and report.
 | Phase | State | Commit range | Notes |
 |---|---|---|---|
 | P1 | complete | 66940c2–d31e223, review fixes 6582db7.. | T1–T7 complete (Codex, GPT-6 Luna Max; commits mis-attributed to Claude). Review fixes by Claude: worker report path under `.agent-state/v4-auto/`, schema-v2 scope shape, authority prefix rule, shell-neutral contract move |
-| G1 | not run | | owner |
+| G1 | **passed** 2026-10-08 | fixes f2aa85a, 114b3b6 | Disposable Story 99.1 (slugify, LOW) delivered by AGY (Gemini 3.8 Flash Medium, ~19 min) with Claude as Lead: run_2f8a42357c45 / task_d1224093b971 / ctx_45d60c03385c; report SHA matched DONE; scope gate PASS, no worker commits; Lead rerun 2/2; checkpoint + metadata commits; receipt.worker with real Orca IDs; Plan next verify_slice:A. Prep fixed worker context (no Lead docs); run found CHECKPOINTED exiting 5. AGY added one unrequested default export (LOW). Smoke worktree/branch removed. |
 | P2 | not started | | |
 | P3 | not started | | |
 | G3 | not run | | owner |
