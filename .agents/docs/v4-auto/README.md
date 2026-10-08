@@ -64,6 +64,11 @@ stops after each phase with a report.
 9. **Phase report:** commits, baseline vs final test counts, deviations with
    reasons, open questions. Then update this file's status table (only the row
    for the phase just finished) in the last commit.
+10. **Single agent, no delegated review.** Do not spawn subagents, delegate to
+    other models, or run independent / re-review passes (including the
+    superpowers subagent-driven-development, requesting-code-review or similar
+    workflows). Self-check with the tests only; the owner's reviewer audits
+    each phase afterwards, so extra review passes only duplicate token cost.
 
 ## Prompt to give the implementer per phase
 
