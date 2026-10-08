@@ -45,3 +45,10 @@ export function decideReviewOutcome({ risk, executor, reviewer, findings = [], v
   if (effectiveLevel === 'HIGH' && reviewer?.type === 'human') return outcome('APPROVE_ALLOWED', 'HUMAN_HIGH_RISK_REVIEW')
   return outcome('HUMAN_REQUIRED', 'POLICY_CASE_UNSPECIFIED')
 }
+
+// Autopilot does not change the P2 table. It binds a durable action to the
+// decision returned by that table, so callers can require the exact decision
+// without treating a caller-supplied boolean as authority.
+export function autopilotDecisionAllowed(policy, requiredDecision) {
+  return policy?.decision === requiredDecision
+}

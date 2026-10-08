@@ -12,7 +12,7 @@ import { validateEvidenceSet } from './prepare-change-evidence.mjs'
 import { executeCheck, validateCheckEvidence } from './v4-check-executor.mjs'
 import { recordActionFinished, recordActionStarted, recordCheckFinished } from './v4-observations.mjs'
 import { REVIEW_RECEIPT_SCHEMA_VERSION } from './v4-finalization-contract.mjs'
-import { decideReviewOutcome } from './v4-review-policy.mjs'
+import { autopilotDecisionAllowed, decideReviewOutcome } from './v4-review-policy.mjs'
 import { inspectScope, isAllowed } from './check-worker-scope.mjs'
 import {
   canonicalPaths,
@@ -329,6 +329,26 @@ function assertUnchanged(original, generated, keys) {
 
 function assertAutopilotUnchanged(original, generated) {
   if (!sameJson(original.autopilot, generated.autopilot)) throw new Error('AUTOPILOT_AUTHORITY_CHANGED')
+}
+
+function autopilotActive(plan) {
+  return plan?.autopilot && plan.autopilot.revoked === false
+}
+
+function suppliedPolicy(request, fallback = null) {
+  const value = request?.policy ?? request?.review_policy ?? request?.policy_decision ?? fallback
+  if (typeof value === 'string') return { decision: value, reasons: [] }
+  if (value && typeof value === 'object' && !Array.isArray(value) && typeof value.decision === 'string') {
+    return value
+  }
+  return null
+}
+
+function requireAutopilotPolicy(plan, request, expected, fallback = null) {
+  if (!autopilotActive(plan)) return suppliedPolicy(request, fallback)
+  const policy = suppliedPolicy(request, fallback)
+  if (!autopilotDecisionAllowed(policy, expected)) throw new Error('AUTOPILOT_POLICY_DENIED')
+  return policy
 }
 
 function sliceById(plan, sliceId) {
@@ -780,6 +800,7 @@ function validateReworkState(root, request, { template = true } = {}) {
   if (changedPaths.length !== 2) throw new Error('REWORK_EXACT_TWO_PATHS_REQUIRED')
   if (!Array.isArray(request.rework_paths) || !sameJson(canonicalPaths(request.rework_paths), changedPaths)) throw new Error('REWORK_SCOPE_MISMATCH')
   const findings = normalizedFindings(request.findings)
+  const policy = requireAutopilotPolicy(plan, request, 'REWORK')
   const newAttempt = expectedReworkAttempt(request.story_id, request.slice_id, currentAttemptId(slice) + 1)
   const oldSnapshot = reworkAttemptSnapshot(slice)
   const generated = template ? frontmatter(request.plan_template) : null
@@ -793,7 +814,7 @@ function validateReworkState(root, request, { template = true } = {}) {
     if (lock?.transaction_id !== request.transaction_id) throw new Error('TRANSACTION_SCOPE_LOCKED')
   }
   return { pointer, head, planPath, planText, plan, slice, checked, oldReceipt: oldReceipt.receipt,
-    oldSnapshot, newAttempt, findings, changedPaths, identity }
+    oldSnapshot, newAttempt, findings, policy, changedPaths, identity }
 }
 
 function buildReworkPreview(root, request) {
@@ -818,6 +839,7 @@ function buildReworkPreview(root, request) {
     old_snapshot: state.oldSnapshot,
     new_attempt: state.newAttempt,
     findings: state.findings,
+    ...(state.policy ? { policy: state.policy } : {}),
     findings_digest: digestValue(state.findings),
     rework_paths: state.changedPaths,
     metadata_paths: [state.planPath],
@@ -846,7 +868,11 @@ function reworkDescriptorFromPreview(root, request, preview, recovery = false) {
   if (request.old_receipt_digest !== undefined && request.old_receipt_digest !== preview.old_receipt_digest) throw new Error('STALE_REWORK_BINDING')
   if (request.rework_paths !== undefined && !sameJson(canonicalPaths(request.rework_paths), preview.rework_paths)) throw new Error('STALE_REWORK_SCOPE')
   if (request.findings !== undefined && !sameJson(normalizedFindings(request.findings), preview.findings)) throw new Error('STALE_REWORK_FINDINGS')
-  if (!recovery) validateReworkState(root, { ...request, operation: 'prepare-rework' })
+  const policyInput = autopilotActive(preview.original_plan) && request.policy === undefined && preview.policy !== undefined
+    ? { ...request, policy: preview.policy }
+    : request
+  if (autopilotActive(preview.original_plan)) requireAutopilotPolicy(preview.original_plan, policyInput, 'REWORK', preview.policy)
+  if (!recovery) validateReworkState(root, { ...policyInput, operation: 'prepare-rework' })
   const descriptor = {
     action: 'rework_slice', story_id: preview.story_id, slice_id: preview.slice_id,
     transaction_id: preview.transaction_id, expected_head: preview.expected_head,
@@ -880,7 +906,7 @@ function reworkError(error) {
   if (error.message === 'WORKTREE_SCOPE_MISMATCH') return blocked('DIRTY_SCOPE_MISMATCH')
   if (error.message.includes('DIRTY') || error.message.includes('WORKTREE') || error.message.includes('LOCKED') || error.message.includes('REWORK_') ||
       error.message.includes('PLAN_') || error.message.includes('ATTEMPT') || error.message.includes('COMPLETION_AUTHORITY') ||
-      error.message.includes('POST_REWORK')) return blocked(error.message)
+      error.message.includes('POST_REWORK') || error.message === 'AUTOPILOT_POLICY_DENIED') return blocked(error.message)
   if (error.message.includes('STALE') || error.message.includes('MISMATCH') || error.message === 'EXPECTED_HEAD_MISMATCH') return stale(error.message)
   if (['INPUT_REQUIRED', 'INVALID_STORY_ID', 'INVALID_SLICE_ID', 'INVALID_EXPECTED_HEAD', 'ACTION_MISMATCH',
     'OPERATION_MISMATCH', 'MAINTENANCE_AUTHORIZATION_REQUIRED', 'REWORK_AUTHORITY_FORBIDDEN'].includes(error.message)) return invalid(error.message)
@@ -1659,7 +1685,8 @@ function verificationError(error) {
   if (error.message === 'REVIEW_FINDINGS_OPEN') return blocked(error.message)
   if (error.message.includes('STALE') || error.message.includes('MISMATCH') || error.message === 'EXPECTED_HEAD_MISMATCH') return stale(error.message)
   if (error.message.includes('PLAN_NOT_READY') || error.message.includes('MANIFEST_') || error.message.includes('SLICE_') ||
-      error.message.includes('DIRTY_') || error.message.includes('SUCCESSOR_') || error.message.includes('AMBIGUOUS_')) return blocked(error.message)
+      error.message.includes('DIRTY_') || error.message.includes('SUCCESSOR_') || error.message.includes('AMBIGUOUS_') ||
+      error.message === 'AUTOPILOT_POLICY_DENIED') return blocked(error.message)
   if (['INPUT_REQUIRED', 'INVALID_STORY_ID', 'INVALID_SLICE_ID', 'INVALID_EXPECTED_HEAD', 'ACTION_MISMATCH', 'OPERATION_MISMATCH',
     'RISK_LEVEL_REQUIRED', 'RISK_FLAGS_INVALID', 'RISK_FLAG_INVALID', 'RISK_DOWNGRADE_FORBIDDEN'].includes(error.message) ||
       error.message.startsWith('RISK_FLAG_UNMAPPED:') ||
@@ -1673,7 +1700,7 @@ function reviewPolicy(preview, bundle, review = null) {
     executor: preview?.original_slice?.executor ?? 'lead', reviewer: review?.reviewer ?? null,
     findings: review?.findings ?? [], verification: bundle?.verification,
     focusedEvidence: bundle?.focusedEvidence ?? bundle?.verification?.focused_checks ?? [],
-    attemptId: preview?.attempt_id ?? 1, autopilot: false
+    attemptId: preview?.attempt_id ?? 1, autopilot: autopilotActive(preview?.original_plan) === true
   })
 }
 
@@ -1734,10 +1761,13 @@ function recordSliceReviewCore(root, request = {}, reportPolicy = () => {}) {
     if (pending.preview_fingerprint !== descriptorPreview.fingerprint || pending.story_id !== descriptorPreview.story_id || pending.slice_id !== descriptorPreview.slice_id) throw new Error('PENDING_EVIDENCE_STALE')
     if (!exactList(pending.changed_paths, descriptorPreview.changed_paths) || pending.changed_paths_sha256 !== descriptorPreview.changed_paths_sha256) throw new Error('PENDING_SCOPE_MISMATCH')
     const validatedReview = validatedSliceReview(request.review, descriptorPreview)
-    reportPolicy(reviewPolicy(descriptorPreview, {
+    const policy = reviewPolicy(descriptorPreview, {
       verification: pending.verification, focusedEvidence: pending.focused_evidence,
       judgmentFlags: pending.judgment_flags
-    }, validatedReview))
+    }, validatedReview)
+    reportPolicy(policy)
+    if (autopilotActive(descriptorPreview.original_plan) && validatedReview?.judgment === 'APPROVE' &&
+        !autopilotDecisionAllowed(policy, 'APPROVE_ALLOWED')) throw new Error('AUTOPILOT_POLICY_DENIED')
     if (recovery) {
       if (!request.review || request.review.judgment !== 'APPROVE') throw new Error('RECOVERY_REVIEW_APPROVAL_REQUIRED')
       return persistVerification(root, descriptorPreview, null, request, 'reviewed', validatedReview, reportPolicy)

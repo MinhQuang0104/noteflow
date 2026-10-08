@@ -1,12 +1,18 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { decideReviewOutcome } from './v4-review-policy.mjs'
+import { autopilotDecisionAllowed, decideReviewOutcome } from './v4-review-policy.mjs'
 
 const pass = { status: 'PASS', complete: true, canonical: { status: 'PASS' }, checks: [{ status: 'PASS' }] }
 const lead = { type: 'lead', vendor: 'codex', independent: true }
 const human = { type: 'human', vendor: null, independent: false }
 const defaults = { risk: { level: 'LOW', flags: [] }, executor: 'lead', reviewer: null,
   findings: [], verification: pass, focusedEvidence: [{ status: 'PASS' }], attemptId: 1, autopilot: false }
+
+test('autopilot binding accepts only the exact P2 decision', () => {
+  assert.equal(autopilotDecisionAllowed({ decision: 'APPROVE_ALLOWED' }, 'APPROVE_ALLOWED'), true)
+  assert.equal(autopilotDecisionAllowed({ decision: 'REWORK' }, 'APPROVE_ALLOWED'), false)
+  assert.equal(autopilotDecisionAllowed(null, 'REWORK'), false)
+})
 
 for (const [name, input, decision] of [
   ['LOW canonical PASS without flags', {}, 'PROGRESS'],
