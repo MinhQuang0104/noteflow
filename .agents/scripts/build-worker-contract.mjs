@@ -10,6 +10,7 @@ import { compileActionContext } from './compile-v4-context.mjs'
 const SHA = /^[0-9a-f]{40,64}$/i
 const CONTRACT_SCHEMA = 'worker-contract-v1'
 const TEMPLATE_PATH = '.agents/templates/worker-contract.md'
+const WORKER_EVIDENCE_ROOT = '.agent-state/v4-auto'
 const EXIT = { READY: 0, BLOCKED: 3, INVALID: 4, ERROR: 5 }
 
 class InvalidContractInput extends Error {}
@@ -188,6 +189,14 @@ function referenceLines(projection) {
   return lines.length ? lines.join('\n') : '- None projected.'
 }
 
+function workerRootPath(options) {
+  return `${WORKER_EVIDENCE_ROOT}/workers/${options.taskId}`
+}
+
+function workerReportPath(options) {
+  return `${workerRootPath(options)}/report-attempt-${options.attempt}.json`
+}
+
 function renderContract(template, projection, options) {
   const source = storyPath(projection)
   if (!source) throw new InvalidContractInput('STORY_SOURCE_NOT_PROJECTED')
@@ -196,15 +205,18 @@ function renderContract(template, projection, options) {
   const checks = projection.known_scope.checks.items
   if (!Array.isArray(checks) || !checks.length) throw new InvalidContractInput('CHECKS_UNKNOWN')
 
-  const reportPath = `workers/${options.taskId}/report-attempt-${options.attempt}.json`
-  const artifactPath = `workers/${options.taskId}/artifacts`
+  // Worker evidence lives under the gitignored .agent-state/ tree so it never
+  // enters the scope gate, the dirty-path check, or the implementation commit.
+  const workerRoot = workerRootPath(options)
+  const reportPath = workerReportPath(options)
+  const artifactPath = `${workerRoot}/artifacts`
   const values = new Map([
     ['<task-id>', options.taskId],
     ['<run-id>', options.runId],
     ['<positive integer>', String(options.attempt)],
     ['<N>', String(options.attempt)],
     ['<durable Task ID and bounded scope; survives terminal/session replacement>', `Task ${options.taskId}; Story ${projection.identity.story_id}; Slice ${projection.identity.slice_id}`],
-    ['<generation>', 'reconciled by Orca from the current Lead lease'],
+    ['<generation>', 'not applicable (V4 Lead)'],
     ['<execution mode / runtime / Run / Task / Dispatch-if-any / worker-or-terminal / worktree IDs>', `V3.2 Antigravity loop; Run ${options.runId}; Task ${options.taskId}; Dispatch IDs supplied by Orca; isolated worker worktree`],
     ['<bounded outcome>', `Implement the projected Story ${projection.identity.story_id} slice ${projection.identity.slice_id} and stop after worker_done.`],
     ['<repo-relative path>', source],
@@ -219,11 +231,11 @@ function renderContract(template, projection, options) {
     ['<yes|no>', 'no'],
     ['<existing exact commands and working directories; each\n  dry-run by the Lead at the dispatch base, with its observed exit code>', checkLines(projection)],
     ['<ambiguity, scope conflict, missing dependency, repeated failure>', 'Ambiguity, scope conflict, missing dependency, local permission/trust/sign-in prompt, or repeated verification failure.'],
-    ['<assigned verified worktree path>', `isolated worktree for Task ${options.taskId}`],
-    ['<canonical run directory>', `Run ${options.runId} worker artifacts`],
+    ['<assigned verified worktree path>', 'this worker worktree root (repo-relative paths below; gitignored, outside the expected scope)'],
+    ['<canonical run directory>', WORKER_EVIDENCE_ROOT],
     ['<assigned-path>', reportPath],
     ['<worker artifact directory>', artifactPath],
-    ['<attempt-specific log paths>', `workers/${options.taskId}/logs/attempt-${options.attempt}`],
+    ['<attempt-specific log paths>', `${workerRoot}/logs/attempt-${options.attempt}`],
     ['<file-digest>', 'supplied in the structured worker_done body'],
   ])
   if (options.correctionOf !== null) {
@@ -264,6 +276,7 @@ export function buildWorkerContract(root, options) {
     status: 'READY',
     contract_path: outPath,
     contract_sha256: sha256(bytes),
+    report_path: workerReportPath(options),
     allow: [...projection.known_scope.file_scope.paths],
     base: options.expectedHead,
     attempt: options.attempt,

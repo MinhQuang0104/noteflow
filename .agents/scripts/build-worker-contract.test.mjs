@@ -86,6 +86,11 @@ test('builder emits a deterministic AGY contract from projected context', () => 
     assert.match(bytes, /node --test src\/a\.test\.js/)
     assert.match(bytes, new RegExp(`Dispatch base: ${expectedHead}; commits\\s+allowed: no`))
     assert.match(bytes, /Worker: Antigravity/)
+    const reportPath = '.agent-state/v4-auto/workers/task-1/report-attempt-1.json'
+    assert.equal(first.json.report_path, reportPath)
+    assert.ok(bytes.includes(`--report-path ${reportPath}`))
+    assert.doesNotMatch(bytes, /(^|[\s>])workers\/task-1\//m)
+    assert.doesNotMatch(bytes, /lease/)
 
     const second = run(fixture, buildArgs(fixture, preamble, out, expectedHead))
     assert.equal(second.status, 0, second.stderr)

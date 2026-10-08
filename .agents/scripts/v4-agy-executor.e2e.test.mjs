@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
+import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import test from 'node:test'
@@ -207,12 +208,21 @@ test('AGY executor completes the bounded worker-to-checkpoint flow', () => {
     assert.deepEqual(context.projection.identity.validated_next_action, { kind: 'implement_slice', target: 'A' })
 
     writeWorkerFiles(scenario.fixture)
+    // The worker writes its report where the contract assigns it. That path is
+    // gitignored, so neither the scope gate nor prepare may see it.
+    const reportPath = scenario.built.json.report_path
+    assert.equal(reportPath, '.agent-state/v4-auto/workers/task-v4-e2e/report-attempt-1.json')
+    assert.ok(readFileSync(scenario.built.output, 'utf8').includes(`--report-path ${reportPath}`))
+    const reportBytes = '{"schemaVersion":1,"status":"DONE"}\n'
+    write(scenario.fixture.root, reportPath, reportBytes)
+    scenario.request.worker.worker_report_sha256 = createHash('sha256').update(reportBytes).digest('hex')
     const gate = inspectScope(scenario.fixture.root, scenario.baseline, ['src/'], {
       forbidCommits: true,
       contractSha256: scenario.built.json.contract_sha256,
     })
     assert.equal(gate.status, 'PASS', JSON.stringify(gate))
     assert.equal(gate.violations.length, 0)
+    assert.ok(!gate.changed.some(item => item.path.startsWith('.agent-state/')))
     rmSync(scenario.built.output)
 
     const prepared = prepareAction(scenario.fixture.root, scenario.request)
