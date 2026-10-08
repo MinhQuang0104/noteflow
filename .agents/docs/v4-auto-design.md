@@ -89,26 +89,50 @@ session, only VALID findings, ≤3 attempts) and produce a new checkpoint each.
 
 ## 3. Risk-tiered review (Phase P2)
 
-Today every MEDIUM/HIGH slice stops at `REVIEW_REQUIRED` for the owner. V4 Auto
-lets the Lead record the review when independence holds (AGY implemented, a
-different vendor reviews):
+**Implemented in P2 (advisory only).** The pure
+[`decideReviewOutcome`](../scripts/v4-review-policy.mjs) policy is exposed as
+`policy` on `verify` and `record-review` results; it does not change their
+existing statuses, receipts, human stops, or authorize successor execution.
+All P2 calls use `autopilot: false`; binding enforcement belongs to P3.
+Independence is computed as `reviewer.type === 'lead'` with `executor: agy`,
+not inferred from a caller's claim or vendor label.
 
 | Tier | Gate after deterministic verification |
 |---|---|
-| LOW, complete PASS, no flags | Auto-progress (unchanged). |
-| MEDIUM | Lead review via `record-review`. `APPROVE` only with zero open VALID findings and complete PASS coverage; otherwise correction loop. |
-| HIGH | Lead review **plus** owner review of the slice; optional cross-vendor second review. |
-| Any `SPEC_AMBIGUITY` / `NEEDS_HUMAN_DECISION` | Stop; owner decides. |
-| `INCOMPLETE`/`ERROR` checks, scope-gate failure, `RECOVERY_REQUIRED`, `STALE` | Stop; never approved by the Lead. |
+| LOW, complete canonical/focused PASS, no flags, no reviewer | `PROGRESS` (unchanged NO_REVIEW path). |
+| MEDIUM, independent Lead, no open findings, complete PASS | `APPROVE_ALLOWED`. |
+| MEDIUM, same Lead; HIGH, any Lead | `HUMAN_REVIEW_REQUIRED`. |
+| HIGH, human reviewer, no open findings, complete PASS | `APPROVE_ALLOWED`. |
+| Open `VALID` findings with complete PASS | `REWORK` at attempts 1–3; `HUMAN_REQUIRED` at attempt 4 or later. |
+| Any `SPEC_AMBIGUITY` / `NEEDS_HUMAN_DECISION` | `HUMAN_REQUIRED`. |
+| Failed/error/incomplete verification or focused coverage | `BLOCKED`; never approvable. |
 
 Rules that do not change: Lead approval is never the Human Gate; Worker DONE is
 never acceptance; `complete_story` still requires fresh exact-scope owner
 approval.
 
-**Prerequisite:** risk is Story-level today (`risk.level` in the Plan), so a
-HIGH Story makes every slice HIGH. P2 adds optional `slices[].risk` that may be
-equal to or lower than the Story risk only when declared in the Plan approved
-at `start_story` (fingerprinted), never lowered at runtime.
+P2 implements optional `slices[].risk: {level, flags}` bounded by the Story's
+level and flags, immutable across checkpoint, verification, and rework.
+Effective risk is the maximum of requested risk and the declared slice risk
+(Story risk when absent); compiled context exposes the slice risk and source.
+Absent slice risk preserves existing projection and receipt digests.
+
+Structured reviewers carry `type`, `vendor`, and computed `independent`;
+legacy strings remain readable and stored unchanged. Optional classified
+findings reject `APPROVE` with open `VALID`, `SPEC_AMBIGUITY`, or
+`NEEDS_HUMAN_DECISION` findings. Runner `record-owner-review` forces human
+identity and requires the owner's explicit structured input; a Lead must
+never call it on its own initiative. Ordinary `record-review` rejects a
+human identity with `OWNER_REVIEW_OPERATION_REQUIRED`.
+
+**P2 deviation and owner questions:** combinations omitted from the approved
+table (including MEDIUM human reviews, flagged/reviewed LOW slices, and legacy
+reviewer strings) conservatively return `HUMAN_REQUIRED` with
+`POLICY_CASE_UNSPECIFIED`; the owner must settle these before binding policy.
+Also, `sliceReviewRequired` in `check-story-finalization.mjs` still uses Story
+risk, so finalization requires review for a declared LOW slice in a
+MEDIUM/HIGH Story even when verification used NO_REVIEW. That file is outside
+P2's scope and remains unchanged. P3 is not started pending resolution.
 
 ## 4. Lead session and loop (Phases P3–P4)
 

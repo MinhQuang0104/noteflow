@@ -25,6 +25,10 @@ Load only when the validated current slice declares `executor: agy`.
 
 ## Corrections and stops
 
-On a `CHANGES_REQUIRED` review, reopen the same Orca Task with `orca orchestration task-update --status ready --result "<VALID finding IDs>"`, allow at most three attempts, and include only `VALID` findings in the correction contract. Build each replacement with `--correction-of <prior-report-path> --finding <id>` and preserve prior reports/contracts as evidence.
+The correction loop starts from a `REWORK` policy decision with only open `VALID` findings. P2 policy is advisory: it grants no automatic correction, successor execution, or removal of a human stop, and `CHANGES_REQUIRED` alone never authorizes a fix.
+
+Under explicit maintenance authorization, use Runner `prepare-rework` and then `apply-rework` with the fingerprint-bound preview, `action: rework_slice`, and `maintenance_authorization: V4_LITE_REWORK`. This preserves the prior attempt and reserves new receipt identities, routing the same slice back to `implement_slice` for a separate invocation; it does not perform implementation.
+
+After that durable transition, reopen the same Orca Task with `orca orchestration task-update --status ready --result "<VALID finding IDs>"` and include only `VALID` findings in the correction contract. Allow at most three corrections after initial attempt 1 (attempts 2–4); open VALID findings at attempt 4 yield `HUMAN_REQUIRED`, not another correction. Build each replacement with `--correction-of <prior-report-path> --finding <id>` and preserve prior reports/contracts as evidence, repeating scope, Lead verification, checkpoint, and review for each attempt.
 
 Stop and escalate to the owner when the scope gate is not `PASS`, the contract is modified or missing, a local permission/trust/sign-in prompt appears, scope or AC intent is ambiguous, a finding is not `VALID`, or the same failure repeats without progress. Worker `DONE` is evidence only; the Lead still owns scope, checkpoint, verification, review, and the Human Gate.
