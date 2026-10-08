@@ -360,10 +360,12 @@ function validateMetadataProjection(root, descriptor, checkpoint, metadata) {
   for (const original of originalSlices) {
     const next = generatedSlices.find(item => item?.id === original.id)
     if (!next) throw new Error('PLAN_SLICE_SET_CHANGED')
+    if (!sameJson(original.risk, next.risk)) throw new Error('SLICE_EXECUTION_CONTRACT_CHANGED')
     if (original.id !== descriptor.slice_id && !sameJson(original, next)) throw new Error('OTHER_SLICE_METADATA_CHANGED')
   }
   const slice = sliceById(generated, descriptor.slice_id)
-  if (!sameJson(slice.executor, descriptor.original_slice.executor) ||
+  if (!sameJson(slice.risk, descriptor.original_slice.risk) ||
+      !sameJson(slice.executor, descriptor.original_slice.executor) ||
       !sameJson(slice.scope, descriptor.original_slice.scope) ||
       !sameJson(slice.verification_obligations, descriptor.original_slice.verification_obligations)) {
     throw new Error('SLICE_EXECUTION_CONTRACT_CHANGED')
@@ -727,9 +729,12 @@ function validateReworkProjection(root, request, originalPlan, generated, oldSna
   for (const original of originalSlices) {
     const next = generated.slices?.find(item => item?.id === original.id)
     if (!next) throw new Error('PLAN_SLICE_SET_CHANGED')
+    if (!sameJson(original.risk, next.risk)) throw new Error('SLICE_EXECUTION_CONTRACT_CHANGED')
     if (original.id !== request.slice_id && !sameJson(original, next)) throw new Error('OTHER_SLICE_METADATA_CHANGED')
   }
   const slice = sliceById(generated, request.slice_id)
+  const originalSlice = sliceById(originalPlan, request.slice_id)
+  if (!sameJson(slice.risk, originalSlice.risk)) throw new Error('SLICE_EXECUTION_CONTRACT_CHANGED')
   if (slice.status !== 'pending') throw new Error('REWORK_PENDING_PROJECTION_REQUIRED')
   if (slice.baseline_commit || slice.checkpoint_commit || slice.subject_digest || slice.changed_paths_sha256 || slice.receipt_refs) {
     throw new Error('REWORK_OLD_CHECKPOINT_MUST_MOVE_TO_HISTORY')
@@ -997,12 +1002,14 @@ function mandatoryJudgmentFlags(plan) {
 }
 
 function selectRisk(plan, request = {}) {
-  const planRisk = normalizedRisk(plan?.risk?.level ?? plan?.risk)
+  const slice = plan?.slices?.find(item => item.id === (request.slice_id ?? plan.current_slice))
+  const selectedRisk = slice?.risk ?? plan?.risk
+  const planRisk = normalizedRisk(selectedRisk?.level ?? selectedRisk)
   const requestedRisk = request.risk === undefined || request.risk === null ? null : normalizedRisk(request.risk)
   if (requestedRisk && RISK_ORDER[requestedRisk] < RISK_ORDER[planRisk]) throw new Error('RISK_DOWNGRADE_FORBIDDEN')
   return {
     risk: requestedRisk && RISK_ORDER[requestedRisk] > RISK_ORDER[planRisk] ? requestedRisk : planRisk,
-    mandatory_judgment_flags: mandatoryJudgmentFlags(plan)
+    mandatory_judgment_flags: mandatoryJudgmentFlags({ risk: selectedRisk })
   }
 }
 
@@ -1183,7 +1190,7 @@ function verificationDescriptorFromPreview(root, request, preview, recovery = fa
   const currentPlan = frontmatter(readText(root, preview.plan_path))
   const requestedRisk = selectRisk(currentPlan, request)
   if (!RISK_LEVELS.has(preview.risk) || RISK_ORDER[preview.risk] < RISK_ORDER[requestedRisk.risk] ||
-      !sameJson(preview.mandatory_judgment_flags ?? [], mandatoryJudgmentFlags(currentPlan))) throw new Error('STALE_RISK_PREVIEW')
+      !sameJson(preview.mandatory_judgment_flags ?? [], requestedRisk.mandatory_judgment_flags)) throw new Error('STALE_RISK_PREVIEW')
   if (digestFiles(root, preview.policy.paths).digest !== preview.policy.digest) throw new Error('STALE_POLICY_PREVIEW')
   if (digestFiles(root, preview.recipes.paths).digest !== preview.recipes.digest) throw new Error('STALE_RECIPE_PREVIEW')
   if (hash(readFileSync(safeFile(root, preview.story_path))) !== preview.story_digest) throw new Error('STALE_STORY_PREVIEW')
@@ -1511,9 +1518,11 @@ function validateVerificationMetadata(root, preview, metadata) {
   for (const original of originalSlices) {
     const next = generated.slices?.find(item => item?.id === original.id)
     if (!next) throw new Error('PLAN_SLICE_SET_CHANGED')
+    if (!sameJson(original.risk, next.risk)) throw new Error('SLICE_EXECUTION_CONTRACT_CHANGED')
     if (original.id !== preview.slice_id && !sameJson(original, next)) throw new Error('OTHER_SLICE_METADATA_CHANGED')
   }
   const slice = sliceById(generated, preview.slice_id)
+  if (!sameJson(slice.risk, preview.original_slice.risk)) throw new Error('SLICE_EXECUTION_CONTRACT_CHANGED')
   if (!sameJson(slice.attempt_history, preview.original_slice.attempt_history) ||
       !sameJson(slice.current_attempt, preview.original_slice.current_attempt)) throw new Error('ATTEMPT_HISTORY_CHANGED')
   if (slice.status !== metadata.target_status || slice.baseline_commit !== preview.baseline_commit ||

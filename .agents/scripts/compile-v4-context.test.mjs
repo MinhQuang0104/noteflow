@@ -71,6 +71,7 @@ test('projects only the selected slice with provenance and explicit unknown scop
     assert.deepEqual(result.projection.requirements.tasks.map(item => item.id), ['T-1'])
     assert.deepEqual(result.projection.requirements.acceptance_criteria.map(item => item.id), ['AC-1'])
     assert.match(result.projection.requirements.story_risk.raw, /Human Gate authority/)
+    assert.equal(Object.hasOwn(result.projection.requirements, 'slice_risk'), false)
     assert.deepEqual(result.projection.dependency_dispositions, [])
     assert.deepEqual(result.projection.blockers, [])
     assert.deepEqual(result.projection.questions, [])
@@ -88,6 +89,19 @@ test('projects only the selected slice with provenance and explicit unknown scop
     assert.equal(Object.hasOwn(result.projection, 'historical_receipts'), false)
 
     assert.deepEqual(snapshot(fixture), before)
+  })
+})
+
+test('explicit slice risk is projected with Plan provenance', () => {
+  runWithFixture({ schemaVersion: 2, state: 'pending' }, fixture => {
+    seedInstructionSources(fixture)
+    writeFileSync(fixture.paths.plan, readFileSync(fixture.paths.plan, 'utf8').replace('slices:', 'risk:\n  level: LOW\nslices:').replace('    depends_on: []', '    depends_on: []\n    risk:\n      level: LOW\n      flags: []'))
+    const result = compileActionContext(fixture.root, fixture.storyId, 'implement_slice', 'A', { expectedHead: head(fixture) })
+    assert.equal(result.status, 'READY', JSON.stringify(result))
+    assert.deepEqual(result.projection.requirements.slice_risk, {
+      raw: { level: 'LOW', flags: [] },
+      source: { path: '_bmad-output/implementation-artifacts/story-9-1-plan.md', sections: ['slices.A.risk'] },
+    })
   })
 })
 

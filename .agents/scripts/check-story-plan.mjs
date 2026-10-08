@@ -136,6 +136,22 @@ function authorityScopePath(value) {
   })
 }
 
+export function validateSliceRisk(slice, storyRisk) {
+  if (slice?.risk === undefined) return []
+  const risk = slice.risk
+  const levels = ['LOW', 'MEDIUM', 'HIGH']
+  if (!isObject(risk) || Object.keys(risk).some(key => !['level', 'flags'].includes(key)) ||
+      !levels.includes(risk.level) || (risk.flags !== undefined &&
+      (!Array.isArray(risk.flags) || risk.flags.some(flag => typeof flag !== 'string' || !flag.trim())))) {
+    return ['SLICE_RISK_INVALID']
+  }
+  const storyLevel = storyRisk?.level ?? storyRisk
+  const storyFlags = storyRisk?.flags ?? []
+  if (!levels.includes(storyLevel) || !Array.isArray(storyFlags)) return ['SLICE_RISK_INVALID']
+  return levels.indexOf(risk.level) > levels.indexOf(storyLevel) ||
+    (risk.flags ?? []).some(flag => !storyFlags.includes(flag)) ? ['SLICE_RISK_EXCEEDS_STORY'] : []
+}
+
 export function validateSliceExecutionContract(slice) {
   const reasons = []
   const executor = slice?.executor === undefined ? 'lead' : slice.executor
@@ -201,10 +217,10 @@ export function validate(root, id) {
   result.sourceDigest = plan.source?.section_digest ?? null
   if (plan.schema_version === 2) {
     const separated = validateSeparatedPlan(root, id, plan, result)
-    for (const slice of plan.slices ?? []) separated.reasons.push(...validateSliceExecutionContract(slice))
+    for (const slice of plan.slices ?? []) separated.reasons.push(...validateSliceExecutionContract(slice), ...validateSliceRisk(slice, plan.risk))
     separated.reasons = [...new Set(separated.reasons)]
     if (separated.reasons.some(reason => [
-      'SLICE_EXECUTOR_INVALID', 'AGY_SCOPE_REQUIRED', 'AGY_SCOPE_INVALID',
+      'SLICE_RISK_INVALID', 'SLICE_RISK_EXCEEDS_STORY', 'SLICE_EXECUTOR_INVALID', 'AGY_SCOPE_REQUIRED', 'AGY_SCOPE_INVALID',
       'AGY_SCOPE_AUTHORITY_PATH', 'AGY_CHECKS_REQUIRED',
     ].includes(reason))) {
       separated.status = 'INVALID'
@@ -258,6 +274,7 @@ export function validate(root, id) {
     const graph = new Map()
     for (const slice of slices) {
       result.reasons.push(...validateSliceExecutionContract(slice))
+      result.reasons.push(...validateSliceRisk(slice, plan.risk))
       const legacyInProgress = slice.status === 'in-progress' && plan.schema_version === 1 &&
         Boolean(slice.checkpoint_commit) && slice.id === plan.current_slice &&
         plan.next_action?.kind === 'verify_slice' && plan.next_action?.target === slice.id &&

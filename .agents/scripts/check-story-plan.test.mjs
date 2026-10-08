@@ -216,6 +216,27 @@ next_action:
 }
 
 test('valid READY fixture', () => withFixture(() => {}, 'READY', 0))
+
+for (const [risk, expectedReason] of [
+  ['\n      level: LOW\n      flags: []', null],
+  ['\n      level: LOW', null],
+  ['\n      level: HIGH\n      flags: []', 'SLICE_RISK_EXCEEDS_STORY'],
+  ['\n      level: LOW\n      flags: [security]', 'SLICE_RISK_EXCEEDS_STORY'],
+  ['\n      level: UNKNOWN\n      flags: []', 'SLICE_RISK_INVALID'],
+  ['\n      level: LOW\n      flags: security', 'SLICE_RISK_INVALID'],
+  ['\n      level: LOW\n      flags: [null]', 'SLICE_RISK_INVALID'],
+  ['LOW', 'SLICE_RISK_INVALID'],
+]) test(`optional slice risk validates ${risk}`, () => {
+  const f = createV4Fixture({ schemaVersion: 2, state: 'pending' })
+  try {
+    writeFileSync(f.paths.plan, readFileSync(f.paths.plan, 'utf8').replace('slices:', 'risk:\n  level: LOW\nslices:').replace('    depends_on: []', `    depends_on: []\n    risk: ${risk}`))
+    const result = check(f.root, '9.1')
+    if (expectedReason) {
+      assert.equal(result.json.status, 'INVALID', JSON.stringify(result.json))
+      assert.ok(result.json.reasons.includes(expectedReason), JSON.stringify(result.json))
+    } else assert.equal(result.json.status, 'READY', JSON.stringify(result.json))
+  } finally { f.cleanup() }
+})
 test('schema-v2 fixture remains readable before finalization', () => {
   const f = schemaV2Fixture()
   try {

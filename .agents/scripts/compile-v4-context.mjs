@@ -300,6 +300,10 @@ function buildProjection(root, storyId, action, selectedSliceId, expectedHead, p
         declared_references: [],
       }
   const dependencyIds = Array.isArray(slice?.depends_on) ? slice.depends_on : []
+  if (slice?.risk !== undefined) requirements.slice_risk = {
+    raw: slice.risk,
+    source: { path: planPath, sections: [`slices.${slice.id}.risk`] },
+  }
   const dependencyDispositions = dependencyIds.map(id => dependencyDisposition(plan, id))
   const planSource = sourceBinding(root, planPath, 'plan', true, { normative_digest: plan.story?.normative_digest ?? null })
   const storySource = story

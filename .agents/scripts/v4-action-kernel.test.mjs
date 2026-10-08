@@ -22,6 +22,17 @@ const POINTER = '.agent-state/active-run.json'
 const RECEIPT = '_bmad-output/implementation-artifacts/receipts/story-9-1/A-implementation.json'
 const digest = value => 'sha256:' + createHash('sha256').update(value, 'utf8').digest('hex')
 
+test('effective risk defaults to Story and uses only the requested slice risk', () => {
+  const plan = { risk: { level: 'HIGH', flags: ['security'] }, current_slice: 'A', slices: [
+    { id: 'A', risk: { level: 'LOW', flags: [] } }, { id: 'B' },
+  ] }
+  assert.equal(kernel.riskLevel(plan, {}), 'LOW')
+  assert.equal(kernel.riskLevel(plan, { risk: 'MEDIUM' }), 'MEDIUM')
+  assert.equal(kernel.riskLevel(plan, { slice_id: 'B' }), 'HIGH')
+  assert.equal(kernel.riskLevel({ risk: { level: 'MEDIUM' } }, {}), 'MEDIUM')
+  assert.throws(() => kernel.riskLevel(plan, { slice_id: 'B', risk: 'LOW' }), /RISK_DOWNGRADE_FORBIDDEN/)
+})
+
 test('Plan risk flags become canonical mandatory escalation flags', () => {
   assert.deepEqual(kernel.mandatoryJudgmentFlags({ risk: { level: 'HIGH', flags: ['security', 'idempotency', 'shared_boundary', 'public_contract'] } }), [
     'CONCURRENCY_STATE', 'PUBLIC_CONTRACT', 'SECURITY_AUTH'
@@ -434,6 +445,34 @@ test('AGY metadata cannot change the execution contract during checkpoint', () =
     const result = checkpointImplementation(f.root, checkpointRequest(f, prepared.preview, { plan_template: altered }))
     assert.equal(result.status, 'RECOVERY_REQUIRED', JSON.stringify(result))
     assert.ok(result.reasons.includes('SLICE_EXECUTION_CONTRACT_CHANGED'))
+  } finally { f.cleanup() }
+})
+
+test('checkpoint metadata cannot add committed slice risk', () => {
+  const f = fixture('v2')
+  try {
+    const altered = f.request.plan_template.replace('    depends_on: []', '    depends_on: []\n    risk: \n      level: LOW\n      flags: []')
+    const prepared = prepareAction(f.root, { ...f.request, plan_template: altered })
+    assert.equal(prepared.status, 'READY', JSON.stringify(prepared))
+    const result = checkpointImplementation(f.root, checkpointRequest(f, prepared.preview, { plan_template: altered }))
+    assert.equal(result.status, 'RECOVERY_REQUIRED', JSON.stringify(result))
+    assert.ok(result.reasons.includes('SLICE_EXECUTION_CONTRACT_CHANGED'), JSON.stringify(result))
+  } finally { f.cleanup() }
+})
+
+test('checkpoint metadata cannot change another slice risk', () => {
+  const f = fixture('v2')
+  try {
+    const other = '  - id: B\n    status: pending\n    task_refs: [T-1]\n    depends_on: [A]\n'
+    write(f.root, PLAN, readFileSync(path.join(f.root, PLAN), 'utf8').replace('blockers: []', `${other}blockers: []`))
+    git(f.root, 'add', '--', PLAN)
+    git(f.root, 'commit', '-qm', 'fixture other pending slice')
+    f.request.expected_head = git(f.root, 'rev-parse', 'HEAD')
+    const altered = f.request.plan_template.replace('blockers: []', `${other}    risk: \n      level: LOW\n      flags: []\nblockers: []`)
+    const prepared = prepareAction(f.root, { ...f.request, plan_template: altered })
+    assert.equal(prepared.status, 'READY', JSON.stringify(prepared))
+    const result = checkpointImplementation(f.root, checkpointRequest(f, prepared.preview, { plan_template: altered }))
+    assert.ok(result.reasons.includes('SLICE_EXECUTION_CONTRACT_CHANGED'), JSON.stringify(result))
   } finally { f.cleanup() }
 })
 

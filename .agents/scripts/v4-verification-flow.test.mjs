@@ -141,7 +141,7 @@ function fixture(risk, options = {}) {
     '.agents/scripts/check-escalation.mjs': readFileSync(path.resolve(process.cwd(), '.agents/scripts/check-escalation.mjs'), 'utf8'),
     '.agents/scripts/prepare-change-evidence.mjs': readFileSync(path.resolve(process.cwd(), '.agents/scripts/prepare-change-evidence.mjs'), 'utf8'),
     '.agent-state/active-run.json': JSON.stringify({ schemaVersion: 1, activeRunId: null, storyId: null, status: 'IDLE' }) + '\n',
-    'src/base.txt': 'base\n', [STORY]: story, [PLAN]: v2Plan(storyDigest, risk),
+    'src/base.txt': 'base\n', [STORY]: story, [PLAN]: withSliceRisk(v2Plan(storyDigest, risk), options.sliceRisk),
     '.agents/verification/registry.json': JSON.stringify(verification.registry, null, 2) + '\n',
     '.agents/verification/fixture-feature.json': JSON.stringify(verification.recipe, null, 2) + '\n',
     '.agents/features/fixture-feature.json': JSON.stringify(verification.map, null, 2) + '\n',
@@ -160,7 +160,7 @@ function fixture(risk, options = {}) {
   const implementationRequest = {
     action: 'implement_slice', operation: 'prepare', story_id: '9.1', slice_id: 'A', expected_head: initialHead,
     transaction_id: `implementation-${risk.toLowerCase()}`, owned_paths: changedPaths,
-    plan_template: implementationTemplate(risk),
+    plan_template: withSliceRisk(implementationTemplate(risk), options.sliceRisk),
     policy_paths: ['AGENTS.md', 'CLAUDE.md', '.agents/routing/task-router.md', '.agents/context/control-plane.md',
       '.agents/context/context-routing.md', '.agents/skills/v4-story-runner/SKILL.md'],
     recipe_paths: ['.agents/skills/v4-story-runner/actions/implement-slice.md', '.agents/skills/v4-story-runner/references/implementation-techniques.md'],
@@ -187,7 +187,11 @@ function fixture(risk, options = {}) {
     policy_paths: implementationRequest.policy_paths,
     recipe_paths: ['.agents/skills/v4-story-runner/actions/verify-slice.md', '.agents/skills/v4-story-runner/references/implementation-techniques.md', '.agents/verification/registry.json'],
   }
-  return { root, cleanup, risk, storyDigest, implementationDigest, head, verifyRequest, checkSpecs, changedPaths }
+  return { root, cleanup, risk, sliceRisk: options.sliceRisk, storyDigest, implementationDigest, head, verifyRequest, checkSpecs, changedPaths }
+}
+
+function withSliceRisk(text, risk) {
+  return risk === undefined ? text : text.replace('    depends_on: []', `    depends_on: []\n    risk: \n      level: ${risk}\n      flags: []`)
 }
 
 function prepareVerification(f) {
@@ -236,6 +240,62 @@ test('LOW PASS runs canonical and focused checks then persists only verification
     assert.deepEqual(validateReceipt(f.root, plan, 'A', 'verification'), [])
     assert.equal(validateStoryPlan(f.root, '9.1').status, 'READY')
     assert.equal(git(f.root, 'status', '--porcelain'), '')
+  } finally { f.cleanup() }
+})
+
+test('LOW slice within HIGH Story takes the NO_REVIEW path and requests can raise risk', () => {
+  const f = fixture('HIGH', { sliceRisk: 'LOW' })
+  try {
+    const prepared = prepareVerification(f)
+    assert.equal(prepared.preview.risk, 'LOW')
+    const raised = prepareAction(f.root, { ...f.verifyRequest, risk: 'HIGH' })
+    assert.equal(raised.preview.risk, 'HIGH', JSON.stringify(raised))
+    const result = verifySlice(f.root, {
+      ...f.verifyRequest, operation: 'verify', preview: prepared.preview,
+      plan_template: withSliceRisk(verificationTemplate(f, false), 'LOW'),
+    })
+    assert.equal(result.status, 'APPLIED', JSON.stringify(result))
+    const receipt = JSON.parse(readFileSync(path.join(f.root, VERIFICATION_RECEIPT), 'utf8'))
+    assert.equal(receipt.escalation.decision, 'NO_REVIEW')
+    assert.equal(existsSync(path.join(f.root, REVIEW_RECEIPT)), false)
+    assert.equal(frontmatter(readFileSync(path.join(f.root, PLAN), 'utf8')).slices[0].risk.level, 'LOW')
+  } finally { f.cleanup() }
+})
+
+test('verification metadata cannot add, remove or change committed slice risk', () => {
+  for (const [original, changed] of [['LOW', undefined], ['LOW', 'MEDIUM']]) {
+    const f = fixture('HIGH', { sliceRisk: original })
+    try {
+      const prepared = prepareVerification(f)
+      const result = verifySlice(f.root, {
+        ...f.verifyRequest, operation: 'verify', preview: prepared.preview,
+        plan_template: withSliceRisk(verificationTemplate(f, false), changed),
+      })
+      assert.ok(result.reasons.includes('SLICE_EXECUTION_CONTRACT_CHANGED'), JSON.stringify(result))
+    } finally { f.cleanup() }
+  }
+  const f = fixture('LOW')
+  try {
+    const prepared = prepareVerification(f)
+    const result = verifySlice(f.root, { ...f.verifyRequest, operation: 'verify', preview: prepared.preview,
+      plan_template: withSliceRisk(verificationTemplate(f, false), 'LOW') })
+    assert.ok(result.reasons.includes('SLICE_EXECUTION_CONTRACT_CHANGED'), JSON.stringify(result))
+  } finally { f.cleanup() }
+})
+
+test('verification metadata cannot change another slice risk', () => {
+  const f = fixture('LOW')
+  try {
+    const other = '  - id: B\n    status: pending\n    task_refs: [T-1]\n    depends_on: [A]\n'
+    const before = readFileSync(path.join(f.root, PLAN), 'utf8')
+    write(f.root, PLAN, before.replace('next_action:', `${other}next_action:`))
+    git(f.root, 'add', '--', PLAN)
+    git(f.root, 'commit', '-qm', 'fixture another pending slice')
+    f.verifyRequest.expected_head = git(f.root, 'rev-parse', 'HEAD')
+    const prepared = prepareVerification(f)
+    const template = verificationTemplate(f, false).replace('next_action:', `${other}    risk: \n      level: LOW\n      flags: []\nnext_action:`)
+    const result = verifySlice(f.root, { ...f.verifyRequest, operation: 'verify', preview: prepared.preview, plan_template: template })
+    assert.ok(result.reasons.includes('SLICE_EXECUTION_CONTRACT_CHANGED'), JSON.stringify(result))
   } finally { f.cleanup() }
 })
 
