@@ -90,6 +90,13 @@ New `.agents/skills/v4-story-runner/references/autopilot.md` (≤ ~70 lines),
 registered as lazy for every Story action with trigger "Load only when the Plan
 carries an autopilot authorization."
 
+Files: the new reference, `compile-v4-context.mjs` (`ACTIONS` lazy lists and
+trigger text) and `compile-v4-context.test.mjs`, plus the tests that seed the
+instruction sources (`v4-context-invariants.architecture.test.mjs`,
+`v4-experience.test.mjs`, `v4-observation-hooks.test.mjs`), which P1 had to
+extend the same way for `agy-executor.md`. Owner decision 2026-10-08: listed
+explicitly so the registration does not stop on a file-scope conflict.
+
 Content: the loop (`autopilot-status` → load the one action contract → run it →
 repeat); every action still re-reads Plan/Git/receipts and never uses chat
 memory as evidence; session replacement (on compaction, context threshold,
