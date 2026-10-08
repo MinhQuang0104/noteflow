@@ -11,11 +11,13 @@ import { recordContextDelivered } from './v4-observations.mjs'
 import { selectExperience } from './v4-experience.mjs'
 
 const SHA = /^[0-9a-f]{40,64}$/i
+const AUTOPILOT_REFERENCE = '.agents/skills/v4-story-runner/references/autopilot.md'
+const AUTOPILOT_TRIGGER = 'Load only when the Plan carries an autopilot authorization.'
 const ACTIONS = new Map([
   ['start_story', {
     target: 'story',
     document: '.agents/skills/v4-story-runner/actions/start-story.md',
-    lazy: [],
+    lazy: [AUTOPILOT_REFERENCE],
     stop: [
       'Stop after the one durable start-story transaction and the explicit implement_slice successor is persisted.',
       'Do not execute implement_slice or alter a second Story action in this invocation.',
@@ -24,7 +26,7 @@ const ACTIONS = new Map([
   ['reconcile_lifecycle', {
     target: 'story',
     document: '.agents/skills/v4-story-runner/actions/reconcile-lifecycle.md',
-    lazy: ['.agents/skills/v4-story-runner/references/recovery.md'],
+    lazy: [AUTOPILOT_REFERENCE, '.agents/skills/v4-story-runner/references/recovery.md'],
     stop: [
       'Stop after the bounded lifecycle reconciliation transaction or a recovery-required result.',
       'Do not implement a slice or infer missing execution evidence.',
@@ -55,7 +57,7 @@ const ACTIONS = new Map([
   ['finalize_story', {
     target: 'story',
     document: '.agents/skills/v4-story-runner/actions/finalize-story.md',
-    lazy: ['.agents/skills/v4-story-runner/references/recovery.md'],
+    lazy: [AUTOPILOT_REFERENCE, '.agents/skills/v4-story-runner/references/recovery.md'],
     stop: [
       'Stop at review and the explicit Human Gate after finalization evidence is committed.',
       'Do not infer approval or perform review-to-done completion.',
@@ -64,7 +66,7 @@ const ACTIONS = new Map([
   ['complete_story', {
     target: 'story',
     document: '.agents/skills/v4-story-runner/actions/complete-story.md',
-    lazy: ['.agents/skills/v4-story-runner/references/recovery.md'],
+    lazy: [AUTOPILOT_REFERENCE, '.agents/skills/v4-story-runner/references/recovery.md'],
     stop: [
       'Stop after the separately authorized exact-scope human approval transaction reaches done.',
       'Generic continuation, stale approval, or missing approval is never sufficient authority.',
@@ -226,7 +228,9 @@ function actionSources(root, action) {
   const spec = ACTIONS.get(action)
   const lazy = spec.lazy.map(relative => ({
     path: relative,
-    trigger: relative.endsWith('agy-executor.md')
+    trigger: relative.endsWith('autopilot.md')
+      ? AUTOPILOT_TRIGGER
+      : relative.endsWith('agy-executor.md')
       ? 'Load only when the current slice declares executor: agy.'
       : relative.endsWith('recovery.md')
       ? 'Load only when a partial, locked, or recovery-required transaction is observed.'

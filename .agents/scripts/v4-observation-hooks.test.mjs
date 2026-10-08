@@ -30,6 +30,7 @@ function installContextSources(fixture) {
     '.agents/skills/v4-story-runner/actions/implement-slice.md', '.agents/skills/v4-story-runner/references/implementation-techniques.md',
     '.agents/skills/v4-story-runner/references/agy-executor.md',
     '.agents/skills/v4-story-runner/references/recovery.md',
+    '.agents/skills/v4-story-runner/references/autopilot.md',
   ]
   for (const relative of files) {
     const file = path.join(fixture.root, relative)
