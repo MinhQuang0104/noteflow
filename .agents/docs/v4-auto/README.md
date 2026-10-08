@@ -13,7 +13,8 @@ time. Each phase file is self-contained except for the common rules below.
 | 2 | `p2-review-policy.md` | implementer | G1 |
 | 2.1 | `p2-1-policy-completion.md` (owner decisions D-P2.1-a/b) | implementer | 2 |
 | 3 | `p3-story-autopilot.md` | implementer | 2.1 |
-| G3 | One Story to Human Gate with a Codex Lead and one with a Claude Lead | **owner** | 3 |
+| 3.1 | `p2-2-no-review-finalization.md` (D-P2.1-b end to end) | implementer | 3 |
+| G3 | One Story to Human Gate with a Codex Lead and one with a Claude Lead | **owner** | 3.1 |
 | 4 | `p5-story-registry.md` | implementer | G3 |
 | 5 | `p6-parallel-integration.md` | implementer | 4 |
 | G5 | Two independent Stories in parallel, both merged | **owner** | 5 + owner DB decision (P6 §0) |
@@ -86,8 +87,9 @@ architecture worktree named there. Stop at the end of the phase and report.
 | G1 | **passed** 2026-10-08 | fixes f2aa85a, 114b3b6 | Disposable Story 99.1 (slugify, LOW) delivered by AGY (Gemini 3.8 Flash Medium, ~19 min) with Claude as Lead: run_2f8a42357c45 / task_d1224093b971 / ctx_45d60c03385c; report SHA matched DONE; scope gate PASS, no worker commits; Lead rerun 2/2; checkpoint + metadata commits; receipt.worker with real Orca IDs; Plan next verify_slice:A. Prep fixed worker context (no Lead docs); run found CHECKPOINTED exiting 5. AGY added one unrequested default export (LOW). Smoke worktree/branch removed. |
 | P2 | complete; P3 stopped | 2d32817..T5 documentation (this commit) | T1–T5 complete; full test:v4 593 baseline / 673 final (592 / 672 passed, 1 existing skip, 0 failures); Python 46 tests + 46 subtests passed baseline/final. Advisory only. Deviation: unspecified policy cases fail closed with HUMAN_REQUIRED / POLICY_CASE_UNSPECIFIED. Owner questions: omitted review-table cases and finalization still requiring Story-risk review for lower-risk slices (outside P2 scope). |
 | P2.1 | complete | 2ffd892..f76fa9a..T3 documentation (this commit) | T1–T3 complete; phase baseline 673 tests (672 passed, 1 existing skip); final full suite 703 tests (702 passed, 1 existing skip); Python architecture test 46 tests + 46 subtests passed at baseline and final. Deviations: none. Open questions: none. |
-| P3 | complete | 914ec62..T6 documentation (this commit) | T1–T6 complete; full test:v4 703 baseline / 713 final (702 / 712 passed, 1 existing skip, 0 failures); Python architecture test 46 tests + 46 subtests passed at baseline/final. Deviations: none. Open questions: none. |
-| G3 | not run | | owner |
+| P3 | complete | 914ec62..T6 documentation (this commit) | T1–T6 complete; full test:v4 703 baseline / 713 final (702 / 712 passed, 1 existing skip, 0 failures); Python architecture test 46 tests + 46 subtests passed at baseline/final. Deviations: none. Open questions: none. Owner review (Claude) fixes in b447044: AGENTS.md one-successor rule restored for the non-autopilot case; T6 allowlist made git read-only and given `orca terminal`/slice checks; pinned by `autopilot-authority.architecture.test.mjs`. Stop reason for `complete_story` is `ACTION_NOT_AUTOPILOT_ALLOWED` (plan said `HUMAN_GATE`; behaviour correct). |
+| P2.2 | not started | | owner review found D-P2.1-b not end to end (NO_REVIEW slices stay `verified`; schema-v2 review state and finalization still require `reviewed`) |
+| G3 | not run | | owner; after P2.2 |
 | P5 | not started | | |
 | P6 | not started | | DB isolation decision pending (owner) |
 | G5 | not run | | owner |
