@@ -152,6 +152,13 @@ human identity with `OWNER_REVIEW_OPERATION_REQUIRED`.
 
 ## 5. Story registry (Phase P5)
 
+**Implemented:** `.agents/scripts/story-registry.mjs` provides claim, explicit
+owner takeover, heartbeat, status, release and `policy-drift`. Registry records
+use a version-keyed reader table; unknown schemas are refused without deleting
+the record. Claims pin `controlPlaneCommit`, and policy drift from canonical
+`main` is informational until integration. Declared scope is stored in P5;
+overlap validation and integration remain P6.
+
 V4 code reads `active-run.json` from the canonical checkout (`pointer()` in
 `v4-lifecycle-transaction.mjs`), so it is global, but it records a single V3 run
 (`activeRunId`, `storyId`) and V4 only requires it to be `IDLE`; it cannot hold
@@ -190,10 +197,14 @@ Rules:
 
 1. **Coordination, not truth.** Plan and Git stay authoritative; a registry
    record that contradicts them yields `RECONCILIATION_REQUIRED` and stops.
-2. **Fencing.** Every Lead write (checkpoint, review, integration) compares
-   `generation`; a superseded Lead is refused.
+2. **Fencing (D-P5-a).** Lead writes under autopilot (`checkpoint`, `verify`,
+   `record-review`, `prepare-rework` / `apply-rework`, `finalize_story`) compare
+   `generation` before acting and after acquiring the transaction lock; a
+   superseded Lead is refused. Owner operations and recovery are never fenced.
+   Read-only prepare and status are not fenced; autopilot status still reports
+   missing claims or superseded generations as STOP reasons.
 3. **No automatic takeover.** Heartbeat is display-only (`STALE?` in status).
-   Only the owner runs `claim <story> --takeover [--vendor <v>]`, which
+   Only the owner runs `claim <story> --takeover --lead-vendor <v> --session <id>`, which
    increments `generation` and records who replaced whom.
 4. **Release.** Deleted after merge; `release --abort` keeps the worktree and
    moves the record to `aborted/`; a record whose worktree is gone shows
@@ -201,7 +212,7 @@ Rules:
 5. **Old pointer.** `active-run.json` keeps governing V3 and the migration lane
    in its own checkout; V4 Auto Stories use the registry.
 
-CLI sketch: `.agents/scripts/story-registry.mjs claim|status|heartbeat|release`
+CLI: `.agents/scripts/story-registry.mjs claim|status|heartbeat|release|policy-drift`
 with the Runner exit-code table. `status` is the owner's dashboard: every
 active Story, current slice, state, waiting-for-owner flags, stale/orphaned.
 
