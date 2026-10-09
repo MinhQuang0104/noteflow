@@ -14,6 +14,14 @@ through a normal BMAD Story, not this lane. Options for the owner: per-worktree
 DB name from an env var, or schema prefix. Until it lands, T5's resource lock
 serializes Stories that need these databases.
 
+**Owner decision (2026-10-09): per-worktree test databases.** A separate BMAD
+Story will make `backend/phpunit.xml` and the E2E helpers read the database name
+from an environment variable (default `noteflow_test`) and add a script that
+creates and migrates a database per worktree. That Story is product work and is
+not part of P6. P6 still implements T5 as written: resource locks stay the
+safety net until that Story is done, and remain valid afterwards for any shared
+resource that is not isolated.
+
 ## 1. Facts established from the code (do not re-derive)
 
 - **Rebase is unsafe for approved Stories.** `human_approval` binds
