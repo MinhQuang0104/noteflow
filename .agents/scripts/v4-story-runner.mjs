@@ -14,6 +14,7 @@ import { applyRework, checkpointImplementation, prepareAction, prepareRework, re
 import { prepareMetadataAbort, applyMetadataAbort } from './v4-metadata-recovery.mjs'
 import { recordActionFinished, recordActionStarted, recordStoryCompleted, recordStoryReviewSnapshot } from './v4-observations.mjs'
 import { pointerIdle, storyCheckoutState } from './v4-lifecycle-transaction.mjs'
+import { checkLeadGeneration, assertLeadGeneration } from './story-registry.mjs'
 
 export { pointerIdle, storyCheckoutState } from './v4-lifecycle-transaction.mjs'
 
@@ -87,6 +88,7 @@ const CLI_OPERATIONS = new Set([
 ])
 const CLI_USAGE = 'USAGE: run <epic.story> [--expected-head <sha>] [--operation <operation> --input <file>] [--approve-exact-scope] [--authorize-autopilot <json> | --revoke-autopilot]'
 const AUTOPILOT_STATUS_ACTIONS = new Set(['implement_slice', 'verify_slice', 'finalize_story'])
+const FENCED_OPERATIONS = new Set(['checkpoint', 'verify', 'record-review', 'record_review', 'prepare-rework', 'apply-rework'])
 
 function planRelative(storyId) {
   return '_bmad-output/implementation-artifacts/story-' + storyId.replace('.', '-') + '-plan.md'
@@ -389,8 +391,14 @@ export function runV4Story(root, storyId, options = {}) {
     }
     const explicitKernelOperation = options.operation ?? options.kernel?.operation
     if (explicitKernelOperation !== undefined) {
-      const input = options.input ?? options.kernel?.input
+      let input = options.input ?? options.kernel?.input
       if (!input || typeof input !== 'object' || Array.isArray(input)) return invalidResult('KERNEL_INPUT_REQUIRED')
+      if (plan.autopilot?.revoked === false && FENCED_OPERATIONS.has(explicitKernelOperation) &&
+          input.recovery_authorized !== true && input.recovery?.authorized !== true) {
+        const fence = checkLeadGeneration(root, storyId, options.leadGeneration)
+        if (fence.status !== 'READY') return { ...fence, authorized: false }
+        input = { ...input, lead_generation: options.leadGeneration }
+      }
       if (explicitKernelOperation === 'prepare-rework' || explicitKernelOperation === 'apply-rework') {
         if (input.action !== 'rework_slice' || input.story_id !== storyId || input.slice_id !== plan.current_slice ||
             input.expected_head !== expectedHead || input.maintenance_authorization !== 'V4_LITE_REWORK') {
@@ -472,6 +480,12 @@ export function runV4Story(root, storyId, options = {}) {
         })
     }
     if (plan.next_action?.kind === 'finalize_story') {
+      let assertFence
+      if (plan.autopilot?.revoked === false) {
+        const fence = checkLeadGeneration(root, storyId, options.leadGeneration)
+        if (fence.status !== 'READY') return { ...fence, authorized: false }
+        assertFence = freshRoot => assertLeadGeneration(freshRoot, storyId, options.leadGeneration)
+      }
       const helper = inspectFinalization(root, storyId, expectedHead)
       const route = routeAction({
         ...decisionInput,
@@ -480,7 +494,7 @@ export function runV4Story(root, storyId, options = {}) {
       })
       if (!route.authorized) return { ...route, helper }
       return runRunnerAction(root, storyId, 'finalize_story', expectedHead, options,
-        () => applyFinalization(root, storyId, expectedHead),
+        () => applyFinalization(root, storyId, expectedHead, { assertFence }),
         result => {
           if (result.status === 'HUMAN_GATE_REQUIRED') recordStoryReviewSnapshot(root, {
             story_id: storyId,
@@ -602,7 +616,7 @@ function autopilotStatusStop(nextAction, reasons, budgetsRemaining = null) {
  * check and must not create observations or infer in-memory verification
  * substates.
  */
-export function autopilotStatus(root, storyId, expectedHead) {
+export function autopilotStatus(root, storyId, expectedHead, leadGeneration) {
   let plan = null
   try {
     if (!/^\d+\.\d+$/.test(storyId ?? '')) return autopilotStatusStop(null, ['INVALID_STORY_ID'])
@@ -631,6 +645,8 @@ export function autopilotStatus(root, storyId, expectedHead) {
         planCheck.status === 'STALE' ? ['STALE'] : planCheck.reasons)
     }
 
+    const fence = checkLeadGeneration(root, storyId, leadGeneration)
+    if (fence.status !== 'READY') return autopilotStatusStop(nextAction, fence.reasons)
     const budgetsRemaining = autopilotBudgetSnapshot(root, plan)
     if (nextAction?.kind === 'complete_story') return autopilotStatusStop(nextAction, ['HUMAN_GATE'], budgetsRemaining)
     if (!AUTOPILOT_STATUS_ACTIONS.has(nextAction?.kind)) {
@@ -710,10 +726,14 @@ export function runAction(root, storyId, expectedHead, options = {}) {
 function parseArguments(argv) {
   const [verb, storyId, ...tail] = argv
   if (verb === 'autopilot-status') {
-    if (!/^\d+\.\d+$/.test(storyId ?? '') || tail.length !== 2 || tail[0] !== '--expected-head' || !SHA.test(tail[1])) {
-      return { error: 'USAGE: autopilot-status <epic.story> --expected-head <sha>' }
+    let expectedHead, leadGeneration
+    for (let index = 0; index < tail.length; index++) {
+      if (tail[index] === '--expected-head' && !expectedHead && SHA.test(tail[index + 1] ?? '')) expectedHead = tail[++index]
+      else if (tail[index] === '--lead-generation' && leadGeneration === undefined && /^[1-9]\d*$/.test(tail[index + 1] ?? '') && Number.isSafeInteger(Number(tail[index + 1]))) leadGeneration = Number(tail[++index])
+      else return { error: 'USAGE: autopilot-status <epic.story> --expected-head <sha> [--lead-generation <n>]' }
     }
-    return { command: 'autopilot-status', storyId, expectedHead: tail[1] }
+    if (!/^\d+\.\d+$/.test(storyId ?? '') || !expectedHead) return { error: 'USAGE: autopilot-status <epic.story> --expected-head <sha> [--lead-generation <n>]' }
+    return { command: 'autopilot-status', storyId, expectedHead, leadGeneration }
   }
   if (!['run', 'execute'].includes(verb) || !/^\d+\.\d+$/.test(storyId ?? '')) return { error: CLI_USAGE }
   let expectedHead
@@ -724,6 +744,7 @@ function parseArguments(argv) {
   let approveExactScope = false
   let autopilotAuthorization
   let revokeAutopilot = false
+  let leadGeneration
   for (let index = 0; index < tail.length; index += 1) {
     if (tail[index] === '--approve-exact-scope') approveExactScope = true
     else if (tail[index] === '--expected-head' && SHA.test(tail[index + 1] ?? '')) { expectedHead = tail[++index] }
@@ -736,12 +757,13 @@ function parseArguments(argv) {
       if (!autopilotAuthorization || typeof autopilotAuthorization !== 'object' || Array.isArray(autopilotAuthorization)) return { error: 'AUTOPILOT_INPUT_INVALID' }
     }
     else if (tail[index] === '--revoke-autopilot' && !revokeAutopilot) revokeAutopilot = true
+    else if (tail[index] === '--lead-generation' && leadGeneration === undefined && /^[1-9]\d*$/.test(tail[index + 1] ?? '') && Number.isSafeInteger(Number(tail[index + 1]))) leadGeneration = Number(tail[++index])
     else return { error: CLI_USAGE }
   }
   if ((operation && !inputFile) || (!operation && inputFile)) return { error: CLI_USAGE }
   if ((autopilotAuthorization !== undefined && revokeAutopilot) ||
       ((autopilotAuthorization !== undefined || revokeAutopilot) && (operation || approveExactScope || startFingerprint || excludeUnrelated.length))) return { error: CLI_USAGE }
-  return { command: 'run', storyId, expectedHead, operation, inputFile, approveExactScope, startFingerprint, excludeUnrelated, autopilotAuthorization, revokeAutopilot }
+  return { command: 'run', storyId, expectedHead, operation, inputFile, approveExactScope, startFingerprint, excludeUnrelated, autopilotAuthorization, revokeAutopilot, leadGeneration }
 }
 
 function readCliInput(root, inputFile) {
@@ -760,7 +782,7 @@ function main() {
   const parsed = parseArguments(process.argv.slice(2))
   if (parsed.error) return invalidResult(parsed.error)
   const root = path.resolve(gitOutput(process.cwd(), ['rev-parse', '--show-toplevel'], 'GIT_ROOT_UNAVAILABLE'))
-  if (parsed.command === 'autopilot-status') return autopilotStatus(root, parsed.storyId, parsed.expectedHead)
+  if (parsed.command === 'autopilot-status') return autopilotStatus(root, parsed.storyId, parsed.expectedHead, parsed.leadGeneration)
   if (!existsSync(path.join(root, planRelative(parsed.storyId)))) return invalidResult('PLAN_MISSING')
   const loaded = parsed.inputFile ? readCliInput(root, parsed.inputFile) : { value: undefined }
   if (loaded.error) return invalidResult(loaded.error)
@@ -771,6 +793,7 @@ function main() {
     approveExactScope: parsed.approveExactScope,
     autopilotAuthorization: parsed.autopilotAuthorization,
     revokeAutopilot: parsed.revokeAutopilot,
+    leadGeneration: parsed.leadGeneration,
     startFingerprint: parsed.startFingerprint,
     excludeUnrelated: parsed.excludeUnrelated
   })

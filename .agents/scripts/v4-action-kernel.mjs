@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto'
 import { existsSync, lstatSync, readFileSync } from 'node:fs'
 import path from 'node:path'
+import { assertLeadGeneration } from './story-registry.mjs'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
@@ -333,6 +334,22 @@ function assertAutopilotUnchanged(original, generated) {
 
 function autopilotActive(plan) {
   return plan?.autopilot && plan.autopilot.revoked === false
+}
+
+function requestFence(root, request, operation) {
+  if (!request || typeof request !== 'object' || Array.isArray(request)) return undefined
+  if (request.recovery_authorized === true || request.recovery?.authorized === true ||
+      (operation === 'record-review' && request.review?.reviewer?.type === 'human')) return undefined
+  const storyId = request.story_id ?? request.preview?.story_id
+  if (!STORY_ID.test(storyId ?? '')) return undefined
+  const file = path.join(root, `_bmad-output/implementation-artifacts/story-${storyId.replace('.', '-')}-plan.md`)
+  if (!existsSync(file) || !autopilotActive(frontmatter(readText(root, path.relative(root, file))))) return undefined
+  return freshRoot => assertLeadGeneration(freshRoot, storyId, request.lead_generation)
+}
+
+function fenceAdmission(root, request, operation) {
+  try { requestFence(root, request, operation)?.(root); return null }
+  catch (error) { return { status: error.fenceStatus ?? 'ERROR', ready: false, valid: !['INVALID', 'ERROR'].includes(error.fenceStatus ?? 'ERROR'), reasons: [error.message] } }
 }
 
 function suppliedPolicy(request, fallback = null) {
@@ -914,6 +931,8 @@ function reworkError(error) {
 }
 
 export function prepareRework(root, request = {}) {
+  const fence = fenceAdmission(path.resolve(root), request, 'prepare-rework')
+  if (fence) return fence
   observeActionStarted(path.resolve(root), request, 'prepare-rework')
   let result
   try { result = buildReworkPreview(path.resolve(root), request) } catch (error) { result = reworkError(error) }
@@ -922,12 +941,16 @@ export function prepareRework(root, request = {}) {
 }
 
 export function applyRework(root, request = {}) {
+  const fence = fenceAdmission(path.resolve(root), request, 'apply-rework')
+  if (fence) return fence
   observeActionStarted(path.resolve(root), request, 'apply-rework')
   let result
   try {
     root = path.resolve(root)
     const recovery = request.recovery_authorized === true || request.recovery?.authorized === true
     const descriptor = reworkDescriptorFromPreview(root, request, request.preview, recovery)
+    const assertFence = requestFence(root, request, 'apply-rework')
+    if (assertFence) descriptor.assertFence = assertFence
     result = executeMetadataTransaction(root, descriptor)
     if (result.status === 'ERROR' && result.reasons?.[0]) result = reworkError(new Error(result.reasons[0]))
     if (result.status === 'APPLIED' || result.status === 'NOOP') {
@@ -1657,6 +1680,8 @@ function persistVerification(root, preview, outcome, request, targetStatus = 've
   const effectivePreview = { ...preview, plan_template: request.plan_template ?? preview.plan_template }
   const transactionId = request.transaction_id ?? (review ? `${preview.transaction_id}-review` : preview.transaction_id)
   const descriptor = metadataDescriptor(root, effectivePreview, outcome, targetStatus, review, transactionId)
+  const assertFence = requestFence(root, request, review ? 'record-review' : 'verify')
+  if (assertFence) descriptor.assertFence = assertFence
   descriptor.fail_at = request.fail_at ?? request.failure_phase
   descriptor.recovery = request.recovery_authorized === true || request.recovery?.authorized === true
   if (descriptor.recovery) {
@@ -1810,6 +1835,8 @@ function recordSliceReviewCore(root, request = {}, reportPolicy = () => {}) {
 }
 
 export function verifySlice(root, request = {}) {
+  const fence = fenceAdmission(path.resolve(root), request, 'verify')
+  if (fence) return fence
   observeActionStarted(path.resolve(root), request, 'verify')
   let result
   let policy = reviewPolicy(null, null)
@@ -1821,6 +1848,8 @@ export function verifySlice(root, request = {}) {
 }
 
 export function recordSliceReview(root, request = {}) {
+  const fence = fenceAdmission(path.resolve(root), request, 'record-review')
+  if (fence) return fence
   observeActionStarted(path.resolve(root), request, 'record-review')
   let result
   let policy = reviewPolicy(null, null)
@@ -1880,6 +1909,8 @@ function checkpointImplementationCore(root, request = {}) {
       throw new Error('STALE_HEAD')
     }
     const descriptor = descriptorFromPreview(root, input, preview, recovery)
+    const assertFence = requestFence(root, input, 'checkpoint')
+    if (assertFence) descriptor.assertFence = assertFence
     descriptor.recovery = recovery
     descriptor.recovery_checkpoint = input.recovery_checkpoint
     descriptor.fail_at = request.fail_at ?? request.failure_phase
@@ -1900,6 +1931,8 @@ function checkpointImplementationCore(root, request = {}) {
 }
 
 export function checkpointImplementation(root, request = {}) {
+  const fence = fenceAdmission(path.resolve(root), request, 'checkpoint')
+  if (fence) return fence
   observeActionStarted(path.resolve(root), request, 'checkpoint')
   let result
   try { result = checkpointImplementationCore(root, request) }

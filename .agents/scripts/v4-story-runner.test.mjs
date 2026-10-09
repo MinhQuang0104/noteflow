@@ -18,10 +18,12 @@ import {
 import { runAction } from './v4-story-runner.mjs'
 import { createCompletionFixture } from './completion-fixture.mjs'
 import { frontmatter, validate as validateStoryPlan } from './check-story-plan.mjs'
+import { claimStory } from './story-registry.mjs'
 
 const RUNNER = fileURLToPath(new URL('./v4-story-runner.mjs', import.meta.url))
 
 function runCli(root, args) {
+  if (args[0] === 'autopilot-status' && !args.includes('--lead-generation')) args = [...args, '--lead-generation', '1']
   return spawnSync(process.execPath, [RUNNER, ...args], {
     cwd: root,
     encoding: 'utf8',
@@ -40,6 +42,7 @@ function prepareFinalizeAutopilotFixture() {
   f.git('add', PLAN)
   f.git('commit', '-qm', 'prepare autopilot status fixture')
   f.refreshHead()
+  assert.equal(claimStory(f.root, '9.1', { worktree: f.root, leadVendor: 'codex', session: 'fixture' }).status, 'APPLIED')
   return f
 }
 
@@ -124,17 +127,17 @@ test('authorization locks fence only their Story while legacy locks stop every S
     const head = f.git('rev-parse', 'HEAD')
     const otherLock = path.join(f.root, '.git', 'v4-autopilot-authority-9.2.lock')
     writeFileSync(otherLock, 'other Story authorization\n')
-    assert.equal(autopilotStatus(f.root, '9.1', head).status, 'CONTINUE')
+    assert.equal(autopilotStatus(f.root, '9.1', head, 1).status, 'CONTINUE')
     const ownLock = path.join(f.root, '.git', 'v4-autopilot-authority-9.1.lock')
     writeFileSync(ownLock, 'this Story authorization\n')
-    assert.deepEqual(autopilotStatus(f.root, '9.1', head).reasons, ['RECOVERY_REQUIRED'])
+    assert.deepEqual(autopilotStatus(f.root, '9.1', head, 1).reasons, ['RECOVERY_REQUIRED'])
     const conflict = JSON.parse(runCli(f.root, ['run', '9.1', '--expected-head', head,
       '--revoke-autopilot']).stdout)
     assert.equal(conflict.recovery.lock_path, ownLock)
     assert.equal(readFileSync(ownLock, 'utf8'), 'this Story authorization\n')
     rmSync(ownLock)
     writeFileSync(path.join(f.root, '.git', 'v4-autopilot-authority.lock'), 'legacy recovery\n')
-    assert.deepEqual(autopilotStatus(f.root, '9.1', head).reasons, ['RECOVERY_REQUIRED'])
+    assert.deepEqual(autopilotStatus(f.root, '9.1', head, 1).reasons, ['RECOVERY_REQUIRED'])
     assert.equal(readFileSync(otherLock, 'utf8'), 'other Story authorization\n')
   } finally { f.cleanup() }
 })

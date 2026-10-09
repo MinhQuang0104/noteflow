@@ -494,6 +494,7 @@ function runTransaction(root, rawDescriptor) {
     } else {
       lock = acquire(root, descriptor, identity, paths)
       lockAcquired = true
+      if (descriptor.assertFence) descriptor.assertFence(root)
       journal = journalSeed(identity, paths, descriptor, lock)
       journal._path = paths.journalPath
       atomicJson(paths.journalPath, journal)
@@ -589,7 +590,7 @@ function runTransaction(root, rawDescriptor) {
       try { updateJournal(journal, { phase: 'ABORTED', recovery_required: false, error: reason }) } catch { /* preserve the original failure */ }
     }
     if (lockAcquired) release(paths.lockPath, descriptor.transaction_id)
-    return statusResult(reason.startsWith('STALE_') ? 'STALE' : reason === 'TRANSACTION_SCOPE_LOCKED' ? 'BLOCKED' : 'BLOCKED', [reason], {
+    return statusResult(error.fenceStatus ?? (reason.startsWith('STALE_') ? 'STALE' : 'BLOCKED'), [reason], {
       transaction_id: descriptor.transaction_id,
       journal_path: paths.journalPath,
       lock_path: paths.lockPath
@@ -932,6 +933,7 @@ function runMetadataTransaction(root, rawDescriptor) {
     } else {
       lock = acquire(root, descriptor, identity, paths)
       lockAcquired = true
+      if (descriptor.assertFence) descriptor.assertFence(root)
       journal = journalSeed(identity, paths, descriptor, lock)
       journal._path = paths.journalPath
       journal = updateJournal(journal, {
@@ -1072,7 +1074,7 @@ function runMetadataTransaction(root, rawDescriptor) {
       try { updateJournal(journal, { phase: 'ABORTED', recovery_required: false, error: reason }) } catch { /* preserve the original failure */ }
     }
     if (lockAcquired) release(paths.lockPath, descriptor.transaction_id)
-    return statusResult(reason.startsWith('STALE_') ? 'STALE' : reason === 'TRANSACTION_SCOPE_LOCKED' ? 'BLOCKED' : 'BLOCKED', [reason], {
+    return statusResult(error.fenceStatus ?? (reason.startsWith('STALE_') ? 'STALE' : 'BLOCKED'), [reason], {
       transaction_id: descriptor.transaction_id,
       journal_path: paths.journalPath,
       lock_path: paths.lockPath

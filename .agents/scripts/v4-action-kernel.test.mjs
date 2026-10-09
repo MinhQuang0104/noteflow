@@ -13,6 +13,7 @@ import { frontmatter, validate as validateStoryPlan } from './check-story-plan.m
 import { checkpointImplementation, inspectActionTransaction, prepareAction } from './v4-action-kernel.mjs'
 import { transactionIdentity } from './v4-slice-transaction.mjs'
 import * as kernel from './v4-action-kernel.mjs'
+import { claimStory } from './story-registry.mjs'
 
 const PLAN = '_bmad-output/implementation-artifacts/story-9-1-plan.md'
 const STORY = 'docs/story.md'
@@ -183,6 +184,8 @@ function fixture(kind, options = {}) {
 test('implementation metadata cannot remove or alter autopilot authority', () => {
   const f = fixture('v2')
   try {
+    assert.equal(claimStory(f.root, '9.1', { worktree: f.root, leadVendor: 'codex', session: 'fixture' }).status, 'APPLIED')
+    f.request.lead_generation = 1
     const plan = readFileSync(path.join(f.root, PLAN), 'utf8')
     const authority = ['autopilot:', '  schema_version: 1', '  authorized_at: "2026-10-08T00:00:00.000Z"',
       `  authorized_plan_digest: ${digest(plan)}`, `  authorized_head: ${f.head}`,

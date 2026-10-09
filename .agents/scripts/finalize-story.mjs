@@ -490,10 +490,10 @@ function applyFinalizationMutation(root, storyId, expectedHead) {
   }
 }
 
-export function applyFinalization(root, storyId, expectedHead) {
+export function applyFinalization(root, storyId, expectedHead, { assertFence } = {}) {
   const admission = lifecycleAdmission(root, { storyId, action: 'finalize_story', expectedHead })
   if (admission.status !== 'READY') return admission
-  return runLifecycleTransaction(root, { storyId, action: 'finalize_story', expectedHead }, () =>
+  return runLifecycleTransaction(root, { storyId, action: 'finalize_story', expectedHead, ...(assertFence ? { assertFence } : {}) }, () =>
     applyFinalizationMutation(root, storyId, expectedHead))
 }
 

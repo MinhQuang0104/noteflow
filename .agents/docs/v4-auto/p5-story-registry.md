@@ -109,6 +109,24 @@ Files: `v4-story-runner.mjs`, `v4-action-kernel.mjs`, `v4-slice-transaction.mjs`
 - `autopilot-status` reports `REGISTRY_CLAIM_REQUIRED` / `GENERATION_FENCED`
   as STOP reasons.
 
+#### D-P5-a — Owner decision: Lead fencing boundary
+
+Approved by the owner: generation fencing protects against a superseded Lead
+and applies only to Lead writes under autopilot. This decision qualifies the
+general Runner-operation requirement above.
+
+- Runner pre-check and post-lock re-check fence `checkpoint`, `verify`,
+  `record-review`, `prepare-rework` / `apply-rework`, and `finalize_story`.
+- T2 also includes `v4-lifecycle-transaction.mjs` and `finalize-story.mjs`
+  (+ their tests). An optional `assertFence` callback runs immediately after
+  acquiring the lifecycle lock; absent that callback, existing behavior and
+  evidence stay unchanged.
+- Owner operations are never fenced: `--approve-exact-scope`, `complete_story`,
+  `record-owner-review`, `--authorize-autopilot` / `--revoke-autopilot`, and
+  owner or maintenance recovery operations. `complete-story.mjs` is unchanged.
+- Read-only `prepare` and `autopilot-status` are not fenced; status still
+  reports `REGISTRY_CLAIM_REQUIRED` / `GENERATION_FENCED` as STOP reasons.
+
 ### T3 — Pinned control plane
 
 Files: `AGENTS.md` (Checkout safety paragraph), `references/autopilot.md`,
