@@ -107,10 +107,35 @@ test('post-write commit failure retains a visible autopilot recovery lock', () =
     const output = JSON.parse(result.stdout)
     assert.equal(output.status, 'RECOVERY_REQUIRED', result.stdout)
     assert.ok(output.recovery.lock_path)
+    assert.equal(output.recovery.lock_path, path.join(f.root, '.git', 'v4-autopilot-authority-9.1.lock'))
     assert.equal(output.recovery.plan_path, path.join(f.root, PLAN))
     assert.equal(output.recovery.index_path, path.join(f.root, '.git', 'index'))
     assert.equal(readFileSync(output.recovery.lock_path, 'utf8').includes(f.head), true)
     assert.equal(f.git('rev-parse', 'HEAD'), f.head)
+  } finally { f.cleanup() }
+})
+
+test('authorization locks fence only their Story while legacy locks stop every Story', () => {
+  const f = prepareFinalizeAutopilotFixture()
+  try {
+    const recorded = runCli(f.root, ['run', '9.1', '--expected-head', f.head,
+      '--authorize-autopilot', JSON.stringify(autopilotInput())])
+    assert.equal(recorded.status, 0, recorded.stdout)
+    const head = f.git('rev-parse', 'HEAD')
+    const otherLock = path.join(f.root, '.git', 'v4-autopilot-authority-9.2.lock')
+    writeFileSync(otherLock, 'other Story authorization\n')
+    assert.equal(autopilotStatus(f.root, '9.1', head).status, 'CONTINUE')
+    const ownLock = path.join(f.root, '.git', 'v4-autopilot-authority-9.1.lock')
+    writeFileSync(ownLock, 'this Story authorization\n')
+    assert.deepEqual(autopilotStatus(f.root, '9.1', head).reasons, ['RECOVERY_REQUIRED'])
+    const conflict = JSON.parse(runCli(f.root, ['run', '9.1', '--expected-head', head,
+      '--revoke-autopilot']).stdout)
+    assert.equal(conflict.recovery.lock_path, ownLock)
+    assert.equal(readFileSync(ownLock, 'utf8'), 'this Story authorization\n')
+    rmSync(ownLock)
+    writeFileSync(path.join(f.root, '.git', 'v4-autopilot-authority.lock'), 'legacy recovery\n')
+    assert.deepEqual(autopilotStatus(f.root, '9.1', head).reasons, ['RECOVERY_REQUIRED'])
+    assert.equal(readFileSync(otherLock, 'utf8'), 'other Story authorization\n')
   } finally { f.cleanup() }
 })
 

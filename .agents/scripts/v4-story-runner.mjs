@@ -166,7 +166,8 @@ export function recordAutopilot(root, storyId, expectedHead, { authorization, re
     const relative = planRelative(storyId)
     if (!existsSync(path.join(root, relative))) return invalidResult('PLAN_MISSING')
     const common = gitOutput(root, ['rev-parse', '--git-common-dir'], 'GIT_COMMON_DIR_UNAVAILABLE')
-    lock = path.resolve(root, common, 'v4-autopilot-authority.lock')
+    const legacyLock = path.resolve(root, common, 'v4-autopilot-authority.lock')
+    lock = existsSync(legacyLock) ? legacyLock : path.resolve(root, common, `v4-autopilot-authority-${storyId}.lock`)
     recovery = autopilotRecovery(root, relative, lock)
     if (existsSync(lock)) return { status: 'RECOVERY_REQUIRED', authorized: false, reasons: ['AUTOPILOT_TRANSACTION_LOCKED'], recovery }
     if (!pointerIdle(root)) return { status: 'BLOCKED', authorized: false, reasons: ['V3_POINTER_NOT_IDLE'] }
@@ -536,7 +537,8 @@ function firstSliceCommit(root, authorizedHead, slice) {
 
 function recoveryPending(root, storyId) {
   const common = path.resolve(root, gitOutput(root, ['rev-parse', '--git-common-dir'], 'GIT_COMMON_DIR_UNAVAILABLE'))
-  if (existsSync(path.join(common, 'v4-autopilot-authority.lock'))) return true
+  if (existsSync(path.join(common, 'v4-autopilot-authority.lock')) ||
+      existsSync(path.join(common, `v4-autopilot-authority-${storyId}.lock`))) return true
   for (const directory of ['noteflow-v4-transactions', 'noteflow-v4-lifecycle']) {
     const folder = path.join(common, directory)
     if (!existsSync(folder)) continue
