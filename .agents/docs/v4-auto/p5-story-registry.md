@@ -23,6 +23,33 @@ common directory, never committed.
   with `{ flag: 'wx' }` at ~line 337) and `noteflow-v4-lifecycle/`. Reuse the
   same `identity()`/common-dir resolution and `wx` creation.
 
+## 1a. Findings from G3 (2026-10-09)
+
+- **F-G3-1 (code, task T0).** `recordAutopilot` holds one repository-wide lock
+  `<git-common-dir>/v4-autopilot-authority.lock`, and `autopilotStatus` →
+  `recoveryPending` treats that file as recovery for **every** Story. While
+  the owner authorized Story 99.3, Story 99.2's Lead got `STOP`
+  `RECOVERY_REQUIRED` with no real recovery state.
+- **F-G3-2 (vendor configuration, owner).** Codex on Windows wraps each command
+  in `powershell.exe -Command "..."`; the `prefix_rule` allowlist did not stop
+  the approval prompts (owner approved every few seconds). This needs a Codex
+  profile or sandbox setting before parallel runs, not a code change here.
+- **F-G3-3 (vendor configuration, owner).** Claude Code's auto-mode permission
+  classifier blocked the `finalize_story` Runner call ("Merge Without Review")
+  although `Bash(node .agents/scripts/*)` allows it; the owner ran it directly.
+
+### T0 — Per-Story autopilot authority lock
+
+Files: `v4-story-runner.mjs`, `v4-story-runner.test.mjs`.
+
+- Name the lock per Story (`v4-autopilot-authority-<story-id>.lock`) and keep
+  the recovery record's `lock_path` accurate.
+- `recoveryPending(root, storyId)` checks only that Story's lock. Any lock
+  still left under the old repository-wide name stops every Story with
+  `RECOVERY_REQUIRED`, so nothing written before this change is lost.
+- Test: while Story X's authorization lock exists, `autopilot-status` for
+  Story Y returns `CONTINUE`, and Story X's status returns `RECOVERY_REQUIRED`.
+
 ## 2. Target behaviour
 
 Registry root: `<git-common-dir>/noteflow-v4-runs/` with `stories/<story-id>.json`
