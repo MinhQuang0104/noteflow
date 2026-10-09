@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { spawn, spawnSync } from 'node:child_process'
-import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createV4Fixture } from './v4-architecture-fixture.mjs'
@@ -179,5 +179,49 @@ test('owner takeover still requires an idle pointer and a valid Plan in the clai
     writeFileSync(f.paths.plan, 'invalid Plan')
     assert.equal(cli(f.root, takeover).status, 'INVALID')
     assert.equal(readFileSync(recordPath(f), 'utf8'), bytes)
+  } finally { f.cleanup() }
+})
+
+test('policy-drift compares the pinned commit with main and only reports information', () => {
+  const f = createV4Fixture()
+  try {
+    const policies = ['AGENTS.md', '.agents/routing/task-router.md', '.agents/skills/v4-story-runner/SKILL.md', '.agents/policies/orchestration-v3.md']
+    for (const relative of policies) {
+      mkdirSync(path.dirname(path.join(f.root, relative)), { recursive: true })
+      writeFileSync(path.join(f.root, relative), 'pinned policy\n')
+    }
+    f.git(['add', '--', ...policies])
+    f.git(['commit', '-m', 'seed policies'])
+    const pin = f.git(['rev-parse', 'HEAD'])
+    f.git(['checkout', '-b', 'story-9-1'])
+    assert.equal(cli(f.root, claimArgs(f.root)).code, 0)
+    const bytes = readFileSync(recordPath(f), 'utf8')
+    assert.equal(cli(f.root, ['policy-drift', '9.1']).status, 'NONE')
+    for (const relative of policies) writeFileSync(path.join(f.root, relative), 'new policy\n')
+    f.git(['add', '--', ...policies])
+    f.git(['commit', '-m', 'advance policy'])
+    const latest = f.git(['rev-parse', 'HEAD'])
+    assert.equal(cli(f.root, ['policy-drift', '9.1']).status, 'NONE', 'current Story HEAD must not replace the pinned policy')
+    f.git(['update-ref', 'refs/heads/main', latest])
+    const result = cli(f.root, ['policy-drift', '9.1'])
+    assert.equal(result.code, 0)
+    assert.equal(result.status, 'INFO_DRIFT')
+    assert.deepEqual(result.paths, policies.sort())
+    assert.equal(result.controlPlaneCommit, pin)
+    assert.equal(result.canonicalMain, latest)
+    assert.equal(readFileSync(recordPath(f), 'utf8'), bytes)
+    assert.equal(f.git(['rev-parse', 'HEAD']), latest)
+    assert.deepEqual(f.gitStatus(), [])
+  } finally { f.cleanup() }
+})
+
+test('policy-drift treats paths absent from both policy commits as unchanged', () => {
+  const f = createV4Fixture()
+  try {
+    assert.equal(cli(f.root, claimArgs(f.root)).code, 0)
+    const result = cli(f.root, ['policy-drift', '9.1'])
+    assert.equal(result.code, 0)
+    assert.equal(result.status, 'NONE')
+    assert.deepEqual(result.paths, [])
   } finally { f.cleanup() }
 })

@@ -33,3 +33,4 @@ A Story is complete only with every AC evidenced, recent deterministic checks, i
 ## Checkout safety
 
 Before Story work inspect status, branch, and worktrees. In a linked worktree compare `AGENTS.md`, V3 policy, and `story-development` with canonical main; report stale policy. Never reset, clean, stash, or update ignored policy copies as a proxy for canonical policy.
+For a claimed V4 Auto Story, compare against its pinned `controlPlaneCommit` instead, and report drift from canonical main as information until integration.

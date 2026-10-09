@@ -10,6 +10,15 @@ Load this reference only when the Plan carries an autopilot authorization.
 Each action re-reads the Plan, Git state, and receipts before acting. Chat
 memory is never evidence, including after a context compaction or vendor change.
 
+## Pinned policy
+
+A claimed V4 Auto Story uses the policy at its registry `controlPlaneCommit`.
+Run `node .agents/scripts/story-registry.mjs policy-drift <story-id>` to compare
+`AGENTS.md`, the router, Runner skill and V3 policy with canonical `main`.
+`NONE` means unchanged; report `INFO_DRIFT` and its paths as information, then
+continue under the pinned policy until integration adopts the latest `main`.
+Policy drift does not stop the Story or authorize a policy change in its scope.
+
 ## The verify step
 
 One `verify_slice` step covers verification, review and `record-review`, and

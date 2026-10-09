@@ -11,6 +11,7 @@ const STORY_ID = /^\d+\.\d+$/
 const SHA = /^[0-9a-f]{40,64}$/
 export const REGISTRY_SCHEMA_VERSION = 1
 export const RUN_STATES = new Set(['IMPLEMENTING', 'WAITING_WORKER', 'REVIEWING', 'WAITING_HUMAN', 'BLOCKED', 'INTEGRATING'])
+const POLICY_PATHS = ['AGENTS.md', '.agents/routing/task-router.md', '.agents/skills/v4-story-runner/SKILL.md', '.agents/policies/orchestration-v3.md']
 const planRelative = storyId => `_bmad-output/implementation-artifacts/story-${storyId.replace('.', '-')}-plan.md`
 const failure = (status, reason, extra = {}) => ({ status, reasons: [reason], ...extra })
 const applied = record => ({ status: 'APPLIED', reasons: [], record })
@@ -219,9 +220,30 @@ export function registryStatus(root, now = Date.now()) {
   } catch (error) { return failure('ERROR', error.message) }
 }
 
+export function policyDrift(root, storyId) {
+  try {
+    const loaded = readRegistryRecord(root, storyId)
+    if (loaded.status !== 'READY') return loaded
+    const controlPlaneCommit = loaded.record.controlPlaneCommit
+    git(root, ['cat-file', '-e', `${controlPlaneCommit}^{commit}`])
+    const canonicalMain = git(root, ['rev-parse', '--verify', 'refs/heads/main'])
+    const blob = (commit, relative) => {
+      const result = spawnSync('git', ['--no-optional-locks', 'rev-parse', '--verify', `${commit}:${relative}`], {
+        cwd: root, encoding: 'utf8', windowsHide: true, timeout: 10000
+      })
+      if (result.error || result.status === null) throw new Error('POLICY_BLOB_UNAVAILABLE')
+      if (result.status !== 0) return null
+      return result.stdout.trim()
+    }
+    const paths = POLICY_PATHS.filter(relative => blob(controlPlaneCommit, relative) !== blob(canonicalMain, relative)).sort()
+    return { status: paths.length ? 'INFO_DRIFT' : 'NONE', paths, controlPlaneCommit, canonicalMain }
+  } catch (error) { return failure('ERROR', error.message) }
+}
+
 function parseArguments(argv) {
   const [command, ...tail] = argv
   if (command === 'status') return tail.length === 0 || (tail.length === 1 && tail[0] === '--json') ? { command } : null
+  if (command === 'policy-drift') return tail.length === 1 && STORY_ID.test(tail[0]) ? { command, storyId: tail[0] } : null
   if (!['claim', 'heartbeat', 'release'].includes(command) || !STORY_ID.test(tail[0] ?? '')) return null
   const result = { command, storyId: tail.shift() }
   const names = { '--worktree': 'worktree', '--lead-vendor': 'leadVendor', '--session': 'session', '--orca-run': 'orcaRun', '--lead-terminal': 'leadTerminal', '--agy-terminal': 'agyTerminal', '--generation': 'generation', '--state': 'state' }
@@ -248,6 +270,7 @@ function main() {
   if (args.command === 'claim') return claimStory(root, args.storyId, args)
   if (args.command === 'heartbeat') return heartbeatStory(root, args.storyId, args.generation, args.state)
   if (args.command === 'release') return releaseStory(root, args.storyId, args.generation, args.disposition)
+  if (args.command === 'policy-drift') return policyDrift(root, args.storyId)
   return registryStatus(root)
 }
 
@@ -255,5 +278,5 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
   let result
   try { result = main() } catch (error) { result = failure('ERROR', error.message) }
   process.stdout.write(JSON.stringify(result) + '\n')
-  process.exitCode = exitCodeForStatus(result.status)
+  process.exitCode = ['NONE', 'INFO_DRIFT'].includes(result.status) ? 0 : exitCodeForStatus(result.status)
 }
