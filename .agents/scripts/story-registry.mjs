@@ -40,8 +40,8 @@ export function registryPaths(root, storyId) {
     ...(storyId === undefined ? {} : { record: path.join(directory, 'stories', `${storyId}.json`), lock: path.join(directory, `story-${storyId}.lock`) }) }
 }
 
-function validRecord(record, storyId) {
-  return record && typeof record === 'object' && !Array.isArray(record) && record.schemaVersion === REGISTRY_SCHEMA_VERSION &&
+function validRecordV1(record, storyId) {
+  return record && typeof record === 'object' && !Array.isArray(record) && record.schemaVersion === 1 &&
     STORY_ID.test(record.storyId ?? '') && record.storyId === storyId && Number.isSafeInteger(record.generation) && record.generation > 0 &&
     text(record.worktree) && path.isAbsolute(record.worktree) && typeof record.branch === 'string' && SHA.test(record.controlPlaneCommit ?? '') &&
     ['codex', 'claude'].includes(record.lead?.vendor) && text(record.lead?.sessionId) && timestamp(record.lead?.claimedAt) &&
@@ -54,13 +54,26 @@ function validRecord(record, storyId) {
       record.takeover.previous.generation > 0 && record.takeover.previous.generation < record.generation))
 }
 
+// Readers are version-specific: changing the writer must not change the old reader.
+export const REGISTRY_READERS = Object.freeze({
+  1: (record, storyId) => validRecordV1(record, storyId) ? record : null
+})
+
+function validRecord(record, storyId) {
+  return Object.hasOwn(REGISTRY_READERS, record?.schemaVersion) && Boolean(REGISTRY_READERS[record.schemaVersion](record, storyId))
+}
+
 export function readRegistryRecord(root, storyId) {
   try {
     const file = registryPaths(root, storyId).record
     if (!existsSync(file)) return failure('BLOCKED', 'REGISTRY_CLAIM_REQUIRED')
     let record
     try { record = JSON.parse(readFileSync(file, 'utf8')) } catch { return failure('INVALID', 'REGISTRY_RECORD_INVALID', { path: file }) }
-    if (!validRecord(record, storyId)) return failure('INVALID', 'REGISTRY_RECORD_INVALID', { path: file })
+    if (!record || typeof record !== 'object' || Array.isArray(record) || !Number.isSafeInteger(record.schemaVersion)) {
+      return failure('INVALID', 'REGISTRY_RECORD_INVALID', { path: file })
+    }
+    if (!Object.hasOwn(REGISTRY_READERS, record.schemaVersion)) return failure('INVALID', 'REGISTRY_SCHEMA_UNSUPPORTED', { path: file })
+    if (!REGISTRY_READERS[record.schemaVersion](record, storyId)) return failure('INVALID', 'REGISTRY_RECORD_INVALID', { path: file })
     return { status: 'READY', reasons: [], record }
   } catch (error) { return failure('ERROR', error.message) }
 }

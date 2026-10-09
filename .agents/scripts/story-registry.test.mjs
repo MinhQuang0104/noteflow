@@ -25,6 +25,31 @@ function concurrentCli(root, args) {
   })
 }
 
+test('unsupported registry versions refuse every operation and preserve the record', () => {
+  const f = createV4Fixture()
+  try {
+    assert.equal(cli(f.root, claimArgs(f.root)).status, 'APPLIED')
+    const record = JSON.parse(readFileSync(recordPath(f), 'utf8'))
+    for (const schemaVersion of [2, 99]) {
+      writeFileSync(recordPath(f), JSON.stringify({ ...record, schemaVersion }))
+      const bytes = readFileSync(recordPath(f), 'utf8')
+      const operations = [
+        ['status'], claimArgs(f.root), ['policy-drift', '9.1'],
+        ['claim', '9.1', '--takeover', '--lead-vendor', 'claude', '--session', 'replacement'],
+        ['heartbeat', '9.1', '--generation', '1', '--state', 'REVIEWING'],
+        ...['merged', 'abort', 'orphaned'].map(disposition => ['release', '9.1', '--generation', '1', `--${disposition}`])
+      ]
+      for (const args of operations) {
+        const result = cli(f.root, args)
+        assert.equal(result.status, 'INVALID', args.join(' '))
+        assert.deepEqual(result.reasons, ['REGISTRY_SCHEMA_UNSUPPORTED'])
+        assert.equal(readFileSync(recordPath(f), 'utf8'), bytes)
+      }
+      assert.equal(existsSync(path.join(path.dirname(path.dirname(recordPath(f))), 'aborted')), false)
+    }
+  } finally { f.cleanup() }
+})
+
 test('claim pins HEAD and scope in Git-common runtime without changing Git or pointer', () => {
   const f = createV4Fixture()
   try {
