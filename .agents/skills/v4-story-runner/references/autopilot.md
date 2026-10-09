@@ -61,6 +61,12 @@ For an explicit abort, `--abort` archives the record in `aborted/` and keeps the
 worktree. Only the owner uses `--orphaned`, and only after the worktree is gone.
 P5 provides these registry operations; integration remains the separate P6 lane.
 
+`CONFLICT` `REGISTRY_MUTATION_LOCKED` means another registry write for that
+Story holds `<git-common-dir>/noteflow-v4-runs/story-<story-id>.lock`. Report
+it and stop; never delete the lock yourself. Only the owner removes it, after
+confirming no registry command for that Story is still running and that
+`stories/<story-id>.json` still parses.
+
 Only the owner may replace a Lead:
 
 ```text
@@ -141,6 +147,7 @@ prefix_rule(pattern=["node", ".agents/scripts/check-worker-scope.mjs"], decision
 prefix_rule(pattern=["node", ".agents/scripts/check-story-finalization.mjs"], decision="allow")
 prefix_rule(pattern=["node", ".agents/scripts/check-story-completion.mjs"], decision="allow")
 prefix_rule(pattern=["node", ".agents/scripts/start-story.mjs"], decision="allow")
+prefix_rule(pattern=["node", ".agents/scripts/story-registry.mjs"], decision="allow")
 prefix_rule(pattern=["git", "status"], decision="allow")
 prefix_rule(pattern=["git", "diff"], decision="allow")
 prefix_rule(pattern=["git", "log"], decision="allow")

@@ -27,6 +27,13 @@ test('autopilot allowlist keeps git read-only', () => {
     assert.match(tail, /^"(status|diff|log|show|rev-parse|ls-files|merge-base)"$|^"worktree", "list"$/, tail)
   }
   assert.match(reference, /prefix_rule\(pattern=\["orca", "terminal"\], decision="allow"\)/)
+  assert.match(reference, /prefix_rule\(pattern=\["node", "\.agents\/scripts\/story-registry\.mjs"\], decision="allow"\)/)
+})
+
+test('a held registry mutation lock is reported, never deleted by a Lead', () => {
+  const reference = read('.agents/skills/v4-story-runner/references/autopilot.md')
+  assert.match(reference, /`REGISTRY_MUTATION_LOCKED`[\s\S]{0,200}never delete the lock yourself/)
+  assert.match(reference, /Only the owner removes it/)
 })
 
 test('committed Claude settings equal the documented autopilot allowlist', () => {
