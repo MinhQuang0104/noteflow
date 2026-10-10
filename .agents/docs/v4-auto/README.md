@@ -17,7 +17,7 @@ time. Each phase file is self-contained except for the common rules below.
 | G3 | One Story to Human Gate with a Codex Lead and one with a Claude Lead | **owner** | 3.1 |
 | 4 | `p5-story-registry.md` | implementer | G3 |
 | 5 | `p6-parallel-integration.md` | implementer | 4 |
-| G5 | Two independent Stories in parallel, both merged | **owner** | 5 + owner DB decision (P6 §0) |
+| G5 | Two independent Stories in parallel, both merged (`g5-runbook.md`, sandbox clone) | **owner** | 5 (DB decision recorded in P6 §0) |
 | 6 | `p7-retire-v3-lane.md` | implementer | G5 |
 | opt | `p4-stateless-driver.md` | implementer | G3; run any time after it, only if the owner asks |
 
