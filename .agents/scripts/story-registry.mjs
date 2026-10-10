@@ -6,7 +6,8 @@ import { pathToFileURL } from 'node:url'
 import { frontmatter, validate as validateStoryPlan } from './check-story-plan.mjs'
 import { pointerIdle, storyCheckoutState } from './v4-lifecycle-transaction.mjs'
 import { autopilotStatus, exitCodeForStatus } from './v4-story-runner.mjs'
-import { declaredScope, scopeConflicts } from './story-scope.mjs'
+import { declaredScope, heldHotPaths, scopeConflicts } from './story-scope.mjs'
+import { inspectCompletion } from './check-story-completion.mjs'
 
 const STORY_ID = /^\d+\.\d+$/
 const SHA = /^[0-9a-f]{40,64}$/
@@ -273,7 +274,24 @@ export function registryStatus(root, now = Date.now()) {
         stop = autopilotStatus(record.worktree, record.storyId, git(record.worktree, ['rev-parse', 'HEAD']), record.generation)
       }
       if (record.state === 'WAITING_HUMAN' || stop?.status === 'STOP') flags.push('WAITING_OWNER')
-      records.push({ ...record, currentSlice: plan?.current_slice ?? null, flags, ...(stop?.status === 'STOP' ? { stopReasons: stop.reasons } : {}) })
+      let integrationStatus = record.state === 'INTEGRATING' ? 'INTEGRATING' : null, integrationPaths = []
+      const marker = path.join(locations.directory, 'integration', `${record.storyId}.json`)
+      if (!integrationStatus && record.state === 'BLOCKED' && existsSync(marker)) {
+        try {
+          const attempt = JSON.parse(readFileSync(marker, 'utf8'))
+          if (attempt.storyId === record.storyId && attempt.generation === record.generation && attempt.status === 'MERGE_CONFLICT') {
+            integrationStatus = 'MERGE_CONFLICT'
+            integrationPaths = Array.isArray(attempt.paths) ? attempt.paths : []
+          }
+        } catch { /* an unreadable attempt cannot grant integration readiness */ }
+      }
+      if (!integrationStatus && plan?.lifecycle_snapshot === 'done' &&
+          inspectCompletion(record.worktree, record.storyId, git(record.worktree, ['rev-parse', 'HEAD'])).status === 'READY') {
+        integrationStatus = 'READY_TO_INTEGRATE'
+      }
+      records.push({ ...record, currentSlice: plan?.current_slice ?? null, flags, integrationStatus,
+        hotPaths: heldHotPaths(record.declaredScope), ...(integrationPaths.length ? { integrationPaths } : {}),
+        ...(stop?.status === 'STOP' ? { stopReasons: stop.reasons } : {}) })
     }
     return { status: 'READY', reasons: [], records }
   } catch (error) { return failure('ERROR', error.message) }
