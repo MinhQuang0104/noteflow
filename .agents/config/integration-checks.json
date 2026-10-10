@@ -1,0 +1,7 @@
+{
+  "schema": "integration-checks-v1",
+  "checks": [
+    { "id": "v4", "argv": ["npm", "run", "test:v4"] },
+    { "id": "completion", "argv": ["node", ".agents/scripts/check-story-completion.mjs", "check", "<story-id>", "--expected-head", "<merge-head>"] }
+  ]
+}
