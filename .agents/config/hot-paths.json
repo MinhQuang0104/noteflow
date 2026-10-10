@@ -1,5 +1,6 @@
 {
   "schema": "hot-paths-v1",
+  "resources": ["backend-test-db", "e2e-db"],
   "entries": [
     { "path": "contracts/openapi.yaml", "group": "API contract (paired)", "overridable": true },
     { "path": "frontend/src/api/schema.generated.ts", "group": "API contract (paired)", "overridable": true },

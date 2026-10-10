@@ -6,6 +6,8 @@ import { pathToFileURL } from 'node:url'
 
 import { frontmatter } from './check-story-plan.mjs'
 import { compileActionContext } from './compile-v4-context.mjs'
+import { sliceResources, resourceConflicts } from './story-scope.mjs'
+import { readRegistryRecord, activeRegistryRecords } from './story-registry.mjs'
 
 const SHA = /^[0-9a-f]{40,64}$/i
 const CONTRACT_SCHEMA = 'worker-contract-v1'
@@ -148,7 +150,7 @@ function storySlice(root, storyId, sliceId) {
   const plan = frontmatter(readFileSync(planPath, 'utf8'))
   const slice = plan.slices?.find(item => item?.id === sliceId)
   if (!slice) throw new InvalidContractInput('SLICE_MISSING')
-  return { planPath, slice }
+  return { planPath, plan, slice }
 }
 
 function storyPath(projection) {
@@ -264,15 +266,26 @@ export function buildWorkerContract(root, options) {
   const projection = context.projection
   if (projection.known_scope.file_scope.status !== 'KNOWN') return blocked('SCOPE_UNKNOWN', options)
   if (projection.known_scope.checks.status !== 'KNOWN') return blocked('CHECKS_UNKNOWN', options)
-  const { slice } = storySlice(root, options.storyId, options.sliceId)
+  const { plan, slice } = storySlice(root, options.storyId, options.sliceId)
   if ((slice.executor ?? 'lead') !== 'agy') return blocked('NOT_AGY_SLICE', options)
+  const resources = sliceResources(plan, slice)
+  if (resources.length) {
+    const loaded = readRegistryRecord(root, options.storyId)
+    if (loaded.status !== 'READY') return blocked(loaded.reasons[0], options)
+    if (resources.some(name => !(loaded.record.resources ?? []).includes(name))) return blocked('RESOURCE_UNDECLARED', options)
+    const active = activeRegistryRecords(root)
+    if (active.status !== 'READY') return blocked(active.reasons[0], options)
+    const conflicts = resourceConflicts(options.storyId, resources, active.records)
+    if (conflicts.status !== 'READY') return blocked(conflicts.reasons[0], options)
+  }
 
   const preamblePath = path.resolve(process.cwd(), options.preambleFile)
   const outPath = path.resolve(process.cwd(), options.out)
   const preamble = lf(readFileSync(preamblePath, 'utf8'))
   const template = readFileSync(path.join(root, TEMPLATE_PATH), 'utf8')
   const rendered = renderContract(template, projection, options)
-  const bytes = Buffer.from(`${preamble}\n\n${rendered}`, 'utf8')
+  const resourceText = resources.length ? `\nShared resources held for this dispatch: ${resources.join(', ')}. The Lead retains these reservations until registry release.\n` : ''
+  const bytes = Buffer.from(`${preamble}\n\n${rendered}${resourceText}`, 'utf8')
   mkdirSync(path.dirname(outPath), { recursive: true })
   writeFileSync(outPath, bytes)
   return {
@@ -284,6 +297,7 @@ export function buildWorkerContract(root, options) {
     allow: [...projection.known_scope.file_scope.paths],
     base: options.expectedHead,
     attempt: options.attempt,
+    ...(resources.length ? { resources } : {}),
   }
 }
 

@@ -5,6 +5,7 @@ import { spawnSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
 import { validateSeparatedPlan } from './v4-separated-plan.mjs'
 import { normalizeAllowed } from './check-worker-scope.mjs'
+import { validateResources } from './story-scope.mjs'
 
 // Exit codes: READY=0, RECONCILIATION_REQUIRED=1, STALE=2, INVALID=3, ERROR=4.
 const CODES = { READY: 0, RECONCILIATION_REQUIRED: 1, STALE: 2, INVALID: 3, ERROR: 4 }
@@ -241,6 +242,9 @@ export function validate(root, id) {
   result.nextAction = plan.next_action ?? null
   result.sourceDigest = plan.source?.section_digest ?? null
   result.reasons.push(...validateAutopilot(root, planPath, plan.autopilot))
+  if (plan.resources !== undefined) {
+    try { validateResources(plan.resources) } catch (error) { invalid(error.message) }
+  }
   if (plan.schema_version === 2) {
     const separated = validateSeparatedPlan(root, id, plan, result)
     for (const slice of plan.slices ?? []) separated.reasons.push(...validateSliceExecutionContract(slice), ...validateSliceRisk(slice, plan.risk))

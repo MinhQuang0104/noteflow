@@ -5,6 +5,7 @@ import { spawnSync } from 'node:child_process'
 import test from 'node:test'
 
 import { createV4Fixture } from './v4-architecture-fixture.mjs'
+import { claimStory, registryPaths } from './story-registry.mjs'
 
 const SCRIPT = path.resolve('.agents/scripts/build-worker-contract.mjs')
 const TEMPLATE = readFileSync('.agents/templates/worker-contract.md', 'utf8')
@@ -64,6 +65,34 @@ function buildArgs(fixture, preamble, out, expectedHead) {
     '--preamble-file', preamble,
     '--out', out,
   ]
+}
+
+for (const [command, resource] of [['php artisan test', 'backend-test-db'], ['npx playwright test', 'e2e-db']]) {
+  test(`builder requires and records the automatic ${resource} reservation`, () => {
+    const { fixture, preamble, expectedHead } = agyFixture()
+    try {
+      writeFileSync(fixture.paths.plan, readFileSync(fixture.paths.plan, 'utf8').replace('node --test src/a.test.js', command))
+      const out = path.join(fixture.root, '.orca-contract', 'contract.md')
+      const args = buildArgs(fixture, preamble, out, expectedHead)
+      const refused = run(fixture, args)
+      assert.equal(refused.json.status, 'BLOCKED', JSON.stringify(refused.json))
+      assert.deepEqual(refused.json.reasons, ['REGISTRY_CLAIM_REQUIRED'])
+      assert.equal(claimStory(fixture.root, '9.1', { worktree: fixture.root, leadVendor: 'codex', session: 'builder' }).status, 'APPLIED')
+      const result = run(fixture, args)
+      assert.equal(result.json.status, 'READY', JSON.stringify(result.json))
+      assert.deepEqual(result.json.resources, [resource])
+      assert.match(readFileSync(out, 'utf8'), new RegExp(`Shared resources held for this dispatch: ${resource}`))
+      const bytes = readFileSync(out, 'utf8'), locations = registryPaths(fixture.root, '9.1')
+      const record = JSON.parse(readFileSync(locations.record, 'utf8'))
+      writeFileSync(locations.record, JSON.stringify({ ...record, resources: [] }))
+      assert.deepEqual(run(fixture, args).json.reasons, ['RESOURCE_UNDECLARED'])
+      writeFileSync(locations.record, JSON.stringify(record))
+      writeFileSync(registryPaths(fixture.root, '9.2').record, JSON.stringify({ ...record, storyId: '9.2',
+        worktree: path.join(fixture.root, 'other'), declaredScope: ['other/'] }))
+      assert.deepEqual(run(fixture, args).json.reasons, ['RESOURCE_CONFLICT'])
+      assert.equal(readFileSync(out, 'utf8'), bytes)
+    } finally { fixture.cleanup() }
+  })
 }
 
 test('builder emits a deterministic AGY contract from projected context', () => {

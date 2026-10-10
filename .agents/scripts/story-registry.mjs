@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url'
 import { frontmatter, validate as validateStoryPlan } from './check-story-plan.mjs'
 import { pointerIdle, storyCheckoutState } from './v4-lifecycle-transaction.mjs'
 import { autopilotStatus, exitCodeForStatus } from './v4-story-runner.mjs'
-import { declaredScope, heldHotPaths, scopeConflicts } from './story-scope.mjs'
+import { declaredScope, declaredResources, heldHotPaths, resourceConflicts, scopeConflicts } from './story-scope.mjs'
 import { inspectCompletion } from './check-story-completion.mjs'
 
 const STORY_ID = /^\d+\.\d+$/
@@ -60,7 +60,8 @@ function validRecordV1(record, storyId) {
 export const REGISTRY_READERS = Object.freeze({
   1: (record, storyId) => validRecordV1(record, storyId) ? record : null,
   2: (record, storyId) => validRecordV1({ ...record, schemaVersion: 1, overlapOverride: null }, storyId) &&
-    record?.schemaVersion === 2 && (record.overlapOverride === null ||
+    record?.schemaVersion === 2 && (record.resources === undefined || (Array.isArray(record.resources) &&
+      record.resources.every(text) && new Set(record.resources).size === record.resources.length)) && (record.overlapOverride === null ||
       (text(record.overlapOverride?.reason) && timestamp(record.overlapOverride?.at) &&
         Array.isArray(record.overlapOverride?.conflicts) && record.overlapOverride.conflicts.every(item =>
           STORY_ID.test(item.storyId ?? '') && Array.isArray(item.paths) && item.paths.every(text) &&
@@ -199,7 +200,7 @@ export function claimStory(root, storyId, options = {}) {
       branch: git(worktree, ['branch', '--show-current']), controlPlaneCommit: head,
       lead: { vendor: options.leadVendor, sessionId: options.session, claimedAt: now },
       orca: { runId: options.orcaRun ?? null, leadTerminal: options.leadTerminal ?? null, agyTerminal: options.agyTerminal ?? null },
-      state: 'IMPLEMENTING', declaredScope: declaredScope(plan),
+      state: 'IMPLEMENTING', declaredScope: declaredScope(plan), resources: declaredResources(plan),
       overlapOverride: null, heartbeatAt: now, planHead: head }
     if (!validRecord(record, storyId)) return failure('INVALID', 'CLAIM_INPUT_INVALID')
     return withClaimLock(locations, () => {
@@ -209,6 +210,8 @@ export function claimStory(root, storyId, options = {}) {
       }
       const active = activeRegistryRecords(root)
       if (active.status !== 'READY') return active
+      const resources = resourceConflicts(storyId, record.resources, active.records)
+      if (resources.status !== 'READY') return resources
       const conflicts = scopeConflicts(storyId, record.declaredScope, active.records)
       if (text(options.allowOverlap)) record.overlapOverride = { reason: options.allowOverlap, at: now, conflicts: [] }
       if (conflicts.status !== 'READY') {
@@ -220,7 +223,7 @@ export function claimStory(root, storyId, options = {}) {
       writeFileSync(locations.record, `${JSON.stringify(record, null, 2)}\n`, { flag: 'wx' })
       return applied(record)
     })
-  } catch (error) { return failure(error.message === 'SCOPE_UNDECLARED' ? 'BLOCKED' : 'ERROR', error.message) }
+  } catch (error) { return failure(error.message === 'SCOPE_UNDECLARED' ? 'BLOCKED' : error.message === 'RESOURCES_INVALID' ? 'INVALID' : 'ERROR', error.message) }
 }
 
 export function heartbeatStory(root, storyId, generation, state) {

@@ -23,6 +23,23 @@ Load only when the validated current slice declares `executor: agy`.
    `node .agents/scripts/v4-story-runner.mjs run <story-id> --expected-head <sha> --operation prepare --input <payload.json>`;
    then repeat with `--operation checkpoint`.
 
+## Shared database resources
+
+The Plan may declare top-level `resources: [backend-test-db, e2e-db]`, using
+only names in `.agents/config/hot-paths.json`. Claim reserves that list plus
+resources inferred from all slice checks: backend tests (Artisan, PHPUnit,
+Pest, backend test commands or `scripts/local.ps1 test`) add `backend-test-db`;
+E2E checks (Playwright or `scripts/local.ps1 e2e`) add `e2e-db` automatically.
+The contract builder includes the current slice's resources and refuses to
+build unless the Story holds them without another active holder. The
+pre-dispatch `check-slice` repeats the resource check. `RESOURCE_CONFLICT` or
+`RESOURCE_UNDECLARED` stops dispatch; an owner scope-overlap override cannot
+bypass a resource lock. Reservations last until registry release.
+
+Per-worktree databases belong to deferred BMAD Story 1-7. Until it lands,
+these locks serialize checks against shared test databases; retain the locks
+afterwards for any resource that remains shared.
+
 ## Corrections and stops
 
 The correction loop starts from a `REWORK` policy decision with only open `VALID` findings. P2 policy is advisory: it grants no automatic correction, successor execution, or removal of a human stop, and `CHANGES_REQUIRED` alone never authorizes a fix.
