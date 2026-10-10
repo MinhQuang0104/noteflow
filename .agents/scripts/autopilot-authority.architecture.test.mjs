@@ -36,6 +36,19 @@ test('a held registry mutation lock is reported, never deleted by a Lead', () =>
   assert.match(reference, /Only the owner removes it/)
 })
 
+test('the shared claim lock is adjacent to the Story lock and remains owner-only', () => {
+  const reference = read('.agents/skills/v4-story-runner/references/autopilot.md')
+  const storyLock = reference.indexOf('<git-common-dir>/noteflow-v4-runs/story-<story-id>.lock')
+  const scopeLock = reference.indexOf('<git-common-dir>/noteflow-v4-runs/scope.lock')
+  assert.ok(storyLock >= 0 && scopeLock > storyLock && scopeLock - storyLock < 700)
+  const paragraph = reference.slice(scopeLock, reference.indexOf('Only the owner may replace a Lead:', scopeLock))
+  assert.match(paragraph, /claim critical section/)
+  assert.match(paragraph, /held lock yields `REGISTRY_MUTATION_LOCKED`/)
+  assert.match(paragraph, /the Lead reports it and stops/)
+  assert.match(paragraph, /never removes the lock/)
+  assert.match(paragraph, /Only the owner removes it after confirming no claim is running/)
+})
+
 test('committed Claude settings equal the documented autopilot allowlist', () => {
   const raw = relative => readFileSync(new URL(`../../${relative}`, import.meta.url), 'utf8')
   const documented = JSON.parse(/Claude Code `\.claude\/settings\.json`[\s\S]*?```json\s*([\s\S]*?)```/

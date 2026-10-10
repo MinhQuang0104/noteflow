@@ -59,13 +59,18 @@ After merge, release the record with
 `node .agents/scripts/story-registry.mjs release <story-id> --generation <n> --merged`.
 For an explicit abort, `--abort` archives the record in `aborted/` and keeps the
 worktree. Only the owner uses `--orphaned`, and only after the worktree is gone.
-P5 provides these registry operations; integration remains the separate P6 lane.
+The integration command below releases the claim after a successful merge.
 
 `CONFLICT` `REGISTRY_MUTATION_LOCKED` means another registry write for that
 Story holds `<git-common-dir>/noteflow-v4-runs/story-<story-id>.lock`. Report
 it and stop; never delete the lock yourself. Only the owner removes it, after
 confirming no registry command for that Story is still running and that
 `stories/<story-id>.json` still parses.
+
+`<git-common-dir>/noteflow-v4-runs/scope.lock` protects the claim critical
+section across all Stories. A held lock yields `REGISTRY_MUTATION_LOCKED`;
+the Lead reports it and stops, and never removes the lock. Only the owner
+removes it after confirming no claim is running.
 
 Only the owner may replace a Lead:
 
@@ -77,6 +82,43 @@ Takeover increments the generation and records the previous vendor, session
 and generation. It preserves the Story's worktree and pinned policy. The new
 session uses the returned generation, reloads the Plan and current Git state,
 and resumes from `autopilot-status`; the previous session's writes are refused.
+
+## Integration after complete_story
+
+After the owner manually runs `complete_story`, require the Plan's
+`lifecycle_snapshot: done` and a READY completion check. From the owning
+Story worktree, use the held claim's generation:
+
+```text
+node .agents/scripts/integrate-story.mjs integrate <story-id> --generation <n> --canonical <absolute-main-checkout>
+```
+
+The canonical checkout must be clean and on `main`. The command takes
+`<git-common-dir>/noteflow-v4-runs/integration.lock`, creates a scratch
+worktree at the current `main`, and merges the Story branch with `--no-ff` and
+message `merge(story-<id>): integrate`. It never rebases the Story: approval
+and checkpoint SHAs remain intact. The owner-maintained
+`.agents/config/integration-checks.json` initially runs full `npm run test:v4`
+and the Story completion check on that merge. Logs stay under
+`<git-common-dir>/noteflow-v4-runs/integration/`.
+
+Only after all checks pass and generation, Story head and main base still
+match does the command fast-forward the canonical `main` to the tested merge
+commit. It releases the registry claim and removes the scratch worktree and
+its lock. It never pushes. Integration is a first-come retry queue, without
+a daemon; a held lock yields `INTEGRATION_BUSY` and must not be deleted by
+the Lead. Retry after the current integration finishes.
+
+`MERGE_CONFLICT` reports paths, aborts the scratch merge and stops for the
+owner; never resolve conflicts automatically, including lifecycle conflicts.
+Failing checks retain logs and leave main unchanged. Report the failure and
+stop. `MAIN_MOVED` means retry against the new main base. The dashboard shows
+`INTEGRATING`, `MERGE_CONFLICT` or `READY_TO_INTEGRATE` (done with completion
+READY), together with held hot paths and resources.
+
+`start_story` and `complete_story` write only the Story's own lifecycle entry
+on its branch; integration merges those entries into main. `complete_story`,
+owner review and the Human Gate stay manual.
 
 ## Pinned policy
 
@@ -148,6 +190,8 @@ prefix_rule(pattern=["node", ".agents/scripts/check-story-finalization.mjs"], de
 prefix_rule(pattern=["node", ".agents/scripts/check-story-completion.mjs"], decision="allow")
 prefix_rule(pattern=["node", ".agents/scripts/start-story.mjs"], decision="allow")
 prefix_rule(pattern=["node", ".agents/scripts/story-registry.mjs"], decision="allow")
+prefix_rule(pattern=["node", ".agents/scripts/story-scope.mjs"], decision="allow")
+prefix_rule(pattern=["node", ".agents/scripts/integrate-story.mjs"], decision="allow")
 prefix_rule(pattern=["git", "status"], decision="allow")
 prefix_rule(pattern=["git", "diff"], decision="allow")
 prefix_rule(pattern=["git", "log"], decision="allow")

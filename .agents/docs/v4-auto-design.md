@@ -52,7 +52,8 @@ owner opens Story in Orca (Lead terminal + AGY terminal, story worktree)
         CHANGES_REQUIRED (VALID findings) → correction contract, ≤3 attempts
         ambiguity / HIGH / gate failure → stop, ask owner
   → finalize_story → Human Gate (owner, once per Story)
-  → integrate: lock → rebase → full checks → merge → lifecycle write → release
+  → owner complete_story (done)
+  → integrate: lock → scratch merge → full checks → fast-forward main → release
 ```
 
 Successor execution changes from "persist one successor and stop" to "persist
@@ -239,25 +240,46 @@ active Story, current slice, state, waiting-for-owner flags, stale/orphaned.
 | Shared store | `frontend/src/stores/sync.ts` |
 | Environment | `backend/.env.example`, `compose.local.yaml`, `deploy/` |
 | Control plane (never in Story scope, no override) | `AGENTS.md`, `CLAUDE.md`, `.agents/` |
-| Lifecycle (integration step only) | `_bmad-output/implementation-artifacts/sprint-status.yaml` |
+| Story lifecycle (merged at integration) | `_bmad-output/implementation-artifacts/sprint-status.yaml` |
 
 - **Convention:** contract changes go in a Story's first slice and integrate
   early, so later work can run in parallel against the merged contract.
-- **Test isolation:** Stories running backend/E2E checks concurrently need a
-  per-worktree database or schema; until that exists, the claim refuses a
-  second Story whose checks touch the shared dev DB.
+- **Lifecycle:** `start_story` and `complete_story` write the Story's own entry
+  in `sprint-status.yaml` on its branch. Integration merges those entries;
+  any conflict stops for the owner and is never auto-resolved.
+- **Test resources:** optional Plan `resources` use the configured names
+  `backend-test-db` and `e2e-db`. Claim also infers these resources from backend
+  and E2E checks, and refuses another active holder with `RESOURCE_CONFLICT`.
+  AGY dispatch and its contract builder repeat the check; an overlap override
+  cannot bypass resource locks. They remain held until registry release.
+  Per-worktree test databases are the owner's decision, delivered separately
+  by deferred BMAD Story 1-7 (P6 §0). Resource locks serialize shared database
+  checks until it lands and remain available for resources still shared later.
 
 ## 7. Integration and architecture changes (Phase P6)
 
-- **Merge queue:** after the Human Gate the Lead takes the Git-common lock,
-  rebases onto `main`, runs the full product checks and `npm run test:v4`, merges,
-  writes lifecycle (`sprint-status`), then releases. First finished, first
-  merged; later Stories rebase onto the new `main`.
+- **Merge queue:** after manual `complete_story` has made the Story `done`
+  with completion READY, the generation-holding Lead uses
+  `integrate-story.mjs integrate <id> --generation <n> --canonical <path>`.
+  The canonical checkout must be clean and on `main`. Under the Git-common
+  `integration.lock`, a scratch worktree starts at main and merges the Story
+  with `--no-ff`, message `merge(story-<id>): integrate`. The owner-maintained
+  `integration-checks.json` initially runs full `npm run test:v4` and completion
+  on that merge. On success, re-check generation, Story head and main base,
+  fast-forward main to the tested merge, release the claim and remove scratch
+  and lock. Never push. First-come retry queue, no daemon: held lock means
+  `INTEGRATION_BUSY`; a moved main means `STALE` `MAIN_MOVED` and a fresh retry.
+  Conflicts abort the scratch merge and return `MERGE_CONFLICT` with paths for
+  the owner; failed checks keep logs and leave main unchanged.
+- **Approval preservation:** merge, never rebase. Rebase would rewrite the
+  approved commit and checkpoint SHAs, making approval stale. Completion must
+  remain READY at the tested merge commit; lifecycle entries arrive through
+  the Story branch's merge, with no extra lifecycle rewrite at integration.
 - **Pinned control plane (D7):** a Story runs on its `controlPlaneCommit`. A
   newer canonical policy is reported as information, not as a stop.
   `AGENTS.md` "Checkout safety" must be amended accordingly in P5. The Story
-  adopts the new policy only when it rebases at integration, so the merge gate
-  always runs under the latest `main`.
+  adopts the new policy through the tested merge at integration, so the merge
+  gate runs with the latest `main` while preserving approved Story SHAs.
 - **Compatibility:** registry, receipts and Plans carry `schemaVersion`. An
   architecture change that breaks a schema must ship a reader for the old
   version or a migration script, and must not merge while active records use
@@ -274,12 +296,11 @@ Per-phase implementation plans: `.agents/docs/v4-auto/README.md`.
 | P3 | One Lead session drives a Story to the Human Gate; budgets; per-vendor allowlists | One Story completed with Codex Lead and one with Claude Lead |
 | P4 | Optional stateless driver (`--resume` per event) | Separate smoke test; compare reliability with P3 |
 | P5 | Registry + claim/takeover/fencing/status; pinned control plane; `AGENTS.md` changes | Two worktrees cannot claim the same Story; takeover fences the old Lead |
-| P6 | Scope-overlap + hot-path checks; merge queue; DB isolation | Two independent Stories run in parallel and merge cleanly |
+| P6 | Scope-overlap + hot-path checks; tested merge queue; shared test DB resource locks | Two independent Stories run in parallel and merge cleanly |
 | P7 | Retire V3 as a standalone lane; keep its AGY transport as the adapter | Router/`AGENTS.md` shrink measured by `measure-v4-instruction-context` |
 
 ## 9. Open items
 
-- Per-worktree database isolation approach (separate DB vs schema prefix).
 - Exact budgets (slices per run, wall-clock per slice).
 - Whether HIGH slices always need cross-vendor review or only on owner request.
 - Supervised Orca `worker-start` remains broken (`agent_prompt_blocked`);
