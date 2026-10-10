@@ -5,6 +5,7 @@ import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { createV4Fixture } from './v4-architecture-fixture.mjs'
+import { createRegistryFixture } from './registry-test-fixture.mjs'
 import { createCompletionFixture } from './completion-fixture.mjs'
 import { claimStory, assertLeadGeneration, registryPaths } from './story-registry.mjs'
 import { autopilotStatus, recordAutopilot, runV4Story } from './v4-story-runner.mjs'
@@ -20,7 +21,7 @@ const claim = root => claimStory(root, '9.1', { worktree: root, leadVendor: 'cod
 const takeover = root => claimStory(root, '9.1', { takeover: true, leadVendor: 'claude', session: 'replacement' })
 const head = f => f.git(['rev-parse', 'HEAD'])
 function authorizedFixture() {
-  const f = createV4Fixture()
+  const f = createRegistryFixture()
   assert.equal(claim(f.root).status, 'APPLIED')
   assert.equal(recordAutopilot(f.root, '9.1', head(f), { authorization: authority }).status, 'AUTHORIZED')
   return f

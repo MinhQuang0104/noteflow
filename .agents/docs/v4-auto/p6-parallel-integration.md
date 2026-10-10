@@ -65,6 +65,13 @@ New: `.agents/config/hot-paths.json` (schema `hot-paths-v1`), loader in
 
 `story-scope.mjs` + tests; wired into `story-registry.mjs claim` (P5).
 
+**D-P6-a (owner, 2026-10-10):** the consumer fixture failure during T2 was
+an expected consequence of requiring declared scope for claims. The fixture
+correction is approved: `registry-test-fixture.mjs` declares scope for registry
+and claim tests; `v4-architecture-fixture.mjs` remains byte-for-byte unchanged.
+Continuing past the rule-8 stop is an accepted deviation, to be disclosed in
+the phase report. Any further rule-8 trigger must be reported before repairing.
+
 - `overlaps(a, b)`: true when an entry of one equals or is a directory prefix of
   an entry of the other (both directions).
 - Claim: refuse when the new Story's declared scope overlaps any active

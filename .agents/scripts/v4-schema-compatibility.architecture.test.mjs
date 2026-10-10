@@ -5,6 +5,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import * as registry from './story-registry.mjs'
 import { createV4Fixture } from './v4-architecture-fixture.mjs'
+import { createRegistryFixture } from './registry-test-fixture.mjs'
 import { createCompletionFixture } from './completion-fixture.mjs'
 import { frontmatter, validate as readPlan, validateAutopilot } from './check-story-plan.mjs'
 import { readReceipt, receiptDigest } from './check-artifact-contract.mjs'
@@ -28,7 +29,7 @@ function version(value) {
 test('registry writer has a version-keyed reader and retains the v1 reader', () => {
   assert.equal(typeof registry.REGISTRY_READERS?.[registry.REGISTRY_SCHEMA_VERSION], 'function')
   assert.equal(typeof registry.REGISTRY_READERS?.[1], 'function')
-  const f = createV4Fixture()
+  const f = createRegistryFixture()
   try {
     const claimed = registry.claimStory(f.root, '9.1', { worktree: f.root, leadVendor: 'codex', session: 'schema-test' })
     assert.equal(claimed.status, 'APPLIED')

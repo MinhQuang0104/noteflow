@@ -6,10 +6,11 @@ import { pathToFileURL } from 'node:url'
 import { frontmatter, validate as validateStoryPlan } from './check-story-plan.mjs'
 import { pointerIdle, storyCheckoutState } from './v4-lifecycle-transaction.mjs'
 import { autopilotStatus, exitCodeForStatus } from './v4-story-runner.mjs'
+import { declaredScope, scopeConflicts } from './story-scope.mjs'
 
 const STORY_ID = /^\d+\.\d+$/
 const SHA = /^[0-9a-f]{40,64}$/
-export const REGISTRY_SCHEMA_VERSION = 1
+export const REGISTRY_SCHEMA_VERSION = 2
 export const RUN_STATES = new Set(['IMPLEMENTING', 'WAITING_WORKER', 'REVIEWING', 'WAITING_HUMAN', 'BLOCKED', 'INTEGRATING'])
 const POLICY_PATHS = ['AGENTS.md', '.agents/routing/task-router.md', '.agents/skills/v4-story-runner/SKILL.md', '.agents/policies/orchestration-v3.md']
 const planRelative = storyId => `_bmad-output/implementation-artifacts/story-${storyId.replace('.', '-')}-plan.md`
@@ -56,7 +57,13 @@ function validRecordV1(record, storyId) {
 
 // Readers are version-specific: changing the writer must not change the old reader.
 export const REGISTRY_READERS = Object.freeze({
-  1: (record, storyId) => validRecordV1(record, storyId) ? record : null
+  1: (record, storyId) => validRecordV1(record, storyId) ? record : null,
+  2: (record, storyId) => validRecordV1({ ...record, schemaVersion: 1, overlapOverride: null }, storyId) &&
+    record?.schemaVersion === 2 && (record.overlapOverride === null ||
+      (text(record.overlapOverride?.reason) && timestamp(record.overlapOverride?.at) &&
+        Array.isArray(record.overlapOverride?.conflicts) && record.overlapOverride.conflicts.every(item =>
+          STORY_ID.test(item.storyId ?? '') && Array.isArray(item.paths) && item.paths.every(text) &&
+          (item.heldPaths === undefined || (Array.isArray(item.heldPaths) && item.heldPaths.every(text)))))) ? record : null
 })
 
 function validRecord(record, storyId) {
@@ -127,10 +134,40 @@ function compareAndSwap(root, storyId, generation, change) {
   })
 }
 
+// One short common-directory critical section covers checking every claim and
+// creating the new record; per-Story locks alone cannot prevent cross-Story races.
+function withClaimLock(locations, callback) {
+  mkdirSync(locations.directory, { recursive: true })
+  const lock = path.join(locations.directory, 'scope.lock'), deadline = Date.now() + 10000
+  let owned = false
+  try {
+    while (!owned) {
+      try { writeFileSync(lock, `${randomUUID()}\n`, { flag: 'wx' }); owned = true }
+      catch (error) {
+        if (error.code !== 'EEXIST') throw error
+        if (Date.now() >= deadline) return failure('CONFLICT', 'REGISTRY_MUTATION_LOCKED')
+        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 25)
+      }
+    }
+    return callback()
+  } finally { if (owned) unlinkSync(lock) }
+}
+
+export function activeRegistryRecords(root) {
+  const locations = registryPaths(root), records = []
+  for (const name of existsSync(locations.stories) ? readdirSync(locations.stories).filter(name => name.endsWith('.json')).sort() : []) {
+    const loaded = readRegistryRecord(root, name.slice(0, -5))
+    if (loaded.status !== 'READY') return loaded
+    records.push(loaded.record)
+  }
+  return { status: 'READY', reasons: [], records }
+}
+
 /** --takeover is an explicit owner operation; heartbeat age never grants it. */
 export function claimStory(root, storyId, options = {}) {
   try {
-    if (!STORY_ID.test(storyId ?? '') || !['codex', 'claude'].includes(options.leadVendor) || !text(options.session)) return failure('INVALID', 'CLAIM_INPUT_INVALID')
+    if (!STORY_ID.test(storyId ?? '') || !['codex', 'claude'].includes(options.leadVendor) || !text(options.session) ||
+        (options.allowOverlap !== undefined && (!text(options.allowOverlap) || options.takeover))) return failure('INVALID', 'CLAIM_INPUT_INVALID')
     if (options.takeover) {
       const loaded = readRegistryRecord(root, storyId)
       if (loaded.status !== 'READY') return loaded
@@ -161,19 +198,28 @@ export function claimStory(root, storyId, options = {}) {
       branch: git(worktree, ['branch', '--show-current']), controlPlaneCommit: head,
       lead: { vendor: options.leadVendor, sessionId: options.session, claimedAt: now },
       orca: { runId: options.orcaRun ?? null, leadTerminal: options.leadTerminal ?? null, agyTerminal: options.agyTerminal ?? null },
-      state: 'IMPLEMENTING', declaredScope: [...new Set((plan.slices ?? []).flatMap(slice => slice.scope?.paths ?? []))].sort(),
+      state: 'IMPLEMENTING', declaredScope: declaredScope(plan),
       overlapOverride: null, heartbeatAt: now, planHead: head }
     if (!validRecord(record, storyId)) return failure('INVALID', 'CLAIM_INPUT_INVALID')
-    mkdirSync(locations.stories, { recursive: true })
-    try { writeFileSync(locations.record, `${JSON.stringify(record, null, 2)}\n`, { flag: 'wx' }) }
-    catch (error) {
-      if (error.code !== 'EEXIST') throw error
-      const holder = readRegistryRecord(root, storyId)
-      if (holder.status !== 'READY') return holder
-      return failure('CONFLICT', 'STORY_ALREADY_CLAIMED', { holder: holder.record })
-    }
-    return applied(record)
-  } catch (error) { return failure('ERROR', error.message) }
+    return withClaimLock(locations, () => {
+      if (existsSync(locations.record)) {
+        const holder = readRegistryRecord(root, storyId)
+        return holder.status === 'READY' ? failure('CONFLICT', 'STORY_ALREADY_CLAIMED', { holder: holder.record }) : holder
+      }
+      const active = activeRegistryRecords(root)
+      if (active.status !== 'READY') return active
+      const conflicts = scopeConflicts(storyId, record.declaredScope, active.records)
+      if (text(options.allowOverlap)) record.overlapOverride = { reason: options.allowOverlap, at: now, conflicts: [] }
+      if (conflicts.status !== 'READY') {
+        if (!text(options.allowOverlap) || !['SCOPE_OVERLAP', 'HOT_PATH_CONFLICT'].includes(conflicts.reasons[0])) return conflicts
+        record.overlapOverride = { reason: options.allowOverlap, at: now,
+          conflicts: [...conflicts.conflicts, ...(conflicts.hotConflicts ?? [])] }
+      }
+      mkdirSync(locations.stories, { recursive: true })
+      writeFileSync(locations.record, `${JSON.stringify(record, null, 2)}\n`, { flag: 'wx' })
+      return applied(record)
+    })
+  } catch (error) { return failure(error.message === 'SCOPE_UNDECLARED' ? 'BLOCKED' : 'ERROR', error.message) }
 }
 
 export function heartbeatStory(root, storyId, generation, state) {
@@ -259,8 +305,8 @@ function parseArguments(argv) {
   if (command === 'policy-drift') return tail.length === 1 && STORY_ID.test(tail[0]) ? { command, storyId: tail[0] } : null
   if (!['claim', 'heartbeat', 'release'].includes(command) || !STORY_ID.test(tail[0] ?? '')) return null
   const result = { command, storyId: tail.shift() }
-  const names = { '--worktree': 'worktree', '--lead-vendor': 'leadVendor', '--session': 'session', '--orca-run': 'orcaRun', '--lead-terminal': 'leadTerminal', '--agy-terminal': 'agyTerminal', '--generation': 'generation', '--state': 'state' }
-  const allowed = command === 'claim' ? new Set(['worktree', 'leadVendor', 'session', 'orcaRun', 'leadTerminal', 'agyTerminal']) : new Set(command === 'heartbeat' ? ['generation', 'state'] : ['generation'])
+  const names = { '--worktree': 'worktree', '--lead-vendor': 'leadVendor', '--session': 'session', '--orca-run': 'orcaRun', '--lead-terminal': 'leadTerminal', '--agy-terminal': 'agyTerminal', '--generation': 'generation', '--state': 'state', '--allow-overlap': 'allowOverlap' }
+  const allowed = command === 'claim' ? new Set(['worktree', 'leadVendor', 'session', 'orcaRun', 'leadTerminal', 'agyTerminal', 'allowOverlap']) : new Set(command === 'heartbeat' ? ['generation', 'state'] : ['generation'])
   for (let index = 0; index < tail.length; index++) {
     const flag = tail[index], name = names[flag]
     if (command === 'claim' && flag === '--takeover' && !result.takeover) result.takeover = true
@@ -272,7 +318,7 @@ function parseArguments(argv) {
     if (!/^[1-9]\d*$/.test(result.generation) || !Number.isSafeInteger(Number(result.generation))) return null
     result.generation = Number(result.generation)
   }
-  if (result.takeover && ['worktree', 'orcaRun', 'leadTerminal', 'agyTerminal'].some(key => result[key] !== undefined)) return null
+  if (result.takeover && ['worktree', 'orcaRun', 'leadTerminal', 'agyTerminal', 'allowOverlap'].some(key => result[key] !== undefined)) return null
   return result
 }
 

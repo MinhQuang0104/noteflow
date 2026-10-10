@@ -39,3 +39,20 @@ test('loader rejects malformed, unsafe and duplicate normalized hot paths', asyn
     assert.equal(load(file).entries[0].path, 'src/')
   } finally { rmSync(root, { recursive: true, force: true }) }
 })
+
+test('scope overlap respects exact files and directory boundaries in both directions', async () => {
+  const scope = await import(moduleUrl)
+  assert.equal(typeof scope.overlaps, 'function', 'overlap checker must exist')
+  for (const [a, b, expected] of [
+    [['src/a'], ['src/a'], true], [['src/'], ['src/a'], true], [['src/a'], ['src/'], true],
+    [['src/a'], ['src/ab'], false], [['src/'], ['src-other/'], false], [[], ['src/'], false]
+  ]) assert.equal(scope.overlaps(a, b), expected)
+})
+
+test('declared scope refuses unsafe entries and unknown future pending slices', async () => {
+  const { declaredScope } = await import(moduleUrl)
+  for (const paths of [[], [null], ['../outside'], ['src/./'], ['src\\a']]) {
+    assert.throws(() => declaredScope({ slices: [{ status: 'pending', scope: { paths } }] }), /SCOPE_UNDECLARED/)
+  }
+  assert.throws(() => declaredScope({ slices: [{ status: 'pending', scope: { paths: ['src/a'] } }, { status: 'pending' }] }), /SCOPE_UNDECLARED/)
+})

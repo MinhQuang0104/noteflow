@@ -184,6 +184,13 @@ function fixture(kind, options = {}) {
 test('implementation metadata cannot remove or alter autopilot authority', () => {
   const f = fixture('v2')
   try {
+    const declared = '    scope:\n      paths: [src/feature.txt]\n'
+    write(f.root, PLAN, readFileSync(path.join(f.root, PLAN), 'utf8').replace('    depends_on: []', '    depends_on: []\n' + declared.trimEnd()))
+    f.request.plan_template = f.request.plan_template.replace('    depends_on: []', '    depends_on: []\n' + declared.trimEnd())
+    git(f.root, 'add', PLAN)
+    git(f.root, 'commit', '-qm', 'fixture registry scope')
+    f.head = git(f.root, 'rev-parse', 'HEAD')
+    f.request.expected_head = f.head
     assert.equal(claimStory(f.root, '9.1', { worktree: f.root, leadVendor: 'codex', session: 'fixture' }).status, 'APPLIED')
     f.request.lead_generation = 1
     const plan = readFileSync(path.join(f.root, PLAN), 'utf8')

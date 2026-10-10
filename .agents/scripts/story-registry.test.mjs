@@ -4,7 +4,7 @@ import { spawn, spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { createV4Fixture } from './v4-architecture-fixture.mjs'
+import { createRegistryFixture as createV4Fixture } from './registry-test-fixture.mjs'
 
 const CLI = fileURLToPath(new URL('./story-registry.mjs', import.meta.url))
 const claimArgs = (root, session = 'session-1') => ['claim', '9.1', '--worktree', root, '--lead-vendor', 'codex', '--session', session]
@@ -30,7 +30,7 @@ test('unsupported registry versions refuse every operation and preserve the reco
   try {
     assert.equal(cli(f.root, claimArgs(f.root)).status, 'APPLIED')
     const record = JSON.parse(readFileSync(recordPath(f), 'utf8'))
-    for (const schemaVersion of [2, 99]) {
+    for (const schemaVersion of [3, 99]) {
       writeFileSync(recordPath(f), JSON.stringify({ ...record, schemaVersion }))
       const bytes = readFileSync(recordPath(f), 'utf8')
       const operations = [
@@ -59,7 +59,7 @@ test('claim pins HEAD and scope in Git-common runtime without changing Git or po
     assert.equal(result.code, 0)
     assert.equal(result.status, 'APPLIED')
     const record = JSON.parse(readFileSync(recordPath(f), 'utf8'))
-    assert.equal(record.schemaVersion, 1)
+    assert.equal(record.schemaVersion, 2)
     assert.equal(record.storyId, '9.1')
     assert.equal(record.generation, 1)
     assert.equal(record.controlPlaneCommit, head)
@@ -67,7 +67,7 @@ test('claim pins HEAD and scope in Git-common runtime without changing Git or po
     assert.equal(record.worktree, path.resolve(f.root))
     assert.equal(record.lead.sessionId, 'session-1')
     assert.deepEqual(record.orca, { runId: 'run-1', leadTerminal: 'lead-h', agyTerminal: 'agy-h' })
-    assert.deepEqual(record.declaredScope, [])
+    assert.deepEqual(record.declaredScope, ['src/fixture.txt'])
     assert.deepEqual(f.gitStatus(), before)
     assert.equal(readFileSync(f.paths.activeRun, 'utf8'), pointer)
     const conflict = cli(f.root, claimArgs(f.root, 'another-session'))
@@ -183,7 +183,7 @@ test('claim validates global pointer, checkout, Plan and Windows paths with spac
 test('claim stores the union of declared slice scopes', () => {
   const f = createV4Fixture()
   try {
-    const text = readFileSync(f.paths.plan, 'utf8').replace('    status: pending', '    scope:\n      paths: ["src/fixture.txt", "src/"]\n    status: pending')
+    const text = readFileSync(f.paths.plan, 'utf8').replace('paths: [src/fixture.txt]', 'paths: ["src/fixture.txt", "src/"]')
     writeFileSync(f.paths.plan, text)
     const result = cli(f.root, claimArgs(f.root))
     assert.equal(result.code, 0, JSON.stringify(result))

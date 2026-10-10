@@ -8,7 +8,7 @@ Load only when the validated current slice declares `executor: agy`.
    `node .agents/scripts/check-slice-implementation.mjs check <story-id> <slice-id>`.
 2. Compile context and stop unless it is `READY` with known scope/checks:
    `node .agents/scripts/compile-v4-context.mjs check <story-id> --action implement_slice --slice <slice-id> --expected-head <sha>`.
-3. Build the contract in the worker worktree:
+3. Immediately before every AGY dispatch, run `node .agents/scripts/story-scope.mjs check-slice <story-id> <slice-id>` in the claimed Story worktree and require `READY`; a conflict or unknown scope stops dispatch. Build the contract in the worker worktree:
    `node .agents/scripts/build-worker-contract.mjs build <story-id> <slice-id> --expected-head <sha> --attempt <n> --run-id <run-id> --task-id <task-id> --preamble-file <preamble-file> --out <worktree>/.orca-contract/contract.md`.
    Keep its `contract_sha256` and `report_path`; the report path is under gitignored `.agent-state/v4-auto/` and never enters the scope.
 4. Deliver through the V3.2 Antigravity loop operations in `.agents/policies/orchestration-v3.md`: create the terminal, wait for `tui-idle`, context-only dispatch with `--return-preamble`, then send one line instructing AGY to read the contract and wait with `orca orchestration check --wait --types worker_done,escalation,question`.
