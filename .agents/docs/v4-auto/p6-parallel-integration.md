@@ -14,13 +14,17 @@ through a normal BMAD Story, not this lane. Options for the owner: per-worktree
 DB name from an env var, or schema prefix. Until it lands, T5's resource lock
 serializes Stories that need these databases.
 
-**Owner decision (2026-10-09): per-worktree test databases.** A separate BMAD
-Story will make `backend/phpunit.xml` and the E2E helpers read the database name
-from an environment variable (default `noteflow_test`) and add a script that
-creates and migrates a database per worktree. That Story is product work and is
-not part of P6. P6 still implements T5 as written: resource locks stay the
-safety net until that Story is done, and remain valid afterwards for any shared
-resource that is not isolated.
+**Owner decision (2026-10-09, mechanism refined 2026-10-10): per-worktree test
+databases.** BMAD Story 1-7 gives each linked worktree its own Compose test
+project (`noteflow-test-<id>`: own `postgres-test` container, volume and ports)
+and lets `scripts/local.ps1 test` / `e2e` run from linked worktrees. The
+database name stays `noteflow_test`, so the identity guards in
+`backend/phpunit.xml`, `backend/tests/TestCase.php`, the E2E DB helper and
+`Assert-TestIdentity` are not weakened; the canonical checkout keeps
+`noteflow-local` unchanged. That Story is product work and is not part of P6.
+P6 still implements T5 as written: resource locks stay the safety net until that
+Story is done, and remain valid afterwards for any shared resource that is not
+isolated.
 
 ## 1. Facts established from the code (do not re-derive)
 
