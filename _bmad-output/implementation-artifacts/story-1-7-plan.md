@@ -3,7 +3,7 @@ schema_version: 2
 story_id: "1.7"
 story:
   path: _bmad-output/implementation-artifacts/1-7-chay-test-co-lap-cho-tung-worktree.md
-  normative_digest: sha256:898a207847840d1a8e133c3e3358cc13a4cd2ad3c5fc695cb1ef5be7db5d00d1
+  normative_digest: sha256:d1c30ee445e63411f7cfd33a93b8f4fdb068ee6b349940ff5cb4b25cb26270d5
 upstream_epic:
   path: docs/product/epics.md
   section_digest: sha256:56a6a93be6a9310dab4cdaf453ef9e1891a3ffb6404c41ed24d17714ea2a4b3c
@@ -13,11 +13,11 @@ execution_status: ready-for-dev
 planning_approval:
   decision: APPROVED
   scope: planning
-  story_normative_digest: sha256:898a207847840d1a8e133c3e3358cc13a4cd2ad3c5fc695cb1ef5be7db5d00d1
+  story_normative_digest: sha256:d1c30ee445e63411f7cfd33a93b8f4fdb068ee6b349940ff5cb4b25cb26270d5
   approved_at: 2026-10-11
 readiness:
   status: READY
-  story_normative_digest: sha256:898a207847840d1a8e133c3e3358cc13a4cd2ad3c5fc695cb1ef5be7db5d00d1
+  story_normative_digest: sha256:d1c30ee445e63411f7cfd33a93b8f4fdb068ee6b349940ff5cb4b25cb26270d5
   dependency_sprint_keys: []
 current_slice: A
 risk:

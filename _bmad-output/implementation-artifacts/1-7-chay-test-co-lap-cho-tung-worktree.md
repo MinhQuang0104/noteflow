@@ -49,6 +49,7 @@ As a developer chạy nhiều Story song song trong các linked worktree, I want
 - invariant: The canonical checkout's Compose project, names, volumes and ports behave exactly as before.
 - invariant: Destructive cleanup (`test-down`) only ever targets the calling linked worktree's own test project.
 - boundary: The Compose file pins `name:` values for test networks and volumes (`noteflow-local-test`, `noteflow-local-postgres-test-data`, `noteflow-local-backend-test-*`); a linked worktree must not reuse them.
+- boundary: `backend-test` bind-mounts `./backend` read-only and mounts named volumes over `backend/vendor`, `backend/storage` and `backend/bootstrap/cache`; Docker cannot create a missing mount point inside a read-only bind, and a fresh linked worktree has no git-ignored `backend/vendor`. Before starting the test project, the wrapper creates any missing mount-point directory in the calling linked worktree only (attempt 1 failed here, tag `evidence/story-1-7-attempt-1`).
 - boundary: `e2e` runs Playwright on the host, so a linked worktree needs its own `frontend` and `tests/e2e` dependencies installed before `e2e`; document it, do not install automatically.
 <!-- v4:risk:end -->
 
