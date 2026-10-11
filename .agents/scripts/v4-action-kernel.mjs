@@ -67,6 +67,14 @@ const FORBIDDEN_REQUEST_KEYS = new Set([
   'lifecycle_update', 'sprint_update'
 ])
 
+// Plans are committed as LF: under core.autocrlf Git normalizes the committed
+// blob, so a CRLF or mixed-EOL template (a Windows checkout) never matches it.
+function withLfPlanTemplate(request) {
+  return typeof request?.plan_template === 'string' && request.plan_template.includes('\r')
+    ? { ...request, plan_template: request.plan_template.replace(/\r\n?/g, '\n') }
+    : request
+}
+
 function hash(bytes) {
   return `sha256:${createHash('sha256').update(bytes).digest('hex')}`
 }
@@ -931,6 +939,7 @@ function reworkError(error) {
 }
 
 export function prepareRework(root, request = {}) {
+  request = withLfPlanTemplate(request)
   const fence = fenceAdmission(path.resolve(root), request, 'prepare-rework')
   if (fence) return fence
   observeActionStarted(path.resolve(root), request, 'prepare-rework')
@@ -941,6 +950,7 @@ export function prepareRework(root, request = {}) {
 }
 
 export function applyRework(root, request = {}) {
+  request = withLfPlanTemplate(request)
   const fence = fenceAdmission(path.resolve(root), request, 'apply-rework')
   if (fence) return fence
   observeActionStarted(path.resolve(root), request, 'apply-rework')
@@ -1835,6 +1845,7 @@ function recordSliceReviewCore(root, request = {}, reportPolicy = () => {}) {
 }
 
 export function verifySlice(root, request = {}) {
+  request = withLfPlanTemplate(request)
   const fence = fenceAdmission(path.resolve(root), request, 'verify')
   if (fence) return fence
   observeActionStarted(path.resolve(root), request, 'verify')
@@ -1848,6 +1859,7 @@ export function verifySlice(root, request = {}) {
 }
 
 export function recordSliceReview(root, request = {}) {
+  request = withLfPlanTemplate(request)
   const fence = fenceAdmission(path.resolve(root), request, 'record-review')
   if (fence) return fence
   observeActionStarted(path.resolve(root), request, 'record-review')
@@ -1861,6 +1873,7 @@ export function recordSliceReview(root, request = {}) {
 }
 
 export function prepareAction(root, request = {}) {
+  request = withLfPlanTemplate(request)
   try {
     root = path.resolve(root)
     if (request?.action === 'rework_slice') return buildReworkPreview(root, request)
@@ -1931,6 +1944,7 @@ function checkpointImplementationCore(root, request = {}) {
 }
 
 export function checkpointImplementation(root, request = {}) {
+  request = withLfPlanTemplate(request)
   const fence = fenceAdmission(path.resolve(root), request, 'checkpoint')
   if (fence) return fence
   observeActionStarted(path.resolve(root), request, 'checkpoint')
@@ -1990,6 +2004,7 @@ function stagedRecoveryKernelDescriptor(root, request, operation) {
 }
 
 export function prepareStagedRecovery(root, request = {}) {
+  request = withLfPlanTemplate(request)
   try {
     root = path.resolve(root)
     const descriptor = stagedRecoveryKernelDescriptor(root, request, 'prepare-staged-recovery')
@@ -2002,6 +2017,7 @@ export function prepareStagedRecovery(root, request = {}) {
 }
 
 export function applyStagedRecovery(root, request = {}) {
+  request = withLfPlanTemplate(request)
   try {
     root = path.resolve(root)
     const descriptor = stagedRecoveryKernelDescriptor(root, request, 'apply-staged-recovery')

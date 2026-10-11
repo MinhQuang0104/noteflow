@@ -161,7 +161,7 @@ function fixture(kind, options = {}) {
   git(root, 'checkout', '-qb', 'main')
   git(root, 'config', 'user.name', 'V4 Fixture')
   git(root, 'config', 'user.email', 'v4-fixture@example.com')
-  git(root, 'config', 'core.autocrlf', 'false')
+  git(root, 'config', 'core.autocrlf', options.autocrlf ? 'true' : 'false')
   git(root, 'add', '.')
   git(root, 'commit', '-qm', 'fixture baseline')
   const head = git(root, 'rev-parse', 'HEAD')
@@ -381,6 +381,36 @@ test('schema v2 commits implementation then Plan plus receipt', () => {
     assert.equal(receipt.worker, undefined)
     assert.equal(inspectActionTransaction(f.root, prepared.preview.transaction_id).status, 'COMPLETE')
   } finally { f.cleanup() }
+})
+
+test('a CRLF or mixed-EOL plan template commits as LF under core.autocrlf', () => {
+  // Windows checkouts with core.autocrlf=true hand the Lead a CRLF Plan; a
+  // template mixing its CRLF lines with new LF lines once failed with
+  // COMMITTED_METADATA_MISMATCH because Git normalized the committed blob (G5).
+  const f = fixture('v2', { autocrlf: true })
+  try {
+    const lines = f.request.plan_template.split('\n')
+    f.request.plan_template = lines.slice(0, 10).join('\r\n') + '\r\n' + lines.slice(10).join('\n')
+    const prepared = prepareAction(f.root, f.request)
+    assert.equal(prepared.status, 'READY', JSON.stringify(prepared))
+    const result = checkpointImplementation(f.root, checkpointRequest(f, prepared.preview))
+    assert.equal(result.status, 'CHECKPOINTED', JSON.stringify(result))
+    const working = readFileSync(path.join(f.root, PLAN), 'utf8')
+    assert.equal(working.includes('\r'), false)
+    assert.equal(git(f.root, 'show', `${result.metadata_commit}:${PLAN}`), working.trimEnd())
+    assert.equal(git(f.root, 'status', '--porcelain'), '')
+    assert.equal(validateStoryPlan(f.root, '9.1').status, 'READY')
+    assert.equal(inspectActionTransaction(f.root, prepared.preview.transaction_id).status, 'COMPLETE')
+  } finally { f.cleanup() }
+})
+
+test('repository checkouts keep V4 Story artifacts LF', () => {
+  // The kernel fix covers templates; .gitattributes keeps fresh worktree
+  // checkouts LF so Leads never start from a CRLF Plan (G5 F-G5-1).
+  const repository = fileURLToPath(new URL('../..', import.meta.url))
+  for (const file of [PLAN, SPRINT, RECEIPT]) {
+    assert.equal(git(repository, 'check-attr', 'eol', '--', file), `${file}: eol: lf`)
+  }
 })
 
 test('AGY prepare and checkpoint bind worker evidence and the scope gate', () => {
