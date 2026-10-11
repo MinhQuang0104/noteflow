@@ -94,11 +94,11 @@ review, and finish the change. Scope is only one signal: high risk, unclear
 requirements, architectural reach, or coordination between people pushes work
 up a tier even when it is small.
 
-- **Trivial.** The edit is obvious and low-risk: follow V3 execution controls and use no
+- **Trivial.** The edit is obvious and low-risk: follow root `AGENTS.md` risk, retry and Done Gate rules and use no
   BMad skill at all — unless the user asks for BMad, or the change
   would still benefit from explicit planning and review.
 - **One session.** For an approved or ready Story, use `v4-story-runner`.
-  For freeform work, follow V3 execution policy; `bmad-build` remains explicit-only
+  For freeform work, follow root `AGENTS.md`; `bmad-build` remains explicit-only
   and cannot bypass its worker or ownership constraints.
 - **Epic-sized.** One coherent outcome that needs several sessions: run
   `bmad-spec` to pin down the what, tell it to create architecture and/or UX

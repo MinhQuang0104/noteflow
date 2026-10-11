@@ -396,6 +396,8 @@ Owner-approved T1 scope additions were limited to CLAUDE, Runner description/ent
 
 Open question (explicitly deferred): should `bmad/references/help.md:97,101` trivial/freeform "V3 execution controls/policy" guidance be retired in a later phase? Those lines remain unchanged and are outside P7's approved Story-routing scope.
 
+Resolved after P7 (owner request, 2026-10-11): trivial and freeform work in `bmad/references/help.md` now follows root `AGENTS.md` (risk, retry, Done Gate) instead of V3 execution policy; `bmad-build` stays explicit-only.
+
 ## 9. Open items
 
 - Exact budgets (slices per run, wall-clock per slice).

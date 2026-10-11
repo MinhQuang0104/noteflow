@@ -55,6 +55,9 @@ test('Story routing uses explicit V4 actions and preserves the historical owner 
   const startStory = read('.agents/skills/v4-story-runner/actions/start-story.md').replace(/\s+/g, ' ')
   assert.match(startStory, /explicit human request to start a named schema-v2 Story\. /)
   assert.doesNotMatch(startStory, /Story by V4 Lite/)
+  const help = read('.agents/skills/bmad/references/help.md').replace(/\s+/g, ' ')
+  assert.doesNotMatch(help, /V3 execution/)
+  assert.match(help, /For freeform work, follow root `AGENTS\.md`; `bmad-build` remains explicit-only/)
 })
 
 function seedInstructionSources(fixture) {
