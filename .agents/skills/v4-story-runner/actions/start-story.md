@@ -1,7 +1,7 @@
 # `start_story` action
 
 Use this action only for an explicit human request to start a named schema-v2
-Story by V4 Lite. Planning approval, readiness, and this migration work are
+Story. Planning approval, readiness, and this migration work are
 different authorities. A planning approval alone never authorizes `apply`.
 
 ## Preconditions

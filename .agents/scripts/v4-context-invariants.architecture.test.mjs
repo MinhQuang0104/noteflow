@@ -50,6 +50,11 @@ test('Story routing uses explicit V4 actions and preserves the historical owner 
   assert.match(runner, /Stop for the owner on unresolved authority.*exceeded V4 capability/)
   assert.doesNotMatch(runner, /explicit V4 request|Story by V4 Lite|V3\.1 may be recommended/)
   assert.match(read('CLAUDE.md'), /Explicit Story requests use V4 Runner \+ one action/)
+  assert.match(agents, /An explicitly authorized schema-v2 Story uses `start-story\.md`/)
+  assert.doesNotMatch(agents, /by V4 Lite/)
+  const startStory = read('.agents/skills/v4-story-runner/actions/start-story.md').replace(/\s+/g, ' ')
+  assert.match(startStory, /explicit human request to start a named schema-v2 Story\. /)
+  assert.doesNotMatch(startStory, /Story by V4 Lite/)
 })
 
 function seedInstructionSources(fixture) {
