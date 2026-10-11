@@ -2,12 +2,14 @@
   "schema_version": 2,
   "id": "local-test-runtime",
   "purpose": "Story 1.7 slice A: per-worktree test Compose project for scripts/local.ps1.",
-  "scope_boundary": "Proves wrapper decisions and one live backend test run from the verifying checkout; does not prove E2E or concurrent runs.",
+  "scope_boundary": "Proves wrapper decisions, the E2E PHP adapter project targeting and one live backend test run from the verifying checkout; does not prove E2E or concurrent runs.",
   "covered_paths": [
     "compose.local.yaml",
     "scripts/local-runtime.psm1",
     "scripts/local.ps1",
     "scripts/tests/local-runtime.Tests.ps1",
+    "tests/e2e/helpers/php-runtime.ts",
+    "tests/e2e/helpers/php-runtime.test.ts",
     "tests/e2e/playwright.config.ts"
   ],
   "anchor_blobs": {
@@ -15,6 +17,8 @@
     "scripts/local-runtime.psm1": "ad5a4f60be81f170f1d35e6a1cb2d9d05d202584",
     "scripts/local.ps1": "6c1f3028787795182da84e18fa8758cdb7a652d6",
     "scripts/tests/local-runtime.Tests.ps1": "b2f6f1e5081be2f33d546e0ebd56322cd9458f2d",
+    "tests/e2e/helpers/php-runtime.ts": "34c86736ea82fd71878058fe1241c3b19a9178bd",
+    "tests/e2e/helpers/php-runtime.test.ts": "3dd1396547a7b28278098a93da75273dca3212a9",
     "tests/e2e/playwright.config.ts": "9e7fb051e2d7397baf7ae7b733f7717dbaa7a1bc"
   }
 }

@@ -3,7 +3,7 @@ schema_version: 2
 story_id: "1.7"
 story:
   path: _bmad-output/implementation-artifacts/1-7-chay-test-co-lap-cho-tung-worktree.md
-  normative_digest: sha256:d1c30ee445e63411f7cfd33a93b8f4fdb068ee6b349940ff5cb4b25cb26270d5
+  normative_digest: sha256:dd431e6bd23a157b38a4c1fc80fce2d84a9df56fc20a546bdd30a639d5e6d62d
 upstream_epic:
   path: docs/product/epics.md
   section_digest: sha256:56a6a93be6a9310dab4cdaf453ef9e1891a3ffb6404c41ed24d17714ea2a4b3c
@@ -13,11 +13,11 @@ execution_status: ready-for-dev
 planning_approval:
   decision: APPROVED
   scope: planning
-  story_normative_digest: sha256:d1c30ee445e63411f7cfd33a93b8f4fdb068ee6b349940ff5cb4b25cb26270d5
+  story_normative_digest: sha256:dd431e6bd23a157b38a4c1fc80fce2d84a9df56fc20a546bdd30a639d5e6d62d
   approved_at: 2026-10-11
 readiness:
   status: READY
-  story_normative_digest: sha256:d1c30ee445e63411f7cfd33a93b8f4fdb068ee6b349940ff5cb4b25cb26270d5
+  story_normative_digest: sha256:dd431e6bd23a157b38a4c1fc80fce2d84a9df56fc20a546bdd30a639d5e6d62d
   dependency_sprint_keys: []
 current_slice: A
 risk:
@@ -33,12 +33,14 @@ slices:
       level: MEDIUM
       flags: [shared_boundary]
     scope:
-      paths: [compose.local.yaml, scripts/local-runtime.psm1, scripts/local.ps1, scripts/tests/local-runtime.Tests.ps1, tests/e2e/playwright.config.ts]
+      paths: [compose.local.yaml, scripts/local-runtime.psm1, scripts/local.ps1, scripts/tests/local-runtime.Tests.ps1, tests/e2e/helpers/php-runtime.ts, tests/e2e/helpers/php-runtime.test.ts, tests/e2e/playwright.config.ts]
     verification_obligations:
       - Invoke-Pester -Script scripts/tests/local-runtime.Tests.ps1 -EnableExit
+      - node --experimental-strip-types --test tests/e2e/helpers/php-runtime.test.ts
       - powershell.exe -File scripts/local.ps1 test from the Story worktree (per-worktree project, unchanged identity)
       - canonical checkout unchanged - local.ps1 status and the test project name from D:/Workspace/Tu_Hoc/New_Project_My_Note stay noteflow-local
       - AC-6 - run local.ps1 test concurrently from the Story worktree and one disposable detached worktree of the slice checkpoint under D:/Workspace/Tu_Hoc, then test-down and remove it
+      - AC-4 - local.ps1 e2e from the Story worktree resets and seeds only its own test project (php-runtime project name), login works on its frontend port
       - AC-7 - test-down from the Story worktree removes only its own project; test-down from the canonical checkout is refused
       - git diff --exit-code main -- .github/workflows/ci.yml backend/phpunit.xml backend/tests/TestCase.php tests/e2e/helpers/db-helper.php
   - id: B

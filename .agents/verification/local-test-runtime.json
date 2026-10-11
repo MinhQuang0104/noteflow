@@ -26,6 +26,16 @@
       ]
     },
     {
+      "id": "php-runtime",
+      "cwd": ".",
+      "argv": [
+        "node",
+        "--experimental-strip-types",
+        "--test",
+        "tests/e2e/helpers/php-runtime.test.ts"
+      ]
+    },
+    {
       "id": "live-backend-test",
       "cwd": ".",
       "argv": [
