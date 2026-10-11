@@ -741,6 +741,21 @@ function reworkChangedPaths(root, slice) {
   return canonicalPaths(result.stdout.split(/\r?\n/))
 }
 
+// Slices that depend on the reworked slice, directly or transitively, must not
+// have started: a rework replaces the evidence they were built on.
+export function reworkDependents(plan, sliceId) {
+  const dependents = new Set()
+  for (let grew = true; grew;) {
+    grew = false
+    for (const item of plan.slices ?? []) {
+      if (item?.id === sliceId || dependents.has(item?.id)) continue
+      const deps = Array.isArray(item?.depends_on) ? item.depends_on : []
+      if (deps.includes(sliceId) || deps.some(dep => dependents.has(dep))) { dependents.add(item.id); grew = true }
+    }
+  }
+  return (plan.slices ?? []).filter(item => dependents.has(item?.id))
+}
+
 function reworkAttemptSnapshot(slice) {
   return {
     attempt_id: currentAttemptId(slice),
@@ -794,8 +809,7 @@ function validateReworkProjection(root, request, originalPlan, generated, oldSna
   const originalHistory = originalPlan.slices.find(item => item.id === request.slice_id)?.attempt_history ?? []
   if (!sameJson(slice.attempt_history, [...originalHistory, oldSnapshot])) throw new Error('REWORK_HISTORY_APPEND_ONLY_REQUIRED')
   if (!sameJson(slice.current_attempt, newAttempt)) throw new Error('REWORK_ATTEMPT_IDENTITY_MISMATCH')
-  const successor = generated.slices?.find(item => item.id === 'E')
-  if (successor && successor.status !== 'pending') throw new Error('REWORK_SUCCESSOR_ALREADY_STARTED')
+  if (reworkDependents(generated, request.slice_id).some(item => item.status !== 'pending')) throw new Error('REWORK_SUCCESSOR_ALREADY_STARTED')
   const checked = validateStoryPlan(root, request.story_id)
   if (checked.status !== 'READY') throw new Error(`POST_REWORK_PLAN_NOT_READY:${checked.reasons.join(',')}`)
 }
@@ -814,15 +828,14 @@ function validateReworkState(root, request, { template = true } = {}) {
   if (plan.current_slice !== request.slice_id || plan.next_action?.kind !== 'verify_slice' || plan.next_action?.target !== request.slice_id) throw new Error('REWORK_PLAN_ACTION_MISMATCH')
   if (!['checkpointed', 'verified'].includes(slice.status)) throw new Error('REWORK_SLICE_NOT_REWORKABLE')
   if (slice.status === 'reviewed' || slice.review?.verdict === 'APPROVE') throw new Error('REWORK_AFTER_REVIEW_FORBIDDEN')
-  const successor = plan.slices?.find(item => item.id === 'E')
-  if (successor && successor.status !== 'pending') throw new Error('REWORK_SUCCESSOR_ALREADY_STARTED')
+  if (reworkDependents(plan, request.slice_id).some(item => item.status !== 'pending')) throw new Error('REWORK_SUCCESSOR_ALREADY_STARTED')
   if (slice.checkpoint_commit !== request.old_checkpoint_commit) throw new Error('REWORK_OLD_CHECKPOINT_MISMATCH')
   const implementationRef = slice.receipt_refs?.implementation
   if (!implementationRef || implementationRef.digest !== request.old_receipt_digest) throw new Error('REWORK_OLD_RECEIPT_MISMATCH')
   const oldReceipt = readReceipt(root, plan, request.slice_id, 'implementation')
   if (oldReceipt.errors.length) throw new Error(`REWORK_OLD_RECEIPT_INVALID:${oldReceipt.errors.join(',')}`)
   const changedPaths = reworkChangedPaths(root, slice)
-  if (changedPaths.length !== 2) throw new Error('REWORK_EXACT_TWO_PATHS_REQUIRED')
+  if (!changedPaths.length) throw new Error('REWORK_CHECKPOINT_PATHS_REQUIRED')
   if (!Array.isArray(request.rework_paths) || !sameJson(canonicalPaths(request.rework_paths), changedPaths)) throw new Error('REWORK_SCOPE_MISMATCH')
   const findings = normalizedFindings(request.findings)
   const policy = requireAutopilotPolicy(plan, request, 'REWORK')

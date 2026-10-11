@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process'
 
 import { inspectStory, normativeDigest, receiptDigest } from './check-artifact-contract.mjs'
 import { frontmatter, validate as validateStoryPlan } from './check-story-plan.mjs'
-import { applyRework, checkpointImplementation, prepareAction, prepareRework } from './v4-action-kernel.mjs'
+import { applyRework, checkpointImplementation, prepareAction, prepareRework, reworkDependents } from './v4-action-kernel.mjs'
 import { deriveScope, stableDigest } from './check-story-finalization.mjs'
 import { transactionIdentity } from './v4-slice-transaction.mjs'
 import { runV4Story } from './v4-story-runner.mjs'
@@ -61,24 +61,24 @@ function planText(storyDigest, sliceText, nextKind, nextTarget) {
   ].join('\n')
 }
 
-function pendingSlices() {
+function pendingSlices(successor = 'E') {
   return [
     '  - id: D', '    status: pending', '    task_refs: [T-6]', '    depends_on: []',
-    '  - id: E', '    status: pending', '    task_refs: [T-7]', '    depends_on: [D]'
+    `  - id: ${successor}`, '    status: pending', '    task_refs: [T-7]', '    depends_on: [D]'
   ].join('\n')
 }
 
-function checkpointedSlices(baseline, checkpoint, subjectDigest, changedDigest, receiptDigestValue) {
+function checkpointedSlices(baseline, checkpoint, subjectDigest, changedDigest, receiptDigestValue, successor = 'E') {
   return [
     '  - id: D', '    status: checkpointed', '    task_refs: [T-6]', '    depends_on: []',
     `    baseline_commit: ${baseline}`, `    checkpoint_commit: ${checkpoint}`,
     `    subject_digest: ${subjectDigest}`, `    changed_paths_sha256: ${changedDigest}`,
     '    receipt_refs:', '      implementation:', `        path: ${OLD_RECEIPT}`, `        digest: ${receiptDigestValue}`,
-    '  - id: E', '    status: pending', '    task_refs: [T-7]', '    depends_on: [D]'
+    `  - id: ${successor}`, '    status: pending', '    task_refs: [T-7]', '    depends_on: [D]'
   ].join('\n')
 }
 
-function reworkSlices(f) {
+function reworkSlices(f, successor = 'E') {
   const history = [
     '    attempt_history:', '      - attempt_id: 1', '        status: checkpointed',
     `        baseline_commit: ${f.baseline}`, `        checkpoint_commit: ${f.checkpoint}`,
@@ -93,11 +93,11 @@ function reworkSlices(f) {
   ]
   return [
     '  - id: D', '    status: pending', '    task_refs: [T-6]', '    depends_on: []', ...history, ...current,
-    '  - id: E', '    status: pending', '    task_refs: [T-7]', '    depends_on: [D]'
+    `  - id: ${successor}`, '    status: pending', '    task_refs: [T-7]', '    depends_on: [D]'
   ].join('\n')
 }
 
-function fixture() {
+function fixture({ successor = 'E', extraPaths = [] } = {}) {
   const root = mkdtempSync(path.join(tmpdir(), 'v4-rework-'))
   const cleanup = () => rmSync(root, { recursive: true, force: true })
   const files = {
@@ -107,12 +107,13 @@ function fixture() {
     '.agent-state/active-run.json': JSON.stringify({ schemaVersion: 1, activeRunId: null, storyId: null, status: 'IDLE' }) + '\n',
     'src/sync.ts': 'old sync\n', 'src/sync.spec.ts': 'old test\n', 'src/untouched.txt': 'untouched\n'
   }
+  for (const extra of extraPaths) files[extra] = 'old extra\n'
   for (const [file, value] of Object.entries(files)) write(root, file, value)
   const story = storySource()
   const storyDigest = normativeDigest(inspectStory(story))
   write(root, STORY, story)
   write(root, SPRINT, 'development_status:\n  9-1-fixture: in-progress\n')
-  write(root, PLAN, planText(storyDigest, pendingSlices(), 'implement_slice', 'D'))
+  write(root, PLAN, planText(storyDigest, pendingSlices(successor), 'implement_slice', 'D'))
   git(root, 'init', '-q')
   git(root, 'checkout', '-qb', 'main')
   git(root, 'config', 'user.name', 'V4 Rework Fixture')
@@ -124,7 +125,8 @@ function fixture() {
 
   write(root, 'src/sync.ts', 'old implementation\n')
   write(root, 'src/sync.spec.ts', 'old implementation test\n')
-  git(root, 'add', '--', 'src/sync.ts', 'src/sync.spec.ts')
+  for (const extra of extraPaths) write(root, extra, 'new extra\n')
+  git(root, 'add', '--', 'src/sync.ts', 'src/sync.spec.ts', ...extraPaths)
   git(root, 'commit', '-qm', 'fixture D implementation')
   const checkpoint = git(root, 'rev-parse', 'HEAD')
   const changedPaths = git(root, 'diff', '--name-only', '--diff-filter=ACDMRTUXB', `${baseline}..${checkpoint}`).split(/\r?\n/).filter(Boolean)
@@ -137,12 +139,12 @@ function fixture() {
     commands: [{ command: 'fixture D', exit_code: 0, tool: 'fixture', environment: 'node-test' }]
   }
   const oldReceiptDigest = receiptDigest(oldReceipt)
-  write(root, PLAN, planText(storyDigest, checkpointedSlices(baseline, checkpoint, subjectDigest, changedDigest, oldReceiptDigest), 'verify_slice', 'D'))
+  write(root, PLAN, planText(storyDigest, checkpointedSlices(baseline, checkpoint, subjectDigest, changedDigest, oldReceiptDigest, successor), 'verify_slice', 'D'))
   write(root, OLD_RECEIPT, `${JSON.stringify(oldReceipt, null, 2)}\n`)
   git(root, 'add', '--', PLAN, OLD_RECEIPT)
   git(root, 'commit', '-qm', 'fixture D metadata')
   const head = git(root, 'rev-parse', 'HEAD')
-  const reworkTemplate = planText(storyDigest, reworkSlices({ baseline, checkpoint, subjectDigest, changedDigest, oldReceiptDigest }), 'implement_slice', 'D')
+  const reworkTemplate = planText(storyDigest, reworkSlices({ baseline, checkpoint, subjectDigest, changedDigest, oldReceiptDigest }, successor), 'implement_slice', 'D')
   const request = {
     action: 'rework_slice', operation: 'prepare-rework', story_id: '9.1', slice_id: 'D', expected_head: head,
     transaction_id: 'fixture-rework-attempt-2', maintenance_authorization: 'V4_LITE_REWORK',
@@ -409,4 +411,39 @@ test('finalization scope includes the original implementation attempt', () => {
       { slice_id: 'D', attempt_id: 2, checkpoint_commit: newCheckpoint }
     ]), JSON.stringify({ scope, result }))
   } finally { f.cleanup() }
+})
+
+test('rework accepts a checkpoint of any size and binds its exact paths (Story 1.7 F-17-2)', () => {
+  const f = fixture({ extraPaths: ['src/extra-one.ts', 'src/extra-two.ts', 'src/extra-three.ts'] })
+  try {
+    assert.equal(f.changedPaths.length, 5)
+    const partial = prepareRework(f.root, { ...f.request, rework_paths: f.changedPaths.slice(1) })
+    assert.notEqual(partial.status, 'READY', JSON.stringify(partial))
+    assert.deepEqual(partial.reasons, ['REWORK_SCOPE_MISMATCH'])
+    const prepared = prepareRework(f.root, f.request)
+    assert.equal(prepared.status, 'READY', JSON.stringify(prepared))
+    assert.deepEqual(prepared.preview.rework_paths, [...f.changedPaths].sort())
+    const result = applyRequest(f, prepared.preview)
+    assert.equal(result.status, 'APPLIED', JSON.stringify(result))
+    const plan = frontmatter(readFileSync(path.join(f.root, PLAN), 'utf8'))
+    assert.equal(plan.slices.find(item => item.id === 'D').current_attempt.attempt_id, 2)
+  } finally { f.cleanup() }
+})
+
+test('rework finds dependent slices by depends_on, not by the slice name E', () => {
+  const f = fixture({ successor: 'B' })
+  try {
+    const prepared = prepareRework(f.root, f.request)
+    assert.equal(prepared.status, 'READY', JSON.stringify(prepared))
+    assert.equal(applyRequest(f, prepared.preview).status, 'APPLIED')
+    const plan = frontmatter(readFileSync(path.join(f.root, PLAN), 'utf8'))
+    assert.equal(plan.slices.find(item => item.id === 'B').status, 'pending')
+  } finally { f.cleanup() }
+  const plan = { slices: [
+    { id: 'A', depends_on: [] }, { id: 'B', depends_on: ['A'] }, { id: 'C', depends_on: ['B'] },
+    { id: 'D', depends_on: [] }, { id: 'E', depends_on: ['D'] }
+  ] }
+  assert.deepEqual(reworkDependents(plan, 'A').map(item => item.id), ['B', 'C'])
+  assert.deepEqual(reworkDependents(plan, 'D').map(item => item.id), ['E'])
+  assert.deepEqual(reworkDependents(plan, 'C').map(item => item.id), [])
 })
