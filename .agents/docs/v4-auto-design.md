@@ -299,6 +299,103 @@ Per-phase implementation plans: `.agents/docs/v4-auto/README.md`.
 | P6 | Scope-overlap + hot-path checks; tested merge queue; shared test DB resource locks | Two independent Stories run in parallel and merge cleanly |
 | P7 | Retire V3 as a standalone lane; keep its AGY transport as the adapter | Router/`AGENTS.md` shrink measured by `measure-v4-instruction-context` |
 
+### P7 completion report (2026-10-11)
+
+Explicit Story requests now use V4, with or without owner-authorized autopilot. The V3.2 transport recipe is a lazy V4 reference, copied unchanged apart from its trailing section separator; the historical policy points to it. `story-development` is deprecated with a V4 pointer and its historical body retained. Historical V3 state remains readable, and a non-`IDLE` pointer stops for the owner. Plan validation, freshness, exact scope, two-commit durability, recovery, review escalation, exact-scope Human Gate, autopilot limits and disabled automatic V3 fallback are preserved.
+
+Commits: T2 `56bf73e` (transport), T3 `1d14528` (routing), T4 documentation (this commit). All are attributed only to Codex (GPT-6). Start-of-phase rebase onto `main` was a no-op. Canonical pointer reads were `IDLE`; no canonical checkout writes, product edits, live runtime, merge, push or delegated review occurred.
+
+| Gate | Node total | Passed | Existing skip | Failed | Python tests / subtests passed |
+|---|---:|---:|---:|---:|---:|
+| Baseline `81fa46f` | 797 | 796 | 1 | 0 | 46 / 46 |
+| T2 final | 798 | 797 | 1 | 0 | 46 / 46 |
+| T3 | 799 | 798 | 1 | 0 | 46 / 46 |
+| T4 final | 799 | 798 | 1 | 0 | 46 / 46 |
+
+Each task ran the full `npm run test:v4` and `D:/Tools/Python314/python.exe -m pytest -q _bmad/scripts/tests/test_agent_architecture.py`. New policy tests were first observed failing against the old policy, then green after the bounded changes. T2's first full green run was followed by an EOF-blank diff-check failure before commit; removing only the section separator blank and rerunning the full suite gave the T2 final gate above.
+
+#### Comparable instruction measurement
+
+Before: `81fa46f2ffea60ab5a511b3dbdb4ab8a30a6a6fe`. After: `1d145283ec9b403bc6fc15ae0c99d26c829798cd`. Both calls used the existing read-only `measureInstructionPair` API from `.agents/scripts/measure-v4-instruction-context.mjs`, `evidenceRoot: null`, the unchanged `normal-action-instruction-source-v1` basis and `v4-lite-normal-action` profile, with status `MEASURED` and action coverage `COMPLETE`. These are raw Git blob bytes, not working-tree CRLF sizes. T4 changes only phase documentation, so its selected instruction blobs are identical to the after revision.
+
+| Entry file / measured profile | Before bytes | After bytes | Delta |
+|---|---:|---:|---:|
+| `AGENTS.md` | 4451 | 4326 | -125 |
+| `CLAUDE.md` | 229 | 218 | -11 |
+| `.agents/routing/task-router.md` | 1870 | 1826 | -44 |
+| `.agents/skills/v4-story-runner/SKILL.md` | 5655 | 5544 | -111 |
+| Four entry files combined | 12205 | 11914 | -291 |
+| `implement_slice` required instruction bytes | 59271 | 58948 | -323 |
+| `verify_slice` required instruction bytes | 59594 | 59271 | -323 |
+| Projection bytes (both actions) | 0 | 0 | 0 |
+
+The extra profile reduction comes from `.agents/context/control-plane.md` (745 to 713 bytes, -32). No action document grew or changed. No token tooling was run, as the owner requested bytes only.
+
+Basis digest: `sha256:6a6749f33ccc57ca4649e4b9e2afa5d7597c0d7db5fdf1a6823a92af4e069998`. Input digest: `sha256:137d0f801f46439e11c54c78daed5d103f7d2ede7059d5a85a3e2d8502a46454`. No stored instruction-digest fixture needs regeneration. The existing compiler computes source/lazy instruction digests (`compile-v4-context.mjs`), and the measurement API computes Git-blob source bindings. Historical alternatives in the unchanged basis remain comparison inputs. Existing fixture/receipt files were untouched; the full suites verify the default behavior and digest contracts.
+
+#### Assertion replacements and retained checks
+
+All locations below are final file lines. Every replaced assertion has a new-rule check; no assertion was deleted or skipped.
+
+| Python assertion (`_bmad/scripts/tests/test_agent_architecture.py`) | Old check -> final check | Policy sentence followed |
+|---|---|---|
+| 245, T2 | `orca terminal send` in V3 policy -> same string in `references/agy-transport.md` | P7 target: "The AGY transport ... lives in `references/agy-transport.md`, referenced by `agy-executor.md`." |
+| 45, T3 | Approved/ready-for-dev historical skill description -> deprecated description pointing to `v4-story-runner` | P7 T3: "mark deprecated with a one-line pointer to the V4 runner; do not delete it in this phase." |
+| 47, T3 | Legacy build directs approved Stories to `story-development` -> `v4-story-runner` | P7 target: "Story work routes only through V4 (with or without autopilot)." |
+| 50, T3 | BMAD help recommends `story-development` -> `v4-story-runner` | Same Story-only-V4 sentence; owner approved Story-routing help lines. |
+| 64, T3 | Active policy contains `orchestration-v3.md` -> "An explicit Story request uses the V4 Runner" | AGENTS: "An explicit Story request uses the V4 Runner and exactly one action." |
+| 68, T3 | Historical no-external-review sentence in active aggregate -> same sentence in retained historical skill | P7 target: "V3 runtime concepts ... remain readable for any historical run but are no longer a selectable lane." |
+| 77, T3 | AGENTS names V3 policy -> exact historical non-IDLE owner-stop sentence | AGENTS: "A historical V3 run with a non-`IDLE` pointer stops for the owner." |
+| 65, T3 input retarget | Same negative `Codex implements directly` assertion, now on AGENTS/router/V4 Runner | Runner: "Routing/invariant context only; it never executes a Story action." |
+| 66, T3 input retarget | Same negative `Codex performs the implementation` assertion, now on AGENTS/router/V4 Runner | Same Runner routing-only sentence. |
+| 67, T3 input retarget | Same no-mandatory-external-reviewer assertion, now on AGENTS/router/V4 Runner | Existing review contract is preserved: "MEDIUM/HIGH review remains mandatory"; no blanket external-model mandate is introduced. |
+
+The three negative checks keep their original predicates; only their aggregate inputs switch from the historical skill/rubric to the active V4 router/Runner. Historical schema, leases, generations, recovery, reconciliation, scope and Human Gate checks remain.
+
+#### Added Node assertions
+
+All added assertions are in `.agents/scripts/v4-context-invariants.architecture.test.mjs`; existing Node assertions are unchanged. The T2 loop runs fourteen distinct checks (17 added assertions total); T3 adds fourteen (31 total). Each loop member is listed separately.
+
+| Line / assertion | Policy sentence followed |
+|---|---|
+| 13: transport reference exists | P7: AGY transport lives in `references/agy-transport.md`. |
+| 15: executor links new reference | P7: transport is referenced by `agy-executor.md`. |
+| 16: historical policy links new reference | P7 T2: "leave a pointer in `orchestration-v3.md`." |
+| 18 via 32: isolated terminal creation | Transport: "In the isolated worktree, start `agy` with `orca terminal create --worktree <explicit selector>`." |
+| 19 via 32: terminal readiness wait | Transport: "wait `orca terminal wait --for tui-idle`." |
+| 20 via 32: context-only dispatch | Transport: "`--return-preamble` without `--inject`." |
+| 21 via 32: no blind resend | Transport: "Never resend blindly." |
+| 22 via 32: structured message loop | Transport: "Loop `orca orchestration check --wait --types worker_done,escalation,question`; process every message, reply, then acknowledge." |
+| 23 via 32: permissions caveat | Transport: "Orca launches Antigravity with `--dangerously-skip-permissions`." |
+| 24 via 32: worker questions use Orca ask | Transport: "The worker never uses local question UI (`ask_question`); only `orca orchestration ask`." |
+| 25 via 32: bounded liveness threshold | Transport: "After three consecutive empty waits or 15 minutes without a heartbeat or message, read one bounded screen." |
+| 26 via 32: screen cannot complete work | Transport: "Screen output is diagnosis, never completion." |
+| 27 via 32: scope violations require human | Transport: "`HISTORY_REWRITTEN`, `CONTRACT_MODIFIED`, or an out-of-scope delete enter NEEDS_HUMAN with the worktree preserved." |
+| 28 via 32: scope errors cannot pass | Transport: "`INVALID`/`ERROR` are never `PASS`." |
+| 29 via 32: corrections limited to valid findings | Transport: "Correction contracts carry only VALID findings." |
+| 30 via 32: bounded correction attempts | Transport: "At most three correction attempts per Task." |
+| 31 via 32: final Human Gate preserved | Transport: "the loop never approves, merges, integrates or marks a Story done". |
+| 39: explicit Story uses one V4 action | AGENTS: "An explicit Story request uses the V4 Runner and exactly one action." |
+| 40: old selectable V3 lane absent | P7: historical V3 is "no longer a selectable lane". |
+| 41: historical non-IDLE owner stop | AGENTS: "A historical V3 run with a non-`IDLE` pointer stops for the owner." |
+| 42: automatic fallback disabled | AGENTS: "automatic V3 fallback stay disabled". |
+| 43: exact-scope human approval retained | AGENTS: "`HUMAN_GATE` approval for exact scope." |
+| 44: only V3 Human Gate qualifier removed | Owner: "only the `V3` qualifier goes." |
+| 45: compare active entry policies | AGENTS: "compare `AGENTS.md`, `task-router.md`, and `v4-story-runner` with canonical main". |
+| 46: pinned comparison retained | AGENTS: "compare against its pinned `controlPlaneCommit` instead". |
+| 47: router selects V4 for explicit Story | Router: "explicit Story request uses V4 Runner plus one validated action." |
+| 48: no opt-in-dependent V3 fallback | P7: "Story work routes only through V4 (with or without autopilot)." |
+| 49: Runner requires explicit Story request | Runner: "Enter only for an explicit Story request". |
+| 50: unsupported capability stops for owner | Runner: "Stop for the owner on unresolved authority ... exceeded V4 capability". |
+| 51: old trigger qualifier/recommendation absent | Owner: "Unsupported work stops for the owner; no V3.1 recommendation remains." |
+| 52: Claude entry routes explicit Story to V4 | CLAUDE: "Explicit Story requests use V4 Runner + one action". |
+
+#### Decisions, deviations and open question
+
+Owner-approved T1 scope additions were limited to CLAUDE, Runner description/entry/stop, control-plane authority qualifier, BMAD Story-routing help and build description. No other file outside the approved inventory was needed. The owner accepted read-only API measurement instead of the writing CLI and bytes instead of tokens. The transport's trailing separator blank was removed to satisfy `git diff --check`; its instructions otherwise match the original section. No further deviation or rule-8 condition remained.
+
+Open question (explicitly deferred): should `bmad/references/help.md:97,101` trivial/freeform "V3 execution controls/policy" guidance be retired in a later phase? Those lines remain unchanged and are outside P7's approved Story-routing scope.
+
 ## 9. Open items
 
 - Exact budgets (slices per run, wall-clock per slice).
