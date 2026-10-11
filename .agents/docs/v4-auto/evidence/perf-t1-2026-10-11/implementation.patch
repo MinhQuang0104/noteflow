@@ -1,0 +1,2418 @@
+diff --git a/.agents/scripts/check-story-completion-fixture.mjs b/.agents/scripts/check-story-completion-fixture.mjs
+new file mode 100644
+index 0000000..c5513b3
+--- /dev/null
++++ b/.agents/scripts/check-story-completion-fixture.mjs
+@@ -0,0 +1,68 @@
++import assert from 'node:assert/strict'
++import { approvalRecordForSnapshot, doneGateSummaryDigest, inspectCompletion } from './check-story-completion.mjs'
++import { createCompletionFixture, PLAN } from './completion-fixture.mjs'
++
++export const digest = letter => `sha256:${letter.repeat(64)}`
++export const TWO_PATHS = ['src/a.txt', 'src/b.txt']
++
++export function snapshot() {
++  const value = {
++    story_id: '9.1',
++    story_title: 'Fixture completion story',
++    lifecycle: 'review',
++    story_normative_digest: digest('a'),
++    finalization_receipt_digest: digest('b'),
++    done_gate_disposition: 'SATISFIED_WITH_DISCLOSURES',
++    ac_coverage: [{ id: 'AC-1', covered: true, evidence: [] }],
++    canonical_disclosures: [{ slice_id: 'A', applicability: 'APPLICABLE', status: 'INCOMPLETE', complete: false }],
++    implementation_path_count: 2,
++    scope_paths_digest: digest('c'),
++    implementation_commit_set_digest: digest('d'),
++    final_scoped_tree_digest: digest('e'),
++    pending_action: { kind: 'complete_story', target: 'story' },
++    approved_review_head: 'f'.repeat(40)
++  }
++  return { ...value, done_gate_summary_digest: doneGateSummaryDigest(value) }
++}
++
++export function approvalYaml(record) {
++  return [
++    'human_approval:',
++    ...Object.entries(record).map(([key, value]) => `  ${key}: ${typeof value === 'string' ? JSON.stringify(value) : value}`),
++    ''
++  ].join('\n')
++}
++
++export function persistApproval(f, mutate = {}, commit = true) {
++  const gate = inspectCompletion(f.root, '9.1', f.head)
++  const approval = { ...approvalRecordForSnapshot(gate.preview, f.head, '2026-09-26T12:00:00.000Z'), ...mutate }
++  f.write(PLAN, f.readPlan().replace('human_approval: null\n', approvalYaml(approval)))
++  if (commit) {
++    f.git('add', '.')
++    f.git('commit', '-qm', 'fixture Human approval')
++    f.refreshHead()
++  }
++  return approval
++}
++
++export async function completedFixture() {
++  const { runAction } = await import('./v4-story-runner.mjs')
++  const f = createCompletionFixture()
++  const approval = runAction(f.root, '9.1', f.head, {
++    approval: { action: 'approve_exact_scope', disclosures_acknowledged: true, approved_at: '2026-09-26T12:00:00.000Z' }
++  })
++  assert.equal(approval.status, 'APPROVAL_DURABLE_PENDING_COMPLETION', JSON.stringify(approval))
++  const completed = runAction(f.root, '9.1', approval.commit)
++  assert.equal(completed.status, 'DONE', JSON.stringify(completed))
++  f.completion = f.refreshHead()
++  return f
++}
++
++export function integrateUnrelatedWork(f) {
++  f.git('checkout', '-q', '-b', 'integration', f.completion + '~3')
++  f.write('docs/unrelated.md', 'work integrated alongside the Story\n')
++  f.git('add', 'docs/unrelated.md')
++  f.git('commit', '-qm', 'unrelated work')
++  f.git('merge', '-q', '--no-ff', '-m', 'merge Story into integration', f.completion)
++  return f.refreshHead()
++}
+diff --git a/.agents/scripts/check-story-completion.test.mjs b/.agents/scripts/check-story-completion.test.mjs
+index 0426dc5..ca78736 100644
+--- a/.agents/scripts/check-story-completion.test.mjs
++++ b/.agents/scripts/check-story-completion.test.mjs
+@@ -1,36 +1,11 @@
++import { digest, TWO_PATHS, snapshot, persistApproval, completedFixture, integrateUnrelatedWork } from './check-story-completion-fixture.mjs'
+ import test from 'node:test'
+ import assert from 'node:assert/strict'
+ import { rmSync } from 'node:fs'
+ 
+-import {
+-  approvalRecordForSnapshot,
+-  doneGateSummaryDigest,
+-  explicitApprovalInput,
+-  inspectCompletion
+-} from './check-story-completion.mjs'
++import { approvalRecordForSnapshot, explicitApprovalInput, inspectCompletion } from './check-story-completion.mjs'
+ import { createCompletionFixture, PLAN, SPRINT, STORY } from './completion-fixture.mjs'
+ 
+-const digest = letter => `sha256:${letter.repeat(64)}`
+-
+-function snapshot() {
+-  const value = {
+-    story_id: '9.1',
+-    story_title: 'Fixture completion story',
+-    lifecycle: 'review',
+-    story_normative_digest: digest('a'),
+-    finalization_receipt_digest: digest('b'),
+-    done_gate_disposition: 'SATISFIED_WITH_DISCLOSURES',
+-    ac_coverage: [{ id: 'AC-1', covered: true, evidence: [] }],
+-    canonical_disclosures: [{ slice_id: 'A', applicability: 'APPLICABLE', status: 'INCOMPLETE', complete: false }],
+-    implementation_path_count: 2,
+-    scope_paths_digest: digest('c'),
+-    implementation_commit_set_digest: digest('d'),
+-    final_scoped_tree_digest: digest('e'),
+-    pending_action: { kind: 'complete_story', target: 'story' },
+-    approved_review_head: 'f'.repeat(40)
+-  }
+-  return { ...value, done_gate_summary_digest: doneGateSummaryDigest(value) }
+-}
+ 
+ test('structured approval input is explicit and generic continuation is rejected', () => {
+   assert.equal(explicitApprovalInput({ action: 'approve_exact_scope', disclosures_acknowledged: true }), true)
+@@ -70,26 +45,6 @@ test('completion gate API is read-only and exposes the exact preview for a fixtu
+   assert.equal(result.valid, false)
+ })
+ 
+-function approvalYaml(record) {
+-  return [
+-    'human_approval:',
+-    ...Object.entries(record).map(([key, value]) => `  ${key}: ${typeof value === 'string' ? JSON.stringify(value) : value}`),
+-    ''
+-  ].join('\n')
+-}
+-
+-function persistApproval(f, mutate = {}, commit = true) {
+-  const gate = inspectCompletion(f.root, '9.1', f.head)
+-  const approval = { ...approvalRecordForSnapshot(gate.preview, f.head, '2026-09-26T12:00:00.000Z'), ...mutate }
+-  f.write(PLAN, f.readPlan().replace('human_approval: null\n', approvalYaml(approval)))
+-  if (commit) {
+-    f.git('add', '.')
+-    f.git('commit', '-qm', 'fixture Human approval')
+-    f.refreshHead()
+-  }
+-  return approval
+-}
+-
+ test('review without approval is BLOCKED but emits the exact Human Gate preview', () => {
+   const f = createCompletionFixture()
+   try {
+@@ -224,7 +179,6 @@ test('uncommitted product drift after durable approval is stale', () => {
+   }
+ })
+ 
+-const TWO_PATHS = ['src/a.txt', 'src/b.txt']
+ 
+ test('exact-scope multi-path review evidence keeps completion at the Human Gate', () => {
+   const f = createCompletionFixture({ implementationPaths: TWO_PATHS })
+@@ -276,28 +230,6 @@ test('review receipt edited after Plan binding fails closed', () => {
+   }
+ })
+ 
+-async function completedFixture() {
+-  const { runAction } = await import('./v4-story-runner.mjs')
+-  const f = createCompletionFixture()
+-  const approval = runAction(f.root, '9.1', f.head, {
+-    approval: { action: 'approve_exact_scope', disclosures_acknowledged: true, approved_at: '2026-09-26T12:00:00.000Z' }
+-  })
+-  assert.equal(approval.status, 'APPROVAL_DURABLE_PENDING_COMPLETION', JSON.stringify(approval))
+-  const completed = runAction(f.root, '9.1', approval.commit)
+-  assert.equal(completed.status, 'DONE', JSON.stringify(completed))
+-  f.completion = f.refreshHead()
+-  return f
+-}
+-
+-function integrateUnrelatedWork(f) {
+-  f.git('checkout', '-q', '-b', 'integration', f.completion + '~3')
+-  f.write('docs/unrelated.md', 'work integrated alongside the Story\n')
+-  f.git('add', 'docs/unrelated.md')
+-  f.git('commit', '-qm', 'unrelated work')
+-  f.git('merge', '-q', '--no-ff', '-m', 'merge Story into integration', f.completion)
+-  return f.refreshHead()
+-}
+-
+ test('terminal Story stays healthy after an integration merge and is evaluated at its completion commit', async () => {
+   const f = await completedFixture()
+   try {
+diff --git a/.agents/scripts/finalize-story-fixture.mjs b/.agents/scripts/finalize-story-fixture.mjs
+new file mode 100644
+index 0000000..1051bb9
+--- /dev/null
++++ b/.agents/scripts/finalize-story-fixture.mjs
+@@ -0,0 +1,218 @@
++import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs'
++import { tmpdir } from 'node:os'
++import path from 'node:path'
++import { inspectStory, normativeDigest, receiptDigest } from './check-artifact-contract.mjs'
++import { pathListDigest, stableDigest } from './check-story-finalization.mjs'
++import * as finalizer from './finalize-story.mjs'
++import { buildFinalizationPreview } from './finalize-story.mjs'
++
++import { git, write, digest } from './v4-test-helpers.mjs'
++
++export const STORY = 'docs/story-9-1.md'
++export const EPIC = 'docs/product/epics.md'
++export const PLAN = '_bmad-output/implementation-artifacts/story-9-1-plan.md'
++export const SPRINT = '_bmad-output/implementation-artifacts/sprint-status.yaml'
++export const FINALIZATION = '_bmad-output/implementation-artifacts/receipts/story-9-1/finalization.json'
++export const storyText = [
++  '---',
++  'story_id: "9.1"',
++  'title: Fixture finalization story',
++  'status: in-progress',
++  '---',
++  '',
++  '# Story 9.1: Fixture finalization story',
++  '',
++  '## Story',
++  '',
++  '<!-- v4:story:start -->',
++  'As a user, I want a bounded fixture story.',
++  '<!-- v4:story:end -->',
++  '',
++  '## Readiness',
++  '',
++  '<!-- v4:readiness:start -->',
++  '- result: READY',
++  '- dependencies: none',
++  '<!-- v4:readiness:end -->',
++  '',
++  '## Acceptance Criteria',
++  '',
++  '<!-- v4:ac:start -->',
++  '- AC-1: the first behavior is evidenced.',
++  '- AC-2: the second behavior is evidenced.',
++  '<!-- v4:ac:end -->',
++  '',
++  '## Tasks',
++  '',
++  '<!-- v4:tasks:start -->',
++  '- [x] T-1 [AC-1, AC-2]: implement the fixture behavior.',
++  '<!-- v4:tasks:end -->',
++  '',
++  '## References',
++  '',
++  '<!-- v4:references:start -->',
++  '- product: docs/product/epics.md#story-91-fixture-finalization-story',
++  '- architecture: docs/architecture/fixture.md#ad-1',
++  '<!-- v4:references:end -->',
++  '',
++  '## Risk',
++  '',
++  '<!-- v4:risk:start -->',
++  '- classification: MEDIUM',
++  '- invariant: fixture scope remains bounded.',
++  '<!-- v4:risk:end -->',
++  ''
++].join('\n')
++
++export function fixture() {
++  const root = mkdtempSync(path.join(tmpdir(), 'finalize-story-'))
++  const storyDigest = normativeDigest(inspectStory(storyText))
++  const epicSection = '### Story 9.1: Fixture finalization story\n\nDone.\n\n'
++  write(root, STORY, storyText)
++  write(root, EPIC, '# Epic\n\n' + epicSection + '### Story 9.2: Next\n')
++  write(root, 'docs/architecture/fixture.md', '# AD-1\n')
++  write(root, '.agent-state/active-run.json', JSON.stringify({ schemaVersion: 1, activeRunId: null, storyId: null, status: 'IDLE' }))
++  write(root, SPRINT, 'development_status:\n  9-1-fixture: in-progress\n')
++  write(root, 'seed.txt', 'seed\n')
++  write(root, '.gitattributes', '* text=auto\n')
++  git(root, 'init', '-q')
++  git(root, 'config', 'user.email', 'test@example.com')
++  git(root, 'config', 'user.name', 'Test')
++  git(root, 'add', '.')
++  git(root, 'commit', '-qm', 'baseline')
++  const baseline = git(root, 'rev-parse', 'HEAD')
++  write(root, 'src/implementation.txt', 'implementation\n')
++  git(root, 'add', '.')
++  git(root, 'commit', '-qm', 'checkpoint')
++  const checkpoint = git(root, 'rev-parse', 'HEAD')
++  const changedPathsSha256 = pathListDigest(['src/implementation.txt'])
++  const subjectDigest = digest('fixture-subject')
++  const refs = {}
++  for (const kind of ['implementation', 'verification', 'review']) {
++    const receipt = {
++      schema_version: 1,
++      story_id: '9.1',
++      slice_id: 'A',
++      kind,
++      checkpoint_commit: checkpoint,
++      baseline_commit: baseline,
++      subject_digest: subjectDigest,
++      created_from_head: checkpoint,
++      changed_paths_sha256: changedPathsSha256,
++      commands: [{ command: 'fixture check', exit_code: 0, tool: 'fixture', environment: 'node-test' }]
++    }
++    if (kind === 'implementation') receipt.changed_paths = ['src/implementation.txt']
++    if (kind === 'verification') {
++      receipt.changed_paths = ['src/implementation.txt']
++      receipt.focused_checks = [{ id: 'focused', result: 'PASS', exit_code: 0, summary: 'fixture checks passed' }]
++      receipt.canonical = { applicability: 'APPLICABLE', status: 'PASS', complete: true }
++      receipt.progression_eligible = true
++      receipt.ac_evidence = [
++        { id: 'ac-1', ac: 'AC-1', result: 'PASS', summary: 'first behavior evidenced' },
++        { id: 'ac-2', ac: 'AC-2', result: 'PASS', summary: 'second behavior evidenced' }
++      ]
++      receipt.done_gate_disclosure = { required: false, coverage_authority: 'focused checks' }
++    }
++    if (kind === 'review') {
++      receipt.required = true
++      receipt.verdict = 'APPROVE'
++      receipt.findings_total = 0
++      receipt.findings_blocking = 0
++      receipt.reviewed_commit = checkpoint
++      receipt.freshness = { status: 'FRESH_CANDIDATE', reasons: [] }
++      receipt.evidence_refs = [{ path: 'src/implementation.txt', hunk_index: 0, body_digest: digest('implementation hunk') }]
++      receipt.scope_digest = stableDigest({ paths: ['src/implementation.txt'], refs: receipt.evidence_refs })
++      receipt.risk_context_digest = stableDigest({ level: 'MEDIUM' })
++    }
++    const relative = '_bmad-output/implementation-artifacts/receipts/story-9-1/A-' + kind + '.json'
++    write(root, relative, JSON.stringify(receipt, null, 2) + '\n')
++    refs[kind] = { path: relative, digest: receiptDigest(receipt) }
++  }
++  const plan = [
++    '---',
++    'schema_version: 2',
++    'story_id: "9.1"',
++    'story:',
++    '  path: ' + STORY,
++    '  normative_digest: ' + storyDigest,
++    'upstream_epic:',
++    '  path: ' + EPIC,
++    '  section_digest: ' + digest(epicSection),
++    'sprint_key: 9-1-fixture',
++    'lifecycle_snapshot: in-progress',
++    'execution_status: in-progress',
++    'current_slice: A',
++    'risk:',
++    '  level: MEDIUM',
++    'slices:',
++    '  - id: A',
++    '    status: reviewed',
++    '    depends_on: []',
++    '    task_refs: [T-1]',
++    '    baseline_commit: ' + baseline,
++    '    checkpoint_commit: ' + checkpoint,
++    '    subject_digest: ' + subjectDigest,
++    '    changed_paths_sha256: ' + changedPathsSha256,
++    '    receipt_refs:',
++    '      implementation:',
++    '        path: ' + refs.implementation.path,
++    '        digest: ' + refs.implementation.digest,
++    '      verification:',
++    '        path: ' + refs.verification.path,
++    '        digest: ' + refs.verification.digest,
++    '      review:',
++    '        path: ' + refs.review.path,
++    '        digest: ' + refs.review.digest,
++    '    verification:',
++    '      canonical_applicability: APPLICABLE',
++    '      canonical_status: PASS',
++    '      progression_eligible: true',
++    '      done_gate_disclosure_required: false',
++    '    review:',
++    '      required: true',
++    '      verdict: APPROVE',
++    '      reviewed_commit: ' + checkpoint,
++    '      freshness: FRESH_CANDIDATE',
++    'blockers: []',
++    'unresolved_questions: []',
++    'next_action:',
++    '  kind: finalize_story',
++    '  target: story',
++    '---',
++    ''
++  ].join('\n')
++  write(root, PLAN, plan)
++  git(root, 'add', '.')
++  git(root, 'commit', '-qm', 'reviewed fixture')
++  return {
++    root,
++    head: git(root, 'rev-parse', 'HEAD'),
++    storyDigest,
++    expectedPaths: [FINALIZATION, PLAN, SPRINT, STORY],
++    cleanup: () => rmSync(root, { recursive: true, force: true })
++  }
++}
++
++export function candidate(f, crlf = false) {
++  const preview = buildFinalizationPreview(f.root, '9.1', f.head)
++  for (const [relative, bytes] of [
++    [STORY, preview.nextStoryBytes], [PLAN, preview.nextPlanBytes],
++    [SPRINT, preview.nextSprintBytes], [FINALIZATION, JSON.stringify(preview.receipt, null, 2) + '\n']
++  ]) write(f.root, relative, crlf ? bytes.replace(/\r?\n/g, '\r\n') : bytes)
++  return preview
++}
++
++export function preserved(f) {
++  const journals = path.join(f.root, '.git/noteflow-v4-finalization-recovery')
++  return {
++    head: git(f.root, 'rev-parse', 'HEAD'),
++    index: digest(readFileSync(path.join(f.root, '.git/index'))),
++    status: git(f.root, '--no-optional-locks', 'status', '--porcelain=v1', '-uall'),
++    files: f.expectedPaths.map(p => digest(readFileSync(path.join(f.root, p)))),
++    worktree: git(f.root, 'ls-files', '-z').split('\0').filter(Boolean).sort().map(p => [p, digest(readFileSync(path.join(f.root, p)))]),
++    journals: existsSync(journals) ? readdirSync(journals).sort().map(p => [p, digest(readFileSync(path.join(journals, p)))]) : [],
++    index_lock: existsSync(path.join(f.root, '.git/index.lock')) ? digest(readFileSync(path.join(f.root, '.git/index.lock'))) : null,
++    lock: existsSync(path.join(f.root, '.git/v4-finalize-story.lock'))
++      ? readFileSync(path.join(f.root, '.git/v4-finalize-story.lock'), 'utf8') : null
++  }
++}
+diff --git a/.agents/scripts/finalize-story.test.mjs b/.agents/scripts/finalize-story.test.mjs
+index 4972b79..fa5c7f9 100644
+--- a/.agents/scripts/finalize-story.test.mjs
++++ b/.agents/scripts/finalize-story.test.mjs
+@@ -1,15 +1,15 @@
++import { STORY, PLAN, FINALIZATION, fixture, candidate, preserved } from './finalize-story-fixture.mjs'
++import { git, write, digest } from './v4-test-helpers.mjs'
+ import test, { after } from 'node:test'
+ import assert from 'node:assert/strict'
+-import { createHash } from 'node:crypto'
+-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
++import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+ import { tmpdir } from 'node:os'
+ import path from 'node:path'
+-import { spawnSync } from 'node:child_process'
+ import { fileURLToPath, pathToFileURL } from 'node:url'
+ 
+ import { inspectStory, normativeDigest, receiptDigest } from './check-artifact-contract.mjs'
+ import { frontmatter } from './check-story-plan.mjs'
+-import { pathListDigest, stableDigest } from './check-story-finalization.mjs'
++import { stableDigest } from './check-story-finalization.mjs'
+ import * as finalizer from './finalize-story.mjs'
+ import { buildFinalizationPreview, applyFinalization, prepareFinalization } from './finalize-story.mjs'
+ import { lifecyclePaths } from './v4-lifecycle-transaction.mjs'
+@@ -24,206 +24,6 @@ git(executorFixture, 'commit', '-qm', 'committed recovery executor fixture')
+ const recovery = await import(pathToFileURL(path.join(executorFixture, '.agents/scripts/finalization-recovery.mjs')).href)
+ after(() => rmSync(executorFixture, { recursive: true, force: true }))
+ 
+-const STORY = 'docs/story-9-1.md'
+-const EPIC = 'docs/product/epics.md'
+-const PLAN = '_bmad-output/implementation-artifacts/story-9-1-plan.md'
+-const SPRINT = '_bmad-output/implementation-artifacts/sprint-status.yaml'
+-const FINALIZATION = '_bmad-output/implementation-artifacts/receipts/story-9-1/finalization.json'
+-const storyText = [
+-  '---',
+-  'story_id: "9.1"',
+-  'title: Fixture finalization story',
+-  'status: in-progress',
+-  '---',
+-  '',
+-  '# Story 9.1: Fixture finalization story',
+-  '',
+-  '## Story',
+-  '',
+-  '<!-- v4:story:start -->',
+-  'As a user, I want a bounded fixture story.',
+-  '<!-- v4:story:end -->',
+-  '',
+-  '## Readiness',
+-  '',
+-  '<!-- v4:readiness:start -->',
+-  '- result: READY',
+-  '- dependencies: none',
+-  '<!-- v4:readiness:end -->',
+-  '',
+-  '## Acceptance Criteria',
+-  '',
+-  '<!-- v4:ac:start -->',
+-  '- AC-1: the first behavior is evidenced.',
+-  '- AC-2: the second behavior is evidenced.',
+-  '<!-- v4:ac:end -->',
+-  '',
+-  '## Tasks',
+-  '',
+-  '<!-- v4:tasks:start -->',
+-  '- [x] T-1 [AC-1, AC-2]: implement the fixture behavior.',
+-  '<!-- v4:tasks:end -->',
+-  '',
+-  '## References',
+-  '',
+-  '<!-- v4:references:start -->',
+-  '- product: docs/product/epics.md#story-91-fixture-finalization-story',
+-  '- architecture: docs/architecture/fixture.md#ad-1',
+-  '<!-- v4:references:end -->',
+-  '',
+-  '## Risk',
+-  '',
+-  '<!-- v4:risk:start -->',
+-  '- classification: MEDIUM',
+-  '- invariant: fixture scope remains bounded.',
+-  '<!-- v4:risk:end -->',
+-  ''
+-].join('\n')
+-
+-function digest(value) {
+-  return 'sha256:' + createHash('sha256').update(value, 'utf8').digest('hex')
+-}
+-
+-function write(root, relative, value) {
+-  const file = path.join(root, relative)
+-  mkdirSync(path.dirname(file), { recursive: true })
+-  writeFileSync(file, value)
+-}
+-
+-function git(root, ...args) {
+-  const result = spawnSync('git', args, { cwd: root, encoding: 'utf8', windowsHide: true })
+-  assert.equal(result.status, 0, result.stderr)
+-  return result.stdout.trim()
+-}
+-
+-function fixture() {
+-  const root = mkdtempSync(path.join(tmpdir(), 'finalize-story-'))
+-  const storyDigest = normativeDigest(inspectStory(storyText))
+-  const epicSection = '### Story 9.1: Fixture finalization story\n\nDone.\n\n'
+-  write(root, STORY, storyText)
+-  write(root, EPIC, '# Epic\n\n' + epicSection + '### Story 9.2: Next\n')
+-  write(root, 'docs/architecture/fixture.md', '# AD-1\n')
+-  write(root, '.agent-state/active-run.json', JSON.stringify({ schemaVersion: 1, activeRunId: null, storyId: null, status: 'IDLE' }))
+-  write(root, SPRINT, 'development_status:\n  9-1-fixture: in-progress\n')
+-  write(root, 'seed.txt', 'seed\n')
+-  write(root, '.gitattributes', '* text=auto\n')
+-  git(root, 'init', '-q')
+-  git(root, 'config', 'user.email', 'test@example.com')
+-  git(root, 'config', 'user.name', 'Test')
+-  git(root, 'add', '.')
+-  git(root, 'commit', '-qm', 'baseline')
+-  const baseline = git(root, 'rev-parse', 'HEAD')
+-  write(root, 'src/implementation.txt', 'implementation\n')
+-  git(root, 'add', '.')
+-  git(root, 'commit', '-qm', 'checkpoint')
+-  const checkpoint = git(root, 'rev-parse', 'HEAD')
+-  const changedPathsSha256 = pathListDigest(['src/implementation.txt'])
+-  const subjectDigest = digest('fixture-subject')
+-  const refs = {}
+-  for (const kind of ['implementation', 'verification', 'review']) {
+-    const receipt = {
+-      schema_version: 1,
+-      story_id: '9.1',
+-      slice_id: 'A',
+-      kind,
+-      checkpoint_commit: checkpoint,
+-      baseline_commit: baseline,
+-      subject_digest: subjectDigest,
+-      created_from_head: checkpoint,
+-      changed_paths_sha256: changedPathsSha256,
+-      commands: [{ command: 'fixture check', exit_code: 0, tool: 'fixture', environment: 'node-test' }]
+-    }
+-    if (kind === 'implementation') receipt.changed_paths = ['src/implementation.txt']
+-    if (kind === 'verification') {
+-      receipt.changed_paths = ['src/implementation.txt']
+-      receipt.focused_checks = [{ id: 'focused', result: 'PASS', exit_code: 0, summary: 'fixture checks passed' }]
+-      receipt.canonical = { applicability: 'APPLICABLE', status: 'PASS', complete: true }
+-      receipt.progression_eligible = true
+-      receipt.ac_evidence = [
+-        { id: 'ac-1', ac: 'AC-1', result: 'PASS', summary: 'first behavior evidenced' },
+-        { id: 'ac-2', ac: 'AC-2', result: 'PASS', summary: 'second behavior evidenced' }
+-      ]
+-      receipt.done_gate_disclosure = { required: false, coverage_authority: 'focused checks' }
+-    }
+-    if (kind === 'review') {
+-      receipt.required = true
+-      receipt.verdict = 'APPROVE'
+-      receipt.findings_total = 0
+-      receipt.findings_blocking = 0
+-      receipt.reviewed_commit = checkpoint
+-      receipt.freshness = { status: 'FRESH_CANDIDATE', reasons: [] }
+-      receipt.evidence_refs = [{ path: 'src/implementation.txt', hunk_index: 0, body_digest: digest('implementation hunk') }]
+-      receipt.scope_digest = stableDigest({ paths: ['src/implementation.txt'], refs: receipt.evidence_refs })
+-      receipt.risk_context_digest = stableDigest({ level: 'MEDIUM' })
+-    }
+-    const relative = '_bmad-output/implementation-artifacts/receipts/story-9-1/A-' + kind + '.json'
+-    write(root, relative, JSON.stringify(receipt, null, 2) + '\n')
+-    refs[kind] = { path: relative, digest: receiptDigest(receipt) }
+-  }
+-  const plan = [
+-    '---',
+-    'schema_version: 2',
+-    'story_id: "9.1"',
+-    'story:',
+-    '  path: ' + STORY,
+-    '  normative_digest: ' + storyDigest,
+-    'upstream_epic:',
+-    '  path: ' + EPIC,
+-    '  section_digest: ' + digest(epicSection),
+-    'sprint_key: 9-1-fixture',
+-    'lifecycle_snapshot: in-progress',
+-    'execution_status: in-progress',
+-    'current_slice: A',
+-    'risk:',
+-    '  level: MEDIUM',
+-    'slices:',
+-    '  - id: A',
+-    '    status: reviewed',
+-    '    depends_on: []',
+-    '    task_refs: [T-1]',
+-    '    baseline_commit: ' + baseline,
+-    '    checkpoint_commit: ' + checkpoint,
+-    '    subject_digest: ' + subjectDigest,
+-    '    changed_paths_sha256: ' + changedPathsSha256,
+-    '    receipt_refs:',
+-    '      implementation:',
+-    '        path: ' + refs.implementation.path,
+-    '        digest: ' + refs.implementation.digest,
+-    '      verification:',
+-    '        path: ' + refs.verification.path,
+-    '        digest: ' + refs.verification.digest,
+-    '      review:',
+-    '        path: ' + refs.review.path,
+-    '        digest: ' + refs.review.digest,
+-    '    verification:',
+-    '      canonical_applicability: APPLICABLE',
+-    '      canonical_status: PASS',
+-    '      progression_eligible: true',
+-    '      done_gate_disclosure_required: false',
+-    '    review:',
+-    '      required: true',
+-    '      verdict: APPROVE',
+-    '      reviewed_commit: ' + checkpoint,
+-    '      freshness: FRESH_CANDIDATE',
+-    'blockers: []',
+-    'unresolved_questions: []',
+-    'next_action:',
+-    '  kind: finalize_story',
+-    '  target: story',
+-    '---',
+-    ''
+-  ].join('\n')
+-  write(root, PLAN, plan)
+-  git(root, 'add', '.')
+-  git(root, 'commit', '-qm', 'reviewed fixture')
+-  return {
+-    root,
+-    head: git(root, 'rev-parse', 'HEAD'),
+-    storyDigest,
+-    expectedPaths: [FINALIZATION, PLAN, SPRINT, STORY],
+-    cleanup: () => rmSync(root, { recursive: true, force: true })
+-  }
+-}
+ 
+ test('preview preserves normative Story digest and derives File List from helper scope', () => {
+   const f = fixture()
+@@ -342,35 +142,11 @@ test('finalization writes exact paths in one commit and stops at Human Gate', ()
+   }
+ })
+ 
+-function candidate(f, crlf = false) {
+-  const preview = buildFinalizationPreview(f.root, '9.1', f.head)
+-  for (const [relative, bytes] of [
+-    [STORY, preview.nextStoryBytes], [PLAN, preview.nextPlanBytes],
+-    [SPRINT, preview.nextSprintBytes], [FINALIZATION, JSON.stringify(preview.receipt, null, 2) + '\n']
+-  ]) write(f.root, relative, crlf ? bytes.replace(/\r?\n/g, '\r\n') : bytes)
+-  return preview
+-}
+-
+ function request(f) {
+   return { story_id: '9.1', expected_head: f.head, executor_commit: git(executorFixture, 'rev-parse', 'HEAD'),
+     transaction_id: 'fixture-finalization-recovery', maintenance_authorization: 'V4_LITE_FINALIZATION_RECOVERY' }
+ }
+ 
+-function preserved(f) {
+-  const journals = path.join(f.root, '.git/noteflow-v4-finalization-recovery')
+-  return {
+-    head: git(f.root, 'rev-parse', 'HEAD'),
+-    index: digest(readFileSync(path.join(f.root, '.git/index'))),
+-    status: git(f.root, '--no-optional-locks', 'status', '--porcelain=v1', '-uall'),
+-    files: f.expectedPaths.map(p => digest(readFileSync(path.join(f.root, p)))),
+-    worktree: git(f.root, 'ls-files', '-z').split('\0').filter(Boolean).sort().map(p => [p, digest(readFileSync(path.join(f.root, p)))]),
+-    journals: existsSync(journals) ? readdirSync(journals).sort().map(p => [p, digest(readFileSync(path.join(journals, p)))]) : [],
+-    index_lock: existsSync(path.join(f.root, '.git/index.lock')) ? digest(readFileSync(path.join(f.root, '.git/index.lock'))) : null,
+-    lock: existsSync(path.join(f.root, '.git/v4-finalize-story.lock'))
+-      ? readFileSync(path.join(f.root, '.git/v4-finalize-story.lock'), 'utf8') : null
+-  }
+-}
+-
+ test('recovery prepare is read-only, LF/CRLF projection is proven and apply consumes unchanged candidates once', () => {
+   assert.equal(typeof recovery.prepareFinalizationRecovery, 'function')
+   const f = fixture()
+diff --git a/.agents/scripts/v4-action-kernel.test.mjs b/.agents/scripts/v4-action-kernel.test.mjs
+index 0402cf0..31e45d7 100644
+--- a/.agents/scripts/v4-action-kernel.test.mjs
++++ b/.agents/scripts/v4-action-kernel.test.mjs
+@@ -1,27 +1,18 @@
++import { PLAN, STORY, SPRINT, POINTER, RECEIPT, fixture, agyWorker, agyFixture, checkpointRequest, maintenanceExecutor, protectedKernelState } from './v4-kernel-fixture.mjs'
++import { git, write, digest } from './v4-test-helpers.mjs'
+ import test from 'node:test'
+ import assert from 'node:assert/strict'
+-import { createHash } from 'node:crypto'
+-import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+-import { mkdtempSync } from 'node:fs'
+-import { tmpdir } from 'node:os'
++import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+ import path from 'node:path'
+-import { spawnSync } from 'node:child_process'
+-import { fileURLToPath, pathToFileURL } from 'node:url'
++import { fileURLToPath } from 'node:url'
+ 
+-import { inspectStory, normativeDigest, receiptDigest } from './check-artifact-contract.mjs'
++import { receiptDigest } from './check-artifact-contract.mjs'
+ import { frontmatter, validate as validateStoryPlan } from './check-story-plan.mjs'
+ import { checkpointImplementation, inspectActionTransaction, prepareAction } from './v4-action-kernel.mjs'
+ import { transactionIdentity } from './v4-slice-transaction.mjs'
+ import * as kernel from './v4-action-kernel.mjs'
+ import { claimStory } from './story-registry.mjs'
+ 
+-const PLAN = '_bmad-output/implementation-artifacts/story-9-1-plan.md'
+-const STORY = 'docs/story.md'
+-const EPIC = 'docs/product/epics.md'
+-const SPRINT = '_bmad-output/implementation-artifacts/sprint-status.yaml'
+-const POINTER = '.agent-state/active-run.json'
+-const RECEIPT = '_bmad-output/implementation-artifacts/receipts/story-9-1/A-implementation.json'
+-const digest = value => 'sha256:' + createHash('sha256').update(value, 'utf8').digest('hex')
+ 
+ test('effective risk defaults to Story and uses only the requested slice risk', () => {
+   const plan = { risk: { level: 'HIGH', flags: ['security'] }, current_slice: 'A', slices: [
+@@ -40,147 +31,6 @@ test('Plan risk flags become canonical mandatory escalation flags', () => {
+   ])
+ })
+ 
+-function git(root, ...args) {
+-  const result = spawnSync('git', args, { cwd: root, encoding: 'utf8', windowsHide: true })
+-  assert.equal(result.status, 0, result.stderr)
+-  return result.stdout.trim()
+-}
+-
+-function write(root, relative, value) {
+-  const file = path.join(root, relative)
+-  mkdirSync(path.dirname(file), { recursive: true })
+-  writeFileSync(file, value)
+-}
+-
+-function storySource() {
+-  return [
+-    '---', 'story_id: "9.1"', 'title: Fixture story', 'status: in-progress', '---',
+-    '# Fixture story', '',
+-    '<!-- v4:story:start -->', 'A bounded fixture story.', '<!-- v4:story:end -->',
+-    '<!-- v4:ac:start -->', '- AC-1: The fixture implementation is checkpointed.', '<!-- v4:ac:end -->',
+-    '<!-- v4:tasks:start -->', '- [ ] T-1 [AC-1]: Implement the fixture.', '<!-- v4:tasks:end -->',
+-    '<!-- v4:readiness:start -->', '- result: READY', '- dependencies: none', '<!-- v4:readiness:end -->',
+-    '<!-- v4:references:start -->', '- architecture: .agents/docs/v4-action-kernel.md#kernel', '<!-- v4:references:end -->',
+-    '<!-- v4:risk:start -->', '- level: HIGH', '- invariants: exact checkpoint and recovery', '<!-- v4:risk:end -->',
+-    ''
+-  ].join('\n')
+-}
+-
+-function v2Plan(storyDigest, status, agy = false) {
+-  const checkpoint = status === 'checkpointed'
+-  const executionContract = agy
+-    ? ['    executor: agy', '    scope:', '      paths: [src/]', '    verification_obligations: [node --check src/feature.txt]']
+-    : []
+-  return [
+-    '---', 'schema_version: 2', 'story_id: "9.1"', 'story:', '  path: ' + STORY,
+-    '  normative_digest: ' + storyDigest, 'sprint_key: 9-1-fixture',
+-    'lifecycle_snapshot: in-progress', 'execution_status: in-progress', 'current_slice: A',
+-    'risk:', '  level: HIGH', 'slices:', '  - id: A', '    status: ' + status,
+-    '    task_refs: [T-1]', '    depends_on: []', ...executionContract, 'blockers: []', 'unresolved_questions: []',
+-    'next_action:', '  kind: ' + (checkpoint ? 'verify_slice' : 'implement_slice'), '  target: A', '---', ''
+-  ].join('\n')
+-}
+-
+-function v1Epic() {
+-  return '# Epic\n\n### Story 9.1: Fixture\n\n**Acceptance Criteria:**\n\nCheckpoint the fixture.\n\n### Story 9.2: Next\n'
+-}
+-
+-function v1Plan(sourceDigest, status) {
+-  const checkpoint = status === 'checkpointed'
+-  return [
+-    '---', 'schema_version: 1', 'story_id: "9.1"', 'source:', '  path: ' + EPIC,
+-    '  anchor: "#story-91-fixture"', '  section_digest: ' + sourceDigest, 'sprint_key: 9-1-fixture',
+-    'execution_status: in-progress', 'lifecycle_snapshot: in-progress', 'current_slice: A',
+-    'risk:', '  level: HIGH', 'slices:', '  - id: A', '    status: ' + status, '    depends_on: []',
+-    'blockers: []', 'unresolved_questions: []', 'next_action:',
+-    '  kind: ' + (checkpoint ? 'verify_slice' : 'implement_slice'), '  target: A', '---', ''
+-  ].join('\n')
+-}
+-
+-function v2Template(agy = false) {
+-  const executionContract = agy
+-    ? ['    executor: agy', '    scope:', '      paths: [src/]', '    verification_obligations: [node --check src/feature.txt]']
+-    : []
+-  return [
+-    '---', 'schema_version: 2', 'story_id: "9.1"', 'story:', '  path: ' + STORY,
+-    '  normative_digest: {{STORY_NORMATIVE_DIGEST}}', 'sprint_key: 9-1-fixture',
+-    'lifecycle_snapshot: in-progress', 'execution_status: in-progress', 'current_slice: A',
+-    'risk:', '  level: HIGH', 'slices:', '  - id: A', '    status: checkpointed',
+-    '    task_refs: [T-1]', '    depends_on: []', ...executionContract, '    baseline_commit: {{BASELINE_COMMIT}}',
+-    '    checkpoint_commit: {{CHECKPOINT_COMMIT}}', '    subject_digest: {{SUBJECT_DIGEST}}',
+-    '    changed_paths_sha256: {{CHANGED_PATHS_SHA256}}', '    receipt_refs:',
+-    '      implementation:', '        path: ' + RECEIPT, '        digest: {{RECEIPT_DIGEST}}',
+-    'blockers: []', 'unresolved_questions: []', 'next_action:',
+-    '  kind: verify_slice', '  target: A', '---', ''
+-  ].join('\n')
+-}
+-
+-function v1Template() {
+-  return [
+-    '---', 'schema_version: 1', 'story_id: "9.1"', 'source:', '  path: ' + EPIC,
+-    '  anchor: "#story-91-fixture"', '  section_digest: {{SOURCE_DIGEST}}', 'sprint_key: 9-1-fixture',
+-    'execution_status: in-progress', 'lifecycle_snapshot: in-progress', 'current_slice: A',
+-    'risk:', '  level: HIGH', 'slices:', '  - id: A', '    status: checkpointed', '    depends_on: []',
+-    '    baseline_commit: {{BASELINE_COMMIT}}', '    checkpoint_commit: {{CHECKPOINT_COMMIT}}',
+-    '    implementation:', '      changed_paths:', '        - src/feature.txt',
+-    '      changed_paths_sha256: {{CHANGED_PATHS_SHA256}}', '      focused_checks:',
+-    '        - command: node --check src/feature.txt', '          result: PASS', '          exit_code: 0',
+-    '      red_green:', '        applicable: false', '        reason: fixture evidence',
+-    'blockers: []', 'unresolved_questions: []', 'next_action:', '  kind: verify_slice', '  target: A', '---', ''
+-  ].join('\n')
+-}
+-
+-function fixture(kind, options = {}) {
+-  const root = mkdtempSync(path.join(tmpdir(), 'v4-kernel-'))
+-  const cleanup = () => rmSync(root, { recursive: true, force: true })
+-  const files = {
+-    '.gitignore': '.agent-state/v4-observations/\n',
+-    'AGENTS.md': '# fixture policy\n', 'CLAUDE.md': '# provider policy\n',
+-    '.agents/routing/task-router.md': '# routing\n', '.agents/context/control-plane.md': '# control\n',
+-    '.agents/context/context-routing.md': '# context\n', '.agents/skills/v4-story-runner/SKILL.md': '# runner\n',
+-    '.agents/skills/v4-story-runner/actions/implement-slice.md': '# recipe\n',
+-    '.agents/skills/v4-story-runner/references/implementation-techniques.md': '# techniques\n',
+-    '.agent-state/active-run.json': JSON.stringify({ schemaVersion: 1, activeRunId: null, storyId: null, status: 'IDLE' }) + '\n',
+-    'src/base.txt': 'base\n'
+-  }
+-  for (const [file, value] of Object.entries(files)) write(root, file, value)
+-  let sourceDigest
+-  if (kind === 'v2') {
+-    const story = storySource()
+-    sourceDigest = normativeDigest(inspectStory(story))
+-    write(root, STORY, story)
+-    write(root, PLAN, v2Plan(sourceDigest, 'pending', options.executor === 'agy'))
+-  } else {
+-    const epic = v1Epic()
+-    sourceDigest = digest(epic.slice(epic.indexOf('### Story 9.1:'), epic.indexOf('### Story 9.2:')))
+-    write(root, EPIC, epic)
+-    write(root, PLAN, v1Plan(sourceDigest, 'pending'))
+-  }
+-  write(root, SPRINT, 'development_status:\n  9-1-fixture: in-progress\n')
+-  git(root, 'init', '-q')
+-  git(root, 'checkout', '-qb', 'main')
+-  git(root, 'config', 'user.name', 'V4 Fixture')
+-  git(root, 'config', 'user.email', 'v4-fixture@example.com')
+-  git(root, 'config', 'core.autocrlf', options.autocrlf ? 'true' : 'false')
+-  git(root, 'add', '.')
+-  git(root, 'commit', '-qm', 'fixture baseline')
+-  const head = git(root, 'rev-parse', 'HEAD')
+-  write(root, 'src/feature.txt', 'implemented\n')
+-  const request = {
+-    action: 'implement_slice', operation: 'prepare', story_id: '9.1', slice_id: 'A',
+-    expected_head: head, transaction_id: 'fixture-' + kind, owned_paths: ['src/feature.txt'],
+-    plan_template: kind === 'v2' ? v2Template(options.executor === 'agy') : v1Template(),
+-    policy_paths: ['AGENTS.md', 'CLAUDE.md', '.agents/routing/task-router.md', '.agents/context/control-plane.md',
+-      '.agents/context/context-routing.md', '.agents/skills/v4-story-runner/SKILL.md'],
+-    recipe_paths: ['.agents/skills/v4-story-runner/actions/implement-slice.md', '.agents/skills/v4-story-runner/references/implementation-techniques.md'],
+-    commands: [{ command: 'node --check src/feature.txt', exit_code: 0, tool: 'Node.js', environment: 'fixture' }],
+-    semantic_coverage: { status: 'MEASURED', task_refs: ['T-1'], note: 'fixture exact scope' },
+-    selected_tasks: ['T-1'], selected_acceptance_criteria: ['AC-1'],
+-    red_green: { applicable: false, reason: 'fixture evidence' }
+-  }
+-  return { root, head, request, cleanup }
+-}
+-
+ test('implementation metadata cannot remove or alter autopilot authority', () => {
+   const f = fixture('v2')
+   try {
+@@ -210,51 +60,6 @@ test('implementation metadata cannot remove or alter autopilot authority', () =>
+   } finally { f.cleanup() }
+ })
+ 
+-function agyWorker() {
+-  return {
+-    executor: 'agy',
+-    orca: { run_id: 'run-fixture', task_id: 'task-fixture', dispatch_ids: ['ctx_fixture'] },
+-    attempt: 1,
+-    contract_sha256: 'a'.repeat(64),
+-    worker_report_sha256: 'b'.repeat(64),
+-    lead_vendor: 'codex'
+-  }
+-}
+-
+-function agyFixture() {
+-  const f = fixture('v2', { executor: 'agy' })
+-  f.request.worker = agyWorker()
+-  return f
+-}
+-
+-function checkpointRequest(fixture, preview, extra = {}) {
+-  return { ...fixture.request, operation: 'checkpoint', preview, ...extra }
+-}
+-
+-async function maintenanceExecutor() {
+-  const root = mkdtempSync(path.join(tmpdir(), 'v4-maintenance-executor-'))
+-  cpSync(path.dirname(fileURLToPath(import.meta.url)), path.join(root, '.agents/scripts'), { recursive: true })
+-  const sourceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
+-  for (const relative of ['.agents/docs/v4-artifact-contract.md', '.agents/skills/v4-story-runner/references/recovery.md']) {
+-    write(root, relative, readFileSync(path.join(sourceRoot, relative)))
+-  }
+-  git(root, 'init', '-q')
+-  git(root, 'config', 'user.name', 'Executor Fixture')
+-  git(root, 'config', 'user.email', 'executor@example.com')
+-  git(root, 'config', 'core.autocrlf', 'false')
+-  git(root, 'add', '.')
+-  git(root, 'commit', '-qm', 'authorized maintenance executor fixture')
+-  const api = await import(pathToFileURL(path.join(root, '.agents/scripts/v4-action-kernel.mjs')).href)
+-  const runner = await import(pathToFileURL(path.join(root, '.agents/scripts/v4-story-runner.mjs')).href)
+-  return { root, api, runner, commit: git(root, 'rev-parse', 'HEAD'), cleanup: () => rmSync(root, { recursive: true, force: true }) }
+-}
+-
+-function protectedKernelState(f, failed) {
+-  const file = relative => existsSync(path.resolve(f.root, relative)) ? readFileSync(path.resolve(f.root, relative)).toString('base64') : null
+-  return { head: git(f.root, 'rev-parse', 'HEAD'), index: file('.git/index'), plan: file(PLAN), story: file(STORY),
+-    product: file('src/feature.txt'), receipt: file(RECEIPT), journal: file(failed.journal_path), lock: file(failed.lock_path) }
+-}
+-
+ test('separate committed executor repairs a legacy staged checkpoint only through explicit bounded Runner recovery', async () => {
+   assert.equal(typeof kernel.prepareStagedRecovery, 'function')
+   const f = fixture('v2'), executor = await maintenanceExecutor()
+diff --git a/.agents/scripts/v4-kernel-fixture.mjs b/.agents/scripts/v4-kernel-fixture.mjs
+new file mode 100644
+index 0000000..4506ecb
+--- /dev/null
++++ b/.agents/scripts/v4-kernel-fixture.mjs
+@@ -0,0 +1,190 @@
++import { cpSync, existsSync, readFileSync, rmSync } from 'node:fs'
++import { mkdtempSync } from 'node:fs'
++import { tmpdir } from 'node:os'
++import path from 'node:path'
++import { fileURLToPath, pathToFileURL } from 'node:url'
++import { inspectStory, normativeDigest } from './check-artifact-contract.mjs'
++import * as kernel from './v4-action-kernel.mjs'
++
++import { git, write, digest } from './v4-test-helpers.mjs'
++
++export const PLAN = '_bmad-output/implementation-artifacts/story-9-1-plan.md'
++export const STORY = 'docs/story.md'
++export const EPIC = 'docs/product/epics.md'
++export const SPRINT = '_bmad-output/implementation-artifacts/sprint-status.yaml'
++export const POINTER = '.agent-state/active-run.json'
++export const RECEIPT = '_bmad-output/implementation-artifacts/receipts/story-9-1/A-implementation.json'
++
++export function storySource() {
++  return [
++    '---', 'story_id: "9.1"', 'title: Fixture story', 'status: in-progress', '---',
++    '# Fixture story', '',
++    '<!-- v4:story:start -->', 'A bounded fixture story.', '<!-- v4:story:end -->',
++    '<!-- v4:ac:start -->', '- AC-1: The fixture implementation is checkpointed.', '<!-- v4:ac:end -->',
++    '<!-- v4:tasks:start -->', '- [ ] T-1 [AC-1]: Implement the fixture.', '<!-- v4:tasks:end -->',
++    '<!-- v4:readiness:start -->', '- result: READY', '- dependencies: none', '<!-- v4:readiness:end -->',
++    '<!-- v4:references:start -->', '- architecture: .agents/docs/v4-action-kernel.md#kernel', '<!-- v4:references:end -->',
++    '<!-- v4:risk:start -->', '- level: HIGH', '- invariants: exact checkpoint and recovery', '<!-- v4:risk:end -->',
++    ''
++  ].join('\n')
++}
++
++export function v2Plan(storyDigest, status, agy = false) {
++  const checkpoint = status === 'checkpointed'
++  const executionContract = agy
++    ? ['    executor: agy', '    scope:', '      paths: [src/]', '    verification_obligations: [node --check src/feature.txt]']
++    : []
++  return [
++    '---', 'schema_version: 2', 'story_id: "9.1"', 'story:', '  path: ' + STORY,
++    '  normative_digest: ' + storyDigest, 'sprint_key: 9-1-fixture',
++    'lifecycle_snapshot: in-progress', 'execution_status: in-progress', 'current_slice: A',
++    'risk:', '  level: HIGH', 'slices:', '  - id: A', '    status: ' + status,
++    '    task_refs: [T-1]', '    depends_on: []', ...executionContract, 'blockers: []', 'unresolved_questions: []',
++    'next_action:', '  kind: ' + (checkpoint ? 'verify_slice' : 'implement_slice'), '  target: A', '---', ''
++  ].join('\n')
++}
++
++export function v1Epic() {
++  return '# Epic\n\n### Story 9.1: Fixture\n\n**Acceptance Criteria:**\n\nCheckpoint the fixture.\n\n### Story 9.2: Next\n'
++}
++
++export function v1Plan(sourceDigest, status) {
++  const checkpoint = status === 'checkpointed'
++  return [
++    '---', 'schema_version: 1', 'story_id: "9.1"', 'source:', '  path: ' + EPIC,
++    '  anchor: "#story-91-fixture"', '  section_digest: ' + sourceDigest, 'sprint_key: 9-1-fixture',
++    'execution_status: in-progress', 'lifecycle_snapshot: in-progress', 'current_slice: A',
++    'risk:', '  level: HIGH', 'slices:', '  - id: A', '    status: ' + status, '    depends_on: []',
++    'blockers: []', 'unresolved_questions: []', 'next_action:',
++    '  kind: ' + (checkpoint ? 'verify_slice' : 'implement_slice'), '  target: A', '---', ''
++  ].join('\n')
++}
++
++export function v2Template(agy = false) {
++  const executionContract = agy
++    ? ['    executor: agy', '    scope:', '      paths: [src/]', '    verification_obligations: [node --check src/feature.txt]']
++    : []
++  return [
++    '---', 'schema_version: 2', 'story_id: "9.1"', 'story:', '  path: ' + STORY,
++    '  normative_digest: {{STORY_NORMATIVE_DIGEST}}', 'sprint_key: 9-1-fixture',
++    'lifecycle_snapshot: in-progress', 'execution_status: in-progress', 'current_slice: A',
++    'risk:', '  level: HIGH', 'slices:', '  - id: A', '    status: checkpointed',
++    '    task_refs: [T-1]', '    depends_on: []', ...executionContract, '    baseline_commit: {{BASELINE_COMMIT}}',
++    '    checkpoint_commit: {{CHECKPOINT_COMMIT}}', '    subject_digest: {{SUBJECT_DIGEST}}',
++    '    changed_paths_sha256: {{CHANGED_PATHS_SHA256}}', '    receipt_refs:',
++    '      implementation:', '        path: ' + RECEIPT, '        digest: {{RECEIPT_DIGEST}}',
++    'blockers: []', 'unresolved_questions: []', 'next_action:',
++    '  kind: verify_slice', '  target: A', '---', ''
++  ].join('\n')
++}
++
++export function v1Template() {
++  return [
++    '---', 'schema_version: 1', 'story_id: "9.1"', 'source:', '  path: ' + EPIC,
++    '  anchor: "#story-91-fixture"', '  section_digest: {{SOURCE_DIGEST}}', 'sprint_key: 9-1-fixture',
++    'execution_status: in-progress', 'lifecycle_snapshot: in-progress', 'current_slice: A',
++    'risk:', '  level: HIGH', 'slices:', '  - id: A', '    status: checkpointed', '    depends_on: []',
++    '    baseline_commit: {{BASELINE_COMMIT}}', '    checkpoint_commit: {{CHECKPOINT_COMMIT}}',
++    '    implementation:', '      changed_paths:', '        - src/feature.txt',
++    '      changed_paths_sha256: {{CHANGED_PATHS_SHA256}}', '      focused_checks:',
++    '        - command: node --check src/feature.txt', '          result: PASS', '          exit_code: 0',
++    '      red_green:', '        applicable: false', '        reason: fixture evidence',
++    'blockers: []', 'unresolved_questions: []', 'next_action:', '  kind: verify_slice', '  target: A', '---', ''
++  ].join('\n')
++}
++
++export function fixture(kind, options = {}) {
++  const root = mkdtempSync(path.join(tmpdir(), 'v4-kernel-'))
++  const cleanup = () => rmSync(root, { recursive: true, force: true })
++  const files = {
++    '.gitignore': '.agent-state/v4-observations/\n',
++    'AGENTS.md': '# fixture policy\n', 'CLAUDE.md': '# provider policy\n',
++    '.agents/routing/task-router.md': '# routing\n', '.agents/context/control-plane.md': '# control\n',
++    '.agents/context/context-routing.md': '# context\n', '.agents/skills/v4-story-runner/SKILL.md': '# runner\n',
++    '.agents/skills/v4-story-runner/actions/implement-slice.md': '# recipe\n',
++    '.agents/skills/v4-story-runner/references/implementation-techniques.md': '# techniques\n',
++    '.agent-state/active-run.json': JSON.stringify({ schemaVersion: 1, activeRunId: null, storyId: null, status: 'IDLE' }) + '\n',
++    'src/base.txt': 'base\n'
++  }
++  for (const [file, value] of Object.entries(files)) write(root, file, value)
++  let sourceDigest
++  if (kind === 'v2') {
++    const story = storySource()
++    sourceDigest = normativeDigest(inspectStory(story))
++    write(root, STORY, story)
++    write(root, PLAN, v2Plan(sourceDigest, 'pending', options.executor === 'agy'))
++  } else {
++    const epic = v1Epic()
++    sourceDigest = digest(epic.slice(epic.indexOf('### Story 9.1:'), epic.indexOf('### Story 9.2:')))
++    write(root, EPIC, epic)
++    write(root, PLAN, v1Plan(sourceDigest, 'pending'))
++  }
++  write(root, SPRINT, 'development_status:\n  9-1-fixture: in-progress\n')
++  git(root, 'init', '-q')
++  git(root, 'checkout', '-qb', 'main')
++  git(root, 'config', 'user.name', 'V4 Fixture')
++  git(root, 'config', 'user.email', 'v4-fixture@example.com')
++  git(root, 'config', 'core.autocrlf', options.autocrlf ? 'true' : 'false')
++  git(root, 'add', '.')
++  git(root, 'commit', '-qm', 'fixture baseline')
++  const head = git(root, 'rev-parse', 'HEAD')
++  write(root, 'src/feature.txt', 'implemented\n')
++  const request = {
++    action: 'implement_slice', operation: 'prepare', story_id: '9.1', slice_id: 'A',
++    expected_head: head, transaction_id: 'fixture-' + kind, owned_paths: ['src/feature.txt'],
++    plan_template: kind === 'v2' ? v2Template(options.executor === 'agy') : v1Template(),
++    policy_paths: ['AGENTS.md', 'CLAUDE.md', '.agents/routing/task-router.md', '.agents/context/control-plane.md',
++      '.agents/context/context-routing.md', '.agents/skills/v4-story-runner/SKILL.md'],
++    recipe_paths: ['.agents/skills/v4-story-runner/actions/implement-slice.md', '.agents/skills/v4-story-runner/references/implementation-techniques.md'],
++    commands: [{ command: 'node --check src/feature.txt', exit_code: 0, tool: 'Node.js', environment: 'fixture' }],
++    semantic_coverage: { status: 'MEASURED', task_refs: ['T-1'], note: 'fixture exact scope' },
++    selected_tasks: ['T-1'], selected_acceptance_criteria: ['AC-1'],
++    red_green: { applicable: false, reason: 'fixture evidence' }
++  }
++  return { root, head, request, cleanup }
++}
++
++export function agyWorker() {
++  return {
++    executor: 'agy',
++    orca: { run_id: 'run-fixture', task_id: 'task-fixture', dispatch_ids: ['ctx_fixture'] },
++    attempt: 1,
++    contract_sha256: 'a'.repeat(64),
++    worker_report_sha256: 'b'.repeat(64),
++    lead_vendor: 'codex'
++  }
++}
++
++export function agyFixture() {
++  const f = fixture('v2', { executor: 'agy' })
++  f.request.worker = agyWorker()
++  return f
++}
++
++export function checkpointRequest(fixture, preview, extra = {}) {
++  return { ...fixture.request, operation: 'checkpoint', preview, ...extra }
++}
++
++export async function maintenanceExecutor() {
++  const root = mkdtempSync(path.join(tmpdir(), 'v4-maintenance-executor-'))
++  cpSync(path.dirname(fileURLToPath(import.meta.url)), path.join(root, '.agents/scripts'), { recursive: true })
++  const sourceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
++  for (const relative of ['.agents/docs/v4-artifact-contract.md', '.agents/skills/v4-story-runner/references/recovery.md']) {
++    write(root, relative, readFileSync(path.join(sourceRoot, relative)))
++  }
++  git(root, 'init', '-q')
++  git(root, 'config', 'user.name', 'Executor Fixture')
++  git(root, 'config', 'user.email', 'executor@example.com')
++  git(root, 'config', 'core.autocrlf', 'false')
++  git(root, 'add', '.')
++  git(root, 'commit', '-qm', 'authorized maintenance executor fixture')
++  const api = await import(pathToFileURL(path.join(root, '.agents/scripts/v4-action-kernel.mjs')).href)
++  const runner = await import(pathToFileURL(path.join(root, '.agents/scripts/v4-story-runner.mjs')).href)
++  return { root, api, runner, commit: git(root, 'rev-parse', 'HEAD'), cleanup: () => rmSync(root, { recursive: true, force: true }) }
++}
++
++export function protectedKernelState(f, failed) {
++  const file = relative => existsSync(path.resolve(f.root, relative)) ? readFileSync(path.resolve(f.root, relative)).toString('base64') : null
++  return { head: git(f.root, 'rev-parse', 'HEAD'), index: file('.git/index'), plan: file(PLAN), story: file(STORY),
++    product: file('src/feature.txt'), receipt: file(RECEIPT), journal: file(failed.journal_path), lock: file(failed.lock_path) }
++}
+diff --git a/.agents/scripts/v4-no-review-finalization-fixture.mjs b/.agents/scripts/v4-no-review-finalization-fixture.mjs
+new file mode 100644
+index 0000000..8652dc0
+--- /dev/null
++++ b/.agents/scripts/v4-no-review-finalization-fixture.mjs
+@@ -0,0 +1,275 @@
++import assert from 'node:assert/strict'
++import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
++import { tmpdir } from 'node:os'
++import path from 'node:path'
++import { spawnSync } from 'node:child_process'
++import { inspectStory, normativeDigest } from './check-artifact-contract.mjs'
++import { frontmatter } from './check-story-plan.mjs'
++import { inspectFinalization } from './check-story-finalization.mjs'
++import { actionFingerprint } from './v4-action-kernel.mjs'
++import { runV4Story } from './v4-story-runner.mjs'
++
++import { git, write, digest } from './v4-test-helpers.mjs'
++
++export const STORY = 'docs/story.md'
++export const EPIC = 'docs/product/epics.md'
++export const PLAN = '_bmad-output/implementation-artifacts/story-9-1-plan.md'
++export const RECEIPTS = '_bmad-output/implementation-artifacts/receipts/story-9-1'
++export const SCRIPTS = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'))
++export const POLICY_PATHS = ['AGENTS.md', 'CLAUDE.md', '.agents/routing/task-router.md', '.agents/context/control-plane.md',
++  '.agents/context/context-routing.md', '.agents/skills/v4-story-runner/SKILL.md']
++export const readPlan = f => readFileSync(path.join(f.root, PLAN), 'utf8')
++export const head = f => git(f.root, 'rev-parse', 'HEAD')
++
++export function storySource(slices) {
++  return [
++    '---', 'story_id: "9.1"', 'title: Fixture story', 'status: in-progress', '---',
++    '# Fixture story', '',
++    '<!-- v4:story:start -->', 'A bounded fixture story.', '<!-- v4:story:end -->',
++    '<!-- v4:ac:start -->', ...slices.map((slice, index) => `- AC-${index + 1}: Slice ${slice.id} is evidenced.`), '<!-- v4:ac:end -->',
++    '<!-- v4:tasks:start -->', ...slices.map((slice, index) => `- [ ] T-${index + 1} [AC-${index + 1}]: Implement slice ${slice.id}.`), '<!-- v4:tasks:end -->',
++    '<!-- v4:readiness:start -->', '- result: READY', '- dependencies: none', '<!-- v4:readiness:end -->',
++    '<!-- v4:references:start -->', '- architecture: docs/architecture/fixture.md#ad-1', '<!-- v4:references:end -->',
++    '<!-- v4:risk:start -->', '- level: MEDIUM', '- invariants: exact checkpoint and review scope', '<!-- v4:risk:end -->',
++    ''
++  ].join('\n')
++}
++
++export function planText(f, blocks, current, nextKind, nextTarget, storyDigest = f.storyDigest) {
++  return [
++    '---', 'schema_version: 2', 'story_id: "9.1"', 'story:', '  path: ' + STORY,
++    '  normative_digest: ' + storyDigest,
++    'upstream_epic:', '  path: ' + EPIC, '  section_digest: ' + f.epicDigest,
++    'sprint_key: 9-1-fixture', 'lifecycle_snapshot: in-progress', 'execution_status: in-progress',
++    'current_slice: ' + current, 'risk:', '  level: MEDIUM', 'slices:',
++    ...f.slices.map(slice => blocks[slice.id]),
++    'blockers: []', 'unresolved_questions: []',
++    'next_action:', '  kind: ' + nextKind, '  target: ' + nextTarget, '---', ''
++  ].join('\n')
++}
++
++export function head4(slice) {
++  return [
++    '  - id: ' + slice.id, null, '    task_refs: [' + slice.task + ']',
++    '    depends_on: [' + (slice.dependsOn ?? []).join(', ') + ']',
++    '    risk:', '      level: ' + slice.risk, '      flags: []'
++  ]
++}
++
++export function pendingBlock(slice) {
++  const lines = head4(slice)
++  lines[1] = '    status: pending'
++  return lines.join('\n')
++}
++
++export function checkpointBlock(slice) {
++  const lines = head4(slice)
++  lines[1] = '    status: checkpointed'
++  return [...lines,
++    '    baseline_commit: {{BASELINE_COMMIT}}', '    checkpoint_commit: {{CHECKPOINT_COMMIT}}',
++    '    subject_digest: {{SUBJECT_DIGEST}}', '    changed_paths_sha256: {{CHANGED_PATHS_SHA256}}',
++    '    receipt_refs:', '      implementation:', `        path: ${RECEIPTS}/${slice.id}-implementation.json`,
++    '        digest: {{RECEIPT_DIGEST}}'].join('\n')
++}
++
++export function verificationBlock(slice, implementationDigest, includeReview) {
++  const lines = head4(slice)
++  lines[1] = '    status: {{TARGET_STATUS}}'
++  lines.push('    baseline_commit: {{BASELINE_COMMIT}}', '    checkpoint_commit: {{CHECKPOINT_COMMIT}}',
++    '    subject_digest: {{SUBJECT_DIGEST}}', '    changed_paths_sha256: {{CHANGED_PATHS_SHA256}}',
++    '    receipt_refs:', '      implementation:', `        path: ${RECEIPTS}/${slice.id}-implementation.json`,
++    '        digest: ' + implementationDigest,
++    '      verification:', '        path: {{VERIFICATION_RECEIPT_PATH}}', '        digest: {{VERIFICATION_RECEIPT_DIGEST}}')
++  if (includeReview) lines.push('      review:', '        path: {{REVIEW_RECEIPT_PATH}}', '        digest: {{REVIEW_RECEIPT_DIGEST}}')
++  lines.push('    verification:', '      status: {{VERIFICATION_STATUS}}', '      canonical:', '        status: {{CANONICAL_STATUS}}',
++    '      escalation:', '        decision: {{ESCALATION_DECISION}}', '      progression_eligible: {{PROGRESSION_ELIGIBLE}}')
++  if (includeReview) {
++    lines.push('    review:', '      freshness: FRESH_CANDIDATE', '      judgment: {{REVIEW_JUDGMENT}}',
++      '      reviewed_commit: {{REVIEWED_COMMIT}}', '      risk_context_digest: {{RISK_CONTEXT_DIGEST}}',
++      '      reviewer: {{REVIEWER}}')
++  }
++  return lines.join('\n')
++}
++
++// The persisted text of every slice, exactly as the kernel committed it.
++export function persistedBlocks(f) {
++  const text = readPlan(f).replaceAll('\r\n', '\n')
++  const body = text.split('\nslices:\n')[1].split('\nblockers: []\n')[0]
++  return Object.fromEntries(body.split(/\n(?=  - id: )/).map(block => [/^  - id: (\S+)/.exec(block)[1], block]))
++}
++
++export function fixture(slices) {
++  const root = mkdtempSync(path.join(tmpdir(), 'v4-no-review-e2e-'))
++  const changedPaths = slices.map(slice => slice.path).sort()
++  const story = storySource(slices)
++  const epicSection = '### Story 9.1: Fixture story\n\nDone.\n\n'
++  const f = {
++    root, slices, storyDigest: normativeDigest(inspectStory(story)), epicDigest: digest(epicSection),
++    cleanup: () => rmSync(root, { recursive: true, force: true })
++  }
++  const recipe = {
++    schema_version: 1, featureId: 'fixture-feature', featureMap: '.agents/features/fixture-feature.json',
++    checks: [
++      { id: 'map', argv: ['node', '-e', "process.stdout.write('VALID\\n')"], cwd: '.', environment: {} },
++      { id: 'behavior', argv: ['node', '-e', 'process.exit(0)'], cwd: '.', environment: {} }
++    ]
++  }
++  const files = {
++    '.gitignore': '.agent-state/\n',
++    'AGENTS.md': '# fixture policy\n', 'CLAUDE.md': '# provider policy\n',
++    '.agents/routing/task-router.md': '# routing\n', '.agents/context/control-plane.md': '# control\n',
++    '.agents/context/context-routing.md': '# context\n', '.agents/skills/v4-story-runner/SKILL.md': '# runner\n',
++    '.agents/skills/v4-story-runner/actions/implement-slice.md': '# implementation\n',
++    '.agents/skills/v4-story-runner/actions/verify-slice.md': '# verification\n',
++    '.agents/skills/v4-story-runner/references/implementation-techniques.md': '# techniques\n',
++    '.agents/scripts/check-escalation.mjs': readFileSync(path.join(SCRIPTS, 'check-escalation.mjs'), 'utf8'),
++    '.agents/scripts/prepare-change-evidence.mjs': readFileSync(path.join(SCRIPTS, 'prepare-change-evidence.mjs'), 'utf8'),
++    '.agent-state/active-run.json': JSON.stringify({ schemaVersion: 1, activeRunId: null, storyId: null, status: 'IDLE' }) + '\n',
++    'docs/architecture/fixture.md': '# AD-1\n',
++    [EPIC]: '# Epic\n\n' + epicSection + '### Story 9.2: Next\n',
++    'src/base.txt': 'base\n', [STORY]: story,
++    [PLAN]: planText(f, Object.fromEntries(slices.map(slice => [slice.id, pendingBlock(slice)])), slices[0].id, 'implement_slice', slices[0].id),
++    '.agents/verification/registry.json': JSON.stringify({ schema_version: 1,
++      recipes: [{ featureId: 'fixture-feature', path: '.agents/verification/fixture-feature.json', enabled: true }] }, null, 2) + '\n',
++    '.agents/verification/fixture-feature.json': JSON.stringify(recipe, null, 2) + '\n',
++    '.agents/features/fixture-feature.json': JSON.stringify({ schema_version: 2, id: 'fixture-feature', covered_paths: changedPaths,
++      anchor_blobs: Object.fromEntries(changedPaths.map(item => [item, '0'.repeat(40)])) }, null, 2) + '\n',
++    '_bmad-output/implementation-artifacts/sprint-status.yaml': 'development_status:\n  9-1-fixture: in-progress\n'
++  }
++  for (const [file, value] of Object.entries(files)) write(root, file, value)
++  git(root, 'init', '-q')
++  git(root, 'checkout', '-qb', 'main')
++  git(root, 'config', 'user.name', 'V4 Fixture')
++  git(root, 'config', 'user.email', 'v4-fixture@example.com')
++  git(root, 'config', 'core.autocrlf', 'false')
++  git(root, 'add', '.')
++  git(root, 'commit', '-qm', 'fixture baseline')
++  return f
++}
++
++export function run(f, options) {
++  return runV4Story(f.root, '9.1', { expectedHead: head(f), ...options })
++}
++
++export function implement(f, slice) {
++  write(f.root, slice.path, `implemented ${slice.id}\n`)
++  const blocks = { ...persistedBlocks(f), [slice.id]: checkpointBlock(slice) }
++  const input = {
++    action: 'implement_slice', story_id: '9.1', slice_id: slice.id, expected_head: head(f),
++    transaction_id: `implementation-${slice.id.toLowerCase()}`, owned_paths: [slice.path],
++    plan_template: planText(f, blocks, slice.id, 'verify_slice', slice.id, '{{STORY_NORMATIVE_DIGEST}}'),
++    policy_paths: POLICY_PATHS,
++    recipe_paths: ['.agents/skills/v4-story-runner/actions/implement-slice.md', '.agents/skills/v4-story-runner/references/implementation-techniques.md'],
++    commands: [{ command: 'node --check fixture', exit_code: 0, tool: 'Node.js', environment: 'fixture' }],
++    semantic_coverage: { status: 'MEASURED', task_refs: [slice.task], note: 'fixture exact scope' },
++    selected_tasks: [slice.task], selected_acceptance_criteria: [slice.task.replace('T-', 'AC-')],
++    red_green: { applicable: false, reason: 'fixture' }
++  }
++  const prepared = run(f, { operation: 'prepare', input })
++  assert.equal(prepared.status, 'READY', JSON.stringify(prepared))
++  const checkpointed = run(f, { operation: 'checkpoint', input: { ...input, preview: prepared.preview } })
++  assert.equal(checkpointed.status, 'CHECKPOINTED', JSON.stringify(checkpointed))
++}
++
++// One verify_slice step: prepare, then verify; returns the verify result and
++// the request needed to continue with record-review.
++export function verify(f, slice, extra = {}) {
++  const implementationDigest = frontmatter(readPlan(f)).slices.find(item => item.id === slice.id).receipt_refs.implementation.digest
++  const request = {
++    action: 'verify_slice', story_id: '9.1', slice_id: slice.id, expected_head: head(f),
++    transaction_id: `verification-${slice.id.toLowerCase()}`, canonical_selector: 'fixture-feature',
++    check_specs: [{
++      id: `focused-${slice.id.toLowerCase()}`, classification: 'behavioral', required: true,
++      argv: ['node', '-e', 'process.exit(0)'], cwd: '.', environment_identity: { name: 'fixture' },
++      source: { kind: 'focused-manifest', path: '.agents/skills/v4-story-runner/actions/verify-slice.md' },
++      referenced_paths: [slice.path]
++    }],
++    policy_paths: POLICY_PATHS,
++    recipe_paths: ['.agents/skills/v4-story-runner/actions/verify-slice.md',
++      '.agents/skills/v4-story-runner/references/implementation-techniques.md', '.agents/verification/registry.json'],
++    ...extra
++  }
++  const prepared = run(f, { operation: 'prepare', input: request })
++  assert.equal(prepared.status, 'READY', JSON.stringify(prepared))
++  const index = f.slices.findIndex(item => item.id === slice.id)
++  const successor = f.slices[index + 1]
++  const template = includeReview => {
++    const blocks = { ...persistedBlocks(f), [slice.id]: verificationBlock(slice, implementationDigest, includeReview) }
++    return planText(f, blocks, '{{CURRENT_SLICE}}', '{{NEXT_ACTION_KIND}}', '{{NEXT_ACTION_TARGET}}')
++  }
++  const result = run(f, { operation: 'verify', input: { ...request, preview: prepared.preview, plan_template: template(false) } })
++  return { result, request, preview: prepared.preview, template, successor }
++}
++
++export function changeEvidence(f, preview) {
++  const result = spawnSync(process.execPath, [path.join(SCRIPTS, 'prepare-change-evidence.mjs'), '--comparison', 'explicit-pair',
++    '--base', preview.baseline_commit, '--head', preview.checkpoint_commit,
++    ...preview.changed_paths.flatMap(relative => ['--path', relative])], { cwd: f.root, encoding: 'utf8', windowsHide: true })
++  assert.equal(result.status, 0, result.stderr)
++  return JSON.parse(result.stdout.trim()).changeEvidence
++}
++
++export function scopeDigest(evidence, file) {
++  if (evidence.evidenceSet) {
++    return actionFingerprint({ paths: evidence.evidenceSet.paths.map(item => item.path), source: evidence.evidenceSet.sourceDigest })
++  }
++  const refs = evidence.paths[0].hunks.map((hunk, hunkIndex) => {
++    const body = typeof hunk.diffText === 'string' ? hunk.diffText : hunk.diffText.join('\n')
++    return { path: file, hunk_index: hunkIndex, body_digest: actionFingerprint(body) }
++  })
++  return actionFingerprint({ paths: [file], refs })
++}
++
++export function recordReview(f, slice, step) {
++  assert.equal(step.result.status, 'REVIEW_REQUIRED', JSON.stringify(step.result))
++  const pending = step.result.pending
++  const evidence = changeEvidence(f, step.preview)
++  const review = {
++    judgment: 'APPROVE', reviewer: 'same-lead', pending_fingerprint: pending.fingerprint,
++    scope_paths: [slice.path], scope_digest: scopeDigest(evidence, slice.path), change_evidence: evidence,
++    answers: pending.review_questions.map(item => ({ id: item.id, answer: 'confirmed' })),
++    commands: [{ command: 'same-lead review', exit_code: 0, tool: 'reviewer', environment: 'fixture' }]
++  }
++  const result = run(f, { operation: 'record-review', input: {
++    ...step.request, preview: step.preview, pending, plan_template: step.template(true), review
++  } })
++  assert.equal(result.status, 'APPLIED', JSON.stringify(result))
++  return result
++}
++
++// Runner finalize -> Human Gate -> structured approval -> complete_story -> done.
++export function finalizeAndComplete(f) {
++  const finalized = run(f, {})
++  assert.equal(finalized.status, 'HUMAN_GATE_REQUIRED', JSON.stringify(finalized))
++  assert.equal(frontmatter(readPlan(f)).next_action.kind, 'complete_story')
++  const approval = run(f, { approveExactScope: true })
++  assert.equal(frontmatter(readPlan(f)).human_approval?.story_id, '9.1', JSON.stringify(approval))
++  const completed = run(f, {})
++  assert.equal(completed.status, 'DONE', JSON.stringify(completed))
++  const plan = frontmatter(readPlan(f))
++  assert.equal(plan.lifecycle_snapshot, 'done')
++  assert.equal(plan.next_action, null)
++  assert.equal(git(f.root, 'status', '--porcelain'), '')
++}
++
++// Hand-written tamper: turn a reviewed slice back into `verified` without its
++// review receipt, as if review had been skipped.
++export function stripReview(f, sliceId) {
++  const blocks = persistedBlocks(f)
++  const block = blocks[sliceId]
++    .replace('    status: reviewed', '    status: verified')
++    .replace(/\n      review:\n        path: .*\n        digest: .*/, '')
++    .replace(/\n    review:(\n      .*)*/, '\n    review:\n      required: false')
++  const text = readPlan(f).replace(blocks[sliceId], block)
++  assert.notEqual(text, readPlan(f))
++  write(f.root, PLAN, text)
++  git(f.root, 'add', '--', PLAN)
++  git(f.root, 'commit', '-qm', 'tamper: drop review')
++  return frontmatter(readPlan(f)).slices.find(slice => slice.id === sliceId)
++}
++
++export function finalizationReasons(f) {
++  const result = inspectFinalization(f.root, '9.1', head(f))
++  assert.equal(result.status, 'BLOCKED', JSON.stringify(result))
++  return result.reasons
++}
+diff --git a/.agents/scripts/v4-no-review-finalization.e2e.test.mjs b/.agents/scripts/v4-no-review-finalization.e2e.test.mjs
+index a6dc756..16a3e36 100644
+--- a/.agents/scripts/v4-no-review-finalization.e2e.test.mjs
++++ b/.agents/scripts/v4-no-review-finalization.e2e.test.mjs
+@@ -1,297 +1,17 @@
++import { RECEIPTS, readPlan, head, fixture, implement, verify, recordReview, finalizeAndComplete, stripReview, finalizationReasons } from './v4-no-review-finalization-fixture.mjs'
++import { write } from './v4-test-helpers.mjs'
+ import test from 'node:test'
+ import assert from 'node:assert/strict'
+-import { createHash } from 'node:crypto'
+-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+-import { tmpdir } from 'node:os'
++import { readFileSync } from 'node:fs'
+ import path from 'node:path'
+-import { spawnSync } from 'node:child_process'
+ 
+-import { inspectStory, normativeDigest } from './check-artifact-contract.mjs'
+ import { frontmatter } from './check-story-plan.mjs'
+-import { inspectFinalization } from './check-story-finalization.mjs'
+-import { actionFingerprint } from './v4-action-kernel.mjs'
+-import { runV4Story } from './v4-story-runner.mjs'
+ 
+ // P2.2: a slice that `verify` passed on the LOW NO_REVIEW path reaches `done`
+ // through the real kernel and Runner, and nothing else can skip review. Only the
+ // fixture seed and the explicit tamper cases write Plan text by hand.
+ 
+-const STORY = 'docs/story.md'
+-const EPIC = 'docs/product/epics.md'
+-const PLAN = '_bmad-output/implementation-artifacts/story-9-1-plan.md'
+-const RECEIPTS = '_bmad-output/implementation-artifacts/receipts/story-9-1'
+-const SCRIPTS = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'))
+-const digest = value => 'sha256:' + createHash('sha256').update(value, 'utf8').digest('hex')
+-const POLICY_PATHS = ['AGENTS.md', 'CLAUDE.md', '.agents/routing/task-router.md', '.agents/context/control-plane.md',
+-  '.agents/context/context-routing.md', '.agents/skills/v4-story-runner/SKILL.md']
+ 
+-function git(root, ...args) {
+-  const result = spawnSync('git', args, { cwd: root, encoding: 'utf8', windowsHide: true })
+-  assert.equal(result.status, 0, result.stderr)
+-  return result.stdout.trim()
+-}
+-
+-function write(root, relative, value) {
+-  const file = path.join(root, relative)
+-  mkdirSync(path.dirname(file), { recursive: true })
+-  writeFileSync(file, value)
+-}
+-
+-const readPlan = f => readFileSync(path.join(f.root, PLAN), 'utf8')
+-const head = f => git(f.root, 'rev-parse', 'HEAD')
+-
+-function storySource(slices) {
+-  return [
+-    '---', 'story_id: "9.1"', 'title: Fixture story', 'status: in-progress', '---',
+-    '# Fixture story', '',
+-    '<!-- v4:story:start -->', 'A bounded fixture story.', '<!-- v4:story:end -->',
+-    '<!-- v4:ac:start -->', ...slices.map((slice, index) => `- AC-${index + 1}: Slice ${slice.id} is evidenced.`), '<!-- v4:ac:end -->',
+-    '<!-- v4:tasks:start -->', ...slices.map((slice, index) => `- [ ] T-${index + 1} [AC-${index + 1}]: Implement slice ${slice.id}.`), '<!-- v4:tasks:end -->',
+-    '<!-- v4:readiness:start -->', '- result: READY', '- dependencies: none', '<!-- v4:readiness:end -->',
+-    '<!-- v4:references:start -->', '- architecture: docs/architecture/fixture.md#ad-1', '<!-- v4:references:end -->',
+-    '<!-- v4:risk:start -->', '- level: MEDIUM', '- invariants: exact checkpoint and review scope', '<!-- v4:risk:end -->',
+-    ''
+-  ].join('\n')
+-}
+-
+-function planText(f, blocks, current, nextKind, nextTarget, storyDigest = f.storyDigest) {
+-  return [
+-    '---', 'schema_version: 2', 'story_id: "9.1"', 'story:', '  path: ' + STORY,
+-    '  normative_digest: ' + storyDigest,
+-    'upstream_epic:', '  path: ' + EPIC, '  section_digest: ' + f.epicDigest,
+-    'sprint_key: 9-1-fixture', 'lifecycle_snapshot: in-progress', 'execution_status: in-progress',
+-    'current_slice: ' + current, 'risk:', '  level: MEDIUM', 'slices:',
+-    ...f.slices.map(slice => blocks[slice.id]),
+-    'blockers: []', 'unresolved_questions: []',
+-    'next_action:', '  kind: ' + nextKind, '  target: ' + nextTarget, '---', ''
+-  ].join('\n')
+-}
+-
+-function head4(slice) {
+-  return [
+-    '  - id: ' + slice.id, null, '    task_refs: [' + slice.task + ']',
+-    '    depends_on: [' + (slice.dependsOn ?? []).join(', ') + ']',
+-    '    risk:', '      level: ' + slice.risk, '      flags: []'
+-  ]
+-}
+-
+-function pendingBlock(slice) {
+-  const lines = head4(slice)
+-  lines[1] = '    status: pending'
+-  return lines.join('\n')
+-}
+-
+-function checkpointBlock(slice) {
+-  const lines = head4(slice)
+-  lines[1] = '    status: checkpointed'
+-  return [...lines,
+-    '    baseline_commit: {{BASELINE_COMMIT}}', '    checkpoint_commit: {{CHECKPOINT_COMMIT}}',
+-    '    subject_digest: {{SUBJECT_DIGEST}}', '    changed_paths_sha256: {{CHANGED_PATHS_SHA256}}',
+-    '    receipt_refs:', '      implementation:', `        path: ${RECEIPTS}/${slice.id}-implementation.json`,
+-    '        digest: {{RECEIPT_DIGEST}}'].join('\n')
+-}
+-
+-function verificationBlock(slice, implementationDigest, includeReview) {
+-  const lines = head4(slice)
+-  lines[1] = '    status: {{TARGET_STATUS}}'
+-  lines.push('    baseline_commit: {{BASELINE_COMMIT}}', '    checkpoint_commit: {{CHECKPOINT_COMMIT}}',
+-    '    subject_digest: {{SUBJECT_DIGEST}}', '    changed_paths_sha256: {{CHANGED_PATHS_SHA256}}',
+-    '    receipt_refs:', '      implementation:', `        path: ${RECEIPTS}/${slice.id}-implementation.json`,
+-    '        digest: ' + implementationDigest,
+-    '      verification:', '        path: {{VERIFICATION_RECEIPT_PATH}}', '        digest: {{VERIFICATION_RECEIPT_DIGEST}}')
+-  if (includeReview) lines.push('      review:', '        path: {{REVIEW_RECEIPT_PATH}}', '        digest: {{REVIEW_RECEIPT_DIGEST}}')
+-  lines.push('    verification:', '      status: {{VERIFICATION_STATUS}}', '      canonical:', '        status: {{CANONICAL_STATUS}}',
+-    '      escalation:', '        decision: {{ESCALATION_DECISION}}', '      progression_eligible: {{PROGRESSION_ELIGIBLE}}')
+-  if (includeReview) {
+-    lines.push('    review:', '      freshness: FRESH_CANDIDATE', '      judgment: {{REVIEW_JUDGMENT}}',
+-      '      reviewed_commit: {{REVIEWED_COMMIT}}', '      risk_context_digest: {{RISK_CONTEXT_DIGEST}}',
+-      '      reviewer: {{REVIEWER}}')
+-  }
+-  return lines.join('\n')
+-}
+-
+-// The persisted text of every slice, exactly as the kernel committed it.
+-function persistedBlocks(f) {
+-  const text = readPlan(f).replaceAll('\r\n', '\n')
+-  const body = text.split('\nslices:\n')[1].split('\nblockers: []\n')[0]
+-  return Object.fromEntries(body.split(/\n(?=  - id: )/).map(block => [/^  - id: (\S+)/.exec(block)[1], block]))
+-}
+-
+-function fixture(slices) {
+-  const root = mkdtempSync(path.join(tmpdir(), 'v4-no-review-e2e-'))
+-  const changedPaths = slices.map(slice => slice.path).sort()
+-  const story = storySource(slices)
+-  const epicSection = '### Story 9.1: Fixture story\n\nDone.\n\n'
+-  const f = {
+-    root, slices, storyDigest: normativeDigest(inspectStory(story)), epicDigest: digest(epicSection),
+-    cleanup: () => rmSync(root, { recursive: true, force: true })
+-  }
+-  const recipe = {
+-    schema_version: 1, featureId: 'fixture-feature', featureMap: '.agents/features/fixture-feature.json',
+-    checks: [
+-      { id: 'map', argv: ['node', '-e', "process.stdout.write('VALID\\n')"], cwd: '.', environment: {} },
+-      { id: 'behavior', argv: ['node', '-e', 'process.exit(0)'], cwd: '.', environment: {} }
+-    ]
+-  }
+-  const files = {
+-    '.gitignore': '.agent-state/\n',
+-    'AGENTS.md': '# fixture policy\n', 'CLAUDE.md': '# provider policy\n',
+-    '.agents/routing/task-router.md': '# routing\n', '.agents/context/control-plane.md': '# control\n',
+-    '.agents/context/context-routing.md': '# context\n', '.agents/skills/v4-story-runner/SKILL.md': '# runner\n',
+-    '.agents/skills/v4-story-runner/actions/implement-slice.md': '# implementation\n',
+-    '.agents/skills/v4-story-runner/actions/verify-slice.md': '# verification\n',
+-    '.agents/skills/v4-story-runner/references/implementation-techniques.md': '# techniques\n',
+-    '.agents/scripts/check-escalation.mjs': readFileSync(path.join(SCRIPTS, 'check-escalation.mjs'), 'utf8'),
+-    '.agents/scripts/prepare-change-evidence.mjs': readFileSync(path.join(SCRIPTS, 'prepare-change-evidence.mjs'), 'utf8'),
+-    '.agent-state/active-run.json': JSON.stringify({ schemaVersion: 1, activeRunId: null, storyId: null, status: 'IDLE' }) + '\n',
+-    'docs/architecture/fixture.md': '# AD-1\n',
+-    [EPIC]: '# Epic\n\n' + epicSection + '### Story 9.2: Next\n',
+-    'src/base.txt': 'base\n', [STORY]: story,
+-    [PLAN]: planText(f, Object.fromEntries(slices.map(slice => [slice.id, pendingBlock(slice)])), slices[0].id, 'implement_slice', slices[0].id),
+-    '.agents/verification/registry.json': JSON.stringify({ schema_version: 1,
+-      recipes: [{ featureId: 'fixture-feature', path: '.agents/verification/fixture-feature.json', enabled: true }] }, null, 2) + '\n',
+-    '.agents/verification/fixture-feature.json': JSON.stringify(recipe, null, 2) + '\n',
+-    '.agents/features/fixture-feature.json': JSON.stringify({ schema_version: 2, id: 'fixture-feature', covered_paths: changedPaths,
+-      anchor_blobs: Object.fromEntries(changedPaths.map(item => [item, '0'.repeat(40)])) }, null, 2) + '\n',
+-    '_bmad-output/implementation-artifacts/sprint-status.yaml': 'development_status:\n  9-1-fixture: in-progress\n'
+-  }
+-  for (const [file, value] of Object.entries(files)) write(root, file, value)
+-  git(root, 'init', '-q')
+-  git(root, 'checkout', '-qb', 'main')
+-  git(root, 'config', 'user.name', 'V4 Fixture')
+-  git(root, 'config', 'user.email', 'v4-fixture@example.com')
+-  git(root, 'config', 'core.autocrlf', 'false')
+-  git(root, 'add', '.')
+-  git(root, 'commit', '-qm', 'fixture baseline')
+-  return f
+-}
+-
+-function run(f, options) {
+-  return runV4Story(f.root, '9.1', { expectedHead: head(f), ...options })
+-}
+-
+-function implement(f, slice) {
+-  write(f.root, slice.path, `implemented ${slice.id}\n`)
+-  const blocks = { ...persistedBlocks(f), [slice.id]: checkpointBlock(slice) }
+-  const input = {
+-    action: 'implement_slice', story_id: '9.1', slice_id: slice.id, expected_head: head(f),
+-    transaction_id: `implementation-${slice.id.toLowerCase()}`, owned_paths: [slice.path],
+-    plan_template: planText(f, blocks, slice.id, 'verify_slice', slice.id, '{{STORY_NORMATIVE_DIGEST}}'),
+-    policy_paths: POLICY_PATHS,
+-    recipe_paths: ['.agents/skills/v4-story-runner/actions/implement-slice.md', '.agents/skills/v4-story-runner/references/implementation-techniques.md'],
+-    commands: [{ command: 'node --check fixture', exit_code: 0, tool: 'Node.js', environment: 'fixture' }],
+-    semantic_coverage: { status: 'MEASURED', task_refs: [slice.task], note: 'fixture exact scope' },
+-    selected_tasks: [slice.task], selected_acceptance_criteria: [slice.task.replace('T-', 'AC-')],
+-    red_green: { applicable: false, reason: 'fixture' }
+-  }
+-  const prepared = run(f, { operation: 'prepare', input })
+-  assert.equal(prepared.status, 'READY', JSON.stringify(prepared))
+-  const checkpointed = run(f, { operation: 'checkpoint', input: { ...input, preview: prepared.preview } })
+-  assert.equal(checkpointed.status, 'CHECKPOINTED', JSON.stringify(checkpointed))
+-}
+-
+-// One verify_slice step: prepare, then verify; returns the verify result and
+-// the request needed to continue with record-review.
+-function verify(f, slice, extra = {}) {
+-  const implementationDigest = frontmatter(readPlan(f)).slices.find(item => item.id === slice.id).receipt_refs.implementation.digest
+-  const request = {
+-    action: 'verify_slice', story_id: '9.1', slice_id: slice.id, expected_head: head(f),
+-    transaction_id: `verification-${slice.id.toLowerCase()}`, canonical_selector: 'fixture-feature',
+-    check_specs: [{
+-      id: `focused-${slice.id.toLowerCase()}`, classification: 'behavioral', required: true,
+-      argv: ['node', '-e', 'process.exit(0)'], cwd: '.', environment_identity: { name: 'fixture' },
+-      source: { kind: 'focused-manifest', path: '.agents/skills/v4-story-runner/actions/verify-slice.md' },
+-      referenced_paths: [slice.path]
+-    }],
+-    policy_paths: POLICY_PATHS,
+-    recipe_paths: ['.agents/skills/v4-story-runner/actions/verify-slice.md',
+-      '.agents/skills/v4-story-runner/references/implementation-techniques.md', '.agents/verification/registry.json'],
+-    ...extra
+-  }
+-  const prepared = run(f, { operation: 'prepare', input: request })
+-  assert.equal(prepared.status, 'READY', JSON.stringify(prepared))
+-  const index = f.slices.findIndex(item => item.id === slice.id)
+-  const successor = f.slices[index + 1]
+-  const template = includeReview => {
+-    const blocks = { ...persistedBlocks(f), [slice.id]: verificationBlock(slice, implementationDigest, includeReview) }
+-    return planText(f, blocks, '{{CURRENT_SLICE}}', '{{NEXT_ACTION_KIND}}', '{{NEXT_ACTION_TARGET}}')
+-  }
+-  const result = run(f, { operation: 'verify', input: { ...request, preview: prepared.preview, plan_template: template(false) } })
+-  return { result, request, preview: prepared.preview, template, successor }
+-}
+-
+-function changeEvidence(f, preview) {
+-  const result = spawnSync(process.execPath, [path.join(SCRIPTS, 'prepare-change-evidence.mjs'), '--comparison', 'explicit-pair',
+-    '--base', preview.baseline_commit, '--head', preview.checkpoint_commit,
+-    ...preview.changed_paths.flatMap(relative => ['--path', relative])], { cwd: f.root, encoding: 'utf8', windowsHide: true })
+-  assert.equal(result.status, 0, result.stderr)
+-  return JSON.parse(result.stdout.trim()).changeEvidence
+-}
+-
+-function scopeDigest(evidence, file) {
+-  if (evidence.evidenceSet) {
+-    return actionFingerprint({ paths: evidence.evidenceSet.paths.map(item => item.path), source: evidence.evidenceSet.sourceDigest })
+-  }
+-  const refs = evidence.paths[0].hunks.map((hunk, hunkIndex) => {
+-    const body = typeof hunk.diffText === 'string' ? hunk.diffText : hunk.diffText.join('\n')
+-    return { path: file, hunk_index: hunkIndex, body_digest: actionFingerprint(body) }
+-  })
+-  return actionFingerprint({ paths: [file], refs })
+-}
+-
+-function recordReview(f, slice, step) {
+-  assert.equal(step.result.status, 'REVIEW_REQUIRED', JSON.stringify(step.result))
+-  const pending = step.result.pending
+-  const evidence = changeEvidence(f, step.preview)
+-  const review = {
+-    judgment: 'APPROVE', reviewer: 'same-lead', pending_fingerprint: pending.fingerprint,
+-    scope_paths: [slice.path], scope_digest: scopeDigest(evidence, slice.path), change_evidence: evidence,
+-    answers: pending.review_questions.map(item => ({ id: item.id, answer: 'confirmed' })),
+-    commands: [{ command: 'same-lead review', exit_code: 0, tool: 'reviewer', environment: 'fixture' }]
+-  }
+-  const result = run(f, { operation: 'record-review', input: {
+-    ...step.request, preview: step.preview, pending, plan_template: step.template(true), review
+-  } })
+-  assert.equal(result.status, 'APPLIED', JSON.stringify(result))
+-  return result
+-}
+-
+-// Runner finalize -> Human Gate -> structured approval -> complete_story -> done.
+-function finalizeAndComplete(f) {
+-  const finalized = run(f, {})
+-  assert.equal(finalized.status, 'HUMAN_GATE_REQUIRED', JSON.stringify(finalized))
+-  assert.equal(frontmatter(readPlan(f)).next_action.kind, 'complete_story')
+-  const approval = run(f, { approveExactScope: true })
+-  assert.equal(frontmatter(readPlan(f)).human_approval?.story_id, '9.1', JSON.stringify(approval))
+-  const completed = run(f, {})
+-  assert.equal(completed.status, 'DONE', JSON.stringify(completed))
+-  const plan = frontmatter(readPlan(f))
+-  assert.equal(plan.lifecycle_snapshot, 'done')
+-  assert.equal(plan.next_action, null)
+-  assert.equal(git(f.root, 'status', '--porcelain'), '')
+-}
+-
+-// Hand-written tamper: turn a reviewed slice back into `verified` without its
+-// review receipt, as if review had been skipped.
+-function stripReview(f, sliceId) {
+-  const blocks = persistedBlocks(f)
+-  const block = blocks[sliceId]
+-    .replace('    status: reviewed', '    status: verified')
+-    .replace(/\n      review:\n        path: .*\n        digest: .*/, '')
+-    .replace(/\n    review:(\n      .*)*/, '\n    review:\n      required: false')
+-  const text = readPlan(f).replace(blocks[sliceId], block)
+-  assert.notEqual(text, readPlan(f))
+-  write(f.root, PLAN, text)
+-  git(f.root, 'add', '--', PLAN)
+-  git(f.root, 'commit', '-qm', 'tamper: drop review')
+-  return frontmatter(readPlan(f)).slices.find(slice => slice.id === sliceId)
+-}
+-
+-function finalizationReasons(f) {
+-  const result = inspectFinalization(f.root, '9.1', head(f))
+-  assert.equal(result.status, 'BLOCKED', JSON.stringify(result))
+-  return result.reasons
+-}
+ 
+ test('MEDIUM Story with one LOW NO_REVIEW slice finalizes, passes the Human Gate and completes', () => {
+   const slice = { id: 'A', risk: 'LOW', path: 'src/a.txt', task: 'T-1' }
+diff --git a/.agents/scripts/v4-slice-transaction.test.mjs b/.agents/scripts/v4-slice-transaction.test.mjs
+index ff7a37f..078b3e4 100644
+--- a/.agents/scripts/v4-slice-transaction.test.mjs
++++ b/.agents/scripts/v4-slice-transaction.test.mjs
+@@ -1,66 +1,13 @@
++import { recoveryDrifts, fixture, preserved, stagedFixture } from './v4-transaction-fixture.mjs'
++import { git, write } from './v4-test-helpers.mjs'
+ import test from 'node:test'
+ import assert from 'node:assert/strict'
+-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+-import { mkdtempSync } from 'node:fs'
+-import { tmpdir } from 'node:os'
++import { existsSync, readFileSync } from 'node:fs'
+ import path from 'node:path'
+-import { spawnSync } from 'node:child_process'
+ 
+-import {
+-  executeSliceTransaction,
+-  inspectActionTransaction,
+-  snapshotWorkingFiles,
+-  transactionHash,
+-  transactionIdentity
+-} from './v4-slice-transaction.mjs'
++import { executeSliceTransaction, inspectActionTransaction, snapshotWorkingFiles, transactionIdentity } from './v4-slice-transaction.mjs'
+ import * as transactions from './v4-slice-transaction.mjs'
+ 
+-function git(root, ...args) {
+-  const result = spawnSync('git', args, { cwd: root, encoding: 'utf8', windowsHide: true })
+-  assert.equal(result.status, 0, result.stderr)
+-  return result.stdout.trim()
+-}
+-
+-function write(root, relative, value) {
+-  const file = path.join(root, relative)
+-  mkdirSync(path.dirname(file), { recursive: true })
+-  writeFileSync(file, value)
+-}
+-
+-function fixture() {
+-  const root = mkdtempSync(path.join(tmpdir(), 'v4-transaction-'))
+-  const cleanup = () => rmSync(root, { recursive: true, force: true })
+-  write(root, 'src/implementation.txt', 'base\n')
+-  git(root, 'init', '-q')
+-  git(root, 'checkout', '-qb', 'main')
+-  git(root, 'config', 'user.name', 'V4 Fixture')
+-  git(root, 'config', 'user.email', 'v4-fixture@example.com')
+-  git(root, 'config', 'core.autocrlf', 'false')
+-  git(root, 'add', '.')
+-  git(root, 'commit', '-qm', 'baseline')
+-  const head = git(root, 'rev-parse', 'HEAD')
+-  write(root, 'src/implementation.txt', 'implemented\n')
+-  const descriptor = {
+-    action: 'implement_slice',
+-    story_id: '9.1',
+-    slice_id: 'A',
+-    transaction_id: 'transaction-fixture',
+-    expected_head: head,
+-    preview_fingerprint: transactionHash('transaction-preview'),
+-    implementation_paths: ['src/implementation.txt'],
+-    metadata_paths: ['meta/checkpoint.txt'],
+-    snapshot: snapshotWorkingFiles(root, ['src/implementation.txt']),
+-    buildMetadata: checkpoint => ({
+-      paths: ['meta/checkpoint.txt'],
+-      files: { 'meta/checkpoint.txt': checkpoint.checkpoint_commit + '\n' },
+-      checkpoint
+-    }),
+-    validateMetadata: () => {},
+-    validateFinal: () => {}
+-  }
+-  return { root, head, descriptor, cleanup }
+-}
+-
+ test('transaction stages and commits exact implementation and metadata scopes', () => {
+   const f = fixture()
+   try {
+@@ -166,29 +113,6 @@ for (const [label, attributes, autocrlf, content] of [
+   } finally { f.cleanup() }
+ })
+ 
+-function preserved(f) {
+-  const identity = transactionIdentity(f.root, f.descriptor)
+-  const file = p => existsSync(p) ? readFileSync(p).toString('base64') : null
+-  return {
+-    head: git(f.root, 'rev-parse', 'HEAD'),
+-    index: file(path.join(f.root, '.git/index')),
+-    product: file(path.join(f.root, 'src/implementation.txt')),
+-    metadata: file(path.join(f.root, 'meta/checkpoint.txt')),
+-    journal: file(identity.journalPath), lock: file(identity.lockPath)
+-  }
+-}
+-
+-function stagedFixture() {
+-  const f = fixture()
+-  const failed = executeSliceTransaction(f.root, { ...f.descriptor, fail_at: 'after-stage' })
+-  assert.equal(failed.status, 'RECOVERY_REQUIRED')
+-  // Legacy journal has no canonical snapshot or checkpoint. Recovery must
+-  // append an audit record without rebinding this original fingerprint.
+-  f.failed = failed
+-  f.descriptor.staged_recovery_authorization = 'V4_LITE_STAGED_RECOVERY'
+-  return f
+-}
+-
+ test('explicit staged recovery consumes the existing index and preserves original journal audit', () => {
+   const f = stagedFixture()
+   try {
+@@ -229,21 +153,6 @@ for (const phase of ['BEFORE_COMMIT1', 'AFTER_COMMIT1_BEFORE_JOURNAL', 'AFTER_CO
+   })
+ }
+ 
+-const recoveryDrifts = {
+-  'missing explicit authorization': f => { delete f.descriptor.staged_recovery_authorization; f.descriptor.recovery = true },
+-  'cross Story': f => { f.descriptor.story_id = '9.2' },
+-  'cross slice': f => { f.descriptor.slice_id = 'B' },
+-  'raw byte drift': f => write(f.root, 'src/implementation.txt', 'implemented\r\n'),
+-  'index blob drift': f => { write(f.root, 'src/implementation.txt', 'foreign\n'); git(f.root, 'add', 'src/implementation.txt'); write(f.root, 'src/implementation.txt', 'implemented\n') },
+-  'index mode drift': f => git(f.root, 'update-index', '--chmod=+x', 'src/implementation.txt'),
+-  'scope drift': f => { write(f.root, 'src/foreign.txt', 'foreign\n'); git(f.root, 'add', 'src/foreign.txt') },
+-  'HEAD drift': f => git(f.root, 'commit', '--allow-empty', '-qm', 'foreign checkpoint'),
+-  'foreign lock': f => { const lock = JSON.parse(readFileSync(f.failed.lock_path)); lock.transaction_id = 'foreign'; writeFileSync(f.failed.lock_path, JSON.stringify(lock)) },
+-  'journal drift': f => { const journal = JSON.parse(readFileSync(f.failed.journal_path)); journal.error = 'foreign'; writeFileSync(f.failed.journal_path, JSON.stringify(journal)) },
+-  'Git config drift': f => git(f.root, 'config', 'core.autocrlf', 'true'),
+-  'Git attribute drift': f => write(f.root, '.git/info/attributes', '* -text\n'),
+-  'metadata already written': f => write(f.root, 'meta/checkpoint.txt', 'foreign\n')
+-}
+ for (const [label, mutate] of Object.entries(recoveryDrifts)) test('staged recovery rejects and preserves all state on ' + label, () => {
+   const f = stagedFixture()
+   try {
+diff --git a/.agents/scripts/v4-test-helpers.mjs b/.agents/scripts/v4-test-helpers.mjs
+new file mode 100644
+index 0000000..ccfd70c
+--- /dev/null
++++ b/.agents/scripts/v4-test-helpers.mjs
+@@ -0,0 +1,21 @@
++import assert from 'node:assert/strict'
++import { createHash } from 'node:crypto'
++import { mkdirSync, writeFileSync } from 'node:fs'
++import path from 'node:path'
++import { spawnSync } from 'node:child_process'
++
++export function git(root, ...args) {
++  const result = spawnSync('git', args, { cwd: root, encoding: 'utf8', windowsHide: true })
++  assert.equal(result.status, 0, result.stderr)
++  return result.stdout.trim()
++}
++
++export function write(root, relative, value) {
++  const file = path.join(root, relative)
++  mkdirSync(path.dirname(file), { recursive: true })
++  writeFileSync(file, value)
++}
++
++export function digest(value) {
++  return 'sha256:' + createHash('sha256').update(value, 'utf8').digest('hex')
++}
+diff --git a/.agents/scripts/v4-transaction-fixture.mjs b/.agents/scripts/v4-transaction-fixture.mjs
+new file mode 100644
+index 0000000..6b9d12e
+--- /dev/null
++++ b/.agents/scripts/v4-transaction-fixture.mjs
+@@ -0,0 +1,82 @@
++import assert from 'node:assert/strict'
++import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
++import { mkdtempSync } from 'node:fs'
++import { tmpdir } from 'node:os'
++import path from 'node:path'
++import { executeSliceTransaction, snapshotWorkingFiles, transactionHash, transactionIdentity } from './v4-slice-transaction.mjs'
++import * as transactions from './v4-slice-transaction.mjs'
++
++import { git, write } from './v4-test-helpers.mjs'
++
++export const recoveryDrifts = {
++  'missing explicit authorization': f => { delete f.descriptor.staged_recovery_authorization; f.descriptor.recovery = true },
++  'cross Story': f => { f.descriptor.story_id = '9.2' },
++  'cross slice': f => { f.descriptor.slice_id = 'B' },
++  'raw byte drift': f => write(f.root, 'src/implementation.txt', 'implemented\r\n'),
++  'index blob drift': f => { write(f.root, 'src/implementation.txt', 'foreign\n'); git(f.root, 'add', 'src/implementation.txt'); write(f.root, 'src/implementation.txt', 'implemented\n') },
++  'index mode drift': f => git(f.root, 'update-index', '--chmod=+x', 'src/implementation.txt'),
++  'scope drift': f => { write(f.root, 'src/foreign.txt', 'foreign\n'); git(f.root, 'add', 'src/foreign.txt') },
++  'HEAD drift': f => git(f.root, 'commit', '--allow-empty', '-qm', 'foreign checkpoint'),
++  'foreign lock': f => { const lock = JSON.parse(readFileSync(f.failed.lock_path)); lock.transaction_id = 'foreign'; writeFileSync(f.failed.lock_path, JSON.stringify(lock)) },
++  'journal drift': f => { const journal = JSON.parse(readFileSync(f.failed.journal_path)); journal.error = 'foreign'; writeFileSync(f.failed.journal_path, JSON.stringify(journal)) },
++  'Git config drift': f => git(f.root, 'config', 'core.autocrlf', 'true'),
++  'Git attribute drift': f => write(f.root, '.git/info/attributes', '* -text\n'),
++  'metadata already written': f => write(f.root, 'meta/checkpoint.txt', 'foreign\n')
++}
++
++export function fixture() {
++  const root = mkdtempSync(path.join(tmpdir(), 'v4-transaction-'))
++  const cleanup = () => rmSync(root, { recursive: true, force: true })
++  write(root, 'src/implementation.txt', 'base\n')
++  git(root, 'init', '-q')
++  git(root, 'checkout', '-qb', 'main')
++  git(root, 'config', 'user.name', 'V4 Fixture')
++  git(root, 'config', 'user.email', 'v4-fixture@example.com')
++  git(root, 'config', 'core.autocrlf', 'false')
++  git(root, 'add', '.')
++  git(root, 'commit', '-qm', 'baseline')
++  const head = git(root, 'rev-parse', 'HEAD')
++  write(root, 'src/implementation.txt', 'implemented\n')
++  const descriptor = {
++    action: 'implement_slice',
++    story_id: '9.1',
++    slice_id: 'A',
++    transaction_id: 'transaction-fixture',
++    expected_head: head,
++    preview_fingerprint: transactionHash('transaction-preview'),
++    implementation_paths: ['src/implementation.txt'],
++    metadata_paths: ['meta/checkpoint.txt'],
++    snapshot: snapshotWorkingFiles(root, ['src/implementation.txt']),
++    buildMetadata: checkpoint => ({
++      paths: ['meta/checkpoint.txt'],
++      files: { 'meta/checkpoint.txt': checkpoint.checkpoint_commit + '\n' },
++      checkpoint
++    }),
++    validateMetadata: () => {},
++    validateFinal: () => {}
++  }
++  return { root, head, descriptor, cleanup }
++}
++
++export function preserved(f) {
++  const identity = transactionIdentity(f.root, f.descriptor)
++  const file = p => existsSync(p) ? readFileSync(p).toString('base64') : null
++  return {
++    head: git(f.root, 'rev-parse', 'HEAD'),
++    index: file(path.join(f.root, '.git/index')),
++    product: file(path.join(f.root, 'src/implementation.txt')),
++    metadata: file(path.join(f.root, 'meta/checkpoint.txt')),
++    journal: file(identity.journalPath), lock: file(identity.lockPath)
++  }
++}
++
++export function stagedFixture() {
++  const f = fixture()
++  const failed = executeSliceTransaction(f.root, { ...f.descriptor, fail_at: 'after-stage' })
++  assert.equal(failed.status, 'RECOVERY_REQUIRED')
++  // Legacy journal has no canonical snapshot or checkpoint. Recovery must
++  // append an audit record without rebinding this original fingerprint.
++  f.failed = failed
++  f.descriptor.staged_recovery_authorization = 'V4_LITE_STAGED_RECOVERY'
++  return f
++}
+diff --git a/.agents/scripts/v4-verification-fixture.mjs b/.agents/scripts/v4-verification-fixture.mjs
+new file mode 100644
+index 0000000..aee7284
+--- /dev/null
++++ b/.agents/scripts/v4-verification-fixture.mjs
+@@ -0,0 +1,222 @@
++import assert from 'node:assert/strict'
++import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
++import { mkdtempSync } from 'node:fs'
++import { tmpdir } from 'node:os'
++import path from 'node:path'
++import { spawnSync } from 'node:child_process'
++import { inspectStory, normativeDigest } from './check-artifact-contract.mjs'
++import { frontmatter } from './check-story-plan.mjs'
++import { actionFingerprint, checkpointImplementation, prepareAction } from './v4-action-kernel.mjs'
++import { transactionIdentity } from './v4-slice-transaction.mjs'
++import { runV4Story } from './v4-story-runner.mjs'
++
++import { git, write, digest } from './v4-test-helpers.mjs'
++
++export const PLAN = '_bmad-output/implementation-artifacts/story-9-1-plan.md'
++export const STORY = 'docs/story.md'
++export const IMPLEMENTATION_RECEIPT = '_bmad-output/implementation-artifacts/receipts/story-9-1/A-implementation.json'
++export const VERIFICATION_RECEIPT = '_bmad-output/implementation-artifacts/receipts/story-9-1/A-verification.json'
++export const REVIEW_RECEIPT = '_bmad-output/implementation-artifacts/receipts/story-9-1/A-review.json'
++
++export function storySource(risk) {
++  return [
++    '---', 'story_id: "9.1"', 'title: Fixture story', 'status: in-progress', '---',
++    '# Fixture story', '',
++    '<!-- v4:story:start -->', 'A bounded fixture story.', '<!-- v4:story:end -->',
++    '<!-- v4:ac:start -->', '- AC-1: The fixture implementation is checkpointed.', '<!-- v4:ac:end -->',
++    '<!-- v4:tasks:start -->', '- [ ] T-1 [AC-1]: Implement the fixture.', '<!-- v4:tasks:end -->',
++    '<!-- v4:readiness:start -->', '- result: READY', '- dependencies: none', '<!-- v4:readiness:end -->',
++    '<!-- v4:references:start -->', '- architecture: .agents/docs/v4-action-kernel.md#kernel', '<!-- v4:references:end -->',
++    '<!-- v4:risk:start -->', `- level: ${risk}`, '- invariants: exact checkpoint and review scope', '<!-- v4:risk:end -->',
++    ''
++  ].join('\n')
++}
++
++export function v2Plan(storyDigest, risk, status = 'pending') {
++  const checkpointed = status === 'checkpointed'
++  return [
++    '---', 'schema_version: 2', 'story_id: "9.1"', 'story:', '  path: ' + STORY,
++    '  normative_digest: ' + storyDigest, 'sprint_key: 9-1-fixture',
++    'lifecycle_snapshot: in-progress', 'execution_status: in-progress', 'current_slice: A',
++    'risk:', `  level: ${risk}`, 'slices:', '  - id: A', '    status: ' + status,
++    '    task_refs: [T-1]', '    depends_on: []', '    blockers: []', '    unresolved_questions: []',
++    'next_action:', '  kind: ' + (checkpointed ? 'verify_slice' : 'implement_slice'), '  target: A', '---', ''
++  ].join('\n')
++}
++
++export function implementationTemplate(risk) {
++  return [
++    '---', 'schema_version: 2', 'story_id: "9.1"', 'story:', '  path: ' + STORY,
++    '  normative_digest: {{STORY_NORMATIVE_DIGEST}}', 'sprint_key: 9-1-fixture',
++    'lifecycle_snapshot: in-progress', 'execution_status: in-progress', 'current_slice: A',
++    'risk:', `  level: ${risk}`, 'slices:', '  - id: A', '    status: checkpointed',
++    '    task_refs: [T-1]', '    depends_on: []', '    baseline_commit: {{BASELINE_COMMIT}}',
++    '    checkpoint_commit: {{CHECKPOINT_COMMIT}}', '    subject_digest: {{SUBJECT_DIGEST}}',
++    '    changed_paths_sha256: {{CHANGED_PATHS_SHA256}}', '    receipt_refs:',
++    '      implementation:', '        path: ' + IMPLEMENTATION_RECEIPT, '        digest: {{RECEIPT_DIGEST}}',
++    '    blockers: []', '    unresolved_questions: []', 'next_action:', '  kind: verify_slice', '  target: A', '---', ''
++  ].join('\n')
++}
++
++export function verificationTemplate(fixture, includeReview) {
++  const implementationDigest = fixture.implementationDigest
++  const lines = [
++    '---', 'schema_version: 2', 'story_id: "9.1"', 'story:', '  path: ' + STORY,
++    '  normative_digest: ' + fixture.storyDigest, 'sprint_key: 9-1-fixture',
++    'lifecycle_snapshot: in-progress', 'execution_status: in-progress', 'current_slice: {{CURRENT_SLICE}}',
++    'risk:', `  level: ${fixture.risk}`, 'slices:', '  - id: A', '    status: {{TARGET_STATUS}}',
++    '    task_refs: [T-1]', '    depends_on: []', '    baseline_commit: {{BASELINE_COMMIT}}',
++    '    checkpoint_commit: {{CHECKPOINT_COMMIT}}', '    subject_digest: {{SUBJECT_DIGEST}}',
++    '    changed_paths_sha256: {{CHANGED_PATHS_SHA256}}', '    receipt_refs:',
++    '      implementation:', '        path: ' + IMPLEMENTATION_RECEIPT, '        digest: ' + implementationDigest,
++    '      verification:', '        path: {{VERIFICATION_RECEIPT_PATH}}', '        digest: {{VERIFICATION_RECEIPT_DIGEST}}',
++    '    verification:', '      status: {{VERIFICATION_STATUS}}', '      canonical:', '        status: {{CANONICAL_STATUS}}',
++    '      escalation:', '        decision: {{ESCALATION_DECISION}}', '      progression_eligible: {{PROGRESSION_ELIGIBLE}}'
++  ]
++  if (includeReview) {
++    const verificationIndex = lines.indexOf('    verification:')
++    lines.splice(verificationIndex, 0,
++      '      review:', '        path: {{REVIEW_RECEIPT_PATH}}', '        digest: {{REVIEW_RECEIPT_DIGEST}}')
++    lines.push(
++      '      review_disclosure: same-lead bounded review',
++      '    review:', '      freshness: FRESH_CANDIDATE', '      judgment: {{REVIEW_JUDGMENT}}',
++      '      reviewed_commit: {{REVIEWED_COMMIT}}', '      risk_context_digest: {{RISK_CONTEXT_DIGEST}}',
++      '      reviewer: {{REVIEWER}}'
++    )
++  }
++  lines.push('    blockers: []', '    unresolved_questions: []', 'next_action:',
++    '  kind: {{NEXT_ACTION_KIND}}', '  target: {{NEXT_ACTION_TARGET}}', '---', '')
++  return lines.join('\n')
++}
++
++export function verificationRegistry(changedPaths = ['src/feature.txt']) {
++  const coveredPaths = [...changedPaths].sort()
++  const map = {
++    schema_version: 2, id: 'fixture-feature', covered_paths: coveredPaths,
++    anchor_blobs: Object.fromEntries(coveredPaths.map(item => [item, '0'.repeat(40)]))
++  }
++  const recipe = {
++    schema_version: 1,
++    featureId: 'fixture-feature',
++    featureMap: '.agents/features/fixture-feature.json',
++    checks: [
++      { id: 'map', argv: ['node', '-e', "process.stdout.write('VALID\\n')"], cwd: '.', environment: {} },
++      { id: 'behavior', argv: ['node', '-e', 'process.exit(0)'], cwd: '.', environment: {} }
++    ]
++  }
++  const registry = { schema_version: 1, recipes: [{ featureId: 'fixture-feature', path: '.agents/verification/fixture-feature.json', enabled: true }] }
++  return { map, recipe, registry }
++}
++
++export function fixture(risk, options = {}) {
++  const root = mkdtempSync(path.join(tmpdir(), 'v4-verification-'))
++  const cleanup = () => rmSync(root, { recursive: true, force: true })
++  const changedPaths = [...(options.changedPaths ?? ['src/feature.txt'])].sort()
++  const story = storySource(risk)
++  const storyDigest = normativeDigest(inspectStory(story))
++  const verification = verificationRegistry(changedPaths)
++  const files = {
++    '.gitignore': '.agent-state/\n',
++    'AGENTS.md': '# fixture policy\n', 'CLAUDE.md': '# provider policy\n',
++    '.agents/routing/task-router.md': '# routing\n', '.agents/context/control-plane.md': '# control\n',
++    '.agents/context/context-routing.md': '# context\n', '.agents/skills/v4-story-runner/SKILL.md': '# runner\n',
++    '.agents/skills/v4-story-runner/actions/implement-slice.md': '# implementation\n',
++    '.agents/skills/v4-story-runner/actions/verify-slice.md': '# verification\n',
++    '.agents/skills/v4-story-runner/references/implementation-techniques.md': '# techniques\n',
++    '.agents/scripts/check-escalation.mjs': readFileSync(path.resolve(process.cwd(), '.agents/scripts/check-escalation.mjs'), 'utf8'),
++    '.agents/scripts/prepare-change-evidence.mjs': readFileSync(path.resolve(process.cwd(), '.agents/scripts/prepare-change-evidence.mjs'), 'utf8'),
++    '.agent-state/active-run.json': JSON.stringify({ schemaVersion: 1, activeRunId: null, storyId: null, status: 'IDLE' }) + '\n',
++    'src/base.txt': 'base\n', [STORY]: story, [PLAN]: withSliceRisk(v2Plan(storyDigest, risk), options.sliceRisk),
++    '.agents/verification/registry.json': JSON.stringify(verification.registry, null, 2) + '\n',
++    '.agents/verification/fixture-feature.json': JSON.stringify(verification.recipe, null, 2) + '\n',
++    '.agents/features/fixture-feature.json': JSON.stringify(verification.map, null, 2) + '\n',
++    '_bmad-output/implementation-artifacts/sprint-status.yaml': 'development_status:\n  9-1-fixture: in-progress\n'
++  }
++  for (const [file, value] of Object.entries(files)) write(root, file, value)
++  git(root, 'init', '-q')
++  git(root, 'checkout', '-qb', 'main')
++  git(root, 'config', 'user.name', 'V4 Fixture')
++  git(root, 'config', 'user.email', 'v4-fixture@example.com')
++  git(root, 'config', 'core.autocrlf', 'false')
++  git(root, 'add', '.')
++  git(root, 'commit', '-qm', 'fixture baseline')
++  const initialHead = git(root, 'rev-parse', 'HEAD')
++  for (const file of changedPaths) write(root, file, `implemented ${file}\n`)
++  const implementationRequest = {
++    action: 'implement_slice', operation: 'prepare', story_id: '9.1', slice_id: 'A', expected_head: initialHead,
++    transaction_id: `implementation-${risk.toLowerCase()}`, owned_paths: changedPaths,
++    plan_template: withSliceRisk(implementationTemplate(risk), options.sliceRisk),
++    policy_paths: ['AGENTS.md', 'CLAUDE.md', '.agents/routing/task-router.md', '.agents/context/control-plane.md',
++      '.agents/context/context-routing.md', '.agents/skills/v4-story-runner/SKILL.md'],
++    recipe_paths: ['.agents/skills/v4-story-runner/actions/implement-slice.md', '.agents/skills/v4-story-runner/references/implementation-techniques.md'],
++    commands: [{ command: 'node --check src/feature.txt', exit_code: 0, tool: 'Node.js', environment: 'fixture' }],
++    semantic_coverage: { status: 'MEASURED', task_refs: ['T-1'], note: 'fixture exact scope' },
++    selected_tasks: ['T-1'], selected_acceptance_criteria: ['AC-1'], red_green: { applicable: false, reason: 'fixture' }
++  }
++  const preparedImplementation = prepareAction(root, implementationRequest)
++  assert.equal(preparedImplementation.status, 'READY', JSON.stringify(preparedImplementation))
++  const checkpointed = checkpointImplementation(root, { ...implementationRequest, operation: 'checkpoint', preview: preparedImplementation.preview })
++  assert.equal(checkpointed.status, 'CHECKPOINTED', JSON.stringify(checkpointed))
++  const plan = frontmatter(readFileSync(path.join(root, PLAN), 'utf8'))
++  const implementationDigest = plan.slices[0].receipt_refs.implementation.digest
++  const head = git(root, 'rev-parse', 'HEAD')
++  const checkSpecs = [{
++    id: 'focused-fixture', classification: 'behavioral', required: true,
++    argv: ['node', '-e', 'process.exit(0)'], cwd: '.', environment_identity: { name: 'fixture' },
++    source: { kind: 'focused-manifest', path: '.agents/skills/v4-story-runner/actions/verify-slice.md' },
++    referenced_paths: changedPaths
++  }]
++  const verifyRequest = {
++    action: 'verify_slice', operation: 'prepare', story_id: '9.1', slice_id: 'A', expected_head: head,
++    transaction_id: `verification-${risk.toLowerCase()}`, canonical_selector: 'fixture-feature', check_specs: checkSpecs,
++    policy_paths: implementationRequest.policy_paths,
++    recipe_paths: ['.agents/skills/v4-story-runner/actions/verify-slice.md', '.agents/skills/v4-story-runner/references/implementation-techniques.md', '.agents/verification/registry.json'],
++  }
++  return { root, cleanup, risk, sliceRisk: options.sliceRisk, storyDigest, implementationDigest, head, verifyRequest, checkSpecs, changedPaths }
++}
++
++export function withSliceRisk(text, risk) {
++  return risk === undefined ? text : text.replace('    depends_on: []', `    depends_on: []\n    risk: \n      level: ${risk}\n      flags: []`)
++}
++
++export function prepareVerification(f) {
++  const result = prepareAction(f.root, f.verifyRequest)
++  assert.equal(result.status, 'READY', JSON.stringify(result))
++  return result
++}
++
++export function makeReviewEvidence(f, preview) {
++  const script = path.resolve(process.cwd(), '.agents/scripts/prepare-change-evidence.mjs')
++  const result = spawnSync(process.execPath, [script, '--comparison', 'explicit-pair', '--base', preview.baseline_commit,
++    '--head', preview.checkpoint_commit, ...preview.changed_paths.flatMap(relative => ['--path', relative])], {
++    cwd: f.root, encoding: 'utf8', windowsHide: true
++  })
++  assert.equal(result.status, 0, result.stderr)
++  return JSON.parse(result.stdout.trim()).changeEvidence
++}
++
++export function scopeDigest(changeEvidence) {
++  if (changeEvidence.evidenceSet) {
++    const paths = changeEvidence.evidenceSet.paths.map(item => item.path)
++    return actionFingerprint({ paths, source: changeEvidence.evidenceSet.sourceDigest })
++  }
++  const refs = changeEvidence.paths[0].hunks.map((hunk, hunkIndex) => {
++    const body = typeof hunk.diffText === 'string' ? hunk.diffText : hunk.diffText.join('\n')
++    return { path: 'src/feature.txt', hunk_index: hunkIndex, body_digest: actionFingerprint(body) }
++  })
++  return actionFingerprint({ paths: ['src/feature.txt'], refs })
++}
++
++export function legacyMetadataFailure(f) {
++  const request = { action: 'verify_slice', story_id: '9.1', slice_id: 'A', transaction_id: 'legacy-prewrite', recovery_checkpoint: f.head, maintenance_paths: [] }
++  const identity = transactionIdentity(f.root, request)
++  const lock = { schema_version: 1, repository: identity.repository, worktree: identity.worktree, action: 'verify_slice', story_id: '9.1', slice_id: 'A', transaction_id: request.transaction_id, scope_key: identity.scopeKey, created_at: '2026-10-01T00:00:00.000Z' }
++  const journal = { ...lock, expected_head: f.head, checkpoint_commit: f.head, implementation_paths: [], metadata_paths: [PLAN, VERIFICATION_RECEIPT, REVIEW_RECEIPT].sort(), preview_fingerprint: digest('legacy-preview'), lock_identity: lock, phase: 'RECOVERY_REQUIRED', error: 'SUCCESSOR_PROJECTION_MISMATCH', recovery_required: true, initial_inventory: { staged: [], unstaged: [], untracked: [] }, lock_path: identity.lockPath, journal_path: identity.journalPath, _path: identity.journalPath }
++  mkdirSync(identity.transactionRoot, { recursive: true })
++  const journalBytes = JSON.stringify(journal, null, 2) + '\n'
++  const lockBytes = JSON.stringify(lock, null, 2) + '\n'
++  writeFileSync(identity.journalPath, journalBytes)
++  writeFileSync(identity.lockPath, lockBytes)
++  const run = (operation, extra = {}) => runV4Story(f.root, '9.1', { expectedHead: f.head, operation, input: { ...request, ...extra } })
++  return { request, identity, journalBytes, lockBytes, run }
++}
+diff --git a/.agents/scripts/v4-verification-flow.test.mjs b/.agents/scripts/v4-verification-flow.test.mjs
+index 022ef19..aff6b03 100644
+--- a/.agents/scripts/v4-verification-flow.test.mjs
++++ b/.agents/scripts/v4-verification-flow.test.mjs
+@@ -1,226 +1,18 @@
++import { PLAN, VERIFICATION_RECEIPT, REVIEW_RECEIPT, verificationTemplate, fixture, withSliceRisk, prepareVerification, makeReviewEvidence, scopeDigest, legacyMetadataFailure } from './v4-verification-fixture.mjs'
++import { git, write, digest } from './v4-test-helpers.mjs'
+ import test from 'node:test'
+ import assert from 'node:assert/strict'
+-import { createHash } from 'node:crypto'
+-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+-import { mkdtempSync } from 'node:fs'
+-import { tmpdir } from 'node:os'
++import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+ import path from 'node:path'
+ import { spawnSync } from 'node:child_process'
+ 
+-import { inspectStory, normativeDigest, receiptDigest, validateReceipt } from './check-artifact-contract.mjs'
++import { receiptDigest, validateReceipt } from './check-artifact-contract.mjs'
+ import { frontmatter, validate as validateStoryPlan } from './check-story-plan.mjs'
+-import { actionFingerprint, checkpointImplementation, prepareAction, recordSliceReview, verifySlice } from './v4-action-kernel.mjs'
++import { actionFingerprint, prepareAction, recordSliceReview, verifySlice } from './v4-action-kernel.mjs'
+ import { digestValue, reviewEvidenceFreshness } from './v4-finalization-contract.mjs'
+ import { inspectActionTransaction, transactionIdentity } from './v4-slice-transaction.mjs'
+ import { runV4Story } from './v4-story-runner.mjs'
+ 
+-const PLAN = '_bmad-output/implementation-artifacts/story-9-1-plan.md'
+-const STORY = 'docs/story.md'
+-const IMPLEMENTATION_RECEIPT = '_bmad-output/implementation-artifacts/receipts/story-9-1/A-implementation.json'
+-const VERIFICATION_RECEIPT = '_bmad-output/implementation-artifacts/receipts/story-9-1/A-verification.json'
+-const REVIEW_RECEIPT = '_bmad-output/implementation-artifacts/receipts/story-9-1/A-review.json'
+-const digest = value => 'sha256:' + createHash('sha256').update(value, 'utf8').digest('hex')
+-
+-function git(root, ...args) {
+-  const result = spawnSync('git', args, { cwd: root, encoding: 'utf8', windowsHide: true })
+-  assert.equal(result.status, 0, result.stderr)
+-  return result.stdout.trim()
+-}
+-
+-function write(root, relative, value) {
+-  const file = path.join(root, relative)
+-  mkdirSync(path.dirname(file), { recursive: true })
+-  writeFileSync(file, value)
+-}
+-
+-function storySource(risk) {
+-  return [
+-    '---', 'story_id: "9.1"', 'title: Fixture story', 'status: in-progress', '---',
+-    '# Fixture story', '',
+-    '<!-- v4:story:start -->', 'A bounded fixture story.', '<!-- v4:story:end -->',
+-    '<!-- v4:ac:start -->', '- AC-1: The fixture implementation is checkpointed.', '<!-- v4:ac:end -->',
+-    '<!-- v4:tasks:start -->', '- [ ] T-1 [AC-1]: Implement the fixture.', '<!-- v4:tasks:end -->',
+-    '<!-- v4:readiness:start -->', '- result: READY', '- dependencies: none', '<!-- v4:readiness:end -->',
+-    '<!-- v4:references:start -->', '- architecture: .agents/docs/v4-action-kernel.md#kernel', '<!-- v4:references:end -->',
+-    '<!-- v4:risk:start -->', `- level: ${risk}`, '- invariants: exact checkpoint and review scope', '<!-- v4:risk:end -->',
+-    ''
+-  ].join('\n')
+-}
+-
+-function v2Plan(storyDigest, risk, status = 'pending') {
+-  const checkpointed = status === 'checkpointed'
+-  return [
+-    '---', 'schema_version: 2', 'story_id: "9.1"', 'story:', '  path: ' + STORY,
+-    '  normative_digest: ' + storyDigest, 'sprint_key: 9-1-fixture',
+-    'lifecycle_snapshot: in-progress', 'execution_status: in-progress', 'current_slice: A',
+-    'risk:', `  level: ${risk}`, 'slices:', '  - id: A', '    status: ' + status,
+-    '    task_refs: [T-1]', '    depends_on: []', '    blockers: []', '    unresolved_questions: []',
+-    'next_action:', '  kind: ' + (checkpointed ? 'verify_slice' : 'implement_slice'), '  target: A', '---', ''
+-  ].join('\n')
+-}
+-
+-function implementationTemplate(risk) {
+-  return [
+-    '---', 'schema_version: 2', 'story_id: "9.1"', 'story:', '  path: ' + STORY,
+-    '  normative_digest: {{STORY_NORMATIVE_DIGEST}}', 'sprint_key: 9-1-fixture',
+-    'lifecycle_snapshot: in-progress', 'execution_status: in-progress', 'current_slice: A',
+-    'risk:', `  level: ${risk}`, 'slices:', '  - id: A', '    status: checkpointed',
+-    '    task_refs: [T-1]', '    depends_on: []', '    baseline_commit: {{BASELINE_COMMIT}}',
+-    '    checkpoint_commit: {{CHECKPOINT_COMMIT}}', '    subject_digest: {{SUBJECT_DIGEST}}',
+-    '    changed_paths_sha256: {{CHANGED_PATHS_SHA256}}', '    receipt_refs:',
+-    '      implementation:', '        path: ' + IMPLEMENTATION_RECEIPT, '        digest: {{RECEIPT_DIGEST}}',
+-    '    blockers: []', '    unresolved_questions: []', 'next_action:', '  kind: verify_slice', '  target: A', '---', ''
+-  ].join('\n')
+-}
+-
+-function verificationTemplate(fixture, includeReview) {
+-  const implementationDigest = fixture.implementationDigest
+-  const lines = [
+-    '---', 'schema_version: 2', 'story_id: "9.1"', 'story:', '  path: ' + STORY,
+-    '  normative_digest: ' + fixture.storyDigest, 'sprint_key: 9-1-fixture',
+-    'lifecycle_snapshot: in-progress', 'execution_status: in-progress', 'current_slice: {{CURRENT_SLICE}}',
+-    'risk:', `  level: ${fixture.risk}`, 'slices:', '  - id: A', '    status: {{TARGET_STATUS}}',
+-    '    task_refs: [T-1]', '    depends_on: []', '    baseline_commit: {{BASELINE_COMMIT}}',
+-    '    checkpoint_commit: {{CHECKPOINT_COMMIT}}', '    subject_digest: {{SUBJECT_DIGEST}}',
+-    '    changed_paths_sha256: {{CHANGED_PATHS_SHA256}}', '    receipt_refs:',
+-    '      implementation:', '        path: ' + IMPLEMENTATION_RECEIPT, '        digest: ' + implementationDigest,
+-    '      verification:', '        path: {{VERIFICATION_RECEIPT_PATH}}', '        digest: {{VERIFICATION_RECEIPT_DIGEST}}',
+-    '    verification:', '      status: {{VERIFICATION_STATUS}}', '      canonical:', '        status: {{CANONICAL_STATUS}}',
+-    '      escalation:', '        decision: {{ESCALATION_DECISION}}', '      progression_eligible: {{PROGRESSION_ELIGIBLE}}'
+-  ]
+-  if (includeReview) {
+-    const verificationIndex = lines.indexOf('    verification:')
+-    lines.splice(verificationIndex, 0,
+-      '      review:', '        path: {{REVIEW_RECEIPT_PATH}}', '        digest: {{REVIEW_RECEIPT_DIGEST}}')
+-    lines.push(
+-      '      review_disclosure: same-lead bounded review',
+-      '    review:', '      freshness: FRESH_CANDIDATE', '      judgment: {{REVIEW_JUDGMENT}}',
+-      '      reviewed_commit: {{REVIEWED_COMMIT}}', '      risk_context_digest: {{RISK_CONTEXT_DIGEST}}',
+-      '      reviewer: {{REVIEWER}}'
+-    )
+-  }
+-  lines.push('    blockers: []', '    unresolved_questions: []', 'next_action:',
+-    '  kind: {{NEXT_ACTION_KIND}}', '  target: {{NEXT_ACTION_TARGET}}', '---', '')
+-  return lines.join('\n')
+-}
+-
+-function verificationRegistry(changedPaths = ['src/feature.txt']) {
+-  const coveredPaths = [...changedPaths].sort()
+-  const map = {
+-    schema_version: 2, id: 'fixture-feature', covered_paths: coveredPaths,
+-    anchor_blobs: Object.fromEntries(coveredPaths.map(item => [item, '0'.repeat(40)]))
+-  }
+-  const recipe = {
+-    schema_version: 1,
+-    featureId: 'fixture-feature',
+-    featureMap: '.agents/features/fixture-feature.json',
+-    checks: [
+-      { id: 'map', argv: ['node', '-e', "process.stdout.write('VALID\\n')"], cwd: '.', environment: {} },
+-      { id: 'behavior', argv: ['node', '-e', 'process.exit(0)'], cwd: '.', environment: {} }
+-    ]
+-  }
+-  const registry = { schema_version: 1, recipes: [{ featureId: 'fixture-feature', path: '.agents/verification/fixture-feature.json', enabled: true }] }
+-  return { map, recipe, registry }
+-}
+-
+-function fixture(risk, options = {}) {
+-  const root = mkdtempSync(path.join(tmpdir(), 'v4-verification-'))
+-  const cleanup = () => rmSync(root, { recursive: true, force: true })
+-  const changedPaths = [...(options.changedPaths ?? ['src/feature.txt'])].sort()
+-  const story = storySource(risk)
+-  const storyDigest = normativeDigest(inspectStory(story))
+-  const verification = verificationRegistry(changedPaths)
+-  const files = {
+-    '.gitignore': '.agent-state/\n',
+-    'AGENTS.md': '# fixture policy\n', 'CLAUDE.md': '# provider policy\n',
+-    '.agents/routing/task-router.md': '# routing\n', '.agents/context/control-plane.md': '# control\n',
+-    '.agents/context/context-routing.md': '# context\n', '.agents/skills/v4-story-runner/SKILL.md': '# runner\n',
+-    '.agents/skills/v4-story-runner/actions/implement-slice.md': '# implementation\n',
+-    '.agents/skills/v4-story-runner/actions/verify-slice.md': '# verification\n',
+-    '.agents/skills/v4-story-runner/references/implementation-techniques.md': '# techniques\n',
+-    '.agents/scripts/check-escalation.mjs': readFileSync(path.resolve(process.cwd(), '.agents/scripts/check-escalation.mjs'), 'utf8'),
+-    '.agents/scripts/prepare-change-evidence.mjs': readFileSync(path.resolve(process.cwd(), '.agents/scripts/prepare-change-evidence.mjs'), 'utf8'),
+-    '.agent-state/active-run.json': JSON.stringify({ schemaVersion: 1, activeRunId: null, storyId: null, status: 'IDLE' }) + '\n',
+-    'src/base.txt': 'base\n', [STORY]: story, [PLAN]: withSliceRisk(v2Plan(storyDigest, risk), options.sliceRisk),
+-    '.agents/verification/registry.json': JSON.stringify(verification.registry, null, 2) + '\n',
+-    '.agents/verification/fixture-feature.json': JSON.stringify(verification.recipe, null, 2) + '\n',
+-    '.agents/features/fixture-feature.json': JSON.stringify(verification.map, null, 2) + '\n',
+-    '_bmad-output/implementation-artifacts/sprint-status.yaml': 'development_status:\n  9-1-fixture: in-progress\n'
+-  }
+-  for (const [file, value] of Object.entries(files)) write(root, file, value)
+-  git(root, 'init', '-q')
+-  git(root, 'checkout', '-qb', 'main')
+-  git(root, 'config', 'user.name', 'V4 Fixture')
+-  git(root, 'config', 'user.email', 'v4-fixture@example.com')
+-  git(root, 'config', 'core.autocrlf', 'false')
+-  git(root, 'add', '.')
+-  git(root, 'commit', '-qm', 'fixture baseline')
+-  const initialHead = git(root, 'rev-parse', 'HEAD')
+-  for (const file of changedPaths) write(root, file, `implemented ${file}\n`)
+-  const implementationRequest = {
+-    action: 'implement_slice', operation: 'prepare', story_id: '9.1', slice_id: 'A', expected_head: initialHead,
+-    transaction_id: `implementation-${risk.toLowerCase()}`, owned_paths: changedPaths,
+-    plan_template: withSliceRisk(implementationTemplate(risk), options.sliceRisk),
+-    policy_paths: ['AGENTS.md', 'CLAUDE.md', '.agents/routing/task-router.md', '.agents/context/control-plane.md',
+-      '.agents/context/context-routing.md', '.agents/skills/v4-story-runner/SKILL.md'],
+-    recipe_paths: ['.agents/skills/v4-story-runner/actions/implement-slice.md', '.agents/skills/v4-story-runner/references/implementation-techniques.md'],
+-    commands: [{ command: 'node --check src/feature.txt', exit_code: 0, tool: 'Node.js', environment: 'fixture' }],
+-    semantic_coverage: { status: 'MEASURED', task_refs: ['T-1'], note: 'fixture exact scope' },
+-    selected_tasks: ['T-1'], selected_acceptance_criteria: ['AC-1'], red_green: { applicable: false, reason: 'fixture' }
+-  }
+-  const preparedImplementation = prepareAction(root, implementationRequest)
+-  assert.equal(preparedImplementation.status, 'READY', JSON.stringify(preparedImplementation))
+-  const checkpointed = checkpointImplementation(root, { ...implementationRequest, operation: 'checkpoint', preview: preparedImplementation.preview })
+-  assert.equal(checkpointed.status, 'CHECKPOINTED', JSON.stringify(checkpointed))
+-  const plan = frontmatter(readFileSync(path.join(root, PLAN), 'utf8'))
+-  const implementationDigest = plan.slices[0].receipt_refs.implementation.digest
+-  const head = git(root, 'rev-parse', 'HEAD')
+-  const checkSpecs = [{
+-    id: 'focused-fixture', classification: 'behavioral', required: true,
+-    argv: ['node', '-e', 'process.exit(0)'], cwd: '.', environment_identity: { name: 'fixture' },
+-    source: { kind: 'focused-manifest', path: '.agents/skills/v4-story-runner/actions/verify-slice.md' },
+-    referenced_paths: changedPaths
+-  }]
+-  const verifyRequest = {
+-    action: 'verify_slice', operation: 'prepare', story_id: '9.1', slice_id: 'A', expected_head: head,
+-    transaction_id: `verification-${risk.toLowerCase()}`, canonical_selector: 'fixture-feature', check_specs: checkSpecs,
+-    policy_paths: implementationRequest.policy_paths,
+-    recipe_paths: ['.agents/skills/v4-story-runner/actions/verify-slice.md', '.agents/skills/v4-story-runner/references/implementation-techniques.md', '.agents/verification/registry.json'],
+-  }
+-  return { root, cleanup, risk, sliceRisk: options.sliceRisk, storyDigest, implementationDigest, head, verifyRequest, checkSpecs, changedPaths }
+-}
+-
+-function withSliceRisk(text, risk) {
+-  return risk === undefined ? text : text.replace('    depends_on: []', `    depends_on: []\n    risk: \n      level: ${risk}\n      flags: []`)
+-}
+-
+-function prepareVerification(f) {
+-  const result = prepareAction(f.root, f.verifyRequest)
+-  assert.equal(result.status, 'READY', JSON.stringify(result))
+-  return result
+-}
+-
+-function makeReviewEvidence(f, preview) {
+-  const script = path.resolve(process.cwd(), '.agents/scripts/prepare-change-evidence.mjs')
+-  const result = spawnSync(process.execPath, [script, '--comparison', 'explicit-pair', '--base', preview.baseline_commit,
+-    '--head', preview.checkpoint_commit, ...preview.changed_paths.flatMap(relative => ['--path', relative])], {
+-    cwd: f.root, encoding: 'utf8', windowsHide: true
+-  })
+-  assert.equal(result.status, 0, result.stderr)
+-  return JSON.parse(result.stdout.trim()).changeEvidence
+-}
+-
+-function scopeDigest(changeEvidence) {
+-  if (changeEvidence.evidenceSet) {
+-    const paths = changeEvidence.evidenceSet.paths.map(item => item.path)
+-    return actionFingerprint({ paths, source: changeEvidence.evidenceSet.sourceDigest })
+-  }
+-  const refs = changeEvidence.paths[0].hunks.map((hunk, hunkIndex) => {
+-    const body = typeof hunk.diffText === 'string' ? hunk.diffText : hunk.diffText.join('\n')
+-    return { path: 'src/feature.txt', hunk_index: hunkIndex, body_digest: actionFingerprint(body) }
+-  })
+-  return actionFingerprint({ paths: ['src/feature.txt'], refs })
+-}
+ 
+ test('LOW PASS runs canonical and focused checks then persists only verification metadata', () => {
+   const f = fixture('LOW')
+@@ -571,20 +363,6 @@ test('interrupted metadata recovery rejects a changed receipt and preserves part
+   } finally { f.cleanup() }
+ })
+ 
+-function legacyMetadataFailure(f) {
+-  const request = { action: 'verify_slice', story_id: '9.1', slice_id: 'A', transaction_id: 'legacy-prewrite', recovery_checkpoint: f.head, maintenance_paths: [] }
+-  const identity = transactionIdentity(f.root, request)
+-  const lock = { schema_version: 1, repository: identity.repository, worktree: identity.worktree, action: 'verify_slice', story_id: '9.1', slice_id: 'A', transaction_id: request.transaction_id, scope_key: identity.scopeKey, created_at: '2026-10-01T00:00:00.000Z' }
+-  const journal = { ...lock, expected_head: f.head, checkpoint_commit: f.head, implementation_paths: [], metadata_paths: [PLAN, VERIFICATION_RECEIPT, REVIEW_RECEIPT].sort(), preview_fingerprint: digest('legacy-preview'), lock_identity: lock, phase: 'RECOVERY_REQUIRED', error: 'SUCCESSOR_PROJECTION_MISMATCH', recovery_required: true, initial_inventory: { staged: [], unstaged: [], untracked: [] }, lock_path: identity.lockPath, journal_path: identity.journalPath, _path: identity.journalPath }
+-  mkdirSync(identity.transactionRoot, { recursive: true })
+-  const journalBytes = JSON.stringify(journal, null, 2) + '\n'
+-  const lockBytes = JSON.stringify(lock, null, 2) + '\n'
+-  writeFileSync(identity.journalPath, journalBytes)
+-  writeFileSync(identity.lockPath, lockBytes)
+-  const run = (operation, extra = {}) => runV4Story(f.root, '9.1', { expectedHead: f.head, operation, input: { ...request, ...extra } })
+-  return { request, identity, journalBytes, lockBytes, run }
+-}
+-
+ test('Runner retires only the unwritten legacy transaction and preserves its journal and lock evidence', () => {
+   const f = fixture('HIGH')
+   try {

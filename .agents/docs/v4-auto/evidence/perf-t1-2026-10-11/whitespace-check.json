@@ -1,0 +1,9 @@
+{
+    "exitCode":  0,
+    "command":  "git -c core.whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol diff --cached --check",
+    "rationale":  "Evidence .gitattributes -text intentionally preserves CRLF; raw reporter multiline names and diff context prefixes are not normalized.",
+    "exclusions":  [
+                       "*.log",
+                       "*.patch"
+                   ]
+}

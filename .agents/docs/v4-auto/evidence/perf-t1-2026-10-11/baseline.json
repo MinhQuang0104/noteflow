@@ -1,0 +1,16 @@
+{
+  "label": "baseline",
+  "command": [
+    "npm.cmd",
+    "run",
+    "test:v4",
+    "--",
+    "--test-reporter=spec"
+  ],
+  "cwd": "D:\\Workspace\\Tu_Hoc\\v4-test-perf",
+  "head": "7501c707d36f4e5114fe032f0dcafaf2e711b463",
+  "started_at": "2026-10-11T14:41:02.820938+00:00",
+  "exit_code": 0,
+  "wall_seconds": 879.786636200035,
+  "ended_at": "2026-10-11T14:55:42.607604+00:00"
+}

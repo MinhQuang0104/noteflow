@@ -1,0 +1,17 @@
+{
+  "baselineSource": "87469b76b45eddd569d6090d422a4158f12218e0",
+  "head": "7501c707d36f4e5114fe032f0dcafaf2e711b463",
+  "canonicalMain": "49e30d5664946817b1fc0703c4ff1829632e7144",
+  "canonicalPointer": {
+    "schemaVersion": 1,
+    "activeRunId": null,
+    "storyId": null,
+    "status": "IDLE",
+    "updatedAt": "2026-09-22T06:13:26.3964611+00:00"
+  },
+  "pointerSha256": "5febd755d0136d14d573383bd88f33e8856acbaa0b4a2d25fd592e1820811ae4",
+  "policyComparedFiles": 14,
+  "policyDrift": [],
+  "sourceDiffFromBaseline": "",
+  "goldenSha256": "c26f85e4f087ef6d82b769b29a63dfc288474ecdb14f8e89e6a73a35264c9393"
+}

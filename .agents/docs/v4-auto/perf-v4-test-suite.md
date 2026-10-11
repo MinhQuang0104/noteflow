@@ -2,7 +2,7 @@
 
 Branch: `perf/v4-test-suite` (worktree `D:/Workspace/Tu_Hoc/v4-test-perf`), cut
 from `main` 3721785. Runs in parallel with Story work and never touches the main
-checkout. Status: **T0 COMPLETE; T1–T4 NOT STARTED**. T0 source is pinned to
+checkout. Status: **T0 COMPLETE; T1 IMPLEMENTED; T2–T4 NOT STARTED**. T0 source is pinned to
 `87469b7`; see [T0 report](perf-t0-report.md) and its evidence index.
 
 ## 0. Phase rules and rationale
@@ -108,6 +108,13 @@ the uncached builder. No cache or fixture extraction was implemented in T0.
 - Collect the helpers that nearly every file repeats (`git()`, `write()`,
   `digest()`) into one shared `v4-test-helpers.mjs`.
 - Done when the golden list is unchanged and the full suite passes.
+
+**Implemented:** [T1 report](perf-t1-report.md) records the pure extraction,
+11 focused checks, full 800/799/1/0 suite and exact golden-name comparison,
+Python 46 tests + 46 subtests, and byte-bound diff self-check. Exact final
+commit verification is recorded locally in the post-commit evidence sidecars
+linked by that report; completion requires their successful final binding check.
+No cache, test split or concurrency change was implemented.
 
 T2 and T3 both depend on T1.
 

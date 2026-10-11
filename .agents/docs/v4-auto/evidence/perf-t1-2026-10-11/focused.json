@@ -1,0 +1,22 @@
+{
+  "label": "focused",
+  "command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-name-pattern=LOW PASS|five changed paths|executor code drift|schema v2 commits|AGY scope gate|commit-1 failure|explicit staged recovery|terminal Story stays healthy|two-slice Story|clean CLI integration",
+    ".agents/scripts/v4-verification-flow.test.mjs",
+    ".agents/scripts/finalize-story.test.mjs",
+    ".agents/scripts/v4-action-kernel.test.mjs",
+    ".agents/scripts/v4-slice-transaction.test.mjs",
+    ".agents/scripts/check-story-completion.test.mjs",
+    ".agents/scripts/v4-no-review-finalization.e2e.test.mjs",
+    ".agents/scripts/integrate-story.test.mjs"
+  ],
+  "cwd": "D:\\Workspace\\Tu_Hoc\\v4-test-perf",
+  "head": "7501c707d36f4e5114fe032f0dcafaf2e711b463",
+  "started_at": "2026-10-11T14:57:14.585909+00:00",
+  "exit_code": 0,
+  "wall_seconds": 79.57160929997917,
+  "ended_at": "2026-10-11T14:58:34.157546+00:00"
+}

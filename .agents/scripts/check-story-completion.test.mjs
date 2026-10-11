@@ -1,36 +1,11 @@
+import { digest, TWO_PATHS, snapshot, persistApproval, completedFixture, integrateUnrelatedWork } from './check-story-completion-fixture.mjs'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { rmSync } from 'node:fs'
 
-import {
-  approvalRecordForSnapshot,
-  doneGateSummaryDigest,
-  explicitApprovalInput,
-  inspectCompletion
-} from './check-story-completion.mjs'
+import { approvalRecordForSnapshot, explicitApprovalInput, inspectCompletion } from './check-story-completion.mjs'
 import { createCompletionFixture, PLAN, SPRINT, STORY } from './completion-fixture.mjs'
 
-const digest = letter => `sha256:${letter.repeat(64)}`
-
-function snapshot() {
-  const value = {
-    story_id: '9.1',
-    story_title: 'Fixture completion story',
-    lifecycle: 'review',
-    story_normative_digest: digest('a'),
-    finalization_receipt_digest: digest('b'),
-    done_gate_disposition: 'SATISFIED_WITH_DISCLOSURES',
-    ac_coverage: [{ id: 'AC-1', covered: true, evidence: [] }],
-    canonical_disclosures: [{ slice_id: 'A', applicability: 'APPLICABLE', status: 'INCOMPLETE', complete: false }],
-    implementation_path_count: 2,
-    scope_paths_digest: digest('c'),
-    implementation_commit_set_digest: digest('d'),
-    final_scoped_tree_digest: digest('e'),
-    pending_action: { kind: 'complete_story', target: 'story' },
-    approved_review_head: 'f'.repeat(40)
-  }
-  return { ...value, done_gate_summary_digest: doneGateSummaryDigest(value) }
-}
 
 test('structured approval input is explicit and generic continuation is rejected', () => {
   assert.equal(explicitApprovalInput({ action: 'approve_exact_scope', disclosures_acknowledged: true }), true)
@@ -69,26 +44,6 @@ test('completion gate API is read-only and exposes the exact preview for a fixtu
   assert.equal(result.status, 'ERROR')
   assert.equal(result.valid, false)
 })
-
-function approvalYaml(record) {
-  return [
-    'human_approval:',
-    ...Object.entries(record).map(([key, value]) => `  ${key}: ${typeof value === 'string' ? JSON.stringify(value) : value}`),
-    ''
-  ].join('\n')
-}
-
-function persistApproval(f, mutate = {}, commit = true) {
-  const gate = inspectCompletion(f.root, '9.1', f.head)
-  const approval = { ...approvalRecordForSnapshot(gate.preview, f.head, '2026-09-26T12:00:00.000Z'), ...mutate }
-  f.write(PLAN, f.readPlan().replace('human_approval: null\n', approvalYaml(approval)))
-  if (commit) {
-    f.git('add', '.')
-    f.git('commit', '-qm', 'fixture Human approval')
-    f.refreshHead()
-  }
-  return approval
-}
 
 test('review without approval is BLOCKED but emits the exact Human Gate preview', () => {
   const f = createCompletionFixture()
@@ -224,7 +179,6 @@ test('uncommitted product drift after durable approval is stale', () => {
   }
 })
 
-const TWO_PATHS = ['src/a.txt', 'src/b.txt']
 
 test('exact-scope multi-path review evidence keeps completion at the Human Gate', () => {
   const f = createCompletionFixture({ implementationPaths: TWO_PATHS })
@@ -275,28 +229,6 @@ test('review receipt edited after Plan binding fails closed', () => {
     f.cleanup()
   }
 })
-
-async function completedFixture() {
-  const { runAction } = await import('./v4-story-runner.mjs')
-  const f = createCompletionFixture()
-  const approval = runAction(f.root, '9.1', f.head, {
-    approval: { action: 'approve_exact_scope', disclosures_acknowledged: true, approved_at: '2026-09-26T12:00:00.000Z' }
-  })
-  assert.equal(approval.status, 'APPROVAL_DURABLE_PENDING_COMPLETION', JSON.stringify(approval))
-  const completed = runAction(f.root, '9.1', approval.commit)
-  assert.equal(completed.status, 'DONE', JSON.stringify(completed))
-  f.completion = f.refreshHead()
-  return f
-}
-
-function integrateUnrelatedWork(f) {
-  f.git('checkout', '-q', '-b', 'integration', f.completion + '~3')
-  f.write('docs/unrelated.md', 'work integrated alongside the Story\n')
-  f.git('add', 'docs/unrelated.md')
-  f.git('commit', '-qm', 'unrelated work')
-  f.git('merge', '-q', '--no-ff', '-m', 'merge Story into integration', f.completion)
-  return f.refreshHead()
-}
 
 test('terminal Story stays healthy after an integration merge and is evaluated at its completion commit', async () => {
   const f = await completedFixture()

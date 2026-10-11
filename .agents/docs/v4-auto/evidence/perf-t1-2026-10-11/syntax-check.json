@@ -1,0 +1,54 @@
+[
+    {
+        "File":  ".agents/scripts/check-story-completion.test.mjs",
+        "ExitCode":  0
+    },
+    {
+        "File":  ".agents/scripts/finalize-story.test.mjs",
+        "ExitCode":  0
+    },
+    {
+        "File":  ".agents/scripts/v4-action-kernel.test.mjs",
+        "ExitCode":  0
+    },
+    {
+        "File":  ".agents/scripts/v4-no-review-finalization.e2e.test.mjs",
+        "ExitCode":  0
+    },
+    {
+        "File":  ".agents/scripts/v4-slice-transaction.test.mjs",
+        "ExitCode":  0
+    },
+    {
+        "File":  ".agents/scripts/v4-verification-flow.test.mjs",
+        "ExitCode":  0
+    },
+    {
+        "File":  ".agents/scripts/check-story-completion-fixture.mjs",
+        "ExitCode":  0
+    },
+    {
+        "File":  ".agents/scripts/finalize-story-fixture.mjs",
+        "ExitCode":  0
+    },
+    {
+        "File":  ".agents/scripts/v4-kernel-fixture.mjs",
+        "ExitCode":  0
+    },
+    {
+        "File":  ".agents/scripts/v4-no-review-finalization-fixture.mjs",
+        "ExitCode":  0
+    },
+    {
+        "File":  ".agents/scripts/v4-test-helpers.mjs",
+        "ExitCode":  0
+    },
+    {
+        "File":  ".agents/scripts/v4-transaction-fixture.mjs",
+        "ExitCode":  0
+    },
+    {
+        "File":  ".agents/scripts/v4-verification-fixture.mjs",
+        "ExitCode":  0
+    }
+]

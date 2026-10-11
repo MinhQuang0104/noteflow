@@ -1,0 +1,61 @@
+{
+  "checks": [
+    {
+      "test": ".agents/scripts/v4-verification-flow.test.mjs",
+      "allRemainingTestTextByteIdentical": true,
+      "originalBytesBoundToT0": true,
+      "unchangedDeclarations": 18,
+      "currentHashMatchesManifest": true
+    },
+    {
+      "test": ".agents/scripts/finalize-story.test.mjs",
+      "allRemainingTestTextByteIdentical": true,
+      "originalBytesBoundToT0": true,
+      "unchangedDeclarations": 12,
+      "currentHashMatchesManifest": true
+    },
+    {
+      "test": ".agents/scripts/v4-action-kernel.test.mjs",
+      "allRemainingTestTextByteIdentical": true,
+      "originalBytesBoundToT0": true,
+      "unchangedDeclarations": 20,
+      "currentHashMatchesManifest": true
+    },
+    {
+      "test": ".agents/scripts/v4-slice-transaction.test.mjs",
+      "allRemainingTestTextByteIdentical": true,
+      "originalBytesBoundToT0": true,
+      "unchangedDeclarations": 6,
+      "currentHashMatchesManifest": true
+    },
+    {
+      "test": ".agents/scripts/v4-no-review-finalization.e2e.test.mjs",
+      "allRemainingTestTextByteIdentical": true,
+      "originalBytesBoundToT0": true,
+      "unchangedDeclarations": 27,
+      "currentHashMatchesManifest": true
+    },
+    {
+      "test": ".agents/scripts/check-story-completion.test.mjs",
+      "allRemainingTestTextByteIdentical": true,
+      "originalBytesBoundToT0": true,
+      "unchangedDeclarations": 7,
+      "currentHashMatchesManifest": true
+    }
+  ],
+  "finalizeModuleExecutorSetupImportAndCleanupUnchanged": true,
+  "existingFixtureModulesAndIntegrationTestUnchanged": [
+    "completion-fixture.mjs",
+    "integration-test-fixture.mjs",
+    "v4-architecture-fixture.mjs",
+    "integrate-story.test.mjs"
+  ],
+  "canonicalPointerUnchanged": true,
+  "risk": "MEDIUM: helper module consumers and executor source-copy boundaries",
+  "scope": "Pure helper relocation and same-semantics shared git/write/digest; no product/runtime/cache/test split/concurrency changes",
+  "sharedSemantics": {
+    "git": "spawnSync git, identical args/options cwd+utf8+windowsHide, strict status assertion with stderr, trimmed stdout",
+    "write": "recursive parent mkdir, writeFileSync without encoding option (string and Buffer preserved)",
+    "digest": "sha256 prefix and createHash.update(value, utf8).digest(hex); fake repeated-letter completion digest stays separate"
+  }
+}

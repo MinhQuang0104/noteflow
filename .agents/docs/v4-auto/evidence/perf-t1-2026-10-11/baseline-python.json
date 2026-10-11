@@ -1,0 +1,16 @@
+{
+  "label": "baseline-python",
+  "command": [
+    "D:/Tools/Python314/python.exe",
+    "-m",
+    "pytest",
+    "-q",
+    "_bmad/scripts/tests/test_agent_architecture.py"
+  ],
+  "cwd": "D:\\Workspace\\Tu_Hoc\\v4-test-perf",
+  "head": "7501c707d36f4e5114fe032f0dcafaf2e711b463",
+  "started_at": "2026-10-11T14:41:36.329559+00:00",
+  "exit_code": 0,
+  "wall_seconds": 2.5457656000507995,
+  "ended_at": "2026-10-11T14:41:38.875366+00:00"
+}

@@ -1,0 +1,19 @@
+✔ terminal Story stays healthy after an integration merge and is evaluated at its completion commit (30284.054ms)
+✔ recovery projection rejects a re-signed candidate and executor code drift before mutation (7044.2952ms)
+✔ clean CLI integration fast-forwards to the tested merge and preserves approval (38034.397ms)
+✔ schema v2 commits implementation then Plan plus receipt (10036.5661ms)
+✔ AGY scope gate blocks out-of-scope files, worker commits, and deletions (4886.2128ms)
+✔ AGY scope gate re-check becomes stale when the tree changes after prepare (4272.2952ms)
+✔ commit-1 failure preserves journal and explicit recovery finishes without replay (12398.2078ms)
+✔ two-slice Story with a LOW NO_REVIEW slice and a reviewed MEDIUM slice finalizes and completes (79311.4429ms)
+✔ explicit staged recovery consumes the existing index and preserves original journal audit (16061.6788ms)
+✔ LOW PASS runs canonical and focused checks then persists only verification metadata (21882.4314ms)
+✔ same-Lead APPROVE accepts one ordered evidence set covering five changed paths (22227.4199ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 79514.4496
