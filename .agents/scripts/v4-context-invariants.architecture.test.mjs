@@ -32,6 +32,26 @@ test('AGY transport is available without selecting the historical V3 lane', () =
   ]) assert.match(transport, invariant)
 })
 
+test('Story routing uses explicit V4 actions and preserves the historical owner stop', () => {
+  const agents = read('AGENTS.md').replace(/\s+/g, ' ')
+  const router = read('.agents/routing/task-router.md').replace(/\s+/g, ' ')
+  const runner = read('.agents/skills/v4-story-runner/SKILL.md').replace(/\s+/g, ' ')
+  assert.match(agents, /An explicit Story request uses the V4 Runner and exactly one action/)
+  assert.doesNotMatch(agents, /Explicit V3\.1\/Orca requests|Story requests without V4 opt-in/)
+  assert.match(agents, /A historical V3 run with a non-`IDLE` pointer stops for the owner/)
+  assert.match(agents, /automatic V3 fallback stay disabled/)
+  assert.match(agents, /`HUMAN_GATE` approval for exact scope/)
+  assert.doesNotMatch(agents, /V3 `HUMAN_GATE`/)
+  assert.match(agents, /compare `AGENTS\.md`, `task-router\.md`, and `v4-story-runner` with canonical main/)
+  assert.match(agents, /compare against its pinned `controlPlaneCommit` instead/)
+  assert.match(router, /explicit Story request uses V4 Runner plus one validated action/)
+  assert.doesNotMatch(router, /Product\/Story work without V4 opt-in remains on V3/)
+  assert.match(runner, /Enter only for an explicit Story request/)
+  assert.match(runner, /Stop for the owner on unresolved authority.*exceeded V4 capability/)
+  assert.doesNotMatch(runner, /explicit V4 request|Story by V4 Lite|V3\.1 may be recommended/)
+  assert.match(read('CLAUDE.md'), /Explicit Story requests use V4 Runner \+ one action/)
+})
+
 function seedInstructionSources(fixture) {
   const paths = [
     'AGENTS.md',

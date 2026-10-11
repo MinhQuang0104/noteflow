@@ -1,11 +1,11 @@
 ---
 name: v4-story-runner
-description: Use when a human explicitly asks to implement or continue a named BMAD Story by V4 Lite; route one bounded action through its contract.
+description: Use when a human explicitly asks to implement or continue a named BMAD Story; route one bounded action through its contract.
 ---
 
 # V4 Lite Story Runner — common entry
 
-Routing/invariant context only; it never executes a Story action. Enter only for an explicit V4 request after read-only `.agent-state/active-run.json` check: continue on clear `IDLE` with no contradiction. Resolve Story identity from canonical artifacts, never chat or branch.
+Routing/invariant context only; it never executes a Story action. Enter only for an explicit Story request after read-only `.agent-state/active-run.json` check: continue on clear `IDLE` with no contradiction. Resolve Story identity from canonical artifacts, never chat or branch.
 
 ## Action selection
 
@@ -66,4 +66,4 @@ the `ERROR` code and never become success:
 
 Default context is Story section, Plan, sprint entry, Git identity, current slice, and selected action. Do not eager-load repo, PRD, V3 policy, BMAD output, or skill library; load action-required skills only when needed.
 
-Stop for unresolved authority, destructive/irreversible work without authorization, unclear lifecycle, external credentials, exceeded V4 capability, incomplete inventory, or repeated repair failure. V3.1 may be recommended when one bounded Lead action cannot represent the work, but is never invoked automatically.
+Stop for the owner on unresolved authority, destructive/irreversible work without authorization, unclear lifecycle, external credentials, exceeded V4 capability, incomplete inventory, or repeated repair failure.
