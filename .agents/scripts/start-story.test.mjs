@@ -240,3 +240,18 @@ test('upstream Epic must be committed even when an ignored local copy matches it
   assert.equal(preview.status, 'BLOCKED', JSON.stringify(preview))
   assert.ok(preview.reasons.includes('ARTIFACTS_NOT_COMMITTED'))
 })
+
+test('a CRLF working Epic under core.autocrlf still matches the committed LF section digest', t => {
+  const f = fixture(t)
+  git(f.root, 'config', 'core.autocrlf', 'true')
+  rmSync(path.join(f.root, EPIC))
+  git(f.root, 'checkout', '--', EPIC)
+  assert.match(f.read(EPIC), /\r\n/)
+  assert.equal(git(f.root, 'status', '--porcelain'), '')
+  const preview = inspectStart(f.root, '9.1', f.head)
+  assert.equal(preview.status, 'READY', JSON.stringify(preview))
+  f.plan.upstream_epic.section_digest = digest('### Story 9.1: Changed story\n\n')
+  f.save()
+  const stale = inspectStart(f.root, '9.1', f.commit())
+  assert.ok(stale.reasons.includes('UPSTREAM_EPIC_STALE'), JSON.stringify(stale))
+})

@@ -98,7 +98,10 @@ function inspect(root, id, expectedHead, options, ownedToken) {
     const epicText = readFileSync(safeFile(root, EPIC), 'utf8')
     const sections = [...epicText.matchAll(/^### Story (\d+\.\d+):[^\r\n]*/gm)]
     const index = sections.findIndex(s => s[1] === id)
-    if (sections.filter(s => s[1] === id).length !== 1 || plan.upstream_epic?.path !== EPIC || hash(epicText.slice(sections[index]?.index, sections[index + 1]?.index)) !== plan.upstream_epic.section_digest) reasons.push('UPSTREAM_EPIC_STALE')
+    // Under core.autocrlf the working Epic is CRLF while Plans hash the committed LF section (as finalization does).
+    const epicSection = epicText.slice(sections[index]?.index, sections[index + 1]?.index)
+    const sectionDigests = [hash(epicSection), hash(epicSection.replaceAll('\r\n', '\n'))]
+    if (sections.filter(s => s[1] === id).length !== 1 || plan.upstream_epic?.path !== EPIC || !sectionDigests.includes(plan.upstream_epic.section_digest)) reasons.push('UPSTREAM_EPIC_STALE')
     const paths = [storyPath, planPath, SPRINT].sort()
     const staged = inventory(root, ['diff', '--cached', '--name-only', '-z', 'HEAD', '--'])
     const dirty = inventory(root, ['diff', '--name-only', '-z', 'HEAD', '--'])
