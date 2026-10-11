@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import test from 'node:test'
 
@@ -7,6 +7,58 @@ import { createV4Fixture } from './v4-architecture-fixture.mjs'
 import { compileActionContext } from './compile-v4-context.mjs'
 
 const read = relative => readFileSync(relative, 'utf8')
+
+test('AGY transport is available without selecting the historical V3 lane', () => {
+  const reference = '.agents/skills/v4-story-runner/references/agy-transport.md'
+  assert.ok(existsSync(reference), 'The V4 AGY transport reference must exist')
+  const transport = read(reference).replace(/\s+/g, ' ')
+  assert.match(read('.agents/skills/v4-story-runner/references/agy-executor.md'), /references\/agy-transport\.md/)
+  assert.match(read('.agents/policies/orchestration-v3.md'), /\]\(\.\.\/skills\/v4-story-runner\/references\/agy-transport\.md\)/)
+  for (const invariant of [
+    /orca terminal create --worktree/,
+    /orca terminal wait --for tui-idle/,
+    /--return-preamble.*without `--inject`/,
+    /Never resend blindly/,
+    /worker_done,escalation,question/,
+    /--dangerously-skip-permissions/,
+    /only `orca orchestration ask`/,
+    /three consecutive empty waits or 15 minutes/,
+    /Screen output is diagnosis, never completion/,
+    /HISTORY_REWRITTEN.*CONTRACT_MODIFIED/,
+    /`INVALID`\/`ERROR` are never `PASS`/,
+    /Correction contracts carry only VALID findings/,
+    /At most three correction attempts per Task/,
+    /never approves, merges, integrates or marks a Story done/,
+  ]) assert.match(transport, invariant)
+})
+
+test('Story routing uses explicit V4 actions and preserves the historical owner stop', () => {
+  const agents = read('AGENTS.md').replace(/\s+/g, ' ')
+  const router = read('.agents/routing/task-router.md').replace(/\s+/g, ' ')
+  const runner = read('.agents/skills/v4-story-runner/SKILL.md').replace(/\s+/g, ' ')
+  assert.match(agents, /An explicit Story request uses the V4 Runner and exactly one action/)
+  assert.doesNotMatch(agents, /Explicit V3\.1\/Orca requests|Story requests without V4 opt-in/)
+  assert.match(agents, /A historical V3 run with a non-`IDLE` pointer stops for the owner/)
+  assert.match(agents, /automatic V3 fallback stay disabled/)
+  assert.match(agents, /`HUMAN_GATE` approval for exact scope/)
+  assert.doesNotMatch(agents, /V3 `HUMAN_GATE`/)
+  assert.match(agents, /compare `AGENTS\.md`, `task-router\.md`, and `v4-story-runner` with canonical main/)
+  assert.match(agents, /compare against its pinned `controlPlaneCommit` instead/)
+  assert.match(router, /explicit Story request uses V4 Runner plus one validated action/)
+  assert.doesNotMatch(router, /Product\/Story work without V4 opt-in remains on V3/)
+  assert.match(runner, /Enter only for an explicit Story request/)
+  assert.match(runner, /Stop for the owner on unresolved authority.*exceeded V4 capability/)
+  assert.doesNotMatch(runner, /explicit V4 request|Story by V4 Lite|V3\.1 may be recommended/)
+  assert.match(read('CLAUDE.md'), /Explicit Story requests use V4 Runner \+ one action/)
+  assert.match(agents, /An explicitly authorized schema-v2 Story uses `start-story\.md`/)
+  assert.doesNotMatch(agents, /by V4 Lite/)
+  const startStory = read('.agents/skills/v4-story-runner/actions/start-story.md').replace(/\s+/g, ' ')
+  assert.match(startStory, /explicit human request to start a named schema-v2 Story\. /)
+  assert.doesNotMatch(startStory, /Story by V4 Lite/)
+  const help = read('.agents/skills/bmad/references/help.md').replace(/\s+/g, ' ')
+  assert.doesNotMatch(help, /V3 execution/)
+  assert.match(help, /For freeform work, follow root `AGENTS\.md`; `bmad-build` remains explicit-only/)
+})
 
 function seedInstructionSources(fixture) {
   const paths = [
@@ -19,7 +71,9 @@ function seedInstructionSources(fixture) {
     '.agents/docs/v4-artifact-contract.md',
     '.agents/skills/v4-story-runner/actions/implement-slice.md',
     '.agents/skills/v4-story-runner/references/implementation-techniques.md',
+    '.agents/skills/v4-story-runner/references/agy-executor.md',
     '.agents/skills/v4-story-runner/references/recovery.md',
+    '.agents/skills/v4-story-runner/references/autopilot.md',
   ]
   for (const relative of paths) {
     const file = path.join(fixture.root, relative)

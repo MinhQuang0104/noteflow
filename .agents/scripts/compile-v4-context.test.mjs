@@ -31,7 +31,9 @@ function seedInstructionSources(fixture) {
     '.agents/docs/v4-artifact-contract.md',
     '.agents/skills/v4-story-runner/actions/implement-slice.md',
     '.agents/skills/v4-story-runner/references/implementation-techniques.md',
+    '.agents/skills/v4-story-runner/references/agy-executor.md',
     '.agents/skills/v4-story-runner/references/recovery.md',
+    '.agents/skills/v4-story-runner/references/autopilot.md',
   ]
   for (const relative of paths) {
     const file = path.join(fixture.root, relative)
@@ -70,6 +72,7 @@ test('projects only the selected slice with provenance and explicit unknown scop
     assert.deepEqual(result.projection.requirements.tasks.map(item => item.id), ['T-1'])
     assert.deepEqual(result.projection.requirements.acceptance_criteria.map(item => item.id), ['AC-1'])
     assert.match(result.projection.requirements.story_risk.raw, /Human Gate authority/)
+    assert.equal(Object.hasOwn(result.projection.requirements, 'slice_risk'), false)
     assert.deepEqual(result.projection.dependency_dispositions, [])
     assert.deepEqual(result.projection.blockers, [])
     assert.deepEqual(result.projection.questions, [])
@@ -87,6 +90,34 @@ test('projects only the selected slice with provenance and explicit unknown scop
     assert.equal(Object.hasOwn(result.projection, 'historical_receipts'), false)
 
     assert.deepEqual(snapshot(fixture), before)
+  })
+})
+
+test('explicit slice risk is projected with Plan provenance', () => {
+  runWithFixture({ schemaVersion: 2, state: 'pending' }, fixture => {
+    seedInstructionSources(fixture)
+    writeFileSync(fixture.paths.plan, readFileSync(fixture.paths.plan, 'utf8').replace('slices:', 'risk:\n  level: LOW\nslices:').replace('    depends_on: []', '    depends_on: []\n    risk:\n      level: LOW\n      flags: []'))
+    const result = compileActionContext(fixture.root, fixture.storyId, 'implement_slice', 'A', { expectedHead: head(fixture) })
+    assert.equal(result.status, 'READY', JSON.stringify(result))
+    assert.deepEqual(result.projection.requirements.slice_risk, {
+      raw: { level: 'LOW', flags: [] },
+      source: { path: '_bmad-output/implementation-artifacts/story-9-1-plan.md', sections: ['slices.A.risk'] },
+    })
+  })
+})
+
+test('AGY executor guidance is lazy and trigger-bound', () => {
+  runWithFixture({ schemaVersion: 2, state: 'pending' }, fixture => {
+    seedInstructionSources(fixture)
+    const expectedHead = head(fixture)
+    const result = compileActionContext(fixture.root, fixture.storyId, 'implement_slice', 'A', { expectedHead })
+    assert.equal(result.status, 'READY', JSON.stringify(result))
+    const reference = '.agents/skills/v4-story-runner/references/agy-executor.md'
+    assert.ok(result.projection.lazy_reference_paths.some(item => item.path === reference && item.trigger === 'Load only when the current slice declares executor: agy.'))
+    const binding = result.projection.source_bindings.find(item => item.path === reference)
+    assert.equal(binding.loaded, false)
+    assert.equal(result.projection.byte_counters.lazy_reference_bytes, 0)
+    assert.match(readFileSync('.agents/skills/v4-story-runner/actions/implement-slice.md', 'utf8'), /executor: agy[\s\S]{0,100}agy-executor\.md/)
   })
 })
 

@@ -95,9 +95,57 @@ function receiptCase(mutateReceipt = () => {}, mutatePlan = () => {}) {
   return { root, p, cleanup: () => rmSync(root, { recursive: true, force: true }) }
 }
 
+function agyReceiptCase(mutateReceipt = () => {}, mutatePlan = () => {}) {
+  return receiptCase(receipt => {
+    receipt.worker = {
+      executor: 'agy',
+      orca: { run_id: 'run-fixture', task_id: 'task-fixture', dispatch_ids: ['ctx_fixture'] },
+      attempt: 1,
+      contract_sha256: 'a'.repeat(64),
+      worker_report_sha256: 'b'.repeat(64),
+      lead_vendor: 'codex',
+      scope_gate: { schema: 'worker-scope-v1', status: 'PASS', base: receipt.baseline_commit, allowed: ['src/'], changed: ['src/a.js'] }
+    }
+    mutateReceipt(receipt)
+  }, planValue => {
+    planValue.slices[0].executor = 'agy'
+    planValue.slices[0].scope = { paths: ['src/'] }
+    planValue.slices[0].verification_obligations = ['node --check src/a.js']
+    mutatePlan(planValue)
+  })
+}
+
 test('valid receipt binds to checkpoint and referenced content', () => {
   const { root, p, cleanup } = receiptCase()
   try { assert.deepEqual(validateReceipt(root, p, 'A', 'implementation'), []) } finally { cleanup() }
+})
+
+test('valid AGY receipt binds worker evidence and its scope gate', () => {
+  const { root, p, cleanup } = agyReceiptCase()
+  try { assert.deepEqual(validateReceipt(root, p, 'A', 'implementation'), []) } finally { cleanup() }
+})
+
+test('AGY implementation receipt requires worker evidence', () => {
+  const { root, p, cleanup } = agyReceiptCase(receipt => delete receipt.worker)
+  try { assert.ok(validateReceipt(root, p, 'A', 'implementation').includes('WORKER_EVIDENCE_MISSING')) } finally { cleanup() }
+})
+
+for (const [name, mutate] of [
+  ['executor', receipt => receipt.worker.executor = 'lead'],
+  ['scope-gate status', receipt => receipt.worker.scope_gate.status = 'FAIL'],
+  ['scope-gate base', receipt => receipt.worker.scope_gate.base = 'c'.repeat(40)],
+  ['scope-gate allowlist', receipt => receipt.worker.scope_gate.allowed = ['lib/']],
+  ['missing scope gate', receipt => delete receipt.worker.scope_gate],
+]) test(`AGY implementation receipt rejects worker ${name} mismatch`, () => {
+  const { root, p, cleanup } = agyReceiptCase(mutate)
+  try { assert.ok(validateReceipt(root, p, 'A', 'implementation').includes('WORKER_EVIDENCE_MISMATCH')) } finally { cleanup() }
+})
+
+test('lead implementation receipt rejects unexpected worker evidence', () => {
+  const { root, p, cleanup } = receiptCase(receipt => {
+    receipt.worker = { executor: 'agy' }
+  })
+  try { assert.ok(validateReceipt(root, p, 'A', 'implementation').includes('WORKER_EVIDENCE_UNEXPECTED')) } finally { cleanup() }
 })
 
 for (const [name, mutate, reason] of [
@@ -125,4 +173,47 @@ test('receipt detail changes never alter Story normative digest', () => {
   const before = normativeDigest(story())
   const { root, p, cleanup } = receiptCase(r => r.commands[0].environment = 'another fixture')
   try { assert.deepEqual(validateReceipt(root, p, 'A', 'implementation'), []); assert.equal(normativeDigest(story()), before) } finally { cleanup() }
+})
+
+function reviewReceiptCase(reviewer, findings, mutate = () => {}, executor = 'lead') {
+  const f = receiptCase(receipt => {
+    receipt.kind = 'review'
+    receipt.schema_version = 2
+    receipt.judgment = 'APPROVE'
+    receipt.reviewer = reviewer
+    if (findings !== undefined) receipt.findings = findings
+    mutate(receipt)
+  })
+  const receipt = JSON.parse(readFileSync(path.join(f.root, 'receipt.json'), 'utf8'))
+  f.p.slices[0].executor = executor
+  f.p.slices[0].receipt_refs.review = { path: 'receipt.json', digest: receiptDigest(receipt) }
+  return f
+}
+
+for (const [name, reviewer, findings, mutate, executor, reason] of [
+  ['independent AGY lead', { type: 'lead', vendor: 'claude', independent: true }, [], () => {}, 'agy', null],
+  ['same lead', { type: 'lead', vendor: 'codex', independent: false }, undefined, () => {}, 'lead', null],
+  ['human', { type: 'human', vendor: null, independent: false }, [], () => {}, 'agy', null],
+  ['legacy string', 'same-lead', undefined, receipt => receipt.schema_version = 1, 'lead', null],
+  ['independence mismatch', { type: 'lead', vendor: 'codex', independent: true }, [], () => {}, 'lead', 'REVIEWER_INDEPENDENCE_MISMATCH'],
+  ['invalid type', { type: 'worker', vendor: null, independent: false }, [], () => {}, 'agy', 'REVIEWER_INVALID'],
+  ['invalid vendor', { type: 'lead', vendor: 'other', independent: false }, [], () => {}, 'lead', 'REVIEWER_INVALID'],
+  ['missing independence', { type: 'lead', vendor: 'codex' }, [], () => {}, 'lead', 'REVIEWER_INVALID'],
+  ['schema1 structured reviewer', { type: 'lead', vendor: 'codex', independent: false }, [], receipt => receipt.schema_version = 1, 'lead', 'INVALID_RECEIPT_IDENTITY'],
+  ['non-array findings', 'same-lead', {}, () => {}, 'lead', 'REVIEW_FINDINGS_INVALID'],
+  ...['VALID', 'SPEC_AMBIGUITY', 'NEEDS_HUMAN_DECISION'].map(className => [className, 'same-lead', [{ id: 'F1', class: className, summary: 'Open', paths: ['src/a.js'] }], () => {}, 'lead', 'REVIEW_FINDINGS_OPEN']),
+  ['false positive', 'same-lead', [{ id: 'F1', class: 'FALSE_POSITIVE', summary: 'Disproved', paths: [] }], () => {}, 'lead', null],
+  ['verdict approval with open finding', 'same-lead', [{ id: 'F1', class: 'VALID', summary: 'Open', paths: [] }], receipt => { delete receipt.judgment; receipt.verdict = 'APPROVE'; receipt.schema_version = 1 }, 'lead', 'REVIEW_FINDINGS_OPEN'],
+  ['conflicting decisions with findings', 'same-lead', [], receipt => receipt.verdict = 'CHANGES_REQUIRED', 'lead', 'REVIEW_DECISION_CONFLICT'],
+  ['valid changes required', 'same-lead', [{ id: 'F1', class: 'VALID', summary: 'Fix', paths: ['src/a.js'] }], receipt => receipt.judgment = 'CHANGES_REQUIRED', 'lead', null],
+  ['invalid class', 'same-lead', [{ id: 'F1', class: 'OTHER', summary: 'Open', paths: [] }], () => {}, 'lead', 'REVIEW_FINDINGS_INVALID'],
+  ['unsafe path', 'same-lead', [{ id: 'F1', class: 'FALSE_POSITIVE', summary: 'Open', paths: ['../outside'] }], () => {}, 'lead', 'REVIEW_FINDINGS_INVALID'],
+  ['duplicate finding', 'same-lead', [1, 2].map(() => ({ id: 'F1', class: 'FALSE_POSITIVE', summary: 'Disproved', paths: [] })), () => {}, 'lead', 'REVIEW_FINDINGS_INVALID']
+]) test(`structured receipt ${name}`, () => {
+  const f = reviewReceiptCase(reviewer, findings, mutate, executor)
+  try {
+    const errors = validateReceipt(f.root, f.p, 'A', 'review')
+    if (reason) assert.ok(errors.includes(reason), JSON.stringify(errors))
+    else assert.deepEqual(errors, [])
+  } finally { f.cleanup() }
 })

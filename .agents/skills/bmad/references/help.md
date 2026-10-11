@@ -38,9 +38,9 @@ Shaping and planning:
 
 Implementation and quality:
 
-- Approved or ready-for-dev Stories use `story-development`, the project router
-  for V3 Lead routing, deterministic evidence, and BMAD lifecycle handoff.
-  Root `AGENTS.md` and `.agents/policies/orchestration-v3.md` govern all execution.
+- Approved or ready-for-dev Stories use `v4-story-runner`, the project router
+  for V4 Story actions, deterministic evidence, and BMAD lifecycle handoff.
+  Root `AGENTS.md` and `.agents/routing/task-router.md` govern Story execution.
 - `bmad-build` — legacy/general delivery workflow, used only when explicitly
   requested for freeform work that is not an approved Story.
 - `bmad-code-review` — optional review used only when explicitly requested; it
@@ -94,16 +94,16 @@ review, and finish the change. Scope is only one signal: high risk, unclear
 requirements, architectural reach, or coordination between people pushes work
 up a tier even when it is small.
 
-- **Trivial.** The edit is obvious and low-risk: follow V3 execution controls and use no
+- **Trivial.** The edit is obvious and low-risk: follow root `AGENTS.md` risk, retry and Done Gate rules and use no
   BMad skill at all — unless the user asks for BMad, or the change
   would still benefit from explicit planning and review.
-- **One session.** For an approved or ready Story, use `story-development`.
-  For freeform work, follow V3 execution policy; `bmad-build` remains explicit-only
+- **One session.** For an approved or ready Story, use `v4-story-runner`.
+  For freeform work, follow root `AGENTS.md`; `bmad-build` remains explicit-only
   and cannot bypass its worker or ownership constraints.
 - **Epic-sized.** One coherent outcome that needs several sessions: run
   `bmad-spec` to pin down the what, tell it to create architecture and/or UX
   companion files if the situation calls for it, have it break the spec into
-  stories, then use `story-development` for each approved Story. Finish with
+  stories, then use `v4-story-runner` for each approved Story. Finish with
   `bmad-retrospective` against the spec.
 - **Project-sized.** 10-100 coding sessions: take the full planning route —
   `bmad-product-brief` or `bmad-prfaq`, then `bmad-prd`, then `bmad-ux` when

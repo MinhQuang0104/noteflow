@@ -1,4 +1,5 @@
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, renameSync, unlinkSync, writeFileSync } from 'node:fs'
+import { createHash, randomUUID } from 'node:crypto'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
@@ -13,6 +14,7 @@ import { applyRework, checkpointImplementation, prepareAction, prepareRework, re
 import { prepareMetadataAbort, applyMetadataAbort } from './v4-metadata-recovery.mjs'
 import { recordActionFinished, recordActionStarted, recordStoryCompleted, recordStoryReviewSnapshot } from './v4-observations.mjs'
 import { pointerIdle, storyCheckoutState } from './v4-lifecycle-transaction.mjs'
+import { checkLeadGeneration, assertLeadGeneration } from './story-registry.mjs'
 
 export { pointerIdle, storyCheckoutState } from './v4-lifecycle-transaction.mjs'
 
@@ -34,6 +36,8 @@ const STORY_ACTIONS = new Set([
 ])
 const SHA = /^[0-9a-f]{40,64}$/
 export const CODES = Object.freeze({
+  CONTINUE: 0,
+  STOP: 3,
   STARTED: 0,
   DONE: 0,
   APPROVAL_DURABLE_PENDING_COMPLETION: 0,
@@ -45,6 +49,7 @@ export const CODES = Object.freeze({
   AUTHORIZED: 0,
   TERMINAL: 0,
   NO_CHANGE: 0,
+  CHECKPOINTED: 0,
   RECOVERY_REQUIRED: 6,
   STALE: 2,
   CONFLICT: 2,
@@ -73,6 +78,7 @@ const CLI_OPERATIONS = new Set([
   'verify',
   'record-review',
   'record_review',
+  'record-owner-review',
   'prepare-rework',
   'apply-rework',
   'prepare-recovery-abort',
@@ -80,7 +86,9 @@ const CLI_OPERATIONS = new Set([
   'prepare-staged-recovery',
   'apply-staged-recovery'
 ])
-const CLI_USAGE = 'USAGE: run <epic.story> [--expected-head <sha>] [--operation <operation> --input <file>] [--approve-exact-scope]'
+const CLI_USAGE = 'USAGE: run <epic.story> [--expected-head <sha>] [--operation <operation> --input <file>] [--approve-exact-scope] [--authorize-autopilot <json> | --revoke-autopilot]'
+const AUTOPILOT_STATUS_ACTIONS = new Set(['implement_slice', 'verify_slice', 'finalize_story'])
+const FENCED_OPERATIONS = new Set(['checkpoint', 'verify', 'record-review', 'record_review', 'prepare-rework', 'apply-rework'])
 
 function planRelative(storyId) {
   return '_bmad-output/implementation-artifacts/story-' + storyId.replace('.', '-') + '-plan.md'
@@ -96,6 +104,143 @@ function gitOutput(root, args, failure) {
   const result = git(root, args)
   if (result.status !== 0) throw new Error(failure)
   return result.stdout.trim()
+}
+
+function autopilotInput(value, storyId, plan) {
+  if (!value || typeof value !== 'object' || Array.isArray(value) ||
+      Object.keys(value).some(key => !['action', 'story_id', 'budgets', 'lead_vendor'].includes(key)) ||
+      value.action !== 'authorize_autopilot' || value.story_id !== storyId ||
+      !['codex', 'claude'].includes(value.lead_vendor) ||
+      !value.budgets || typeof value.budgets !== 'object' || Array.isArray(value.budgets) ||
+      Object.keys(value.budgets).some(key => !['max_slices', 'max_rework_per_slice', 'max_minutes_per_slice'].includes(key))) return null
+  const budgets = {
+    max_slices: value.budgets.max_slices ?? plan.slices?.length,
+    max_rework_per_slice: value.budgets.max_rework_per_slice ?? 0,
+    max_minutes_per_slice: value.budgets.max_minutes_per_slice ?? 60
+  }
+  if (!Number.isInteger(budgets.max_slices) || budgets.max_slices < 1 ||
+      !Number.isInteger(budgets.max_rework_per_slice) || budgets.max_rework_per_slice < 0 || budgets.max_rework_per_slice > 3 ||
+      !Number.isInteger(budgets.max_minutes_per_slice) || budgets.max_minutes_per_slice < 5 || budgets.max_minutes_per_slice > 240) return null
+  return { budgets, lead_vendor: value.lead_vendor }
+}
+
+function writePlanAtomic(root, relative, value) {
+  const file = path.join(root, relative)
+  const temp = `${file}.${randomUUID()}.tmp`
+  try { writeFileSync(temp, value, { flag: 'wx' }); renameSync(temp, file) }
+  finally { if (existsSync(temp)) unlinkSync(temp) }
+}
+
+function authorityYaml(record) {
+  return ['autopilot:', '  schema_version: 1', `  authorized_at: ${JSON.stringify(record.authorized_at)}`,
+    `  authorized_plan_digest: ${record.authorized_plan_digest}`, `  authorized_head: ${record.authorized_head}`,
+    '  budgets:', `    max_slices: ${record.budgets.max_slices}`,
+    `    max_rework_per_slice: ${record.budgets.max_rework_per_slice}`,
+    `    max_minutes_per_slice: ${record.budgets.max_minutes_per_slice}`,
+    `  lead_vendor: ${record.lead_vendor}`, '  revoked: false'].join('\n')
+}
+
+function autopilotRecovery(root, relative, lock) {
+  return {
+    lock_path: lock,
+    plan_path: path.join(root, relative),
+    index_path: path.resolve(root, gitOutput(root, ['rev-parse', '--git-path', 'index'], 'GIT_INDEX_UNAVAILABLE')),
+    procedure: 'Inspect HEAD, the Plan worktree and index blobs, then reconcile or preserve partial evidence before removing the lock.'
+  }
+}
+
+function canonicalPlanBlob(root, relative, bytes) {
+  const result = spawnSync('git', ['--no-optional-locks', 'hash-object', '--path', relative, '--stdin'], {
+    cwd: root, encoding: 'utf8', windowsHide: true, timeout: 10000, input: bytes
+  })
+  if (result.error || result.status !== 0) throw new Error('PLAN_BLOB_UNAVAILABLE')
+  return result.stdout.trim()
+}
+
+export function recordAutopilot(root, storyId, expectedHead, { authorization, revoke = false } = {}) {
+  let lock
+  let lockOwned = false
+  let mutated = false
+  let released = false
+  let recovery
+  try {
+    if (!/^\d+\.\d+$/.test(storyId ?? '') || !SHA.test(expectedHead ?? '') || Boolean(authorization) === revoke) return invalidResult('AUTOPILOT_INPUT_REQUIRED')
+    const relative = planRelative(storyId)
+    if (!existsSync(path.join(root, relative))) return invalidResult('PLAN_MISSING')
+    const common = gitOutput(root, ['rev-parse', '--git-common-dir'], 'GIT_COMMON_DIR_UNAVAILABLE')
+    const legacyLock = path.resolve(root, common, 'v4-autopilot-authority.lock')
+    lock = existsSync(legacyLock) ? legacyLock : path.resolve(root, common, `v4-autopilot-authority-${storyId}.lock`)
+    recovery = autopilotRecovery(root, relative, lock)
+    if (existsSync(lock)) return { status: 'RECOVERY_REQUIRED', authorized: false, reasons: ['AUTOPILOT_TRANSACTION_LOCKED'], recovery }
+    if (!pointerIdle(root)) return { status: 'BLOCKED', authorized: false, reasons: ['V3_POINTER_NOT_IDLE'] }
+    const head = gitOutput(root, ['rev-parse', 'HEAD'], 'HEAD_UNAVAILABLE')
+    if (head !== expectedHead) return { status: 'STALE', authorized: false, reasons: ['EXPECTED_HEAD_MISMATCH'] }
+    const checkout = checkoutBlock(root, storyId)
+    if (checkout) return checkout
+    const before = readFileSync(path.join(root, relative), 'utf8')
+    const plan = frontmatter(before)
+    const input = revoke ? null : autopilotInput(authorization, storyId, plan)
+    if (!revoke && !input) return invalidResult('AUTOPILOT_INPUT_INVALID')
+    const checked = validateStoryPlan(root, storyId)
+    const approvalOnly = plan.next_action?.kind === 'complete_story' && checked.reasons.length > 0 &&
+      checked.reasons.every(reason => reason === 'DISCLOSURES_NOT_ACKNOWLEDGED')
+    if (!checked.valid && !approvalOnly) return { status: checked.status, authorized: false, reasons: checked.reasons }
+    if (revoke && !plan.autopilot) return { status: 'BLOCKED', authorized: false, reasons: ['NO_AUTOPILOT_AUTHORIZATION'] }
+    if (plan.autopilot?.revoked === true) return { status: 'NOOP', authorized: false, reasons: ['AUTOPILOT_REVOKED'] }
+    if (!revoke && plan.autopilot) return { status: 'BLOCKED', authorized: false, reasons: ['AUTOPILOT_ALREADY_AUTHORIZED'] }
+    const dirty = gitOutput(root, ['status', '--porcelain', '--untracked-files=all'], 'WORKTREE_UNAVAILABLE')
+    if (dirty) return { status: 'BLOCKED', authorized: false, reasons: ['DIRTY_WORKTREE'] }
+    try { writeFileSync(lock, `${storyId}:${expectedHead}\n`, { flag: 'wx' }); lockOwned = true }
+    catch { return { status: 'RECOVERY_REQUIRED', authorized: false, reasons: ['AUTOPILOT_TRANSACTION_LOCKED'], recovery } }
+    if (gitOutput(root, ['rev-parse', 'HEAD'], 'HEAD_UNAVAILABLE') !== expectedHead ||
+        readFileSync(path.join(root, relative), 'utf8') !== before) return { status: 'STALE', authorized: false, reasons: ['AUTOPILOT_GUARD_CHANGED'] }
+    const committedPlan = git(root, ['show', `${expectedHead}:${relative}`])
+    if (committedPlan.status !== 0) throw new Error('PLAN_BLOB_UNAVAILABLE')
+    const record = revoke ? { ...plan.autopilot, revoked: true } : {
+      schema_version: 1, authorized_at: new Date().toISOString(),
+      authorized_plan_digest: `sha256:${createHash('sha256').update(committedPlan.stdout, 'utf8').digest('hex')}`,
+      authorized_head: expectedHead, budgets: input.budgets, lead_vendor: input.lead_vendor, revoked: false
+    }
+    let next
+    if (revoke) {
+      const marker = /^autopilot:\s*$/m.exec(before)
+      if (!marker) return invalidResult('AUTOPILOT_RECORD_MISSING')
+      const end = before.slice(marker.index + marker[0].length).search(/^\S/m)
+      const stop = end < 0 ? before.length : marker.index + marker[0].length + end
+      const block = before.slice(marker.index, stop)
+      if (!/^  revoked: false[ \t]*$/m.test(block)) return invalidResult('AUTOPILOT_RECORD_INVALID')
+      next = before.slice(0, marker.index) + block.replace(/^  revoked: false[ \t]*$/m, '  revoked: true') + before.slice(stop)
+    } else {
+      const delimiter = /\r?\n---(?=\r?\n|$)/.exec(before)
+      if (!delimiter) return invalidResult('INVALID_FRONTMATTER')
+      next = before.slice(0, delimiter.index) + '\n' + authorityYaml(record) + before.slice(delimiter.index)
+    }
+    writePlanAtomic(root, relative, next)
+    mutated = true
+    const afterCheck = validateStoryPlan(root, storyId)
+    if (!afterCheck.valid && !(approvalOnly && afterCheck.reasons.every(reason => reason === 'DISCLOSURES_NOT_ACKNOWLEDGED'))) throw new Error(`POST_AUTOPILOT_VALIDATION_FAILED:${afterCheck.reasons.join(',')}`)
+    if (git(root, ['add', '--', relative]).status !== 0) throw new Error('STAGE_FAILED')
+    const staged = gitOutput(root, ['diff', '--cached', '--name-only', 'HEAD', '--'], 'STAGED_PATHS_FAILED').split(/\r?\n/).filter(Boolean)
+    if (staged.length !== 1 || staged[0] !== relative) throw new Error('STAGED_AUTOPILOT_SCOPE_MISMATCH')
+    const expectedBlob = canonicalPlanBlob(root, relative, next)
+    if (gitOutput(root, ['rev-parse', `:${relative}`], 'INDEX_PLAN_UNAVAILABLE') !== expectedBlob) throw new Error('STAGED_AUTOPILOT_BLOB_MISMATCH')
+    const tree = gitOutput(root, ['write-tree'], 'WRITE_TREE_FAILED')
+    const treePaths = gitOutput(root, ['diff-tree', '--no-commit-id', '--name-only', '-r', expectedHead, tree], 'TREE_SCOPE_UNAVAILABLE').split(/\r?\n/).filter(Boolean)
+    if (treePaths.length !== 1 || treePaths[0] !== relative ||
+        gitOutput(root, ['rev-parse', `${tree}:${relative}`], 'TREE_PLAN_UNAVAILABLE') !== expectedBlob) throw new Error('AUTOPILOT_TREE_SCOPE_MISMATCH')
+    if (readFileSync(path.join(root, relative), 'utf8') !== next) throw new Error('AUTOPILOT_WORKTREE_CHANGED')
+    const message = `chore(story-${storyId}): ${revoke ? 'revoke' : 'record'} autopilot authorization`
+    const commit = gitOutput(root, ['commit-tree', tree, '-p', expectedHead, '-m', message], 'COMMIT_TREE_FAILED')
+    if (git(root, ['update-ref', 'HEAD', commit, expectedHead]).status !== 0) throw new Error('HEAD_UPDATE_FAILED')
+    if (gitOutput(root, ['rev-parse', 'HEAD'], 'HEAD_UNAVAILABLE') !== commit ||
+        gitOutput(root, ['rev-parse', `HEAD:${relative}`], 'COMMITTED_PLAN_UNAVAILABLE') !== expectedBlob) throw new Error('COMMITTED_AUTOPILOT_BLOB_MISMATCH')
+    if (gitOutput(root, ['rev-parse', `:${relative}`], 'INDEX_PLAN_UNAVAILABLE') !== expectedBlob ||
+        readFileSync(path.join(root, relative), 'utf8') !== next) throw new Error('AUTOPILOT_POSTCOMMIT_DRIFT')
+    released = true
+    return { status: revoke ? 'APPLIED' : 'AUTHORIZED', authorized: !revoke, valid: true, autopilot: record,
+      commit, committed_plan_blob: expectedBlob }
+  } catch (error) { return { status: mutated ? 'RECOVERY_REQUIRED' : 'ERROR', authorized: false, reasons: [error.message], ...(mutated ? { recovery } : {}) } }
+  finally { if (lockOwned && (!mutated || released) && existsSync(lock)) unlinkSync(lock) }
 }
 
 function storyLifecycle(root, storyId) {
@@ -201,6 +346,11 @@ export function runV4Story(root, storyId, options = {}) {
   try {
     if (!/^\d+\.\d+$/.test(storyId ?? '')) return invalidResult('INVALID_STORY_ID')
     if (!existsSync(path.join(root, planRelative(storyId)))) return invalidResult('PLAN_MISSING')
+    if (options.autopilotAuthorization || options.revokeAutopilot) {
+      if (options.approval || options.approveExactScope || options.operation || options.kernel || options.startFingerprint) return invalidResult('AUTOPILOT_OPERATION_CONFLICT')
+      return recordAutopilot(root, storyId, options.expectedHead ?? gitOutput(root, ['rev-parse', 'HEAD'], 'HEAD_UNAVAILABLE'),
+        { authorization: options.autopilotAuthorization, revoke: options.revokeAutopilot })
+    }
     if (!pointerIdle(root)) return { status: 'BLOCKED', authorized: false, reasons: ['V3_POINTER_NOT_IDLE'] }
     const head = gitOutput(root, ['rev-parse', 'HEAD'], 'HEAD_UNAVAILABLE')
     const expectedHead = options.expectedHead ?? head
@@ -241,8 +391,14 @@ export function runV4Story(root, storyId, options = {}) {
     }
     const explicitKernelOperation = options.operation ?? options.kernel?.operation
     if (explicitKernelOperation !== undefined) {
-      const input = options.input ?? options.kernel?.input
+      let input = options.input ?? options.kernel?.input
       if (!input || typeof input !== 'object' || Array.isArray(input)) return invalidResult('KERNEL_INPUT_REQUIRED')
+      if (plan.autopilot?.revoked === false && FENCED_OPERATIONS.has(explicitKernelOperation) &&
+          input.recovery_authorized !== true && input.recovery?.authorized !== true) {
+        const fence = checkLeadGeneration(root, storyId, options.leadGeneration)
+        if (fence.status !== 'READY') return { ...fence, authorized: false }
+        input = { ...input, lead_generation: options.leadGeneration }
+      }
       if (explicitKernelOperation === 'prepare-rework' || explicitKernelOperation === 'apply-rework') {
         if (input.action !== 'rework_slice' || input.story_id !== storyId || input.slice_id !== plan.current_slice ||
             input.expected_head !== expectedHead || input.maintenance_authorization !== 'V4_LITE_REWORK') {
@@ -268,7 +424,17 @@ export function runV4Story(root, storyId, options = {}) {
         if (explicitKernelOperation === 'abort-unwritten-metadata') return applyMetadataAbort(root, input)
         if (explicitKernelOperation === 'prepare') return prepareAction(root, { ...input, operation: 'prepare' })
         if (explicitKernelOperation === 'verify') return verifySlice(root, { ...input, operation: 'verify' })
-        if (explicitKernelOperation === 'record-review' || explicitKernelOperation === 'record_review') return recordSliceReview(root, { ...input, operation: 'record-review' })
+        if (explicitKernelOperation === 'record-review' || explicitKernelOperation === 'record_review') {
+          if (input.review?.reviewer?.type === 'human') return invalidResult('OWNER_REVIEW_OPERATION_REQUIRED')
+          return recordSliceReview(root, { ...input, operation: 'record-review' })
+        }
+        if (explicitKernelOperation === 'record-owner-review') {
+          const reviewer = input.review?.reviewer
+          return recordSliceReview(root, { ...input, operation: 'record-review', review: {
+            ...input.review,
+            reviewer: { ...(reviewer && typeof reviewer === 'object' ? reviewer : { vendor: null, independent: false }), type: 'human' }
+          } })
+        }
         return invalidResult('KERNEL_OPERATION_UNSUPPORTED')
       }
       return { status: 'UNAUTHORIZED_ACTION', authorized: false, reasons: ['KERNEL_ACTION_NOT_CURRENT'] }
@@ -314,6 +480,12 @@ export function runV4Story(root, storyId, options = {}) {
         })
     }
     if (plan.next_action?.kind === 'finalize_story') {
+      let assertFence
+      if (plan.autopilot?.revoked === false) {
+        const fence = checkLeadGeneration(root, storyId, options.leadGeneration)
+        if (fence.status !== 'READY') return { ...fence, authorized: false }
+        assertFence = freshRoot => assertLeadGeneration(freshRoot, storyId, options.leadGeneration)
+      }
       const helper = inspectFinalization(root, storyId, expectedHead)
       const route = routeAction({
         ...decisionInput,
@@ -322,7 +494,7 @@ export function runV4Story(root, storyId, options = {}) {
       })
       if (!route.authorized) return { ...route, helper }
       return runRunnerAction(root, storyId, 'finalize_story', expectedHead, options,
-        () => applyFinalization(root, storyId, expectedHead),
+        () => applyFinalization(root, storyId, expectedHead, { assertFence }),
         result => {
           if (result.status === 'HUMAN_GATE_REQUIRED') recordStoryReviewSnapshot(root, {
             story_id: storyId,
@@ -339,6 +511,164 @@ export function runV4Story(root, storyId, options = {}) {
     return routeAction(decisionInput)
   } catch (error) {
     return { status: 'ERROR', authorized: false, reasons: [error.message] }
+  }
+}
+
+function isAncestor(root, ancestor, descendant) {
+  if (!SHA.test(ancestor ?? '') || !SHA.test(descendant ?? '')) return false
+  return git(root, ['merge-base', '--is-ancestor', ancestor, descendant]).status === 0
+}
+
+function currentAttempt(slice) {
+  if (Number.isInteger(slice?.current_attempt?.attempt_id) && slice.current_attempt.attempt_id > 0) {
+    return slice.current_attempt.attempt_id
+  }
+  const history = Array.isArray(slice?.attempt_history) ? slice.attempt_history : []
+  const latest = history.at(-1)?.attempt_id
+  return Number.isInteger(latest) && latest > 0 ? latest : 1
+}
+
+function sliceScope(slice) {
+  const paths = slice?.scope?.paths
+  if (Array.isArray(paths)) return paths.filter(value => typeof value === 'string' && value.length > 0)
+  return []
+}
+
+function firstSliceCommit(root, authorizedHead, slice) {
+  const end = SHA.test(slice?.checkpoint_commit ?? '') ? slice.checkpoint_commit : 'HEAD'
+  if (!isAncestor(root, authorizedHead, end) || authorizedHead === end) return null
+  const args = ['log', '--format=%H%x09%ct', '--reverse', `${authorizedHead}..${end}`]
+  const paths = sliceScope(slice)
+  if (paths.length) args.push('--', ...paths)
+  const result = git(root, args)
+  if (result.status !== 0) throw new Error('SLICE_COMMIT_HISTORY_UNAVAILABLE')
+  const line = result.stdout.trim().split(/\r?\n/).find(Boolean)
+  if (!line) return null
+  const match = /^([0-9a-f]{40,64})\t(\d+)$/.exec(line.trim())
+  if (!match) throw new Error('SLICE_COMMIT_TIMESTAMP_INVALID')
+  return { commit: match[1], timestamp: Number(match[2]) }
+}
+
+function recoveryPending(root, storyId) {
+  const common = path.resolve(root, gitOutput(root, ['rev-parse', '--git-common-dir'], 'GIT_COMMON_DIR_UNAVAILABLE'))
+  if (existsSync(path.join(common, 'v4-autopilot-authority.lock')) ||
+      existsSync(path.join(common, `v4-autopilot-authority-${storyId}.lock`))) return true
+  for (const directory of ['noteflow-v4-transactions', 'noteflow-v4-lifecycle']) {
+    const folder = path.join(common, directory)
+    if (!existsSync(folder)) continue
+    for (const name of readdirSync(folder)) {
+      if (!name.endsWith('.json')) continue
+      try {
+        const record = JSON.parse(readFileSync(path.join(folder, name), 'utf8'))
+        if (record.story_id === storyId && (record.phase === 'RECOVERY_REQUIRED' || record.recovery_required === true)) return true
+      } catch {
+        // A malformed transaction is itself a recovery condition for this
+        // Story only when its filename cannot be read as an unrelated file.
+      }
+    }
+  }
+  return false
+}
+
+function autopilotBudgetSnapshot(root, plan) {
+  const authority = plan.autopilot
+  const maxSlices = authority.budgets.max_slices
+  const maxRework = authority.budgets.max_rework_per_slice
+  const maxMinutes = authority.budgets.max_minutes_per_slice
+  const checkpointedSlices = (Array.isArray(plan.slices) ? plan.slices : [])
+    .filter(slice => SHA.test(slice?.checkpoint_commit ?? '') &&
+      slice.checkpoint_commit !== authority.authorized_head &&
+      isAncestor(root, authority.authorized_head, slice.checkpoint_commit)).length
+  const slice = (plan.slices ?? []).find(item => item?.id === plan.current_slice)
+  const attemptId = currentAttempt(slice)
+  const reworkUsed = Math.max(0, attemptId - 1)
+  const first = firstSliceCommit(root, authority.authorized_head, slice)
+  const elapsedMinutes = first
+    ? Math.max(0, (Date.now() - first.timestamp * 1000) / 60000)
+    : 0
+  return {
+    slices: {
+      used: checkpointedSlices,
+      max: maxSlices,
+      remaining: Math.max(0, maxSlices - checkpointedSlices)
+    },
+    rework: {
+      used: reworkUsed,
+      max: maxRework,
+      remaining: Math.max(0, maxRework - reworkUsed)
+    },
+    time: {
+      elapsed_minutes: elapsedMinutes,
+      max_minutes: maxMinutes,
+      remaining_minutes: Math.max(0, maxMinutes - elapsedMinutes),
+      first_commit: first?.commit ?? null
+    }
+  }
+}
+
+function autopilotStatusStop(nextAction, reasons, budgetsRemaining = null) {
+  return { status: 'STOP', next_action: nextAction ?? null, reasons, budgets_remaining: budgetsRemaining }
+}
+
+/**
+ * Read the durable Story state that governs the next autopilot step. This
+ * intentionally does not call runV4Story: status is a read-only admission
+ * check and must not create observations or infer in-memory verification
+ * substates.
+ */
+export function autopilotStatus(root, storyId, expectedHead, leadGeneration) {
+  let plan = null
+  try {
+    if (!/^\d+\.\d+$/.test(storyId ?? '')) return autopilotStatusStop(null, ['INVALID_STORY_ID'])
+    if (!SHA.test(expectedHead ?? '')) return autopilotStatusStop(null, ['INVALID_EXPECTED_HEAD'])
+    const relative = planRelative(storyId)
+    if (!existsSync(path.join(root, relative))) return autopilotStatusStop(null, ['PLAN_MISSING'])
+    if (!pointerIdle(root)) return autopilotStatusStop(null, ['V3_POINTER_NOT_IDLE'])
+    const head = gitOutput(root, ['rev-parse', 'HEAD'], 'HEAD_UNAVAILABLE')
+    if (head !== expectedHead) return autopilotStatusStop(null, ['STALE'])
+    const checkout = checkoutBlock(root, storyId)
+    if (checkout) return autopilotStatusStop(null, checkout.reasons ?? [checkout.status ?? 'RUNNER_REFUSAL'])
+    if (recoveryPending(root, storyId)) return autopilotStatusStop(null, ['RECOVERY_REQUIRED'])
+    plan = frontmatter(readFileSync(path.join(root, relative), 'utf8'))
+    const nextAction = plan.next_action ?? null
+    if (!plan.autopilot) return autopilotStatusStop(nextAction, ['NO_AUTHORIZATION'])
+    if (plan.autopilot.revoked === true) return autopilotStatusStop(nextAction, ['REVOKED'])
+
+    const planCheck = validateStoryPlan(root, storyId)
+    const autopilotReasons = planCheck.reasons.filter(reason => reason.startsWith('AUTOPILOT_'))
+    if (autopilotReasons.length) {
+      return autopilotStatusStop(nextAction,
+        autopilotReasons.includes('AUTOPILOT_PLAN_BINDING_MISMATCH') ? ['STALE'] : autopilotReasons)
+    }
+    if (!planCheck.valid) {
+      return autopilotStatusStop(nextAction,
+        planCheck.status === 'STALE' ? ['STALE'] : planCheck.reasons)
+    }
+
+    const fence = checkLeadGeneration(root, storyId, leadGeneration)
+    if (fence.status !== 'READY') return autopilotStatusStop(nextAction, fence.reasons)
+    const budgetsRemaining = autopilotBudgetSnapshot(root, plan)
+    if (nextAction?.kind === 'complete_story') return autopilotStatusStop(nextAction, ['HUMAN_GATE'], budgetsRemaining)
+    if (!AUTOPILOT_STATUS_ACTIONS.has(nextAction?.kind)) {
+      return autopilotStatusStop(nextAction, ['ACTION_NOT_AUTOPILOT_ALLOWED'], budgetsRemaining)
+    }
+    const current = (plan.slices ?? []).find(slice => slice?.id === plan.current_slice)
+    const currentCheckpointed = SHA.test(current?.checkpoint_commit ?? '') &&
+      current.checkpoint_commit !== plan.autopilot.authorized_head &&
+      isAncestor(root, plan.autopilot.authorized_head, current.checkpoint_commit)
+    if (budgetsRemaining.slices.used >= budgetsRemaining.slices.max &&
+        nextAction.kind === 'implement_slice' && !currentCheckpointed) {
+      return autopilotStatusStop(nextAction, ['BUDGET_SLICES'], budgetsRemaining)
+    }
+    if (budgetsRemaining.rework.used > budgetsRemaining.rework.max) {
+      return autopilotStatusStop(nextAction, ['BUDGET_REWORK'], budgetsRemaining)
+    }
+    if (budgetsRemaining.time.elapsed_minutes >= budgetsRemaining.time.max_minutes) {
+      return autopilotStatusStop(nextAction, ['BUDGET_TIME'], budgetsRemaining)
+    }
+    return { status: 'CONTINUE', next_action: nextAction, reasons: [], budgets_remaining: budgetsRemaining }
+  } catch (error) {
+    return autopilotStatusStop(plan?.next_action ?? null, [error.message])
   }
 }
 
@@ -395,6 +725,16 @@ export function runAction(root, storyId, expectedHead, options = {}) {
 
 function parseArguments(argv) {
   const [verb, storyId, ...tail] = argv
+  if (verb === 'autopilot-status') {
+    let expectedHead, leadGeneration
+    for (let index = 0; index < tail.length; index++) {
+      if (tail[index] === '--expected-head' && !expectedHead && SHA.test(tail[index + 1] ?? '')) expectedHead = tail[++index]
+      else if (tail[index] === '--lead-generation' && leadGeneration === undefined && /^[1-9]\d*$/.test(tail[index + 1] ?? '') && Number.isSafeInteger(Number(tail[index + 1]))) leadGeneration = Number(tail[++index])
+      else return { error: 'USAGE: autopilot-status <epic.story> --expected-head <sha> [--lead-generation <n>]' }
+    }
+    if (!/^\d+\.\d+$/.test(storyId ?? '') || !expectedHead) return { error: 'USAGE: autopilot-status <epic.story> --expected-head <sha> [--lead-generation <n>]' }
+    return { command: 'autopilot-status', storyId, expectedHead, leadGeneration }
+  }
   if (!['run', 'execute'].includes(verb) || !/^\d+\.\d+$/.test(storyId ?? '')) return { error: CLI_USAGE }
   let expectedHead
   let startFingerprint
@@ -402,6 +742,9 @@ function parseArguments(argv) {
   let inputFile
   const excludeUnrelated = []
   let approveExactScope = false
+  let autopilotAuthorization
+  let revokeAutopilot = false
+  let leadGeneration
   for (let index = 0; index < tail.length; index += 1) {
     if (tail[index] === '--approve-exact-scope') approveExactScope = true
     else if (tail[index] === '--expected-head' && SHA.test(tail[index + 1] ?? '')) { expectedHead = tail[++index] }
@@ -409,10 +752,18 @@ function parseArguments(argv) {
     else if (tail[index] === '--exclude-unrelated' && tail[index + 1]) { excludeUnrelated.push(tail[++index]) }
     else if (tail[index] === '--operation' && CLI_OPERATIONS.has(tail[index + 1] ?? '') && !operation) { operation = tail[++index] }
     else if (tail[index] === '--input' && tail[index + 1] && !inputFile) { inputFile = tail[++index] }
+    else if (tail[index] === '--authorize-autopilot' && tail[index + 1] && !autopilotAuthorization) {
+      try { autopilotAuthorization = JSON.parse(tail[++index]) } catch { return { error: 'AUTOPILOT_JSON_INVALID' } }
+      if (!autopilotAuthorization || typeof autopilotAuthorization !== 'object' || Array.isArray(autopilotAuthorization)) return { error: 'AUTOPILOT_INPUT_INVALID' }
+    }
+    else if (tail[index] === '--revoke-autopilot' && !revokeAutopilot) revokeAutopilot = true
+    else if (tail[index] === '--lead-generation' && leadGeneration === undefined && /^[1-9]\d*$/.test(tail[index + 1] ?? '') && Number.isSafeInteger(Number(tail[index + 1]))) leadGeneration = Number(tail[++index])
     else return { error: CLI_USAGE }
   }
   if ((operation && !inputFile) || (!operation && inputFile)) return { error: CLI_USAGE }
-  return { storyId, expectedHead, operation, inputFile, approveExactScope, startFingerprint, excludeUnrelated }
+  if ((autopilotAuthorization !== undefined && revokeAutopilot) ||
+      ((autopilotAuthorization !== undefined || revokeAutopilot) && (operation || approveExactScope || startFingerprint || excludeUnrelated.length))) return { error: CLI_USAGE }
+  return { command: 'run', storyId, expectedHead, operation, inputFile, approveExactScope, startFingerprint, excludeUnrelated, autopilotAuthorization, revokeAutopilot, leadGeneration }
 }
 
 function readCliInput(root, inputFile) {
@@ -431,6 +782,7 @@ function main() {
   const parsed = parseArguments(process.argv.slice(2))
   if (parsed.error) return invalidResult(parsed.error)
   const root = path.resolve(gitOutput(process.cwd(), ['rev-parse', '--show-toplevel'], 'GIT_ROOT_UNAVAILABLE'))
+  if (parsed.command === 'autopilot-status') return autopilotStatus(root, parsed.storyId, parsed.expectedHead, parsed.leadGeneration)
   if (!existsSync(path.join(root, planRelative(parsed.storyId)))) return invalidResult('PLAN_MISSING')
   const loaded = parsed.inputFile ? readCliInput(root, parsed.inputFile) : { value: undefined }
   if (loaded.error) return invalidResult(loaded.error)
@@ -439,6 +791,9 @@ function main() {
     operation: parsed.operation,
     input: loaded.value,
     approveExactScope: parsed.approveExactScope,
+    autopilotAuthorization: parsed.autopilotAuthorization,
+    revokeAutopilot: parsed.revokeAutopilot,
+    leadGeneration: parsed.leadGeneration,
     startFingerprint: parsed.startFingerprint,
     excludeUnrelated: parsed.excludeUnrelated
   })

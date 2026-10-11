@@ -18,6 +18,8 @@ node .agents/scripts/compile-v4-context.mjs check <story-id> --action implement_
 
 Use projected tasks/AC/risk/dependencies exactly. `UNKNOWN` scope/consumers/checks is not an empty allowlist. HIGH risk needs applicable negative/security/concurrency/contract/recovery evidence; never lower risk or turn canonical `INCOMPLETE` into `PASS`.
 
+When the validated current slice declares `executor: agy`, load `references/agy-executor.md`; otherwise this action is unchanged.
+
 For the CLI Runner, persist the exact context payload as JSON and name the
 operation explicitly:
 

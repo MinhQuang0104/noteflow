@@ -1,8 +1,10 @@
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
-import { attemptReceiptPath, inspectStory, normativeDigest, readReceiptForAttempt, validateTaskSlices, validateReceipt } from './check-artifact-contract.mjs'
+import { attemptReceiptPath, inspectStory, normativeDigest, readReceipt, readReceiptForAttempt, validateTaskSlices, validateReceipt } from './check-artifact-contract.mjs'
 import { validateFinalizationReceipt } from './finalization-contract.mjs'
+import { normalizeAllowed } from './check-worker-scope.mjs'
+import { noReviewFinalReady } from './v4-finalization-contract.mjs'
 
 const DIGEST = /^sha256:[0-9a-f]{64}$/
 const SHA = /^[0-9a-f]{40,64}$/
@@ -173,6 +175,15 @@ export function separatedStory(root, plan) {
   return { story, error: null }
 }
 
+// A slice is final-ready when reviewed, or verified on the receipt-recorded
+// LOW NO_REVIEW path (P2.2); the receipt must also load without errors.
+function finalReady(root, plan, slice) {
+  if (slice?.status === 'reviewed') return true
+  if (slice?.status !== 'verified' || !slice.receipt_refs?.verification) return false
+  const loaded = readReceipt(root, plan, slice.id, 'verification')
+  return !loaded.errors.length && noReviewFinalReady(plan, slice, loaded.receipt).ready
+}
+
 export function validateSeparatedPlan(root, id, plan, result) {
   const invalid = reason => result.reasons.push(reason)
   const stale = reason => result.reasons.push(reason)
@@ -229,8 +240,17 @@ export function validateSeparatedPlan(root, id, plan, result) {
   for (const slice of slices) {
     if (!slice || typeof slice !== 'object' || Array.isArray(slice)) { invalid('INVALID_SLICES'); continue }
     if (!STATUSES.has(slice.status)) invalid('INVALID_SLICE_STATUS')
-    if (slice.purpose !== undefined || slice.scope !== undefined || slice.implementation !== undefined ||
+    if (slice.purpose !== undefined || slice.implementation !== undefined ||
         slice.verification?.focused_checks !== undefined) invalid('MIXED_SCHEMA_PLAN')
+    // Schema-v2 scope is only the V4 allowlist shape `{paths: [...]}`; any other
+    // shape is a schema-v1 scope object. AGY entries get their own reasons.
+    if (slice.scope !== undefined) {
+      const scope = slice.scope
+      if (!scope || typeof scope !== 'object' || Array.isArray(scope) ||
+          Object.keys(scope).length !== 1 || !Array.isArray(scope.paths)) invalid('MIXED_SCHEMA_PLAN')
+      else if (slice.executor !== 'agy' && (!scope.paths.length ||
+          scope.paths.some(entry => normalizeAllowed(entry) !== entry))) invalid('SLICE_SCOPE_INVALID')
+    }
     if (slice.receipt_refs !== undefined && (!slice.receipt_refs || typeof slice.receipt_refs !== 'object' || Array.isArray(slice.receipt_refs) ||
         Object.keys(slice.receipt_refs).some(kind => !['implementation', 'verification', 'review'].includes(kind)))) invalid('INVALID_RECEIPT_REF')
     if (slice.status === 'checkpointed' || slice.status === 'verified' || slice.status === 'reviewed') {
@@ -277,7 +297,7 @@ export function validateSeparatedPlan(root, id, plan, result) {
   const reviewState = plan.lifecycle_snapshot === 'review' && plan.execution_status === 'complete'
   if (plan.next_action?.kind === 'complete_story' && !reviewState) invalid('COMPLETE_STORY_REQUIRES_REVIEW')
   if (reviewState && result.storyStatus !== 'review') invalid('STORY_STATUS_MISMATCH')
-  if (reviewState && !slices.every(slice => slice?.status === 'reviewed')) invalid('REVIEW_SLICES_INCOMPLETE')
+  if (reviewState && !slices.every(slice => finalReady(root, plan, slice))) invalid('REVIEW_SLICES_INCOMPLETE')
   if (terminalState && result.storyStatus !== 'done') invalid('STORY_STATUS_MISMATCH')
   if ((reviewState || terminalState) && plan.human_approval !== undefined && plan.human_approval !== null) {
     validateHumanApproval(root, plan, result, plan.finalization)

@@ -14,11 +14,13 @@ Only an explicit human request may use this lane for agent instructions, routing
 
 ## Story and provider routing
 
-The router selects the lane before bootstrap. A schema-v2 Story explicitly authorized by V4 Lite uses `start-story.md`: read-only readiness, fingerprint-bound apply, one lifecycle commit, then `implement_slice`; it never implements the successor or fabricates evidence.
+The router selects the lane before bootstrap. An explicitly authorized schema-v2 Story uses `start-story.md`: read-only readiness, fingerprint-bound apply, one lifecycle commit, then `implement_slice`; it never implements the successor or fabricates evidence.
 
-An explicit Story request **by V4 Lite** uses the Runner and exactly one action. Plan validation, freshness, exact scope, two-commit durability, recovery, review escalation, and Human Gate remain authoritative. `review_slice`, automatic approval, generic continuation, automatic review-to-done, and automatic V3 fallback stay disabled; one invocation may persist one successor but never execute it.
+A V4 Story slice whose validated Plan declares `executor: agy` may deliver that slice to Antigravity per `references/agy-executor.md`; this is not V3 fallback, and the Lead still owns scope gate, checkpoint, verification and review.
 
-Explicit V3.1/Orca requests and Story requests without V4 opt-in use `.agents/policies/orchestration-v3.md` and `story-development`; do not invoke V3 from V4 readiness or migration.
+An explicit Story request uses the V4 Runner and exactly one action. Plan validation, freshness, exact scope, two-commit durability, recovery, review escalation, and Human Gate remain authoritative. Under a valid owner-granted autopilot authorization, the Lead may execute successors that `autopilot-status` returns as `CONTINUE`, per `references/autopilot.md`; `complete_story`, owner review and Human Gate stay manual. `review_slice`, automatic approval, generic continuation, automatic review-to-done, and automatic V3 fallback stay disabled; without that authorization, one invocation may persist one successor but never execute it.
+
+A historical V3 run with a non-`IDLE` pointer stops for the owner.
 
 ## Risk and retry
 
@@ -26,8 +28,9 @@ Explicit V3.1/Orca requests and Story requests without V4 opt-in use `.agents/po
 
 ## Deterministic Done Gate
 
-A Story is complete only with every AC evidenced, recent deterministic checks, inspected exact diff, valid invariants, no unresolved HIGH/MEDIUM issue, synchronized lifecycle, and V3 `HUMAN_GATE` approval for exact scope. Worker DONE/Lead ACCEPTED is not completion; never claim an unrun check passed.
+A Story is complete only with every AC evidenced, recent deterministic checks, inspected exact diff, valid invariants, no unresolved HIGH/MEDIUM issue, synchronized lifecycle, and `HUMAN_GATE` approval for exact scope. Worker DONE/Lead ACCEPTED is not completion; never claim an unrun check passed.
 
 ## Checkout safety
 
-Before Story work inspect status, branch, and worktrees. In a linked worktree compare `AGENTS.md`, V3 policy, and `story-development` with canonical main; report stale policy. Never reset, clean, stash, or update ignored policy copies as a proxy for canonical policy.
+Before Story work inspect status, branch, and worktrees. In a linked worktree compare `AGENTS.md`, `task-router.md`, and `v4-story-runner` with canonical main; report stale policy. Never reset, clean, stash, or update ignored policy copies as a proxy for canonical policy.
+For a claimed V4 Auto Story, compare against its pinned `controlPlaneCommit` instead, and report drift from canonical main as information until integration.

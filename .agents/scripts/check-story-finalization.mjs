@@ -17,10 +17,12 @@ import {
   inferCanonicalApplicability,
   LEGACY_REVIEW_RECEIPT_CUTOFF,
   legacyReviewFreshness,
+  noReviewFinalReady,
   receiptKindsForAttemptStatus,
   reviewDecision,
   reviewEvidenceFreshness,
-  reviewReceiptDialect
+  reviewReceiptDialect,
+  sliceReviewRequired
 } from './v4-finalization-contract.mjs'
 
 const CODES = { READY: 0, RECONCILIATION_REQUIRED: 1, STALE: 2, BLOCKED: 3, INVALID: 4, ERROR: 5 }
@@ -512,15 +514,9 @@ function reviewFreshness(receipt, slice = null, verification = null, plan = null
 }
 
 // The Plan projection may name the decision `judgment` (kernel template) or
-// `verdict` (earlier templates). MEDIUM/HIGH slices and any slice that binds a
-// review receipt always require that receipt.
+// `verdict` (earlier templates).
 function planReviewDecision(slice) {
   return reviewDecision(slice.review ?? {})
-}
-
-function sliceReviewRequired(plan, slice) {
-  return slice.review?.required === true || Boolean(slice.receipt_refs?.review) ||
-    ['MEDIUM', 'HIGH'].includes(String(plan.risk?.level ?? '').toUpperCase())
 }
 
 function loadSliceReceipts(root, plan, result) {
@@ -572,7 +568,9 @@ function loadSliceReceipts(root, plan, result) {
       detail.attempts.push(historical)
     }
     for (const kind of RECEIPT_KINDS) {
-      const required = kind === 'implementation' || kind === 'verification' || sliceReviewRequired(plan, slice)
+      const reviewRequired = kind === 'review' ? sliceReviewRequired(plan, slice, detail.receipts.verification) : false
+      if (kind === 'review' && reviewRequired === null) issue(result, `ESCALATION_EVIDENCE_MISSING:${slice.id}`, 'blocked')
+      const required = kind === 'implementation' || kind === 'verification' || reviewRequired === true
       const ref = slice.receipt_refs?.[kind]
       if (!required) continue
       if (!ref) {
@@ -821,9 +819,6 @@ export function inspectFinalization(root, storyId, expectedHead) {
   const ids = slices.map(slice => slice?.id)
   if (ids.some(id => typeof id !== 'string' || !id) || new Set(ids).size !== ids.length) issue(result, 'DUPLICATE_OR_MALFORMED_SLICE', 'invalid')
   if (plan.current_slice !== ids.at(-1)) issue(result, 'CURRENT_SLICE_NOT_FINAL', 'blocked')
-  for (const slice of slices) {
-    if (slice?.status !== 'reviewed') issue(result, `SLICE_NOT_REVIEWED:${slice?.id ?? 'unknown'}`, 'blocked')
-  }
   if (!Array.isArray(plan.blockers)) issue(result, 'INVALID_BLOCKERS', 'invalid')
   else if (plan.blockers.length) issue(result, 'BLOCKERS_PRESENT', 'blocked')
   if (!Array.isArray(plan.unresolved_questions)) issue(result, 'INVALID_UNRESOLVED_QUESTIONS', 'invalid')
@@ -858,6 +853,17 @@ export function inspectFinalization(root, storyId, expectedHead) {
   }
 
   const details = loadSliceReceipts(root, plan, result)
+  // Final-ready: reviewed, or verified on the receipt-recorded LOW NO_REVIEW
+  // path (P2.2). A verified slice whose evidence calls for review stays
+  // SLICE_NOT_REVIEWED; one with missing or inconsistent evidence is not final-ready.
+  for (const slice of slices) {
+    if (slice?.status === 'reviewed') continue
+    const verification = details.find(detail => detail.id === slice?.id)?.receipts.verification
+    const finalReady = noReviewFinalReady(plan, slice, verification)
+    if (finalReady.ready) continue
+    const reason = finalReady.reason === 'NO_REVIEW_EVIDENCE_INVALID' ? 'SLICE_NOT_FINAL_READY' : 'SLICE_NOT_REVIEWED'
+    issue(result, `${reason}:${slice?.id ?? 'unknown'}`, 'blocked')
+  }
   const sliceSummary = slices.map(slice => {
     const detail = details.find(item => item.id === slice.id)
     return {

@@ -187,6 +187,7 @@ export function runLifecycleTransaction(root, descriptor, callback) {
       created_at: transaction.created_at
     }, null, 2)}\n`, { flag: 'wx' })
     acquired = true
+    if (descriptor.assertFence) descriptor.assertFence(root)
     atomicJson(journalPath, transaction)
     let journal = transaction
     if (process.env.V4_LIFECYCLE_TEST_FAULT === 'AFTER_ADMISSION') throw new Error('INJECTED_FAILURE:AFTER_ADMISSION')
@@ -199,6 +200,10 @@ export function runLifecycleTransaction(root, descriptor, callback) {
     return { ...result, lifecycle_transaction: metadata }
   } catch (error) {
     if (error.code === 'EEXIST') return lifecycleFailure('BLOCKED', 'LIFECYCLE_SCOPE_LOCKED', { lock_path: locations.lockPath })
+    if (acquired && error.fenceStatus && !existsSync(journalPath)) {
+      unlinkSync(locations.lockPath)
+      return lifecycleFailure(error.fenceStatus, error.message)
+    }
     let journal = readJson(journalPath)
     if (journal) updateJournal(journalPath, journal, { phase: 'RECOVERY_REQUIRED', error: error.message })
     if (acquired) {

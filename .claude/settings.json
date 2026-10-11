@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(orca orchestration *)",
+      "Bash(orca terminal *)",
+      "Bash(node .agents/scripts/*)",
+      "Bash(node --test *)",
+      "Bash(git status *)", "Bash(git diff *)", "Bash(git log *)",
+      "Bash(git show *)", "Bash(git rev-parse *)", "Bash(git ls-files *)",
+      "Bash(git merge-base *)", "Bash(git worktree list *)"
+    ]
+  }
+}

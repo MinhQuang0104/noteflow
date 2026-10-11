@@ -6,6 +6,7 @@ import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { inspectStory, normativeDigest, receiptDigest } from './check-artifact-contract.mjs'
+import { createV4Fixture } from './v4-architecture-fixture.mjs'
 
 const script = path.resolve('.agents/scripts/check-story-plan.mjs')
 
@@ -85,6 +86,16 @@ function editPlan(f, from, to) {
   const file = path.join(f.root, '_bmad-output/implementation-artifacts/story-9-1-plan.md')
   writeFileSync(file, f.plan.replace(from, to))
 }
+
+test('autopilot record rejects malformed budgets and vendors', () => {
+  const f = fixture()
+  try {
+    editPlan(f, 'blockers: []', `autopilot:\n  schema_version: 1\n  authorized_at: "2026-10-08T00:00:00.000Z"\n  authorized_plan_digest: sha256:${'a'.repeat(64)}\n  authorized_head: ${f.sha}\n  budgets:\n    max_slices: 0\n    max_rework_per_slice: 4\n    max_minutes_per_slice: 4\n  lead_vendor: unknown\n  revoked: false\nblockers: []`)
+    const result = check(f.root)
+    assert.equal(result.json.status, 'INVALID')
+    assert.ok(result.json.reasons.includes('AUTOPILOT_INVALID'), JSON.stringify(result.json))
+  } finally { rmSync(f.root, { recursive: true, force: true }) }
+})
 
 function schemaV2Fixture() {
   const root = mkdtempSync(path.join(tmpdir(), 'story-plan-v2-'))
@@ -215,6 +226,27 @@ next_action:
 }
 
 test('valid READY fixture', () => withFixture(() => {}, 'READY', 0))
+
+for (const [risk, expectedReason] of [
+  ['\n      level: LOW\n      flags: []', null],
+  ['\n      level: LOW', null],
+  ['\n      level: HIGH\n      flags: []', 'SLICE_RISK_EXCEEDS_STORY'],
+  ['\n      level: LOW\n      flags: [security]', 'SLICE_RISK_EXCEEDS_STORY'],
+  ['\n      level: UNKNOWN\n      flags: []', 'SLICE_RISK_INVALID'],
+  ['\n      level: LOW\n      flags: security', 'SLICE_RISK_INVALID'],
+  ['\n      level: LOW\n      flags: [null]', 'SLICE_RISK_INVALID'],
+  ['LOW', 'SLICE_RISK_INVALID'],
+]) test(`optional slice risk validates ${risk}`, () => {
+  const f = createV4Fixture({ schemaVersion: 2, state: 'pending' })
+  try {
+    writeFileSync(f.paths.plan, readFileSync(f.paths.plan, 'utf8').replace('slices:', 'risk:\n  level: LOW\nslices:').replace('    depends_on: []', `    depends_on: []\n    risk: ${risk}`))
+    const result = check(f.root, '9.1')
+    if (expectedReason) {
+      assert.equal(result.json.status, 'INVALID', JSON.stringify(result.json))
+      assert.ok(result.json.reasons.includes(expectedReason), JSON.stringify(result.json))
+    } else assert.equal(result.json.status, 'READY', JSON.stringify(result.json))
+  } finally { f.cleanup() }
+})
 test('schema-v2 fixture remains readable before finalization', () => {
   const f = schemaV2Fixture()
   try {
@@ -230,6 +262,84 @@ test('schema-v2 fixture remains readable before finalization', () => {
     rmSync(f.root, { recursive: true, force: true })
   }
 })
+
+function agyPlanFixture(edit = text => text) {
+  const fixture = createV4Fixture({ schemaVersion: 2, state: 'pending' })
+  const original = readFileSync(fixture.paths.plan, 'utf8')
+  writeFileSync(fixture.paths.plan, edit(original.replace(
+    '    depends_on: []',
+    '    depends_on: []\n    executor: agy\n    scope:\n      paths: [src/]\n    verification_obligations: [node --test src/a.test.js]',
+  )))
+  return fixture
+}
+
+test('schema-v2 AGY slice requires and accepts a normalized product scope and checks', () => {
+  const fixture = agyPlanFixture()
+  try {
+    const result = check(fixture.root, '9.1')
+    assert.equal(result.code, 0, JSON.stringify(result.json))
+    assert.equal(result.json.status, 'READY')
+  } finally { fixture.cleanup() }
+})
+
+for (const [name, edit, reason] of [
+  ['invalid executor', text => text.replace('executor: agy', 'executor: robot'), 'SLICE_EXECUTOR_INVALID'],
+  ['missing AGY scope', text => text.replace('    scope:\n      paths: [src/]\n', ''), 'AGY_SCOPE_REQUIRED'],
+  ['invalid AGY scope entry', text => text.replace('paths: [src/]', 'paths: [./src/]'), 'AGY_SCOPE_INVALID'],
+  ['authority AGY scope entry', text => text.replace('paths: [src/]', 'paths: [.agents/]'), 'AGY_SCOPE_AUTHORITY_PATH'],
+  ['missing AGY checks', text => text.replace('verification_obligations: [node --test src/a.test.js]', 'verification_obligations: []'), 'AGY_CHECKS_REQUIRED'],
+]) test(`schema-v2 AGY slice rejects ${name}`, () => {
+  const fixture = agyPlanFixture(edit)
+  try {
+    const result = check(fixture.root, '9.1')
+    assert.equal(result.code, 3, JSON.stringify(result.json))
+    assert.equal(result.json.status, 'INVALID')
+    assert.ok(result.json.reasons.includes(reason), JSON.stringify(result.json))
+  } finally { fixture.cleanup() }
+})
+
+test('AGY scope accepts files whose names merely prefix an authority path', () => {
+  const fixture = agyPlanFixture(text => text.replace('paths: [src/]', 'paths: [src/, .agent, AGENTS]'))
+  try {
+    const result = check(fixture.root, '9.1')
+    assert.equal(result.json.status, 'READY', JSON.stringify(result.json))
+  } finally { fixture.cleanup() }
+})
+
+for (const entry of ['_bmad-output/', 'AGENTS.md', '.agents/skills/x.md', '.agent-state/']) {
+  test(`AGY scope rejects authority-bearing entry ${entry}`, () => {
+    const fixture = agyPlanFixture(text => text.replace('paths: [src/]', `paths: [src/, ${entry}]`))
+    try {
+      const result = check(fixture.root, '9.1')
+      assert.ok(result.json.reasons.includes('AGY_SCOPE_AUTHORITY_PATH'), JSON.stringify(result.json))
+    } finally { fixture.cleanup() }
+  })
+}
+
+test('schema-v2 lead slice accepts a normalized allowlist scope without AGY checks', () => {
+  const fixture = agyPlanFixture(text => text
+    .replace('executor: agy', 'executor: lead')
+    .replace('verification_obligations: [node --test src/a.test.js]', 'verification_obligations: []'))
+  try {
+    const result = check(fixture.root, '9.1')
+    assert.equal(result.code, 0, JSON.stringify(result.json))
+    assert.equal(result.json.status, 'READY')
+  } finally { fixture.cleanup() }
+})
+
+for (const [name, edit, reason] of [
+  ['non-normalized lead scope entry', text => text.replace('executor: agy', 'executor: lead').replace('paths: [src/]', 'paths: [./src/]'), 'SLICE_SCOPE_INVALID'],
+  ['schema-v1 scope object on a lead slice', text => text.replace('executor: agy', 'executor: lead').replace('    scope:\n      paths: [src/]\n', '    scope:\n      paths: [src/]\n      purpose: legacy\n'), 'MIXED_SCHEMA_PLAN'],
+  ['schema-v1 scope object on an AGY slice', text => text.replace('    scope:\n      paths: [src/]\n', '    scope:\n      paths: [src/]\n      purpose: legacy\n'), 'MIXED_SCHEMA_PLAN'],
+]) test(`schema-v2 slice scope rejects ${name}`, () => {
+  const fixture = agyPlanFixture(edit)
+  try {
+    const result = check(fixture.root, '9.1')
+    assert.equal(result.json.status, 'INVALID', JSON.stringify(result.json))
+    assert.ok(result.json.reasons.includes(reason), JSON.stringify(result.json))
+  } finally { fixture.cleanup() }
+})
+
 test('unsupported schema', () => withFixture(f => editPlan(f, 'schema_version: 1', 'schema_version: 3'), 'INVALID', 3, 'UNSUPPORTED_SCHEMA'))
 test('story ID mismatch', () => withFixture(f => editPlan(f, 'story_id: "9.1"', 'story_id: "9.2"'), 'INVALID', 3, 'STORY_ID_MISMATCH'))
 test('missing Plan', () => { const f = fixture(); try { assert.equal(check(f.root, '9.2').json.status, 'INVALID') } finally { rmSync(f.root, { recursive: true, force: true }) } })

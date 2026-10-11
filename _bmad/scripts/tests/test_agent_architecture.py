@@ -37,44 +37,44 @@ def frontmatter(relative_path: str) -> dict[str, str]:
 
 
 class AgentArchitectureTests(unittest.TestCase):
-    def test_story_development_is_the_only_automatic_approved_story_router(self):
+    def test_v4_is_the_only_automatic_approved_story_router(self):
         story = frontmatter(".agents/skills/story-development/SKILL.md")
         legacy_build = frontmatter(".agents/skills/bmad-build/SKILL.md")
 
         self.assertEqual(story.get("name"), "story-development")
-        self.assertRegex(story.get("description", ""), r"(?i)approved|ready-for-dev")
+        self.assertRegex(story.get("description", ""), r"(?i)deprecated.*v4-story-runner")
         self.assertRegex(legacy_build.get("description", ""), r"(?i)only when.*explicit")
-        self.assertRegex(legacy_build.get("description", ""), r"(?i)approved.*story-development")
+        self.assertRegex(legacy_build.get("description", ""), r"(?i)approved.*v4-story-runner")
 
         hub_help = read(".agents/skills/bmad/references/help.md")
-        self.assertIn("Approved or ready-for-dev Stories use `story-development`", hub_help)
+        self.assertIn("Approved or ready-for-dev Stories use `v4-story-runner`", hub_help)
         self.assertNotRegex(hub_help, r"(?i)bmad-build(?:-auto)?.{0,80}(?:once )?per story")
 
-    def test_active_story_path_uses_v3_without_mandatory_reviewer(self):
+    def test_active_story_path_uses_v4_and_preserves_historical_review_policy(self):
         self.assertFalse((REPO / ".agents/skills/antigravity-review").exists())
 
         active_policy = "\n".join(
             read(path)
             for path in (
                 "AGENTS.md",
-                ".agents/skills/story-development/SKILL.md",
-                ".agents/skills/story-development/references/complexity-rubric.md",
+                ".agents/routing/task-router.md",
+                ".agents/skills/v4-story-runner/SKILL.md",
             )
         )
-        self.assertIn("orchestration-v3.md", active_policy)
+        self.assertIn("An explicit Story request uses the V4 Runner", active_policy)
         self.assertNotIn("Codex implements directly", active_policy)
         self.assertNotIn("Codex performs the implementation", active_policy)
         self.assertNotRegex(active_policy, r"(?i)mandatory (external )?reviewer")
-        self.assertIn("No external model review is required", active_policy)
+        self.assertIn("No external model review is required", read(".agents/skills/story-development/SKILL.md"))
 
     def test_both_leads_share_canonical_bootstrap(self):
         # V4 Lite: CLAUDE.md is a thin entry point that defers to AGENTS.md and
-        # the router; AGENTS.md alone names the V3 policy path.
+        # the router; historical non-IDLE runs still stop for the owner.
         claude = read("CLAUDE.md")
         self.assertIn("`AGENTS.md`", claude)
         self.assertIn("`task-router.md`", claude)
         self.assertTrue((REPO / ".agents/routing/task-router.md").is_file())
-        self.assertIn(".agents/policies/orchestration-v3.md", read("AGENTS.md"))
+        self.assertIn("A historical V3 run with a non-`IDLE` pointer stops for the owner.", read("AGENTS.md"))
         policy = read(".agents/policies/orchestration-v3.md")
         self.assertIn("Do NOT read `events.jsonl` during ordinary resume", policy)
         self.assertIn("Antigravity", policy)
@@ -242,7 +242,7 @@ class AgentArchitectureTests(unittest.TestCase):
         self.assertIn("orca skills get orchestration", policy)
         self.assertIn("Orca supervised orchestration", policy)
         self.assertIn("compat-terminal", policy)
-        self.assertIn("orca terminal send", policy)
+        self.assertIn("orca terminal send", read(".agents/skills/v4-story-runner/references/agy-transport.md"))
         self.assertIn("orca terminal read --screen", policy)
         self.assertIn("orca orchestration task-update", policy)
         self.assertIn("durable explicit repo/worktree identifiers", policy)

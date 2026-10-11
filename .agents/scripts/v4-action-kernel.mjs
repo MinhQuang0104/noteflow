@@ -1,17 +1,20 @@
 import { createHash, randomUUID } from 'node:crypto'
 import { existsSync, lstatSync, readFileSync } from 'node:fs'
 import path from 'node:path'
+import { assertLeadGeneration } from './story-registry.mjs'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
 import { frontmatter, validate as validateStoryPlan } from './check-story-plan.mjs'
-import { attemptReceiptPath, readReceipt, receiptDigest } from './check-artifact-contract.mjs'
+import { attemptReceiptPath, readReceipt, receiptDigest, validateReviewPayload } from './check-artifact-contract.mjs'
 import { inspect as inspectSliceVerification } from './check-slice-verification.mjs'
 import { verifyChangedPaths } from './check-verification.mjs'
 import { validateEvidenceSet } from './prepare-change-evidence.mjs'
 import { executeCheck, validateCheckEvidence } from './v4-check-executor.mjs'
 import { recordActionFinished, recordActionStarted, recordCheckFinished } from './v4-observations.mjs'
 import { REVIEW_RECEIPT_SCHEMA_VERSION } from './v4-finalization-contract.mjs'
+import { autopilotDecisionAllowed, decideReviewOutcome } from './v4-review-policy.mjs'
+import { inspectScope, isAllowed } from './check-worker-scope.mjs'
 import {
   canonicalPaths,
   executeMetadataTransaction,
@@ -29,6 +32,7 @@ import {
 } from './v4-slice-transaction.mjs'
 
 const SHA = /^[0-9a-f]{40,64}$/
+const SHA256_HEX = /^[0-9a-f]{64}$/i
 const DIGEST = /^sha256:[0-9a-f]{64}$/
 const STORY_ID = /^\d+\.\d+$/
 const SLICE_ID = /^[A-Za-z0-9][A-Za-z0-9._-]*$/
@@ -62,6 +66,14 @@ const FORBIDDEN_REQUEST_KEYS = new Set([
   'human_approval', 'complete_story', 'finalize_story', 'start_story', 'review_story',
   'lifecycle_update', 'sprint_update'
 ])
+
+// Plans are committed as LF: under core.autocrlf Git normalizes the committed
+// blob, so a CRLF or mixed-EOL template (a Windows checkout) never matches it.
+function withLfPlanTemplate(request) {
+  return typeof request?.plan_template === 'string' && request.plan_template.includes('\r')
+    ? { ...request, plan_template: request.plan_template.replace(/\r\n?/g, '\n') }
+    : request
+}
 
 function hash(bytes) {
   return `sha256:${createHash('sha256').update(bytes).digest('hex')}`
@@ -220,6 +232,67 @@ function normalizePaths(root, values, label) {
   return result
 }
 
+class AgyScopeGateError extends Error {
+  constructor(reason, gate) {
+    super(reason)
+    this.scope_gate = gate
+  }
+}
+
+function workerText(value) {
+  return typeof value === 'string' && value.length > 0 && !/[\r\n]/.test(value)
+}
+
+function cloneJson(value) {
+  return JSON.parse(JSON.stringify(value))
+}
+
+function validateWorkerEvidence(request, executor) {
+  const hasWorker = Object.hasOwn(request, 'worker')
+  if (executor !== 'agy') {
+    if (hasWorker) throw new Error('WORKER_EVIDENCE_FORBIDDEN')
+    return null
+  }
+  if (!hasWorker || request.worker === undefined) throw new Error('WORKER_EVIDENCE_REQUIRED')
+  const worker = request.worker
+  const allowedKeys = new Set(['executor', 'orca', 'attempt', 'contract_sha256', 'worker_report_sha256', 'lead_vendor'])
+  const orcaKeys = new Set(['run_id', 'task_id', 'dispatch_ids'])
+  const valid = worker && typeof worker === 'object' && !Array.isArray(worker) &&
+    Object.keys(worker).every(key => allowedKeys.has(key)) &&
+    worker.executor === 'agy' && worker.orca && typeof worker.orca === 'object' && !Array.isArray(worker.orca) &&
+    Object.keys(worker.orca).every(key => orcaKeys.has(key)) &&
+    workerText(worker.orca.run_id) && workerText(worker.orca.task_id) &&
+    Array.isArray(worker.orca.dispatch_ids) && worker.orca.dispatch_ids.length > 0 &&
+    worker.orca.dispatch_ids.every(item => typeof item === 'string' && /^ctx_[A-Za-z0-9._:-]+$/.test(item)) &&
+    Number.isSafeInteger(worker.attempt) && worker.attempt > 0 &&
+    SHA256_HEX.test(worker.contract_sha256 ?? '') &&
+    SHA256_HEX.test(worker.worker_report_sha256 ?? '') &&
+    ['codex', 'claude'].includes(worker.lead_vendor)
+  if (!valid) throw new Error('WORKER_EVIDENCE_INVALID')
+  return cloneJson(worker)
+}
+
+function compactScopeGate(gate) {
+  return {
+    schema: gate.schema,
+    status: gate.status,
+    base: gate.base,
+    allowed: [...gate.allowed].sort(),
+    changed: gate.changed.map(item => item.path).filter(Boolean).sort()
+  }
+}
+
+function scopeGateDiagnostic(gate) {
+  return { ...compactScopeGate(gate), violations: cloneJson(gate.violations), reasons: [...gate.reasons] }
+}
+
+function inspectAgyScope(root, base, allowed) {
+  const gate = inspectScope(root, base, allowed, { forbidCommits: true })
+  if (gate.status !== 'PASS') throw new AgyScopeGateError(`AGY_SCOPE_GATE_${gate.status}`, gate)
+  if (gate.changed.some(item => item.sources.includes('deleted'))) throw new Error('AGY_DELETE_UNSUPPORTED')
+  return { raw: gate, compact: compactScopeGate(gate) }
+}
+
 function commandRecords(request) {
   const source = request.commands ?? request.focused_checks
   if (!Array.isArray(source) || !source.length) throw new Error('FOCUSED_EVIDENCE_REQUIRED')
@@ -263,6 +336,46 @@ function assertUnchanged(original, generated, keys) {
   for (const key of keys) if (!sameJson(original[key], generated[key])) throw new Error(`PLAN_FIELD_CHANGED:${key}`)
 }
 
+function assertAutopilotUnchanged(original, generated) {
+  if (!sameJson(original.autopilot, generated.autopilot)) throw new Error('AUTOPILOT_AUTHORITY_CHANGED')
+}
+
+function autopilotActive(plan) {
+  return plan?.autopilot && plan.autopilot.revoked === false
+}
+
+function requestFence(root, request, operation) {
+  if (!request || typeof request !== 'object' || Array.isArray(request)) return undefined
+  if (request.recovery_authorized === true || request.recovery?.authorized === true ||
+      (operation === 'record-review' && request.review?.reviewer?.type === 'human')) return undefined
+  const storyId = request.story_id ?? request.preview?.story_id
+  if (!STORY_ID.test(storyId ?? '')) return undefined
+  const file = path.join(root, `_bmad-output/implementation-artifacts/story-${storyId.replace('.', '-')}-plan.md`)
+  if (!existsSync(file) || !autopilotActive(frontmatter(readText(root, path.relative(root, file))))) return undefined
+  return freshRoot => assertLeadGeneration(freshRoot, storyId, request.lead_generation)
+}
+
+function fenceAdmission(root, request, operation) {
+  try { requestFence(root, request, operation)?.(root); return null }
+  catch (error) { return { status: error.fenceStatus ?? 'ERROR', ready: false, valid: !['INVALID', 'ERROR'].includes(error.fenceStatus ?? 'ERROR'), reasons: [error.message] } }
+}
+
+function suppliedPolicy(request, fallback = null) {
+  const value = request?.policy ?? request?.review_policy ?? request?.policy_decision ?? fallback
+  if (typeof value === 'string') return { decision: value, reasons: [] }
+  if (value && typeof value === 'object' && !Array.isArray(value) && typeof value.decision === 'string') {
+    return value
+  }
+  return null
+}
+
+function requireAutopilotPolicy(plan, request, expected, fallback = null) {
+  if (!autopilotActive(plan)) return suppliedPolicy(request, fallback)
+  const policy = suppliedPolicy(request, fallback)
+  if (!autopilotDecisionAllowed(policy, expected)) throw new Error('AUTOPILOT_POLICY_DENIED')
+  return policy
+}
+
 function sliceById(plan, sliceId) {
   const slice = plan.slices?.find(item => item?.id === sliceId)
   if (!slice) throw new Error('TARGET_SLICE_MISSING')
@@ -283,6 +396,7 @@ function currentAttemptId(slice) {
 function validateMetadataProjection(root, descriptor, checkpoint, metadata) {
   const planText = metadata.files[descriptor.plan_path]
   const generated = frontmatter(planText)
+  assertAutopilotUnchanged(descriptor.original_plan, generated)
   if (generated.schema_version !== descriptor.schema_version || generated.story_id !== descriptor.story_id) throw new Error('PLAN_IDENTITY_CHANGED')
   if (generated.lifecycle_snapshot !== descriptor.original_plan.lifecycle_snapshot || generated.execution_status !== descriptor.original_plan.execution_status) throw new Error('PLAN_LIFECYCLE_CHANGED')
   if (generated.current_slice !== descriptor.slice_id || generated.next_action?.kind !== 'verify_slice' || generated.next_action?.target !== descriptor.slice_id) throw new Error('VERIFY_SUCCESSOR_REQUIRED')
@@ -297,9 +411,16 @@ function validateMetadataProjection(root, descriptor, checkpoint, metadata) {
   for (const original of originalSlices) {
     const next = generatedSlices.find(item => item?.id === original.id)
     if (!next) throw new Error('PLAN_SLICE_SET_CHANGED')
+    if (!sameJson(original.risk, next.risk)) throw new Error('SLICE_EXECUTION_CONTRACT_CHANGED')
     if (original.id !== descriptor.slice_id && !sameJson(original, next)) throw new Error('OTHER_SLICE_METADATA_CHANGED')
   }
   const slice = sliceById(generated, descriptor.slice_id)
+  if (!sameJson(slice.risk, descriptor.original_slice.risk) ||
+      !sameJson(slice.executor, descriptor.original_slice.executor) ||
+      !sameJson(slice.scope, descriptor.original_slice.scope) ||
+      !sameJson(slice.verification_obligations, descriptor.original_slice.verification_obligations)) {
+    throw new Error('SLICE_EXECUTION_CONTRACT_CHANGED')
+  }
   if (!sameJson(slice.attempt_history, descriptor.original_slice.attempt_history) ||
       !sameJson(slice.current_attempt, descriptor.original_slice.current_attempt)) throw new Error('ATTEMPT_HISTORY_CHANGED')
   const changedDigest = descriptor.schema_version === 2
@@ -332,7 +453,6 @@ function buildPreview(root, request) {
       /^\s*(?:human_approval|finalization):/m.test(request.plan_template)) throw new Error('COMPLETION_AUTHORITY_FORBIDDEN')
   const pointer = assertPointerIdle(root)
   const head = gitOutput(root, ['rev-parse', 'HEAD'])
-  if (head !== request.expected_head) throw new Error('EXPECTED_HEAD_MISMATCH')
   const planPath = planRelative(request.story_id)
   const planText = readText(root, planPath)
   const plan = frontmatter(planText)
@@ -342,9 +462,18 @@ function buildPreview(root, request) {
   const slice = sliceById(plan, request.slice_id)
   if (plan.current_slice !== request.slice_id || plan.next_action?.kind !== 'implement_slice' || plan.next_action?.target !== request.slice_id) throw new Error('PLAN_ACTION_SLICE_MISMATCH')
   if (slice.status !== 'pending') throw new Error('SLICE_NOT_PENDING')
+  const executor = slice.executor ?? 'lead'
+  const worker = validateWorkerEvidence(request, executor)
+  if (executor !== 'agy' && head !== request.expected_head) throw new Error('EXPECTED_HEAD_MISMATCH')
   const storyPath = plan.schema_version === 2 ? plan.story?.path : 'docs/product/epics.md'
   if (!safeRelative(storyPath)) throw new Error('STORY_PATH_INVALID')
   const owned = normalizePaths(root, request.owned_paths, 'IMPLEMENTATION_SCOPE')
+  let scopeGate = null
+  if (executor === 'agy') {
+    if (owned.some(relative => !isAllowed(relative, slice.scope.paths))) throw new Error('AGY_OWNED_PATH_OUT_OF_SCOPE')
+    scopeGate = inspectAgyScope(root, request.expected_head, slice.scope.paths).compact
+    if (head !== request.expected_head) throw new Error('EXPECTED_HEAD_MISMATCH')
+  }
   const expectedReceiptPath = plan.schema_version === 2 ? implementationReceiptPath(request.story_id, slice) : null
   const receiptPath = plan.schema_version === 2
     ? (request.receipt_path ?? expectedReceiptPath)
@@ -396,6 +525,8 @@ function buildPreview(root, request) {
     plan_digest: hash(Buffer.from(planText)),
     story_digest: story.files[storyPath],
     story_normative_digest: plan.story?.normative_digest ?? null,
+    executor,
+    ...(executor === 'agy' ? { worker, scope_gate: scopeGate } : {}),
     policy: { paths: policy.paths, files: policy.files, digest: policy.digest },
     recipes: { paths: recipes.paths, files: recipes.files, digest: recipes.digest },
     pointer_digest: hash(pointerBytes),
@@ -450,6 +581,8 @@ function descriptorFromPreview(root, request, preview, recovery = false) {
   if (request.selected_tasks !== undefined && !sameJson(request.selected_tasks, preview.selected_tasks)) throw new Error('SELECTED_TASKS_CHANGED')
   if (request.selected_acceptance_criteria !== undefined && !sameJson(request.selected_acceptance_criteria, preview.selected_acceptance_criteria)) throw new Error('SELECTED_AC_CHANGED')
   if (request.red_green !== undefined && !sameJson(request.red_green, preview.red_green)) throw new Error('RED_GREEN_CHANGED')
+  if (preview.executor === 'agy' && !sameJson(request.worker, preview.worker)) throw new Error('WORKER_EVIDENCE_CHANGED')
+  if (preview.executor !== 'agy' && Object.hasOwn(request, 'worker')) throw new Error('WORKER_EVIDENCE_FORBIDDEN')
   const metadataPaths = preview.metadata_paths
   return {
     action: 'implement_slice',
@@ -466,6 +599,8 @@ function descriptorFromPreview(root, request, preview, recovery = false) {
     schema_version: preview.schema_version_plan,
     original_plan: preview.original_plan,
     original_slice: preview.original_slice,
+    executor: preview.executor,
+    ...(preview.executor === 'agy' ? { worker: preview.worker, scope_gate: preview.scope_gate } : {}),
     commands: preview.commands,
     semantic_coverage: preview.semantic_coverage,
     red_green: preview.red_green,
@@ -473,6 +608,13 @@ function descriptorFromPreview(root, request, preview, recovery = false) {
     metadata_message: preview.metadata_message,
     buildMetadata: checkpoint => buildMetadata(root, preview, checkpoint),
     recheck: freshRoot => {
+      if (preview.executor === 'agy') {
+        let current
+        try { current = inspectScope(freshRoot, preview.expected_head, preview.original_slice.scope.paths, { forbidCommits: true }) }
+        catch { throw new Error('STALE_AGY_SCOPE_GATE_CHANGED') }
+        if (current.changed.some(item => item.sources.includes('deleted')) ||
+            !sameJson(compactScopeGate(current), preview.scope_gate)) throw new Error('STALE_AGY_SCOPE_GATE_CHANGED')
+      }
       if (gitOutput(freshRoot, ['rev-parse', 'HEAD']) !== preview.expected_head) throw new Error('STALE_HEAD')
       const pointer = assertPointerIdle(freshRoot)
       if (pointer.digest !== preview.pointer_digest) throw new Error('STALE_POINTER_PREVIEW')
@@ -534,7 +676,8 @@ function buildMetadata(root, preview, checkpoint) {
     subject_digest: checkpoint.subject_digest,
     created_from_head: checkpoint.checkpoint_commit,
     changed_paths_sha256: checkpoint.changed_paths_sha256,
-    commands: preview.commands
+    commands: preview.commands,
+    ...(preview.executor === 'agy' ? { worker: { ...preview.worker, scope_gate: preview.scope_gate } } : {})
   } : null
   const receiptBytes = receipt ? `${JSON.stringify(receipt, null, 2)}\n` : null
   const receiptDigestValue = receipt ? receiptDigest(receipt) : null
@@ -622,6 +765,7 @@ function expectedReworkAttempt(storyId, sliceId, attemptId) {
 }
 
 function validateReworkProjection(root, request, originalPlan, generated, oldSnapshot, newAttempt) {
+  assertAutopilotUnchanged(originalPlan, generated)
   if (generated.schema_version !== originalPlan.schema_version || generated.story_id !== request.story_id) throw new Error('PLAN_IDENTITY_CHANGED')
   if (generated.lifecycle_snapshot !== originalPlan.lifecycle_snapshot || generated.execution_status !== originalPlan.execution_status) throw new Error('PLAN_LIFECYCLE_CHANGED')
   if (generated.current_slice !== request.slice_id || generated.next_action?.kind !== 'implement_slice' || generated.next_action?.target !== request.slice_id) throw new Error('REWORK_SAME_SLICE_IMPLEMENTATION_REQUIRED')
@@ -637,9 +781,12 @@ function validateReworkProjection(root, request, originalPlan, generated, oldSna
   for (const original of originalSlices) {
     const next = generated.slices?.find(item => item?.id === original.id)
     if (!next) throw new Error('PLAN_SLICE_SET_CHANGED')
+    if (!sameJson(original.risk, next.risk)) throw new Error('SLICE_EXECUTION_CONTRACT_CHANGED')
     if (original.id !== request.slice_id && !sameJson(original, next)) throw new Error('OTHER_SLICE_METADATA_CHANGED')
   }
   const slice = sliceById(generated, request.slice_id)
+  const originalSlice = sliceById(originalPlan, request.slice_id)
+  if (!sameJson(slice.risk, originalSlice.risk)) throw new Error('SLICE_EXECUTION_CONTRACT_CHANGED')
   if (slice.status !== 'pending') throw new Error('REWORK_PENDING_PROJECTION_REQUIRED')
   if (slice.baseline_commit || slice.checkpoint_commit || slice.subject_digest || slice.changed_paths_sha256 || slice.receipt_refs) {
     throw new Error('REWORK_OLD_CHECKPOINT_MUST_MOVE_TO_HISTORY')
@@ -678,6 +825,7 @@ function validateReworkState(root, request, { template = true } = {}) {
   if (changedPaths.length !== 2) throw new Error('REWORK_EXACT_TWO_PATHS_REQUIRED')
   if (!Array.isArray(request.rework_paths) || !sameJson(canonicalPaths(request.rework_paths), changedPaths)) throw new Error('REWORK_SCOPE_MISMATCH')
   const findings = normalizedFindings(request.findings)
+  const policy = requireAutopilotPolicy(plan, request, 'REWORK')
   const newAttempt = expectedReworkAttempt(request.story_id, request.slice_id, currentAttemptId(slice) + 1)
   const oldSnapshot = reworkAttemptSnapshot(slice)
   const generated = template ? frontmatter(request.plan_template) : null
@@ -691,7 +839,7 @@ function validateReworkState(root, request, { template = true } = {}) {
     if (lock?.transaction_id !== request.transaction_id) throw new Error('TRANSACTION_SCOPE_LOCKED')
   }
   return { pointer, head, planPath, planText, plan, slice, checked, oldReceipt: oldReceipt.receipt,
-    oldSnapshot, newAttempt, findings, changedPaths, identity }
+    oldSnapshot, newAttempt, findings, policy, changedPaths, identity }
 }
 
 function buildReworkPreview(root, request) {
@@ -716,6 +864,7 @@ function buildReworkPreview(root, request) {
     old_snapshot: state.oldSnapshot,
     new_attempt: state.newAttempt,
     findings: state.findings,
+    ...(state.policy ? { policy: state.policy } : {}),
     findings_digest: digestValue(state.findings),
     rework_paths: state.changedPaths,
     metadata_paths: [state.planPath],
@@ -744,7 +893,11 @@ function reworkDescriptorFromPreview(root, request, preview, recovery = false) {
   if (request.old_receipt_digest !== undefined && request.old_receipt_digest !== preview.old_receipt_digest) throw new Error('STALE_REWORK_BINDING')
   if (request.rework_paths !== undefined && !sameJson(canonicalPaths(request.rework_paths), preview.rework_paths)) throw new Error('STALE_REWORK_SCOPE')
   if (request.findings !== undefined && !sameJson(normalizedFindings(request.findings), preview.findings)) throw new Error('STALE_REWORK_FINDINGS')
-  if (!recovery) validateReworkState(root, { ...request, operation: 'prepare-rework' })
+  const policyInput = autopilotActive(preview.original_plan) && request.policy === undefined && preview.policy !== undefined
+    ? { ...request, policy: preview.policy }
+    : request
+  if (autopilotActive(preview.original_plan)) requireAutopilotPolicy(preview.original_plan, policyInput, 'REWORK', preview.policy)
+  if (!recovery) validateReworkState(root, { ...policyInput, operation: 'prepare-rework' })
   const descriptor = {
     action: 'rework_slice', story_id: preview.story_id, slice_id: preview.slice_id,
     transaction_id: preview.transaction_id, expected_head: preview.expected_head,
@@ -778,7 +931,7 @@ function reworkError(error) {
   if (error.message === 'WORKTREE_SCOPE_MISMATCH') return blocked('DIRTY_SCOPE_MISMATCH')
   if (error.message.includes('DIRTY') || error.message.includes('WORKTREE') || error.message.includes('LOCKED') || error.message.includes('REWORK_') ||
       error.message.includes('PLAN_') || error.message.includes('ATTEMPT') || error.message.includes('COMPLETION_AUTHORITY') ||
-      error.message.includes('POST_REWORK')) return blocked(error.message)
+      error.message.includes('POST_REWORK') || error.message === 'AUTOPILOT_POLICY_DENIED') return blocked(error.message)
   if (error.message.includes('STALE') || error.message.includes('MISMATCH') || error.message === 'EXPECTED_HEAD_MISMATCH') return stale(error.message)
   if (['INPUT_REQUIRED', 'INVALID_STORY_ID', 'INVALID_SLICE_ID', 'INVALID_EXPECTED_HEAD', 'ACTION_MISMATCH',
     'OPERATION_MISMATCH', 'MAINTENANCE_AUTHORIZATION_REQUIRED', 'REWORK_AUTHORITY_FORBIDDEN'].includes(error.message)) return invalid(error.message)
@@ -786,6 +939,9 @@ function reworkError(error) {
 }
 
 export function prepareRework(root, request = {}) {
+  request = withLfPlanTemplate(request)
+  const fence = fenceAdmission(path.resolve(root), request, 'prepare-rework')
+  if (fence) return fence
   observeActionStarted(path.resolve(root), request, 'prepare-rework')
   let result
   try { result = buildReworkPreview(path.resolve(root), request) } catch (error) { result = reworkError(error) }
@@ -794,12 +950,17 @@ export function prepareRework(root, request = {}) {
 }
 
 export function applyRework(root, request = {}) {
+  request = withLfPlanTemplate(request)
+  const fence = fenceAdmission(path.resolve(root), request, 'apply-rework')
+  if (fence) return fence
   observeActionStarted(path.resolve(root), request, 'apply-rework')
   let result
   try {
     root = path.resolve(root)
     const recovery = request.recovery_authorized === true || request.recovery?.authorized === true
     const descriptor = reworkDescriptorFromPreview(root, request, request.preview, recovery)
+    const assertFence = requestFence(root, request, 'apply-rework')
+    if (assertFence) descriptor.assertFence = assertFence
     result = executeMetadataTransaction(root, descriptor)
     if (result.status === 'ERROR' && result.reasons?.[0]) result = reworkError(new Error(result.reasons[0]))
     if (result.status === 'APPLIED' || result.status === 'NOOP') {
@@ -811,7 +972,7 @@ export function applyRework(root, request = {}) {
 }
 
 function buildRequestFromPreview(preview, request, operation) {
-  return {
+  const result = {
     ...request,
     operation,
     action: 'implement_slice',
@@ -824,6 +985,8 @@ function buildRequestFromPreview(preview, request, operation) {
     semantic_coverage: request.semantic_coverage ?? preview.semantic_coverage,
     plan_template: request.plan_template ?? preview.plan_template
   }
+  if (preview.executor === 'agy') result.worker = request.worker ?? preview.worker
+  return result
 }
 
 // ---------------------------------------------------------------------------
@@ -905,12 +1068,14 @@ function mandatoryJudgmentFlags(plan) {
 }
 
 function selectRisk(plan, request = {}) {
-  const planRisk = normalizedRisk(plan?.risk?.level ?? plan?.risk)
+  const slice = plan?.slices?.find(item => item.id === (request.slice_id ?? plan.current_slice))
+  const selectedRisk = slice?.risk ?? plan?.risk
+  const planRisk = normalizedRisk(selectedRisk?.level ?? selectedRisk)
   const requestedRisk = request.risk === undefined || request.risk === null ? null : normalizedRisk(request.risk)
   if (requestedRisk && RISK_ORDER[requestedRisk] < RISK_ORDER[planRisk]) throw new Error('RISK_DOWNGRADE_FORBIDDEN')
   return {
     risk: requestedRisk && RISK_ORDER[requestedRisk] > RISK_ORDER[planRisk] ? requestedRisk : planRisk,
-    mandatory_judgment_flags: mandatoryJudgmentFlags(plan)
+    mandatory_judgment_flags: mandatoryJudgmentFlags({ risk: selectedRisk })
   }
 }
 
@@ -1091,7 +1256,7 @@ function verificationDescriptorFromPreview(root, request, preview, recovery = fa
   const currentPlan = frontmatter(readText(root, preview.plan_path))
   const requestedRisk = selectRisk(currentPlan, request)
   if (!RISK_LEVELS.has(preview.risk) || RISK_ORDER[preview.risk] < RISK_ORDER[requestedRisk.risk] ||
-      !sameJson(preview.mandatory_judgment_flags ?? [], mandatoryJudgmentFlags(currentPlan))) throw new Error('STALE_RISK_PREVIEW')
+      !sameJson(preview.mandatory_judgment_flags ?? [], requestedRisk.mandatory_judgment_flags)) throw new Error('STALE_RISK_PREVIEW')
   if (digestFiles(root, preview.policy.paths).digest !== preview.policy.digest) throw new Error('STALE_POLICY_PREVIEW')
   if (digestFiles(root, preview.recipes.paths).digest !== preview.recipes.digest) throw new Error('STALE_RECIPE_PREVIEW')
   if (hash(readFileSync(safeFile(root, preview.story_path))) !== preview.story_digest) throw new Error('STALE_STORY_PREVIEW')
@@ -1290,6 +1455,15 @@ function reviewCommandRecords(review) {
   return records.map(item => ({ command: item.command, exit_code: item.exit_code, tool: item.tool, environment: item.environment }))
 }
 
+function validatedSliceReview(review, preview) {
+  const payloadErrors = validateReviewPayload(review, preview.original_slice.executor ?? 'lead')
+  if (payloadErrors.length) throw new Error(payloadErrors[0])
+  return review?.reviewer && typeof review.reviewer === 'object'
+    ? { ...review, reviewer: { ...review.reviewer,
+        independent: review.reviewer.type === 'lead' && preview.original_slice.executor === 'agy' } }
+    : review
+}
+
 function buildVerificationMetadata(root, preview, outcome, targetStatus, review = null) {
   const verificationEvidence = outcome.verification
   const focused = outcome.focusedEvidence ?? verificationEvidence.focused_checks ?? []
@@ -1327,6 +1501,7 @@ function buildVerificationMetadata(root, preview, outcome, targetStatus, review 
   let reviewReceipt = null
   let reviewDigest = null
   if (review) {
+    review = validatedSliceReview(review, preview)
     const reviewCommands = reviewCommandRecords(review)
     reviewReceipt = {
       schema_version: REVIEW_RECEIPT_SCHEMA_VERSION,
@@ -1347,7 +1522,8 @@ function buildVerificationMetadata(root, preview, outcome, targetStatus, review 
       scope_digest: review.scope_digest ?? null,
       risk_context_digest: digestValue(preview.original_plan.risk ?? null),
       reviewed_commit: preview.checkpoint_commit,
-      reviewer: review.reviewer ?? 'same-lead'
+      reviewer: review.reviewer ?? 'same-lead',
+      ...(Object.hasOwn(review, 'findings') ? { findings: review.findings } : {})
     }
     reviewDigest = receiptDigest(reviewReceipt)
   }
@@ -1372,11 +1548,16 @@ function buildVerificationMetadata(root, preview, outcome, targetStatus, review 
     PROGRESSION_ELIGIBLE: 'true',
     REVIEW_JUDGMENT: review?.judgment ?? '',
     REVIEWED_COMMIT: preview.checkpoint_commit,
-    REVIEWER: review?.reviewer ?? '',
+    REVIEWER: typeof review?.reviewer === 'object' ? '' : review?.reviewer ?? '',
     RISK_CONTEXT_DIGEST: digestValue(preview.original_plan.risk ?? null),
     CONTEXT_DIGEST: preview.context_digest
   }
-  const planText = replaceVerificationTemplate(preview.plan_template, values)
+  let planTemplate = preview.plan_template
+  if (review?.reviewer && typeof review.reviewer === 'object') {
+    planTemplate = planTemplate.replace(/^([ \t]*)reviewer: (\{\{(?:REVIEWER|reviewer)\}\})[ \t]*\r?$/gm, (_, indent) =>
+      `${indent}reviewer:\n${indent}  type: ${review.reviewer.type}\n${indent}  vendor: ${review.reviewer.vendor ?? 'null'}\n${indent}  independent: ${review.reviewer.independent}`)
+  }
+  const planText = replaceVerificationTemplate(planTemplate, values)
   const files = {
     [preview.plan_path]: planText,
     [preview.verification_receipt_path]: `${JSON.stringify(verificationReceipt, null, 2)}\n`
@@ -1405,6 +1586,7 @@ function buildVerificationMetadata(root, preview, outcome, targetStatus, review 
 
 function validateVerificationMetadata(root, preview, metadata) {
   const generated = frontmatter(metadata.files[preview.plan_path])
+  assertAutopilotUnchanged(preview.original_plan, generated)
   if (generated.schema_version !== preview.original_plan.schema_version || generated.story_id !== preview.story_id) throw new Error('PLAN_IDENTITY_CHANGED')
   if (generated.lifecycle_snapshot !== preview.original_plan.lifecycle_snapshot || generated.execution_status !== preview.original_plan.execution_status) throw new Error('PLAN_LIFECYCLE_CHANGED')
   const expectedCurrent = metadata.next_action.kind === 'implement_slice' ? metadata.next_action.target : preview.slice_id
@@ -1419,9 +1601,11 @@ function validateVerificationMetadata(root, preview, metadata) {
   for (const original of originalSlices) {
     const next = generated.slices?.find(item => item?.id === original.id)
     if (!next) throw new Error('PLAN_SLICE_SET_CHANGED')
+    if (!sameJson(original.risk, next.risk)) throw new Error('SLICE_EXECUTION_CONTRACT_CHANGED')
     if (original.id !== preview.slice_id && !sameJson(original, next)) throw new Error('OTHER_SLICE_METADATA_CHANGED')
   }
   const slice = sliceById(generated, preview.slice_id)
+  if (!sameJson(slice.risk, preview.original_slice.risk)) throw new Error('SLICE_EXECUTION_CONTRACT_CHANGED')
   if (!sameJson(slice.attempt_history, preview.original_slice.attempt_history) ||
       !sameJson(slice.current_attempt, preview.original_slice.current_attempt)) throw new Error('ATTEMPT_HISTORY_CHANGED')
   if (slice.status !== metadata.target_status || slice.baseline_commit !== preview.baseline_commit ||
@@ -1499,18 +1683,31 @@ function metadataDescriptor(root, preview, outcome, targetStatus, review, transa
   }
 }
 
-function persistVerification(root, preview, outcome, request, targetStatus = 'verified', review = null) {
+function persistVerification(root, preview, outcome, request, targetStatus = 'verified', review = null, reportPolicy = () => {}) {
+  review = validatedSliceReview(review, preview)
   const recovery = request.recovery_authorized === true || request.recovery?.authorized === true
   if (!preview.plan_template && !request.plan_template && !recovery) throw new Error('PLAN_TEMPLATE_REQUIRED')
   const effectivePreview = { ...preview, plan_template: request.plan_template ?? preview.plan_template }
   const transactionId = request.transaction_id ?? (review ? `${preview.transaction_id}-review` : preview.transaction_id)
   const descriptor = metadataDescriptor(root, effectivePreview, outcome, targetStatus, review, transactionId)
+  const assertFence = requestFence(root, request, review ? 'record-review' : 'verify')
+  if (assertFence) descriptor.assertFence = assertFence
   descriptor.fail_at = request.fail_at ?? request.failure_phase
   descriptor.recovery = request.recovery_authorized === true || request.recovery?.authorized === true
   if (descriptor.recovery) {
     descriptor.recovery_checkpoint = request.recovery_checkpoint ?? request.recovery?.checkpoint_commit
     if (!descriptor.recovery_checkpoint) throw new Error('RECOVERY_CHECKPOINT_REQUIRED')
     descriptor.recheck = undefined
+    const validateFinal = descriptor.validateFinal
+    descriptor.validateFinal = metadata => {
+      validateFinal(metadata)
+      const receipt = metadata.verification_receipt
+      reportPolicy(reviewPolicy(preview, {
+        verification: { status: receipt.status, complete: receipt.status === 'PASS',
+          canonical: receipt.canonical, checks: receipt.raw_focused_checks },
+        focusedEvidence: receipt.raw_focused_checks
+      }, review))
+    }
   }
   const result = executeMetadataTransaction(root, descriptor)
   if (result.status === 'APPLIED' || result.status === 'NOOP') return { ...result, action: 'verify_slice', operation: review ? 'record-review' : 'verify', next_action: result.next_action }
@@ -1518,9 +1715,13 @@ function persistVerification(root, preview, outcome, request, targetStatus = 've
 }
 
 function verificationError(error) {
+  if (['REVIEWER_INVALID', 'REVIEW_FINDINGS_INVALID', 'REVIEWER_INDEPENDENCE_MISMATCH',
+    'REVIEW_DECISION_CONFLICT', 'REVIEW_DECISION_INVALID', 'REVIEW_DECISION_MISSING'].includes(error.message)) return invalid(error.message)
+  if (error.message === 'REVIEW_FINDINGS_OPEN') return blocked(error.message)
   if (error.message.includes('STALE') || error.message.includes('MISMATCH') || error.message === 'EXPECTED_HEAD_MISMATCH') return stale(error.message)
   if (error.message.includes('PLAN_NOT_READY') || error.message.includes('MANIFEST_') || error.message.includes('SLICE_') ||
-      error.message.includes('DIRTY_') || error.message.includes('SUCCESSOR_') || error.message.includes('AMBIGUOUS_')) return blocked(error.message)
+      error.message.includes('DIRTY_') || error.message.includes('SUCCESSOR_') || error.message.includes('AMBIGUOUS_') ||
+      error.message === 'AUTOPILOT_POLICY_DENIED') return blocked(error.message)
   if (['INPUT_REQUIRED', 'INVALID_STORY_ID', 'INVALID_SLICE_ID', 'INVALID_EXPECTED_HEAD', 'ACTION_MISMATCH', 'OPERATION_MISMATCH',
     'RISK_LEVEL_REQUIRED', 'RISK_FLAGS_INVALID', 'RISK_FLAG_INVALID', 'RISK_DOWNGRADE_FORBIDDEN'].includes(error.message) ||
       error.message.startsWith('RISK_FLAG_UNMAPPED:') ||
@@ -1528,15 +1729,26 @@ function verificationError(error) {
   return errorResult(error)
 }
 
-function verifySliceCore(root, request = {}) {
+function reviewPolicy(preview, bundle, review = null) {
+  return decideReviewOutcome({
+    risk: { level: preview?.risk, flags: bundle?.judgmentFlags ?? preview?.mandatory_judgment_flags ?? [] },
+    executor: preview?.original_slice?.executor ?? 'lead', reviewer: review?.reviewer ?? null,
+    findings: review?.findings ?? [], verification: bundle?.verification,
+    focusedEvidence: bundle?.focusedEvidence ?? bundle?.verification?.focused_checks ?? [],
+    attemptId: preview?.attempt_id ?? 1, autopilot: autopilotActive(preview?.original_plan) === true
+  })
+}
+
+function verifySliceCore(root, request = {}, reportPolicy = () => {}) {
   try {
     root = path.resolve(root)
     assertVerificationRequestShape(request, 'verify')
     const recovery = request.recovery_authorized === true || request.recovery?.authorized === true
     const preview = request.preview
     const descriptorPreview = verificationDescriptorFromPreview(root, request, preview, recovery)
-    if (recovery) return persistVerification(root, descriptorPreview, null, request, request.target_status ?? 'verified', request.review ?? null)
+    if (recovery) return persistVerification(root, descriptorPreview, null, request, request.target_status ?? 'verified', validatedSliceReview(request.review ?? null, descriptorPreview), reportPolicy)
     const bundle = runVerificationBundle(root, descriptorPreview, request)
+    reportPolicy(reviewPolicy(descriptorPreview, bundle))
     if (bundle.stale) return stale(bundle.reasons[0], { action: 'verify_slice', operation: 'verify', manifest: bundle.manifest })
     if (bundle.invalid) return invalid(bundle.reasons[0], { action: 'verify_slice', operation: 'verify', verification: bundle.verification })
     if (bundle.blocked) return blocked(bundle.reasons[0], { action: 'verify_slice', operation: 'verify', manifest: bundle.manifest, verification: bundle.verification ?? null })
@@ -1572,7 +1784,7 @@ function validateReviewAnswers(review, questions) {
   throw new Error('REVIEW_ANSWERS_INCOMPLETE')
 }
 
-function recordSliceReviewCore(root, request = {}) {
+function recordSliceReviewCore(root, request = {}, reportPolicy = () => {}) {
   try {
     root = path.resolve(root)
     assertVerificationRequestShape({ ...request, action: 'verify_slice' }, 'record-review')
@@ -1583,14 +1795,22 @@ function recordSliceReviewCore(root, request = {}) {
     const descriptorPreview = verificationDescriptorFromPreview(root, { ...request, action: 'verify_slice' }, preview, recovery)
     if (pending.preview_fingerprint !== descriptorPreview.fingerprint || pending.story_id !== descriptorPreview.story_id || pending.slice_id !== descriptorPreview.slice_id) throw new Error('PENDING_EVIDENCE_STALE')
     if (!exactList(pending.changed_paths, descriptorPreview.changed_paths) || pending.changed_paths_sha256 !== descriptorPreview.changed_paths_sha256) throw new Error('PENDING_SCOPE_MISMATCH')
+    const validatedReview = validatedSliceReview(request.review, descriptorPreview)
+    const policy = reviewPolicy(descriptorPreview, {
+      verification: pending.verification, focusedEvidence: pending.focused_evidence,
+      judgmentFlags: pending.judgment_flags
+    }, validatedReview)
+    reportPolicy(policy)
+    if (autopilotActive(descriptorPreview.original_plan) && validatedReview?.judgment === 'APPROVE' &&
+        !autopilotDecisionAllowed(policy, 'APPROVE_ALLOWED')) throw new Error('AUTOPILOT_POLICY_DENIED')
     if (recovery) {
       if (!request.review || request.review.judgment !== 'APPROVE') throw new Error('RECOVERY_REVIEW_APPROVAL_REQUIRED')
-      return persistVerification(root, descriptorPreview, null, request, 'reviewed', request.review)
+      return persistVerification(root, descriptorPreview, null, request, 'reviewed', validatedReview, reportPolicy)
     }
     const manifest = inspectSliceVerification(root, descriptorPreview.story_id, descriptorPreview.slice_id)
     if (['STALE', 'BLOCKED', 'INVALID', 'ERROR'].includes(manifest.status)) return stale(`VERIFICATION_MANIFEST_${manifest.status}`)
     if (!exactList(changePaths(manifest.changedPaths), descriptorPreview.changed_paths)) return stale('CHANGED_PATH_SCOPE_CHANGED')
-    const review = request.review
+    const review = validatedReview
     if (!review || typeof review !== 'object' || Array.isArray(review) || !REVIEW_JUDGMENTS.has(review.judgment)) throw new Error('REVIEW_JUDGMENT_REQUIRED')
     const questions = pending.review_questions
     if (!Array.isArray(questions) || !questions.length) throw new Error('REVIEW_QUESTIONS_REQUIRED')
@@ -1625,24 +1845,35 @@ function recordSliceReviewCore(root, request = {}) {
 }
 
 export function verifySlice(root, request = {}) {
+  request = withLfPlanTemplate(request)
+  const fence = fenceAdmission(path.resolve(root), request, 'verify')
+  if (fence) return fence
   observeActionStarted(path.resolve(root), request, 'verify')
   let result
-  try { result = verifySliceCore(root, request) }
+  let policy = reviewPolicy(null, null)
+  try { result = verifySliceCore(root, request, value => { policy = value }) }
   catch (error) { result = errorResult(error) }
+  result = { ...result, policy }
   observeActionFinished(path.resolve(root), request, 'verify', result)
   return result
 }
 
 export function recordSliceReview(root, request = {}) {
+  request = withLfPlanTemplate(request)
+  const fence = fenceAdmission(path.resolve(root), request, 'record-review')
+  if (fence) return fence
   observeActionStarted(path.resolve(root), request, 'record-review')
   let result
-  try { result = recordSliceReviewCore(root, request) }
+  let policy = reviewPolicy(null, null)
+  try { result = recordSliceReviewCore(root, request, value => { policy = value }) }
   catch (error) { result = errorResult(error) }
+  result = { ...result, policy }
   observeActionFinished(path.resolve(root), request, 'record-review', result)
   return result
 }
 
 export function prepareAction(root, request = {}) {
+  request = withLfPlanTemplate(request)
   try {
     root = path.resolve(root)
     if (request?.action === 'rework_slice') return buildReworkPreview(root, request)
@@ -1651,6 +1882,9 @@ export function prepareAction(root, request = {}) {
   }
   catch (error) {
     if (request?.action === 'verify_slice') return verificationError(error)
+    if (error instanceof AgyScopeGateError) return blocked(error.message, { scope_gate: scopeGateDiagnostic(error.scope_gate) })
+    if (['AGY_OWNED_PATH_OUT_OF_SCOPE', 'AGY_DELETE_UNSUPPORTED'].includes(error.message)) return blocked(error.message)
+    if (['WORKER_EVIDENCE_REQUIRED', 'WORKER_EVIDENCE_FORBIDDEN', 'WORKER_EVIDENCE_INVALID'].includes(error.message)) return invalid(error.message)
     if (error.message.includes('MISMATCH') || error.message.includes('STALE') || error.message === 'EXPECTED_HEAD_MISMATCH') return stale(error.message)
     if (error.message.includes('NOT_READY') || error.message.startsWith('PLAN_NOT_READY')) return blocked(error.message)
     if (['INPUT_REQUIRED', 'INVALID_STORY_ID', 'INVALID_SLICE_ID', 'INVALID_EXPECTED_HEAD', 'ACTION_MISMATCH', 'OPERATION_MISMATCH'].includes(error.message)) return invalid(error.message)
@@ -1688,10 +1922,15 @@ function checkpointImplementationCore(root, request = {}) {
       throw new Error('STALE_HEAD')
     }
     const descriptor = descriptorFromPreview(root, input, preview, recovery)
+    const assertFence = requestFence(root, input, 'checkpoint')
+    if (assertFence) descriptor.assertFence = assertFence
     descriptor.recovery = recovery
     descriptor.recovery_checkpoint = input.recovery_checkpoint
     descriptor.fail_at = request.fail_at ?? request.failure_phase
     const result = executeSliceTransaction(root, descriptor)
+    if (result.status === 'STALE' && result.reasons?.includes('STALE_AGY_SCOPE_GATE_CHANGED')) {
+      return { ...result, reasons: ['AGY_SCOPE_GATE_CHANGED'] }
+    }
     if (result.status === 'CHECKPOINTED' || result.status === 'NOOP') {
       return { ...result, action: 'implement_slice', operation: 'checkpoint', next_action: result.next_action ?? { kind: 'verify_slice', target: preview.slice_id } }
     }
@@ -1705,6 +1944,9 @@ function checkpointImplementationCore(root, request = {}) {
 }
 
 export function checkpointImplementation(root, request = {}) {
+  request = withLfPlanTemplate(request)
+  const fence = fenceAdmission(path.resolve(root), request, 'checkpoint')
+  if (fence) return fence
   observeActionStarted(path.resolve(root), request, 'checkpoint')
   let result
   try { result = checkpointImplementationCore(root, request) }
@@ -1762,6 +2004,7 @@ function stagedRecoveryKernelDescriptor(root, request, operation) {
 }
 
 export function prepareStagedRecovery(root, request = {}) {
+  request = withLfPlanTemplate(request)
   try {
     root = path.resolve(root)
     const descriptor = stagedRecoveryKernelDescriptor(root, request, 'prepare-staged-recovery')
@@ -1774,6 +2017,7 @@ export function prepareStagedRecovery(root, request = {}) {
 }
 
 export function applyStagedRecovery(root, request = {}) {
+  request = withLfPlanTemplate(request)
   try {
     root = path.resolve(root)
     const descriptor = stagedRecoveryKernelDescriptor(root, request, 'apply-staged-recovery')

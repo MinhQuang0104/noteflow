@@ -1,9 +1,11 @@
 ---
 name: story-development
-description: Use for implementing an approved or ready-for-dev BMAD Story under the shared V3 Lead policy.
+description: Deprecated; approved or ready-for-dev Stories use v4-story-runner.
 ---
 
 # Story Development
+
+Deprecated: use [V4 Runner](../v4-story-runner/SKILL.md); the following V3 instructions are historical only.
 
 This skill is the repository's execution router for an approved BMAD Story. It
 selects proportionate controls; it is not a second SDLC or implementation agent.

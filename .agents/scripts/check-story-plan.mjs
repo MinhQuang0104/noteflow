@@ -4,6 +4,8 @@ import { createHash } from 'node:crypto'
 import { spawnSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
 import { validateSeparatedPlan } from './v4-separated-plan.mjs'
+import { normalizeAllowed } from './check-worker-scope.mjs'
+import { validateResources } from './story-scope.mjs'
 
 // Exit codes: READY=0, RECONCILIATION_REQUIRED=1, STALE=2, INVALID=3, ERROR=4.
 const CODES = { READY: 0, RECONCILIATION_REQUIRED: 1, STALE: 2, INVALID: 3, ERROR: 4 }
@@ -11,6 +13,7 @@ const ACTIONS = new Set(['plan_slice', 'implement_slice', 'verify_slice', 'revie
 const SLICE_STATUSES = new Set(['pending', 'active', 'checkpointed', 'verified', 'reviewed', 'blocked'])
 const V3_KEYS = new Set(['run_id', 'runId', 'activeRunId', 'task_id', 'taskId', 'taskIds', 'workerId', 'lease', 'generation', 'humanGateRequired', 'dispatchId'])
 const SHA256 = /^sha256:[0-9a-f]{64}$/
+const COMMIT_SHA = /^[0-9a-f]{40,64}$/
 
 function scalar(raw) {
   const value = raw.trim()
@@ -115,6 +118,92 @@ function hasForbidden(value) {
 
 function isObject(value) { return value !== null && typeof value === 'object' && !Array.isArray(value) }
 
+export function validateAutopilot(root, planPath, value) {
+  if (value === undefined) return []
+  const expected = ['schema_version', 'authorized_at', 'authorized_plan_digest', 'authorized_head', 'budgets', 'lead_vendor', 'revoked']
+  const budgetKeys = ['max_slices', 'max_rework_per_slice', 'max_minutes_per_slice']
+  if (!isObject(value) || Object.keys(value).length !== expected.length || expected.some(key => !Object.hasOwn(value, key)) ||
+      value.schema_version !== 1 || typeof value.authorized_at !== 'string' ||
+      !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(value.authorized_at) ||
+      !Number.isFinite(Date.parse(value.authorized_at)) || !SHA256.test(value.authorized_plan_digest) ||
+      !COMMIT_SHA.test(value.authorized_head) || !['codex', 'claude'].includes(value.lead_vendor) ||
+      typeof value.revoked !== 'boolean' || !isObject(value.budgets) ||
+      Object.keys(value.budgets).length !== budgetKeys.length || budgetKeys.some(key => !Object.hasOwn(value.budgets, key)) ||
+      !Number.isInteger(value.budgets.max_slices) || value.budgets.max_slices < 1 ||
+      !Number.isInteger(value.budgets.max_rework_per_slice) || value.budgets.max_rework_per_slice < 0 || value.budgets.max_rework_per_slice > 3 ||
+      !Number.isInteger(value.budgets.max_minutes_per_slice) || value.budgets.max_minutes_per_slice < 5 || value.budgets.max_minutes_per_slice > 240) {
+    return ['AUTOPILOT_INVALID']
+  }
+  const original = git(root, ['show', `${value.authorized_head}:${planPath}`])
+  if (original.status !== 0 ||
+      `sha256:${createHash('sha256').update(original.stdout, 'utf8').digest('hex')}` !== value.authorized_plan_digest) {
+    return ['AUTOPILOT_PLAN_BINDING_MISMATCH']
+  }
+  return []
+}
+
+const AUTHORITY_PATHS = [
+  'AGENTS.md',
+  'CLAUDE.md',
+  '.agents/',
+  '.agent-state/',
+  '.orca-contract/',
+  '_bmad-output/implementation-artifacts/',
+]
+
+function authorityScopePath(value) {
+  const entry = value.endsWith('/') ? value.slice(0, -1) : value
+  return AUTHORITY_PATHS.some(authority => {
+    const authorityBase = authority.endsWith('/') ? authority.slice(0, -1) : authority
+    // A directory entry that contains an authority path is rejected; a file
+    // entry is rejected only when it is, or sits inside, an authority path.
+    return entry === authorityBase || value.startsWith(authority) ||
+      (value.endsWith('/') && authority.startsWith(value))
+  })
+}
+
+export function validateSliceRisk(slice, storyRisk) {
+  if (slice?.risk === undefined) return []
+  const risk = slice.risk
+  const levels = ['LOW', 'MEDIUM', 'HIGH']
+  if (!isObject(risk) || Object.keys(risk).some(key => !['level', 'flags'].includes(key)) ||
+      !levels.includes(risk.level) || (risk.flags !== undefined &&
+      (!Array.isArray(risk.flags) || risk.flags.some(flag => typeof flag !== 'string' || !flag.trim())))) {
+    return ['SLICE_RISK_INVALID']
+  }
+  const storyLevel = storyRisk?.level ?? storyRisk
+  const storyFlags = storyRisk?.flags ?? []
+  if (!levels.includes(storyLevel) || !Array.isArray(storyFlags)) return ['SLICE_RISK_INVALID']
+  return levels.indexOf(risk.level) > levels.indexOf(storyLevel) ||
+    (risk.flags ?? []).some(flag => !storyFlags.includes(flag)) ? ['SLICE_RISK_EXCEEDS_STORY'] : []
+}
+
+export function validateSliceExecutionContract(slice) {
+  const reasons = []
+  const executor = slice?.executor === undefined ? 'lead' : slice.executor
+  if (!['lead', 'agy'].includes(executor)) reasons.push('SLICE_EXECUTOR_INVALID')
+  if (executor !== 'agy') return reasons
+
+  const paths = isObject(slice.scope) ? slice.scope.paths : null
+  if (!Array.isArray(paths) || !paths.length) reasons.push('AGY_SCOPE_REQUIRED')
+  else {
+    for (const entry of paths) {
+      const normalized = normalizeAllowed(entry)
+      if (normalized === null || entry !== normalized) {
+        reasons.push('AGY_SCOPE_INVALID')
+        break
+      }
+    }
+    if (!reasons.includes('AGY_SCOPE_INVALID') && paths.some(authorityScopePath)) {
+      reasons.push('AGY_SCOPE_AUTHORITY_PATH')
+    }
+  }
+  if (!Array.isArray(slice.verification_obligations) || !slice.verification_obligations.length) {
+    reasons.push('AGY_CHECKS_REQUIRED')
+  }
+  return reasons
+}
+
 function validVerificationSchema(slice) {
   const verification = slice.verification
   if (verification !== undefined && !isObject(verification)) return false
@@ -152,7 +241,23 @@ export function validate(root, id) {
   result.currentSlice = plan.current_slice ?? null
   result.nextAction = plan.next_action ?? null
   result.sourceDigest = plan.source?.section_digest ?? null
-  if (plan.schema_version === 2) return validateSeparatedPlan(root, id, plan, result)
+  result.reasons.push(...validateAutopilot(root, planPath, plan.autopilot))
+  if (plan.resources !== undefined) {
+    try { validateResources(plan.resources) } catch (error) { invalid(error.message) }
+  }
+  if (plan.schema_version === 2) {
+    const separated = validateSeparatedPlan(root, id, plan, result)
+    for (const slice of plan.slices ?? []) separated.reasons.push(...validateSliceExecutionContract(slice), ...validateSliceRisk(slice, plan.risk))
+    separated.reasons = [...new Set(separated.reasons)]
+    if (separated.reasons.some(reason => [
+      'SLICE_RISK_INVALID', 'SLICE_RISK_EXCEEDS_STORY', 'SLICE_EXECUTOR_INVALID', 'AGY_SCOPE_REQUIRED', 'AGY_SCOPE_INVALID',
+      'AGY_SCOPE_AUTHORITY_PATH', 'AGY_CHECKS_REQUIRED',
+    ].includes(reason))) {
+      separated.status = 'INVALID'
+      separated.valid = false
+    }
+    return separated
+  }
   if (plan.schema_version !== 1) invalid('UNSUPPORTED_SCHEMA')
   if (plan.story_id !== id) invalid('STORY_ID_MISMATCH')
   if (hasForbidden(plan)) invalid('FORBIDDEN_V3_STATE')
@@ -198,6 +303,8 @@ export function validate(root, id) {
     if (!ids.includes(plan.current_slice)) invalid('INVALID_CURRENT_SLICE')
     const graph = new Map()
     for (const slice of slices) {
+      result.reasons.push(...validateSliceExecutionContract(slice))
+      result.reasons.push(...validateSliceRisk(slice, plan.risk))
       const legacyInProgress = slice.status === 'in-progress' && plan.schema_version === 1 &&
         Boolean(slice.checkpoint_commit) && slice.id === plan.current_slice &&
         plan.next_action?.kind === 'verify_slice' && plan.next_action?.target === slice.id &&

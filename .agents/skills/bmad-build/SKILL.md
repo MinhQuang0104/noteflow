@@ -1,6 +1,6 @@
 ---
 name: bmad-build
-description: 'Legacy/general BMad Build workflow. Use only when the user explicitly invokes bmad-build for freeform work that is not an approved BMAD Story; approved or ready-for-dev Stories use story-development.'
+description: 'Legacy/general BMad Build workflow. Use only when the user explicitly invokes bmad-build for freeform work that is not an approved BMAD Story; approved or ready-for-dev Stories use v4-story-runner.'
 ---
 
 Run the following command exactly once without changing the current working directory. Replace `{project-root}` with the absolute path to the project root and `{skill-root}` with the absolute path to this skill's directory:

@@ -29,13 +29,21 @@ Parsing converts CRLF to LF, removes trailing whitespace per line, and removes b
 
 ## Task-to-slice projection
 
+A slice may optionally declare `risk: {level, flags}`. The level is `LOW`, `MEDIUM`, or `HIGH` and cannot exceed `plan.risk.level`; flags, when present, are a subset of the Story risk flags. Invalid shapes produce `SLICE_RISK_INVALID`; an exceeded level or flag set produces `SLICE_RISK_EXCEEDS_STORY`. Verification uses the maximum of requested risk and the slice level (falling back to Story risk when omitted); a request cannot lower that level. Explicit slice risk supplies its own mandatory judgment flags and is projected as `requirements.slice_risk` with Plan provenance. Omitting it preserves the existing projection and receipt digests. Once committed, slice risk is immutable across checkpoint, verification, and rework metadata (`SLICE_EXECUTION_CONTRACT_CHANGED`).
+
 The Story owns Tasks/Subtasks; the Plan only maps them to implementation slices. A schema-v2 Plan binds `story.path` and `story.normative_digest` and has nonempty `slices`. Every slice has one or more `task_refs`, all pointing to real Task IDs. Every Story Task is covered by at least one slice. One Task may span slices and one slice may cover Tasks. `depends_on` references real slice IDs and is acyclic. Slices cannot add ACs, Tasks, or product semantics. Plan status/checkpoint/next-action fields are execution state; this helper does not yet replace the schema-v1 runtime validators.
+
+A slice may declare `executor: lead` or `executor: agy`; omission means `lead`. An AGY slice must declare a non-empty normalized `scope.paths` allowlist containing no authority paths (`AGENTS.md`, `CLAUDE.md`, `.agents/`, `.agent-state/`, `.orca-contract/`, or `_bmad-output/implementation-artifacts/`) and a non-empty `verification_obligations` list. In schema v2, `scope` on any slice is only `{paths: [...]}`; another shape is `MIXED_SCHEMA_PLAN`, and a lead slice's entries must be non-empty and normalized (`SLICE_SCOPE_INVALID`) but are not subject to the AGY authority-path or verification checks. A file entry is an authority path only when it is, or lies inside, one of those paths.
 
 ## Receipt binding and implementation checkpoint durability
 
 Receipt kinds are `implementation`, `verification`, and `review`. A receipt is UTF-8 JSON with `schema_version: 1`, `story_id`, `slice_id`, `kind`, `checkpoint_commit`, `baseline_commit`, `subject_digest`, `created_from_head`, `changed_paths_sha256`, and nonempty `commands` records (`command`, integer `exit_code`, `tool`, `environment`). `created_from_head` equals the implementation checkpoint. The Plan slice supplies the expected checkpoint, baseline, subject digest, changed-path digest, and `receipt_refs.<kind>: {path, digest}`. A checkpointed slice requires its implementation receipt; verified and reviewed slices additionally require the corresponding receipts. Verification receipts may carry structured `focused_checks` for reuse. The validator checks identity and SHA-256 over compact JSON with object keys sorted recursively (array order preserved); indentation, key order, and Git line-ending conversion do not change the digest. The path must remain relative to the supplied root. Read-only Plan validation inspects receipt content for the current slice and its dependency chain; unrelated historical slices receive safe-path and existence checks. Slice helpers load relevant receipt detail when needed. Once a durable Plan references a receipt, its parsed content is immutable; a policy-authorized replacement must use a new digest/reference. Receipt detail never changes the Story digest.
 
-Review receipts written by the action kernel use `schema_version: 2` and carry `judgment`, ordered `evidence_refs` and `scope_digest`. Schema-1 review receipts that carry the `scope_digest` key are read with the same binding rules. A schema-1 review receipt without that key (`verdict` plus declared `freshness`) is legacy: it is admissible only when the exact blob already existed at the binding-contract commit `f58969aadad06163d35169ed8cbfb58264103122`, and it still must match approval, reviewed checkpoint and risk context digest. The Plan review projection may name its decision `judgment` or `verdict`; MEDIUM/HIGH slices and any slice binding a review receipt require that receipt at finalization.
+An AGY implementation receipt additionally carries `worker`, including `executor: agy` and a `scope_gate` whose status is `PASS`, whose base is the receipt baseline commit, and whose allowed paths equal the current slice's validated `scope.paths`; missing or mismatched worker evidence is invalid. Lead implementation receipts must not carry `worker`.
+
+Review receipts written by the action kernel use `schema_version: 2` and carry `judgment`, ordered `evidence_refs` and `scope_digest`. Schema-1 review receipts that carry the `scope_digest` key are read with the same binding rules. A schema-1 review receipt without that key (`verdict` plus declared `freshness`) is legacy: it is admissible only when the exact blob already existed at the binding-contract commit `f58969aadad06163d35169ed8cbfb58264103122`, and it still must match approval, reviewed checkpoint and risk context digest. The Plan review projection may name its decision `judgment` or `verdict`; MEDIUM/HIGH slices and any slice binding a review receipt require that receipt at finalization. A slice is final-ready when it is `reviewed` with its review receipt, or `verified` with a verification receipt whose escalation is `NO_REVIEW` at `LOW` and a Plan that adds no review requirement (`review.required: true` or a review receipt ref); anything else blocks finalization.
+
+The reviewer may remain a legacy string, stored unchanged, or be `{type: 'lead'|'human', vendor: 'codex'|'claude'|null, independent: boolean}` in schema-2 receipts. The kernel computes independence as `type === 'lead' && slice.executor === 'agy'`; a conflicting caller value is rejected with `REVIEWER_INDEPENDENCE_MISMATCH`. Structured reviewer projections use a YAML mapping in the Plan. Optional `findings` contain unique nonempty `id`, `class` (`VALID`, `FALSE_POSITIVE`, `SPEC_AMBIGUITY`, or `NEEDS_HUMAN_DECISION`), nonempty `summary`, and an array of safe relative `paths`. `APPROVE` rejects any finding other than `FALSE_POSITIVE` with `REVIEW_FINDINGS_OPEN`; absent findings add no receipt key and preserve legacy receipt digests. Malformed reviewer or finding shapes are rejected with `REVIEWER_INVALID` or `REVIEW_FINDINGS_INVALID`.
 
 For a terminal Story whose HEAD has moved past the completion commit (an integration merge or later Stories), `check-story-completion.mjs` evaluates the full Done/Human Gate contract against the completion commit in a temporary shared clone and additionally requires the Story's Plan, Story file and referenced receipts to be unchanged from that commit to HEAD (`STORY_METADATA_DRIFT_AFTER_COMPLETION`, `STORY_METADATA_DIRTY_AFTER_COMPLETION`). Product files may change afterwards; that is later work, not drift of the approved snapshot.
 
@@ -147,6 +155,31 @@ The V4 Runner may execute `finalize_story` only from a validated schema-v2 Plan 
 The transaction ends at `review`: Plan execution becomes `complete`, `next_action.kind` becomes `complete_story`, and Human approval remains absent/null. The completion receipt binds the Story normative digest, upstream Epic digest, reviewed slice/receipt set, AC coverage, canonical disclosures, final implementation scope, and source HEAD. A committed review projection without approval is healthy `HUMAN_GATE_PENDING`. `complete_story` is a recognized Human-Gate successor and is executable only after a separate explicit structured approval; generic continuation cannot authorize it, and no automatic `review → done` edge is enabled.
 
 ## Explicit Human approval and terminal state
+
+The Plan may carry a separate owner-granted `autopilot` record. The Runner accepts only
+`--authorize-autopilot <json>` with `{action:"authorize_autopilot", story_id,
+budgets, lead_vendor}` and writes a single Plan metadata commit. The record has
+`schema_version: 1`, an ISO UTC `authorized_at`, the SHA-256 digest of the Plan
+blob at `authorized_head`, the exact pre-authorization HEAD, resolved `budgets`,
+`lead_vendor` (`codex` or `claude`), and `revoked: false`. Budgets are integer
+`max_slices` (at least 1), `max_rework_per_slice` (0–3), and
+`max_minutes_per_slice` (5–240); omitted entries default respectively to the
+Plan's slice count, 0, and 60. Out-of-range input is invalid. The owner may use
+`--revoke-autopilot` to set `revoked: true` in another Plan-only commit.
+Action metadata projections preserve the record exactly. It grants no Human
+approval or completion authority; finalization and completion continue to use
+their own gates.
+
+The authorization transaction stages the exact Plan bytes, checks the index
+blob and one-path tree, and advances HEAD only to that tree with an expected-HEAD
+compare-and-swap. It checks the committed blob before returning success. A
+conflicting or retained `v4-autopilot-authority.lock` returns
+`RECOVERY_REQUIRED` with the lock, Plan, and index paths. After a post-write
+failure the lock and partial files remain. The owner inspects the reported
+lock plus HEAD, Plan worktree, and index blobs; preserves any divergent
+evidence; reconciles Plan and index to the intended committed state or the
+unchanged prior HEAD; then removes that exact lock and retries with the current
+HEAD. The Runner never clears an unknown lock or retries a partial write.
 
 The Plan's optional `human_approval` object is the machine-readable authority. It contains `schema_version: 1`, `story_id`, `approver_type: human`, `decision: APPROVED`, `approved_at`, `story_normative_digest`, `finalization_receipt_digest`, `done_gate_summary_digest`, `scope_paths_digest`, `implementation_commit_set_digest`, `final_scope_digest`, `final_scoped_tree_digest`, `approved_review_head`, `approved_commit`, `approved_action: complete_story`, and `disclosures_acknowledged: true`. It contains no account identity or transcript. `approved_review_head` and `approved_commit` identify the exact reviewed HEAD; all receipt, Done Gate, implementation scope, and Story bindings must match the recomputed preview. Any product blob, checkpoint/scope, receipt, disclosure, review-head, or normative-digest drift makes the record stale. The only accepted approval input is the structured action `{ action: approve_exact_scope, disclosures_acknowledged: true }`; strings such as `continue`, `next`, `go on`, `proceed`, and `ok` have no authority.
 

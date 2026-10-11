@@ -13,6 +13,7 @@ import { frontmatter, validate as validateStoryPlan } from './check-story-plan.m
 import { checkpointImplementation, inspectActionTransaction, prepareAction } from './v4-action-kernel.mjs'
 import { transactionIdentity } from './v4-slice-transaction.mjs'
 import * as kernel from './v4-action-kernel.mjs'
+import { claimStory } from './story-registry.mjs'
 
 const PLAN = '_bmad-output/implementation-artifacts/story-9-1-plan.md'
 const STORY = 'docs/story.md'
@@ -21,6 +22,17 @@ const SPRINT = '_bmad-output/implementation-artifacts/sprint-status.yaml'
 const POINTER = '.agent-state/active-run.json'
 const RECEIPT = '_bmad-output/implementation-artifacts/receipts/story-9-1/A-implementation.json'
 const digest = value => 'sha256:' + createHash('sha256').update(value, 'utf8').digest('hex')
+
+test('effective risk defaults to Story and uses only the requested slice risk', () => {
+  const plan = { risk: { level: 'HIGH', flags: ['security'] }, current_slice: 'A', slices: [
+    { id: 'A', risk: { level: 'LOW', flags: [] } }, { id: 'B' },
+  ] }
+  assert.equal(kernel.riskLevel(plan, {}), 'LOW')
+  assert.equal(kernel.riskLevel(plan, { risk: 'MEDIUM' }), 'MEDIUM')
+  assert.equal(kernel.riskLevel(plan, { slice_id: 'B' }), 'HIGH')
+  assert.equal(kernel.riskLevel({ risk: { level: 'MEDIUM' } }, {}), 'MEDIUM')
+  assert.throws(() => kernel.riskLevel(plan, { slice_id: 'B', risk: 'LOW' }), /RISK_DOWNGRADE_FORBIDDEN/)
+})
 
 test('Plan risk flags become canonical mandatory escalation flags', () => {
   assert.deepEqual(kernel.mandatoryJudgmentFlags({ risk: { level: 'HIGH', flags: ['security', 'idempotency', 'shared_boundary', 'public_contract'] } }), [
@@ -54,14 +66,17 @@ function storySource() {
   ].join('\n')
 }
 
-function v2Plan(storyDigest, status) {
+function v2Plan(storyDigest, status, agy = false) {
   const checkpoint = status === 'checkpointed'
+  const executionContract = agy
+    ? ['    executor: agy', '    scope:', '      paths: [src/]', '    verification_obligations: [node --check src/feature.txt]']
+    : []
   return [
     '---', 'schema_version: 2', 'story_id: "9.1"', 'story:', '  path: ' + STORY,
     '  normative_digest: ' + storyDigest, 'sprint_key: 9-1-fixture',
     'lifecycle_snapshot: in-progress', 'execution_status: in-progress', 'current_slice: A',
     'risk:', '  level: HIGH', 'slices:', '  - id: A', '    status: ' + status,
-    '    task_refs: [T-1]', '    depends_on: []', 'blockers: []', 'unresolved_questions: []',
+    '    task_refs: [T-1]', '    depends_on: []', ...executionContract, 'blockers: []', 'unresolved_questions: []',
     'next_action:', '  kind: ' + (checkpoint ? 'verify_slice' : 'implement_slice'), '  target: A', '---', ''
   ].join('\n')
 }
@@ -82,13 +97,16 @@ function v1Plan(sourceDigest, status) {
   ].join('\n')
 }
 
-function v2Template() {
+function v2Template(agy = false) {
+  const executionContract = agy
+    ? ['    executor: agy', '    scope:', '      paths: [src/]', '    verification_obligations: [node --check src/feature.txt]']
+    : []
   return [
     '---', 'schema_version: 2', 'story_id: "9.1"', 'story:', '  path: ' + STORY,
     '  normative_digest: {{STORY_NORMATIVE_DIGEST}}', 'sprint_key: 9-1-fixture',
     'lifecycle_snapshot: in-progress', 'execution_status: in-progress', 'current_slice: A',
     'risk:', '  level: HIGH', 'slices:', '  - id: A', '    status: checkpointed',
-    '    task_refs: [T-1]', '    depends_on: []', '    baseline_commit: {{BASELINE_COMMIT}}',
+    '    task_refs: [T-1]', '    depends_on: []', ...executionContract, '    baseline_commit: {{BASELINE_COMMIT}}',
     '    checkpoint_commit: {{CHECKPOINT_COMMIT}}', '    subject_digest: {{SUBJECT_DIGEST}}',
     '    changed_paths_sha256: {{CHANGED_PATHS_SHA256}}', '    receipt_refs:',
     '      implementation:', '        path: ' + RECEIPT, '        digest: {{RECEIPT_DIGEST}}',
@@ -112,10 +130,11 @@ function v1Template() {
   ].join('\n')
 }
 
-function fixture(kind) {
+function fixture(kind, options = {}) {
   const root = mkdtempSync(path.join(tmpdir(), 'v4-kernel-'))
   const cleanup = () => rmSync(root, { recursive: true, force: true })
   const files = {
+    '.gitignore': '.agent-state/v4-observations/\n',
     'AGENTS.md': '# fixture policy\n', 'CLAUDE.md': '# provider policy\n',
     '.agents/routing/task-router.md': '# routing\n', '.agents/context/control-plane.md': '# control\n',
     '.agents/context/context-routing.md': '# context\n', '.agents/skills/v4-story-runner/SKILL.md': '# runner\n',
@@ -130,7 +149,7 @@ function fixture(kind) {
     const story = storySource()
     sourceDigest = normativeDigest(inspectStory(story))
     write(root, STORY, story)
-    write(root, PLAN, v2Plan(sourceDigest, 'pending'))
+    write(root, PLAN, v2Plan(sourceDigest, 'pending', options.executor === 'agy'))
   } else {
     const epic = v1Epic()
     sourceDigest = digest(epic.slice(epic.indexOf('### Story 9.1:'), epic.indexOf('### Story 9.2:')))
@@ -142,7 +161,7 @@ function fixture(kind) {
   git(root, 'checkout', '-qb', 'main')
   git(root, 'config', 'user.name', 'V4 Fixture')
   git(root, 'config', 'user.email', 'v4-fixture@example.com')
-  git(root, 'config', 'core.autocrlf', 'false')
+  git(root, 'config', 'core.autocrlf', options.autocrlf ? 'true' : 'false')
   git(root, 'add', '.')
   git(root, 'commit', '-qm', 'fixture baseline')
   const head = git(root, 'rev-parse', 'HEAD')
@@ -150,7 +169,7 @@ function fixture(kind) {
   const request = {
     action: 'implement_slice', operation: 'prepare', story_id: '9.1', slice_id: 'A',
     expected_head: head, transaction_id: 'fixture-' + kind, owned_paths: ['src/feature.txt'],
-    plan_template: kind === 'v2' ? v2Template() : v1Template(),
+    plan_template: kind === 'v2' ? v2Template(options.executor === 'agy') : v1Template(),
     policy_paths: ['AGENTS.md', 'CLAUDE.md', '.agents/routing/task-router.md', '.agents/context/control-plane.md',
       '.agents/context/context-routing.md', '.agents/skills/v4-story-runner/SKILL.md'],
     recipe_paths: ['.agents/skills/v4-story-runner/actions/implement-slice.md', '.agents/skills/v4-story-runner/references/implementation-techniques.md'],
@@ -160,6 +179,52 @@ function fixture(kind) {
     red_green: { applicable: false, reason: 'fixture evidence' }
   }
   return { root, head, request, cleanup }
+}
+
+test('implementation metadata cannot remove or alter autopilot authority', () => {
+  const f = fixture('v2')
+  try {
+    const declared = '    scope:\n      paths: [src/feature.txt]\n'
+    write(f.root, PLAN, readFileSync(path.join(f.root, PLAN), 'utf8').replace('    depends_on: []', '    depends_on: []\n' + declared.trimEnd()))
+    f.request.plan_template = f.request.plan_template.replace('    depends_on: []', '    depends_on: []\n' + declared.trimEnd())
+    git(f.root, 'add', PLAN)
+    git(f.root, 'commit', '-qm', 'fixture registry scope')
+    f.head = git(f.root, 'rev-parse', 'HEAD')
+    f.request.expected_head = f.head
+    assert.equal(claimStory(f.root, '9.1', { worktree: f.root, leadVendor: 'codex', session: 'fixture' }).status, 'APPLIED')
+    f.request.lead_generation = 1
+    const plan = readFileSync(path.join(f.root, PLAN), 'utf8')
+    const authority = ['autopilot:', '  schema_version: 1', '  authorized_at: "2026-10-08T00:00:00.000Z"',
+      `  authorized_plan_digest: ${digest(plan)}`, `  authorized_head: ${f.head}`,
+      '  budgets:', '    max_slices: 1', '    max_rework_per_slice: 0', '    max_minutes_per_slice: 30',
+      '  lead_vendor: codex', '  revoked: false', ''].join('\n')
+    write(f.root, PLAN, plan.replace('blockers: []', authority + 'blockers: []'))
+    git(f.root, 'add', PLAN)
+    git(f.root, 'commit', '-qm', 'fixture autopilot authority')
+    f.request.expected_head = git(f.root, 'rev-parse', 'HEAD')
+    const prepared = prepareAction(f.root, f.request)
+    assert.equal(prepared.status, 'READY', JSON.stringify(prepared))
+    const result = checkpointImplementation(f.root, checkpointRequest(f, prepared.preview))
+    assert.notEqual(result.status, 'CHECKPOINTED', JSON.stringify(result))
+    assert.ok(result.reasons.includes('AUTOPILOT_AUTHORITY_CHANGED'), JSON.stringify(result))
+  } finally { f.cleanup() }
+})
+
+function agyWorker() {
+  return {
+    executor: 'agy',
+    orca: { run_id: 'run-fixture', task_id: 'task-fixture', dispatch_ids: ['ctx_fixture'] },
+    attempt: 1,
+    contract_sha256: 'a'.repeat(64),
+    worker_report_sha256: 'b'.repeat(64),
+    lead_vendor: 'codex'
+  }
+}
+
+function agyFixture() {
+  const f = fixture('v2', { executor: 'agy' })
+  f.request.worker = agyWorker()
+  return f
 }
 
 function checkpointRequest(fixture, preview, extra = {}) {
@@ -313,7 +378,161 @@ test('schema v2 commits implementation then Plan plus receipt', () => {
     const receipt = JSON.parse(readFileSync(path.join(f.root, RECEIPT), 'utf8'))
     assert.equal(plan.slices[0].receipt_refs.implementation.digest, receiptDigest(receipt))
     assert.equal(receipt.checkpoint_commit, result.checkpoint_commit)
+    assert.equal(receipt.worker, undefined)
     assert.equal(inspectActionTransaction(f.root, prepared.preview.transaction_id).status, 'COMPLETE')
+  } finally { f.cleanup() }
+})
+
+test('a CRLF or mixed-EOL plan template commits as LF under core.autocrlf', () => {
+  // Windows checkouts with core.autocrlf=true hand the Lead a CRLF Plan; a
+  // template mixing its CRLF lines with new LF lines once failed with
+  // COMMITTED_METADATA_MISMATCH because Git normalized the committed blob (G5).
+  const f = fixture('v2', { autocrlf: true })
+  try {
+    const lines = f.request.plan_template.split('\n')
+    f.request.plan_template = lines.slice(0, 10).join('\r\n') + '\r\n' + lines.slice(10).join('\n')
+    const prepared = prepareAction(f.root, f.request)
+    assert.equal(prepared.status, 'READY', JSON.stringify(prepared))
+    const result = checkpointImplementation(f.root, checkpointRequest(f, prepared.preview))
+    assert.equal(result.status, 'CHECKPOINTED', JSON.stringify(result))
+    const working = readFileSync(path.join(f.root, PLAN), 'utf8')
+    assert.equal(working.includes('\r'), false)
+    assert.equal(git(f.root, 'show', `${result.metadata_commit}:${PLAN}`), working.trimEnd())
+    assert.equal(git(f.root, 'status', '--porcelain'), '')
+    assert.equal(validateStoryPlan(f.root, '9.1').status, 'READY')
+    assert.equal(inspectActionTransaction(f.root, prepared.preview.transaction_id).status, 'COMPLETE')
+  } finally { f.cleanup() }
+})
+
+test('repository checkouts keep V4 Story artifacts LF', () => {
+  // The kernel fix covers templates; .gitattributes keeps fresh worktree
+  // checkouts LF so Leads never start from a CRLF Plan (G5 F-G5-1).
+  const repository = fileURLToPath(new URL('../..', import.meta.url))
+  for (const file of [PLAN, SPRINT, RECEIPT]) {
+    assert.equal(git(repository, 'check-attr', 'eol', '--', file), `${file}: eol: lf`)
+  }
+})
+
+test('AGY prepare and checkpoint bind worker evidence and the scope gate', () => {
+  const f = agyFixture()
+  try {
+    const prepared = prepareAction(f.root, f.request)
+    assert.equal(prepared.status, 'READY', JSON.stringify(prepared))
+    assert.equal(prepared.preview.worker.executor, 'agy')
+    assert.equal(prepared.preview.scope_gate.status, 'PASS')
+    assert.deepEqual(prepared.preview.scope_gate.allowed, ['src/'])
+    assert.deepEqual(prepared.preview.scope_gate.changed, ['src/feature.txt'])
+    const result = checkpointImplementation(f.root, checkpointRequest(f, prepared.preview))
+    assert.equal(result.status, 'CHECKPOINTED', JSON.stringify(result))
+    const receipt = JSON.parse(readFileSync(path.join(f.root, RECEIPT), 'utf8'))
+    assert.deepEqual(receipt.worker, { ...agyWorker(), scope_gate: prepared.preview.scope_gate })
+  } finally { f.cleanup() }
+})
+
+test('AGY worker evidence is required, forbidden for lead, and shape-validated', () => {
+  const missing = agyFixture()
+  try {
+    const request = { ...missing.request }
+    delete request.worker
+    const result = prepareAction(missing.root, request)
+    assert.equal(result.status, 'INVALID', JSON.stringify(result))
+    assert.ok(result.reasons.includes('WORKER_EVIDENCE_REQUIRED'))
+  } finally { missing.cleanup() }
+
+  const forbidden = fixture('v2')
+  try {
+    const result = prepareAction(forbidden.root, { ...forbidden.request, worker: agyWorker() })
+    assert.equal(result.status, 'INVALID', JSON.stringify(result))
+    assert.ok(result.reasons.includes('WORKER_EVIDENCE_FORBIDDEN'))
+  } finally { forbidden.cleanup() }
+
+  const invalid = agyFixture()
+  try {
+    const result = prepareAction(invalid.root, { ...invalid.request, worker: { ...agyWorker(), orca: { ...agyWorker().orca, dispatch_ids: [] } } })
+    assert.equal(result.status, 'INVALID', JSON.stringify(result))
+    assert.ok(result.reasons.includes('WORKER_EVIDENCE_INVALID'))
+  } finally { invalid.cleanup() }
+})
+
+test('AGY scope gate blocks out-of-scope files, worker commits, and deletions', () => {
+  const outside = agyFixture()
+  try {
+    write(outside.root, 'docs/outside.txt', 'outside\n')
+    const result = prepareAction(outside.root, outside.request)
+    assert.equal(result.status, 'BLOCKED', JSON.stringify(result))
+    assert.ok(result.reasons.includes('AGY_SCOPE_GATE_FAIL'))
+    assert.ok(result.scope_gate.violations.some(item => item.path === 'docs/outside.txt'))
+  } finally { outside.cleanup() }
+
+  const committed = agyFixture()
+  try {
+    git(committed.root, 'add', 'src/feature.txt')
+    git(committed.root, 'commit', '-qm', 'worker commit')
+    const result = prepareAction(committed.root, committed.request)
+    assert.equal(result.status, 'BLOCKED', JSON.stringify(result))
+    assert.ok(result.reasons.includes('AGY_SCOPE_GATE_FAIL'))
+  } finally { committed.cleanup() }
+
+  const deleted = agyFixture()
+  try {
+    deleted.request.owned_paths = ['src/base.txt', 'src/feature.txt']
+    rmSync(path.join(deleted.root, 'src/feature.txt'))
+    rmSync(path.join(deleted.root, 'src/base.txt'))
+    const result = prepareAction(deleted.root, deleted.request)
+    assert.equal(result.status, 'BLOCKED', JSON.stringify(result))
+    assert.ok(result.reasons.includes('AGY_DELETE_UNSUPPORTED'))
+  } finally { deleted.cleanup() }
+})
+
+test('AGY scope gate re-check becomes stale when the tree changes after prepare', () => {
+  const f = agyFixture()
+  try {
+    const prepared = prepareAction(f.root, f.request)
+    assert.equal(prepared.status, 'READY', JSON.stringify(prepared))
+    write(f.root, 'docs/outside.txt', 'outside after prepare\n')
+    const result = checkpointImplementation(f.root, checkpointRequest(f, prepared.preview))
+    assert.equal(result.status, 'STALE', JSON.stringify(result))
+    assert.ok(result.reasons.includes('AGY_SCOPE_GATE_CHANGED'))
+  } finally { f.cleanup() }
+})
+
+test('AGY metadata cannot change the execution contract during checkpoint', () => {
+  const f = agyFixture()
+  try {
+    const altered = f.request.plan_template.replace('    executor: agy\n', '')
+    const prepared = prepareAction(f.root, { ...f.request, plan_template: altered })
+    assert.equal(prepared.status, 'READY', JSON.stringify(prepared))
+    const result = checkpointImplementation(f.root, checkpointRequest(f, prepared.preview, { plan_template: altered }))
+    assert.equal(result.status, 'RECOVERY_REQUIRED', JSON.stringify(result))
+    assert.ok(result.reasons.includes('SLICE_EXECUTION_CONTRACT_CHANGED'))
+  } finally { f.cleanup() }
+})
+
+test('checkpoint metadata cannot add committed slice risk', () => {
+  const f = fixture('v2')
+  try {
+    const altered = f.request.plan_template.replace('    depends_on: []', '    depends_on: []\n    risk: \n      level: LOW\n      flags: []')
+    const prepared = prepareAction(f.root, { ...f.request, plan_template: altered })
+    assert.equal(prepared.status, 'READY', JSON.stringify(prepared))
+    const result = checkpointImplementation(f.root, checkpointRequest(f, prepared.preview, { plan_template: altered }))
+    assert.equal(result.status, 'RECOVERY_REQUIRED', JSON.stringify(result))
+    assert.ok(result.reasons.includes('SLICE_EXECUTION_CONTRACT_CHANGED'), JSON.stringify(result))
+  } finally { f.cleanup() }
+})
+
+test('checkpoint metadata cannot change another slice risk', () => {
+  const f = fixture('v2')
+  try {
+    const other = '  - id: B\n    status: pending\n    task_refs: [T-1]\n    depends_on: [A]\n'
+    write(f.root, PLAN, readFileSync(path.join(f.root, PLAN), 'utf8').replace('blockers: []', `${other}blockers: []`))
+    git(f.root, 'add', '--', PLAN)
+    git(f.root, 'commit', '-qm', 'fixture other pending slice')
+    f.request.expected_head = git(f.root, 'rev-parse', 'HEAD')
+    const altered = f.request.plan_template.replace('blockers: []', `${other}    risk: \n      level: LOW\n      flags: []\nblockers: []`)
+    const prepared = prepareAction(f.root, { ...f.request, plan_template: altered })
+    assert.equal(prepared.status, 'READY', JSON.stringify(prepared))
+    const result = checkpointImplementation(f.root, checkpointRequest(f, prepared.preview, { plan_template: altered }))
+    assert.ok(result.reasons.includes('SLICE_EXECUTION_CONTRACT_CHANGED'), JSON.stringify(result))
   } finally { f.cleanup() }
 })
 

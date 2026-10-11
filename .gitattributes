@@ -1,0 +1,4 @@
+# V4 Story artifacts (Plans, Stories, receipts, sprint status) are byte-bound by
+# digests and committed-blob checks, so every checkout keeps them LF whatever
+# core.autocrlf says (G5 finding F-G5-1).
+_bmad-output/implementation-artifacts/** text eol=lf

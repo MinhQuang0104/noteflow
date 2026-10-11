@@ -80,7 +80,9 @@ function git(root, ...args) {
   return result.stdout.trim()
 }
 
-function fixture() {
+// options.noReview builds the persisted NO_REVIEW shape (P2.2): slice `verified`,
+// no review receipt or Plan review block, escalation only in the receipt.
+function fixture(options = {}) {
   const root = mkdtempSync(path.join(tmpdir(), 'finalization-plan-'))
   const storyDigest = normativeDigest(inspectStory(storyText))
   const epicSection = '### Story 9.1: Fixture finalization story\n\nDone.\n\n'
@@ -113,11 +115,13 @@ function fixture() {
     commands: [{ command: 'fixture check', exit_code: 0, tool: 'fixture', environment: 'node-test' }]
   })
   const refs = {}
-  for (const kind of ['implementation', 'verification', 'review']) {
+  const kinds = options.noReview ? ['implementation', 'verification'] : ['implementation', 'verification', 'review']
+  for (const kind of kinds) {
     const receipt = receiptBase(kind)
     if (kind === 'verification') {
       receipt.focused_checks = [{ id: 'focused', result: 'PASS', exit_code: 0 }]
       receipt.progression_eligible = true
+      if (options.noReview && options.escalation !== null) receipt.escalation = options.escalation ?? { decision: 'NO_REVIEW', risk: 'LOW', reasons: [] }
     }
     if (kind === 'review') {
       receipt.verdict = 'APPROVE'
@@ -135,7 +139,7 @@ function fixture() {
     story_normative_digest: storyDigest,
     upstream_epic_digest: digest(epicSection),
     prepared_from_head: checkpoint,
-    slice_set_digest: stableFinalizationDigest([{ id: 'A', status: 'reviewed' }]),
+    slice_set_digest: stableFinalizationDigest([{ id: 'A', status: options.noReview ? 'verified' : 'reviewed' }]),
     receipt_set_digest: stableFinalizationDigest(Object.values(refs)),
     ac_coverage_digest: stableFinalizationDigest([{ id: 'AC-1', covered: true }]),
     canonical_disclosures_digest: stableFinalizationDigest([]),
@@ -164,10 +168,11 @@ function fixture() {
     'execution_status: complete',
     'current_slice: A',
     'risk:',
-    '  level: LOW',
+    '  level: ' + (options.storyRisk ?? 'LOW'),
     'slices:',
     '  - id: A',
-    '    status: reviewed',
+    '    status: ' + (options.noReview ? 'verified' : 'reviewed'),
+    ...(options.sliceRisk ? ['    risk:', '      level: ' + options.sliceRisk] : []),
     '    depends_on: []',
     '    task_refs: [T-1]',
     '    baseline_commit: ' + baseline,
@@ -181,18 +186,17 @@ function fixture() {
     '      verification:',
     '        path: ' + refs.verification.path,
     '        digest: ' + refs.verification.digest,
-    '      review:',
-    '        path: ' + refs.review.path,
-    '        digest: ' + refs.review.digest,
+    ...(refs.review ? ['      review:', '        path: ' + refs.review.path, '        digest: ' + refs.review.digest] : []),
     '    verification:',
     '      canonical_applicability: APPLICABLE',
     '      canonical_status: PASS',
     '      progression_eligible: true',
-    '    review:',
-    '      required: true',
-    '      verdict: APPROVE',
-    '      reviewed_commit: ' + checkpoint,
-    '      freshness: FRESH',
+    ...(options.noReview ? (options.planReviewRequired ? ['    review:', '      required: true'] : []) : [
+      '    review:',
+      '      required: true',
+      '      verdict: APPROVE',
+      '      reviewed_commit: ' + checkpoint,
+      '      freshness: FRESH']),
     'blockers: []',
     'unresolved_questions: []',
     'finalization:',
@@ -226,3 +230,35 @@ test('schema-v2 review state validates finalization receipt and complete_story s
     f.cleanup()
   }
 })
+
+test('schema-v2 review state accepts a receipt-recorded LOW NO_REVIEW verified slice', () => {
+  for (const options of [{ noReview: true }, { noReview: true, storyRisk: 'MEDIUM', sliceRisk: 'LOW' }]) {
+    const f = fixture(options)
+    try {
+      const result = validate(f.root, '9.1')
+      assert.equal(result.status, 'READY', JSON.stringify({ options, result }))
+    } finally {
+      f.cleanup()
+    }
+  }
+})
+
+for (const [label, options] of [
+  ['receipt escalation REVIEW_REQUIRED', { escalation: { decision: 'REVIEW_REQUIRED', risk: 'LOW', reasons: ['JUDGMENT_PUBLIC_CONTRACT'] } }],
+  ['receipt escalation risk MEDIUM', { escalation: { decision: 'NO_REVIEW', risk: 'MEDIUM', reasons: [] } }],
+  ['missing receipt escalation', { escalation: null }],
+  ['Plan review.required true', { planReviewRequired: true }],
+  ['MEDIUM Story without slice risk', { storyRisk: 'MEDIUM' }],
+  ['MEDIUM slice', { storyRisk: 'MEDIUM', sliceRisk: 'MEDIUM' }]
+]) {
+  test(`schema-v2 review state rejects a verified slice with ${label}`, () => {
+    const f = fixture({ noReview: true, ...options })
+    try {
+      const result = validate(f.root, '9.1')
+      assert.equal(result.status, 'INVALID', JSON.stringify(result))
+      assert.deepEqual(result.reasons, ['REVIEW_SLICES_INCOMPLETE'])
+    } finally {
+      f.cleanup()
+    }
+  })
+}

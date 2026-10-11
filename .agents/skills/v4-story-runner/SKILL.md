@@ -1,11 +1,11 @@
 ---
 name: v4-story-runner
-description: Use when a human explicitly asks to implement or continue a named BMAD Story by V4 Lite; route one bounded action through its contract.
+description: Use when a human explicitly asks to implement or continue a named BMAD Story; route one bounded action through its contract.
 ---
 
 # V4 Lite Story Runner — common entry
 
-Routing/invariant context only; it never executes a Story action. Enter only for an explicit V4 request after read-only `.agent-state/active-run.json` check: continue on clear `IDLE` with no contradiction. Resolve Story identity from canonical artifacts, never chat or branch.
+Routing/invariant context only; it never executes a Story action. Enter only for an explicit Story request after read-only `.agent-state/active-run.json` check: continue on clear `IDLE` with no contradiction. Resolve Story identity from canonical artifacts, never chat or branch.
 
 ## Action selection
 
@@ -31,7 +31,7 @@ node .agents/scripts/v4-story-runner.mjs run <epic.story> \
   --expected-head <sha> --operation <operation> --input <payload.json>
 ```
 
-Supported operations are `prepare`, `checkpoint`, `verify`, `record-review`
+Supported operations are `prepare`, `checkpoint`, `verify`, `record-owner-review`, `record-review`
 (`record_review` is accepted as an alias), `prepare-rework`, `apply-rework`,
 `prepare-recovery-abort`, `abort-unwritten-metadata`,
 `prepare-staged-recovery`, and `apply-staged-recovery`. The JSON file must
@@ -40,12 +40,14 @@ validated Plan before dispatch. `--operation` and `--input` are a pair. A
 missing Plan is reported as `INVALID` with `PLAN_MISSING` before the Plan is
 read.
 
+`record-owner-review` takes the same payload as `record-review` and forces a structured human reviewer, with authority from the owner's explicit structured input like `approve_exact_scope`; a Lead must never call it on its own initiative. Ordinary `record-review` (including `record_review`) rejects `reviewer.type: human` with `INVALID` / `OWNER_REVIEW_OPERATION_REQUIRED`.
+
 The CLI exit-code table is exhaustive for Runner results. Unknown statuses use
 the `ERROR` code and never become success:
 
 | Exit | Statuses | Meaning |
 |---:|---|---|
-| 0 | `STARTED`, `DONE`, `APPROVAL_DURABLE_PENDING_COMPLETION`, `NOOP`, `APPLIED`, `HUMAN_GATE_REQUIRED`, `REVIEW_REQUIRED`, `READY`, `AUTHORIZED`, `TERMINAL`, `NO_CHANGE` | Durable action or valid stop/preview |
+| 0 | `STARTED`, `DONE`, `APPROVAL_DURABLE_PENDING_COMPLETION`, `NOOP`, `APPLIED`, `HUMAN_GATE_REQUIRED`, `REVIEW_REQUIRED`, `READY`, `AUTHORIZED`, `TERMINAL`, `NO_CHANGE`, `CHECKPOINTED` | Durable action or valid stop/preview |
 | 2 | `STALE`, `CONFLICT` | Bound state changed or conflicts with the preview |
 | 3 | `BLOCKED`, `UNAUTHORIZED_ACTION`, `HUMAN_REQUIRED`, `RECONCILIATION_REQUIRED`, `HUMAN_GATE_PENDING`, `APPROVAL_PREVIEW_ONLY`, `CHECKPOINT_UNRECORDED`, `PLAN_UPDATE_PENDING`, `RESUME_WORKTREE`, `RERUN_REQUIRED`, `INCONCLUSIVE` | Safe refusal or more authority/evidence required |
 | 4 | `INVALID` | Invalid command, input, or artifact |
@@ -64,4 +66,4 @@ the `ERROR` code and never become success:
 
 Default context is Story section, Plan, sprint entry, Git identity, current slice, and selected action. Do not eager-load repo, PRD, V3 policy, BMAD output, or skill library; load action-required skills only when needed.
 
-Stop for unresolved authority, destructive/irreversible work without authorization, unclear lifecycle, external credentials, exceeded V4 capability, incomplete inventory, or repeated repair failure. V3.1 may be recommended when one bounded Lead action cannot represent the work, but is never invoked automatically.
+Stop for the owner on unresolved authority, destructive/irreversible work without authorization, unclear lifecycle, external credentials, exceeded V4 capability, incomplete inventory, or repeated repair failure.
