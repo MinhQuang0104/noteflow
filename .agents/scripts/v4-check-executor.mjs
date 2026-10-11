@@ -171,7 +171,8 @@ function excerpt(output) {
 function forbiddenCommand(argv) {
   const joined = argv.join(' ').toLowerCase()
   if (argv[0] === 'npm' && argv[1] !== 'run') return 'UNSAFE_COMMAND'
-  if (/\b(?:npm\s+(?:ci|install|uninstall|publish|exec)|git\s+(?:reset|clean|checkout|push|commit)|(?:rm|del|format|deploy)\b)/i.test(joined)) {
+  // A destructive command word, not an option such as Docker's `--format` (Story 1.7 F-17-3).
+  if (/\b(?:npm\s+(?:ci|install|uninstall|publish|exec)|git\s+(?:reset|clean|checkout|push|commit)|(?<!-)(?:rm|del|format|deploy)\b)/i.test(joined)) {
     return 'UNSAFE_COMMAND'
   }
   return null

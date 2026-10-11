@@ -157,3 +157,20 @@ test('subject drift and unsupported Node range make evidence non-reusable', () =
     f.cleanup()
   }
 })
+
+test('option flags such as --format are not destructive commands, but format/rm/del still are', () => {
+  const f = fixture()
+  try {
+    const subject = captureWorktreeSubject(f.root, ['fixtures/é space.txt'])
+    const flagged = executeCheck(f.root, spec(['node', '-e', 'process.exit(0)', '--', '--format', '{{.Names}}']), subject)
+    assert.equal(flagged.status, 'PASS', JSON.stringify(flagged))
+    // Harmless if ever run: each destructive word is only a node argument.
+    for (const word of ['format', 'rm', 'del', 'deploy']) {
+      const blocked = executeCheck(f.root, spec(['node', '-e', '0', '--', word, 'x']), subject)
+      assert.equal(blocked.status, 'ERROR', word)
+      assert.deepEqual(blocked.reasons, ['UNSAFE_COMMAND'], word)
+    }
+  } finally {
+    f.cleanup()
+  }
+})
