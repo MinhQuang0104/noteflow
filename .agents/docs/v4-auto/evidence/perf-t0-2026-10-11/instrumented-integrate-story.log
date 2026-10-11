@@ -1,0 +1,17 @@
+✔ clean CLI integration fast-forwards to the tested merge and preserves approval (26381.842ms)
+✔ merge conflicts report paths and preserve main and claim (18291.4072ms)
+✔ failing integration check retains logs and leaves main unchanged (18393.3384ms)
+✔ main moved during checks is stale and is never replaced by the scratch merge (21045.7517ms)
+✔ held integration lock is preserved and reports busy (17103.598ms)
+✔ dirty canonical checkout and stale generation refuse integration before mutation (15103.2211ms)
+✔ checks cannot mutate the scratch tree or supersede the held generation (24449.5944ms)
+✔ foreign canonical repository and a non-main checkout are refused without ref changes (16198.8432ms)
+✔ not-done Story and invalid integration checks fail before main or registry changes (18044.4488ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 175136.9122

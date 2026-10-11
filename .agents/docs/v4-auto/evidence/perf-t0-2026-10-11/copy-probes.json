@@ -1,0 +1,1149 @@
+[
+  {
+    "label": "verification",
+    "root": "C:\\Users\\ACER\\AppData\\Local\\Temp\\v4-verification-dgNtkI",
+    "copy": "C:\\Users\\ACER\\AppData\\Local\\Temp\\t0-copy-6SScwO\\copy",
+    "head": "9c3f23e5ac0fb195234b86dd6b8d42c66f585a8f",
+    "copyHead": {
+      "status": 0,
+      "stdout": "9c3f23e5ac0fb195234b86dd6b8d42c66f585a8f",
+      "stderr": ""
+    },
+    "refresh": {
+      "status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "originalStatus": "",
+    "copyStatus": "",
+    "sameStatus": true,
+    "sameNonGitBytes": true,
+    "copyPrepare": {
+      "status": "READY",
+      "ready": true,
+      "valid": true,
+      "action": "verify_slice",
+      "operation": "prepare",
+      "fingerprint": "sha256:3015f9c0be82e5e49218c51c4c265bca2c348fe677375def79eb063abd05e1a4",
+      "preview": {
+        "schema_version": 1,
+        "action": "verify_slice",
+        "operation": "verify",
+        "story_id": "9.1",
+        "slice_id": "A",
+        "transaction_id": "verification-low",
+        "expected_head": "9c3f23e5ac0fb195234b86dd6b8d42c66f585a8f",
+        "plan_path": "_bmad-output/implementation-artifacts/story-9-1-plan.md",
+        "story_path": "docs/story.md",
+        "original_plan": {
+          "schema_version": 2,
+          "story_id": "9.1",
+          "story": {
+            "path": "docs/story.md",
+            "normative_digest": "sha256:f7d25cd1f5cd6b1db2f305602e4afe7ae09d7c0ef6e9bc74640b3f2e3412f338"
+          },
+          "sprint_key": "9-1-fixture",
+          "lifecycle_snapshot": "in-progress",
+          "execution_status": "in-progress",
+          "current_slice": "A",
+          "risk": {
+            "level": "LOW"
+          },
+          "slices": [
+            {
+              "id": "A",
+              "status": "checkpointed",
+              "task_refs": [
+                "T-1"
+              ],
+              "depends_on": [],
+              "baseline_commit": "21fbb0cc89abd4c1459d2a6e966469700ec982dc",
+              "checkpoint_commit": "276601fd9b1ae400d66b0ae35fe5863b23610714",
+              "subject_digest": "sha256:e3985b34415f7878f89dbbdc3e3d50890e962016b1efef38e5f57e636f09d459",
+              "changed_paths_sha256": "sha256:35cf675d30b3aa46b14b00bc8479cb23d90535779424424985fd64e1680beb99",
+              "receipt_refs": {
+                "implementation": {
+                  "path": "_bmad-output/implementation-artifacts/receipts/story-9-1/A-implementation.json",
+                  "digest": "sha256:b6f527a12a0114988666c6502ec030cdfd3e71c1885e1e48641947e9224f037d"
+                }
+              },
+              "blockers": [],
+              "unresolved_questions": []
+            }
+          ],
+          "next_action": {
+            "kind": "verify_slice",
+            "target": "A"
+          }
+        },
+        "original_slice": {
+          "id": "A",
+          "status": "checkpointed",
+          "task_refs": [
+            "T-1"
+          ],
+          "depends_on": [],
+          "baseline_commit": "21fbb0cc89abd4c1459d2a6e966469700ec982dc",
+          "checkpoint_commit": "276601fd9b1ae400d66b0ae35fe5863b23610714",
+          "subject_digest": "sha256:e3985b34415f7878f89dbbdc3e3d50890e962016b1efef38e5f57e636f09d459",
+          "changed_paths_sha256": "sha256:35cf675d30b3aa46b14b00bc8479cb23d90535779424424985fd64e1680beb99",
+          "receipt_refs": {
+            "implementation": {
+              "path": "_bmad-output/implementation-artifacts/receipts/story-9-1/A-implementation.json",
+              "digest": "sha256:b6f527a12a0114988666c6502ec030cdfd3e71c1885e1e48641947e9224f037d"
+            }
+          },
+          "blockers": [],
+          "unresolved_questions": []
+        },
+        "attempt_id": 1,
+        "plan_digest": "sha256:04433ec8f32b3c3e21bdb0bb47f2895bb97624fec1ed28b9dda99366634b995e",
+        "story_digest": "sha256:de3b11ddf87f4f1224706cbf68e8c6561b67389e35e045795f94479610705d86",
+        "policy": {
+          "paths": [
+            ".agents/context/context-routing.md",
+            ".agents/context/control-plane.md",
+            ".agents/routing/task-router.md",
+            ".agents/skills/v4-story-runner/SKILL.md",
+            "AGENTS.md",
+            "CLAUDE.md"
+          ],
+          "files": {
+            ".agents/context/context-routing.md": "sha256:6be98dcbf9e875ac88a444ec904daad801f9d17ac1695e86503f33425743ca35",
+            ".agents/context/control-plane.md": "sha256:78a9f3f6b3f1d6d07093244a72b2833e250d2d7686aad509543f78a5903ad6af",
+            ".agents/routing/task-router.md": "sha256:79ce0334708944592d0570cbe74ef2b9feeac6ebb678c78ce78733c82aed303e",
+            ".agents/skills/v4-story-runner/SKILL.md": "sha256:7cd14ebdd927a6af35c8bcf3fc6f87f97c7fd2a2f4ddb7b0ee37b139cdcf8e7e",
+            "AGENTS.md": "sha256:6c18ec25fea723d75e4fb677a64687cd264bd17faea83ab2197015fafae2a0ee",
+            "CLAUDE.md": "sha256:0b604e03e299440268ad35bd3cbf1f697dc507c3b111aeeabfb960cedd7f29c3"
+          },
+          "digest": "sha256:3fbba784f1246be5af666db1e764dd7f1d74cf16a2230591a6237123aac67db4"
+        },
+        "recipes": {
+          "paths": [
+            ".agents/skills/v4-story-runner/actions/verify-slice.md",
+            ".agents/skills/v4-story-runner/references/implementation-techniques.md",
+            ".agents/verification/registry.json"
+          ],
+          "files": {
+            ".agents/skills/v4-story-runner/actions/verify-slice.md": "sha256:ecedc0c46922896c907951de7ba63f425cb29a01f4844e138656a6ce4ce1213f",
+            ".agents/skills/v4-story-runner/references/implementation-techniques.md": "sha256:55036bd9ce7f63d698149912753392a02c983afc192eb601dfb589f5dc3a8a55",
+            ".agents/verification/registry.json": "sha256:2883d00b2becf495cd5d108dfc2b8b47076b6eb726e47b1c2418a491a54f2df8"
+          },
+          "digest": "sha256:1f9fcef4cf680991e00a9c734fcaa93df031ef515767ce7b69e7a170f559de93"
+        },
+        "pointer_digest": "sha256:ce63f02949a6f7713b753aee1889b697df5521eb352623cfe76fa176ff4770f2",
+        "manifest": {
+          "storyId": "9.1",
+          "sliceId": "A",
+          "attemptId": 1,
+          "historicalAttemptCount": 0,
+          "valid": true,
+          "status": "RERUN_REQUIRED",
+          "mode": "checkpoint",
+          "head": "9c3f23e5ac0fb195234b86dd6b8d42c66f585a8f",
+          "baselineCommit": "21fbb0cc89abd4c1459d2a6e966469700ec982dc",
+          "checkpointCommit": "276601fd9b1ae400d66b0ae35fe5863b23610714",
+          "checkpointFreshness": "FRESH",
+          "changedPaths": [
+            "src/feature.txt"
+          ],
+          "changedPathsSha256": "sha256:35cf675d30b3aa46b14b00bc8479cb23d90535779424424985fd64e1680beb99",
+          "postCheckpointDrift": [],
+          "workingDrift": [],
+          "sourceFreshness": "FRESH",
+          "referenceFreshness": "FILE_LEVEL_FRESH",
+          "evidence": [
+            {
+              "id": "focused-checks",
+              "status": "RERUN_REQUIRED",
+              "reasons": [
+                "FOCUSED_EVIDENCE_MISSING"
+              ]
+            }
+          ],
+          "reviewFreshness": {
+            "status": "STALE",
+            "reasons": [
+              "REVIEW_IDENTITY_MISSING"
+            ]
+          },
+          "legacy": {
+            "sliceStatusDrift": false,
+            "baselineDerivedFromFirstParent": false
+          },
+          "reasons": [
+            "FOCUSED_EVIDENCE_RERUN_REQUIRED"
+          ]
+        },
+        "changed_paths": [
+          "src/feature.txt"
+        ],
+        "changed_paths_sha256": "sha256:35cf675d30b3aa46b14b00bc8479cb23d90535779424424985fd64e1680beb99",
+        "baseline_commit": "21fbb0cc89abd4c1459d2a6e966469700ec982dc",
+        "checkpoint_commit": "276601fd9b1ae400d66b0ae35fe5863b23610714",
+        "subject_digest": "sha256:e3985b34415f7878f89dbbdc3e3d50890e962016b1efef38e5f57e636f09d459",
+        "risk": "LOW",
+        "mandatory_judgment_flags": [],
+        "canonical_selector": "fixture-feature",
+        "check_specs": [
+          {
+            "id": "focused-fixture",
+            "classification": "behavioral",
+            "required": true,
+            "argv": [
+              "node",
+              "-e",
+              "process.exit(0)"
+            ],
+            "cwd": ".",
+            "environment_identity": {
+              "name": "fixture"
+            },
+            "source": {
+              "kind": "focused-manifest",
+              "path": ".agents/skills/v4-story-runner/actions/verify-slice.md"
+            },
+            "referenced_paths": [
+              "src/feature.txt"
+            ]
+          }
+        ],
+        "semantic_coverage": null,
+        "review_questions": null,
+        "verification_receipt_path": "_bmad-output/implementation-artifacts/receipts/story-9-1/A-verification.json",
+        "review_receipt_path": "_bmad-output/implementation-artifacts/receipts/story-9-1/A-review.json",
+        "next_action": {
+          "kind": "finalize_story",
+          "target": "story"
+        },
+        "plan_template": null,
+        "plan_template_digest": null,
+        "context_digest": "sha256:bdefd6e8dc061ae74254f69423fd8bbc09d52bcd3793741487e37a8966f03285",
+        "fingerprint": "sha256:3015f9c0be82e5e49218c51c4c265bca2c348fe677375def79eb063abd05e1a4"
+      }
+    },
+    "copiedJournalIdentity": {
+      "repository": "C:\\Users\\ACER\\AppData\\Local\\Temp\\v4-verification-dgNtkI\\.git",
+      "worktree": "C:\\Users\\ACER\\AppData\\Local\\Temp\\v4-verification-dgNtkI",
+      "scopeKey": "7e245ac8a194d6d5e23b7da3bb881e028e1988e908c62961ce703ed9ee1c67fe",
+      "lockPath": "C:\\Users\\ACER\\AppData\\Local\\Temp\\v4-verification-dgNtkI\\.git\\noteflow-v4-transactions\\scope-7e245ac8a194d6d5e23b7da3bb881e028e1988e908c62961ce703ed9ee1c67fe.lock",
+      "journalPath": "C:\\Users\\ACER\\AppData\\Local\\Temp\\v4-verification-dgNtkI\\.git\\noteflow-v4-transactions\\transaction-implementation-low.json"
+    },
+    "newIdentity": {
+      "repository": "C:\\Users\\ACER\\AppData\\Local\\Temp\\t0-copy-6SScwO\\copy\\.git",
+      "worktree": "C:\\Users\\ACER\\AppData\\Local\\Temp\\t0-copy-6SScwO\\copy",
+      "common": "C:\\Users\\ACER\\AppData\\Local\\Temp\\t0-copy-6SScwO\\copy\\.git",
+      "transactionRoot": "C:\\Users\\ACER\\AppData\\Local\\Temp\\t0-copy-6SScwO\\copy\\.git\\noteflow-v4-transactions",
+      "scopeKey": "db5fa8941ba88412527cd77e5e2c870b5f0db64e6f81c7ab35c7cb0df04ff349",
+      "lockPath": "C:\\Users\\ACER\\AppData\\Local\\Temp\\t0-copy-6SScwO\\copy\\.git\\noteflow-v4-transactions\\scope-db5fa8941ba88412527cd77e5e2c870b5f0db64e6f81c7ab35c7cb0df04ff349.lock",
+      "journalPath": "C:\\Users\\ACER\\AppData\\Local\\Temp\\t0-copy-6SScwO\\copy\\.git\\noteflow-v4-transactions\\transaction-implementation-low.json"
+    },
+    "replayCopiedCompletedJournal": {
+      "status": "STALE",
+      "ready": false,
+      "valid": true,
+      "reasons": [
+        "COMPLETED_TRANSACTION_BINDING_MISMATCH"
+      ],
+      "transaction_id": "implementation-low"
+    }
+  },
+  {
+    "label": "finalize",
+    "root": "C:\\Users\\ACER\\AppData\\Local\\Temp\\finalize-story-hjPrCW",
+    "copy": "C:\\Users\\ACER\\AppData\\Local\\Temp\\t0-copy-FkDiM9\\copy",
+    "head": "41ae6ba28ae1a78b726eb4faa743ccf3e76615e1",
+    "copyHead": {
+      "status": 0,
+      "stdout": "41ae6ba28ae1a78b726eb4faa743ccf3e76615e1",
+      "stderr": ""
+    },
+    "refresh": {
+      "status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "originalStatus": "",
+    "copyStatus": "",
+    "sameStatus": true,
+    "sameNonGitBytes": true,
+    "originalGate": {
+      "story_id": "9.1",
+      "status": "READY",
+      "valid": true,
+      "ready": true,
+      "expected_head": "41ae6ba28ae1a78b726eb4faa743ccf3e76615e1",
+      "head": "41ae6ba28ae1a78b726eb4faa743ccf3e76615e1",
+      "story_normative_digest": "sha256:6b5900644a6ab729242204a4d45cbdf2b03c5cc312e1fe6291efea193004735c",
+      "slice_set_digest": "sha256:013e05d981c46c221aed267a7c2bf0fb3082ba3b604cc35522ef5878e80dbf21",
+      "receipt_set_digest": "sha256:4173a9b5626b62e9ac2fd12bcd3cd846eabcd09a199a065a6e9e5a8cbd528746",
+      "slices": [
+        {
+          "id": "A",
+          "status": "reviewed",
+          "checkpoint": "bf9da070a0b548ca9707aee0e0a954da44f551ca",
+          "progression_eligible": true,
+          "review_required": true,
+          "review_verdict": "APPROVE",
+          "review_freshness": "FRESH_CANDIDATE"
+        }
+      ],
+      "ac_coverage": [
+        {
+          "id": "AC-1",
+          "covered": true,
+          "contributor_slices": [
+            "A"
+          ],
+          "evidence": [
+            {
+              "slice_id": "A",
+              "mode": "structured",
+              "evidence_id": "ac-1",
+              "receipt_digest": "sha256:8e1c7e98d09bfc9686ce1cad1af2c2b7ec6c20667192da014c1b41352cd75ad7",
+              "receipt_ref": "_bmad-output/implementation-artifacts/receipts/story-9-1/A-verification.json",
+              "summary": "first behavior evidenced"
+            }
+          ],
+          "canonical_disclosure_relevant": []
+        },
+        {
+          "id": "AC-2",
+          "covered": true,
+          "contributor_slices": [
+            "A"
+          ],
+          "evidence": [
+            {
+              "slice_id": "A",
+              "mode": "structured",
+              "evidence_id": "ac-2",
+              "receipt_digest": "sha256:8e1c7e98d09bfc9686ce1cad1af2c2b7ec6c20667192da014c1b41352cd75ad7",
+              "receipt_ref": "_bmad-output/implementation-artifacts/receipts/story-9-1/A-verification.json",
+              "summary": "second behavior evidenced"
+            }
+          ],
+          "canonical_disclosure_relevant": []
+        }
+      ],
+      "canonical_disclosures": [
+        {
+          "slice_id": "A",
+          "applicability": "APPLICABLE",
+          "status": "PASS",
+          "complete": true,
+          "reasons": [],
+          "done_gate_disclosure_required": false,
+          "coverage_authority": "focused checks"
+        }
+      ],
+      "reference_freshness": "PARTIAL",
+      "reference_freshness_reasons": [
+        "NO_PINNED_REFERENCE_DIGESTS"
+      ],
+      "scope": {
+        "path_count": 1,
+        "paths": [
+          {
+            "path": "src/implementation.txt",
+            "contributor_slices": [
+              "A"
+            ],
+            "latest_slice": "A",
+            "latest_checkpoint": "bf9da070a0b548ca9707aee0e0a954da44f551ca",
+            "blob": "14643263f2ed766708ca24c0784ed4ea41f8684a"
+          }
+        ],
+        "scope_paths_digest": "sha256:da89fa55c1fce44696a55b94058eb3d764b13ad6f27ca16c253fb228398f9715",
+        "implementation_commit_set_digest": "sha256:e787fcbd886dc123eaba92d8017c9450f7c6e139a3d9e12076bd451f47efeb8b",
+        "final_scoped_tree_digest": "sha256:47b23de5d6648ad1fced62bfbae8f2b16bcd19da40f969b7d950f4ebf88802f1",
+        "excluded_paths": [],
+        "excluded_worktree_paths": []
+      },
+      "scope_paths_digest": "sha256:da89fa55c1fce44696a55b94058eb3d764b13ad6f27ca16c253fb228398f9715",
+      "implementation_commit_set_digest": "sha256:e787fcbd886dc123eaba92d8017c9450f7c6e139a3d9e12076bd451f47efeb8b",
+      "final_scoped_tree_digest": "sha256:47b23de5d6648ad1fced62bfbae8f2b16bcd19da40f969b7d950f4ebf88802f1",
+      "done_gate_disposition": "READY",
+      "lifecycle_from": "in-progress",
+      "lifecycle_target": "review",
+      "human_gate_required": true,
+      "human_approval_present": false,
+      "recovery_classification": "CLEAN_BASE",
+      "reasons": [],
+      "warnings": [],
+      "reference_freshness_blocking": false,
+      "ac_coverage_summary": {
+        "total": 2,
+        "covered": 2,
+        "fallback_count": 0,
+        "structured_count": 2
+      }
+    },
+    "copyGate": {
+      "story_id": "9.1",
+      "status": "READY",
+      "valid": true,
+      "ready": true,
+      "expected_head": "41ae6ba28ae1a78b726eb4faa743ccf3e76615e1",
+      "head": "41ae6ba28ae1a78b726eb4faa743ccf3e76615e1",
+      "story_normative_digest": "sha256:6b5900644a6ab729242204a4d45cbdf2b03c5cc312e1fe6291efea193004735c",
+      "slice_set_digest": "sha256:013e05d981c46c221aed267a7c2bf0fb3082ba3b604cc35522ef5878e80dbf21",
+      "receipt_set_digest": "sha256:4173a9b5626b62e9ac2fd12bcd3cd846eabcd09a199a065a6e9e5a8cbd528746",
+      "slices": [
+        {
+          "id": "A",
+          "status": "reviewed",
+          "checkpoint": "bf9da070a0b548ca9707aee0e0a954da44f551ca",
+          "progression_eligible": true,
+          "review_required": true,
+          "review_verdict": "APPROVE",
+          "review_freshness": "FRESH_CANDIDATE"
+        }
+      ],
+      "ac_coverage": [
+        {
+          "id": "AC-1",
+          "covered": true,
+          "contributor_slices": [
+            "A"
+          ],
+          "evidence": [
+            {
+              "slice_id": "A",
+              "mode": "structured",
+              "evidence_id": "ac-1",
+              "receipt_digest": "sha256:8e1c7e98d09bfc9686ce1cad1af2c2b7ec6c20667192da014c1b41352cd75ad7",
+              "receipt_ref": "_bmad-output/implementation-artifacts/receipts/story-9-1/A-verification.json",
+              "summary": "first behavior evidenced"
+            }
+          ],
+          "canonical_disclosure_relevant": []
+        },
+        {
+          "id": "AC-2",
+          "covered": true,
+          "contributor_slices": [
+            "A"
+          ],
+          "evidence": [
+            {
+              "slice_id": "A",
+              "mode": "structured",
+              "evidence_id": "ac-2",
+              "receipt_digest": "sha256:8e1c7e98d09bfc9686ce1cad1af2c2b7ec6c20667192da014c1b41352cd75ad7",
+              "receipt_ref": "_bmad-output/implementation-artifacts/receipts/story-9-1/A-verification.json",
+              "summary": "second behavior evidenced"
+            }
+          ],
+          "canonical_disclosure_relevant": []
+        }
+      ],
+      "canonical_disclosures": [
+        {
+          "slice_id": "A",
+          "applicability": "APPLICABLE",
+          "status": "PASS",
+          "complete": true,
+          "reasons": [],
+          "done_gate_disclosure_required": false,
+          "coverage_authority": "focused checks"
+        }
+      ],
+      "reference_freshness": "PARTIAL",
+      "reference_freshness_reasons": [
+        "NO_PINNED_REFERENCE_DIGESTS"
+      ],
+      "scope": {
+        "path_count": 1,
+        "paths": [
+          {
+            "path": "src/implementation.txt",
+            "contributor_slices": [
+              "A"
+            ],
+            "latest_slice": "A",
+            "latest_checkpoint": "bf9da070a0b548ca9707aee0e0a954da44f551ca",
+            "blob": "14643263f2ed766708ca24c0784ed4ea41f8684a"
+          }
+        ],
+        "scope_paths_digest": "sha256:da89fa55c1fce44696a55b94058eb3d764b13ad6f27ca16c253fb228398f9715",
+        "implementation_commit_set_digest": "sha256:e787fcbd886dc123eaba92d8017c9450f7c6e139a3d9e12076bd451f47efeb8b",
+        "final_scoped_tree_digest": "sha256:47b23de5d6648ad1fced62bfbae8f2b16bcd19da40f969b7d950f4ebf88802f1",
+        "excluded_paths": [],
+        "excluded_worktree_paths": []
+      },
+      "scope_paths_digest": "sha256:da89fa55c1fce44696a55b94058eb3d764b13ad6f27ca16c253fb228398f9715",
+      "implementation_commit_set_digest": "sha256:e787fcbd886dc123eaba92d8017c9450f7c6e139a3d9e12076bd451f47efeb8b",
+      "final_scoped_tree_digest": "sha256:47b23de5d6648ad1fced62bfbae8f2b16bcd19da40f969b7d950f4ebf88802f1",
+      "done_gate_disposition": "READY",
+      "lifecycle_from": "in-progress",
+      "lifecycle_target": "review",
+      "human_gate_required": true,
+      "human_approval_present": false,
+      "recovery_classification": "CLEAN_BASE",
+      "reasons": [],
+      "warnings": [],
+      "reference_freshness_blocking": false,
+      "ac_coverage_summary": {
+        "total": 2,
+        "covered": 2,
+        "fallback_count": 0,
+        "structured_count": 2
+      }
+    }
+  },
+  {
+    "label": "completion",
+    "root": "C:\\Users\\ACER\\AppData\\Local\\Temp\\v4-completion-FSI6Ek",
+    "copy": "C:\\Users\\ACER\\AppData\\Local\\Temp\\t0-copy-nThJJE\\copy",
+    "head": "207e770748b08588ce0a6819cf6008996621ddf8",
+    "copyHead": {
+      "status": 0,
+      "stdout": "207e770748b08588ce0a6819cf6008996621ddf8",
+      "stderr": ""
+    },
+    "refresh": {
+      "status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "originalStatus": "",
+    "copyStatus": "",
+    "sameStatus": true,
+    "sameNonGitBytes": true,
+    "originalGate": {
+      "story_id": "9.1",
+      "status": "BLOCKED",
+      "valid": true,
+      "ready": false,
+      "terminal": false,
+      "approval_fresh": false,
+      "expected_head": "207e770748b08588ce0a6819cf6008996621ddf8",
+      "head": "207e770748b08588ce0a6819cf6008996621ddf8",
+      "lifecycle": "review",
+      "execution_status": "complete",
+      "next_action": {
+        "kind": "complete_story",
+        "target": "story"
+      },
+      "story_normative_digest": "sha256:2d2656f62b415a9a39f5dd1f13984c4455c72d00a2c3ada78ed2f20b20723da2",
+      "finalization_receipt_digest": "sha256:9f28ca23279569abb1d8cacb5deca12e4be75ccda24dd4d120361bda8861512b",
+      "done_gate_summary_digest": "sha256:c2616e6b3a6e55c922a59e7865609daa5913dffd0d354110d158219f95c3f8db",
+      "scope_paths_digest": "sha256:da89fa55c1fce44696a55b94058eb3d764b13ad6f27ca16c253fb228398f9715",
+      "implementation_commit_set_digest": "sha256:0a09e691263781d6c50d5fd8f6dc7c4cf74e001d7cff4e42958c29ead3bba9a0",
+      "final_scoped_tree_digest": "sha256:47b23de5d6648ad1fced62bfbae8f2b16bcd19da40f969b7d950f4ebf88802f1",
+      "preview": {
+        "story_id": "9.1",
+        "story_title": "Fixture completion story",
+        "lifecycle": "review",
+        "story_normative_digest": "sha256:2d2656f62b415a9a39f5dd1f13984c4455c72d00a2c3ada78ed2f20b20723da2",
+        "finalization_receipt_digest": "sha256:9f28ca23279569abb1d8cacb5deca12e4be75ccda24dd4d120361bda8861512b",
+        "done_gate_disposition": "SATISFIED",
+        "done_gate_summary_digest": "sha256:c2616e6b3a6e55c922a59e7865609daa5913dffd0d354110d158219f95c3f8db",
+        "canonical_disclosures": [
+          {
+            "slice_id": "A",
+            "applicability": "APPLICABLE",
+            "status": "PASS",
+            "complete": true,
+            "reasons": [],
+            "done_gate_disclosure_required": false,
+            "coverage_authority": "focused checks"
+          }
+        ],
+        "ac_coverage": [
+          {
+            "id": "AC-1",
+            "covered": true,
+            "contributor_slices": [
+              "A"
+            ],
+            "evidence": [
+              {
+                "slice_id": "A",
+                "mode": "structured",
+                "evidence_id": "ac-1",
+                "receipt_digest": "sha256:947724da1a8c86d32e728fa6c4215b4800bf7a430104c092902348e52cd4f255",
+                "receipt_ref": "receipts/verification.json",
+                "summary": "fixture behavior checked"
+              }
+            ],
+            "canonical_disclosure_relevant": []
+          }
+        ],
+        "ac_coverage_summary": {
+          "total": 1,
+          "covered": 1,
+          "fallback_count": 0,
+          "structured_count": 1
+        },
+        "implementation_path_count": 1,
+        "scope_paths_digest": "sha256:da89fa55c1fce44696a55b94058eb3d764b13ad6f27ca16c253fb228398f9715",
+        "implementation_commit_set_digest": "sha256:0a09e691263781d6c50d5fd8f6dc7c4cf74e001d7cff4e42958c29ead3bba9a0",
+        "final_scoped_tree_digest": "sha256:47b23de5d6648ad1fced62bfbae8f2b16bcd19da40f969b7d950f4ebf88802f1",
+        "final_scope_digest": "sha256:47b23de5d6648ad1fced62bfbae8f2b16bcd19da40f969b7d950f4ebf88802f1",
+        "approved_review_head": "207e770748b08588ce0a6819cf6008996621ddf8",
+        "approved_action": "complete_story",
+        "pending_action": {
+          "kind": "complete_story",
+          "target": "story"
+        }
+      },
+      "recovery_classification": "HUMAN_GATE_REQUIRED",
+      "reasons": [
+        "HUMAN_APPROVAL_REQUIRED"
+      ]
+    },
+    "copyGate": {
+      "story_id": "9.1",
+      "status": "BLOCKED",
+      "valid": true,
+      "ready": false,
+      "terminal": false,
+      "approval_fresh": false,
+      "expected_head": "207e770748b08588ce0a6819cf6008996621ddf8",
+      "head": "207e770748b08588ce0a6819cf6008996621ddf8",
+      "lifecycle": "review",
+      "execution_status": "complete",
+      "next_action": {
+        "kind": "complete_story",
+        "target": "story"
+      },
+      "story_normative_digest": "sha256:2d2656f62b415a9a39f5dd1f13984c4455c72d00a2c3ada78ed2f20b20723da2",
+      "finalization_receipt_digest": "sha256:9f28ca23279569abb1d8cacb5deca12e4be75ccda24dd4d120361bda8861512b",
+      "done_gate_summary_digest": "sha256:c2616e6b3a6e55c922a59e7865609daa5913dffd0d354110d158219f95c3f8db",
+      "scope_paths_digest": "sha256:da89fa55c1fce44696a55b94058eb3d764b13ad6f27ca16c253fb228398f9715",
+      "implementation_commit_set_digest": "sha256:0a09e691263781d6c50d5fd8f6dc7c4cf74e001d7cff4e42958c29ead3bba9a0",
+      "final_scoped_tree_digest": "sha256:47b23de5d6648ad1fced62bfbae8f2b16bcd19da40f969b7d950f4ebf88802f1",
+      "preview": {
+        "story_id": "9.1",
+        "story_title": "Fixture completion story",
+        "lifecycle": "review",
+        "story_normative_digest": "sha256:2d2656f62b415a9a39f5dd1f13984c4455c72d00a2c3ada78ed2f20b20723da2",
+        "finalization_receipt_digest": "sha256:9f28ca23279569abb1d8cacb5deca12e4be75ccda24dd4d120361bda8861512b",
+        "done_gate_disposition": "SATISFIED",
+        "done_gate_summary_digest": "sha256:c2616e6b3a6e55c922a59e7865609daa5913dffd0d354110d158219f95c3f8db",
+        "canonical_disclosures": [
+          {
+            "slice_id": "A",
+            "applicability": "APPLICABLE",
+            "status": "PASS",
+            "complete": true,
+            "reasons": [],
+            "done_gate_disclosure_required": false,
+            "coverage_authority": "focused checks"
+          }
+        ],
+        "ac_coverage": [
+          {
+            "id": "AC-1",
+            "covered": true,
+            "contributor_slices": [
+              "A"
+            ],
+            "evidence": [
+              {
+                "slice_id": "A",
+                "mode": "structured",
+                "evidence_id": "ac-1",
+                "receipt_digest": "sha256:947724da1a8c86d32e728fa6c4215b4800bf7a430104c092902348e52cd4f255",
+                "receipt_ref": "receipts/verification.json",
+                "summary": "fixture behavior checked"
+              }
+            ],
+            "canonical_disclosure_relevant": []
+          }
+        ],
+        "ac_coverage_summary": {
+          "total": 1,
+          "covered": 1,
+          "fallback_count": 0,
+          "structured_count": 1
+        },
+        "implementation_path_count": 1,
+        "scope_paths_digest": "sha256:da89fa55c1fce44696a55b94058eb3d764b13ad6f27ca16c253fb228398f9715",
+        "implementation_commit_set_digest": "sha256:0a09e691263781d6c50d5fd8f6dc7c4cf74e001d7cff4e42958c29ead3bba9a0",
+        "final_scoped_tree_digest": "sha256:47b23de5d6648ad1fced62bfbae8f2b16bcd19da40f969b7d950f4ebf88802f1",
+        "final_scope_digest": "sha256:47b23de5d6648ad1fced62bfbae8f2b16bcd19da40f969b7d950f4ebf88802f1",
+        "approved_review_head": "207e770748b08588ce0a6819cf6008996621ddf8",
+        "approved_action": "complete_story",
+        "pending_action": {
+          "kind": "complete_story",
+          "target": "story"
+        }
+      },
+      "recovery_classification": "HUMAN_GATE_REQUIRED",
+      "reasons": [
+        "HUMAN_APPROVAL_REQUIRED"
+      ]
+    },
+    "staleClosureReadOriginalRoot": true,
+    "staleClosureProbe": {
+      "copiedObjectRoot": "C:\\Users\\ACER\\AppData\\Local\\Temp\\t0-copy-nThJJE\\copy",
+      "readThroughCopiedObject": "seed\n",
+      "readAtCopiedRoot": "isolated copy marker\n",
+      "stillReadsOriginal": true
+    }
+  },
+  {
+    "label": "kernel-v2",
+    "root": "C:\\Users\\ACER\\AppData\\Local\\Temp\\v4-kernel-MzXrQh",
+    "copy": "C:\\Users\\ACER\\AppData\\Local\\Temp\\t0-copy-3bgsfN\\copy",
+    "head": "c3a9563080fb851a93af85d783603ff75e18812c",
+    "copyHead": {
+      "status": 0,
+      "stdout": "c3a9563080fb851a93af85d783603ff75e18812c",
+      "stderr": ""
+    },
+    "refresh": {
+      "status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "originalStatus": "?? src/feature.txt",
+    "copyStatus": "?? src/feature.txt",
+    "sameStatus": true,
+    "sameNonGitBytes": true,
+    "copyPrepare": {
+      "status": "READY",
+      "ready": true,
+      "valid": true,
+      "action": "implement_slice",
+      "operation": "prepare",
+      "fingerprint": "sha256:33f163206a069f3340a767cad0099eeaf624f519b3ce03f5b912da5e20db05a9",
+      "preview": {
+        "schema_version": 1,
+        "action": "implement_slice",
+        "operation": "checkpoint",
+        "story_id": "9.1",
+        "slice_id": "A",
+        "transaction_id": "fixture-v2",
+        "expected_head": "c3a9563080fb851a93af85d783603ff75e18812c",
+        "plan_path": "_bmad-output/implementation-artifacts/story-9-1-plan.md",
+        "story_path": "docs/story.md",
+        "schema_version_plan": 2,
+        "original_plan": {
+          "schema_version": 2,
+          "story_id": "9.1",
+          "story": {
+            "path": "docs/story.md",
+            "normative_digest": "sha256:20d6a8324646d17465a375109826ea40ed48918f3362a60f7128e3d5f7d03040"
+          },
+          "sprint_key": "9-1-fixture",
+          "lifecycle_snapshot": "in-progress",
+          "execution_status": "in-progress",
+          "current_slice": "A",
+          "risk": {
+            "level": "HIGH"
+          },
+          "slices": [
+            {
+              "id": "A",
+              "status": "pending",
+              "task_refs": [
+                "T-1"
+              ],
+              "depends_on": []
+            }
+          ],
+          "blockers": [],
+          "unresolved_questions": [],
+          "next_action": {
+            "kind": "implement_slice",
+            "target": "A"
+          }
+        },
+        "original_slice": {
+          "id": "A",
+          "status": "pending",
+          "task_refs": [
+            "T-1"
+          ],
+          "depends_on": []
+        },
+        "plan_digest": "sha256:6f5284b282900223632daf48f3f247412ed14cdee398aacc6081a2257fcbdee8",
+        "story_digest": "sha256:ee73f9d0e3e30e70c95b5660d60d99f8bec24a6791cfd5acc8a72db774eed20d",
+        "story_normative_digest": "sha256:20d6a8324646d17465a375109826ea40ed48918f3362a60f7128e3d5f7d03040",
+        "executor": "lead",
+        "policy": {
+          "paths": [
+            ".agents/context/context-routing.md",
+            ".agents/context/control-plane.md",
+            ".agents/routing/task-router.md",
+            ".agents/skills/v4-story-runner/SKILL.md",
+            "AGENTS.md",
+            "CLAUDE.md"
+          ],
+          "files": {
+            ".agents/context/context-routing.md": "sha256:6be98dcbf9e875ac88a444ec904daad801f9d17ac1695e86503f33425743ca35",
+            ".agents/context/control-plane.md": "sha256:78a9f3f6b3f1d6d07093244a72b2833e250d2d7686aad509543f78a5903ad6af",
+            ".agents/routing/task-router.md": "sha256:79ce0334708944592d0570cbe74ef2b9feeac6ebb678c78ce78733c82aed303e",
+            ".agents/skills/v4-story-runner/SKILL.md": "sha256:7cd14ebdd927a6af35c8bcf3fc6f87f97c7fd2a2f4ddb7b0ee37b139cdcf8e7e",
+            "AGENTS.md": "sha256:6c18ec25fea723d75e4fb677a64687cd264bd17faea83ab2197015fafae2a0ee",
+            "CLAUDE.md": "sha256:0b604e03e299440268ad35bd3cbf1f697dc507c3b111aeeabfb960cedd7f29c3"
+          },
+          "digest": "sha256:3fbba784f1246be5af666db1e764dd7f1d74cf16a2230591a6237123aac67db4"
+        },
+        "recipes": {
+          "paths": [
+            ".agents/skills/v4-story-runner/actions/implement-slice.md",
+            ".agents/skills/v4-story-runner/references/implementation-techniques.md"
+          ],
+          "files": {
+            ".agents/skills/v4-story-runner/actions/implement-slice.md": "sha256:7292b419a5e854f50e0d5c6749c7e0bff47a300900f67b0a06226f91fdb7c494",
+            ".agents/skills/v4-story-runner/references/implementation-techniques.md": "sha256:55036bd9ce7f63d698149912753392a02c983afc192eb601dfb589f5dc3a8a55"
+          },
+          "digest": "sha256:b67c4efe53eb296a14ad5dafa8bccf334cdccae3d60b488fe6ba1a624de5ab9f"
+        },
+        "pointer_digest": "sha256:ce63f02949a6f7713b753aee1889b697df5521eb352623cfe76fa176ff4770f2",
+        "implementation_paths": [
+          "src/feature.txt"
+        ],
+        "snapshot": {
+          "src/feature.txt": {
+            "path": "src/feature.txt",
+            "exists": true,
+            "kind": "file",
+            "sha256": "sha256:59d5b5dd37b8ffcd852815de5703d69ce12ea4cd6b334d1e50597db28303f780",
+            "mode": "100644",
+            "git_blob": "978dddd5a1ac882fb73446160722966250505409",
+            "git_context": "sha256:9cbc4d7d93e9c0bcaf8ffe1bfff3f23bab0efcbdd5e0baa97cb775d87472b0ce"
+          }
+        },
+        "metadata_paths": [
+          "_bmad-output/implementation-artifacts/story-9-1-plan.md",
+          "_bmad-output/implementation-artifacts/receipts/story-9-1/A-implementation.json"
+        ],
+        "receipt_path": "_bmad-output/implementation-artifacts/receipts/story-9-1/A-implementation.json",
+        "attempt_id": 1,
+        "plan_template": "---\nschema_version: 2\nstory_id: \"9.1\"\nstory:\n  path: docs/story.md\n  normative_digest: {{STORY_NORMATIVE_DIGEST}}\nsprint_key: 9-1-fixture\nlifecycle_snapshot: in-progress\nexecution_status: in-progress\ncurrent_slice: A\nrisk:\n  level: HIGH\nslices:\n  - id: A\n    status: checkpointed\n    task_refs: [T-1]\n    depends_on: []\n    baseline_commit: {{BASELINE_COMMIT}}\n    checkpoint_commit: {{CHECKPOINT_COMMIT}}\n    subject_digest: {{SUBJECT_DIGEST}}\n    changed_paths_sha256: {{CHANGED_PATHS_SHA256}}\n    receipt_refs:\n      implementation:\n        path: _bmad-output/implementation-artifacts/receipts/story-9-1/A-implementation.json\n        digest: {{RECEIPT_DIGEST}}\nblockers: []\nunresolved_questions: []\nnext_action:\n  kind: verify_slice\n  target: A\n---\n",
+        "plan_template_digest": "sha256:87884db3c8180d0b047c1f49643a62d0d57c87c5397811f749ed1adc86a955a8",
+        "commands": [
+          {
+            "command": "node --check src/feature.txt",
+            "exit_code": 0,
+            "tool": "Node.js",
+            "environment": "fixture"
+          }
+        ],
+        "commands_digest": "sha256:5d30f051c563a035764da156a9e9735031ea183d11124bd1958f2fdfd9603761",
+        "semantic_coverage": {
+          "status": "MEASURED",
+          "task_refs": [
+            "T-1"
+          ],
+          "note": "fixture exact scope"
+        },
+        "context_digest": "sha256:ea6fa2ddea11c44f32b9c1ff574d5f12b5a99777e4512f0de0eac6358fee341f",
+        "selected_tasks": [
+          "T-1"
+        ],
+        "selected_acceptance_criteria": [
+          "AC-1"
+        ],
+        "red_green": {
+          "applicable": false,
+          "reason": "fixture evidence"
+        },
+        "implementation_message": "chore(story-9.1): implementation checkpoint",
+        "metadata_message": "chore(story-9.1): record implementation checkpoint",
+        "fingerprint": "sha256:33f163206a069f3340a767cad0099eeaf624f519b3ce03f5b912da5e20db05a9"
+      }
+    }
+  },
+  {
+    "label": "kernel-v1",
+    "root": "C:\\Users\\ACER\\AppData\\Local\\Temp\\v4-kernel-piCWP1",
+    "copy": "C:\\Users\\ACER\\AppData\\Local\\Temp\\t0-copy-if5jEA\\copy",
+    "head": "bf20313387c5f63aef49ba6a730db8e347057dde",
+    "copyHead": {
+      "status": 0,
+      "stdout": "bf20313387c5f63aef49ba6a730db8e347057dde",
+      "stderr": ""
+    },
+    "refresh": {
+      "status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "originalStatus": "?? src/feature.txt",
+    "copyStatus": "?? src/feature.txt",
+    "sameStatus": true,
+    "sameNonGitBytes": true,
+    "copyPrepare": {
+      "status": "READY",
+      "ready": true,
+      "valid": true,
+      "action": "implement_slice",
+      "operation": "prepare",
+      "fingerprint": "sha256:179ebd1a9859a000076a4a58f797ba6dc5a072a9e146c8027a24e81f81fcdcc8",
+      "preview": {
+        "schema_version": 1,
+        "action": "implement_slice",
+        "operation": "checkpoint",
+        "story_id": "9.1",
+        "slice_id": "A",
+        "transaction_id": "fixture-v1",
+        "expected_head": "bf20313387c5f63aef49ba6a730db8e347057dde",
+        "plan_path": "_bmad-output/implementation-artifacts/story-9-1-plan.md",
+        "story_path": "docs/product/epics.md",
+        "schema_version_plan": 1,
+        "original_plan": {
+          "schema_version": 1,
+          "story_id": "9.1",
+          "source": {
+            "path": "docs/product/epics.md",
+            "anchor": "#story-91-fixture",
+            "section_digest": "sha256:16c511ca0022dd11e0bd319eb83ee22837e90f7e45dfcf1d299babc9a1da97c3"
+          },
+          "sprint_key": "9-1-fixture",
+          "execution_status": "in-progress",
+          "lifecycle_snapshot": "in-progress",
+          "current_slice": "A",
+          "risk": {
+            "level": "HIGH"
+          },
+          "slices": [
+            {
+              "id": "A",
+              "status": "pending",
+              "depends_on": []
+            }
+          ],
+          "blockers": [],
+          "unresolved_questions": [],
+          "next_action": {
+            "kind": "implement_slice",
+            "target": "A"
+          }
+        },
+        "original_slice": {
+          "id": "A",
+          "status": "pending",
+          "depends_on": []
+        },
+        "plan_digest": "sha256:6bdacfb68bd04ae9abbdd1c8d1218a81b99a5d9abfe621ecb03eb0a1d1d912a9",
+        "story_digest": "sha256:d08a92d368819f83aa8a396d70f970b2c930da0bd76a80f32250744947f4834a",
+        "story_normative_digest": null,
+        "executor": "lead",
+        "policy": {
+          "paths": [
+            ".agents/context/context-routing.md",
+            ".agents/context/control-plane.md",
+            ".agents/routing/task-router.md",
+            ".agents/skills/v4-story-runner/SKILL.md",
+            "AGENTS.md",
+            "CLAUDE.md"
+          ],
+          "files": {
+            ".agents/context/context-routing.md": "sha256:6be98dcbf9e875ac88a444ec904daad801f9d17ac1695e86503f33425743ca35",
+            ".agents/context/control-plane.md": "sha256:78a9f3f6b3f1d6d07093244a72b2833e250d2d7686aad509543f78a5903ad6af",
+            ".agents/routing/task-router.md": "sha256:79ce0334708944592d0570cbe74ef2b9feeac6ebb678c78ce78733c82aed303e",
+            ".agents/skills/v4-story-runner/SKILL.md": "sha256:7cd14ebdd927a6af35c8bcf3fc6f87f97c7fd2a2f4ddb7b0ee37b139cdcf8e7e",
+            "AGENTS.md": "sha256:6c18ec25fea723d75e4fb677a64687cd264bd17faea83ab2197015fafae2a0ee",
+            "CLAUDE.md": "sha256:0b604e03e299440268ad35bd3cbf1f697dc507c3b111aeeabfb960cedd7f29c3"
+          },
+          "digest": "sha256:3fbba784f1246be5af666db1e764dd7f1d74cf16a2230591a6237123aac67db4"
+        },
+        "recipes": {
+          "paths": [
+            ".agents/skills/v4-story-runner/actions/implement-slice.md",
+            ".agents/skills/v4-story-runner/references/implementation-techniques.md"
+          ],
+          "files": {
+            ".agents/skills/v4-story-runner/actions/implement-slice.md": "sha256:7292b419a5e854f50e0d5c6749c7e0bff47a300900f67b0a06226f91fdb7c494",
+            ".agents/skills/v4-story-runner/references/implementation-techniques.md": "sha256:55036bd9ce7f63d698149912753392a02c983afc192eb601dfb589f5dc3a8a55"
+          },
+          "digest": "sha256:b67c4efe53eb296a14ad5dafa8bccf334cdccae3d60b488fe6ba1a624de5ab9f"
+        },
+        "pointer_digest": "sha256:ce63f02949a6f7713b753aee1889b697df5521eb352623cfe76fa176ff4770f2",
+        "implementation_paths": [
+          "src/feature.txt"
+        ],
+        "snapshot": {
+          "src/feature.txt": {
+            "path": "src/feature.txt",
+            "exists": true,
+            "kind": "file",
+            "sha256": "sha256:59d5b5dd37b8ffcd852815de5703d69ce12ea4cd6b334d1e50597db28303f780",
+            "mode": "100644",
+            "git_blob": "978dddd5a1ac882fb73446160722966250505409",
+            "git_context": "sha256:b763284ddbad1eea1c14f527f34803e6bfb86d3114c6a6f6053b4e98409d23da"
+          }
+        },
+        "metadata_paths": [
+          "_bmad-output/implementation-artifacts/story-9-1-plan.md"
+        ],
+        "receipt_path": null,
+        "attempt_id": 1,
+        "plan_template": "---\nschema_version: 1\nstory_id: \"9.1\"\nsource:\n  path: docs/product/epics.md\n  anchor: \"#story-91-fixture\"\n  section_digest: {{SOURCE_DIGEST}}\nsprint_key: 9-1-fixture\nexecution_status: in-progress\nlifecycle_snapshot: in-progress\ncurrent_slice: A\nrisk:\n  level: HIGH\nslices:\n  - id: A\n    status: checkpointed\n    depends_on: []\n    baseline_commit: {{BASELINE_COMMIT}}\n    checkpoint_commit: {{CHECKPOINT_COMMIT}}\n    implementation:\n      changed_paths:\n        - src/feature.txt\n      changed_paths_sha256: {{CHANGED_PATHS_SHA256}}\n      focused_checks:\n        - command: node --check src/feature.txt\n          result: PASS\n          exit_code: 0\n      red_green:\n        applicable: false\n        reason: fixture evidence\nblockers: []\nunresolved_questions: []\nnext_action:\n  kind: verify_slice\n  target: A\n---\n",
+        "plan_template_digest": "sha256:22c69befdcfca1d3839ac5a3613276894a6c8aca55677123438803bd4cb8de29",
+        "commands": [
+          {
+            "command": "node --check src/feature.txt",
+            "exit_code": 0,
+            "tool": "Node.js",
+            "environment": "fixture"
+          }
+        ],
+        "commands_digest": "sha256:5d30f051c563a035764da156a9e9735031ea183d11124bd1958f2fdfd9603761",
+        "semantic_coverage": {
+          "status": "MEASURED",
+          "task_refs": [
+            "T-1"
+          ],
+          "note": "fixture exact scope"
+        },
+        "context_digest": "sha256:ea6fa2ddea11c44f32b9c1ff574d5f12b5a99777e4512f0de0eac6358fee341f",
+        "selected_tasks": [
+          "T-1"
+        ],
+        "selected_acceptance_criteria": [
+          "AC-1"
+        ],
+        "red_green": {
+          "applicable": false,
+          "reason": "fixture evidence"
+        },
+        "implementation_message": "chore(story-9.1): implementation checkpoint",
+        "metadata_message": "chore(story-9.1): record implementation checkpoint",
+        "fingerprint": "sha256:179ebd1a9859a000076a4a58f797ba6dc5a072a9e146c8027a24e81f81fcdcc8"
+      }
+    }
+  },
+  {
+    "label": "transaction",
+    "root": "C:\\Users\\ACER\\AppData\\Local\\Temp\\v4-transaction-FqOL0G",
+    "copy": "C:\\Users\\ACER\\AppData\\Local\\Temp\\t0-copy-wPtEa1\\copy",
+    "head": "123495369ad640aaa21296ee89f41a2221311f13",
+    "copyHead": {
+      "status": 0,
+      "stdout": "123495369ad640aaa21296ee89f41a2221311f13",
+      "stderr": ""
+    },
+    "refresh": {
+      "status": 1,
+      "stdout": "src/implementation.txt: needs update",
+      "stderr": ""
+    },
+    "originalStatus": "M src/implementation.txt",
+    "copyStatus": "M src/implementation.txt",
+    "sameStatus": true,
+    "sameNonGitBytes": true,
+    "copyExecute": {
+      "status": "CHECKPOINTED",
+      "ready": false,
+      "valid": true,
+      "reasons": [],
+      "transaction_id": "transaction-fixture",
+      "baseline_commit": "123495369ad640aaa21296ee89f41a2221311f13",
+      "checkpoint_commit": "780d39234d8b3a86374c61f02f30e20567e988c8",
+      "metadata_commit": "18c49d5a714afa186d59df77dcac5f224337da78",
+      "changed_paths": [
+        "src/implementation.txt"
+      ],
+      "changed_paths_sha256": "sha256:33644acc6f8b10bbb2d97cd6b2ba8be4ac0eb2d77bcb666a3cae3e03a0257876",
+      "next_action": {
+        "kind": "verify_slice",
+        "target": "A"
+      },
+      "journal_path": "C:\\Users\\ACER\\AppData\\Local\\Temp\\t0-copy-wPtEa1\\copy\\.git\\noteflow-v4-transactions\\transaction-transaction-fixture.json",
+      "lock_path": "C:\\Users\\ACER\\AppData\\Local\\Temp\\t0-copy-wPtEa1\\copy\\.git\\noteflow-v4-transactions\\scope-40cbf857fb5ff5ff8e47722052b22dc2c46465a2cb056517c026035945035bef.lock",
+      "durable_action_count": 1,
+      "stop_condition": "VERIFY_SLICE_SAME_SLICE"
+    }
+  },
+  {
+    "label": "e2e",
+    "root": "C:\\Users\\ACER\\AppData\\Local\\Temp\\v4-no-review-e2e-uO1BJH",
+    "copy": "C:\\Users\\ACER\\AppData\\Local\\Temp\\t0-copy-zuzXwH\\copy",
+    "head": "3c710ef638bc721b090ad3f73bcace4a622e057e",
+    "copyHead": {
+      "status": 0,
+      "stdout": "3c710ef638bc721b090ad3f73bcace4a622e057e",
+      "stderr": ""
+    },
+    "refresh": {
+      "status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "originalStatus": "",
+    "copyStatus": "",
+    "sameStatus": true,
+    "sameNonGitBytes": true,
+    "copyPlan": {
+      "storyId": "9.1",
+      "planPath": "_bmad-output/implementation-artifacts/story-9-1-plan.md",
+      "valid": true,
+      "status": "READY",
+      "executionStatus": "in-progress",
+      "lifecycleSnapshot": "in-progress",
+      "actualLifecycle": "in-progress",
+      "currentSlice": "A",
+      "nextAction": {
+        "kind": "implement_slice",
+        "target": "A"
+      },
+      "sourceDigest": "sha256:753319951eb19ecb4ba4e3973b92b6fee2395b0d77380e382fdd73ad5dc917cf",
+      "checkpointState": "NONE",
+      "warnings": [],
+      "legacy": {
+        "sliceStatusDrift": false
+      },
+      "reasons": [],
+      "storyStatus": "in-progress"
+    }
+  },
+  {
+    "label": "integration",
+    "root": "C:\\Users\\ACER\\AppData\\Local\\Temp\\v4-completion-SqtLTz",
+    "copy": "C:\\Users\\ACER\\AppData\\Local\\Temp\\t0-copy-aGEoc4\\copy",
+    "head": "9c6d058438b1ef5893dc88fdb44dd7e07e2e127f",
+    "copyHead": {
+      "status": 0,
+      "stdout": "9c6d058438b1ef5893dc88fdb44dd7e07e2e127f",
+      "stderr": ""
+    },
+    "refresh": {
+      "status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "originalStatus": "",
+    "copyStatus": "",
+    "sameStatus": true,
+    "sameNonGitBytes": true,
+    "copyWorktreeList": {
+      "status": 0,
+      "stdout": "worktree C:/Users/ACER/AppData/Local/Temp/t0-copy-aGEoc4/copy\nHEAD 9c6d058438b1ef5893dc88fdb44dd7e07e2e127f\nbranch refs/heads/story-9-1\n\nworktree C:/Users/ACER/AppData/Local/Temp/p6-integration-fixture-PllS9x/canonical\nHEAD 843b79d05dc1884ae7976bc11ea90b82ad5b88e1\nbranch refs/heads/main",
+      "stderr": ""
+    },
+    "copiedGitdir": "C:/Users/ACER/AppData/Local/Temp/p6-integration-fixture-PllS9x/canonical/.git\n",
+    "linkedDotGit": "gitdir: C:/Users/ACER/AppData/Local/Temp/v4-completion-SqtLTz/.git/worktrees/canonical\n",
+    "registry": {
+      "schemaVersion": 2,
+      "storyId": "9.1",
+      "generation": 1,
+      "worktree": "C:\\Users\\ACER\\AppData\\Local\\Temp\\v4-completion-SqtLTz",
+      "branch": "story-9-1",
+      "controlPlaneCommit": "9c6d058438b1ef5893dc88fdb44dd7e07e2e127f",
+      "lead": {
+        "vendor": "codex",
+        "sessionId": "integration-fixture",
+        "claimedAt": "2026-10-11T14:26:59.581Z"
+      },
+      "orca": {
+        "runId": null,
+        "leadTerminal": null,
+        "agyTerminal": null
+      },
+      "state": "IMPLEMENTING",
+      "declaredScope": [],
+      "resources": [],
+      "overlapOverride": null,
+      "heartbeatAt": "2026-10-11T14:26:59.581Z",
+      "planHead": "9c6d058438b1ef5893dc88fdb44dd7e07e2e127f"
+    }
+  }
+]

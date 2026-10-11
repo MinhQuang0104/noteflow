@@ -1,0 +1,14 @@
+✔ MEDIUM Story with one LOW NO_REVIEW slice finalizes, passes the Human Gate and completes (40914.9194ms)
+✔ MEDIUM slice stops at REVIEW_REQUIRED and skipping review cannot reach finalization (13518.163ms)
+✔ LOW slice raised to REVIEW_REQUIRED by a judgment flag escalation is not final-ready without review (20184.8359ms)
+✔ LOW slice raised to REVIEW_REQUIRED by a requested MEDIUM risk is not final-ready without review (19055.0029ms)
+✔ tampering a reviewed MEDIUM slice to verified with review.required false is blocked by the receipt (18988.072ms)
+✔ two-slice Story with a LOW NO_REVIEW slice and a reviewed MEDIUM slice finalizes and completes (66185.8998ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 178974.1132

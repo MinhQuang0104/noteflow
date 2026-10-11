@@ -1,0 +1,293 @@
+[
+  {
+    "file": "check-story-completion.test.mjs",
+    "summary": {
+      "tests": 35,
+      "suites": 0,
+      "pass": 35,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "duration_ms": 197316.2114
+    },
+    "wall_seconds": 197.40355610009283,
+    "fixture_calls": 32,
+    "test_callback_ms": 197178.4726,
+    "fixture_ms": 126453.12620000003,
+    "body_ms": 69824.62439999996,
+    "cleanup_ms": 793.2785000000003,
+    "audit_ms": 107.44350000001396,
+    "module_setup_ms": 0,
+    "fixture_fraction_of_fixture_plus_body": 0.6442560392782495,
+    "fixture_to_body_ratio": 1.811010474980802,
+    "fixture_including_module_fraction": 0.6442560392782495,
+    "fixture_labels": {
+      "completion-fixture.mjs:createCompletionFixture": 28,
+      "check-story-completion.test.mjs:completedFixture": 4
+    },
+    "nested_fixture_diagnostics_not_added_again": {
+      "completion-fixture.mjs:createCompletionFixture": {
+        "calls": 4,
+        "ms": 8082.020300000033
+      }
+    },
+    "largest_callback": {
+      "kind": "test",
+      "file": "check-story-completion.test.mjs",
+      "name": "uncommitted terminal Plan edits are stale and a wrong expected head is reported",
+      "totalMs": 23652.41870000001,
+      "fixtureMs": 18102.55859999999,
+      "cleanupMs": 31.510000000009313,
+      "auditMs": 0.013399999996181577,
+      "bodyMs": 5518.336700000014
+    }
+  },
+  {
+    "file": "finalize-story.test.mjs",
+    "summary": {
+      "tests": 33,
+      "suites": 0,
+      "pass": 33,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "duration_ms": 309562.6348
+    },
+    "wall_seconds": 309.6501019001007,
+    "fixture_calls": 32,
+    "test_callback_ms": 308747.3876000001,
+    "fixture_ms": 24970.057599999887,
+    "body_ms": 283090.1079000002,
+    "cleanup_ms": 679.6036999999924,
+    "audit_ms": 7.618400000005067,
+    "module_setup_ms": 613.8269,
+    "fixture_fraction_of_fixture_plus_body": 0.08105578194269938,
+    "fixture_to_body_ratio": 0.08820533428465965,
+    "fixture_including_module_fraction": 0.08288318786134274,
+    "fixture_labels": {
+      "finalize-story.test.mjs:fixture": 32
+    },
+    "nested_fixture_diagnostics_not_added_again": {},
+    "largest_callback": {
+      "kind": "test",
+      "file": "finalize-story.test.mjs",
+      "name": "recovery interruption at COMMITTING resumes explicitly without duplicate commit",
+      "totalMs": 22779.11010000002,
+      "fixtureMs": 780.2983999999997,
+      "cleanupMs": 23.253100000001723,
+      "auditMs": 0.025000000023283064,
+      "bodyMs": 21975.533599999995
+    }
+  },
+  {
+    "file": "integrate-story.test.mjs",
+    "summary": {
+      "tests": 9,
+      "suites": 0,
+      "pass": 9,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "duration_ms": 175136.9122
+    },
+    "wall_seconds": 175.22434140008409,
+    "fixture_calls": 10,
+    "test_callback_ms": 175006.92130000005,
+    "fixture_ms": 130505.68870000004,
+    "body_ms": 43657.69419999997,
+    "cleanup_ms": 824.0877000000073,
+    "audit_ms": 19.45070000001033,
+    "module_setup_ms": 0,
+    "fixture_fraction_of_fixture_plus_body": 0.7493290870155693,
+    "fixture_to_body_ratio": 2.989294123096408,
+    "fixture_including_module_fraction": 0.7493290870155693,
+    "fixture_labels": {
+      "integration-test-fixture.mjs:createIntegrationFixture": 9,
+      "v4-architecture-fixture.mjs:createV4Fixture": 1
+    },
+    "nested_fixture_diagnostics_not_added_again": {
+      "completion-fixture.mjs:createCompletionFixture": {
+        "calls": 9,
+        "ms": 17977.59539999999
+      }
+    },
+    "largest_callback": {
+      "kind": "test",
+      "file": "integrate-story.test.mjs",
+      "name": "clean CLI integration fast-forwards to the tested merge and preserves approval",
+      "totalMs": 26380.5826,
+      "fixtureMs": 14292.881,
+      "cleanupMs": 88.99329999999827,
+      "auditMs": 14.743400000001202,
+      "bodyMs": 11983.964900000003
+    }
+  },
+  {
+    "file": "v4-action-kernel.test.mjs",
+    "summary": {
+      "tests": 24,
+      "suites": 0,
+      "pass": 24,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "duration_ms": 203097.2637
+    },
+    "wall_seconds": 203.1868694999721,
+    "fixture_calls": 41,
+    "test_callback_ms": 202951.6511999999,
+    "fixture_ms": 21826.99700000008,
+    "body_ms": 180009.42389999965,
+    "cleanup_ms": 1079.2978000000558,
+    "audit_ms": 35.932500000112555,
+    "module_setup_ms": 0,
+    "fixture_fraction_of_fixture_plus_body": 0.10814201372909951,
+    "fixture_to_body_ratio": 0.12125474615221032,
+    "fixture_including_module_fraction": 0.10814201372909951,
+    "fixture_labels": {
+      "v4-action-kernel.test.mjs:fixture": 29,
+      "v4-action-kernel.test.mjs:maintenanceExecutor": 4,
+      "v4-action-kernel.test.mjs:agyFixture": 8
+    },
+    "nested_fixture_diagnostics_not_added_again": {
+      "v4-action-kernel.test.mjs:fixture": {
+        "calls": 8,
+        "ms": 4060.9531000000134
+      }
+    },
+    "largest_callback": {
+      "kind": "test",
+      "file": "v4-action-kernel.test.mjs",
+      "name": "staged recovery binds authority, evidence, executor and target without rejection writes",
+      "totalMs": 68010.7124,
+      "fixtureMs": 6273.974100000018,
+      "cleanupMs": 307.6635000000133,
+      "auditMs": 0.26090000000112923,
+      "bodyMs": 61428.81389999997
+    }
+  },
+  {
+    "file": "v4-no-review-finalization.e2e.test.mjs",
+    "summary": {
+      "tests": 6,
+      "suites": 0,
+      "pass": 6,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "duration_ms": 178974.1132
+    },
+    "wall_seconds": 179.06199299998116,
+    "fixture_calls": 6,
+    "test_callback_ms": 178842.6471,
+    "fixture_ms": 2979.1705000000143,
+    "body_ms": 175587.8646,
+    "cleanup_ms": 247.54309999998804,
+    "audit_ms": 28.06889999999396,
+    "module_setup_ms": 0,
+    "fixture_fraction_of_fixture_plus_body": 0.01668376527801807,
+    "fixture_to_body_ratio": 0.016966835987138114,
+    "fixture_including_module_fraction": 0.01668376527801807,
+    "fixture_labels": {
+      "v4-no-review-finalization.e2e.test.mjs:fixture": 6
+    },
+    "nested_fixture_diagnostics_not_added_again": {},
+    "largest_callback": {
+      "kind": "test",
+      "file": "v4-no-review-finalization.e2e.test.mjs",
+      "name": "two-slice Story with a LOW NO_REVIEW slice and a reviewed MEDIUM slice finalizes and completes",
+      "totalMs": 66185.4136,
+      "fixtureMs": 478.70620000000054,
+      "cleanupMs": 55.251499999983935,
+      "auditMs": 8.77270000000135,
+      "bodyMs": 65642.68320000001
+    }
+  },
+  {
+    "file": "v4-slice-transaction.test.mjs",
+    "summary": {
+      "tests": 36,
+      "suites": 0,
+      "pass": 36,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "duration_ms": 193566.9912
+    },
+    "wall_seconds": 193.65626279998105,
+    "fixture_calls": 36,
+    "test_callback_ms": 193439.37970000008,
+    "fixture_ms": 48218.48180000006,
+    "body_ms": 144831.35470000003,
+    "cleanup_ms": 381.10600000000295,
+    "audit_ms": 8.43719999996324,
+    "module_setup_ms": 0,
+    "fixture_fraction_of_fixture_plus_body": 0.24977219703576406,
+    "fixture_to_body_ratio": 0.33292847325690345,
+    "fixture_including_module_fraction": 0.24977219703576406,
+    "fixture_labels": {
+      "v4-slice-transaction.test.mjs:fixture": 12,
+      "v4-slice-transaction.test.mjs:stagedFixture": 24
+    },
+    "nested_fixture_diagnostics_not_added_again": {
+      "v4-slice-transaction.test.mjs:fixture": {
+        "calls": 24,
+        "ms": 18335.55339999997
+      }
+    },
+    "largest_callback": {
+      "kind": "test",
+      "file": "v4-slice-transaction.test.mjs",
+      "name": "staged recovery retry is idempotent after interruption AFTER_METADATA_STAGE",
+      "totalMs": 10975.516699999993,
+      "fixtureMs": 1559.7183000000077,
+      "cleanupMs": 11.468799999987823,
+      "auditMs": 0.014500000004773028,
+      "bodyMs": 9404.315099999993
+    }
+  },
+  {
+    "file": "v4-verification-flow.test.mjs",
+    "summary": {
+      "tests": 41,
+      "suites": 0,
+      "pass": 41,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "duration_ms": 504634.0301
+    },
+    "wall_seconds": 504.72177459998056,
+    "fixture_calls": 43,
+    "test_callback_ms": 504469.43629999994,
+    "fixture_ms": 240492.09560000003,
+    "body_ms": 262533.9466999998,
+    "cleanup_ms": 1383.948400000223,
+    "audit_ms": 59.44559999988542,
+    "module_setup_ms": 0,
+    "fixture_fraction_of_fixture_plus_body": 0.47809074556138564,
+    "fixture_to_body_ratio": 0.9160419009539089,
+    "fixture_including_module_fraction": 0.47809074556138564,
+    "fixture_labels": {
+      "v4-verification-flow.test.mjs:fixture": 43
+    },
+    "nested_fixture_diagnostics_not_added_again": {},
+    "largest_callback": {
+      "kind": "test",
+      "file": "v4-verification-flow.test.mjs",
+      "name": "verification metadata cannot add, remove or change committed slice risk",
+      "totalMs": 34442.8663,
+      "fixtureMs": 17204.446599999996,
+      "cleanupMs": 93.08990000000631,
+      "auditMs": 0.06849999998667045,
+      "bodyMs": 17145.261300000013
+    }
+  }
+]

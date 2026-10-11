@@ -1,0 +1,78 @@
+{
+  "checked_at": "2026-10-11T13:30:55.711530+00:00",
+  "owner_exception": "Pinned source 87469b7 for T0-T4; no rebase during performance optimisation. Rebase, reconcile new main tests and full suite + Python on exact commit before integration; integrated count need not be 800.",
+  "source_commit": "87469b76b45eddd569d6090d422a4158f12218e0",
+  "main_observed": "2d64650ab97d96c779e6850ea8f60815ff626cf9",
+  "source_tree": "be40aaa5756b67ecbb8c01f39bc0539c418ab511",
+  "protected_diff": "",
+  "hashes": [
+    {
+      "path": "package.json",
+      "sha256": "d802b8bc6093af81f2c6785720d43e16de37700a4130dd8e6b217c32da152b6a",
+      "matches_original_baseline_bytes": true
+    },
+    {
+      "path": ".agents/scripts/v4-verification-flow.test.mjs",
+      "sha256": "63dfc01e7f891cf2de49e29a9fb78d57994e71f3052d915e53dd6d98467d6eb0",
+      "matches_original_baseline_bytes": true
+    },
+    {
+      "path": ".agents/scripts/finalize-story.test.mjs",
+      "sha256": "1ed3e7cd068e577915f1acf4db49dc7b78a306f57e0d77c2f3b87fa62b0e6b3e",
+      "matches_original_baseline_bytes": true
+    },
+    {
+      "path": ".agents/scripts/check-story-completion.test.mjs",
+      "sha256": "b3c4234ae32d31ba23bef67b46e0aee43f32224483372ac9837563da74b0524d",
+      "matches_original_baseline_bytes": true
+    },
+    {
+      "path": ".agents/scripts/v4-action-kernel.test.mjs",
+      "sha256": "e6deccd71976b240fd7f878ff071a062ae5c38152db58f5cebe16a9b668738a3",
+      "matches_original_baseline_bytes": true
+    },
+    {
+      "path": ".agents/scripts/integrate-story.test.mjs",
+      "sha256": "63ddf9609dadd70867ac7eee133ebc0b6225b3742b0aae034e5eed8a79c4dd1d",
+      "matches_original_baseline_bytes": true
+    },
+    {
+      "path": ".agents/scripts/v4-slice-transaction.test.mjs",
+      "sha256": "51ed72170a62419bf82038800475bef20aff3e73e210107c1d7c87d7f2ebecc5",
+      "matches_original_baseline_bytes": true
+    },
+    {
+      "path": ".agents/scripts/v4-no-review-finalization.e2e.test.mjs",
+      "sha256": "23f444130d03752ba46a9dd5bc25d2eff2957b1d5d24e42a00bddd46daa8004b",
+      "matches_original_baseline_bytes": true
+    },
+    {
+      "path": ".agents/scripts/completion-fixture.mjs",
+      "sha256": "10f33d9ce8a46e12a004497e1f77d3507cb5904b8523244f6379127713120a3d",
+      "matches_original_baseline_bytes": true
+    },
+    {
+      "path": ".agents/scripts/integration-test-fixture.mjs",
+      "sha256": "c9e1150c3cf63b9b542c8361fea7646cfbc7d24073fb0bca0ded094d91ada54d",
+      "matches_original_baseline_bytes": true
+    },
+    {
+      "path": ".agents/scripts/v4-architecture-fixture.mjs",
+      "sha256": "367b5fba5a57e4070f5d704e3b8992dc8f3964e6ad6e40ec539d24843b850dac",
+      "matches_original_baseline_bytes": true
+    }
+  ],
+  "policy_drift_from_canonical_main": [],
+  "pointer": {
+    "schemaVersion": 1,
+    "activeRunId": null,
+    "storyId": null,
+    "status": "IDLE",
+    "updatedAt": "2026-09-22T06:13:26.3964611+00:00"
+  },
+  "pointer_sha256": "5febd755d0136d14d573383bd88f33e8856acbaa0b4a2d25fd592e1820811ae4",
+  "default_baseline_reused": true,
+  "default_wall_seconds": 990.2058930000057,
+  "golden_sha256": "c26f85e4f087ef6d82b769b29a63dfc288474ecdb14f8e89e6a73a35264c9393",
+  "new_round_rebase": false
+}

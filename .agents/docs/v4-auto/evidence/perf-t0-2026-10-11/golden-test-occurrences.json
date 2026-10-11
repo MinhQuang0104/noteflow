@@ -1,0 +1,5602 @@
+[
+  {
+    "ordinal": 1,
+    "name": "authority keeps the one-successor rule outside autopilot",
+    "status": "pass",
+    "duration_ms": 3.8654,
+    "annotation": ""
+  },
+  {
+    "ordinal": 2,
+    "name": "autopilot allowlist keeps git read-only",
+    "status": "pass",
+    "duration_ms": 1.2495,
+    "annotation": ""
+  },
+  {
+    "ordinal": 3,
+    "name": "a held registry mutation lock is reported, never deleted by a Lead",
+    "status": "pass",
+    "duration_ms": 0.7439,
+    "annotation": ""
+  },
+  {
+    "ordinal": 4,
+    "name": "the shared claim lock is adjacent to the Story lock and remains owner-only",
+    "status": "pass",
+    "duration_ms": 1.6021,
+    "annotation": ""
+  },
+  {
+    "ordinal": 5,
+    "name": "committed Claude settings equal the documented autopilot allowlist",
+    "status": "pass",
+    "duration_ms": 14.3928,
+    "annotation": ""
+  },
+  {
+    "ordinal": 6,
+    "name": "comparison rejects identity differences without explicit comparability reasons",
+    "status": "pass",
+    "duration_ms": 6.3145,
+    "annotation": ""
+  },
+  {
+    "ordinal": 7,
+    "name": "comparison keeps per-case coverage and unverified quality separate",
+    "status": "pass",
+    "duration_ms": 0.6873,
+    "annotation": ""
+  },
+  {
+    "ordinal": 8,
+    "name": "normalization rejects malformed bundles and the compare CLI emits JSON only",
+    "status": "pass",
+    "duration_ms": 1483.1616,
+    "annotation": ""
+  },
+  {
+    "ordinal": 9,
+    "name": "L/M/H candidate bundle and fault guards use isolated fixtures without Story lifecycle mutation",
+    "status": "pass",
+    "duration_ms": 1655.0026,
+    "annotation": ""
+  },
+  {
+    "ordinal": 10,
+    "name": "R02 regression: missing case results are UNKNOWN and never synthesize PASS",
+    "status": "pass",
+    "duration_ms": 1347.3285,
+    "annotation": ""
+  },
+  {
+    "ordinal": 11,
+    "name": "R02 regression: unbound evidence is inconclusive even when raw labels say PASS",
+    "status": "pass",
+    "duration_ms": 3.7774,
+    "annotation": ""
+  },
+  {
+    "ordinal": 12,
+    "name": "R02 regression: contradictory checks and tampered raw evidence cannot become quality PASS",
+    "status": "pass",
+    "duration_ms": 171.1487,
+    "annotation": ""
+  },
+  {
+    "ordinal": 13,
+    "name": "R04 regression: instruction metrics require one shared basis and are not multiplied by L/M/H rows",
+    "status": "pass",
+    "duration_ms": 2.4168,
+    "annotation": ""
+  },
+  {
+    "ordinal": 14,
+    "name": "R02 regression: evolution rejects empty caller usage and missing evidence binding",
+    "status": "pass",
+    "duration_ms": 1.0471,
+    "annotation": ""
+  },
+  {
+    "ordinal": 15,
+    "name": "builder requires and records the automatic backend-test-db reservation",
+    "status": "pass",
+    "duration_ms": 21452.6918,
+    "annotation": ""
+  },
+  {
+    "ordinal": 16,
+    "name": "builder requires and records the automatic e2e-db reservation",
+    "status": "pass",
+    "duration_ms": 22721.3752,
+    "annotation": ""
+  },
+  {
+    "ordinal": 17,
+    "name": "builder emits a deterministic AGY contract from projected context",
+    "status": "pass",
+    "duration_ms": 7716.3817,
+    "annotation": ""
+  },
+  {
+    "ordinal": 18,
+    "name": "builder blocks when context is not ready",
+    "status": "pass",
+    "duration_ms": 3200.384,
+    "annotation": ""
+  },
+  {
+    "ordinal": 19,
+    "name": "builder refuses a lead slice",
+    "status": "pass",
+    "duration_ms": 5246.8914,
+    "annotation": ""
+  },
+  {
+    "ordinal": 20,
+    "name": "builder rejects malformed flags before writing output",
+    "status": "pass",
+    "duration_ms": 3497.648,
+    "annotation": ""
+  },
+  {
+    "ordinal": 21,
+    "name": "ready canonical Story is valid and completion-only sections are optional",
+    "status": "pass",
+    "duration_ms": 42.6844,
+    "annotation": ""
+  },
+  {
+    "ordinal": 22,
+    "name": "unmarked requirement prose is rejected instead of silently omitted from digest",
+    "status": "pass",
+    "duration_ms": 0.8541,
+    "annotation": ""
+  },
+  {
+    "ordinal": 23,
+    "name": "missing Story",
+    "status": "pass",
+    "duration_ms": 2.5016,
+    "annotation": ""
+  },
+  {
+    "ordinal": 24,
+    "name": "missing AC",
+    "status": "pass",
+    "duration_ms": 0.4123,
+    "annotation": ""
+  },
+  {
+    "ordinal": 25,
+    "name": "duplicate AC",
+    "status": "pass",
+    "duration_ms": 0.3613,
+    "annotation": ""
+  },
+  {
+    "ordinal": 26,
+    "name": "missing Tasks",
+    "status": "pass",
+    "duration_ms": 0.4977,
+    "annotation": ""
+  },
+  {
+    "ordinal": 27,
+    "name": "duplicate Task",
+    "status": "pass",
+    "duration_ms": 0.4178,
+    "annotation": ""
+  },
+  {
+    "ordinal": 28,
+    "name": "unknown Task AC",
+    "status": "pass",
+    "duration_ms": 0.2797,
+    "annotation": ""
+  },
+  {
+    "ordinal": 29,
+    "name": "AC text changes normative digest",
+    "status": "pass",
+    "duration_ms": 0.7071,
+    "annotation": ""
+  },
+  {
+    "ordinal": 30,
+    "name": "Task text changes normative digest",
+    "status": "pass",
+    "duration_ms": 0.7895,
+    "annotation": ""
+  },
+  {
+    "ordinal": 31,
+    "name": "Task AC mapping changes normative digest",
+    "status": "pass",
+    "duration_ms": 0.8609,
+    "annotation": ""
+  },
+  {
+    "ordinal": 32,
+    "name": "readiness dependency changes normative digest",
+    "status": "pass",
+    "duration_ms": 0.5521,
+    "annotation": ""
+  },
+  {
+    "ordinal": 33,
+    "name": "normative architecture reference changes normative digest",
+    "status": "pass",
+    "duration_ms": 1.2698,
+    "annotation": ""
+  },
+  {
+    "ordinal": 34,
+    "name": "Status does not change normative digest",
+    "status": "pass",
+    "duration_ms": 1.1801,
+    "annotation": ""
+  },
+  {
+    "ordinal": 35,
+    "name": "Task checkbox does not change normative digest",
+    "status": "pass",
+    "duration_ms": 0.6957,
+    "annotation": ""
+  },
+  {
+    "ordinal": 36,
+    "name": "Completion Notes does not change normative digest",
+    "status": "pass",
+    "duration_ms": 0.4329,
+    "annotation": ""
+  },
+  {
+    "ordinal": 37,
+    "name": "File List does not change normative digest",
+    "status": "pass",
+    "duration_ms": 10.4767,
+    "annotation": ""
+  },
+  {
+    "ordinal": 38,
+    "name": "Change Log does not change normative digest",
+    "status": "pass",
+    "duration_ms": 0.4511,
+    "annotation": ""
+  },
+  {
+    "ordinal": 39,
+    "name": "AC evidence/results does not change normative digest",
+    "status": "pass",
+    "duration_ms": 0.3899,
+    "annotation": ""
+  },
+  {
+    "ordinal": 40,
+    "name": "safe line endings and trailing whitespace do not change digest",
+    "status": "pass",
+    "duration_ms": 1.4441,
+    "annotation": ""
+  },
+  {
+    "ordinal": 41,
+    "name": "Markdown indentation inside narrative remains normative",
+    "status": "pass",
+    "duration_ms": 0.3889,
+    "annotation": ""
+  },
+  {
+    "ordinal": 42,
+    "name": "multiple architecture references remain valid and normative",
+    "status": "pass",
+    "duration_ms": 0.4716,
+    "annotation": ""
+  },
+  {
+    "ordinal": 43,
+    "name": "one Task to one slice, one Task to many slices, and many Tasks to one slice",
+    "status": "pass",
+    "duration_ms": 0.7662,
+    "annotation": ""
+  },
+  {
+    "ordinal": 44,
+    "name": "unknown task ref",
+    "status": "pass",
+    "duration_ms": 0.4024,
+    "annotation": ""
+  },
+  {
+    "ordinal": 45,
+    "name": "uncovered Task",
+    "status": "pass",
+    "duration_ms": 0.3904,
+    "annotation": ""
+  },
+  {
+    "ordinal": 46,
+    "name": "cyclic dependency",
+    "status": "pass",
+    "duration_ms": 0.3358,
+    "annotation": ""
+  },
+  {
+    "ordinal": 47,
+    "name": "valid dependency chain passes",
+    "status": "pass",
+    "duration_ms": 0.3437,
+    "annotation": ""
+  },
+  {
+    "ordinal": 48,
+    "name": "valid receipt binds to checkpoint and referenced content",
+    "status": "pass",
+    "duration_ms": 3.9672,
+    "annotation": ""
+  },
+  {
+    "ordinal": 49,
+    "name": "valid AGY receipt binds worker evidence and its scope gate",
+    "status": "pass",
+    "duration_ms": 5.2165,
+    "annotation": ""
+  },
+  {
+    "ordinal": 50,
+    "name": "AGY implementation receipt requires worker evidence",
+    "status": "pass",
+    "duration_ms": 21.8144,
+    "annotation": ""
+  },
+  {
+    "ordinal": 51,
+    "name": "AGY implementation receipt rejects worker executor mismatch",
+    "status": "pass",
+    "duration_ms": 4.8334,
+    "annotation": ""
+  },
+  {
+    "ordinal": 52,
+    "name": "AGY implementation receipt rejects worker scope-gate status mismatch",
+    "status": "pass",
+    "duration_ms": 6.4283,
+    "annotation": ""
+  },
+  {
+    "ordinal": 53,
+    "name": "AGY implementation receipt rejects worker scope-gate base mismatch",
+    "status": "pass",
+    "duration_ms": 4.8708,
+    "annotation": ""
+  },
+  {
+    "ordinal": 54,
+    "name": "AGY implementation receipt rejects worker scope-gate allowlist mismatch",
+    "status": "pass",
+    "duration_ms": 3.7293,
+    "annotation": ""
+  },
+  {
+    "ordinal": 55,
+    "name": "AGY implementation receipt rejects worker missing scope gate mismatch",
+    "status": "pass",
+    "duration_ms": 3.5405,
+    "annotation": ""
+  },
+  {
+    "ordinal": 56,
+    "name": "lead implementation receipt rejects unexpected worker evidence",
+    "status": "pass",
+    "duration_ms": 5.96,
+    "annotation": ""
+  },
+  {
+    "ordinal": 57,
+    "name": "wrong story ID",
+    "status": "pass",
+    "duration_ms": 4.3583,
+    "annotation": ""
+  },
+  {
+    "ordinal": 58,
+    "name": "wrong slice ID",
+    "status": "pass",
+    "duration_ms": 3.7488,
+    "annotation": ""
+  },
+  {
+    "ordinal": 59,
+    "name": "wrong checkpoint SHA",
+    "status": "pass",
+    "duration_ms": 3.5141,
+    "annotation": ""
+  },
+  {
+    "ordinal": 60,
+    "name": "wrong changed path digest",
+    "status": "pass",
+    "duration_ms": 3.8239,
+    "annotation": ""
+  },
+  {
+    "ordinal": 61,
+    "name": "missing required identity",
+    "status": "pass",
+    "duration_ms": 11.0676,
+    "annotation": ""
+  },
+  {
+    "ordinal": 62,
+    "name": "tampered referenced receipt digest fails",
+    "status": "pass",
+    "duration_ms": 3.6442,
+    "annotation": ""
+  },
+  {
+    "ordinal": 63,
+    "name": "receipt binding survives Git line-ending conversion",
+    "status": "pass",
+    "duration_ms": 4.3197,
+    "annotation": ""
+  },
+  {
+    "ordinal": 64,
+    "name": "receipt detail changes never alter Story normative digest",
+    "status": "pass",
+    "duration_ms": 6.8319,
+    "annotation": ""
+  },
+  {
+    "ordinal": 65,
+    "name": "structured receipt independent AGY lead",
+    "status": "pass",
+    "duration_ms": 5.4351,
+    "annotation": ""
+  },
+  {
+    "ordinal": 66,
+    "name": "structured receipt same lead",
+    "status": "pass",
+    "duration_ms": 6.2628,
+    "annotation": ""
+  },
+  {
+    "ordinal": 67,
+    "name": "structured receipt human",
+    "status": "pass",
+    "duration_ms": 6.4016,
+    "annotation": ""
+  },
+  {
+    "ordinal": 68,
+    "name": "structured receipt legacy string",
+    "status": "pass",
+    "duration_ms": 9.1779,
+    "annotation": ""
+  },
+  {
+    "ordinal": 69,
+    "name": "structured receipt independence mismatch",
+    "status": "pass",
+    "duration_ms": 5.606,
+    "annotation": ""
+  },
+  {
+    "ordinal": 70,
+    "name": "structured receipt invalid type",
+    "status": "pass",
+    "duration_ms": 4.8844,
+    "annotation": ""
+  },
+  {
+    "ordinal": 71,
+    "name": "structured receipt invalid vendor",
+    "status": "pass",
+    "duration_ms": 25.695,
+    "annotation": ""
+  },
+  {
+    "ordinal": 72,
+    "name": "structured receipt missing independence",
+    "status": "pass",
+    "duration_ms": 54.5049,
+    "annotation": ""
+  },
+  {
+    "ordinal": 73,
+    "name": "structured receipt schema1 structured reviewer",
+    "status": "pass",
+    "duration_ms": 7.2323,
+    "annotation": ""
+  },
+  {
+    "ordinal": 74,
+    "name": "structured receipt non-array findings",
+    "status": "pass",
+    "duration_ms": 5.0581,
+    "annotation": ""
+  },
+  {
+    "ordinal": 75,
+    "name": "structured receipt VALID",
+    "status": "pass",
+    "duration_ms": 6.8809,
+    "annotation": ""
+  },
+  {
+    "ordinal": 76,
+    "name": "structured receipt SPEC_AMBIGUITY",
+    "status": "pass",
+    "duration_ms": 5.6675,
+    "annotation": ""
+  },
+  {
+    "ordinal": 77,
+    "name": "structured receipt NEEDS_HUMAN_DECISION",
+    "status": "pass",
+    "duration_ms": 6.308,
+    "annotation": ""
+  },
+  {
+    "ordinal": 78,
+    "name": "structured receipt false positive",
+    "status": "pass",
+    "duration_ms": 5.6682,
+    "annotation": ""
+  },
+  {
+    "ordinal": 79,
+    "name": "structured receipt verdict approval with open finding",
+    "status": "pass",
+    "duration_ms": 4.7726,
+    "annotation": ""
+  },
+  {
+    "ordinal": 80,
+    "name": "structured receipt conflicting decisions with findings",
+    "status": "pass",
+    "duration_ms": 5.9204,
+    "annotation": ""
+  },
+  {
+    "ordinal": 81,
+    "name": "structured receipt valid changes required",
+    "status": "pass",
+    "duration_ms": 49.6682,
+    "annotation": ""
+  },
+  {
+    "ordinal": 82,
+    "name": "structured receipt invalid class",
+    "status": "pass",
+    "duration_ms": 21.7005,
+    "annotation": ""
+  },
+  {
+    "ordinal": 83,
+    "name": "structured receipt unsafe path",
+    "status": "pass",
+    "duration_ms": 5.8091,
+    "annotation": ""
+  },
+  {
+    "ordinal": 84,
+    "name": "structured receipt duplicate finding",
+    "status": "pass",
+    "duration_ms": 4.0872,
+    "annotation": ""
+  },
+  {
+    "ordinal": 85,
+    "name": "happy FRESH case",
+    "status": "pass",
+    "duration_ms": 3051.7628,
+    "annotation": ""
+  },
+  {
+    "ordinal": 86,
+    "name": "wrong current slice is blocked",
+    "status": "pass",
+    "duration_ms": 2946.3612,
+    "annotation": ""
+  },
+  {
+    "ordinal": 87,
+    "name": "wrong next action is blocked",
+    "status": "pass",
+    "duration_ms": 3092.3555,
+    "annotation": ""
+  },
+  {
+    "ordinal": 88,
+    "name": "invalid lifecycle or execution state is blocked",
+    "status": "pass",
+    "duration_ms": 3693.6584,
+    "annotation": ""
+  },
+  {
+    "ordinal": 89,
+    "name": "blocker present is blocked",
+    "status": "pass",
+    "duration_ms": 3680.5711,
+    "annotation": ""
+  },
+  {
+    "ordinal": 90,
+    "name": "unresolved question present is blocked",
+    "status": "pass",
+    "duration_ms": 4102.6091,
+    "annotation": ""
+  },
+  {
+    "ordinal": 91,
+    "name": "pending dependency is not eligible",
+    "status": "pass",
+    "duration_ms": 3975.5495,
+    "annotation": ""
+  },
+  {
+    "ordinal": 92,
+    "name": "reviewed dependency is eligible",
+    "status": "pass",
+    "duration_ms": 3588.8507,
+    "annotation": ""
+  },
+  {
+    "ordinal": 93,
+    "name": "verified progression-eligible dependency without required review is eligible",
+    "status": "pass",
+    "duration_ms": 3815.8659,
+    "annotation": ""
+  },
+  {
+    "ordinal": 94,
+    "name": "verified dependency with unsatisfied required review is blocked",
+    "status": "pass",
+    "duration_ms": 3042.0596,
+    "annotation": ""
+  },
+  {
+    "ordinal": 95,
+    "name": "relevant staged path is blocked",
+    "status": "pass",
+    "duration_ms": 3193.6395,
+    "annotation": ""
+  },
+  {
+    "ordinal": 96,
+    "name": "relevant unstaged path is blocked",
+    "status": "pass",
+    "duration_ms": 4278.395,
+    "annotation": ""
+  },
+  {
+    "ordinal": 97,
+    "name": "relevant untracked path is blocked",
+    "status": "pass",
+    "duration_ms": 3757.8162,
+    "annotation": ""
+  },
+  {
+    "ordinal": 98,
+    "name": "exact explicitly accepted unrelated noise is excluded",
+    "status": "pass",
+    "duration_ms": 3198.8944,
+    "annotation": ""
+  },
+  {
+    "ordinal": 99,
+    "name": "Git inventory failure returns ERROR and never claims completeness",
+    "status": "pass",
+    "duration_ms": 3365.3149,
+    "annotation": ""
+  },
+  {
+    "ordinal": 100,
+    "name": "malformed Plan propagates INVALID",
+    "status": "pass",
+    "duration_ms": 3703.3382,
+    "annotation": ""
+  },
+  {
+    "ordinal": 101,
+    "name": "missing requested slice is INVALID",
+    "status": "pass",
+    "duration_ms": 3258.2255,
+    "annotation": ""
+  },
+  {
+    "ordinal": 102,
+    "name": "RECONCILIATION_REQUIRED is propagated",
+    "status": "pass",
+    "duration_ms": 4057.8372,
+    "annotation": ""
+  },
+  {
+    "ordinal": 103,
+    "name": "STALE is propagated",
+    "status": "pass",
+    "duration_ms": 2949.718,
+    "annotation": ""
+  },
+  {
+    "ordinal": 104,
+    "name": "RESUME_WORKTREE requires exact explicit resume scope",
+    "status": "pass",
+    "duration_ms": 3093.6829,
+    "annotation": ""
+  },
+  {
+    "ordinal": 105,
+    "name": "CHECKPOINT_UNRECORDED requires an explicit exact checkpoint candidate",
+    "status": "pass",
+    "duration_ms": 4084.0124,
+    "annotation": ""
+  },
+  {
+    "ordinal": 106,
+    "name": "PLAN_UPDATE_PENDING detects a matching uncommitted Plan-only mutation",
+    "status": "pass",
+    "duration_ms": 5237.6552,
+    "annotation": ""
+  },
+  {
+    "ordinal": 107,
+    "name": "COMPLETE detects committed checkpoint metadata and never requests implementation",
+    "status": "pass",
+    "duration_ms": 5371.346,
+    "annotation": ""
+  },
+  {
+    "ordinal": 108,
+    "name": "helper is read-only",
+    "status": "pass",
+    "duration_ms": 3228.1229,
+    "annotation": ""
+  },
+  {
+    "ordinal": 109,
+    "name": "valid checkpoint slice is ready for rerunning legacy focused evidence",
+    "status": "pass",
+    "duration_ms": 4709.5852,
+    "annotation": ""
+  },
+  {
+    "ordinal": 110,
+    "name": "legacy baseline is derived from a checkpoint single parent",
+    "status": "pass",
+    "duration_ms": 5035.3819,
+    "annotation": ""
+  },
+  {
+    "ordinal": 111,
+    "name": "persisted baseline is preferred",
+    "status": "pass",
+    "duration_ms": 5172.8443,
+    "annotation": ""
+  },
+  {
+    "ordinal": 112,
+    "name": "merge checkpoint without persisted baseline is blocked",
+    "status": "pass",
+    "duration_ms": 5692.3204,
+    "annotation": ""
+  },
+  {
+    "ordinal": 113,
+    "name": "missing checkpoint is blocked",
+    "status": "pass",
+    "duration_ms": 3234.2647,
+    "annotation": ""
+  },
+  {
+    "ordinal": 114,
+    "name": "checkpoint that is not an ancestor is stale",
+    "status": "pass",
+    "duration_ms": 6311.6563,
+    "annotation": ""
+  },
+  {
+    "ordinal": 115,
+    "name": "changed paths are derived exactly and sorted",
+    "status": "pass",
+    "duration_ms": 4989.4228,
+    "annotation": ""
+  },
+  {
+    "ordinal": 116,
+    "name": "path canonicalization normalizes, deduplicates, and sorts",
+    "status": "pass",
+    "duration_ms": 0.6253,
+    "annotation": ""
+  },
+  {
+    "ordinal": 117,
+    "name": "changed path digest is stable",
+    "status": "pass",
+    "duration_ms": 0.721,
+    "annotation": ""
+  },
+  {
+    "ordinal": 118,
+    "name": "persisted changed path allowlist exact match passes",
+    "status": "pass",
+    "duration_ms": 4856.4382,
+    "annotation": ""
+  },
+  {
+    "ordinal": 119,
+    "name": "persisted allowlist missing a path is blocked",
+    "status": "pass",
+    "duration_ms": 6117.2327,
+    "annotation": ""
+  },
+  {
+    "ordinal": 120,
+    "name": "persisted allowlist with an extra path is blocked",
+    "status": "pass",
+    "duration_ms": 4671.4612,
+    "annotation": ""
+  },
+  {
+    "ordinal": 121,
+    "name": "post-checkpoint implementation drift is stale",
+    "status": "pass",
+    "duration_ms": 5669.3033,
+    "annotation": ""
+  },
+  {
+    "ordinal": 122,
+    "name": "staged implementation drift is blocked",
+    "status": "pass",
+    "duration_ms": 5292.7762,
+    "annotation": ""
+  },
+  {
+    "ordinal": 123,
+    "name": "unstaged implementation drift is blocked",
+    "status": "pass",
+    "duration_ms": 5180.7443,
+    "annotation": ""
+  },
+  {
+    "ordinal": 124,
+    "name": "relevant untracked drift is blocked",
+    "status": "pass",
+    "duration_ms": 4612.1351,
+    "annotation": ""
+  },
+  {
+    "ordinal": 125,
+    "name": "unrelated untracked file does not stale the slice",
+    "status": "pass",
+    "duration_ms": 4409.6236,
+    "annotation": ""
+  },
+  {
+    "ordinal": 126,
+    "name": "source digest is fresh",
+    "status": "pass",
+    "duration_ms": 4583.4972,
+    "annotation": ""
+  },
+  {
+    "ordinal": 127,
+    "name": "changed Story source digest is stale",
+    "status": "pass",
+    "duration_ms": 4681.5814,
+    "annotation": ""
+  },
+  {
+    "ordinal": 128,
+    "name": "persisted reference digest is verified",
+    "status": "pass",
+    "duration_ms": 5068.7852,
+    "annotation": ""
+  },
+  {
+    "ordinal": 129,
+    "name": "persisted reference digest mismatch is stale",
+    "status": "pass",
+    "duration_ms": 5578.6354,
+    "annotation": ""
+  },
+  {
+    "ordinal": 130,
+    "name": "legacy summary evidence requires rerun",
+    "status": "pass",
+    "duration_ms": 4008.3225,
+    "annotation": ""
+  },
+  {
+    "ordinal": 131,
+    "name": "structured immutable evidence is reusable",
+    "status": "pass",
+    "duration_ms": 5225.4362,
+    "annotation": ""
+  },
+  {
+    "ordinal": 132,
+    "name": "environment-sensitive evidence without identity requires rerun",
+    "status": "pass",
+    "duration_ms": 4565.7428,
+    "annotation": ""
+  },
+  {
+    "ordinal": 133,
+    "name": "structured evidence that contradicts the checkpoint is blocked",
+    "status": "pass",
+    "duration_ms": 4311.8479,
+    "annotation": ""
+  },
+  {
+    "ordinal": 134,
+    "name": "matching reviewed commit is a freshness candidate pending checks",
+    "status": "pass",
+    "duration_ms": 3839.0857,
+    "annotation": ""
+  },
+  {
+    "ordinal": 135,
+    "name": "reviewed commit mismatch makes review stale",
+    "status": "pass",
+    "duration_ms": 3791.5001,
+    "annotation": ""
+  },
+  {
+    "ordinal": 136,
+    "name": "risk context structural mismatch makes review stale",
+    "status": "pass",
+    "duration_ms": 5203.5541,
+    "annotation": ""
+  },
+  {
+    "ordinal": 137,
+    "name": "helper performs no mutation",
+    "status": "pass",
+    "duration_ms": 4982.7131,
+    "annotation": ""
+  },
+  {
+    "ordinal": 138,
+    "name": "structured approval input is explicit and generic continuation is rejected",
+    "status": "pass",
+    "duration_ms": 2.3802,
+    "annotation": ""
+  },
+  {
+    "ordinal": 139,
+    "name": "approval record binds the complete exact review snapshot without account identity",
+    "status": "pass",
+    "duration_ms": 2.3236,
+    "annotation": ""
+  },
+  {
+    "ordinal": 140,
+    "name": "completion gate API is read-only and exposes the exact preview for a fixture root",
+    "status": "pass",
+    "duration_ms": 5.2381,
+    "annotation": ""
+  },
+  {
+    "ordinal": 141,
+    "name": "review without approval is BLOCKED but emits the exact Human Gate preview",
+    "status": "pass",
+    "duration_ms": 12473.6338,
+    "annotation": ""
+  },
+  {
+    "ordinal": 142,
+    "name": "durable exact approval is READY for completion and generic continuation cannot create it",
+    "status": "pass",
+    "duration_ms": 22941.619,
+    "annotation": ""
+  },
+  {
+    "ordinal": 143,
+    "name": "disclosures must be acknowledged and remain BLOCKED",
+    "status": "pass",
+    "duration_ms": 21567.1902,
+    "annotation": ""
+  },
+  {
+    "ordinal": 144,
+    "name": "missing finalization receipt blocks completion",
+    "status": "pass",
+    "duration_ms": 9900.5668,
+    "annotation": ""
+  },
+  {
+    "ordinal": 145,
+    "name": "Story-only done projection requires reconciliation",
+    "status": "pass",
+    "duration_ms": 12061.7749,
+    "annotation": ""
+  },
+  {
+    "ordinal": 146,
+    "name": "Plan-only done projection requires reconciliation",
+    "status": "pass",
+    "duration_ms": 12419.6895,
+    "annotation": ""
+  },
+  {
+    "ordinal": 147,
+    "name": "sprint-only done projection requires reconciliation",
+    "status": "pass",
+    "duration_ms": 12454.2298,
+    "annotation": ""
+  },
+  {
+    "ordinal": 148,
+    "name": "approval story digest mismatch is stale",
+    "status": "pass",
+    "duration_ms": 16661.2244,
+    "annotation": ""
+  },
+  {
+    "ordinal": 149,
+    "name": "approval receipt digest mismatch is stale",
+    "status": "pass",
+    "duration_ms": 18328.9537,
+    "annotation": ""
+  },
+  {
+    "ordinal": 150,
+    "name": "approval Done Gate digest mismatch is stale",
+    "status": "pass",
+    "duration_ms": 15078.5796,
+    "annotation": ""
+  },
+  {
+    "ordinal": 151,
+    "name": "approval scope digest mismatch is stale",
+    "status": "pass",
+    "duration_ms": 16100.7852,
+    "annotation": ""
+  },
+  {
+    "ordinal": 152,
+    "name": "approval approved review HEAD mismatch is stale",
+    "status": "pass",
+    "duration_ms": 14834.2429,
+    "annotation": ""
+  },
+  {
+    "ordinal": 153,
+    "name": "approval approved HEAD mismatch is stale",
+    "status": "pass",
+    "duration_ms": 15550.0711,
+    "annotation": ""
+  },
+  {
+    "ordinal": 154,
+    "name": "approval in an uncommitted Plan is only an approval preview",
+    "status": "pass",
+    "duration_ms": 13221.2657,
+    "annotation": ""
+  },
+  {
+    "ordinal": 155,
+    "name": "product drift after durable approval is stale",
+    "status": "pass",
+    "duration_ms": 16341.7696,
+    "annotation": ""
+  },
+  {
+    "ordinal": 156,
+    "name": "uncommitted product drift after durable approval is stale",
+    "status": "pass",
+    "duration_ms": 16434.607,
+    "annotation": ""
+  },
+  {
+    "ordinal": 157,
+    "name": "exact-scope multi-path review evidence keeps completion at the Human Gate",
+    "status": "pass",
+    "duration_ms": 11397.7016,
+    "annotation": ""
+  },
+  {
+    "ordinal": 158,
+    "name": "review receipt with missing evidence refs fails closed",
+    "status": "pass",
+    "duration_ms": 10548.0194,
+    "annotation": ""
+  },
+  {
+    "ordinal": 159,
+    "name": "review receipt with missing risk context fails closed",
+    "status": "pass",
+    "duration_ms": 9348.9432,
+    "annotation": ""
+  },
+  {
+    "ordinal": 160,
+    "name": "review receipt with missing scope digest fails closed",
+    "status": "pass",
+    "duration_ms": 11037.5563,
+    "annotation": ""
+  },
+  {
+    "ordinal": 161,
+    "name": "review receipt with stale risk context fails closed",
+    "status": "pass",
+    "duration_ms": 9251.6345,
+    "annotation": ""
+  },
+  {
+    "ordinal": 162,
+    "name": "review receipt with stale scope digest fails closed",
+    "status": "pass",
+    "duration_ms": 8089.9257,
+    "annotation": ""
+  },
+  {
+    "ordinal": 163,
+    "name": "review receipt with tampered evidence body digest fails closed",
+    "status": "pass",
+    "duration_ms": 7780.3237,
+    "annotation": ""
+  },
+  {
+    "ordinal": 164,
+    "name": "review receipt with duplicated evidence hunk fails closed",
+    "status": "pass",
+    "duration_ms": 8588.2351,
+    "annotation": ""
+  },
+  {
+    "ordinal": 165,
+    "name": "review receipt with reordered multi-path evidence fails closed",
+    "status": "pass",
+    "duration_ms": 8854.1335,
+    "annotation": ""
+  },
+  {
+    "ordinal": 166,
+    "name": "review receipt with partial multi-path evidence fails closed",
+    "status": "pass",
+    "duration_ms": 8453.8867,
+    "annotation": ""
+  },
+  {
+    "ordinal": 167,
+    "name": "review receipt with cross-scope evidence fails closed",
+    "status": "pass",
+    "duration_ms": 7271.7754,
+    "annotation": ""
+  },
+  {
+    "ordinal": 168,
+    "name": "review receipt edited after Plan binding fails closed",
+    "status": "pass",
+    "duration_ms": 8929.5004,
+    "annotation": ""
+  },
+  {
+    "ordinal": 169,
+    "name": "terminal Story stays healthy after an integration merge and is evaluated at its completion commit",
+    "status": "pass",
+    "duration_ms": 44660.2729,
+    "annotation": ""
+  },
+  {
+    "ordinal": 170,
+    "name": "terminal Story metadata edited after completion is stale even behind a merge",
+    "status": "pass",
+    "duration_ms": 41914.2595,
+    "annotation": ""
+  },
+  {
+    "ordinal": 171,
+    "name": "uncommitted terminal Plan edits are stale and a wrong expected head is reported",
+    "status": "pass",
+    "duration_ms": 44634.8897,
+    "annotation": ""
+  },
+  {
+    "ordinal": 172,
+    "name": "terminal check at the completion commit itself keeps the direct parent-chain binding",
+    "status": "pass",
+    "duration_ms": 33628.799,
+    "annotation": ""
+  },
+  {
+    "ordinal": 173,
+    "name": "finalization helper is present and read-only",
+    "status": "pass",
+    "duration_ms": 15.5454,
+    "annotation": ""
+  },
+  {
+    "ordinal": 174,
+    "name": "Human Gate remains explicit and bound to immutable scope evidence",
+    "status": "pass",
+    "duration_ms": 8.0329,
+    "annotation": ""
+  },
+  {
+    "ordinal": 175,
+    "name": "V4 runner enables finalization only through the Human Gate",
+    "status": "pass",
+    "duration_ms": 1.7454,
+    "annotation": ""
+  },
+  {
+    "ordinal": 176,
+    "name": "artifact contract records disclosure and lifecycle authority",
+    "status": "pass",
+    "duration_ms": 2.3139,
+    "annotation": ""
+  },
+  {
+    "ordinal": 177,
+    "name": "clean reviewed fixture is READY with a compact preview",
+    "status": "pass",
+    "duration_ms": 6673.5938,
+    "annotation": ""
+  },
+  {
+    "ordinal": 178,
+    "name": "canonical disclosures produce READY with READY_WITH_DISCLOSURES without relabeling",
+    "status": "pass",
+    "duration_ms": 7129.3473,
+    "annotation": ""
+  },
+  {
+    "ordinal": 179,
+    "name": "all slices must be reviewed",
+    "status": "pass",
+    "duration_ms": 8155.0051,
+    "annotation": ""
+  },
+  {
+    "ordinal": 180,
+    "name": "progression false blocks finalization",
+    "status": "pass",
+    "duration_ms": 7733.8914,
+    "annotation": ""
+  },
+  {
+    "ordinal": 181,
+    "name": "blockers and unresolved questions block finalization",
+    "status": "pass",
+    "duration_ms": 7042.9459,
+    "annotation": ""
+  },
+  {
+    "ordinal": 182,
+    "name": "unresolved questions block finalization",
+    "status": "pass",
+    "duration_ms": 8310.1704,
+    "annotation": ""
+  },
+  {
+    "ordinal": 183,
+    "name": "missing verification receipt is blocked",
+    "status": "pass",
+    "duration_ms": 7597.1496,
+    "annotation": ""
+  },
+  {
+    "ordinal": 184,
+    "name": "missing implementation receipt is blocked",
+    "status": "pass",
+    "duration_ms": 7689.3511,
+    "annotation": ""
+  },
+  {
+    "ordinal": 185,
+    "name": "missing required review receipt is blocked",
+    "status": "pass",
+    "duration_ms": 8335.0574,
+    "annotation": ""
+  },
+  {
+    "ordinal": 186,
+    "name": "verified LOW slice in MEDIUM Story with a NO_REVIEW receipt is final-ready",
+    "status": "pass",
+    "duration_ms": 6766.72,
+    "annotation": ""
+  },
+  {
+    "ordinal": 187,
+    "name": "reviewed slice without its review receipt is blocked even when no review was due",
+    "status": "pass",
+    "duration_ms": 6506.3354,
+    "annotation": ""
+  },
+  {
+    "ordinal": 188,
+    "name": "verified slice whose Plan adds review.required true is not final-ready",
+    "status": "pass",
+    "duration_ms": 6259.6931,
+    "annotation": ""
+  },
+  {
+    "ordinal": 189,
+    "name": "MEDIUM slice in MEDIUM Story still requires a review receipt",
+    "status": "pass",
+    "duration_ms": 7060.7022,
+    "annotation": ""
+  },
+  {
+    "ordinal": 190,
+    "name": "absent slice risk retains Story risk review requirement and digest",
+    "status": "pass",
+    "duration_ms": 6128.2107,
+    "annotation": ""
+  },
+  {
+    "ordinal": 191,
+    "name": "absent slice risk still requires Story risk review without explicit review clauses",
+    "status": "pass",
+    "duration_ms": 6813.022,
+    "annotation": ""
+  },
+  {
+    "ordinal": 192,
+    "name": "LOW slice with a bound review still validates its Story risk digest",
+    "status": "pass",
+    "duration_ms": 6105.4681,
+    "annotation": ""
+  },
+  {
+    "ordinal": 193,
+    "name": "LOW slice review bound to slice risk digest fails Story risk freshness",
+    "status": "pass",
+    "duration_ms": 5472.3991,
+    "annotation": ""
+  },
+  {
+    "ordinal": 194,
+    "name": "LOW slice with REVIEW_REQUIRED decision requires review",
+    "status": "pass",
+    "duration_ms": 6843.531,
+    "annotation": ""
+  },
+  {
+    "ordinal": 195,
+    "name": "LOW slice with raised MEDIUM risk requires review",
+    "status": "pass",
+    "duration_ms": 6632.6851,
+    "annotation": ""
+  },
+  {
+    "ordinal": 196,
+    "name": "declared slice risk without persisted escalation stops finalization",
+    "status": "pass",
+    "duration_ms": 5817.0891,
+    "annotation": ""
+  },
+  {
+    "ordinal": 197,
+    "name": "review verdict and blocking findings are enforced",
+    "status": "pass",
+    "duration_ms": 5835.6392,
+    "annotation": ""
+  },
+  {
+    "ordinal": 198,
+    "name": "stale review freshness blocks finalization",
+    "status": "pass",
+    "duration_ms": 5020.4305,
+    "annotation": ""
+  },
+  {
+    "ordinal": 199,
+    "name": "missing canonical disclosure blocks finalization",
+    "status": "pass",
+    "duration_ms": 4758.6186,
+    "annotation": ""
+  },
+  {
+    "ordinal": 200,
+    "name": "receipt digest tamper is STALE",
+    "status": "pass",
+    "duration_ms": 6282.4635,
+    "annotation": ""
+  },
+  {
+    "ordinal": 201,
+    "name": "structured AC evidence covers every AC",
+    "status": "pass",
+    "duration_ms": 5336.2126,
+    "annotation": ""
+  },
+  {
+    "ordinal": 202,
+    "name": "legacy focused evidence fallback is labeled",
+    "status": "pass",
+    "duration_ms": 5442.5071,
+    "annotation": ""
+  },
+  {
+    "ordinal": 203,
+    "name": "uncovered AC blocks finalization",
+    "status": "pass",
+    "duration_ms": 5151.1999,
+    "annotation": ""
+  },
+  {
+    "ordinal": 204,
+    "name": "duplicate paths across ordered slices are deduplicated and later Story slice owns them",
+    "status": "pass",
+    "duration_ms": 6668.28,
+    "annotation": ""
+  },
+  {
+    "ordinal": 205,
+    "name": "outside-Story product drift is STALE",
+    "status": "pass",
+    "duration_ms": 5983.127,
+    "annotation": ""
+  },
+  {
+    "ordinal": 206,
+    "name": "working tree drift on final scope is STALE",
+    "status": "pass",
+    "duration_ms": 5762.8465,
+    "annotation": ""
+  },
+  {
+    "ordinal": 207,
+    "name": "explicit unrelated pycache noise does not affect scope readiness",
+    "status": "pass",
+    "duration_ms": 8724.0033,
+    "annotation": ""
+  },
+  {
+    "ordinal": 208,
+    "name": "normative Story digest freshness is enforced",
+    "status": "pass",
+    "duration_ms": 4787.5097,
+    "annotation": ""
+  },
+  {
+    "ordinal": 209,
+    "name": "unsupported Plan schema is INVALID",
+    "status": "pass",
+    "duration_ms": 4906.8695,
+    "annotation": ""
+  },
+  {
+    "ordinal": 210,
+    "name": "upstream Epic section freshness is enforced",
+    "status": "pass",
+    "duration_ms": 4814.9944,
+    "annotation": ""
+  },
+  {
+    "ordinal": 211,
+    "name": "uncommitted completion metadata is a repairable partial transition",
+    "status": "pass",
+    "duration_ms": 6099.0705,
+    "annotation": ""
+  },
+  {
+    "ordinal": 212,
+    "name": "finalization candidate without Plan advance is a repairable partial transition",
+    "status": "pass",
+    "duration_ms": 6256.6187,
+    "annotation": ""
+  },
+  {
+    "ordinal": 213,
+    "name": "Plan review with sprint in-progress requires reconciliation",
+    "status": "pass",
+    "duration_ms": 5482.9351,
+    "annotation": ""
+  },
+  {
+    "ordinal": 214,
+    "name": "sprint review with Plan in-progress requires reconciliation",
+    "status": "pass",
+    "duration_ms": 5400.6839,
+    "annotation": ""
+  },
+  {
+    "ordinal": 215,
+    "name": "review state without a finalization receipt is invalid",
+    "status": "pass",
+    "duration_ms": 6101.3169,
+    "annotation": ""
+  },
+  {
+    "ordinal": 216,
+    "name": "stale Human approval is rejected by scope binding",
+    "status": "pass",
+    "duration_ms": 5529.9564,
+    "annotation": ""
+  },
+  {
+    "ordinal": 217,
+    "name": "Plan/sprint/story done mismatch fails closed",
+    "status": "pass",
+    "duration_ms": 5761.4662,
+    "annotation": ""
+  },
+  {
+    "ordinal": 218,
+    "name": "finalization helper is read-only and does not create a candidate receipt",
+    "status": "pass",
+    "duration_ms": 6641.8199,
+    "annotation": ""
+  },
+  {
+    "ordinal": 219,
+    "name": "scope digests are stable across repeated read-only checks",
+    "status": "pass",
+    "duration_ms": 8548.9181,
+    "annotation": ""
+  },
+  {
+    "ordinal": 220,
+    "name": "schema-v2 fixture is READY with disclosures at finalization entry state",
+    "status": "pass",
+    "duration_ms": 4973.4645,
+    "annotation": ""
+  },
+  {
+    "ordinal": 221,
+    "name": "kernel-produced judgment and ordered evidence prove review freshness",
+    "status": "pass",
+    "duration_ms": 6144.8955,
+    "annotation": ""
+  },
+  {
+    "ordinal": 222,
+    "name": "validated canonical recipe provenance infers applicability without relabeling INCOMPLETE",
+    "status": "pass",
+    "duration_ms": 5680.519,
+    "annotation": ""
+  },
+  {
+    "ordinal": 223,
+    "name": "CRLF-only Epic checkout representation remains fresh against the canonical Git blob",
+    "status": "pass",
+    "duration_ms": 5312.3498,
+    "annotation": ""
+  },
+  {
+    "ordinal": 224,
+    "name": "conflicting kernel judgment and legacy verdict reject idempotently without finalization mutation",
+    "status": "pass",
+    "duration_ms": 7159.8719,
+    "annotation": ""
+  },
+  {
+    "ordinal": 225,
+    "name": "autopilot record rejects malformed budgets and vendors",
+    "status": "pass",
+    "duration_ms": 2133.7616,
+    "annotation": ""
+  },
+  {
+    "ordinal": 226,
+    "name": "valid READY fixture",
+    "status": "pass",
+    "duration_ms": 2015.8853,
+    "annotation": ""
+  },
+  {
+    "ordinal": 227,
+    "name": "optional slice risk validates \n      level: LOW\n      flags: []",
+    "status": "pass",
+    "duration_ms": 1757.7949,
+    "annotation": ""
+  },
+  {
+    "ordinal": 228,
+    "name": "optional slice risk validates \n      level: LOW",
+    "status": "pass",
+    "duration_ms": 1506.1395,
+    "annotation": ""
+  },
+  {
+    "ordinal": 229,
+    "name": "optional slice risk validates \n      level: HIGH\n      flags: []",
+    "status": "pass",
+    "duration_ms": 1619.2516,
+    "annotation": ""
+  },
+  {
+    "ordinal": 230,
+    "name": "optional slice risk validates \n      level: LOW\n      flags: [security]",
+    "status": "pass",
+    "duration_ms": 2416.6829,
+    "annotation": ""
+  },
+  {
+    "ordinal": 231,
+    "name": "optional slice risk validates \n      level: UNKNOWN\n      flags: []",
+    "status": "pass",
+    "duration_ms": 1534.4967,
+    "annotation": ""
+  },
+  {
+    "ordinal": 232,
+    "name": "optional slice risk validates \n      level: LOW\n      flags: security",
+    "status": "pass",
+    "duration_ms": 1839.8677,
+    "annotation": ""
+  },
+  {
+    "ordinal": 233,
+    "name": "optional slice risk validates \n      level: LOW\n      flags: [null]",
+    "status": "pass",
+    "duration_ms": 2178.8479,
+    "annotation": ""
+  },
+  {
+    "ordinal": 234,
+    "name": "optional slice risk validates LOW",
+    "status": "pass",
+    "duration_ms": 2237.3553,
+    "annotation": ""
+  },
+  {
+    "ordinal": 235,
+    "name": "schema-v2 fixture remains readable before finalization",
+    "status": "pass",
+    "duration_ms": 3446.1011,
+    "annotation": ""
+  },
+  {
+    "ordinal": 236,
+    "name": "schema-v2 AGY slice requires and accepts a normalized product scope and checks",
+    "status": "pass",
+    "duration_ms": 2021.7829,
+    "annotation": ""
+  },
+  {
+    "ordinal": 237,
+    "name": "schema-v2 AGY slice rejects invalid executor",
+    "status": "pass",
+    "duration_ms": 2054.481,
+    "annotation": ""
+  },
+  {
+    "ordinal": 238,
+    "name": "schema-v2 AGY slice rejects missing AGY scope",
+    "status": "pass",
+    "duration_ms": 1871.1552,
+    "annotation": ""
+  },
+  {
+    "ordinal": 239,
+    "name": "schema-v2 AGY slice rejects invalid AGY scope entry",
+    "status": "pass",
+    "duration_ms": 2240.6438,
+    "annotation": ""
+  },
+  {
+    "ordinal": 240,
+    "name": "schema-v2 AGY slice rejects authority AGY scope entry",
+    "status": "pass",
+    "duration_ms": 1782.869,
+    "annotation": ""
+  },
+  {
+    "ordinal": 241,
+    "name": "schema-v2 AGY slice rejects missing AGY checks",
+    "status": "pass",
+    "duration_ms": 1807.1467,
+    "annotation": ""
+  },
+  {
+    "ordinal": 242,
+    "name": "AGY scope accepts files whose names merely prefix an authority path",
+    "status": "pass",
+    "duration_ms": 1616.9819,
+    "annotation": ""
+  },
+  {
+    "ordinal": 243,
+    "name": "AGY scope rejects authority-bearing entry _bmad-output/",
+    "status": "pass",
+    "duration_ms": 1731.6753,
+    "annotation": ""
+  },
+  {
+    "ordinal": 244,
+    "name": "AGY scope rejects authority-bearing entry AGENTS.md",
+    "status": "pass",
+    "duration_ms": 1626.3813,
+    "annotation": ""
+  },
+  {
+    "ordinal": 245,
+    "name": "AGY scope rejects authority-bearing entry .agents/skills/x.md",
+    "status": "pass",
+    "duration_ms": 2115.418,
+    "annotation": ""
+  },
+  {
+    "ordinal": 246,
+    "name": "AGY scope rejects authority-bearing entry .agent-state/",
+    "status": "pass",
+    "duration_ms": 2611.1841,
+    "annotation": ""
+  },
+  {
+    "ordinal": 247,
+    "name": "schema-v2 lead slice accepts a normalized allowlist scope without AGY checks",
+    "status": "pass",
+    "duration_ms": 1722.7057,
+    "annotation": ""
+  },
+  {
+    "ordinal": 248,
+    "name": "schema-v2 slice scope rejects non-normalized lead scope entry",
+    "status": "pass",
+    "duration_ms": 1641.3487,
+    "annotation": ""
+  },
+  {
+    "ordinal": 249,
+    "name": "schema-v2 slice scope rejects schema-v1 scope object on a lead slice",
+    "status": "pass",
+    "duration_ms": 1649.8838,
+    "annotation": ""
+  },
+  {
+    "ordinal": 250,
+    "name": "schema-v2 slice scope rejects schema-v1 scope object on an AGY slice",
+    "status": "pass",
+    "duration_ms": 2002.4239,
+    "annotation": ""
+  },
+  {
+    "ordinal": 251,
+    "name": "unsupported schema",
+    "status": "pass",
+    "duration_ms": 2708.7381,
+    "annotation": ""
+  },
+  {
+    "ordinal": 252,
+    "name": "story ID mismatch",
+    "status": "pass",
+    "duration_ms": 2706.3758,
+    "annotation": ""
+  },
+  {
+    "ordinal": 253,
+    "name": "missing Plan",
+    "status": "pass",
+    "duration_ms": 1599.7247,
+    "annotation": ""
+  },
+  {
+    "ordinal": 254,
+    "name": "missing source",
+    "status": "pass",
+    "duration_ms": 2581.7385,
+    "annotation": ""
+  },
+  {
+    "ordinal": 255,
+    "name": "changed source digest",
+    "status": "pass",
+    "duration_ms": 3242.2258,
+    "annotation": ""
+  },
+  {
+    "ordinal": 256,
+    "name": "malformed source digest",
+    "status": "pass",
+    "duration_ms": 2142.6542,
+    "annotation": ""
+  },
+  {
+    "ordinal": 257,
+    "name": "missing sprint key",
+    "status": "pass",
+    "duration_ms": 2229.7244,
+    "annotation": ""
+  },
+  {
+    "ordinal": 258,
+    "name": "snapshot mismatch",
+    "status": "pass",
+    "duration_ms": 1958.3537,
+    "annotation": ""
+  },
+  {
+    "ordinal": 259,
+    "name": "invalid current slice",
+    "status": "pass",
+    "duration_ms": 2175.2192,
+    "annotation": ""
+  },
+  {
+    "ordinal": 260,
+    "name": "missing dependency",
+    "status": "pass",
+    "duration_ms": 2109.7339,
+    "annotation": ""
+  },
+  {
+    "ordinal": 261,
+    "name": "cyclic dependencies",
+    "status": "pass",
+    "duration_ms": 2184.5549,
+    "annotation": ""
+  },
+  {
+    "ordinal": 262,
+    "name": "missing checkpoint",
+    "status": "pass",
+    "duration_ms": 2127.8487,
+    "annotation": ""
+  },
+  {
+    "ordinal": 263,
+    "name": "missing reviewed commit",
+    "status": "pass",
+    "duration_ms": 2006.8026,
+    "annotation": ""
+  },
+  {
+    "ordinal": 264,
+    "name": "checkpoint not ancestor of HEAD",
+    "status": "pass",
+    "duration_ms": 3763.9654,
+    "annotation": ""
+  },
+  {
+    "ordinal": 265,
+    "name": "complete with pending slice",
+    "status": "pass",
+    "duration_ms": 2051.4635,
+    "annotation": ""
+  },
+  {
+    "ordinal": 266,
+    "name": "complete execution may await review lifecycle reconciliation",
+    "status": "pass",
+    "duration_ms": 2011.1052,
+    "annotation": ""
+  },
+  {
+    "ordinal": 267,
+    "name": "forbidden V3 runtime state",
+    "status": "pass",
+    "duration_ms": 2541.4734,
+    "annotation": ""
+  },
+  {
+    "ordinal": 268,
+    "name": "supported action plan_slice",
+    "status": "pass",
+    "duration_ms": 2529.8457,
+    "annotation": ""
+  },
+  {
+    "ordinal": 269,
+    "name": "supported action implement_slice",
+    "status": "pass",
+    "duration_ms": 2076.3793,
+    "annotation": ""
+  },
+  {
+    "ordinal": 270,
+    "name": "supported action verify_slice",
+    "status": "pass",
+    "duration_ms": 1857.2379,
+    "annotation": ""
+  },
+  {
+    "ordinal": 271,
+    "name": "supported action review_slice",
+    "status": "pass",
+    "duration_ms": 1927.2623,
+    "annotation": ""
+  },
+  {
+    "ordinal": 272,
+    "name": "supported action resolve_blocker",
+    "status": "pass",
+    "duration_ms": 2354.231,
+    "annotation": ""
+  },
+  {
+    "ordinal": 273,
+    "name": "supported action reconcile_lifecycle",
+    "status": "pass",
+    "duration_ms": 2289.4523,
+    "annotation": ""
+  },
+  {
+    "ordinal": 274,
+    "name": "supported action request_gate",
+    "status": "pass",
+    "duration_ms": 2383.7102,
+    "annotation": ""
+  },
+  {
+    "ordinal": 275,
+    "name": "supported action finalize_story",
+    "status": "pass",
+    "duration_ms": 2001.0328,
+    "annotation": ""
+  },
+  {
+    "ordinal": 276,
+    "name": "schema-v1 complete_story remains unsupported",
+    "status": "pass",
+    "duration_ms": 1940.0351,
+    "annotation": ""
+  },
+  {
+    "ordinal": 277,
+    "name": "unknown action",
+    "status": "pass",
+    "duration_ms": 2064.913,
+    "annotation": ""
+  },
+  {
+    "ordinal": 278,
+    "name": "canonical slice statuses are accepted",
+    "status": "pass",
+    "duration_ms": 11443.5779,
+    "annotation": ""
+  },
+  {
+    "ordinal": 279,
+    "name": "legacy in-progress slice status is accepted only by the schema-v1 verification bridge",
+    "status": "pass",
+    "duration_ms": 2454.9131,
+    "annotation": ""
+  },
+  {
+    "ordinal": 280,
+    "name": "legacy in-progress slice status is rejected outside the exact bridge",
+    "status": "pass",
+    "duration_ms": 2092.4884,
+    "annotation": ""
+  },
+  {
+    "ordinal": 281,
+    "name": "unknown slice status is rejected",
+    "status": "pass",
+    "duration_ms": 2284.5421,
+    "annotation": ""
+  },
+  {
+    "ordinal": 282,
+    "name": "structured verification fields remain schema-v1 compatible",
+    "status": "pass",
+    "duration_ms": 2017.045,
+    "annotation": ""
+  },
+  {
+    "ordinal": 283,
+    "name": "malformed structured verification fields are rejected",
+    "status": "pass",
+    "duration_ms": 1857.461,
+    "annotation": ""
+  },
+  {
+    "ordinal": 284,
+    "name": "routes mapped-only, unmapped-only, and mixed scope without dropping changed paths",
+    "status": "pass",
+    "duration_ms": 1130.2658,
+    "annotation": ""
+  },
+  {
+    "ordinal": 285,
+    "name": "aggregates multiple recipes, preserves raw recipe output, and deduplicates shared checks",
+    "status": "pass",
+    "duration_ms": 525.7434,
+    "annotation": ""
+  },
+  {
+    "ordinal": 286,
+    "name": "dependency-only changes trigger affected recipes but never count as covered",
+    "status": "pass",
+    "duration_ms": 494.0055,
+    "annotation": ""
+  },
+  {
+    "ordinal": 287,
+    "name": "invalid registry and execution failures remain errors or failures",
+    "status": "pass",
+    "duration_ms": 1048.6233,
+    "annotation": ""
+  },
+  {
+    "ordinal": 288,
+    "name": "legacy challenge-list selection remains available through the registry contract",
+    "status": "pass",
+    "duration_ms": 454.3418,
+    "annotation": ""
+  },
+  {
+    "ordinal": 289,
+    "name": "allowed entries normalize to repo-relative files or directories and reject escapes",
+    "status": "pass",
+    "duration_ms": 3.0327,
+    "annotation": ""
+  },
+  {
+    "ordinal": 290,
+    "name": "in-scope tracked, staged and untracked changes pass",
+    "status": "pass",
+    "duration_ms": 2377.2932,
+    "annotation": ""
+  },
+  {
+    "ordinal": 291,
+    "name": "out-of-scope untracked file and tracked deletion fail",
+    "status": "pass",
+    "duration_ms": 2021.9931,
+    "annotation": ""
+  },
+  {
+    "ordinal": 292,
+    "name": "worker commits are inspected and can be forbidden",
+    "status": "pass",
+    "duration_ms": 5152.4936,
+    "annotation": ""
+  },
+  {
+    "ordinal": 293,
+    "name": "renaming a file into scope still fails for its out-of-scope source",
+    "status": "pass",
+    "duration_ms": 2516.1989,
+    "annotation": ""
+  },
+  {
+    "ordinal": 294,
+    "name": "rewritten history fails even when the tree is in scope",
+    "status": "pass",
+    "duration_ms": 2191.809,
+    "annotation": ""
+  },
+  {
+    "ordinal": 295,
+    "name": "the delivered contract file is exempt only while unmodified",
+    "status": "pass",
+    "duration_ms": 5867.5677,
+    "annotation": ""
+  },
+  {
+    "ordinal": 296,
+    "name": "invalid inputs and missing repositories fail closed",
+    "status": "pass",
+    "duration_ms": 1406.6456,
+    "annotation": ""
+  },
+  {
+    "ordinal": 297,
+    "name": "CLI emits one JSON result with a status exit code",
+    "status": "pass",
+    "duration_ms": 2912.7255,
+    "annotation": ""
+  },
+  {
+    "ordinal": 298,
+    "name": "projects only the selected slice with provenance and explicit unknown scope",
+    "status": "pass",
+    "duration_ms": 4859.6989,
+    "annotation": ""
+  },
+  {
+    "ordinal": 299,
+    "name": "explicit slice risk is projected with Plan provenance",
+    "status": "pass",
+    "duration_ms": 3454.2152,
+    "annotation": ""
+  },
+  {
+    "ordinal": 300,
+    "name": "AGY executor guidance is lazy and trigger-bound",
+    "status": "pass",
+    "duration_ms": 4450.6118,
+    "annotation": ""
+  },
+  {
+    "ordinal": 301,
+    "name": "dependency dispositions are projected without loading historical receipt detail",
+    "status": "pass",
+    "duration_ms": 4711.1786,
+    "annotation": ""
+  },
+  {
+    "ordinal": 302,
+    "name": "fail-closed cases never return a READY projection",
+    "status": "pass",
+    "duration_ms": 4701.5075,
+    "annotation": ""
+  },
+  {
+    "ordinal": 303,
+    "name": "completion transaction exports the bounded approval and completion interfaces",
+    "status": "pass",
+    "duration_ms": 2.336,
+    "annotation": ""
+  },
+  {
+    "ordinal": 304,
+    "name": "completion preparation fails closed outside a repository",
+    "status": "pass",
+    "duration_ms": 6.5091,
+    "annotation": ""
+  },
+  {
+    "ordinal": 305,
+    "name": "direct completion approval rejects a non-IDLE canonical pointer before mutation",
+    "status": "pass",
+    "duration_ms": 8968.3804,
+    "annotation": ""
+  },
+  {
+    "ordinal": 306,
+    "name": "direct completion rejects a concurrent lifecycle lock without removing it",
+    "status": "pass",
+    "duration_ms": 13380.3745,
+    "annotation": ""
+  },
+  {
+    "ordinal": 307,
+    "name": "exact structured approval is durable and stops before complete_story",
+    "status": "pass",
+    "duration_ms": 27899.5859,
+    "annotation": ""
+  },
+  {
+    "ordinal": 308,
+    "name": "generic continuation cannot create approval or execute completion",
+    "status": "pass",
+    "duration_ms": 19849.7487,
+    "annotation": ""
+  },
+  {
+    "ordinal": 309,
+    "name": "fresh approval permits exactly review to done and preserves immutable evidence",
+    "status": "pass",
+    "duration_ms": 53575.7812,
+    "annotation": ""
+  },
+  {
+    "ordinal": 310,
+    "name": "complete_story is idempotently terminal and does not create a second commit",
+    "status": "pass",
+    "duration_ms": 51670.4784,
+    "annotation": ""
+  },
+  {
+    "ordinal": 311,
+    "name": "tampered finalization receipt fails closed after approval",
+    "status": "pass",
+    "duration_ms": 29926.6811,
+    "annotation": ""
+  },
+  {
+    "ordinal": 312,
+    "name": "separated pending Plan validates and implementation starts FRESH",
+    "status": "pass",
+    "duration_ms": 3053.7459,
+    "annotation": ""
+  },
+  {
+    "ordinal": 313,
+    "name": "Plan v2: invalid Story contract",
+    "status": "pass",
+    "duration_ms": 1899.0757,
+    "annotation": ""
+  },
+  {
+    "ordinal": 314,
+    "name": "Plan v2: wrong Story ID",
+    "status": "pass",
+    "duration_ms": 2500.401,
+    "annotation": ""
+  },
+  {
+    "ordinal": 315,
+    "name": "Plan v2: normative digest mismatch",
+    "status": "pass",
+    "duration_ms": 1801.0039,
+    "annotation": ""
+  },
+  {
+    "ordinal": 316,
+    "name": "Plan v2: nonexistent task ref",
+    "status": "pass",
+    "duration_ms": 2129.2899,
+    "annotation": ""
+  },
+  {
+    "ordinal": 317,
+    "name": "Plan v2: uncovered Task",
+    "status": "pass",
+    "duration_ms": 2359.173,
+    "annotation": ""
+  },
+  {
+    "ordinal": 318,
+    "name": "Plan v2: cyclic slices",
+    "status": "pass",
+    "duration_ms": 2338.8177,
+    "annotation": ""
+  },
+  {
+    "ordinal": 319,
+    "name": "Plan v2: unknown schema",
+    "status": "pass",
+    "duration_ms": 2062.1983,
+    "annotation": ""
+  },
+  {
+    "ordinal": 320,
+    "name": "Plan v2: mixed schema",
+    "status": "pass",
+    "duration_ms": 2266.7536,
+    "annotation": ""
+  },
+  {
+    "ordinal": 321,
+    "name": "Plan v2: completion edit has READY freshness",
+    "status": "pass",
+    "duration_ms": 2291.7211,
+    "annotation": ""
+  },
+  {
+    "ordinal": 322,
+    "name": "Plan v2: status edit has READY freshness",
+    "status": "pass",
+    "duration_ms": 1907.9072,
+    "annotation": ""
+  },
+  {
+    "ordinal": 323,
+    "name": "Plan v2: task checkbox edit has READY freshness",
+    "status": "pass",
+    "duration_ms": 2471.5059,
+    "annotation": ""
+  },
+  {
+    "ordinal": 324,
+    "name": "Plan v2: AC text edit has STALE freshness",
+    "status": "pass",
+    "duration_ms": 2102.1941,
+    "annotation": ""
+  },
+  {
+    "ordinal": 325,
+    "name": "Plan v2: Task semantics edit has STALE freshness",
+    "status": "pass",
+    "duration_ms": 1769.211,
+    "annotation": ""
+  },
+  {
+    "ordinal": 326,
+    "name": "Plan v2: checkpoint requires implementation receipt",
+    "status": "pass",
+    "duration_ms": 3000.8285,
+    "annotation": ""
+  },
+  {
+    "ordinal": 327,
+    "name": "Plan v2: tampered receipt digest is STALE",
+    "status": "pass",
+    "duration_ms": 3606.729,
+    "annotation": ""
+  },
+  {
+    "ordinal": 328,
+    "name": "Plan v2: checkpoint subject digest remains separate from Story normative digest",
+    "status": "pass",
+    "duration_ms": 3976.9316,
+    "annotation": ""
+  },
+  {
+    "ordinal": 329,
+    "name": "Plan v2: malformed slice and blocker shapes are INVALID",
+    "status": "pass",
+    "duration_ms": 1841.4635,
+    "annotation": ""
+  },
+  {
+    "ordinal": 330,
+    "name": "Plan v2: null receipt document is INVALID",
+    "status": "pass",
+    "duration_ms": 3499.7413,
+    "annotation": ""
+  },
+  {
+    "ordinal": 331,
+    "name": "Plan v2: malformed receipt command is INVALID",
+    "status": "pass",
+    "duration_ms": 3388.2237,
+    "annotation": ""
+  },
+  {
+    "ordinal": 332,
+    "name": "implementation v2: checkpointed receipt is COMPLETE",
+    "status": "pass",
+    "duration_ms": 5819.208,
+    "annotation": ""
+  },
+  {
+    "ordinal": 333,
+    "name": "verification v2: checkpoint without verification receipt requires rerun",
+    "status": "pass",
+    "duration_ms": 7123.6722,
+    "annotation": ""
+  },
+  {
+    "ordinal": 334,
+    "name": "implementation v2: relevant dirty path blocks",
+    "status": "pass",
+    "duration_ms": 3045.025,
+    "annotation": ""
+  },
+  {
+    "ordinal": 335,
+    "name": "implementation v2: exact explicit resume succeeds",
+    "status": "pass",
+    "duration_ms": 3064.8703,
+    "annotation": ""
+  },
+  {
+    "ordinal": 336,
+    "name": "implementation v2: unrelated noise requires explicit exclusion",
+    "status": "pass",
+    "duration_ms": 4554.7369,
+    "annotation": ""
+  },
+  {
+    "ordinal": 337,
+    "name": "implementation v2: blocker blocks pending slice",
+    "status": "pass",
+    "duration_ms": 3072.3514,
+    "annotation": ""
+  },
+  {
+    "ordinal": 338,
+    "name": "implementation v2: checkpoint receipt mismatch fails closed",
+    "status": "pass",
+    "duration_ms": 4180.1227,
+    "annotation": ""
+  },
+  {
+    "ordinal": 339,
+    "name": "verification v2: fresh verification receipt can be reused",
+    "status": "pass",
+    "duration_ms": 6307.2674,
+    "annotation": ""
+  },
+  {
+    "ordinal": 340,
+    "name": "verification v2: normative Story edit is STALE",
+    "status": "pass",
+    "duration_ms": 5619.8267,
+    "annotation": ""
+  },
+  {
+    "ordinal": 341,
+    "name": "verification v2: completion edit does not invalidate checkpoint",
+    "status": "pass",
+    "duration_ms": 6148.9255,
+    "annotation": ""
+  },
+  {
+    "ordinal": 342,
+    "name": "verification v2: post-checkpoint implementation drift is STALE",
+    "status": "pass",
+    "duration_ms": 6217.2543,
+    "annotation": ""
+  },
+  {
+    "ordinal": 343,
+    "name": "verification v2: receipt tamper is STALE",
+    "status": "pass",
+    "duration_ms": 5507.9154,
+    "annotation": ""
+  },
+  {
+    "ordinal": 344,
+    "name": "verification v2: wrong checkpoint binding fails closed",
+    "status": "pass",
+    "duration_ms": 4701.9298,
+    "annotation": ""
+  },
+  {
+    "ordinal": 345,
+    "name": "Plan v2: verified slice requires verification receipt",
+    "status": "pass",
+    "duration_ms": 2511.172,
+    "annotation": ""
+  },
+  {
+    "ordinal": 346,
+    "name": "implementation v2: reviewed dependency is eligible",
+    "status": "pass",
+    "duration_ms": 5745.3453,
+    "annotation": ""
+  },
+  {
+    "ordinal": 347,
+    "name": "implementation v2: verified dependency is eligible",
+    "status": "pass",
+    "duration_ms": 4928.4348,
+    "annotation": ""
+  },
+  {
+    "ordinal": 348,
+    "name": "Plan v2: tampered current dependency receipt is STALE",
+    "status": "pass",
+    "duration_ms": 5174.5638,
+    "annotation": ""
+  },
+  {
+    "ordinal": 349,
+    "name": "implementation v2: explicit checkpoint candidate stays CHECKPOINT_UNRECORDED",
+    "status": "pass",
+    "duration_ms": 3547.3121,
+    "annotation": ""
+  },
+  {
+    "ordinal": 350,
+    "name": "implementation v2: Plan and bound receipt update is PLAN_UPDATE_PENDING",
+    "status": "pass",
+    "duration_ms": 4803.9501,
+    "annotation": ""
+  },
+  {
+    "ordinal": 351,
+    "name": "receipt digest is stable and excludes approval",
+    "status": "pass",
+    "duration_ms": 3.2788,
+    "annotation": ""
+  },
+  {
+    "ordinal": 352,
+    "name": "finalization disposition preserves disclosure semantics",
+    "status": "pass",
+    "duration_ms": 0.3619,
+    "annotation": ""
+  },
+  {
+    "ordinal": 353,
+    "name": "completion renderer labels fallback evidence and canonical disclosure separately",
+    "status": "pass",
+    "duration_ms": 1.158,
+    "annotation": ""
+  },
+  {
+    "ordinal": 354,
+    "name": "receipt validator rejects approval and mismatched bindings",
+    "status": "pass",
+    "duration_ms": 1.4087,
+    "annotation": ""
+  },
+  {
+    "ordinal": 355,
+    "name": "schema-v2 review state validates finalization receipt and complete_story successor",
+    "status": "pass",
+    "duration_ms": 3313.5664,
+    "annotation": ""
+  },
+  {
+    "ordinal": 356,
+    "name": "schema-v2 review state accepts a receipt-recorded LOW NO_REVIEW verified slice",
+    "status": "pass",
+    "duration_ms": 8296.8158,
+    "annotation": ""
+  },
+  {
+    "ordinal": 357,
+    "name": "schema-v2 review state rejects a verified slice with receipt escalation REVIEW_REQUIRED",
+    "status": "pass",
+    "duration_ms": 4327.2168,
+    "annotation": ""
+  },
+  {
+    "ordinal": 358,
+    "name": "schema-v2 review state rejects a verified slice with receipt escalation risk MEDIUM",
+    "status": "pass",
+    "duration_ms": 4135.1228,
+    "annotation": ""
+  },
+  {
+    "ordinal": 359,
+    "name": "schema-v2 review state rejects a verified slice with missing receipt escalation",
+    "status": "pass",
+    "duration_ms": 4280.9995,
+    "annotation": ""
+  },
+  {
+    "ordinal": 360,
+    "name": "schema-v2 review state rejects a verified slice with Plan review.required true",
+    "status": "pass",
+    "duration_ms": 3712.3735,
+    "annotation": ""
+  },
+  {
+    "ordinal": 361,
+    "name": "schema-v2 review state rejects a verified slice with MEDIUM Story without slice risk",
+    "status": "pass",
+    "duration_ms": 3304.9971,
+    "annotation": ""
+  },
+  {
+    "ordinal": 362,
+    "name": "schema-v2 review state rejects a verified slice with MEDIUM slice",
+    "status": "pass",
+    "duration_ms": 3979.9956,
+    "annotation": ""
+  },
+  {
+    "ordinal": 363,
+    "name": "Git timeout diagnostics preserve timeout phase, status, signal and subprocess output",
+    "status": "pass",
+    "duration_ms": 2.9586,
+    "annotation": ""
+  },
+  {
+    "ordinal": 364,
+    "name": "healthy committed review without approval is HUMAN_GATE_PENDING",
+    "status": "pass",
+    "duration_ms": 3085.8599,
+    "annotation": ""
+  },
+  {
+    "ordinal": 365,
+    "name": "uncommitted Story transition is UNCOMMITTED_FINALIZATION",
+    "status": "pass",
+    "duration_ms": 2296.4992,
+    "annotation": ""
+  },
+  {
+    "ordinal": 366,
+    "name": "Story-only partial is classified without cleanup",
+    "status": "pass",
+    "duration_ms": 3316.4136,
+    "annotation": ""
+  },
+  {
+    "ordinal": 367,
+    "name": "Plan-only partial is classified without cleanup",
+    "status": "pass",
+    "duration_ms": 2706.2736,
+    "annotation": ""
+  },
+  {
+    "ordinal": 368,
+    "name": "sprint-only partial is classified without cleanup",
+    "status": "pass",
+    "duration_ms": 2722.5058,
+    "annotation": ""
+  },
+  {
+    "ordinal": 369,
+    "name": "orphan receipt is classified without deletion",
+    "status": "pass",
+    "duration_ms": 2971.8538,
+    "annotation": ""
+  },
+  {
+    "ordinal": 370,
+    "name": "committed receipt tamper is detected",
+    "status": "pass",
+    "duration_ms": 4552.708,
+    "annotation": ""
+  },
+  {
+    "ordinal": 371,
+    "name": "uncommitted durable approval bytes are APPROVAL_PREVIEW_ONLY",
+    "status": "pass",
+    "duration_ms": 2810.9283,
+    "annotation": ""
+  },
+  {
+    "ordinal": 372,
+    "name": "durable approval with review projections is APPROVAL_DURABLE_PENDING_COMPLETION",
+    "status": "pass",
+    "duration_ms": 4269.4421,
+    "annotation": ""
+  },
+  {
+    "ordinal": 373,
+    "name": "Story-only done projection is PARTIAL_STORY_ONLY",
+    "status": "pass",
+    "duration_ms": 4041.0653,
+    "annotation": ""
+  },
+  {
+    "ordinal": 374,
+    "name": "Plan-only done projection is PARTIAL_PLAN_ONLY",
+    "status": "pass",
+    "duration_ms": 3812.2048,
+    "annotation": ""
+  },
+  {
+    "ordinal": 375,
+    "name": "sprint-only done projection is PARTIAL_SPRINT_ONLY",
+    "status": "pass",
+    "duration_ms": 4908.8459,
+    "annotation": ""
+  },
+  {
+    "ordinal": 376,
+    "name": "stale approval is classified without repair",
+    "status": "pass",
+    "duration_ms": 3609.379,
+    "annotation": ""
+  },
+  {
+    "ordinal": 377,
+    "name": "fully consistent done projections are terminal healthy",
+    "status": "pass",
+    "duration_ms": 4729.0738,
+    "annotation": ""
+  },
+  {
+    "ordinal": 378,
+    "name": "preview preserves normative Story digest and derives File List from helper scope",
+    "status": "pass",
+    "duration_ms": 6867.6317,
+    "annotation": ""
+  },
+  {
+    "ordinal": 379,
+    "name": "Git add failure retains subprocess diagnostics rather than reporting a scope mismatch",
+    "status": "pass",
+    "duration_ms": 32173.2231,
+    "annotation": ""
+  },
+  {
+    "ordinal": 380,
+    "name": "NUL-delimited Git path parsing preserves Unicode, quotes and embedded newlines",
+    "status": "pass",
+    "duration_ms": 5.7091,
+    "annotation": ""
+  },
+  {
+    "ordinal": 381,
+    "name": "prepare is read-only and wrong expected HEAD is rejected",
+    "status": "pass",
+    "duration_ms": 13120.7813,
+    "annotation": ""
+  },
+  {
+    "ordinal": 382,
+    "name": "direct finalization rejects a non-IDLE canonical pointer before mutation",
+    "status": "pass",
+    "duration_ms": 4076.2934,
+    "annotation": ""
+  },
+  {
+    "ordinal": 383,
+    "name": "direct finalization rejects a Story-owned worktree from the wrong checkout",
+    "status": "pass",
+    "duration_ms": 4628.9428,
+    "annotation": ""
+  },
+  {
+    "ordinal": 384,
+    "name": "direct finalization rejects a concurrent lifecycle lock without removing it",
+    "status": "pass",
+    "duration_ms": 7012.9254,
+    "annotation": ""
+  },
+  {
+    "ordinal": 385,
+    "name": "finalization writes exact paths in one commit and stops at Human Gate",
+    "status": "pass",
+    "duration_ms": 25010.1197,
+    "annotation": ""
+  },
+  {
+    "ordinal": 386,
+    "name": "recovery prepare is read-only, LF/CRLF projection is proven and apply consumes unchanged candidates once",
+    "status": "pass",
+    "duration_ms": 62447.4484,
+    "annotation": ""
+  },
+  {
+    "ordinal": 387,
+    "name": "recovery rejects fingerprint preserving HEAD/index/files/locks",
+    "status": "pass",
+    "duration_ms": 20585.3661,
+    "annotation": ""
+  },
+  {
+    "ordinal": 388,
+    "name": "recovery rejects cross-story preserving HEAD/index/files/locks",
+    "status": "pass",
+    "duration_ms": 18125.2301,
+    "annotation": ""
+  },
+  {
+    "ordinal": 389,
+    "name": "recovery rejects executor preserving HEAD/index/files/locks",
+    "status": "pass",
+    "duration_ms": 21442.5388,
+    "annotation": ""
+  },
+  {
+    "ordinal": 390,
+    "name": "recovery rejects candidate-tamper preserving HEAD/index/files/locks",
+    "status": "pass",
+    "duration_ms": 24795.1817,
+    "annotation": ""
+  },
+  {
+    "ordinal": 391,
+    "name": "recovery rejects extra-path preserving HEAD/index/files/locks",
+    "status": "pass",
+    "duration_ms": 24724.8248,
+    "annotation": ""
+  },
+  {
+    "ordinal": 392,
+    "name": "recovery rejects index-drift preserving HEAD/index/files/locks",
+    "status": "pass",
+    "duration_ms": 19925.9914,
+    "annotation": ""
+  },
+  {
+    "ordinal": 393,
+    "name": "recovery rejects index-lock preserving HEAD/index/files/locks",
+    "status": "pass",
+    "duration_ms": 17676.9615,
+    "annotation": ""
+  },
+  {
+    "ordinal": 394,
+    "name": "recovery rejects foreign-lock preserving HEAD/index/files/locks",
+    "status": "pass",
+    "duration_ms": 17082.4204,
+    "annotation": ""
+  },
+  {
+    "ordinal": 395,
+    "name": "recovery rejects idle preserving HEAD/index/files/locks",
+    "status": "pass",
+    "duration_ms": 15848.2105,
+    "annotation": ""
+  },
+  {
+    "ordinal": 396,
+    "name": "recovery rejects receipt-tamper preserving HEAD/index/files/locks",
+    "status": "pass",
+    "duration_ms": 15352.9719,
+    "annotation": ""
+  },
+  {
+    "ordinal": 397,
+    "name": "recovery rejects scope-omission preserving HEAD/index/files/locks",
+    "status": "pass",
+    "duration_ms": 16362.2528,
+    "annotation": ""
+  },
+  {
+    "ordinal": 398,
+    "name": "recovery rejects stale-head preserving HEAD/index/files/locks",
+    "status": "pass",
+    "duration_ms": 14741.3723,
+    "annotation": ""
+  },
+  {
+    "ordinal": 399,
+    "name": "recovery projection rejects a re-signed candidate and executor code drift before mutation",
+    "status": "pass",
+    "duration_ms": 9402.1181,
+    "annotation": ""
+  },
+  {
+    "ordinal": 400,
+    "name": "recovery preserves canonical INCOMPLETE and explicit manual NOT_RUN disclosure",
+    "status": "pass",
+    "duration_ms": 34304.9432,
+    "annotation": ""
+  },
+  {
+    "ordinal": 401,
+    "name": "recovery binds D original and rework implementations without inventing historical verification",
+    "status": "pass",
+    "duration_ms": 40780.0418,
+    "annotation": ""
+  },
+  {
+    "ordinal": 402,
+    "name": "recovery interruption at LOCKED resumes explicitly without duplicate commit",
+    "status": "pass",
+    "duration_ms": 35021.5982,
+    "annotation": ""
+  },
+  {
+    "ordinal": 403,
+    "name": "recovery interruption at STAGED resumes explicitly without duplicate commit",
+    "status": "pass",
+    "duration_ms": 31533.4685,
+    "annotation": ""
+  },
+  {
+    "ordinal": 404,
+    "name": "recovery interruption at COMMITTING resumes explicitly without duplicate commit",
+    "status": "pass",
+    "duration_ms": 34445.3107,
+    "annotation": ""
+  },
+  {
+    "ordinal": 405,
+    "name": "recovery interruption at COMMIT_RETURNED resumes explicitly without duplicate commit",
+    "status": "pass",
+    "duration_ms": 26205.7126,
+    "annotation": ""
+  },
+  {
+    "ordinal": 406,
+    "name": "recovery interruption at COMMITTED resumes explicitly without duplicate commit",
+    "status": "pass",
+    "duration_ms": 23709.3347,
+    "annotation": ""
+  },
+  {
+    "ordinal": 407,
+    "name": "explicit retry rejects staged-drift preserving the partial journal and owned lock",
+    "status": "pass",
+    "duration_ms": 18882.4207,
+    "annotation": ""
+  },
+  {
+    "ordinal": 408,
+    "name": "explicit retry rejects unbound-staging preserving the partial journal and owned lock",
+    "status": "pass",
+    "duration_ms": 17031.9675,
+    "annotation": ""
+  },
+  {
+    "ordinal": 409,
+    "name": "explicit retry rejects journal-tamper preserving the partial journal and owned lock",
+    "status": "pass",
+    "duration_ms": 12758.7398,
+    "annotation": ""
+  },
+  {
+    "ordinal": 410,
+    "name": "prepare rejects product drift hidden by an assume-unchanged index flag",
+    "status": "pass",
+    "duration_ms": 2848.6838,
+    "annotation": ""
+  },
+  {
+    "ordinal": 411,
+    "name": "clean CLI integration fast-forwards to the tested merge and preserves approval",
+    "status": "pass",
+    "duration_ms": 100644.6686,
+    "annotation": ""
+  },
+  {
+    "ordinal": 412,
+    "name": "merge conflicts report paths and preserve main and claim",
+    "status": "pass",
+    "duration_ms": 55710.4834,
+    "annotation": ""
+  },
+  {
+    "ordinal": 413,
+    "name": "failing integration check retains logs and leaves main unchanged",
+    "status": "pass",
+    "duration_ms": 56551.3602,
+    "annotation": ""
+  },
+  {
+    "ordinal": 414,
+    "name": "main moved during checks is stale and is never replaced by the scratch merge",
+    "status": "pass",
+    "duration_ms": 61616.142,
+    "annotation": ""
+  },
+  {
+    "ordinal": 415,
+    "name": "held integration lock is preserved and reports busy",
+    "status": "pass",
+    "duration_ms": 42734.2768,
+    "annotation": ""
+  },
+  {
+    "ordinal": 416,
+    "name": "dirty canonical checkout and stale generation refuse integration before mutation",
+    "status": "pass",
+    "duration_ms": 34635.6907,
+    "annotation": ""
+  },
+  {
+    "ordinal": 417,
+    "name": "checks cannot mutate the scratch tree or supersede the held generation",
+    "status": "pass",
+    "duration_ms": 51913.0064,
+    "annotation": ""
+  },
+  {
+    "ordinal": 418,
+    "name": "foreign canonical repository and a non-main checkout are refused without ref changes",
+    "status": "pass",
+    "duration_ms": 31057.107,
+    "annotation": ""
+  },
+  {
+    "ordinal": 419,
+    "name": "not-done Story and invalid integration checks fail before main or registry changes",
+    "status": "pass",
+    "duration_ms": 31284.266,
+    "annotation": ""
+  },
+  {
+    "ordinal": 420,
+    "name": "R04 reads raw Git blobs, counts duplicate paths once, and preserves UTF-8/CRLF byte counts",
+    "status": "pass",
+    "duration_ms": 6559.1019,
+    "annotation": ""
+  },
+  {
+    "ordinal": 421,
+    "name": "R04 missing required sources are INCONCLUSIVE instead of zero bytes",
+    "status": "pass",
+    "duration_ms": 4599.7561,
+    "annotation": ""
+  },
+  {
+    "ordinal": 422,
+    "name": "R04 rejects unresolved revisions and invalid input identity",
+    "status": "pass",
+    "duration_ms": 2824.6679,
+    "annotation": ""
+  },
+  {
+    "ordinal": 423,
+    "name": "R04 distinguishes a triggered lazy source from an untriggered optional source",
+    "status": "pass",
+    "duration_ms": 6811.2302,
+    "annotation": ""
+  },
+  {
+    "ordinal": 424,
+    "name": "R04 preserves a real zero-byte measurement instead of treating it as missing",
+    "status": "pass",
+    "duration_ms": 2681.7425,
+    "annotation": ""
+  },
+  {
+    "ordinal": 425,
+    "name": "tracked modified text remains reviewable",
+    "status": "pass",
+    "duration_ms": 1665.6979,
+    "annotation": ""
+  },
+  {
+    "ordinal": 426,
+    "name": "tracked deletion remains reviewable",
+    "status": "pass",
+    "duration_ms": 1962.6856,
+    "annotation": ""
+  },
+  {
+    "ordinal": 427,
+    "name": "unchanged tracked path retains no-change outcome",
+    "status": "pass",
+    "duration_ms": 1822.1807,
+    "annotation": ""
+  },
+  {
+    "ordinal": 428,
+    "name": "new untracked text is an added delta without changing the index",
+    "status": "pass",
+    "duration_ms": 2476.4493,
+    "annotation": ""
+  },
+  {
+    "ordinal": 429,
+    "name": "new untracked text over line budget yields complete bounded evidence",
+    "status": "pass",
+    "duration_ms": 1909.3455,
+    "annotation": ""
+  },
+  {
+    "ordinal": 430,
+    "name": "newline marker remains with its preceding record at a chunk boundary",
+    "status": "pass",
+    "duration_ms": 2133.8288,
+    "annotation": ""
+  },
+  {
+    "ordinal": 431,
+    "name": "tracked oversized hunk and tampered unit sequences are rejected",
+    "status": "pass",
+    "duration_ms": 1648.8956,
+    "annotation": ""
+  },
+  {
+    "ordinal": 432,
+    "name": "multiple hunks on one oversized path retain complete ordered coverage",
+    "status": "pass",
+    "duration_ms": 2191.3036,
+    "annotation": ""
+  },
+  {
+    "ordinal": 433,
+    "name": "more than six hunks and oversized multi-path groups yield complete ordered evidence sets",
+    "status": "pass",
+    "duration_ms": 8756.1424,
+    "annotation": ""
+  },
+  {
+    "ordinal": 434,
+    "name": "duplicate requested paths are rejected instead of silently deduplicated",
+    "status": "pass",
+    "duration_ms": 975.4002,
+    "annotation": ""
+  },
+  {
+    "ordinal": 435,
+    "name": "evidence sets enforce a bounded path count",
+    "status": "pass",
+    "duration_ms": 955.2998,
+    "annotation": ""
+  },
+  {
+    "ordinal": 436,
+    "name": "multi-path evidence generation is idempotent and never mutates the index or commits",
+    "status": "pass",
+    "duration_ms": 9139.4431,
+    "annotation": ""
+  },
+  {
+    "ordinal": 437,
+    "name": "new empty text file still has an added file delta",
+    "status": "pass",
+    "duration_ms": 2009.681,
+    "annotation": ""
+  },
+  {
+    "ordinal": 438,
+    "name": "valid dot-prefixed name remains inside the repository",
+    "status": "pass",
+    "duration_ms": 1850.7166,
+    "annotation": ""
+  },
+  {
+    "ordinal": 439,
+    "name": "new untracked binary is unsupported",
+    "status": "pass",
+    "duration_ms": 1925.0357,
+    "annotation": ""
+  },
+  {
+    "ordinal": 440,
+    "name": "nonexistent path retains unsupported outcome",
+    "status": "pass",
+    "duration_ms": 1565.352,
+    "annotation": ""
+  },
+  {
+    "ordinal": 441,
+    "name": "path traversal is rejected",
+    "status": "pass",
+    "duration_ms": 995.5673,
+    "annotation": ""
+  },
+  {
+    "ordinal": 442,
+    "name": "explicit pair remains reviewable",
+    "status": "pass",
+    "duration_ms": 1849.2567,
+    "annotation": ""
+  },
+  {
+    "ordinal": 443,
+    "name": "backlog to in-progress preview is read only",
+    "status": "pass",
+    "duration_ms": 5454.4995,
+    "annotation": ""
+  },
+  {
+    "ordinal": 444,
+    "name": "backlog to ready-for-dev allowed",
+    "status": "pass",
+    "duration_ms": 4254.2586,
+    "annotation": ""
+  },
+  {
+    "ordinal": 445,
+    "name": "ready-for-dev to in-progress allowed",
+    "status": "pass",
+    "duration_ms": 4925.3524,
+    "annotation": ""
+  },
+  {
+    "ordinal": 446,
+    "name": "in-progress to review with complete gates",
+    "status": "pass",
+    "duration_ms": 5632.835,
+    "annotation": ""
+  },
+  {
+    "ordinal": 447,
+    "name": "review to done requires human approval",
+    "status": "pass",
+    "duration_ms": 3405.3718,
+    "annotation": ""
+  },
+  {
+    "ordinal": 448,
+    "name": "same state no change",
+    "status": "pass",
+    "duration_ms": 4171.729,
+    "annotation": ""
+  },
+  {
+    "ordinal": 449,
+    "name": "same-state apply creates no lifecycle commit",
+    "status": "pass",
+    "duration_ms": 3954.8759,
+    "annotation": ""
+  },
+  {
+    "ordinal": 450,
+    "name": "reverse transition needs human",
+    "status": "pass",
+    "duration_ms": 1618.0108,
+    "annotation": ""
+  },
+  {
+    "ordinal": 451,
+    "name": "done cannot advance",
+    "status": "pass",
+    "duration_ms": 1873.0864,
+    "annotation": ""
+  },
+  {
+    "ordinal": 452,
+    "name": "unknown state invalid",
+    "status": "pass",
+    "duration_ms": 2769.5492,
+    "annotation": ""
+  },
+  {
+    "ordinal": 453,
+    "name": "missing Story invalid",
+    "status": "pass",
+    "duration_ms": 3328.2339,
+    "annotation": ""
+  },
+  {
+    "ordinal": 454,
+    "name": "stale source digest rejected",
+    "status": "pass",
+    "duration_ms": 4347.3769,
+    "annotation": ""
+  },
+  {
+    "ordinal": 455,
+    "name": "active V3 pointer blocks preview",
+    "status": "pass",
+    "duration_ms": 3052.7629,
+    "annotation": ""
+  },
+  {
+    "ordinal": 456,
+    "name": "concurrent lifecycle caller is blocked by the shared lock",
+    "status": "pass",
+    "duration_ms": 6306.3688,
+    "annotation": ""
+  },
+  {
+    "ordinal": 457,
+    "name": "missing checkpoint reference blocks preview",
+    "status": "pass",
+    "duration_ms": 4159.7063,
+    "annotation": ""
+  },
+  {
+    "ordinal": 458,
+    "name": "sprint snapshot mismatch classified",
+    "status": "pass",
+    "duration_ms": 2396.9451,
+    "annotation": ""
+  },
+  {
+    "ordinal": 459,
+    "name": "expected from mismatch",
+    "status": "pass",
+    "duration_ms": 2599.7698,
+    "annotation": ""
+  },
+  {
+    "ordinal": 460,
+    "name": "expected HEAD mismatch",
+    "status": "pass",
+    "duration_ms": 1449.1428,
+    "annotation": ""
+  },
+  {
+    "ordinal": 461,
+    "name": "plan hash mismatch",
+    "status": "pass",
+    "duration_ms": 2984.5166,
+    "annotation": ""
+  },
+  {
+    "ordinal": 462,
+    "name": "sprint hash mismatch",
+    "status": "pass",
+    "duration_ms": 3415.3933,
+    "annotation": ""
+  },
+  {
+    "ordinal": 463,
+    "name": "dirty index",
+    "status": "pass",
+    "duration_ms": 3823.852,
+    "annotation": ""
+  },
+  {
+    "ordinal": 464,
+    "name": "unrelated tracked worktree change",
+    "status": "pass",
+    "duration_ms": 3912.3125,
+    "annotation": ""
+  },
+  {
+    "ordinal": 465,
+    "name": "parent backlog planned for in-progress",
+    "status": "pass",
+    "duration_ms": 4136.1026,
+    "annotation": ""
+  },
+  {
+    "ordinal": 466,
+    "name": "parent in-progress unchanged",
+    "status": "pass",
+    "duration_ms": 3734.2873,
+    "annotation": ""
+  },
+  {
+    "ordinal": 467,
+    "name": "parent done requires human",
+    "status": "pass",
+    "duration_ms": 3483.7054,
+    "annotation": ""
+  },
+  {
+    "ordinal": 468,
+    "name": "product blocker prevents in-progress",
+    "status": "pass",
+    "duration_ms": 4634.4132,
+    "annotation": ""
+  },
+  {
+    "ordinal": 469,
+    "name": "invalid successor action",
+    "status": "pass",
+    "duration_ms": 3590.7146,
+    "annotation": ""
+  },
+  {
+    "ordinal": 470,
+    "name": "apply commits exactly two files and preserves other semantic fields",
+    "status": "pass",
+    "duration_ms": 13522.9112,
+    "annotation": ""
+  },
+  {
+    "ordinal": 471,
+    "name": "backlog to in-progress uses the exact canonical commit message",
+    "status": "pass",
+    "duration_ms": 11086.5073,
+    "annotation": ""
+  },
+  {
+    "ordinal": 472,
+    "name": "in-progress to review uses the exact canonical commit message",
+    "status": "pass",
+    "duration_ms": 12920.7825,
+    "annotation": ""
+  },
+  {
+    "ordinal": 473,
+    "name": "arbitrary validated Story ID formats deterministically",
+    "status": "pass",
+    "duration_ms": 12743.4285,
+    "annotation": ""
+  },
+  {
+    "ordinal": 474,
+    "name": "failure before write changes nothing",
+    "status": "pass",
+    "duration_ms": 11685.3709,
+    "annotation": ""
+  },
+  {
+    "ordinal": 475,
+    "name": "first write failure rolls back unchanged target",
+    "status": "pass",
+    "duration_ms": 12023.3977,
+    "annotation": ""
+  },
+  {
+    "ordinal": 476,
+    "name": "concurrent edit prevents rollback overwrite",
+    "status": "pass",
+    "duration_ms": 11639.3336,
+    "annotation": ""
+  },
+  {
+    "ordinal": 477,
+    "name": "both writes before commit failure remain recoverable",
+    "status": "pass",
+    "duration_ms": 14246.4561,
+    "annotation": ""
+  },
+  {
+    "ordinal": 478,
+    "name": "partial Plan only is classified without mutation",
+    "status": "pass",
+    "duration_ms": 2959.7814,
+    "annotation": ""
+  },
+  {
+    "ordinal": 479,
+    "name": "conflicting edit is classified without overwrite",
+    "status": "pass",
+    "duration_ms": 2669.1898,
+    "annotation": ""
+  },
+  {
+    "ordinal": 480,
+    "name": "untracked unrelated file is never staged or committed",
+    "status": "pass",
+    "duration_ms": 10645.0039,
+    "annotation": ""
+  },
+  {
+    "ordinal": 481,
+    "name": "R03 runner executes actual L/M/H scenarios and records bound evidence",
+    "status": "pass",
+    "duration_ms": 42604.9939,
+    "annotation": ""
+  },
+  {
+    "ordinal": 482,
+    "name": "R03 CLI rejects a source-head mismatch before creating evidence",
+    "status": "pass",
+    "duration_ms": 884.499,
+    "annotation": ""
+  },
+  {
+    "ordinal": 483,
+    "name": "check is read-only and start commits exactly three lifecycle files without implementation",
+    "status": "pass",
+    "duration_ms": 15068.8238,
+    "annotation": ""
+  },
+  {
+    "ordinal": 484,
+    "name": "ready-for-dev projection also starts through Runner with explicit fingerprint",
+    "status": "pass",
+    "duration_ms": 19839.8333,
+    "annotation": ""
+  },
+  {
+    "ordinal": 485,
+    "name": "start rejects active runtime without writing",
+    "status": "pass",
+    "duration_ms": 3151.3481,
+    "annotation": ""
+  },
+  {
+    "ordinal": 486,
+    "name": "start rejects unapproved planning without writing",
+    "status": "pass",
+    "duration_ms": 6228.3624,
+    "annotation": ""
+  },
+  {
+    "ordinal": 487,
+    "name": "start rejects wrong approval digest without writing",
+    "status": "pass",
+    "duration_ms": 5853.368,
+    "annotation": ""
+  },
+  {
+    "ordinal": 488,
+    "name": "start rejects readiness absent without writing",
+    "status": "pass",
+    "duration_ms": 5826.907,
+    "annotation": ""
+  },
+  {
+    "ordinal": 489,
+    "name": "start rejects unfinished dependency without writing",
+    "status": "pass",
+    "duration_ms": 5150.4325,
+    "annotation": ""
+  },
+  {
+    "ordinal": 490,
+    "name": "start rejects unknown dependency without writing",
+    "status": "pass",
+    "duration_ms": 5494.879,
+    "annotation": ""
+  },
+  {
+    "ordinal": 491,
+    "name": "start rejects duplicate dependency without writing",
+    "status": "pass",
+    "duration_ms": 6437.1807,
+    "annotation": ""
+  },
+  {
+    "ordinal": 492,
+    "name": "start rejects product blocker without writing",
+    "status": "pass",
+    "duration_ms": 6146.7405,
+    "annotation": ""
+  },
+  {
+    "ordinal": 493,
+    "name": "start rejects unresolved question without writing",
+    "status": "pass",
+    "duration_ms": 6016.7469,
+    "annotation": ""
+  },
+  {
+    "ordinal": 494,
+    "name": "start rejects started slice without writing",
+    "status": "pass",
+    "duration_ms": 4611.3512,
+    "annotation": ""
+  },
+  {
+    "ordinal": 495,
+    "name": "start rejects checkpoint field without writing",
+    "status": "pass",
+    "duration_ms": 3019.6655,
+    "annotation": ""
+  },
+  {
+    "ordinal": 496,
+    "name": "start rejects review metadata without writing",
+    "status": "pass",
+    "duration_ms": 5374.4867,
+    "annotation": ""
+  },
+  {
+    "ordinal": 497,
+    "name": "start rejects orphan receipt without writing",
+    "status": "pass",
+    "duration_ms": 6367.2012,
+    "annotation": ""
+  },
+  {
+    "ordinal": 498,
+    "name": "start rejects current slice has prerequisites without writing",
+    "status": "pass",
+    "duration_ms": 6466.0905,
+    "annotation": ""
+  },
+  {
+    "ordinal": 499,
+    "name": "start rejects completion approval without writing",
+    "status": "pass",
+    "duration_ms": 3315.3176,
+    "annotation": ""
+  },
+  {
+    "ordinal": 500,
+    "name": "start rejects story lifecycle differs without writing",
+    "status": "pass",
+    "duration_ms": 5683.875,
+    "annotation": ""
+  },
+  {
+    "ordinal": 501,
+    "name": "start rejects epic changed without writing",
+    "status": "pass",
+    "duration_ms": 6638.8623,
+    "annotation": ""
+  },
+  {
+    "ordinal": 502,
+    "name": "start rejects task already checked without writing",
+    "status": "pass",
+    "duration_ms": 5810.6395,
+    "annotation": ""
+  },
+  {
+    "ordinal": 503,
+    "name": "stale HEAD, digest, index, and dirty artifacts cannot be excluded",
+    "status": "pass",
+    "duration_ms": 13819.2595,
+    "annotation": ""
+  },
+  {
+    "ordinal": 504,
+    "name": "only exact unrelated untracked noise can be excluded and it stays uncommitted",
+    "status": "pass",
+    "duration_ms": 12062.076,
+    "annotation": ""
+  },
+  {
+    "ordinal": 505,
+    "name": "excluded unrelated noise is content-bound across the start transaction",
+    "status": "pass",
+    "duration_ms": 12110.2558,
+    "annotation": ""
+  },
+  {
+    "ordinal": 506,
+    "name": "failed commit preserves partial transaction and lock; retry cannot overwrite it",
+    "status": "pass",
+    "duration_ms": 8629.8285,
+    "annotation": ""
+  },
+  {
+    "ordinal": 507,
+    "name": "an existing lock from another invocation is never removed",
+    "status": "pass",
+    "duration_ms": 1223.595,
+    "annotation": ""
+  },
+  {
+    "ordinal": 508,
+    "name": "commit hook cannot silently change a dependency in the approved lifecycle transaction",
+    "status": "pass",
+    "duration_ms": 8317.9128,
+    "annotation": ""
+  },
+  {
+    "ordinal": 509,
+    "name": "commit hook changes outside the preview remain recoverable instead of reporting STARTED",
+    "status": "pass",
+    "duration_ms": 8358.0279,
+    "annotation": ""
+  },
+  {
+    "ordinal": 510,
+    "name": "partial Story write with a retained transaction lock blocks automatic recovery",
+    "status": "pass",
+    "duration_ms": 1612.7198,
+    "annotation": ""
+  },
+  {
+    "ordinal": 511,
+    "name": "Runner in linked worktree uses canonical pointer and rejects a stale local IDLE copy",
+    "status": "pass",
+    "duration_ms": 7127.2951,
+    "annotation": ""
+  },
+  {
+    "ordinal": 512,
+    "name": "upstream Epic must be committed even when an ignored local copy matches its digest",
+    "status": "pass",
+    "duration_ms": 2650.9278,
+    "annotation": ""
+  },
+  {
+    "ordinal": 513,
+    "name": "a CRLF working Epic under core.autocrlf still matches the committed LF section digest",
+    "status": "pass",
+    "duration_ms": 5160.1574,
+    "annotation": ""
+  },
+  {
+    "ordinal": 514,
+    "name": "status shows held hot paths and an integrating Story without changing its record",
+    "status": "pass",
+    "duration_ms": 7054.1589,
+    "annotation": ""
+  },
+  {
+    "ordinal": 515,
+    "name": "done is ready to integrate only while its completion evidence is READY",
+    "status": "pass",
+    "duration_ms": 57067.3337,
+    "annotation": ""
+  },
+  {
+    "ordinal": 516,
+    "name": "merge-conflict status survives scratch cleanup and ignores another generation",
+    "status": "pass",
+    "duration_ms": 63724.3641,
+    "annotation": ""
+  },
+  {
+    "ordinal": 517,
+    "name": "unsupported registry versions refuse every operation and preserve the record",
+    "status": "pass",
+    "duration_ms": 26226.0235,
+    "annotation": ""
+  },
+  {
+    "ordinal": 518,
+    "name": "claim pins HEAD and scope in Git-common runtime without changing Git or pointer",
+    "status": "pass",
+    "duration_ms": 6818.7026,
+    "annotation": ""
+  },
+  {
+    "ordinal": 519,
+    "name": "two claim processes have exactly one winner",
+    "status": "pass",
+    "duration_ms": 3687.7742,
+    "annotation": ""
+  },
+  {
+    "ordinal": 520,
+    "name": "takeover preserves pin and fences old heartbeat and release generations",
+    "status": "pass",
+    "duration_ms": 11223.4869,
+    "annotation": ""
+  },
+  {
+    "ordinal": 521,
+    "name": "status flags stale and orphaned records without automatic takeover or deletion",
+    "status": "pass",
+    "duration_ms": 6578.4419,
+    "annotation": ""
+  },
+  {
+    "ordinal": 522,
+    "name": "malformed records fail closed and remain untouched",
+    "status": "pass",
+    "duration_ms": 11887.4468,
+    "annotation": ""
+  },
+  {
+    "ordinal": 523,
+    "name": "release abort archives only the record and merged release removes it",
+    "status": "pass",
+    "duration_ms": 10153.1907,
+    "annotation": ""
+  },
+  {
+    "ordinal": 524,
+    "name": "claim validates global pointer, checkout, Plan and Windows paths with spaces",
+    "status": "pass",
+    "duration_ms": 9407.7202,
+    "annotation": ""
+  },
+  {
+    "ordinal": 525,
+    "name": "claim stores the union of declared slice scopes",
+    "status": "pass",
+    "duration_ms": 3727.9586,
+    "annotation": ""
+  },
+  {
+    "ordinal": 526,
+    "name": "owner takeover still requires an idle pointer and a valid Plan in the claimed checkout",
+    "status": "pass",
+    "duration_ms": 8826.6023,
+    "annotation": ""
+  },
+  {
+    "ordinal": 527,
+    "name": "policy-drift compares the pinned commit with main and only reports information",
+    "status": "pass",
+    "duration_ms": 12647.2783,
+    "annotation": ""
+  },
+  {
+    "ordinal": 528,
+    "name": "policy-drift treats paths absent from both policy commits as unchanged",
+    "status": "pass",
+    "duration_ms": 5961.5838,
+    "annotation": ""
+  },
+  {
+    "ordinal": 529,
+    "name": "resource configuration and declarations reject unknown, malformed and duplicate names",
+    "status": "pass",
+    "duration_ms": 1535.4088,
+    "annotation": ""
+  },
+  {
+    "ordinal": 530,
+    "name": "backend and E2E command forms automatically declare the shared database resources",
+    "status": "pass",
+    "duration_ms": 6.0785,
+    "annotation": ""
+  },
+  {
+    "ordinal": 531,
+    "name": "schema-1 Plan validates its optional resource list",
+    "status": "pass",
+    "duration_ms": 3150.9724,
+    "annotation": ""
+  },
+  {
+    "ordinal": 532,
+    "name": "schema-2 Plan validates its optional resource list",
+    "status": "pass",
+    "duration_ms": 2941.3885,
+    "annotation": ""
+  },
+  {
+    "ordinal": 533,
+    "name": "claim reserves explicit and automatic resources until release",
+    "status": "pass",
+    "duration_ms": 4396.0276,
+    "annotation": ""
+  },
+  {
+    "ordinal": 534,
+    "name": "resource overlap refuses disjoint scope and cannot be bypassed by an overlap override",
+    "status": "pass",
+    "duration_ms": 10614.1747,
+    "annotation": ""
+  },
+  {
+    "ordinal": 535,
+    "name": "dispatch stops when checks add an unclaimed resource or another Story holds it",
+    "status": "pass",
+    "duration_ms": 9617.9976,
+    "annotation": ""
+  },
+  {
+    "ordinal": 536,
+    "name": "concurrent disjoint Stories have exactly one winner for a shared database",
+    "status": "pass",
+    "duration_ms": 5400.3208,
+    "annotation": ""
+  },
+  {
+    "ordinal": 537,
+    "name": "unknown pending scope refuses a claim without a record",
+    "status": "pass",
+    "duration_ms": 2206.8692,
+    "annotation": ""
+  },
+  {
+    "ordinal": 538,
+    "name": "legacy empty scope is unknown and blocks another Story claim",
+    "status": "pass",
+    "duration_ms": 3040.6871,
+    "annotation": ""
+  },
+  {
+    "ordinal": 539,
+    "name": "claim refuses directory scope with Story IDs and paths",
+    "status": "pass",
+    "duration_ms": 3382.8285,
+    "annotation": ""
+  },
+  {
+    "ordinal": 540,
+    "name": "claim refuses reverse directory scope with Story IDs and paths",
+    "status": "pass",
+    "duration_ms": 4462.3588,
+    "annotation": ""
+  },
+  {
+    "ordinal": 541,
+    "name": "claim refuses shared hot directory with Story IDs and paths",
+    "status": "pass",
+    "duration_ms": 3780.7558,
+    "annotation": ""
+  },
+  {
+    "ordinal": 542,
+    "name": "owner overlap reason is persisted and slice dispatch rechecks new conflicts",
+    "status": "pass",
+    "duration_ms": 7506.6935,
+    "annotation": ""
+  },
+  {
+    "ordinal": 543,
+    "name": "non-overridable control-plane paths cannot be claimed with an owner override",
+    "status": "pass",
+    "duration_ms": 2771.6636,
+    "annotation": ""
+  },
+  {
+    "ordinal": 544,
+    "name": "owner reason is recorded even when no current overlap needs it",
+    "status": "pass",
+    "duration_ms": 2392.2397,
+    "annotation": ""
+  },
+  {
+    "ordinal": 545,
+    "name": "CLI records an owner override and rejects a missing reason",
+    "status": "pass",
+    "duration_ms": 3849.1772,
+    "annotation": ""
+  },
+  {
+    "ordinal": 546,
+    "name": "approved directory overlap covers a bounded child slice but does not allow broader held scope",
+    "status": "pass",
+    "duration_ms": 6668.1292,
+    "annotation": ""
+  },
+  {
+    "ordinal": 547,
+    "name": "concurrent cross-Story claims cannot both reserve overlapping scope",
+    "status": "pass",
+    "duration_ms": 5662.8528,
+    "annotation": ""
+  },
+  {
+    "ordinal": 548,
+    "name": "hot paths expose the paired contract and non-overridable control plane",
+    "status": "pass",
+    "duration_ms": 67.6783,
+    "annotation": ""
+  },
+  {
+    "ordinal": 549,
+    "name": "loader rejects malformed, unsafe and duplicate normalized hot paths",
+    "status": "pass",
+    "duration_ms": 28.2754,
+    "annotation": ""
+  },
+  {
+    "ordinal": 550,
+    "name": "scope overlap respects exact files and directory boundaries in both directions",
+    "status": "pass",
+    "duration_ms": 0.7985,
+    "annotation": ""
+  },
+  {
+    "ordinal": 551,
+    "name": "declared scope refuses unsafe entries and unknown future pending slices",
+    "status": "pass",
+    "duration_ms": 1.1268,
+    "annotation": ""
+  },
+  {
+    "ordinal": 552,
+    "name": "effective risk defaults to Story and uses only the requested slice risk",
+    "status": "pass",
+    "duration_ms": 2.6198,
+    "annotation": ""
+  },
+  {
+    "ordinal": 553,
+    "name": "Plan risk flags become canonical mandatory escalation flags",
+    "status": "pass",
+    "duration_ms": 1.2505,
+    "annotation": ""
+  },
+  {
+    "ordinal": 554,
+    "name": "implementation metadata cannot remove or alter autopilot authority",
+    "status": "pass",
+    "duration_ms": 16421.1663,
+    "annotation": ""
+  },
+  {
+    "ordinal": 555,
+    "name": "separate committed executor repairs a legacy staged checkpoint only through explicit bounded Runner recovery",
+    "status": "pass",
+    "duration_ms": 57008.7578,
+    "annotation": ""
+  },
+  {
+    "ordinal": 556,
+    "name": "staged recovery binds authority, evidence, executor and target without rejection writes",
+    "status": "pass",
+    "duration_ms": 186073.2651,
+    "annotation": ""
+  },
+  {
+    "ordinal": 557,
+    "name": "bounded Runner retries its own partial metadata AFTER_WRITE, rejects foreign metadata and never duplicates commits",
+    "status": "pass",
+    "duration_ms": 45006.5057,
+    "annotation": ""
+  },
+  {
+    "ordinal": 558,
+    "name": "bounded Runner retries its own partial metadata AFTER_FIRST_METADATA_WRITE, rejects foreign metadata and never duplicates commits",
+    "status": "pass",
+    "duration_ms": 38184.7035,
+    "annotation": ""
+  },
+  {
+    "ordinal": 559,
+    "name": "schema v2 commits implementation then Plan plus receipt",
+    "status": "pass",
+    "duration_ms": 10494.0929,
+    "annotation": ""
+  },
+  {
+    "ordinal": 560,
+    "name": "a CRLF or mixed-EOL plan template commits as LF under core.autocrlf",
+    "status": "pass",
+    "duration_ms": 10015.5549,
+    "annotation": ""
+  },
+  {
+    "ordinal": 561,
+    "name": "repository checkouts keep V4 Story artifacts LF",
+    "status": "pass",
+    "duration_ms": 257.6121,
+    "annotation": ""
+  },
+  {
+    "ordinal": 562,
+    "name": "AGY prepare and checkpoint bind worker evidence and the scope gate",
+    "status": "pass",
+    "duration_ms": 9671.6291,
+    "annotation": ""
+  },
+  {
+    "ordinal": 563,
+    "name": "AGY worker evidence is required, forbidden for lead, and shape-validated",
+    "status": "pass",
+    "duration_ms": 2613.4353,
+    "annotation": ""
+  },
+  {
+    "ordinal": 564,
+    "name": "AGY scope gate blocks out-of-scope files, worker commits, and deletions",
+    "status": "pass",
+    "duration_ms": 4489.464,
+    "annotation": ""
+  },
+  {
+    "ordinal": 565,
+    "name": "AGY scope gate re-check becomes stale when the tree changes after prepare",
+    "status": "pass",
+    "duration_ms": 4539.3451,
+    "annotation": ""
+  },
+  {
+    "ordinal": 566,
+    "name": "AGY metadata cannot change the execution contract during checkpoint",
+    "status": "pass",
+    "duration_ms": 8024.2733,
+    "annotation": ""
+  },
+  {
+    "ordinal": 567,
+    "name": "checkpoint metadata cannot add committed slice risk",
+    "status": "pass",
+    "duration_ms": 7209.7804,
+    "annotation": ""
+  },
+  {
+    "ordinal": 568,
+    "name": "checkpoint metadata cannot change another slice risk",
+    "status": "pass",
+    "duration_ms": 6742.9817,
+    "annotation": ""
+  },
+  {
+    "ordinal": 569,
+    "name": "schema v1 metadata commit is Plan-only",
+    "status": "pass",
+    "duration_ms": 8333.5036,
+    "annotation": ""
+  },
+  {
+    "ordinal": 570,
+    "name": "stale worktree/policy and wrong identity fail closed",
+    "status": "pass",
+    "duration_ms": 7336.3103,
+    "annotation": ""
+  },
+  {
+    "ordinal": 571,
+    "name": "same-scope lock blocks concurrent invocation",
+    "status": "pass",
+    "duration_ms": 4135.5447,
+    "annotation": ""
+  },
+  {
+    "ordinal": 572,
+    "name": "metadata cannot smuggle a completion or finalization authority",
+    "status": "pass",
+    "duration_ms": 930.4895,
+    "annotation": ""
+  },
+  {
+    "ordinal": 573,
+    "name": "commit-1 failure preserves journal and explicit recovery finishes without replay",
+    "status": "pass",
+    "duration_ms": 12775.707,
+    "annotation": ""
+  },
+  {
+    "ordinal": 574,
+    "name": "metadata write failure preserves the partial Plan and requires recovery",
+    "status": "pass",
+    "duration_ms": 7166.6333,
+    "annotation": ""
+  },
+  {
+    "ordinal": 575,
+    "name": "mixed approval input cannot authorize implementation",
+    "status": "pass",
+    "duration_ms": 2627.0294,
+    "annotation": ""
+  },
+  {
+    "ordinal": 576,
+    "name": "AGY executor completes the bounded worker-to-checkpoint flow",
+    "status": "pass",
+    "duration_ms": 24864.8901,
+    "annotation": ""
+  },
+  {
+    "ordinal": 577,
+    "name": "AGY scope gate blocks an out-of-scope worker change",
+    "status": "pass",
+    "duration_ms": 5866.0119,
+    "annotation": ""
+  },
+  {
+    "ordinal": 578,
+    "name": "AGY scope gate blocks a worker commit since the dispatch base",
+    "status": "pass",
+    "duration_ms": 6718.6775,
+    "annotation": ""
+  },
+  {
+    "ordinal": 579,
+    "name": "AGY prepare rejects a delivered contract left in the worktree",
+    "status": "pass",
+    "duration_ms": 8050.4362,
+    "annotation": ""
+  },
+  {
+    "ordinal": 580,
+    "name": "creates a synthetic canonical fixture without touching the caller checkout",
+    "status": "pass",
+    "duration_ms": 886.0002,
+    "annotation": ""
+  },
+  {
+    "ordinal": 581,
+    "name": "creates a linked worktree with a distinct canonical root and an IDLE pointer",
+    "status": "pass",
+    "duration_ms": 1294.0851,
+    "annotation": ""
+  },
+  {
+    "ordinal": 582,
+    "name": "fixture states preserve the one-action boundary and explicit Human Gate",
+    "status": "pass",
+    "duration_ms": 3439.5794,
+    "annotation": ""
+  },
+  {
+    "ordinal": 583,
+    "name": "baseline guards expose stale source, wrong slice, and staged-scope drift",
+    "status": "pass",
+    "duration_ms": 3236.0428,
+    "annotation": ""
+  },
+  {
+    "ordinal": 584,
+    "name": "corpus scenarios are stable and separated by risk and coverage class",
+    "status": "pass",
+    "duration_ms": 15.4022,
+    "annotation": ""
+  },
+  {
+    "ordinal": 585,
+    "name": "baseline bundles keep usage unknown and preserve source/instruction provenance",
+    "status": "pass",
+    "duration_ms": 1.1293,
+    "annotation": ""
+  },
+  {
+    "ordinal": 586,
+    "name": "executes argv directly, handles spaces/Unicode, and records redacted provenance",
+    "status": "pass",
+    "duration_ms": 594.8076,
+    "annotation": ""
+  },
+  {
+    "ordinal": 587,
+    "name": "nonzero checks are FAIL, fabricated summaries are not reusable, and learned commands never run",
+    "status": "pass",
+    "duration_ms": 272.9239,
+    "annotation": ""
+  },
+  {
+    "ordinal": 588,
+    "name": "rejects traversal, unavailable executables, and timeouts without PASS",
+    "status": "pass",
+    "duration_ms": 58.0229,
+    "annotation": ""
+  },
+  {
+    "ordinal": 589,
+    "name": "rejects symlinked cwd or referenced paths",
+    "status": "skip",
+    "duration_ms": 4.9897,
+    "annotation": "# symlink creation is unavailable in this Windows test environment"
+  },
+  {
+    "ordinal": 590,
+    "name": "subject drift and unsupported Node range make evidence non-reusable",
+    "status": "pass",
+    "duration_ms": 321.6854,
+    "annotation": ""
+  },
+  {
+    "ordinal": 591,
+    "name": "AGY transport is available without selecting the historical V3 lane",
+    "status": "pass",
+    "duration_ms": 6.2995,
+    "annotation": ""
+  },
+  {
+    "ordinal": 592,
+    "name": "Story routing uses explicit V4 actions and preserves the historical owner stop",
+    "status": "pass",
+    "duration_ms": 6.7521,
+    "annotation": ""
+  },
+  {
+    "ordinal": 593,
+    "name": "normal-action context keeps the compact routing and invariant contract",
+    "status": "pass",
+    "duration_ms": 23.3754,
+    "annotation": ""
+  },
+  {
+    "ordinal": 594,
+    "name": "projection preserves selected requirements and fail-closed freshness after context compaction",
+    "status": "pass",
+    "duration_ms": 2676.4088,
+    "annotation": ""
+  },
+  {
+    "ordinal": 595,
+    "name": "one observation without a trigger is recorded but yields NO_CANDIDATE",
+    "status": "pass",
+    "duration_ms": 3706.8308,
+    "annotation": ""
+  },
+  {
+    "ordinal": 596,
+    "name": "repeated issue creates at most three bounded candidates and never applies one",
+    "status": "pass",
+    "duration_ms": 1794.0483,
+    "annotation": ""
+  },
+  {
+    "ordinal": 597,
+    "name": "reflection and output budgets fail closed",
+    "status": "pass",
+    "duration_ms": 2879.0325,
+    "annotation": ""
+  },
+  {
+    "ordinal": 598,
+    "name": "candidate scope and stale baseline/evidence are rejected without product mutation",
+    "status": "pass",
+    "duration_ms": 1674.6028,
+    "annotation": ""
+  },
+  {
+    "ordinal": 599,
+    "name": "evaluation separates deterministic evidence, missing measurements, and self-rating",
+    "status": "pass",
+    "duration_ms": 1081.3619,
+    "annotation": ""
+  },
+  {
+    "ordinal": 600,
+    "name": "adoption validation requires exact human-bound candidate/evaluation/scope",
+    "status": "pass",
+    "duration_ms": 1303.4301,
+    "annotation": ""
+  },
+  {
+    "ordinal": 601,
+    "name": "extracts a narrow verified fact with source identity and retrieves it in scope",
+    "status": "pass",
+    "duration_ms": 3646.0358,
+    "annotation": ""
+  },
+  {
+    "ordinal": 602,
+    "name": "source or relevant path drift makes experience stale and excludes it",
+    "status": "pass",
+    "duration_ms": 3212.5192,
+    "annotation": ""
+  },
+  {
+    "ordinal": 603,
+    "name": "risk, path, and current-head mismatch do not inject advisory memory",
+    "status": "pass",
+    "duration_ms": 4242.8055,
+    "annotation": ""
+  },
+  {
+    "ordinal": 604,
+    "name": "selection is capped at three whole entries and six KiB with provenance intact",
+    "status": "pass",
+    "duration_ms": 11566.6985,
+    "annotation": ""
+  },
+  {
+    "ordinal": 605,
+    "name": "unsafe hypothesis remains a rejected candidate and never becomes executable input",
+    "status": "pass",
+    "duration_ms": 2727.5653,
+    "annotation": ""
+  },
+  {
+    "ordinal": 606,
+    "name": "context exposes experience only as advisory data and does not alter authorization",
+    "status": "pass",
+    "duration_ms": 7155.9153,
+    "annotation": ""
+  },
+  {
+    "ordinal": 607,
+    "name": "kernel review judgment is accepted and contradictory legacy verdict is rejected",
+    "status": "pass",
+    "duration_ms": 2.7072,
+    "annotation": ""
+  },
+  {
+    "ordinal": 608,
+    "name": "review freshness requires exact checkpoint, risk binding and ordered evidence scope",
+    "status": "pass",
+    "duration_ms": 1.929,
+    "annotation": ""
+  },
+  {
+    "ordinal": 609,
+    "name": "historical receipt kinds follow immutable attempt status",
+    "status": "pass",
+    "duration_ms": 0.3651,
+    "annotation": ""
+  },
+  {
+    "ordinal": 610,
+    "name": "canonical applicability is inferred only from complete validated recipe provenance",
+    "status": "pass",
+    "duration_ms": 0.4833,
+    "annotation": ""
+  },
+  {
+    "ordinal": 611,
+    "name": "review receipt dialect separates schema 2, bound schema 1 and legacy schema 1 receipts",
+    "status": "pass",
+    "duration_ms": 0.7369,
+    "annotation": ""
+  },
+  {
+    "ordinal": 612,
+    "name": "legacy review freshness still binds approval, checkpoint, risk and declared freshness",
+    "status": "pass",
+    "duration_ms": 3.6655,
+    "annotation": ""
+  },
+  {
+    "ordinal": 613,
+    "name": "a verified slice is final-ready without review only on receipt-recorded LOW NO_REVIEW",
+    "status": "pass",
+    "duration_ms": 0.9216,
+    "annotation": ""
+  },
+  {
+    "ordinal": 614,
+    "name": "MEDIUM Story with one LOW NO_REVIEW slice finalizes, passes the Human Gate and completes",
+    "status": "pass",
+    "duration_ms": 111209.4395,
+    "annotation": ""
+  },
+  {
+    "ordinal": 615,
+    "name": "MEDIUM slice stops at REVIEW_REQUIRED and skipping review cannot reach finalization",
+    "status": "pass",
+    "duration_ms": 28617.7854,
+    "annotation": ""
+  },
+  {
+    "ordinal": 616,
+    "name": "LOW slice raised to REVIEW_REQUIRED by a judgment flag escalation is not final-ready without review",
+    "status": "pass",
+    "duration_ms": 42478.2811,
+    "annotation": ""
+  },
+  {
+    "ordinal": 617,
+    "name": "LOW slice raised to REVIEW_REQUIRED by a requested MEDIUM risk is not final-ready without review",
+    "status": "pass",
+    "duration_ms": 40202.7335,
+    "annotation": ""
+  },
+  {
+    "ordinal": 618,
+    "name": "tampering a reviewed MEDIUM slice to verified with review.required false is blocked by the receipt",
+    "status": "pass",
+    "duration_ms": 35472.7171,
+    "annotation": ""
+  },
+  {
+    "ordinal": 619,
+    "name": "two-slice Story with a LOW NO_REVIEW slice and a reviewed MEDIUM slice finalizes and completes",
+    "status": "pass",
+    "duration_ms": 109233.7396,
+    "annotation": ""
+  },
+  {
+    "ordinal": 620,
+    "name": "real action, check, and context paths emit bounded provenance events",
+    "status": "pass",
+    "duration_ms": 8378.4476,
+    "annotation": ""
+  },
+  {
+    "ordinal": 621,
+    "name": "hook IDs are idempotent while a new attempt can create a new event",
+    "status": "pass",
+    "duration_ms": 8906.1224,
+    "annotation": ""
+  },
+  {
+    "ordinal": 622,
+    "name": "session checkpoints stay PARTIAL/UNKNOWN and close does not claim provider session truth",
+    "status": "pass",
+    "duration_ms": 4496.2011,
+    "annotation": ""
+  },
+  {
+    "ordinal": 623,
+    "name": "review snapshot requires real finalization and completed event requires fresh approval",
+    "status": "pass",
+    "duration_ms": 3612.9082,
+    "annotation": ""
+  },
+  {
+    "ordinal": 624,
+    "name": "records one immutable event, repeats are NOOP, and conflicting payloads are rejected",
+    "status": "pass",
+    "duration_ms": 5719.5119,
+    "annotation": ""
+  },
+  {
+    "ordinal": 625,
+    "name": "usage normalization keeps unknown values explicit and does not double-count parent exports or reasoning subsets",
+    "status": "pass",
+    "duration_ms": 5661.224,
+    "annotation": ""
+  },
+  {
+    "ordinal": 626,
+    "name": "summary preserves measured, partial, and unknown coverage without making lifecycle decisions",
+    "status": "pass",
+    "duration_ms": 4959.3674,
+    "annotation": ""
+  },
+  {
+    "ordinal": 627,
+    "name": "rejects traversal, foreign repository, secrets, oversized payloads, and malformed usage",
+    "status": "pass",
+    "duration_ms": 5421.0178,
+    "annotation": ""
+  },
+  {
+    "ordinal": 628,
+    "name": "write failures report a coverage gap and never mutate the runtime pointer",
+    "status": "pass",
+    "duration_ms": 2803.4024,
+    "annotation": ""
+  },
+  {
+    "ordinal": 629,
+    "name": "CLI records normalized events and summarizes by Story",
+    "status": "pass",
+    "duration_ms": 4562.6483,
+    "annotation": ""
+  },
+  {
+    "ordinal": 630,
+    "name": "Runner and autopilot-status require the current generation and claimed worktree",
+    "status": "pass",
+    "duration_ms": 19692.3984,
+    "annotation": ""
+  },
+  {
+    "ordinal": 631,
+    "name": "all named Lead kernel operations reject a superseded generation before writes",
+    "status": "pass",
+    "duration_ms": 10898.9612,
+    "annotation": ""
+  },
+  {
+    "ordinal": 632,
+    "name": "implementation transaction rechecks generation after acquiring its lock",
+    "status": "pass",
+    "duration_ms": 9385.4047,
+    "annotation": ""
+  },
+  {
+    "ordinal": 633,
+    "name": "metadata transaction rechecks generation after acquiring its lock",
+    "status": "pass",
+    "duration_ms": 8733.6187,
+    "annotation": ""
+  },
+  {
+    "ordinal": 634,
+    "name": "lifecycle transaction rechecks generation after acquiring its lock",
+    "status": "pass",
+    "duration_ms": 10345.6893,
+    "annotation": ""
+  },
+  {
+    "ordinal": 635,
+    "name": "finalize_story passes its optional fence through to the lifecycle lock",
+    "status": "pass",
+    "duration_ms": 7403.7634,
+    "annotation": ""
+  },
+  {
+    "ordinal": 636,
+    "name": "owner authorization, revocation, exact approval and completion never require a claim",
+    "status": "pass",
+    "duration_ms": 52498.615,
+    "annotation": ""
+  },
+  {
+    "ordinal": 637,
+    "name": "read-only preparation, owner review and maintenance recovery do not consult a claim",
+    "status": "pass",
+    "duration_ms": 9434.7892,
+    "annotation": ""
+  },
+  {
+    "ordinal": 638,
+    "name": "autopilot binding accepts only the exact P2 decision",
+    "status": "pass",
+    "duration_ms": 2.5583,
+    "annotation": ""
+  },
+  {
+    "ordinal": 639,
+    "name": "review policy: LOW canonical PASS without flags",
+    "status": "pass",
+    "duration_ms": 3.1121,
+    "annotation": ""
+  },
+  {
+    "ordinal": 640,
+    "name": "review policy: MEDIUM independent lead",
+    "status": "pass",
+    "duration_ms": 0.3352,
+    "annotation": ""
+  },
+  {
+    "ordinal": 641,
+    "name": "review policy: MEDIUM same lead",
+    "status": "pass",
+    "duration_ms": 0.2524,
+    "annotation": ""
+  },
+  {
+    "ordinal": 642,
+    "name": "review policy: HIGH independent lead",
+    "status": "pass",
+    "duration_ms": 1.7047,
+    "annotation": ""
+  },
+  {
+    "ordinal": 643,
+    "name": "review policy: HIGH same lead",
+    "status": "pass",
+    "duration_ms": 0.2779,
+    "annotation": ""
+  },
+  {
+    "ordinal": 644,
+    "name": "review policy: HIGH human",
+    "status": "pass",
+    "duration_ms": 0.2211,
+    "annotation": ""
+  },
+  {
+    "ordinal": 645,
+    "name": "review policy: VALID correction at attempt 3",
+    "status": "pass",
+    "duration_ms": 0.3366,
+    "annotation": ""
+  },
+  {
+    "ordinal": 646,
+    "name": "review policy: VALID correction exhausted at attempt 4",
+    "status": "pass",
+    "duration_ms": 0.2261,
+    "annotation": ""
+  },
+  {
+    "ordinal": 647,
+    "name": "review policy: spec ambiguity",
+    "status": "pass",
+    "duration_ms": 0.3833,
+    "annotation": ""
+  },
+  {
+    "ordinal": 648,
+    "name": "review policy: human decision",
+    "status": "pass",
+    "duration_ms": 0.2037,
+    "annotation": ""
+  },
+  {
+    "ordinal": 649,
+    "name": "review policy: mixed VALID and ambiguity",
+    "status": "pass",
+    "duration_ms": 0.1426,
+    "annotation": ""
+  },
+  {
+    "ordinal": 650,
+    "name": "review policy: false positives are closed",
+    "status": "pass",
+    "duration_ms": 0.1205,
+    "annotation": ""
+  },
+  {
+    "ordinal": 651,
+    "name": "review policy: FAIL",
+    "status": "pass",
+    "duration_ms": 0.1063,
+    "annotation": ""
+  },
+  {
+    "ordinal": 652,
+    "name": "review policy: ERROR",
+    "status": "pass",
+    "duration_ms": 0.1076,
+    "annotation": ""
+  },
+  {
+    "ordinal": 653,
+    "name": "review policy: incomplete coverage",
+    "status": "pass",
+    "duration_ms": 0.116,
+    "annotation": ""
+  },
+  {
+    "ordinal": 654,
+    "name": "review policy: incomplete PASS",
+    "status": "pass",
+    "duration_ms": 0.1002,
+    "annotation": ""
+  },
+  {
+    "ordinal": 655,
+    "name": "review policy: canonical FAIL",
+    "status": "pass",
+    "duration_ms": 0.1221,
+    "annotation": ""
+  },
+  {
+    "ordinal": 656,
+    "name": "review policy: focused FAIL",
+    "status": "pass",
+    "duration_ms": 0.1359,
+    "annotation": ""
+  },
+  {
+    "ordinal": 657,
+    "name": "review policy: focused ERROR",
+    "status": "pass",
+    "duration_ms": 0.1347,
+    "annotation": ""
+  },
+  {
+    "ordinal": 658,
+    "name": "review policy: focused missing",
+    "status": "pass",
+    "duration_ms": 0.1071,
+    "annotation": ""
+  },
+  {
+    "ordinal": 659,
+    "name": "review policy: focused empty",
+    "status": "pass",
+    "duration_ms": 0.1067,
+    "annotation": ""
+  },
+  {
+    "ordinal": 660,
+    "name": "review policy: focused omitted",
+    "status": "pass",
+    "duration_ms": 0.1017,
+    "annotation": ""
+  },
+  {
+    "ordinal": 661,
+    "name": "review policy: failed checks outrank rework",
+    "status": "pass",
+    "duration_ms": 0.1098,
+    "annotation": ""
+  },
+  {
+    "ordinal": 662,
+    "name": "review policy: MEDIUM human review",
+    "status": "pass",
+    "duration_ms": 0.1023,
+    "annotation": ""
+  },
+  {
+    "ordinal": 663,
+    "name": "review policy: LOW flagged without reviewer",
+    "status": "pass",
+    "duration_ms": 0.0978,
+    "annotation": ""
+  },
+  {
+    "ordinal": 664,
+    "name": "review policy: LOW structured review",
+    "status": "pass",
+    "duration_ms": 0.0845,
+    "annotation": ""
+  },
+  {
+    "ordinal": 665,
+    "name": "review policy: MEDIUM no reviewer",
+    "status": "pass",
+    "duration_ms": 0.0899,
+    "annotation": ""
+  },
+  {
+    "ordinal": 666,
+    "name": "independence is computed from executor, never asserted by the caller",
+    "status": "pass",
+    "duration_ms": 0.2025,
+    "annotation": ""
+  },
+  {
+    "ordinal": 667,
+    "name": "completed review policy table: LOW no flags without reviewer",
+    "status": "pass",
+    "duration_ms": 0.1559,
+    "annotation": ""
+  },
+  {
+    "ordinal": 668,
+    "name": "completed review policy table: LOW no flags with lead",
+    "status": "pass",
+    "duration_ms": 0.1217,
+    "annotation": ""
+  },
+  {
+    "ordinal": 669,
+    "name": "completed review policy table: LOW no flags with human",
+    "status": "pass",
+    "duration_ms": 0.1007,
+    "annotation": ""
+  },
+  {
+    "ordinal": 670,
+    "name": "completed review policy table: MEDIUM without reviewer",
+    "status": "pass",
+    "duration_ms": 0.0856,
+    "annotation": ""
+  },
+  {
+    "ordinal": 671,
+    "name": "completed review policy table: MEDIUM independent lead",
+    "status": "pass",
+    "duration_ms": 0.1209,
+    "annotation": ""
+  },
+  {
+    "ordinal": 672,
+    "name": "completed review policy table: MEDIUM same lead",
+    "status": "pass",
+    "duration_ms": 0.0877,
+    "annotation": ""
+  },
+  {
+    "ordinal": 673,
+    "name": "completed review policy table: MEDIUM human",
+    "status": "pass",
+    "duration_ms": 0.1064,
+    "annotation": ""
+  },
+  {
+    "ordinal": 674,
+    "name": "completed review policy table: HIGH without reviewer",
+    "status": "pass",
+    "duration_ms": 0.1042,
+    "annotation": ""
+  },
+  {
+    "ordinal": 675,
+    "name": "completed review policy table: HIGH lead",
+    "status": "pass",
+    "duration_ms": 0.1106,
+    "annotation": ""
+  },
+  {
+    "ordinal": 676,
+    "name": "completed review policy table: HIGH human",
+    "status": "pass",
+    "duration_ms": 0.1067,
+    "annotation": ""
+  },
+  {
+    "ordinal": 677,
+    "name": "completed review policy table: legacy string LOW",
+    "status": "pass",
+    "duration_ms": 0.0719,
+    "annotation": ""
+  },
+  {
+    "ordinal": 678,
+    "name": "completed review policy table: legacy string MEDIUM",
+    "status": "pass",
+    "duration_ms": 0.0888,
+    "annotation": ""
+  },
+  {
+    "ordinal": 679,
+    "name": "completed review policy table: legacy string HIGH",
+    "status": "pass",
+    "duration_ms": 0.0858,
+    "annotation": ""
+  },
+  {
+    "ordinal": 680,
+    "name": "completed review policy table: flagged LOW without reviewer",
+    "status": "pass",
+    "duration_ms": 0.1002,
+    "annotation": ""
+  },
+  {
+    "ordinal": 681,
+    "name": "completed review policy table: flagged LOW independent lead",
+    "status": "pass",
+    "duration_ms": 0.1083,
+    "annotation": ""
+  },
+  {
+    "ordinal": 682,
+    "name": "completed review policy table: flagged LOW same lead",
+    "status": "pass",
+    "duration_ms": 0.1986,
+    "annotation": ""
+  },
+  {
+    "ordinal": 683,
+    "name": "completed review policy table: flagged LOW human",
+    "status": "pass",
+    "duration_ms": 0.1015,
+    "annotation": ""
+  },
+  {
+    "ordinal": 684,
+    "name": "completed review policy table: unknown risk",
+    "status": "pass",
+    "duration_ms": 0.2152,
+    "annotation": ""
+  },
+  {
+    "ordinal": 685,
+    "name": "completed review policy table: unknown reviewer type",
+    "status": "pass",
+    "duration_ms": 0.0924,
+    "annotation": ""
+  },
+  {
+    "ordinal": 686,
+    "name": "completed review policy table: invalid attempt id",
+    "status": "pass",
+    "duration_ms": 0.1134,
+    "annotation": ""
+  },
+  {
+    "ordinal": 687,
+    "name": "completed review policy table: unknown finding class",
+    "status": "pass",
+    "duration_ms": 0.0795,
+    "annotation": ""
+  },
+  {
+    "ordinal": 688,
+    "name": "rework is append-only, creates attempt identity, and never runs the successor",
+    "status": "pass",
+    "duration_ms": 23508.394,
+    "annotation": ""
+  },
+  {
+    "ordinal": 689,
+    "name": "the next implementation binds to the new receipt path and attempt id",
+    "status": "pass",
+    "duration_ms": 34994.3474,
+    "annotation": ""
+  },
+  {
+    "ordinal": 690,
+    "name": "rework rejects cross identity, stale fingerprint, dirty scope, and foreign lock without mutation",
+    "status": "pass",
+    "duration_ms": 53983.7156,
+    "annotation": ""
+  },
+  {
+    "ordinal": 691,
+    "name": "rework cannot approve or move to E and interruption retry does not duplicate metadata commits",
+    "status": "pass",
+    "duration_ms": 23371.9169,
+    "annotation": ""
+  },
+  {
+    "ordinal": 692,
+    "name": "Runner accepts rework only as an explicit maintenance action and stops before implementation",
+    "status": "pass",
+    "duration_ms": 18842.9716,
+    "annotation": ""
+  },
+  {
+    "ordinal": 693,
+    "name": "rework cannot add, remove or change committed slice risk",
+    "status": "pass",
+    "duration_ms": 19702.7282,
+    "annotation": ""
+  },
+  {
+    "ordinal": 694,
+    "name": "rework cannot change another slice risk",
+    "status": "pass",
+    "duration_ms": 5613.7823,
+    "annotation": ""
+  },
+  {
+    "ordinal": 695,
+    "name": "finalization scope includes the original implementation attempt",
+    "status": "pass",
+    "duration_ms": 2946.8575,
+    "annotation": ""
+  },
+  {
+    "ordinal": 696,
+    "name": "registry writer has a version-keyed reader and retains the v1 reader",
+    "status": "pass",
+    "duration_ms": 2957.1017,
+    "annotation": ""
+  },
+  {
+    "ordinal": 697,
+    "name": "every emitted receipt schema has a reader, including legacy receipts",
+    "status": "pass",
+    "duration_ms": 5441.3596,
+    "annotation": ""
+  },
+  {
+    "ordinal": 698,
+    "name": "Plan helper schema versions and nested authority records have readers",
+    "status": "pass",
+    "duration_ms": 27387.8911,
+    "annotation": ""
+  },
+  {
+    "ordinal": 699,
+    "name": "transaction stages and commits exact implementation and metadata scopes",
+    "status": "pass",
+    "duration_ms": 7894.0452,
+    "annotation": ""
+  },
+  {
+    "ordinal": 700,
+    "name": "failure before metadata commit preserves exact partial state and explicit recovery finishes it",
+    "status": "pass",
+    "duration_ms": 9091.1955,
+    "annotation": ""
+  },
+  {
+    "ordinal": 701,
+    "name": "failure after stage leaves the index and lock for inspection",
+    "status": "pass",
+    "duration_ms": 4836.0938,
+    "annotation": ""
+  },
+  {
+    "ordinal": 702,
+    "name": "a pre-commit hook that adds scope is detected after commit instead of being trusted",
+    "status": "pass",
+    "duration_ms": 6646.1566,
+    "annotation": ""
+  },
+  {
+    "ordinal": 703,
+    "name": "transaction identity is per repository/worktree/action/slice scope",
+    "status": "pass",
+    "duration_ms": 2374.8985,
+    "annotation": ""
+  },
+  {
+    "ordinal": 704,
+    "name": "Git canonical CRLF blob identity does not reject legitimate exact staging",
+    "status": "pass",
+    "duration_ms": 7917.9832,
+    "annotation": ""
+  },
+  {
+    "ordinal": 705,
+    "name": "canonical staging supports LF without rewriting working bytes",
+    "status": "pass",
+    "duration_ms": 7938.2479,
+    "annotation": ""
+  },
+  {
+    "ordinal": 706,
+    "name": "canonical staging supports mixed EOL without rewriting working bytes",
+    "status": "pass",
+    "duration_ms": 8416.5046,
+    "annotation": ""
+  },
+  {
+    "ordinal": 707,
+    "name": "canonical staging supports binary without rewriting working bytes",
+    "status": "pass",
+    "duration_ms": 7817.9737,
+    "annotation": ""
+  },
+  {
+    "ordinal": 708,
+    "name": "canonical staging supports explicit CRLF checkout without rewriting working bytes",
+    "status": "pass",
+    "duration_ms": 7749.4474,
+    "annotation": ""
+  },
+  {
+    "ordinal": 709,
+    "name": "explicit staged recovery consumes the existing index and preserves original journal audit",
+    "status": "pass",
+    "duration_ms": 22083.7339,
+    "annotation": ""
+  },
+  {
+    "ordinal": 710,
+    "name": "staged recovery retry is idempotent after interruption BEFORE_COMMIT1",
+    "status": "pass",
+    "duration_ms": 22076.5682,
+    "annotation": ""
+  },
+  {
+    "ordinal": 711,
+    "name": "staged recovery retry is idempotent after interruption AFTER_COMMIT1_BEFORE_JOURNAL",
+    "status": "pass",
+    "duration_ms": 21190.1743,
+    "annotation": ""
+  },
+  {
+    "ordinal": 712,
+    "name": "staged recovery retry is idempotent after interruption AFTER_COMMIT1",
+    "status": "pass",
+    "duration_ms": 22304.2524,
+    "annotation": ""
+  },
+  {
+    "ordinal": 713,
+    "name": "staged recovery retry is idempotent after interruption AFTER_WRITE",
+    "status": "pass",
+    "duration_ms": 20715.6996,
+    "annotation": ""
+  },
+  {
+    "ordinal": 714,
+    "name": "staged recovery retry is idempotent after interruption AFTER_METADATA_STAGE",
+    "status": "pass",
+    "duration_ms": 18927.2991,
+    "annotation": ""
+  },
+  {
+    "ordinal": 715,
+    "name": "staged recovery retry is idempotent after interruption AFTER_COMMIT2_BEFORE_JOURNAL",
+    "status": "pass",
+    "duration_ms": 20040.1838,
+    "annotation": ""
+  },
+  {
+    "ordinal": 716,
+    "name": "staged recovery retry is idempotent after interruption AFTER_COMMIT2_HOOK",
+    "status": "pass",
+    "duration_ms": 18567.8134,
+    "annotation": ""
+  },
+  {
+    "ordinal": 717,
+    "name": "staged recovery retry is idempotent after interruption AFTER_COMPLETE_BEFORE_RELEASE",
+    "status": "pass",
+    "duration_ms": 15876.7119,
+    "annotation": ""
+  },
+  {
+    "ordinal": 718,
+    "name": "staged recovery rejects and preserves all state on missing explicit authorization",
+    "status": "pass",
+    "duration_ms": 5238.7008,
+    "annotation": ""
+  },
+  {
+    "ordinal": 719,
+    "name": "staged recovery rejects and preserves all state on cross Story",
+    "status": "pass",
+    "duration_ms": 5010.7728,
+    "annotation": ""
+  },
+  {
+    "ordinal": 720,
+    "name": "staged recovery rejects and preserves all state on cross slice",
+    "status": "pass",
+    "duration_ms": 5632.7614,
+    "annotation": ""
+  },
+  {
+    "ordinal": 721,
+    "name": "staged recovery rejects and preserves all state on raw byte drift",
+    "status": "pass",
+    "duration_ms": 5617.366,
+    "annotation": ""
+  },
+  {
+    "ordinal": 722,
+    "name": "staged recovery rejects and preserves all state on index blob drift",
+    "status": "pass",
+    "duration_ms": 7848.4887,
+    "annotation": ""
+  },
+  {
+    "ordinal": 723,
+    "name": "staged recovery rejects and preserves all state on index mode drift",
+    "status": "pass",
+    "duration_ms": 7975.3219,
+    "annotation": ""
+  },
+  {
+    "ordinal": 724,
+    "name": "staged recovery rejects and preserves all state on scope drift",
+    "status": "pass",
+    "duration_ms": 7914.9205,
+    "annotation": ""
+  },
+  {
+    "ordinal": 725,
+    "name": "staged recovery rejects and preserves all state on HEAD drift",
+    "status": "pass",
+    "duration_ms": 6714.4267,
+    "annotation": ""
+  },
+  {
+    "ordinal": 726,
+    "name": "staged recovery rejects and preserves all state on foreign lock",
+    "status": "pass",
+    "duration_ms": 4418.612,
+    "annotation": ""
+  },
+  {
+    "ordinal": 727,
+    "name": "staged recovery rejects and preserves all state on journal drift",
+    "status": "pass",
+    "duration_ms": 7004.7411,
+    "annotation": ""
+  },
+  {
+    "ordinal": 728,
+    "name": "staged recovery rejects and preserves all state on Git config drift",
+    "status": "pass",
+    "duration_ms": 4904.5255,
+    "annotation": ""
+  },
+  {
+    "ordinal": 729,
+    "name": "staged recovery rejects and preserves all state on Git attribute drift",
+    "status": "pass",
+    "duration_ms": 4312.6639,
+    "annotation": ""
+  },
+  {
+    "ordinal": 730,
+    "name": "staged recovery rejects and preserves all state on metadata already written",
+    "status": "pass",
+    "duration_ms": 6788.786,
+    "annotation": ""
+  },
+  {
+    "ordinal": 731,
+    "name": "external clean filters fail closed without executing the configured command",
+    "status": "pass",
+    "duration_ms": 1066.7769,
+    "annotation": ""
+  },
+  {
+    "ordinal": 732,
+    "name": "metadata-only external filter rejects staged recovery before any mutation",
+    "status": "pass",
+    "duration_ms": 2829.4602,
+    "annotation": ""
+  },
+  {
+    "ordinal": 733,
+    "name": "raw byte freshness still rejects changed EOL even when canonical blobs are equal",
+    "status": "pass",
+    "duration_ms": 2474.0449,
+    "annotation": ""
+  },
+  {
+    "ordinal": 734,
+    "name": "interrupted recovery rejects metadata index mode drift without restaging user state",
+    "status": "pass",
+    "duration_ms": 10493.0289,
+    "annotation": ""
+  },
+  {
+    "ordinal": 735,
+    "name": "structured autopilot authority is Plan-bound in one exact-path commit and can be revoked",
+    "status": "pass",
+    "duration_ms": 14834.7217,
+    "annotation": ""
+  },
+  {
+    "ordinal": 736,
+    "name": "autopilot lock conflict reports recovery paths and leaves the foreign lock untouched",
+    "status": "pass",
+    "duration_ms": 6856.062,
+    "annotation": ""
+  },
+  {
+    "ordinal": 737,
+    "name": "post-write commit failure retains a visible autopilot recovery lock",
+    "status": "pass",
+    "duration_ms": 8645.6384,
+    "annotation": ""
+  },
+  {
+    "ordinal": 738,
+    "name": "authorization locks fence only their Story while legacy locks stop every Story",
+    "status": "pass",
+    "duration_ms": 14814.912,
+    "annotation": ""
+  },
+  {
+    "ordinal": 739,
+    "name": "autopilot cannot be reauthorized or revoked without a durable record",
+    "status": "pass",
+    "duration_ms": 12569.5463,
+    "annotation": ""
+  },
+  {
+    "ordinal": 740,
+    "name": "autopilot authority rejects free text, invalid budgets, and stale HEAD without mutation",
+    "status": "pass",
+    "duration_ms": 7169.1669,
+    "annotation": ""
+  },
+  {
+    "ordinal": 741,
+    "name": "autopilot-status is read-only, requires authorization, and stops at the Human Gate",
+    "status": "pass",
+    "duration_ms": 18828.7088,
+    "annotation": ""
+  },
+  {
+    "ordinal": 742,
+    "name": "autopilot-status reports revoked, stale, and recovery stop reasons",
+    "status": "pass",
+    "duration_ms": 16783.3292,
+    "annotation": ""
+  },
+  {
+    "ordinal": 743,
+    "name": "CLI exit-code table covers every documented result class",
+    "status": "pass",
+    "duration_ms": 0.5431,
+    "annotation": ""
+  },
+  {
+    "ordinal": 744,
+    "name": "every status the action kernel or transactions emit has a Runner exit code",
+    "status": "pass",
+    "duration_ms": 1.6878,
+    "annotation": ""
+  },
+  {
+    "ordinal": 745,
+    "name": "fresh start routes only a ready preview and stops before implementing its successor",
+    "status": "pass",
+    "duration_ms": 0.5474,
+    "annotation": ""
+  },
+  {
+    "ordinal": 746,
+    "name": "finalize_story is authorized only for READY in-progress story state",
+    "status": "pass",
+    "duration_ms": 0.2176,
+    "annotation": ""
+  },
+  {
+    "ordinal": 747,
+    "name": "finalize_story rejects helper BLOCKED",
+    "status": "pass",
+    "duration_ms": 0.2371,
+    "annotation": ""
+  },
+  {
+    "ordinal": 748,
+    "name": "finalize_story rejects helper STALE",
+    "status": "pass",
+    "duration_ms": 0.1608,
+    "annotation": ""
+  },
+  {
+    "ordinal": 749,
+    "name": "finalize_story rejects helper INVALID",
+    "status": "pass",
+    "duration_ms": 0.159,
+    "annotation": ""
+  },
+  {
+    "ordinal": 750,
+    "name": "complete_story is enabled only with a fresh durable approval",
+    "status": "pass",
+    "duration_ms": 0.2188,
+    "annotation": ""
+  },
+  {
+    "ordinal": 751,
+    "name": "generic continuation is never an explicit approval intent",
+    "status": "pass",
+    "duration_ms": 0.2677,
+    "annotation": ""
+  },
+  {
+    "ordinal": 752,
+    "name": "complete_story without approval is blocked and returns the exact preview",
+    "status": "pass",
+    "duration_ms": 0.2038,
+    "annotation": ""
+  },
+  {
+    "ordinal": 753,
+    "name": "complete_story rejects non-review lifecycle and wrong next action",
+    "status": "pass",
+    "duration_ms": 4214.3587,
+    "annotation": ""
+  },
+  {
+    "ordinal": 754,
+    "name": "Runner approval flag is one durable action and the next invocation completes",
+    "status": "pass",
+    "duration_ms": 40208.2658,
+    "annotation": ""
+  },
+  {
+    "ordinal": 755,
+    "name": "Runner does not invoke the kernel without an explicit current implement action",
+    "status": "pass",
+    "duration_ms": 4864.6891,
+    "annotation": ""
+  },
+  {
+    "ordinal": 756,
+    "name": "Runner refuses a Story action outside the linked worktree that owns the Story branch",
+    "status": "pass",
+    "duration_ms": 5559.9047,
+    "annotation": ""
+  },
+  {
+    "ordinal": 757,
+    "name": "CLI accepts an explicit operation and JSON input file",
+    "status": "pass",
+    "duration_ms": 4961.6357,
+    "annotation": ""
+  },
+  {
+    "ordinal": 758,
+    "name": "CLI maps durable approval success to exit code zero",
+    "status": "pass",
+    "duration_ms": 14100.8319,
+    "annotation": ""
+  },
+  {
+    "ordinal": 759,
+    "name": "CLI reports PLAN_MISSING before attempting to read a missing Plan",
+    "status": "pass",
+    "duration_ms": 4409.3106,
+    "annotation": ""
+  },
+  {
+    "ordinal": 760,
+    "name": "LOW PASS runs canonical and focused checks then persists only verification metadata",
+    "status": "pass",
+    "duration_ms": 33736.4476,
+    "annotation": ""
+  },
+  {
+    "ordinal": 761,
+    "name": "LOW slice within HIGH Story takes the NO_REVIEW path and requests can raise risk",
+    "status": "pass",
+    "duration_ms": 34328.3927,
+    "annotation": ""
+  },
+  {
+    "ordinal": 762,
+    "name": "verification metadata cannot add, remove or change committed slice risk",
+    "status": "pass",
+    "duration_ms": 69967.692,
+    "annotation": ""
+  },
+  {
+    "ordinal": 763,
+    "name": "verification metadata cannot change another slice risk",
+    "status": "pass",
+    "duration_ms": 21972.4256,
+    "annotation": ""
+  },
+  {
+    "ordinal": 764,
+    "name": "HIGH PASS stops at REVIEW_REQUIRED with immutable pending evidence and no commit",
+    "status": "pass",
+    "duration_ms": 16901.3953,
+    "annotation": ""
+  },
+  {
+    "ordinal": 765,
+    "name": "Runner record-review rejects human review authority without mutation",
+    "status": "pass",
+    "duration_ms": 11499.852,
+    "annotation": ""
+  },
+  {
+    "ordinal": 766,
+    "name": "Runner record_review rejects human review authority without mutation",
+    "status": "pass",
+    "duration_ms": 11138.4234,
+    "annotation": ""
+  },
+  {
+    "ordinal": 767,
+    "name": "Runner owner review forces human identity from undefined",
+    "status": "pass",
+    "duration_ms": 26863.9909,
+    "annotation": ""
+  },
+  {
+    "ordinal": 768,
+    "name": "Runner owner review forces human identity from \"same-lead\"",
+    "status": "pass",
+    "duration_ms": 26285.0235,
+    "annotation": ""
+  },
+  {
+    "ordinal": 769,
+    "name": "Runner owner review forces human identity from {\"type\":\"lead\",\"vendor\":\"codex\",\"independent\":false}",
+    "status": "pass",
+    "duration_ms": 26381.899,
+    "annotation": ""
+  },
+  {
+    "ordinal": 770,
+    "name": "caller cannot lower a MEDIUM Plan risk before verification preview",
+    "status": "pass",
+    "duration_ms": 9325.73,
+    "annotation": ""
+  },
+  {
+    "ordinal": 771,
+    "name": "caller cannot lower a HIGH Plan risk before verification preview",
+    "status": "pass",
+    "duration_ms": 8950.0585,
+    "annotation": ""
+  },
+  {
+    "ordinal": 772,
+    "name": "same-Lead APPROVE requires exact bounded evidence and persists verification plus review receipts",
+    "status": "pass",
+    "duration_ms": 20656.0854,
+    "annotation": ""
+  },
+  {
+    "ordinal": 773,
+    "name": "same-Lead APPROVE accepts one ordered evidence set covering five changed paths",
+    "status": "pass",
+    "duration_ms": 22025.7892,
+    "annotation": ""
+  },
+  {
+    "ordinal": 774,
+    "name": "CHANGES_REQUIRED blocks and stale policy rejects continuation without mutation",
+    "status": "pass",
+    "duration_ms": 16509.7776,
+    "annotation": ""
+  },
+  {
+    "ordinal": 775,
+    "name": "NEED_MORE_EVIDENCE permits one bounded round and rejects a second round",
+    "status": "pass",
+    "duration_ms": 15550.3936,
+    "annotation": ""
+  },
+  {
+    "ordinal": 776,
+    "name": "verification metadata recovery resumes an interrupted commit without replay",
+    "status": "pass",
+    "duration_ms": 17602.3154,
+    "annotation": ""
+  },
+  {
+    "ordinal": 777,
+    "name": "wrong verification successor is rejected before creating a transaction or lock",
+    "status": "pass",
+    "duration_ms": 13804.2757,
+    "annotation": ""
+  },
+  {
+    "ordinal": 778,
+    "name": "verification recovery resumes after-write without regenerating evidence",
+    "status": "pass",
+    "duration_ms": 19716.5647,
+    "annotation": ""
+  },
+  {
+    "ordinal": 779,
+    "name": "verification recovery resumes after-metadata-stage without regenerating evidence",
+    "status": "pass",
+    "duration_ms": 17325.2016,
+    "annotation": ""
+  },
+  {
+    "ordinal": 780,
+    "name": "interrupted metadata recovery rejects a changed receipt and preserves partial state",
+    "status": "pass",
+    "duration_ms": 13696.3768,
+    "annotation": ""
+  },
+  {
+    "ordinal": 781,
+    "name": "Runner retires only the unwritten legacy transaction and preserves its journal and lock evidence",
+    "status": "pass",
+    "duration_ms": 10008.2399,
+    "annotation": ""
+  },
+  {
+    "ordinal": 782,
+    "name": "unwritten retirement rejects wrong-checkpoint without changing recovery evidence",
+    "status": "pass",
+    "duration_ms": 6542.2374,
+    "annotation": ""
+  },
+  {
+    "ordinal": 783,
+    "name": "unwritten retirement rejects foreign-lock without changing recovery evidence",
+    "status": "pass",
+    "duration_ms": 6512.3789,
+    "annotation": ""
+  },
+  {
+    "ordinal": 784,
+    "name": "unwritten retirement rejects dirty-product without changing recovery evidence",
+    "status": "pass",
+    "duration_ms": 6464.7519,
+    "annotation": ""
+  },
+  {
+    "ordinal": 785,
+    "name": "unwritten retirement rejects dirty-metadata without changing recovery evidence",
+    "status": "pass",
+    "duration_ms": 6815.9667,
+    "annotation": ""
+  },
+  {
+    "ordinal": 786,
+    "name": "unwritten retirement rejects staged-work without changing recovery evidence",
+    "status": "pass",
+    "duration_ms": 6599.3612,
+    "annotation": ""
+  },
+  {
+    "ordinal": 787,
+    "name": "unwritten retirement rejects non-idle without changing recovery evidence",
+    "status": "pass",
+    "duration_ms": 5856.541,
+    "annotation": ""
+  },
+  {
+    "ordinal": 788,
+    "name": "retirement binds maintenance changes and rejects a stale preview",
+    "status": "pass",
+    "duration_ms": 9022.5931,
+    "annotation": ""
+  },
+  {
+    "ordinal": 789,
+    "name": "retirement resumes interrupted owned-lock archival without replacing evidence",
+    "status": "pass",
+    "duration_ms": 9344.6708,
+    "annotation": ""
+  },
+  {
+    "ordinal": 790,
+    "name": "kernel-written review receipts round-trip through the finalization gate",
+    "status": "pass",
+    "duration_ms": 19750.6417,
+    "annotation": ""
+  },
+  {
+    "ordinal": 791,
+    "name": "structured review structured lead validates before persisting",
+    "status": "pass",
+    "duration_ms": 17287.3244,
+    "annotation": ""
+  },
+  {
+    "ordinal": 792,
+    "name": "structured review structured human validates before persisting",
+    "status": "pass",
+    "duration_ms": 16484.6103,
+    "annotation": ""
+  },
+  {
+    "ordinal": 793,
+    "name": "structured review false independence validates before persisting",
+    "status": "pass",
+    "duration_ms": 11621.1946,
+    "annotation": ""
+  },
+  {
+    "ordinal": 794,
+    "name": "structured review malformed reviewer validates before persisting",
+    "status": "pass",
+    "duration_ms": 11414.5,
+    "annotation": ""
+  },
+  {
+    "ordinal": 795,
+    "name": "structured review VALID validates before persisting",
+    "status": "pass",
+    "duration_ms": 11169.4687,
+    "annotation": ""
+  },
+  {
+    "ordinal": 796,
+    "name": "structured review SPEC_AMBIGUITY validates before persisting",
+    "status": "pass",
+    "duration_ms": 11495.7662,
+    "annotation": ""
+  },
+  {
+    "ordinal": 797,
+    "name": "structured review NEEDS_HUMAN_DECISION validates before persisting",
+    "status": "pass",
+    "duration_ms": 11279.3541,
+    "annotation": ""
+  },
+  {
+    "ordinal": 798,
+    "name": "structured review malformed findings validates before persisting",
+    "status": "pass",
+    "duration_ms": 11308.001,
+    "annotation": ""
+  },
+  {
+    "ordinal": 799,
+    "name": "structured review conflicting decisions validates before persisting",
+    "status": "pass",
+    "duration_ms": 11648.4259,
+    "annotation": ""
+  },
+  {
+    "ordinal": 800,
+    "name": "structured alternate verification recovery rejects open findings before transaction mutation",
+    "status": "pass",
+    "duration_ms": 8328.0397,
+    "annotation": ""
+  }
+]

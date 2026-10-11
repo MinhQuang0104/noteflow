@@ -1,0 +1,17 @@
+{
+  "label": "python-architecture",
+  "command": [
+    "D:/Tools/Python314/python.exe",
+    "-m",
+    "pytest",
+    "-q",
+    "_bmad/scripts/tests/test_agent_architecture.py"
+  ],
+  "cwd": "D:\\Workspace\\Tu_Hoc\\v4-test-perf",
+  "head": "87469b76b45eddd569d6090d422a4158f12218e0",
+  "started_at": "2026-10-11T13:54:38.349502+00:00",
+  "ended_at": "2026-10-11T13:54:39.153625+00:00",
+  "wall_seconds": 0.8041454000631347,
+  "exit_code": 0,
+  "node_options": null
+}

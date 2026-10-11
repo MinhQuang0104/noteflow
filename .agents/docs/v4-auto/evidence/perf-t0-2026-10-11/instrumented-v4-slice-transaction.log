@@ -1,0 +1,44 @@
+✔ transaction stages and commits exact implementation and metadata scopes (3281.795ms)
+✔ failure before metadata commit preserves exact partial state and explicit recovery finishes it (3641.5736ms)
+✔ failure after stage leaves the index and lock for inspection (1935.5443ms)
+✔ a pre-commit hook that adds scope is detected after commit instead of being trusted (2853.6497ms)
+✔ transaction identity is per repository/worktree/action/slice scope (926.1386ms)
+✔ Git canonical CRLF blob identity does not reject legitimate exact staging (3390.1732ms)
+✔ canonical staging supports LF without rewriting working bytes (3553.7303ms)
+✔ canonical staging supports mixed EOL without rewriting working bytes (3852.7559ms)
+✔ canonical staging supports binary without rewriting working bytes (3726.3015ms)
+✔ canonical staging supports explicit CRLF checkout without rewriting working bytes (3979.2511ms)
+✔ explicit staged recovery consumes the existing index and preserves original journal audit (10531.516ms)
+✔ staged recovery retry is idempotent after interruption BEFORE_COMMIT1 (10057.4774ms)
+✔ staged recovery retry is idempotent after interruption AFTER_COMMIT1_BEFORE_JOURNAL (10111.555ms)
+✔ staged recovery retry is idempotent after interruption AFTER_COMMIT1 (10360.3836ms)
+✔ staged recovery retry is idempotent after interruption AFTER_WRITE (10355.4632ms)
+✔ staged recovery retry is idempotent after interruption AFTER_METADATA_STAGE (10975.9217ms)
+✔ staged recovery retry is idempotent after interruption AFTER_COMMIT2_BEFORE_JOURNAL (10884.2245ms)
+✔ staged recovery retry is idempotent after interruption AFTER_COMMIT2_HOOK (10708.8099ms)
+✔ staged recovery retry is idempotent after interruption AFTER_COMPLETE_BEFORE_RELEASE (10473.6929ms)
+✔ staged recovery rejects and preserves all state on missing explicit authorization (3307.4175ms)
+✔ staged recovery rejects and preserves all state on cross Story (3315.5439ms)
+✔ staged recovery rejects and preserves all state on cross slice (3283.34ms)
+✔ staged recovery rejects and preserves all state on raw byte drift (3642.219ms)
+✔ staged recovery rejects and preserves all state on index blob drift (5144.9219ms)
+✔ staged recovery rejects and preserves all state on index mode drift (5000.1107ms)
+✔ staged recovery rejects and preserves all state on scope drift (4992.9733ms)
+✔ staged recovery rejects and preserves all state on HEAD drift (4272.9071ms)
+✔ staged recovery rejects and preserves all state on foreign lock (3445.294ms)
+✔ staged recovery rejects and preserves all state on journal drift (5350.6631ms)
+✔ staged recovery rejects and preserves all state on Git config drift (3742.8967ms)
+✔ staged recovery rejects and preserves all state on Git attribute drift (3675.7802ms)
+✔ staged recovery rejects and preserves all state on metadata already written (5063.7278ms)
+✔ external clean filters fail closed without executing the configured command (870.57ms)
+✔ metadata-only external filter rejects staged recovery before any mutation (2261.0196ms)
+✔ raw byte freshness still rejects changed EOL even when canonical blobs are equal (1941.9009ms)
+✔ interrupted recovery rejects metadata index mode drift without restaging user state (8545.9795ms)
+ℹ tests 36
+ℹ suites 0
+ℹ pass 36
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 193566.9912

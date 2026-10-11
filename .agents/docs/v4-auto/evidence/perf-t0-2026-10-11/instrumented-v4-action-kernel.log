@@ -1,0 +1,32 @@
+✔ effective risk defaults to Story and uses only the requested slice risk (2.5525ms)
+✔ Plan risk flags become canonical mandatory escalation flags (0.9641ms)
+✔ implementation metadata cannot remove or alter autopilot authority (5602.4566ms)
+✔ separate committed executor repairs a legacy staged checkpoint only through explicit bounded Runner recovery (16404.3848ms)
+✔ staged recovery binds authority, evidence, executor and target without rejection writes (68011.2223ms)
+✔ bounded Runner retries its own partial metadata AFTER_WRITE, rejects foreign metadata and never duplicates commits (20979.552ms)
+✔ bounded Runner retries its own partial metadata AFTER_FIRST_METADATA_WRITE, rejects foreign metadata and never duplicates commits (20540.1867ms)
+✔ schema v2 commits implementation then Plan plus receipt (6118.6955ms)
+✔ a CRLF or mixed-EOL plan template commits as LF under core.autocrlf (5992.0955ms)
+✔ repository checkouts keep V4 Story artifacts LF (160.3026ms)
+✔ AGY prepare and checkpoint bind worker evidence and the scope gate (6197.553ms)
+✔ AGY worker evidence is required, forbidden for lead, and shape-validated (1846.9542ms)
+✔ AGY scope gate blocks out-of-scope files, worker commits, and deletions (3037.6522ms)
+✔ AGY scope gate re-check becomes stale when the tree changes after prepare (3148.3831ms)
+✔ AGY metadata cannot change the execution contract during checkpoint (5282.2972ms)
+✔ checkpoint metadata cannot add committed slice risk (4847.7958ms)
+✔ checkpoint metadata cannot change another slice risk (4761.3085ms)
+✔ schema v1 metadata commit is Plan-only (5539.815ms)
+✔ stale worktree/policy and wrong identity fail closed (5014.9356ms)
+✔ same-scope lock blocks concurrent invocation (2623.4628ms)
+✔ metadata cannot smuggle a completion or finalization authority (558.5427ms)
+✔ commit-1 failure preserves journal and explicit recovery finishes without replay (8761.8448ms)
+✔ metadata write failure preserves the partial Plan and requires recovery (5517.3122ms)
+✔ mixed approval input cannot authorize implementation (2013.7724ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 203097.2637

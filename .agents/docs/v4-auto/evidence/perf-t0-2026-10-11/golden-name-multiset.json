@@ -1,0 +1,3202 @@
+[
+  {
+    "name": "AC evidence/results does not change normative digest",
+    "count": 1
+  },
+  {
+    "name": "AC text changes normative digest",
+    "count": 1
+  },
+  {
+    "name": "AGY executor completes the bounded worker-to-checkpoint flow",
+    "count": 1
+  },
+  {
+    "name": "AGY executor guidance is lazy and trigger-bound",
+    "count": 1
+  },
+  {
+    "name": "AGY implementation receipt rejects worker executor mismatch",
+    "count": 1
+  },
+  {
+    "name": "AGY implementation receipt rejects worker missing scope gate mismatch",
+    "count": 1
+  },
+  {
+    "name": "AGY implementation receipt rejects worker scope-gate allowlist mismatch",
+    "count": 1
+  },
+  {
+    "name": "AGY implementation receipt rejects worker scope-gate base mismatch",
+    "count": 1
+  },
+  {
+    "name": "AGY implementation receipt rejects worker scope-gate status mismatch",
+    "count": 1
+  },
+  {
+    "name": "AGY implementation receipt requires worker evidence",
+    "count": 1
+  },
+  {
+    "name": "AGY metadata cannot change the execution contract during checkpoint",
+    "count": 1
+  },
+  {
+    "name": "AGY prepare and checkpoint bind worker evidence and the scope gate",
+    "count": 1
+  },
+  {
+    "name": "AGY prepare rejects a delivered contract left in the worktree",
+    "count": 1
+  },
+  {
+    "name": "AGY scope accepts files whose names merely prefix an authority path",
+    "count": 1
+  },
+  {
+    "name": "AGY scope gate blocks a worker commit since the dispatch base",
+    "count": 1
+  },
+  {
+    "name": "AGY scope gate blocks an out-of-scope worker change",
+    "count": 1
+  },
+  {
+    "name": "AGY scope gate blocks out-of-scope files, worker commits, and deletions",
+    "count": 1
+  },
+  {
+    "name": "AGY scope gate re-check becomes stale when the tree changes after prepare",
+    "count": 1
+  },
+  {
+    "name": "AGY scope rejects authority-bearing entry .agent-state/",
+    "count": 1
+  },
+  {
+    "name": "AGY scope rejects authority-bearing entry .agents/skills/x.md",
+    "count": 1
+  },
+  {
+    "name": "AGY scope rejects authority-bearing entry AGENTS.md",
+    "count": 1
+  },
+  {
+    "name": "AGY scope rejects authority-bearing entry _bmad-output/",
+    "count": 1
+  },
+  {
+    "name": "AGY transport is available without selecting the historical V3 lane",
+    "count": 1
+  },
+  {
+    "name": "AGY worker evidence is required, forbidden for lead, and shape-validated",
+    "count": 1
+  },
+  {
+    "name": "CHANGES_REQUIRED blocks and stale policy rejects continuation without mutation",
+    "count": 1
+  },
+  {
+    "name": "CHECKPOINT_UNRECORDED requires an explicit exact checkpoint candidate",
+    "count": 1
+  },
+  {
+    "name": "CLI accepts an explicit operation and JSON input file",
+    "count": 1
+  },
+  {
+    "name": "CLI emits one JSON result with a status exit code",
+    "count": 1
+  },
+  {
+    "name": "CLI exit-code table covers every documented result class",
+    "count": 1
+  },
+  {
+    "name": "CLI maps durable approval success to exit code zero",
+    "count": 1
+  },
+  {
+    "name": "CLI records an owner override and rejects a missing reason",
+    "count": 1
+  },
+  {
+    "name": "CLI records normalized events and summarizes by Story",
+    "count": 1
+  },
+  {
+    "name": "CLI reports PLAN_MISSING before attempting to read a missing Plan",
+    "count": 1
+  },
+  {
+    "name": "COMPLETE detects committed checkpoint metadata and never requests implementation",
+    "count": 1
+  },
+  {
+    "name": "CRLF-only Epic checkout representation remains fresh against the canonical Git blob",
+    "count": 1
+  },
+  {
+    "name": "Change Log does not change normative digest",
+    "count": 1
+  },
+  {
+    "name": "Completion Notes does not change normative digest",
+    "count": 1
+  },
+  {
+    "name": "File List does not change normative digest",
+    "count": 1
+  },
+  {
+    "name": "Git add failure retains subprocess diagnostics rather than reporting a scope mismatch",
+    "count": 1
+  },
+  {
+    "name": "Git canonical CRLF blob identity does not reject legitimate exact staging",
+    "count": 1
+  },
+  {
+    "name": "Git inventory failure returns ERROR and never claims completeness",
+    "count": 1
+  },
+  {
+    "name": "Git timeout diagnostics preserve timeout phase, status, signal and subprocess output",
+    "count": 1
+  },
+  {
+    "name": "HIGH PASS stops at REVIEW_REQUIRED with immutable pending evidence and no commit",
+    "count": 1
+  },
+  {
+    "name": "Human Gate remains explicit and bound to immutable scope evidence",
+    "count": 1
+  },
+  {
+    "name": "L/M/H candidate bundle and fault guards use isolated fixtures without Story lifecycle mutation",
+    "count": 1
+  },
+  {
+    "name": "LOW PASS runs canonical and focused checks then persists only verification metadata",
+    "count": 1
+  },
+  {
+    "name": "LOW slice raised to REVIEW_REQUIRED by a judgment flag escalation is not final-ready without review",
+    "count": 1
+  },
+  {
+    "name": "LOW slice raised to REVIEW_REQUIRED by a requested MEDIUM risk is not final-ready without review",
+    "count": 1
+  },
+  {
+    "name": "LOW slice review bound to slice risk digest fails Story risk freshness",
+    "count": 1
+  },
+  {
+    "name": "LOW slice with REVIEW_REQUIRED decision requires review",
+    "count": 1
+  },
+  {
+    "name": "LOW slice with a bound review still validates its Story risk digest",
+    "count": 1
+  },
+  {
+    "name": "LOW slice with raised MEDIUM risk requires review",
+    "count": 1
+  },
+  {
+    "name": "LOW slice within HIGH Story takes the NO_REVIEW path and requests can raise risk",
+    "count": 1
+  },
+  {
+    "name": "MEDIUM Story with one LOW NO_REVIEW slice finalizes, passes the Human Gate and completes",
+    "count": 1
+  },
+  {
+    "name": "MEDIUM slice in MEDIUM Story still requires a review receipt",
+    "count": 1
+  },
+  {
+    "name": "MEDIUM slice stops at REVIEW_REQUIRED and skipping review cannot reach finalization",
+    "count": 1
+  },
+  {
+    "name": "Markdown indentation inside narrative remains normative",
+    "count": 1
+  },
+  {
+    "name": "NEED_MORE_EVIDENCE permits one bounded round and rejects a second round",
+    "count": 1
+  },
+  {
+    "name": "NUL-delimited Git path parsing preserves Unicode, quotes and embedded newlines",
+    "count": 1
+  },
+  {
+    "name": "PLAN_UPDATE_PENDING detects a matching uncommitted Plan-only mutation",
+    "count": 1
+  },
+  {
+    "name": "Plan helper schema versions and nested authority records have readers",
+    "count": 1
+  },
+  {
+    "name": "Plan review with sprint in-progress requires reconciliation",
+    "count": 1
+  },
+  {
+    "name": "Plan risk flags become canonical mandatory escalation flags",
+    "count": 1
+  },
+  {
+    "name": "Plan v2: AC text edit has STALE freshness",
+    "count": 1
+  },
+  {
+    "name": "Plan v2: Task semantics edit has STALE freshness",
+    "count": 1
+  },
+  {
+    "name": "Plan v2: checkpoint requires implementation receipt",
+    "count": 1
+  },
+  {
+    "name": "Plan v2: checkpoint subject digest remains separate from Story normative digest",
+    "count": 1
+  },
+  {
+    "name": "Plan v2: completion edit has READY freshness",
+    "count": 1
+  },
+  {
+    "name": "Plan v2: cyclic slices",
+    "count": 1
+  },
+  {
+    "name": "Plan v2: invalid Story contract",
+    "count": 1
+  },
+  {
+    "name": "Plan v2: malformed receipt command is INVALID",
+    "count": 1
+  },
+  {
+    "name": "Plan v2: malformed slice and blocker shapes are INVALID",
+    "count": 1
+  },
+  {
+    "name": "Plan v2: mixed schema",
+    "count": 1
+  },
+  {
+    "name": "Plan v2: nonexistent task ref",
+    "count": 1
+  },
+  {
+    "name": "Plan v2: normative digest mismatch",
+    "count": 1
+  },
+  {
+    "name": "Plan v2: null receipt document is INVALID",
+    "count": 1
+  },
+  {
+    "name": "Plan v2: status edit has READY freshness",
+    "count": 1
+  },
+  {
+    "name": "Plan v2: tampered current dependency receipt is STALE",
+    "count": 1
+  },
+  {
+    "name": "Plan v2: tampered receipt digest is STALE",
+    "count": 1
+  },
+  {
+    "name": "Plan v2: task checkbox edit has READY freshness",
+    "count": 1
+  },
+  {
+    "name": "Plan v2: uncovered Task",
+    "count": 1
+  },
+  {
+    "name": "Plan v2: unknown schema",
+    "count": 1
+  },
+  {
+    "name": "Plan v2: verified slice requires verification receipt",
+    "count": 1
+  },
+  {
+    "name": "Plan v2: wrong Story ID",
+    "count": 1
+  },
+  {
+    "name": "Plan-only done projection is PARTIAL_PLAN_ONLY",
+    "count": 1
+  },
+  {
+    "name": "Plan-only done projection requires reconciliation",
+    "count": 1
+  },
+  {
+    "name": "Plan-only partial is classified without cleanup",
+    "count": 1
+  },
+  {
+    "name": "Plan/sprint/story done mismatch fails closed",
+    "count": 1
+  },
+  {
+    "name": "R02 regression: contradictory checks and tampered raw evidence cannot become quality PASS",
+    "count": 1
+  },
+  {
+    "name": "R02 regression: evolution rejects empty caller usage and missing evidence binding",
+    "count": 1
+  },
+  {
+    "name": "R02 regression: missing case results are UNKNOWN and never synthesize PASS",
+    "count": 1
+  },
+  {
+    "name": "R02 regression: unbound evidence is inconclusive even when raw labels say PASS",
+    "count": 1
+  },
+  {
+    "name": "R03 CLI rejects a source-head mismatch before creating evidence",
+    "count": 1
+  },
+  {
+    "name": "R03 runner executes actual L/M/H scenarios and records bound evidence",
+    "count": 1
+  },
+  {
+    "name": "R04 distinguishes a triggered lazy source from an untriggered optional source",
+    "count": 1
+  },
+  {
+    "name": "R04 missing required sources are INCONCLUSIVE instead of zero bytes",
+    "count": 1
+  },
+  {
+    "name": "R04 preserves a real zero-byte measurement instead of treating it as missing",
+    "count": 1
+  },
+  {
+    "name": "R04 reads raw Git blobs, counts duplicate paths once, and preserves UTF-8/CRLF byte counts",
+    "count": 1
+  },
+  {
+    "name": "R04 regression: instruction metrics require one shared basis and are not multiplied by L/M/H rows",
+    "count": 1
+  },
+  {
+    "name": "R04 rejects unresolved revisions and invalid input identity",
+    "count": 1
+  },
+  {
+    "name": "RECONCILIATION_REQUIRED is propagated",
+    "count": 1
+  },
+  {
+    "name": "RESUME_WORKTREE requires exact explicit resume scope",
+    "count": 1
+  },
+  {
+    "name": "Runner accepts rework only as an explicit maintenance action and stops before implementation",
+    "count": 1
+  },
+  {
+    "name": "Runner and autopilot-status require the current generation and claimed worktree",
+    "count": 1
+  },
+  {
+    "name": "Runner approval flag is one durable action and the next invocation completes",
+    "count": 1
+  },
+  {
+    "name": "Runner does not invoke the kernel without an explicit current implement action",
+    "count": 1
+  },
+  {
+    "name": "Runner in linked worktree uses canonical pointer and rejects a stale local IDLE copy",
+    "count": 1
+  },
+  {
+    "name": "Runner owner review forces human identity from \"same-lead\"",
+    "count": 1
+  },
+  {
+    "name": "Runner owner review forces human identity from undefined",
+    "count": 1
+  },
+  {
+    "name": "Runner owner review forces human identity from {\"type\":\"lead\",\"vendor\":\"codex\",\"independent\":false}",
+    "count": 1
+  },
+  {
+    "name": "Runner record-review rejects human review authority without mutation",
+    "count": 1
+  },
+  {
+    "name": "Runner record_review rejects human review authority without mutation",
+    "count": 1
+  },
+  {
+    "name": "Runner refuses a Story action outside the linked worktree that owns the Story branch",
+    "count": 1
+  },
+  {
+    "name": "Runner retires only the unwritten legacy transaction and preserves its journal and lock evidence",
+    "count": 1
+  },
+  {
+    "name": "STALE is propagated",
+    "count": 1
+  },
+  {
+    "name": "Status does not change normative digest",
+    "count": 1
+  },
+  {
+    "name": "Story routing uses explicit V4 actions and preserves the historical owner stop",
+    "count": 1
+  },
+  {
+    "name": "Story-only done projection is PARTIAL_STORY_ONLY",
+    "count": 1
+  },
+  {
+    "name": "Story-only done projection requires reconciliation",
+    "count": 1
+  },
+  {
+    "name": "Story-only partial is classified without cleanup",
+    "count": 1
+  },
+  {
+    "name": "Task AC mapping changes normative digest",
+    "count": 1
+  },
+  {
+    "name": "Task checkbox does not change normative digest",
+    "count": 1
+  },
+  {
+    "name": "Task text changes normative digest",
+    "count": 1
+  },
+  {
+    "name": "V4 runner enables finalization only through the Human Gate",
+    "count": 1
+  },
+  {
+    "name": "a CRLF or mixed-EOL plan template commits as LF under core.autocrlf",
+    "count": 1
+  },
+  {
+    "name": "a CRLF working Epic under core.autocrlf still matches the committed LF section digest",
+    "count": 1
+  },
+  {
+    "name": "a held registry mutation lock is reported, never deleted by a Lead",
+    "count": 1
+  },
+  {
+    "name": "a pre-commit hook that adds scope is detected after commit instead of being trusted",
+    "count": 1
+  },
+  {
+    "name": "a verified slice is final-ready without review only on receipt-recorded LOW NO_REVIEW",
+    "count": 1
+  },
+  {
+    "name": "absent slice risk retains Story risk review requirement and digest",
+    "count": 1
+  },
+  {
+    "name": "absent slice risk still requires Story risk review without explicit review clauses",
+    "count": 1
+  },
+  {
+    "name": "active V3 pointer blocks preview",
+    "count": 1
+  },
+  {
+    "name": "adoption validation requires exact human-bound candidate/evaluation/scope",
+    "count": 1
+  },
+  {
+    "name": "aggregates multiple recipes, preserves raw recipe output, and deduplicates shared checks",
+    "count": 1
+  },
+  {
+    "name": "all named Lead kernel operations reject a superseded generation before writes",
+    "count": 1
+  },
+  {
+    "name": "all slices must be reviewed",
+    "count": 1
+  },
+  {
+    "name": "allowed entries normalize to repo-relative files or directories and reject escapes",
+    "count": 1
+  },
+  {
+    "name": "an existing lock from another invocation is never removed",
+    "count": 1
+  },
+  {
+    "name": "apply commits exactly two files and preserves other semantic fields",
+    "count": 1
+  },
+  {
+    "name": "approval Done Gate digest mismatch is stale",
+    "count": 1
+  },
+  {
+    "name": "approval approved HEAD mismatch is stale",
+    "count": 1
+  },
+  {
+    "name": "approval approved review HEAD mismatch is stale",
+    "count": 1
+  },
+  {
+    "name": "approval in an uncommitted Plan is only an approval preview",
+    "count": 1
+  },
+  {
+    "name": "approval receipt digest mismatch is stale",
+    "count": 1
+  },
+  {
+    "name": "approval record binds the complete exact review snapshot without account identity",
+    "count": 1
+  },
+  {
+    "name": "approval scope digest mismatch is stale",
+    "count": 1
+  },
+  {
+    "name": "approval story digest mismatch is stale",
+    "count": 1
+  },
+  {
+    "name": "approved directory overlap covers a bounded child slice but does not allow broader held scope",
+    "count": 1
+  },
+  {
+    "name": "arbitrary validated Story ID formats deterministically",
+    "count": 1
+  },
+  {
+    "name": "artifact contract records disclosure and lifecycle authority",
+    "count": 1
+  },
+  {
+    "name": "authority keeps the one-successor rule outside autopilot",
+    "count": 1
+  },
+  {
+    "name": "authorization locks fence only their Story while legacy locks stop every Story",
+    "count": 1
+  },
+  {
+    "name": "autopilot allowlist keeps git read-only",
+    "count": 1
+  },
+  {
+    "name": "autopilot authority rejects free text, invalid budgets, and stale HEAD without mutation",
+    "count": 1
+  },
+  {
+    "name": "autopilot binding accepts only the exact P2 decision",
+    "count": 1
+  },
+  {
+    "name": "autopilot cannot be reauthorized or revoked without a durable record",
+    "count": 1
+  },
+  {
+    "name": "autopilot lock conflict reports recovery paths and leaves the foreign lock untouched",
+    "count": 1
+  },
+  {
+    "name": "autopilot record rejects malformed budgets and vendors",
+    "count": 1
+  },
+  {
+    "name": "autopilot-status is read-only, requires authorization, and stops at the Human Gate",
+    "count": 1
+  },
+  {
+    "name": "autopilot-status reports revoked, stale, and recovery stop reasons",
+    "count": 1
+  },
+  {
+    "name": "backend and E2E command forms automatically declare the shared database resources",
+    "count": 1
+  },
+  {
+    "name": "backlog to in-progress preview is read only",
+    "count": 1
+  },
+  {
+    "name": "backlog to in-progress uses the exact canonical commit message",
+    "count": 1
+  },
+  {
+    "name": "backlog to ready-for-dev allowed",
+    "count": 1
+  },
+  {
+    "name": "baseline bundles keep usage unknown and preserve source/instruction provenance",
+    "count": 1
+  },
+  {
+    "name": "baseline guards expose stale source, wrong slice, and staged-scope drift",
+    "count": 1
+  },
+  {
+    "name": "blocker present is blocked",
+    "count": 1
+  },
+  {
+    "name": "blockers and unresolved questions block finalization",
+    "count": 1
+  },
+  {
+    "name": "both writes before commit failure remain recoverable",
+    "count": 1
+  },
+  {
+    "name": "bounded Runner retries its own partial metadata AFTER_FIRST_METADATA_WRITE, rejects foreign metadata and never duplicates commits",
+    "count": 1
+  },
+  {
+    "name": "bounded Runner retries its own partial metadata AFTER_WRITE, rejects foreign metadata and never duplicates commits",
+    "count": 1
+  },
+  {
+    "name": "builder blocks when context is not ready",
+    "count": 1
+  },
+  {
+    "name": "builder emits a deterministic AGY contract from projected context",
+    "count": 1
+  },
+  {
+    "name": "builder refuses a lead slice",
+    "count": 1
+  },
+  {
+    "name": "builder rejects malformed flags before writing output",
+    "count": 1
+  },
+  {
+    "name": "builder requires and records the automatic backend-test-db reservation",
+    "count": 1
+  },
+  {
+    "name": "builder requires and records the automatic e2e-db reservation",
+    "count": 1
+  },
+  {
+    "name": "caller cannot lower a HIGH Plan risk before verification preview",
+    "count": 1
+  },
+  {
+    "name": "caller cannot lower a MEDIUM Plan risk before verification preview",
+    "count": 1
+  },
+  {
+    "name": "candidate scope and stale baseline/evidence are rejected without product mutation",
+    "count": 1
+  },
+  {
+    "name": "canonical applicability is inferred only from complete validated recipe provenance",
+    "count": 1
+  },
+  {
+    "name": "canonical disclosures produce READY with READY_WITH_DISCLOSURES without relabeling",
+    "count": 1
+  },
+  {
+    "name": "canonical slice statuses are accepted",
+    "count": 1
+  },
+  {
+    "name": "canonical staging supports LF without rewriting working bytes",
+    "count": 1
+  },
+  {
+    "name": "canonical staging supports binary without rewriting working bytes",
+    "count": 1
+  },
+  {
+    "name": "canonical staging supports explicit CRLF checkout without rewriting working bytes",
+    "count": 1
+  },
+  {
+    "name": "canonical staging supports mixed EOL without rewriting working bytes",
+    "count": 1
+  },
+  {
+    "name": "changed Story source digest is stale",
+    "count": 1
+  },
+  {
+    "name": "changed path digest is stable",
+    "count": 1
+  },
+  {
+    "name": "changed paths are derived exactly and sorted",
+    "count": 1
+  },
+  {
+    "name": "changed source digest",
+    "count": 1
+  },
+  {
+    "name": "check is read-only and start commits exactly three lifecycle files without implementation",
+    "count": 1
+  },
+  {
+    "name": "checkpoint metadata cannot add committed slice risk",
+    "count": 1
+  },
+  {
+    "name": "checkpoint metadata cannot change another slice risk",
+    "count": 1
+  },
+  {
+    "name": "checkpoint not ancestor of HEAD",
+    "count": 1
+  },
+  {
+    "name": "checkpoint that is not an ancestor is stale",
+    "count": 1
+  },
+  {
+    "name": "checks cannot mutate the scratch tree or supersede the held generation",
+    "count": 1
+  },
+  {
+    "name": "claim pins HEAD and scope in Git-common runtime without changing Git or pointer",
+    "count": 1
+  },
+  {
+    "name": "claim refuses directory scope with Story IDs and paths",
+    "count": 1
+  },
+  {
+    "name": "claim refuses reverse directory scope with Story IDs and paths",
+    "count": 1
+  },
+  {
+    "name": "claim refuses shared hot directory with Story IDs and paths",
+    "count": 1
+  },
+  {
+    "name": "claim reserves explicit and automatic resources until release",
+    "count": 1
+  },
+  {
+    "name": "claim stores the union of declared slice scopes",
+    "count": 1
+  },
+  {
+    "name": "claim validates global pointer, checkout, Plan and Windows paths with spaces",
+    "count": 1
+  },
+  {
+    "name": "clean CLI integration fast-forwards to the tested merge and preserves approval",
+    "count": 1
+  },
+  {
+    "name": "clean reviewed fixture is READY with a compact preview",
+    "count": 1
+  },
+  {
+    "name": "commit hook cannot silently change a dependency in the approved lifecycle transaction",
+    "count": 1
+  },
+  {
+    "name": "commit hook changes outside the preview remain recoverable instead of reporting STARTED",
+    "count": 1
+  },
+  {
+    "name": "commit-1 failure preserves journal and explicit recovery finishes without replay",
+    "count": 1
+  },
+  {
+    "name": "committed Claude settings equal the documented autopilot allowlist",
+    "count": 1
+  },
+  {
+    "name": "committed receipt tamper is detected",
+    "count": 1
+  },
+  {
+    "name": "comparison keeps per-case coverage and unverified quality separate",
+    "count": 1
+  },
+  {
+    "name": "comparison rejects identity differences without explicit comparability reasons",
+    "count": 1
+  },
+  {
+    "name": "complete execution may await review lifecycle reconciliation",
+    "count": 1
+  },
+  {
+    "name": "complete with pending slice",
+    "count": 1
+  },
+  {
+    "name": "complete_story is enabled only with a fresh durable approval",
+    "count": 1
+  },
+  {
+    "name": "complete_story is idempotently terminal and does not create a second commit",
+    "count": 1
+  },
+  {
+    "name": "complete_story rejects non-review lifecycle and wrong next action",
+    "count": 1
+  },
+  {
+    "name": "complete_story without approval is blocked and returns the exact preview",
+    "count": 1
+  },
+  {
+    "name": "completed review policy table: HIGH human",
+    "count": 1
+  },
+  {
+    "name": "completed review policy table: HIGH lead",
+    "count": 1
+  },
+  {
+    "name": "completed review policy table: HIGH without reviewer",
+    "count": 1
+  },
+  {
+    "name": "completed review policy table: LOW no flags with human",
+    "count": 1
+  },
+  {
+    "name": "completed review policy table: LOW no flags with lead",
+    "count": 1
+  },
+  {
+    "name": "completed review policy table: LOW no flags without reviewer",
+    "count": 1
+  },
+  {
+    "name": "completed review policy table: MEDIUM human",
+    "count": 1
+  },
+  {
+    "name": "completed review policy table: MEDIUM independent lead",
+    "count": 1
+  },
+  {
+    "name": "completed review policy table: MEDIUM same lead",
+    "count": 1
+  },
+  {
+    "name": "completed review policy table: MEDIUM without reviewer",
+    "count": 1
+  },
+  {
+    "name": "completed review policy table: flagged LOW human",
+    "count": 1
+  },
+  {
+    "name": "completed review policy table: flagged LOW independent lead",
+    "count": 1
+  },
+  {
+    "name": "completed review policy table: flagged LOW same lead",
+    "count": 1
+  },
+  {
+    "name": "completed review policy table: flagged LOW without reviewer",
+    "count": 1
+  },
+  {
+    "name": "completed review policy table: invalid attempt id",
+    "count": 1
+  },
+  {
+    "name": "completed review policy table: legacy string HIGH",
+    "count": 1
+  },
+  {
+    "name": "completed review policy table: legacy string LOW",
+    "count": 1
+  },
+  {
+    "name": "completed review policy table: legacy string MEDIUM",
+    "count": 1
+  },
+  {
+    "name": "completed review policy table: unknown finding class",
+    "count": 1
+  },
+  {
+    "name": "completed review policy table: unknown reviewer type",
+    "count": 1
+  },
+  {
+    "name": "completed review policy table: unknown risk",
+    "count": 1
+  },
+  {
+    "name": "completion gate API is read-only and exposes the exact preview for a fixture root",
+    "count": 1
+  },
+  {
+    "name": "completion preparation fails closed outside a repository",
+    "count": 1
+  },
+  {
+    "name": "completion renderer labels fallback evidence and canonical disclosure separately",
+    "count": 1
+  },
+  {
+    "name": "completion transaction exports the bounded approval and completion interfaces",
+    "count": 1
+  },
+  {
+    "name": "concurrent cross-Story claims cannot both reserve overlapping scope",
+    "count": 1
+  },
+  {
+    "name": "concurrent disjoint Stories have exactly one winner for a shared database",
+    "count": 1
+  },
+  {
+    "name": "concurrent edit prevents rollback overwrite",
+    "count": 1
+  },
+  {
+    "name": "concurrent lifecycle caller is blocked by the shared lock",
+    "count": 1
+  },
+  {
+    "name": "conflicting edit is classified without overwrite",
+    "count": 1
+  },
+  {
+    "name": "conflicting kernel judgment and legacy verdict reject idempotently without finalization mutation",
+    "count": 1
+  },
+  {
+    "name": "context exposes experience only as advisory data and does not alter authorization",
+    "count": 1
+  },
+  {
+    "name": "corpus scenarios are stable and separated by risk and coverage class",
+    "count": 1
+  },
+  {
+    "name": "creates a linked worktree with a distinct canonical root and an IDLE pointer",
+    "count": 1
+  },
+  {
+    "name": "creates a synthetic canonical fixture without touching the caller checkout",
+    "count": 1
+  },
+  {
+    "name": "cyclic dependencies",
+    "count": 1
+  },
+  {
+    "name": "cyclic dependency",
+    "count": 1
+  },
+  {
+    "name": "declared scope refuses unsafe entries and unknown future pending slices",
+    "count": 1
+  },
+  {
+    "name": "declared slice risk without persisted escalation stops finalization",
+    "count": 1
+  },
+  {
+    "name": "dependency dispositions are projected without loading historical receipt detail",
+    "count": 1
+  },
+  {
+    "name": "dependency-only changes trigger affected recipes but never count as covered",
+    "count": 1
+  },
+  {
+    "name": "direct completion approval rejects a non-IDLE canonical pointer before mutation",
+    "count": 1
+  },
+  {
+    "name": "direct completion rejects a concurrent lifecycle lock without removing it",
+    "count": 1
+  },
+  {
+    "name": "direct finalization rejects a Story-owned worktree from the wrong checkout",
+    "count": 1
+  },
+  {
+    "name": "direct finalization rejects a concurrent lifecycle lock without removing it",
+    "count": 1
+  },
+  {
+    "name": "direct finalization rejects a non-IDLE canonical pointer before mutation",
+    "count": 1
+  },
+  {
+    "name": "dirty canonical checkout and stale generation refuse integration before mutation",
+    "count": 1
+  },
+  {
+    "name": "dirty index",
+    "count": 1
+  },
+  {
+    "name": "disclosures must be acknowledged and remain BLOCKED",
+    "count": 1
+  },
+  {
+    "name": "dispatch stops when checks add an unclaimed resource or another Story holds it",
+    "count": 1
+  },
+  {
+    "name": "done cannot advance",
+    "count": 1
+  },
+  {
+    "name": "done is ready to integrate only while its completion evidence is READY",
+    "count": 1
+  },
+  {
+    "name": "duplicate AC",
+    "count": 1
+  },
+  {
+    "name": "duplicate Task",
+    "count": 1
+  },
+  {
+    "name": "duplicate paths across ordered slices are deduplicated and later Story slice owns them",
+    "count": 1
+  },
+  {
+    "name": "duplicate requested paths are rejected instead of silently deduplicated",
+    "count": 1
+  },
+  {
+    "name": "durable approval with review projections is APPROVAL_DURABLE_PENDING_COMPLETION",
+    "count": 1
+  },
+  {
+    "name": "durable exact approval is READY for completion and generic continuation cannot create it",
+    "count": 1
+  },
+  {
+    "name": "effective risk defaults to Story and uses only the requested slice risk",
+    "count": 1
+  },
+  {
+    "name": "environment-sensitive evidence without identity requires rerun",
+    "count": 1
+  },
+  {
+    "name": "evaluation separates deterministic evidence, missing measurements, and self-rating",
+    "count": 1
+  },
+  {
+    "name": "every emitted receipt schema has a reader, including legacy receipts",
+    "count": 1
+  },
+  {
+    "name": "every status the action kernel or transactions emit has a Runner exit code",
+    "count": 1
+  },
+  {
+    "name": "evidence sets enforce a bounded path count",
+    "count": 1
+  },
+  {
+    "name": "exact explicitly accepted unrelated noise is excluded",
+    "count": 1
+  },
+  {
+    "name": "exact structured approval is durable and stops before complete_story",
+    "count": 1
+  },
+  {
+    "name": "exact-scope multi-path review evidence keeps completion at the Human Gate",
+    "count": 1
+  },
+  {
+    "name": "excluded unrelated noise is content-bound across the start transaction",
+    "count": 1
+  },
+  {
+    "name": "executes argv directly, handles spaces/Unicode, and records redacted provenance",
+    "count": 1
+  },
+  {
+    "name": "expected HEAD mismatch",
+    "count": 1
+  },
+  {
+    "name": "expected from mismatch",
+    "count": 1
+  },
+  {
+    "name": "explicit pair remains reviewable",
+    "count": 1
+  },
+  {
+    "name": "explicit retry rejects journal-tamper preserving the partial journal and owned lock",
+    "count": 1
+  },
+  {
+    "name": "explicit retry rejects staged-drift preserving the partial journal and owned lock",
+    "count": 1
+  },
+  {
+    "name": "explicit retry rejects unbound-staging preserving the partial journal and owned lock",
+    "count": 1
+  },
+  {
+    "name": "explicit slice risk is projected with Plan provenance",
+    "count": 1
+  },
+  {
+    "name": "explicit staged recovery consumes the existing index and preserves original journal audit",
+    "count": 1
+  },
+  {
+    "name": "explicit unrelated pycache noise does not affect scope readiness",
+    "count": 1
+  },
+  {
+    "name": "external clean filters fail closed without executing the configured command",
+    "count": 1
+  },
+  {
+    "name": "extracts a narrow verified fact with source identity and retrieves it in scope",
+    "count": 1
+  },
+  {
+    "name": "fail-closed cases never return a READY projection",
+    "count": 1
+  },
+  {
+    "name": "failed commit preserves partial transaction and lock; retry cannot overwrite it",
+    "count": 1
+  },
+  {
+    "name": "failing integration check retains logs and leaves main unchanged",
+    "count": 1
+  },
+  {
+    "name": "failure after stage leaves the index and lock for inspection",
+    "count": 1
+  },
+  {
+    "name": "failure before metadata commit preserves exact partial state and explicit recovery finishes it",
+    "count": 1
+  },
+  {
+    "name": "failure before write changes nothing",
+    "count": 1
+  },
+  {
+    "name": "finalization candidate without Plan advance is a repairable partial transition",
+    "count": 1
+  },
+  {
+    "name": "finalization disposition preserves disclosure semantics",
+    "count": 1
+  },
+  {
+    "name": "finalization helper is present and read-only",
+    "count": 1
+  },
+  {
+    "name": "finalization helper is read-only and does not create a candidate receipt",
+    "count": 1
+  },
+  {
+    "name": "finalization scope includes the original implementation attempt",
+    "count": 1
+  },
+  {
+    "name": "finalization writes exact paths in one commit and stops at Human Gate",
+    "count": 1
+  },
+  {
+    "name": "finalize_story is authorized only for READY in-progress story state",
+    "count": 1
+  },
+  {
+    "name": "finalize_story passes its optional fence through to the lifecycle lock",
+    "count": 1
+  },
+  {
+    "name": "finalize_story rejects helper BLOCKED",
+    "count": 1
+  },
+  {
+    "name": "finalize_story rejects helper INVALID",
+    "count": 1
+  },
+  {
+    "name": "finalize_story rejects helper STALE",
+    "count": 1
+  },
+  {
+    "name": "first write failure rolls back unchanged target",
+    "count": 1
+  },
+  {
+    "name": "fixture states preserve the one-action boundary and explicit Human Gate",
+    "count": 1
+  },
+  {
+    "name": "forbidden V3 runtime state",
+    "count": 1
+  },
+  {
+    "name": "foreign canonical repository and a non-main checkout are refused without ref changes",
+    "count": 1
+  },
+  {
+    "name": "fresh approval permits exactly review to done and preserves immutable evidence",
+    "count": 1
+  },
+  {
+    "name": "fresh start routes only a ready preview and stops before implementing its successor",
+    "count": 1
+  },
+  {
+    "name": "fully consistent done projections are terminal healthy",
+    "count": 1
+  },
+  {
+    "name": "generic continuation cannot create approval or execute completion",
+    "count": 1
+  },
+  {
+    "name": "generic continuation is never an explicit approval intent",
+    "count": 1
+  },
+  {
+    "name": "happy FRESH case",
+    "count": 1
+  },
+  {
+    "name": "healthy committed review without approval is HUMAN_GATE_PENDING",
+    "count": 1
+  },
+  {
+    "name": "held integration lock is preserved and reports busy",
+    "count": 1
+  },
+  {
+    "name": "helper is read-only",
+    "count": 1
+  },
+  {
+    "name": "helper performs no mutation",
+    "count": 1
+  },
+  {
+    "name": "historical receipt kinds follow immutable attempt status",
+    "count": 1
+  },
+  {
+    "name": "hook IDs are idempotent while a new attempt can create a new event",
+    "count": 1
+  },
+  {
+    "name": "hot paths expose the paired contract and non-overridable control plane",
+    "count": 1
+  },
+  {
+    "name": "implementation metadata cannot remove or alter autopilot authority",
+    "count": 1
+  },
+  {
+    "name": "implementation transaction rechecks generation after acquiring its lock",
+    "count": 1
+  },
+  {
+    "name": "implementation v2: Plan and bound receipt update is PLAN_UPDATE_PENDING",
+    "count": 1
+  },
+  {
+    "name": "implementation v2: blocker blocks pending slice",
+    "count": 1
+  },
+  {
+    "name": "implementation v2: checkpoint receipt mismatch fails closed",
+    "count": 1
+  },
+  {
+    "name": "implementation v2: checkpointed receipt is COMPLETE",
+    "count": 1
+  },
+  {
+    "name": "implementation v2: exact explicit resume succeeds",
+    "count": 1
+  },
+  {
+    "name": "implementation v2: explicit checkpoint candidate stays CHECKPOINT_UNRECORDED",
+    "count": 1
+  },
+  {
+    "name": "implementation v2: relevant dirty path blocks",
+    "count": 1
+  },
+  {
+    "name": "implementation v2: reviewed dependency is eligible",
+    "count": 1
+  },
+  {
+    "name": "implementation v2: unrelated noise requires explicit exclusion",
+    "count": 1
+  },
+  {
+    "name": "implementation v2: verified dependency is eligible",
+    "count": 1
+  },
+  {
+    "name": "in-progress to review uses the exact canonical commit message",
+    "count": 1
+  },
+  {
+    "name": "in-progress to review with complete gates",
+    "count": 1
+  },
+  {
+    "name": "in-scope tracked, staged and untracked changes pass",
+    "count": 1
+  },
+  {
+    "name": "independence is computed from executor, never asserted by the caller",
+    "count": 1
+  },
+  {
+    "name": "interrupted metadata recovery rejects a changed receipt and preserves partial state",
+    "count": 1
+  },
+  {
+    "name": "interrupted recovery rejects metadata index mode drift without restaging user state",
+    "count": 1
+  },
+  {
+    "name": "invalid current slice",
+    "count": 1
+  },
+  {
+    "name": "invalid inputs and missing repositories fail closed",
+    "count": 1
+  },
+  {
+    "name": "invalid lifecycle or execution state is blocked",
+    "count": 1
+  },
+  {
+    "name": "invalid registry and execution failures remain errors or failures",
+    "count": 1
+  },
+  {
+    "name": "invalid successor action",
+    "count": 1
+  },
+  {
+    "name": "kernel review judgment is accepted and contradictory legacy verdict is rejected",
+    "count": 1
+  },
+  {
+    "name": "kernel-produced judgment and ordered evidence prove review freshness",
+    "count": 1
+  },
+  {
+    "name": "kernel-written review receipts round-trip through the finalization gate",
+    "count": 1
+  },
+  {
+    "name": "lead implementation receipt rejects unexpected worker evidence",
+    "count": 1
+  },
+  {
+    "name": "legacy baseline is derived from a checkpoint single parent",
+    "count": 1
+  },
+  {
+    "name": "legacy challenge-list selection remains available through the registry contract",
+    "count": 1
+  },
+  {
+    "name": "legacy empty scope is unknown and blocks another Story claim",
+    "count": 1
+  },
+  {
+    "name": "legacy focused evidence fallback is labeled",
+    "count": 1
+  },
+  {
+    "name": "legacy in-progress slice status is accepted only by the schema-v1 verification bridge",
+    "count": 1
+  },
+  {
+    "name": "legacy in-progress slice status is rejected outside the exact bridge",
+    "count": 1
+  },
+  {
+    "name": "legacy review freshness still binds approval, checkpoint, risk and declared freshness",
+    "count": 1
+  },
+  {
+    "name": "legacy summary evidence requires rerun",
+    "count": 1
+  },
+  {
+    "name": "lifecycle transaction rechecks generation after acquiring its lock",
+    "count": 1
+  },
+  {
+    "name": "loader rejects malformed, unsafe and duplicate normalized hot paths",
+    "count": 1
+  },
+  {
+    "name": "main moved during checks is stale and is never replaced by the scratch merge",
+    "count": 1
+  },
+  {
+    "name": "malformed Plan propagates INVALID",
+    "count": 1
+  },
+  {
+    "name": "malformed records fail closed and remain untouched",
+    "count": 1
+  },
+  {
+    "name": "malformed source digest",
+    "count": 1
+  },
+  {
+    "name": "malformed structured verification fields are rejected",
+    "count": 1
+  },
+  {
+    "name": "matching reviewed commit is a freshness candidate pending checks",
+    "count": 1
+  },
+  {
+    "name": "merge checkpoint without persisted baseline is blocked",
+    "count": 1
+  },
+  {
+    "name": "merge conflicts report paths and preserve main and claim",
+    "count": 1
+  },
+  {
+    "name": "merge-conflict status survives scratch cleanup and ignores another generation",
+    "count": 1
+  },
+  {
+    "name": "metadata cannot smuggle a completion or finalization authority",
+    "count": 1
+  },
+  {
+    "name": "metadata transaction rechecks generation after acquiring its lock",
+    "count": 1
+  },
+  {
+    "name": "metadata write failure preserves the partial Plan and requires recovery",
+    "count": 1
+  },
+  {
+    "name": "metadata-only external filter rejects staged recovery before any mutation",
+    "count": 1
+  },
+  {
+    "name": "missing AC",
+    "count": 1
+  },
+  {
+    "name": "missing Plan",
+    "count": 1
+  },
+  {
+    "name": "missing Story",
+    "count": 1
+  },
+  {
+    "name": "missing Story invalid",
+    "count": 1
+  },
+  {
+    "name": "missing Tasks",
+    "count": 1
+  },
+  {
+    "name": "missing canonical disclosure blocks finalization",
+    "count": 1
+  },
+  {
+    "name": "missing checkpoint",
+    "count": 1
+  },
+  {
+    "name": "missing checkpoint is blocked",
+    "count": 1
+  },
+  {
+    "name": "missing checkpoint reference blocks preview",
+    "count": 1
+  },
+  {
+    "name": "missing dependency",
+    "count": 1
+  },
+  {
+    "name": "missing finalization receipt blocks completion",
+    "count": 1
+  },
+  {
+    "name": "missing implementation receipt is blocked",
+    "count": 1
+  },
+  {
+    "name": "missing requested slice is INVALID",
+    "count": 1
+  },
+  {
+    "name": "missing required identity",
+    "count": 1
+  },
+  {
+    "name": "missing required review receipt is blocked",
+    "count": 1
+  },
+  {
+    "name": "missing reviewed commit",
+    "count": 1
+  },
+  {
+    "name": "missing source",
+    "count": 1
+  },
+  {
+    "name": "missing sprint key",
+    "count": 1
+  },
+  {
+    "name": "missing verification receipt is blocked",
+    "count": 1
+  },
+  {
+    "name": "mixed approval input cannot authorize implementation",
+    "count": 1
+  },
+  {
+    "name": "more than six hunks and oversized multi-path groups yield complete ordered evidence sets",
+    "count": 1
+  },
+  {
+    "name": "multi-path evidence generation is idempotent and never mutates the index or commits",
+    "count": 1
+  },
+  {
+    "name": "multiple architecture references remain valid and normative",
+    "count": 1
+  },
+  {
+    "name": "multiple hunks on one oversized path retain complete ordered coverage",
+    "count": 1
+  },
+  {
+    "name": "new empty text file still has an added file delta",
+    "count": 1
+  },
+  {
+    "name": "new untracked binary is unsupported",
+    "count": 1
+  },
+  {
+    "name": "new untracked text is an added delta without changing the index",
+    "count": 1
+  },
+  {
+    "name": "new untracked text over line budget yields complete bounded evidence",
+    "count": 1
+  },
+  {
+    "name": "newline marker remains with its preceding record at a chunk boundary",
+    "count": 1
+  },
+  {
+    "name": "non-overridable control-plane paths cannot be claimed with an owner override",
+    "count": 1
+  },
+  {
+    "name": "nonexistent path retains unsupported outcome",
+    "count": 1
+  },
+  {
+    "name": "nonzero checks are FAIL, fabricated summaries are not reusable, and learned commands never run",
+    "count": 1
+  },
+  {
+    "name": "normal-action context keeps the compact routing and invariant contract",
+    "count": 1
+  },
+  {
+    "name": "normalization rejects malformed bundles and the compare CLI emits JSON only",
+    "count": 1
+  },
+  {
+    "name": "normative Story digest freshness is enforced",
+    "count": 1
+  },
+  {
+    "name": "normative architecture reference changes normative digest",
+    "count": 1
+  },
+  {
+    "name": "not-done Story and invalid integration checks fail before main or registry changes",
+    "count": 1
+  },
+  {
+    "name": "one Task to one slice, one Task to many slices, and many Tasks to one slice",
+    "count": 1
+  },
+  {
+    "name": "one observation without a trigger is recorded but yields NO_CANDIDATE",
+    "count": 1
+  },
+  {
+    "name": "only exact unrelated untracked noise can be excluded and it stays uncommitted",
+    "count": 1
+  },
+  {
+    "name": "optional slice risk validates \n      level: HIGH\n      flags: []",
+    "count": 1
+  },
+  {
+    "name": "optional slice risk validates \n      level: LOW",
+    "count": 1
+  },
+  {
+    "name": "optional slice risk validates \n      level: LOW\n      flags: []",
+    "count": 1
+  },
+  {
+    "name": "optional slice risk validates \n      level: LOW\n      flags: [null]",
+    "count": 1
+  },
+  {
+    "name": "optional slice risk validates \n      level: LOW\n      flags: [security]",
+    "count": 1
+  },
+  {
+    "name": "optional slice risk validates \n      level: LOW\n      flags: security",
+    "count": 1
+  },
+  {
+    "name": "optional slice risk validates \n      level: UNKNOWN\n      flags: []",
+    "count": 1
+  },
+  {
+    "name": "optional slice risk validates LOW",
+    "count": 1
+  },
+  {
+    "name": "orphan receipt is classified without deletion",
+    "count": 1
+  },
+  {
+    "name": "out-of-scope untracked file and tracked deletion fail",
+    "count": 1
+  },
+  {
+    "name": "outside-Story product drift is STALE",
+    "count": 1
+  },
+  {
+    "name": "owner authorization, revocation, exact approval and completion never require a claim",
+    "count": 1
+  },
+  {
+    "name": "owner overlap reason is persisted and slice dispatch rechecks new conflicts",
+    "count": 1
+  },
+  {
+    "name": "owner reason is recorded even when no current overlap needs it",
+    "count": 1
+  },
+  {
+    "name": "owner takeover still requires an idle pointer and a valid Plan in the claimed checkout",
+    "count": 1
+  },
+  {
+    "name": "parent backlog planned for in-progress",
+    "count": 1
+  },
+  {
+    "name": "parent done requires human",
+    "count": 1
+  },
+  {
+    "name": "parent in-progress unchanged",
+    "count": 1
+  },
+  {
+    "name": "partial Plan only is classified without mutation",
+    "count": 1
+  },
+  {
+    "name": "partial Story write with a retained transaction lock blocks automatic recovery",
+    "count": 1
+  },
+  {
+    "name": "path canonicalization normalizes, deduplicates, and sorts",
+    "count": 1
+  },
+  {
+    "name": "path traversal is rejected",
+    "count": 1
+  },
+  {
+    "name": "pending dependency is not eligible",
+    "count": 1
+  },
+  {
+    "name": "persisted allowlist missing a path is blocked",
+    "count": 1
+  },
+  {
+    "name": "persisted allowlist with an extra path is blocked",
+    "count": 1
+  },
+  {
+    "name": "persisted baseline is preferred",
+    "count": 1
+  },
+  {
+    "name": "persisted changed path allowlist exact match passes",
+    "count": 1
+  },
+  {
+    "name": "persisted reference digest is verified",
+    "count": 1
+  },
+  {
+    "name": "persisted reference digest mismatch is stale",
+    "count": 1
+  },
+  {
+    "name": "plan hash mismatch",
+    "count": 1
+  },
+  {
+    "name": "policy-drift compares the pinned commit with main and only reports information",
+    "count": 1
+  },
+  {
+    "name": "policy-drift treats paths absent from both policy commits as unchanged",
+    "count": 1
+  },
+  {
+    "name": "post-checkpoint implementation drift is stale",
+    "count": 1
+  },
+  {
+    "name": "post-write commit failure retains a visible autopilot recovery lock",
+    "count": 1
+  },
+  {
+    "name": "prepare is read-only and wrong expected HEAD is rejected",
+    "count": 1
+  },
+  {
+    "name": "prepare rejects product drift hidden by an assume-unchanged index flag",
+    "count": 1
+  },
+  {
+    "name": "preview preserves normative Story digest and derives File List from helper scope",
+    "count": 1
+  },
+  {
+    "name": "product blocker prevents in-progress",
+    "count": 1
+  },
+  {
+    "name": "product drift after durable approval is stale",
+    "count": 1
+  },
+  {
+    "name": "progression false blocks finalization",
+    "count": 1
+  },
+  {
+    "name": "projection preserves selected requirements and fail-closed freshness after context compaction",
+    "count": 1
+  },
+  {
+    "name": "projects only the selected slice with provenance and explicit unknown scope",
+    "count": 1
+  },
+  {
+    "name": "raw byte freshness still rejects changed EOL even when canonical blobs are equal",
+    "count": 1
+  },
+  {
+    "name": "read-only preparation, owner review and maintenance recovery do not consult a claim",
+    "count": 1
+  },
+  {
+    "name": "readiness dependency changes normative digest",
+    "count": 1
+  },
+  {
+    "name": "ready canonical Story is valid and completion-only sections are optional",
+    "count": 1
+  },
+  {
+    "name": "ready-for-dev projection also starts through Runner with explicit fingerprint",
+    "count": 1
+  },
+  {
+    "name": "ready-for-dev to in-progress allowed",
+    "count": 1
+  },
+  {
+    "name": "real action, check, and context paths emit bounded provenance events",
+    "count": 1
+  },
+  {
+    "name": "receipt binding survives Git line-ending conversion",
+    "count": 1
+  },
+  {
+    "name": "receipt detail changes never alter Story normative digest",
+    "count": 1
+  },
+  {
+    "name": "receipt digest is stable and excludes approval",
+    "count": 1
+  },
+  {
+    "name": "receipt digest tamper is STALE",
+    "count": 1
+  },
+  {
+    "name": "receipt validator rejects approval and mismatched bindings",
+    "count": 1
+  },
+  {
+    "name": "records one immutable event, repeats are NOOP, and conflicting payloads are rejected",
+    "count": 1
+  },
+  {
+    "name": "recovery binds D original and rework implementations without inventing historical verification",
+    "count": 1
+  },
+  {
+    "name": "recovery interruption at COMMITTED resumes explicitly without duplicate commit",
+    "count": 1
+  },
+  {
+    "name": "recovery interruption at COMMITTING resumes explicitly without duplicate commit",
+    "count": 1
+  },
+  {
+    "name": "recovery interruption at COMMIT_RETURNED resumes explicitly without duplicate commit",
+    "count": 1
+  },
+  {
+    "name": "recovery interruption at LOCKED resumes explicitly without duplicate commit",
+    "count": 1
+  },
+  {
+    "name": "recovery interruption at STAGED resumes explicitly without duplicate commit",
+    "count": 1
+  },
+  {
+    "name": "recovery prepare is read-only, LF/CRLF projection is proven and apply consumes unchanged candidates once",
+    "count": 1
+  },
+  {
+    "name": "recovery preserves canonical INCOMPLETE and explicit manual NOT_RUN disclosure",
+    "count": 1
+  },
+  {
+    "name": "recovery projection rejects a re-signed candidate and executor code drift before mutation",
+    "count": 1
+  },
+  {
+    "name": "recovery rejects candidate-tamper preserving HEAD/index/files/locks",
+    "count": 1
+  },
+  {
+    "name": "recovery rejects cross-story preserving HEAD/index/files/locks",
+    "count": 1
+  },
+  {
+    "name": "recovery rejects executor preserving HEAD/index/files/locks",
+    "count": 1
+  },
+  {
+    "name": "recovery rejects extra-path preserving HEAD/index/files/locks",
+    "count": 1
+  },
+  {
+    "name": "recovery rejects fingerprint preserving HEAD/index/files/locks",
+    "count": 1
+  },
+  {
+    "name": "recovery rejects foreign-lock preserving HEAD/index/files/locks",
+    "count": 1
+  },
+  {
+    "name": "recovery rejects idle preserving HEAD/index/files/locks",
+    "count": 1
+  },
+  {
+    "name": "recovery rejects index-drift preserving HEAD/index/files/locks",
+    "count": 1
+  },
+  {
+    "name": "recovery rejects index-lock preserving HEAD/index/files/locks",
+    "count": 1
+  },
+  {
+    "name": "recovery rejects receipt-tamper preserving HEAD/index/files/locks",
+    "count": 1
+  },
+  {
+    "name": "recovery rejects scope-omission preserving HEAD/index/files/locks",
+    "count": 1
+  },
+  {
+    "name": "recovery rejects stale-head preserving HEAD/index/files/locks",
+    "count": 1
+  },
+  {
+    "name": "reflection and output budgets fail closed",
+    "count": 1
+  },
+  {
+    "name": "registry writer has a version-keyed reader and retains the v1 reader",
+    "count": 1
+  },
+  {
+    "name": "rejects symlinked cwd or referenced paths",
+    "count": 1
+  },
+  {
+    "name": "rejects traversal, foreign repository, secrets, oversized payloads, and malformed usage",
+    "count": 1
+  },
+  {
+    "name": "rejects traversal, unavailable executables, and timeouts without PASS",
+    "count": 1
+  },
+  {
+    "name": "release abort archives only the record and merged release removes it",
+    "count": 1
+  },
+  {
+    "name": "relevant staged path is blocked",
+    "count": 1
+  },
+  {
+    "name": "relevant unstaged path is blocked",
+    "count": 1
+  },
+  {
+    "name": "relevant untracked drift is blocked",
+    "count": 1
+  },
+  {
+    "name": "relevant untracked path is blocked",
+    "count": 1
+  },
+  {
+    "name": "renaming a file into scope still fails for its out-of-scope source",
+    "count": 1
+  },
+  {
+    "name": "repeated issue creates at most three bounded candidates and never applies one",
+    "count": 1
+  },
+  {
+    "name": "repository checkouts keep V4 Story artifacts LF",
+    "count": 1
+  },
+  {
+    "name": "resource configuration and declarations reject unknown, malformed and duplicate names",
+    "count": 1
+  },
+  {
+    "name": "resource overlap refuses disjoint scope and cannot be bypassed by an overlap override",
+    "count": 1
+  },
+  {
+    "name": "retirement binds maintenance changes and rejects a stale preview",
+    "count": 1
+  },
+  {
+    "name": "retirement resumes interrupted owned-lock archival without replacing evidence",
+    "count": 1
+  },
+  {
+    "name": "reverse transition needs human",
+    "count": 1
+  },
+  {
+    "name": "review freshness requires exact checkpoint, risk binding and ordered evidence scope",
+    "count": 1
+  },
+  {
+    "name": "review policy: ERROR",
+    "count": 1
+  },
+  {
+    "name": "review policy: FAIL",
+    "count": 1
+  },
+  {
+    "name": "review policy: HIGH human",
+    "count": 1
+  },
+  {
+    "name": "review policy: HIGH independent lead",
+    "count": 1
+  },
+  {
+    "name": "review policy: HIGH same lead",
+    "count": 1
+  },
+  {
+    "name": "review policy: LOW canonical PASS without flags",
+    "count": 1
+  },
+  {
+    "name": "review policy: LOW flagged without reviewer",
+    "count": 1
+  },
+  {
+    "name": "review policy: LOW structured review",
+    "count": 1
+  },
+  {
+    "name": "review policy: MEDIUM human review",
+    "count": 1
+  },
+  {
+    "name": "review policy: MEDIUM independent lead",
+    "count": 1
+  },
+  {
+    "name": "review policy: MEDIUM no reviewer",
+    "count": 1
+  },
+  {
+    "name": "review policy: MEDIUM same lead",
+    "count": 1
+  },
+  {
+    "name": "review policy: VALID correction at attempt 3",
+    "count": 1
+  },
+  {
+    "name": "review policy: VALID correction exhausted at attempt 4",
+    "count": 1
+  },
+  {
+    "name": "review policy: canonical FAIL",
+    "count": 1
+  },
+  {
+    "name": "review policy: failed checks outrank rework",
+    "count": 1
+  },
+  {
+    "name": "review policy: false positives are closed",
+    "count": 1
+  },
+  {
+    "name": "review policy: focused ERROR",
+    "count": 1
+  },
+  {
+    "name": "review policy: focused FAIL",
+    "count": 1
+  },
+  {
+    "name": "review policy: focused empty",
+    "count": 1
+  },
+  {
+    "name": "review policy: focused missing",
+    "count": 1
+  },
+  {
+    "name": "review policy: focused omitted",
+    "count": 1
+  },
+  {
+    "name": "review policy: human decision",
+    "count": 1
+  },
+  {
+    "name": "review policy: incomplete PASS",
+    "count": 1
+  },
+  {
+    "name": "review policy: incomplete coverage",
+    "count": 1
+  },
+  {
+    "name": "review policy: mixed VALID and ambiguity",
+    "count": 1
+  },
+  {
+    "name": "review policy: spec ambiguity",
+    "count": 1
+  },
+  {
+    "name": "review receipt dialect separates schema 2, bound schema 1 and legacy schema 1 receipts",
+    "count": 1
+  },
+  {
+    "name": "review receipt edited after Plan binding fails closed",
+    "count": 1
+  },
+  {
+    "name": "review receipt with cross-scope evidence fails closed",
+    "count": 1
+  },
+  {
+    "name": "review receipt with duplicated evidence hunk fails closed",
+    "count": 1
+  },
+  {
+    "name": "review receipt with missing evidence refs fails closed",
+    "count": 1
+  },
+  {
+    "name": "review receipt with missing risk context fails closed",
+    "count": 1
+  },
+  {
+    "name": "review receipt with missing scope digest fails closed",
+    "count": 1
+  },
+  {
+    "name": "review receipt with partial multi-path evidence fails closed",
+    "count": 1
+  },
+  {
+    "name": "review receipt with reordered multi-path evidence fails closed",
+    "count": 1
+  },
+  {
+    "name": "review receipt with stale risk context fails closed",
+    "count": 1
+  },
+  {
+    "name": "review receipt with stale scope digest fails closed",
+    "count": 1
+  },
+  {
+    "name": "review receipt with tampered evidence body digest fails closed",
+    "count": 1
+  },
+  {
+    "name": "review snapshot requires real finalization and completed event requires fresh approval",
+    "count": 1
+  },
+  {
+    "name": "review state without a finalization receipt is invalid",
+    "count": 1
+  },
+  {
+    "name": "review to done requires human approval",
+    "count": 1
+  },
+  {
+    "name": "review verdict and blocking findings are enforced",
+    "count": 1
+  },
+  {
+    "name": "review without approval is BLOCKED but emits the exact Human Gate preview",
+    "count": 1
+  },
+  {
+    "name": "reviewed commit mismatch makes review stale",
+    "count": 1
+  },
+  {
+    "name": "reviewed dependency is eligible",
+    "count": 1
+  },
+  {
+    "name": "reviewed slice without its review receipt is blocked even when no review was due",
+    "count": 1
+  },
+  {
+    "name": "rework cannot add, remove or change committed slice risk",
+    "count": 1
+  },
+  {
+    "name": "rework cannot approve or move to E and interruption retry does not duplicate metadata commits",
+    "count": 1
+  },
+  {
+    "name": "rework cannot change another slice risk",
+    "count": 1
+  },
+  {
+    "name": "rework is append-only, creates attempt identity, and never runs the successor",
+    "count": 1
+  },
+  {
+    "name": "rework rejects cross identity, stale fingerprint, dirty scope, and foreign lock without mutation",
+    "count": 1
+  },
+  {
+    "name": "rewritten history fails even when the tree is in scope",
+    "count": 1
+  },
+  {
+    "name": "risk context structural mismatch makes review stale",
+    "count": 1
+  },
+  {
+    "name": "risk, path, and current-head mismatch do not inject advisory memory",
+    "count": 1
+  },
+  {
+    "name": "routes mapped-only, unmapped-only, and mixed scope without dropping changed paths",
+    "count": 1
+  },
+  {
+    "name": "safe line endings and trailing whitespace do not change digest",
+    "count": 1
+  },
+  {
+    "name": "same state no change",
+    "count": 1
+  },
+  {
+    "name": "same-Lead APPROVE accepts one ordered evidence set covering five changed paths",
+    "count": 1
+  },
+  {
+    "name": "same-Lead APPROVE requires exact bounded evidence and persists verification plus review receipts",
+    "count": 1
+  },
+  {
+    "name": "same-scope lock blocks concurrent invocation",
+    "count": 1
+  },
+  {
+    "name": "same-state apply creates no lifecycle commit",
+    "count": 1
+  },
+  {
+    "name": "schema v1 metadata commit is Plan-only",
+    "count": 1
+  },
+  {
+    "name": "schema v2 commits implementation then Plan plus receipt",
+    "count": 1
+  },
+  {
+    "name": "schema-1 Plan validates its optional resource list",
+    "count": 1
+  },
+  {
+    "name": "schema-2 Plan validates its optional resource list",
+    "count": 1
+  },
+  {
+    "name": "schema-v1 complete_story remains unsupported",
+    "count": 1
+  },
+  {
+    "name": "schema-v2 AGY slice rejects authority AGY scope entry",
+    "count": 1
+  },
+  {
+    "name": "schema-v2 AGY slice rejects invalid AGY scope entry",
+    "count": 1
+  },
+  {
+    "name": "schema-v2 AGY slice rejects invalid executor",
+    "count": 1
+  },
+  {
+    "name": "schema-v2 AGY slice rejects missing AGY checks",
+    "count": 1
+  },
+  {
+    "name": "schema-v2 AGY slice rejects missing AGY scope",
+    "count": 1
+  },
+  {
+    "name": "schema-v2 AGY slice requires and accepts a normalized product scope and checks",
+    "count": 1
+  },
+  {
+    "name": "schema-v2 fixture is READY with disclosures at finalization entry state",
+    "count": 1
+  },
+  {
+    "name": "schema-v2 fixture remains readable before finalization",
+    "count": 1
+  },
+  {
+    "name": "schema-v2 lead slice accepts a normalized allowlist scope without AGY checks",
+    "count": 1
+  },
+  {
+    "name": "schema-v2 review state accepts a receipt-recorded LOW NO_REVIEW verified slice",
+    "count": 1
+  },
+  {
+    "name": "schema-v2 review state rejects a verified slice with MEDIUM Story without slice risk",
+    "count": 1
+  },
+  {
+    "name": "schema-v2 review state rejects a verified slice with MEDIUM slice",
+    "count": 1
+  },
+  {
+    "name": "schema-v2 review state rejects a verified slice with Plan review.required true",
+    "count": 1
+  },
+  {
+    "name": "schema-v2 review state rejects a verified slice with missing receipt escalation",
+    "count": 1
+  },
+  {
+    "name": "schema-v2 review state rejects a verified slice with receipt escalation REVIEW_REQUIRED",
+    "count": 1
+  },
+  {
+    "name": "schema-v2 review state rejects a verified slice with receipt escalation risk MEDIUM",
+    "count": 1
+  },
+  {
+    "name": "schema-v2 review state validates finalization receipt and complete_story successor",
+    "count": 1
+  },
+  {
+    "name": "schema-v2 slice scope rejects non-normalized lead scope entry",
+    "count": 1
+  },
+  {
+    "name": "schema-v2 slice scope rejects schema-v1 scope object on a lead slice",
+    "count": 1
+  },
+  {
+    "name": "schema-v2 slice scope rejects schema-v1 scope object on an AGY slice",
+    "count": 1
+  },
+  {
+    "name": "scope digests are stable across repeated read-only checks",
+    "count": 1
+  },
+  {
+    "name": "scope overlap respects exact files and directory boundaries in both directions",
+    "count": 1
+  },
+  {
+    "name": "selection is capped at three whole entries and six KiB with provenance intact",
+    "count": 1
+  },
+  {
+    "name": "separate committed executor repairs a legacy staged checkpoint only through explicit bounded Runner recovery",
+    "count": 1
+  },
+  {
+    "name": "separated pending Plan validates and implementation starts FRESH",
+    "count": 1
+  },
+  {
+    "name": "session checkpoints stay PARTIAL/UNKNOWN and close does not claim provider session truth",
+    "count": 1
+  },
+  {
+    "name": "snapshot mismatch",
+    "count": 1
+  },
+  {
+    "name": "source digest is fresh",
+    "count": 1
+  },
+  {
+    "name": "source or relevant path drift makes experience stale and excludes it",
+    "count": 1
+  },
+  {
+    "name": "sprint hash mismatch",
+    "count": 1
+  },
+  {
+    "name": "sprint review with Plan in-progress requires reconciliation",
+    "count": 1
+  },
+  {
+    "name": "sprint snapshot mismatch classified",
+    "count": 1
+  },
+  {
+    "name": "sprint-only done projection is PARTIAL_SPRINT_ONLY",
+    "count": 1
+  },
+  {
+    "name": "sprint-only done projection requires reconciliation",
+    "count": 1
+  },
+  {
+    "name": "sprint-only partial is classified without cleanup",
+    "count": 1
+  },
+  {
+    "name": "staged implementation drift is blocked",
+    "count": 1
+  },
+  {
+    "name": "staged recovery binds authority, evidence, executor and target without rejection writes",
+    "count": 1
+  },
+  {
+    "name": "staged recovery rejects and preserves all state on Git attribute drift",
+    "count": 1
+  },
+  {
+    "name": "staged recovery rejects and preserves all state on Git config drift",
+    "count": 1
+  },
+  {
+    "name": "staged recovery rejects and preserves all state on HEAD drift",
+    "count": 1
+  },
+  {
+    "name": "staged recovery rejects and preserves all state on cross Story",
+    "count": 1
+  },
+  {
+    "name": "staged recovery rejects and preserves all state on cross slice",
+    "count": 1
+  },
+  {
+    "name": "staged recovery rejects and preserves all state on foreign lock",
+    "count": 1
+  },
+  {
+    "name": "staged recovery rejects and preserves all state on index blob drift",
+    "count": 1
+  },
+  {
+    "name": "staged recovery rejects and preserves all state on index mode drift",
+    "count": 1
+  },
+  {
+    "name": "staged recovery rejects and preserves all state on journal drift",
+    "count": 1
+  },
+  {
+    "name": "staged recovery rejects and preserves all state on metadata already written",
+    "count": 1
+  },
+  {
+    "name": "staged recovery rejects and preserves all state on missing explicit authorization",
+    "count": 1
+  },
+  {
+    "name": "staged recovery rejects and preserves all state on raw byte drift",
+    "count": 1
+  },
+  {
+    "name": "staged recovery rejects and preserves all state on scope drift",
+    "count": 1
+  },
+  {
+    "name": "staged recovery retry is idempotent after interruption AFTER_COMMIT1",
+    "count": 1
+  },
+  {
+    "name": "staged recovery retry is idempotent after interruption AFTER_COMMIT1_BEFORE_JOURNAL",
+    "count": 1
+  },
+  {
+    "name": "staged recovery retry is idempotent after interruption AFTER_COMMIT2_BEFORE_JOURNAL",
+    "count": 1
+  },
+  {
+    "name": "staged recovery retry is idempotent after interruption AFTER_COMMIT2_HOOK",
+    "count": 1
+  },
+  {
+    "name": "staged recovery retry is idempotent after interruption AFTER_COMPLETE_BEFORE_RELEASE",
+    "count": 1
+  },
+  {
+    "name": "staged recovery retry is idempotent after interruption AFTER_METADATA_STAGE",
+    "count": 1
+  },
+  {
+    "name": "staged recovery retry is idempotent after interruption AFTER_WRITE",
+    "count": 1
+  },
+  {
+    "name": "staged recovery retry is idempotent after interruption BEFORE_COMMIT1",
+    "count": 1
+  },
+  {
+    "name": "stale HEAD, digest, index, and dirty artifacts cannot be excluded",
+    "count": 1
+  },
+  {
+    "name": "stale Human approval is rejected by scope binding",
+    "count": 1
+  },
+  {
+    "name": "stale approval is classified without repair",
+    "count": 1
+  },
+  {
+    "name": "stale review freshness blocks finalization",
+    "count": 1
+  },
+  {
+    "name": "stale source digest rejected",
+    "count": 1
+  },
+  {
+    "name": "stale worktree/policy and wrong identity fail closed",
+    "count": 1
+  },
+  {
+    "name": "start rejects active runtime without writing",
+    "count": 1
+  },
+  {
+    "name": "start rejects checkpoint field without writing",
+    "count": 1
+  },
+  {
+    "name": "start rejects completion approval without writing",
+    "count": 1
+  },
+  {
+    "name": "start rejects current slice has prerequisites without writing",
+    "count": 1
+  },
+  {
+    "name": "start rejects duplicate dependency without writing",
+    "count": 1
+  },
+  {
+    "name": "start rejects epic changed without writing",
+    "count": 1
+  },
+  {
+    "name": "start rejects orphan receipt without writing",
+    "count": 1
+  },
+  {
+    "name": "start rejects product blocker without writing",
+    "count": 1
+  },
+  {
+    "name": "start rejects readiness absent without writing",
+    "count": 1
+  },
+  {
+    "name": "start rejects review metadata without writing",
+    "count": 1
+  },
+  {
+    "name": "start rejects started slice without writing",
+    "count": 1
+  },
+  {
+    "name": "start rejects story lifecycle differs without writing",
+    "count": 1
+  },
+  {
+    "name": "start rejects task already checked without writing",
+    "count": 1
+  },
+  {
+    "name": "start rejects unapproved planning without writing",
+    "count": 1
+  },
+  {
+    "name": "start rejects unfinished dependency without writing",
+    "count": 1
+  },
+  {
+    "name": "start rejects unknown dependency without writing",
+    "count": 1
+  },
+  {
+    "name": "start rejects unresolved question without writing",
+    "count": 1
+  },
+  {
+    "name": "start rejects wrong approval digest without writing",
+    "count": 1
+  },
+  {
+    "name": "status flags stale and orphaned records without automatic takeover or deletion",
+    "count": 1
+  },
+  {
+    "name": "status shows held hot paths and an integrating Story without changing its record",
+    "count": 1
+  },
+  {
+    "name": "story ID mismatch",
+    "count": 1
+  },
+  {
+    "name": "structured AC evidence covers every AC",
+    "count": 1
+  },
+  {
+    "name": "structured alternate verification recovery rejects open findings before transaction mutation",
+    "count": 1
+  },
+  {
+    "name": "structured approval input is explicit and generic continuation is rejected",
+    "count": 1
+  },
+  {
+    "name": "structured autopilot authority is Plan-bound in one exact-path commit and can be revoked",
+    "count": 1
+  },
+  {
+    "name": "structured evidence that contradicts the checkpoint is blocked",
+    "count": 1
+  },
+  {
+    "name": "structured immutable evidence is reusable",
+    "count": 1
+  },
+  {
+    "name": "structured receipt NEEDS_HUMAN_DECISION",
+    "count": 1
+  },
+  {
+    "name": "structured receipt SPEC_AMBIGUITY",
+    "count": 1
+  },
+  {
+    "name": "structured receipt VALID",
+    "count": 1
+  },
+  {
+    "name": "structured receipt conflicting decisions with findings",
+    "count": 1
+  },
+  {
+    "name": "structured receipt duplicate finding",
+    "count": 1
+  },
+  {
+    "name": "structured receipt false positive",
+    "count": 1
+  },
+  {
+    "name": "structured receipt human",
+    "count": 1
+  },
+  {
+    "name": "structured receipt independence mismatch",
+    "count": 1
+  },
+  {
+    "name": "structured receipt independent AGY lead",
+    "count": 1
+  },
+  {
+    "name": "structured receipt invalid class",
+    "count": 1
+  },
+  {
+    "name": "structured receipt invalid type",
+    "count": 1
+  },
+  {
+    "name": "structured receipt invalid vendor",
+    "count": 1
+  },
+  {
+    "name": "structured receipt legacy string",
+    "count": 1
+  },
+  {
+    "name": "structured receipt missing independence",
+    "count": 1
+  },
+  {
+    "name": "structured receipt non-array findings",
+    "count": 1
+  },
+  {
+    "name": "structured receipt same lead",
+    "count": 1
+  },
+  {
+    "name": "structured receipt schema1 structured reviewer",
+    "count": 1
+  },
+  {
+    "name": "structured receipt unsafe path",
+    "count": 1
+  },
+  {
+    "name": "structured receipt valid changes required",
+    "count": 1
+  },
+  {
+    "name": "structured receipt verdict approval with open finding",
+    "count": 1
+  },
+  {
+    "name": "structured review NEEDS_HUMAN_DECISION validates before persisting",
+    "count": 1
+  },
+  {
+    "name": "structured review SPEC_AMBIGUITY validates before persisting",
+    "count": 1
+  },
+  {
+    "name": "structured review VALID validates before persisting",
+    "count": 1
+  },
+  {
+    "name": "structured review conflicting decisions validates before persisting",
+    "count": 1
+  },
+  {
+    "name": "structured review false independence validates before persisting",
+    "count": 1
+  },
+  {
+    "name": "structured review malformed findings validates before persisting",
+    "count": 1
+  },
+  {
+    "name": "structured review malformed reviewer validates before persisting",
+    "count": 1
+  },
+  {
+    "name": "structured review structured human validates before persisting",
+    "count": 1
+  },
+  {
+    "name": "structured review structured lead validates before persisting",
+    "count": 1
+  },
+  {
+    "name": "structured verification fields remain schema-v1 compatible",
+    "count": 1
+  },
+  {
+    "name": "subject drift and unsupported Node range make evidence non-reusable",
+    "count": 1
+  },
+  {
+    "name": "summary preserves measured, partial, and unknown coverage without making lifecycle decisions",
+    "count": 1
+  },
+  {
+    "name": "supported action finalize_story",
+    "count": 1
+  },
+  {
+    "name": "supported action implement_slice",
+    "count": 1
+  },
+  {
+    "name": "supported action plan_slice",
+    "count": 1
+  },
+  {
+    "name": "supported action reconcile_lifecycle",
+    "count": 1
+  },
+  {
+    "name": "supported action request_gate",
+    "count": 1
+  },
+  {
+    "name": "supported action resolve_blocker",
+    "count": 1
+  },
+  {
+    "name": "supported action review_slice",
+    "count": 1
+  },
+  {
+    "name": "supported action verify_slice",
+    "count": 1
+  },
+  {
+    "name": "takeover preserves pin and fences old heartbeat and release generations",
+    "count": 1
+  },
+  {
+    "name": "tampered finalization receipt fails closed after approval",
+    "count": 1
+  },
+  {
+    "name": "tampered referenced receipt digest fails",
+    "count": 1
+  },
+  {
+    "name": "tampering a reviewed MEDIUM slice to verified with review.required false is blocked by the receipt",
+    "count": 1
+  },
+  {
+    "name": "terminal Story metadata edited after completion is stale even behind a merge",
+    "count": 1
+  },
+  {
+    "name": "terminal Story stays healthy after an integration merge and is evaluated at its completion commit",
+    "count": 1
+  },
+  {
+    "name": "terminal check at the completion commit itself keeps the direct parent-chain binding",
+    "count": 1
+  },
+  {
+    "name": "the delivered contract file is exempt only while unmodified",
+    "count": 1
+  },
+  {
+    "name": "the next implementation binds to the new receipt path and attempt id",
+    "count": 1
+  },
+  {
+    "name": "the shared claim lock is adjacent to the Story lock and remains owner-only",
+    "count": 1
+  },
+  {
+    "name": "tracked deletion remains reviewable",
+    "count": 1
+  },
+  {
+    "name": "tracked modified text remains reviewable",
+    "count": 1
+  },
+  {
+    "name": "tracked oversized hunk and tampered unit sequences are rejected",
+    "count": 1
+  },
+  {
+    "name": "transaction identity is per repository/worktree/action/slice scope",
+    "count": 1
+  },
+  {
+    "name": "transaction stages and commits exact implementation and metadata scopes",
+    "count": 1
+  },
+  {
+    "name": "two claim processes have exactly one winner",
+    "count": 1
+  },
+  {
+    "name": "two-slice Story with a LOW NO_REVIEW slice and a reviewed MEDIUM slice finalizes and completes",
+    "count": 1
+  },
+  {
+    "name": "unchanged tracked path retains no-change outcome",
+    "count": 1
+  },
+  {
+    "name": "uncommitted Story transition is UNCOMMITTED_FINALIZATION",
+    "count": 1
+  },
+  {
+    "name": "uncommitted completion metadata is a repairable partial transition",
+    "count": 1
+  },
+  {
+    "name": "uncommitted durable approval bytes are APPROVAL_PREVIEW_ONLY",
+    "count": 1
+  },
+  {
+    "name": "uncommitted product drift after durable approval is stale",
+    "count": 1
+  },
+  {
+    "name": "uncommitted terminal Plan edits are stale and a wrong expected head is reported",
+    "count": 1
+  },
+  {
+    "name": "uncovered AC blocks finalization",
+    "count": 1
+  },
+  {
+    "name": "uncovered Task",
+    "count": 1
+  },
+  {
+    "name": "unknown Task AC",
+    "count": 1
+  },
+  {
+    "name": "unknown action",
+    "count": 1
+  },
+  {
+    "name": "unknown pending scope refuses a claim without a record",
+    "count": 1
+  },
+  {
+    "name": "unknown slice status is rejected",
+    "count": 1
+  },
+  {
+    "name": "unknown state invalid",
+    "count": 1
+  },
+  {
+    "name": "unknown task ref",
+    "count": 1
+  },
+  {
+    "name": "unmarked requirement prose is rejected instead of silently omitted from digest",
+    "count": 1
+  },
+  {
+    "name": "unrelated tracked worktree change",
+    "count": 1
+  },
+  {
+    "name": "unrelated untracked file does not stale the slice",
+    "count": 1
+  },
+  {
+    "name": "unresolved question present is blocked",
+    "count": 1
+  },
+  {
+    "name": "unresolved questions block finalization",
+    "count": 1
+  },
+  {
+    "name": "unsafe hypothesis remains a rejected candidate and never becomes executable input",
+    "count": 1
+  },
+  {
+    "name": "unstaged implementation drift is blocked",
+    "count": 1
+  },
+  {
+    "name": "unsupported Plan schema is INVALID",
+    "count": 1
+  },
+  {
+    "name": "unsupported registry versions refuse every operation and preserve the record",
+    "count": 1
+  },
+  {
+    "name": "unsupported schema",
+    "count": 1
+  },
+  {
+    "name": "untracked unrelated file is never staged or committed",
+    "count": 1
+  },
+  {
+    "name": "unwritten retirement rejects dirty-metadata without changing recovery evidence",
+    "count": 1
+  },
+  {
+    "name": "unwritten retirement rejects dirty-product without changing recovery evidence",
+    "count": 1
+  },
+  {
+    "name": "unwritten retirement rejects foreign-lock without changing recovery evidence",
+    "count": 1
+  },
+  {
+    "name": "unwritten retirement rejects non-idle without changing recovery evidence",
+    "count": 1
+  },
+  {
+    "name": "unwritten retirement rejects staged-work without changing recovery evidence",
+    "count": 1
+  },
+  {
+    "name": "unwritten retirement rejects wrong-checkpoint without changing recovery evidence",
+    "count": 1
+  },
+  {
+    "name": "upstream Epic must be committed even when an ignored local copy matches its digest",
+    "count": 1
+  },
+  {
+    "name": "upstream Epic section freshness is enforced",
+    "count": 1
+  },
+  {
+    "name": "usage normalization keeps unknown values explicit and does not double-count parent exports or reasoning subsets",
+    "count": 1
+  },
+  {
+    "name": "valid AGY receipt binds worker evidence and its scope gate",
+    "count": 1
+  },
+  {
+    "name": "valid READY fixture",
+    "count": 1
+  },
+  {
+    "name": "valid checkpoint slice is ready for rerunning legacy focused evidence",
+    "count": 1
+  },
+  {
+    "name": "valid dependency chain passes",
+    "count": 1
+  },
+  {
+    "name": "valid dot-prefixed name remains inside the repository",
+    "count": 1
+  },
+  {
+    "name": "valid receipt binds to checkpoint and referenced content",
+    "count": 1
+  },
+  {
+    "name": "validated canonical recipe provenance infers applicability without relabeling INCOMPLETE",
+    "count": 1
+  },
+  {
+    "name": "verification metadata cannot add, remove or change committed slice risk",
+    "count": 1
+  },
+  {
+    "name": "verification metadata cannot change another slice risk",
+    "count": 1
+  },
+  {
+    "name": "verification metadata recovery resumes an interrupted commit without replay",
+    "count": 1
+  },
+  {
+    "name": "verification recovery resumes after-metadata-stage without regenerating evidence",
+    "count": 1
+  },
+  {
+    "name": "verification recovery resumes after-write without regenerating evidence",
+    "count": 1
+  },
+  {
+    "name": "verification v2: checkpoint without verification receipt requires rerun",
+    "count": 1
+  },
+  {
+    "name": "verification v2: completion edit does not invalidate checkpoint",
+    "count": 1
+  },
+  {
+    "name": "verification v2: fresh verification receipt can be reused",
+    "count": 1
+  },
+  {
+    "name": "verification v2: normative Story edit is STALE",
+    "count": 1
+  },
+  {
+    "name": "verification v2: post-checkpoint implementation drift is STALE",
+    "count": 1
+  },
+  {
+    "name": "verification v2: receipt tamper is STALE",
+    "count": 1
+  },
+  {
+    "name": "verification v2: wrong checkpoint binding fails closed",
+    "count": 1
+  },
+  {
+    "name": "verified LOW slice in MEDIUM Story with a NO_REVIEW receipt is final-ready",
+    "count": 1
+  },
+  {
+    "name": "verified dependency with unsatisfied required review is blocked",
+    "count": 1
+  },
+  {
+    "name": "verified progression-eligible dependency without required review is eligible",
+    "count": 1
+  },
+  {
+    "name": "verified slice whose Plan adds review.required true is not final-ready",
+    "count": 1
+  },
+  {
+    "name": "worker commits are inspected and can be forbidden",
+    "count": 1
+  },
+  {
+    "name": "working tree drift on final scope is STALE",
+    "count": 1
+  },
+  {
+    "name": "write failures report a coverage gap and never mutate the runtime pointer",
+    "count": 1
+  },
+  {
+    "name": "wrong changed path digest",
+    "count": 1
+  },
+  {
+    "name": "wrong checkpoint SHA",
+    "count": 1
+  },
+  {
+    "name": "wrong current slice is blocked",
+    "count": 1
+  },
+  {
+    "name": "wrong next action is blocked",
+    "count": 1
+  },
+  {
+    "name": "wrong slice ID",
+    "count": 1
+  },
+  {
+    "name": "wrong story ID",
+    "count": 1
+  },
+  {
+    "name": "wrong verification successor is rejected before creating a transaction or lock",
+    "count": 1
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-concurrency=1",
+    ".agents/scripts/finalize-story.test.mjs"
+  ],
+  "head": "87469b76b45eddd569d6090d422a4158f12218e0",
+  "wall_seconds": 309.6501019001007,
+  "exit_code": 0
+}

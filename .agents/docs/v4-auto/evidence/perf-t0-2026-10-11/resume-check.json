@@ -1,0 +1,48 @@
+{
+  "checked_at": "2026-10-11T13:23:06.845703+00:00",
+  "status": "STOPPED_NEW_MAIN_SOURCE_DRIFT",
+  "owner_decision": "Baseline invariant corrected to 800 tests, 799 pass, 1 existing skip, 0 fail because existing main commit 74c7372 added one test; no weakening authorized.",
+  "head": "87469b76b45eddd569d6090d422a4158f12218e0",
+  "main_now": "2d64650ab97d96c779e6850ea8f60815ff626cf9",
+  "main_at_default_baseline": "37217853b548382ff058a7047f807d2adb687cf9",
+  "baseline_metadata_head_matches": true,
+  "baseline_log_names_match_golden": true,
+  "golden_occurrences": 800,
+  "golden_multiline_names": 7,
+  "golden_multiplicity": {
+    "1": 800
+  },
+  "golden_sha256": "c26f85e4f087ef6d82b769b29a63dfc288474ecdb14f8e89e6a73a35264c9393",
+  "added_by_74c7372": [
+    "a CRLF working Epic under core.autocrlf still matches the committed LF section digest"
+  ],
+  "incoming_added_test_names": [
+    "option flags such as --format are not destructive commands, but format/rm/del still are",
+    "rework accepts a checkpoint of any size and binds its exact paths (Story 1.7 F-17-2)",
+    "rework finds dependent slices by depends_on, not by the slice name E"
+  ],
+  "incoming_removed_test_names": [],
+  "incoming_source_changed": true,
+  "expected_count_after_rebase_from_diff_only": 803,
+  "new_main_suite_executed": false,
+  "local_protected_diff": "",
+  "pointer": {
+    "schemaVersion": 1,
+    "activeRunId": null,
+    "storyId": null,
+    "status": "IDLE",
+    "updatedAt": "2026-09-22T06:13:26.3964611+00:00"
+  },
+  "pointer_sha256": "5febd755d0136d14d573383bd88f33e8856acbaa0b4a2d25fd592e1820811ae4",
+  "branch": "perf/v4-test-suite",
+  "checkout": "D:/Workspace/Tu_Hoc/v4-test-perf",
+  "git_status": [
+    "M .agents/docs/v4-auto/perf-v4-test-suite.md",
+    "?? .agents/docs/v4-auto/evidence/",
+    "?? .agents/docs/v4-auto/perf-t0-report.md"
+  ],
+  "rebase_executed_this_round": false,
+  "instrumentation_applied": false,
+  "new_measurements_executed": false,
+  "commits_created": []
+}

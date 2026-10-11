@@ -1,0 +1,32 @@
+[
+  {
+    "source": "D:\\Workspace\\Tu_Hoc\\v4-test-perf\\.agents\\scripts\\v4-verification-flow.test.mjs",
+    "source_sha256": "63dfc01e7f891cf2de49e29a9fb78d57994e71f3052d915e53dd6d98467d6eb0",
+    "end_line": 225,
+    "extracted_sha256": "7e9bf38e55ddecfd95b138dbdaca2244fa6974c0db3a1e87e7ccb49d1a5c0831"
+  },
+  {
+    "source": "D:\\Workspace\\Tu_Hoc\\v4-test-perf\\.agents\\scripts\\finalize-story.test.mjs",
+    "source_sha256": "1ed3e7cd068e577915f1acf4db49dc7b78a306f57e0d77c2f3b87fa62b0e6b3e",
+    "end_line": 227,
+    "extracted_sha256": "873fd8726ca75fa73780afc10c1ebb9792b16d3f94080f0cfddc86799fbb37fa"
+  },
+  {
+    "source": "D:\\Workspace\\Tu_Hoc\\v4-test-perf\\.agents\\scripts\\v4-action-kernel.test.mjs",
+    "source_sha256": "e6deccd71976b240fd7f878ff071a062ae5c38152db58f5cebe16a9b668738a3",
+    "end_line": 183,
+    "extracted_sha256": "6643f9c65ed0df05b1b68bcfb71ed9c3a24d512691f31fbd2ca489486188a914"
+  },
+  {
+    "source": "D:\\Workspace\\Tu_Hoc\\v4-test-perf\\.agents\\scripts\\v4-slice-transaction.test.mjs",
+    "source_sha256": "51ed72170a62419bf82038800475bef20aff3e73e210107c1d7c87d7f2ebecc5",
+    "end_line": 63,
+    "extracted_sha256": "6f0cdf2d52b18f52c28ba3033a9f778f1831ef9316586c74cf1cd8b945352cd6"
+  },
+  {
+    "source": "D:\\Workspace\\Tu_Hoc\\v4-test-perf\\.agents\\scripts\\v4-no-review-finalization.e2e.test.mjs",
+    "source_sha256": "23f444130d03752ba46a9dd5bc25d2eff2957b1d5d24e42a00bddd46daa8004b",
+    "end_line": 295,
+    "extracted_sha256": "830e29e9169eb8f5dc2ca52818751c821db166e31e9e9bebcda0c20286b74a25"
+  }
+]

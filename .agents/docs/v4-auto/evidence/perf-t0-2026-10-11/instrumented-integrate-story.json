@@ -1,0 +1,12 @@
+{
+  "command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-concurrency=1",
+    ".agents/scripts/integrate-story.test.mjs"
+  ],
+  "head": "87469b76b45eddd569d6090d422a4158f12218e0",
+  "wall_seconds": 175.22434140008409,
+  "exit_code": 0
+}

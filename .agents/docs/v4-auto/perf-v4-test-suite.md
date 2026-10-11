@@ -2,28 +2,42 @@
 
 Branch: `perf/v4-test-suite` (worktree `D:/Workspace/Tu_Hoc/v4-test-perf`), cut
 from `main` 3721785. Runs in parallel with Story work and never touches the main
-checkout. Status: **PLANNED**.
+checkout. Status: **T0 COMPLETE; T1–T4 NOT STARTED**. T0 source is pinned to
+`87469b7`; see [T0 report](perf-t0-report.md) and its evidence index.
 
 ## 0. Phase rules and rationale
 
 Follow `README.md` common rules and the V4 Lite migration lane in `AGENTS.md`:
 confirm `.agent-state/active-run.json` is `IDLE`, one Conventional Commit per
 task, full `npm run test:v4` plus the Python architecture test on every commit.
-Rebase onto `main` before each new round of work.
+**Owner exception for this performance campaign (T0–T4):** keep source baseline
+`87469b76b45eddd569d6090d422a4158f12218e0` (`87469b7`); do not rebase onto main
+during optimisation. New main commits do not stop or replace this baseline.
+Runtime IDLE, scope, verification and one Conventional Commit per task still
+apply. The invariant is all 800 baseline test names, preserving multiplicity,
+newlines and assertions. Rebase and reconcile new main tests before integration,
+then run the full suite and Python architecture test on the exact integration
+commit; the integrated suite is not constrained to count 800.
 
 **No weakening.** The suite must keep the same test names and assertions. The
-baseline on 2026-10-11 is 799 tests (798 passed, 1 skip for symlinks on Windows,
-0 failures). Tests may move between files but are never renamed, merged or
+baseline on 2026-10-11 is 800 tests (799 pass, 1 existing skip for symlinks on
+Windows, 0 fail), corrected with owner approval because existing main commit
+74c7372 added one test. Tests may move between files but are never renamed, merged or
 removed. The changes themselves are control-plane changes, so this plan never
 counts as a gate for driving a Story until the full suite passes on its commit.
 
 ## 1. Measurements (2026-10-11, Windows 11, 12 threads, Node 24.21.0)
 
-- Full `npm run test:v4` at the default concurrency (11 files at once): about
-  26 min wall time (`duration_ms` 1 560 122). `g5-runbook.md` records about
-  10 min, so contention (process spawning, Defender real-time scanning) is
-  likely part of the cost.
-- Per file, 4 files at once: 3 227 s in total. The heaviest files:
+- T0 full default concurrency (11 files at once): **16m30.206s** wall time,
+  Node `duration_ms` **990062.7761**. Existing complete evidence is reused:
+  baseline source and the golden list are unchanged.
+- T0 full `--test-concurrency=4`: **26m00.302s** wall time, Node `duration_ms`
+  **1560230.5514**. Both full runs: **800 tests, 799 pass, 1 existing skip,
+  0 fail**. They ran sequentially. Other test processes were observed on the
+  machine, so these single samples do not establish a concurrency speedup.
+- Python architecture: **46 tests + 46 subtests passed**, 0.42s pytest time.
+- The earlier planning sample below used 4 files at once: 3 227 s summed
+  file time. It is historical context, not the T0 baseline. The heaviest files:
 
 | File | Seconds |
 |---|---|
@@ -43,7 +57,8 @@ The other 41 files take under 130 s each, and most take under 20 s.
    `v4-verification-flow.test.mjs` writes about 20 files, runs `git init`,
    config and commit, then runs a real `implement_slice` (`prepareAction` plus
    `checkpointImplementation`) before it reaches the verification under test.
-   The 19 tests repeat this setup 19 times.
+   T0 measured 41 tests invoking this setup 43 times; setup took 240.492s
+   against 262.534s of body time in the isolated instrumented run.
 2. **The test code is synchronous** (`spawnSync`). The `concurrency` option of
    `node:test` inside one file therefore gains nothing, because the event loop
    is blocked. Only separate files, which run in separate processes, run in
@@ -53,7 +68,7 @@ The other 41 files take under 130 s each, and most take under 20 s.
 
 ## 3. Target
 
-Full `npm run test:v4` under 8 min on the same machine, with the same 799 test
+Full `npm run test:v4` under 8 min on the same machine, with the same 800 test
 names. This is a target to be confirmed by T0, not a promise.
 
 ## 4. Tasks
@@ -73,6 +88,14 @@ names. This is a target to be confirmed by T0, not a promise.
 
 Output: a fixture/test ratio for each file and the list of fixtures that are
 safe to cache. It decides how far T2 goes.
+
+**Completed:** [perf-t0-report.md](perf-t0-report.md) records all seven ratios,
+copy probes, cache boundaries and exact instrumentation restoration. T2 is
+bounded to portable seed repos with fresh root-bound functions and cloned
+consumer metadata. Completed/staged journals and linked integration topology
+must be rebuilt; rewriting absolute path strings is not sufficient to preserve
+identity/digest invariants. Callback variants require an explicit contract or
+the uncached builder. No cache or fixture extraction was implemented in T0.
 
 ### T1 — Extract fixtures into modules (pure refactor)
 
@@ -96,10 +119,13 @@ T2 and T3 both depend on T1.
 - Points to handle:
   - Run `git update-index --refresh` after the copy, since changed mtimes can
     make git report files as modified.
-  - Fixtures that record absolute paths or use worktrees (found in T0) are not
-    cached, or have those paths rewritten after the copy.
-  - Templates may be shared between tests, so return cloned, frozen metadata
-    objects so one test cannot corrupt another. Remove templates in `after()`.
+  - Follow the T0 cache boundaries: cache before transaction/claim/worktree
+    setup and rebuild that state on each copy. Do not rewrite journal identity,
+    locks or linked-worktree registration as a shortcut.
+  - Freeze pure template metadata; return separate cloned consumer metadata
+    that remains mutable where existing tests mutate it. Bind functions to the
+    new root; copying an object and changing `root` does not rebind closures.
+    Remove templates in `after()`.
   - Tests that build broken state on purpose (tamper, crash recovery) still copy
     the template, then break their own copy.
   - Add `V4_TEST_NO_CACHE=1` to fall back to the old per-test build.
@@ -123,7 +149,9 @@ T2 and T3 both depend on T1.
 - Only move tests between files; never rename them, so the golden list still
   matches.
 - `finalize-story.test.mjs` builds a module-level `executorFixture` (line 17).
-  After the split each file gets its own copy; confirm the tests only read it.
+  After the split each file gets its own copy. T0 confirmed that the executor
+  drift test temporarily writes and restores its code, so do not share this
+  executor across files or concurrently executing tests.
 
 ### T4 — Tune concurrency and lock in (optional)
 
@@ -151,8 +179,10 @@ the fixture/test ratio that T0 measures, so no number is claimed yet.
 ## 7. Integration
 
 The branch stays local until the owner asks to merge. Before merging, rebase
-onto `main`, run the full suite and the Python architecture test on the exact
-commit, and record the result in the `README.md` status table.
+onto `main`, reconcile all new main tests as well as the preserved baseline
+names/assertions, run the full suite and the Python architecture test on the
+exact integration commit, and record the result in the `README.md` status table.
+The integrated suite is not constrained to 800 tests.
 
 Optional, outside this plan: excluding `%TEMP%`, `git.exe` and `node.exe` from
 Windows Defender real-time scanning needs administrator rights and is the

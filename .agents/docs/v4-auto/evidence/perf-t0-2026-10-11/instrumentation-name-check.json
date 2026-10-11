@@ -1,0 +1,16 @@
+{
+  "baseline_occurrences": 800,
+  "instrumented_occurrences": 184,
+  "per_file_counts": {
+    "check-story-completion.test.mjs": 35,
+    "finalize-story.test.mjs": 33,
+    "integrate-story.test.mjs": 9,
+    "v4-action-kernel.test.mjs": 24,
+    "v4-no-review-finalization.e2e.test.mjs": 6,
+    "v4-slice-transaction.test.mjs": 36,
+    "v4-verification-flow.test.mjs": 41
+  },
+  "names_are_exact_golden_subset": true,
+  "restored_files": 10,
+  "all_files_restored_exactly": true
+}

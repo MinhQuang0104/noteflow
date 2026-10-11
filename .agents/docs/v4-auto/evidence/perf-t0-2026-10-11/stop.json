@@ -1,0 +1,23 @@
+{
+  "status": "STOPPED_DESIGN_CONTRADICTION",
+  "reason": "Plan fixes baseline and target at 799 test names; clean rebased checkout actually reports 800 tests, 799 pass, 1 skip, 0 fail. Preserving all names requires an 800-name golden list.",
+  "stopped_at": "2026-10-11T13:09:59.136299+00:00",
+  "completed": [
+    "preflight",
+    "rebase main",
+    "full default baseline",
+    "golden names including multiline names and multiplicity",
+    "read-only source audit"
+  ],
+  "not_completed": [
+    "full concurrency-4 measurement (interrupted on discovering contradiction)",
+    "Python architecture test",
+    "temporary instrumentation for seven heavy files",
+    "copy probes",
+    "fixture/body ratios",
+    "final T2 scope decision"
+  ],
+  "instrumentation_applied": false,
+  "implementation_changed": false,
+  "commits": []
+}

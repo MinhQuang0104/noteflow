@@ -1,0 +1,40 @@
+﻿{
+    "checkout":  "D:/Workspace/Tu_Hoc/v4-test-perf",
+    "branch":  "perf/v4-test-suite",
+    "head":  "87469b76b45eddd569d6090d422a4158f12218e0",
+    "main":  "37217853b548382ff058a7047f807d2adb687cf9",
+    "initialStatus":  "clean",
+    "canonicalStatus":  "clean",
+    "rebase":  "git rebase main: Current branch perf/v4-test-suite is up to date.",
+    "canonicalPointer":  {
+                             "schemaVersion":  1,
+                             "activeRunId":  null,
+                             "storyId":  null,
+                             "status":  "IDLE",
+                             "updatedAt":  "2026-09-22T06:13:26.3964611+00:00"
+                         },
+    "canonicalPointerSha256":  "5FEBD755D0136D14D573383BD88F33E8856ACBAA0B4A2D25FD592E1820811AE4",
+    "node":  "v24.21.0",
+    "git":  "git version 2.49.0.windows.1",
+    "availableParallelism":  12,
+    "cpu":  {
+                "Name":  "AMD Ryzen 5 5625U with Radeon Graphics         ",
+                "NumberOfCores":  6,
+                "NumberOfLogicalProcessors":  12
+            },
+    "policyComparison":  "AGENTS.md, .agents/routing/task-router.md, all v4-story-runner skill files match canonical main by SHA256; git diff main empty",
+    "worktrees":  [
+                      "worktree D:/Workspace/Tu_Hoc/New_Project_My_Note",
+                      "HEAD 37217853b548382ff058a7047f807d2adb687cf9",
+                      "branch refs/heads/main",
+                      "",
+                      "worktree D:/Workspace/Tu_Hoc/v4-rework-fix",
+                      "HEAD 2d64650ab97d96c779e6850ea8f60815ff626cf9",
+                      "branch refs/heads/fix/v4-general-rework",
+                      "",
+                      "worktree D:/Workspace/Tu_Hoc/v4-test-perf",
+                      "HEAD 87469b76b45eddd569d6090d422a4158f12218e0",
+                      "branch refs/heads/perf/v4-test-suite",
+                      ""
+                  ]
+}

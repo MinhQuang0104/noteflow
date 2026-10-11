@@ -1,0 +1,43 @@
+✔ structured approval input is explicit and generic continuation is rejected (1.7479ms)
+✔ approval record binds the complete exact review snapshot without account identity (1.4527ms)
+✔ completion gate API is read-only and exposes the exact preview for a fixture root (3.181ms)
+✔ review without approval is BLOCKED but emits the exact Human Gate preview (3262.3009ms)
+✔ durable exact approval is READY for completion and generic continuation cannot create it (5143.5305ms)
+✔ disclosures must be acknowledged and remain BLOCKED (5031.9526ms)
+✔ missing finalization receipt blocks completion (2191.7603ms)
+✔ Story-only done projection requires reconciliation (3472.7367ms)
+✔ Plan-only done projection requires reconciliation (3721.0085ms)
+✔ sprint-only done projection requires reconciliation (3372.2724ms)
+✔ approval story digest mismatch is stale (5071.5301ms)
+✔ approval receipt digest mismatch is stale (5099.8574ms)
+✔ approval Done Gate digest mismatch is stale (5415.6079ms)
+✔ approval scope digest mismatch is stale (5089.8757ms)
+✔ approval approved review HEAD mismatch is stale (5202.3614ms)
+✔ approval approved HEAD mismatch is stale (5132.3892ms)
+✔ approval in an uncommitted Plan is only an approval preview (4747.9784ms)
+✔ product drift after durable approval is stale (5263.6ms)
+✔ uncommitted product drift after durable approval is stale (5193.9602ms)
+✔ exact-scope multi-path review evidence keeps completion at the Human Gate (3534.7408ms)
+✔ review receipt with missing evidence refs fails closed (3240.4015ms)
+✔ review receipt with missing risk context fails closed (3318.3578ms)
+✔ review receipt with missing scope digest fails closed (3658.4019ms)
+✔ review receipt with stale risk context fails closed (3263.4088ms)
+✔ review receipt with stale scope digest fails closed (3253.3615ms)
+✔ review receipt with tampered evidence body digest fails closed (3433.8391ms)
+✔ review receipt with duplicated evidence hunk fails closed (3247.8277ms)
+✔ review receipt with reordered multi-path evidence fails closed (3534.4069ms)
+✔ review receipt with partial multi-path evidence fails closed (3571.5683ms)
+✔ review receipt with cross-scope evidence fails closed (3246.721ms)
+✔ review receipt edited after Plan binding fails closed (3660.7523ms)
+✔ terminal Story stays healthy after an integration merge and is evaluated at its completion commit (20445.8323ms)
+✔ terminal Story metadata edited after completion is stale even behind a merge (21083.0261ms)
+✔ uncommitted terminal Plan edits are stale and a wrong expected head is reported (23652.7857ms)
+✔ terminal check at the completion commit itself keeps the direct parent-chain binding (18630.5908ms)
+ℹ tests 35
+ℹ suites 0
+ℹ pass 35
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 197316.2114

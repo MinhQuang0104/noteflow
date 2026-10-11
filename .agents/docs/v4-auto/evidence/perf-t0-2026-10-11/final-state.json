@@ -1,0 +1,80 @@
+﻿{
+    "checkedAt":  "2026-10-11T20:11:19.1994131+07:00",
+    "head":  "87469b76b45eddd569d6090d422a4158f12218e0",
+    "branch":  "perf/v4-test-suite",
+    "gitStatus":  [
+                      "?? .agents/docs/v4-auto/evidence/",
+                      "?? .agents/docs/v4-auto/perf-t0-report.md"
+                  ],
+    "protectedDiff":  [
+
+                      ],
+    "pointer":  {
+                    "schemaVersion":  1,
+                    "activeRunId":  null,
+                    "storyId":  null,
+                    "status":  "IDLE",
+                    "updatedAt":  "2026-09-22T06:13:26.3964611+00:00"
+                },
+    "pointerSha256":  "5FEBD755D0136D14D573383BD88F33E8856ACBAA0B4A2D25FD592E1820811AE4",
+    "hashes":  [
+                   {
+                       "path":  "package.json",
+                       "worktree":  "D802B8BC6093AF81F2C6785720D43E16DE37700A4130DD8E6B217C32DA152B6A",
+                       "canonical":  "D802B8BC6093AF81F2C6785720D43E16DE37700A4130DD8E6B217C32DA152B6A"
+                   },
+                   {
+                       "path":  ".agents/scripts/v4-verification-flow.test.mjs",
+                       "worktree":  "63DFC01E7F891CF2DE49E29A9FB78D57994E71F3052D915E53DD6D98467D6EB0",
+                       "canonical":  "63DFC01E7F891CF2DE49E29A9FB78D57994E71F3052D915E53DD6D98467D6EB0"
+                   },
+                   {
+                       "path":  ".agents/scripts/finalize-story.test.mjs",
+                       "worktree":  "1ED3E7CD068E577915F1ACF4DB49DC7B78A306F57E0D77C2F3B87FA62B0E6B3E",
+                       "canonical":  "1ED3E7CD068E577915F1ACF4DB49DC7B78A306F57E0D77C2F3B87FA62B0E6B3E"
+                   },
+                   {
+                       "path":  ".agents/scripts/check-story-completion.test.mjs",
+                       "worktree":  "B3C4234AE32D31BA23BEF67B46E0AEE43F32224483372AC9837563DA74B0524D",
+                       "canonical":  "B3C4234AE32D31BA23BEF67B46E0AEE43F32224483372AC9837563DA74B0524D"
+                   },
+                   {
+                       "path":  ".agents/scripts/v4-action-kernel.test.mjs",
+                       "worktree":  "E6DECCD71976B240FD7F878FF071A062AE5C38152DB58F5CEBE16A9B668738A3",
+                       "canonical":  "E6DECCD71976B240FD7F878FF071A062AE5C38152DB58F5CEBE16A9B668738A3"
+                   },
+                   {
+                       "path":  ".agents/scripts/integrate-story.test.mjs",
+                       "worktree":  "63DDF9609DADD70867AC7EEE133EBC0B6225B3742B0AAE034E5EED8A79C4DD1D",
+                       "canonical":  "63DDF9609DADD70867AC7EEE133EBC0B6225B3742B0AAE034E5EED8A79C4DD1D"
+                   },
+                   {
+                       "path":  ".agents/scripts/v4-slice-transaction.test.mjs",
+                       "worktree":  "51ED72170A62419BF82038800475BEF20AFF3E73E210107C1D7C87D7F2EBECC5",
+                       "canonical":  "51ED72170A62419BF82038800475BEF20AFF3E73E210107C1D7C87D7F2EBECC5"
+                   },
+                   {
+                       "path":  ".agents/scripts/v4-no-review-finalization.e2e.test.mjs",
+                       "worktree":  "23F444130D03752BA46A9DD5BC25D2EFF2957B1D5D24E42A00BDDD46DAA8004B",
+                       "canonical":  "23F444130D03752BA46A9DD5BC25D2EFF2957B1D5D24E42A00BDDD46DAA8004B"
+                   },
+                   {
+                       "path":  ".agents/scripts/completion-fixture.mjs",
+                       "worktree":  "10F33D9CE8A46E12A004497E1F77D3507CB5904B8523244F6379127713120A3D",
+                       "canonical":  "10F33D9CE8A46E12A004497E1F77D3507CB5904B8523244F6379127713120A3D"
+                   },
+                   {
+                       "path":  ".agents/scripts/integration-test-fixture.mjs",
+                       "worktree":  "C9E1150C3CF63B9B542C8361FEA7646CFBC7D24073FB0BCA0DED094D91ADA54D",
+                       "canonical":  "C9E1150C3CF63B9B542C8361FEA7646CFBC7D24073FB0BCA0DED094D91ADA54D"
+                   },
+                   {
+                       "path":  ".agents/scripts/v4-architecture-fixture.mjs",
+                       "worktree":  "367B5FBA5A57E4070F5D704E3B8992DC8F3964E6AD6E40EC539D24843B850DAC",
+                       "canonical":  "367B5FBA5A57E4070F5D704E3B8992DC8F3964E6AD6E40EC539D24843B850DAC"
+                   }
+               ],
+    "commitsCreated":  [
+
+                       ]
+}
