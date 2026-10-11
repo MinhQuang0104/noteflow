@@ -1,0 +1,14 @@
+{
+  "schema_version": 2,
+  "id": "local-test-runtime-guards",
+  "purpose": "Story 1.7 slice B: guard tests and the linked-worktree testing guide.",
+  "scope_boundary": "Proves the guard files and dev-action refusal statically; does not run Docker.",
+  "covered_paths": [
+    "docs/development/local-runtime.md",
+    "scripts/tests/local-runtime-guards.Tests.ps1"
+  ],
+  "anchor_blobs": {
+    "docs/development/local-runtime.md": "017065bda1fe11792449de18bdbd3e3f0722670e",
+    "scripts/tests/local-runtime-guards.Tests.ps1": "aa457be4ba962faefd3a89252c41aa2250a3be01"
+  }
+}

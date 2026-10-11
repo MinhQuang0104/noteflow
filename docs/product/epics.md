@@ -302,6 +302,24 @@ As a chủ tài khoản, I want xem và chọn nội dung khi hai thiết bị s
 
 **Given** conflict dialog **When** dùng keyboard/touch/screen reader **Then** focus trap, labels, scrolling và focus return hoạt động.
 
+### Story 1.7: Chạy test cô lập cho từng worktree
+
+As a developer chạy nhiều Story song song trong các linked worktree, I want chạy test backend và E2E từ mỗi worktree trên database test riêng, So that các Story song song không dùng chung hay ghi đè dữ liệu test và các guard an toàn của database test giữ nguyên.
+
+**Maps to:** Additional Requirements (local runtime, test isolation); hạ tầng phát triển, không đổi hành vi sản phẩm.
+
+**Dependency note:** Không phụ thuộc Story khác. Cơ chế đã được owner chọn: Compose test project riêng cho mỗi worktree, giữ tên database `noteflow_test`.
+
+**Acceptance Criteria:**
+
+**Given** một linked worktree **When** chạy `local.ps1 test`, `e2e`, `test-stop` hoặc `test-down` **Then** lệnh chạy trên test project riêng của worktree đó **And** các action dev vẫn từ chối linked worktree.
+
+**Given** checkout canonical **When** chạy bất kỳ action nào **Then** Compose project, volume và port giữ nguyên như trước.
+
+**Given** mọi checkout **When** test chạy **Then** test identity và các guard `noteflow_test` không bị nới lỏng **And** database dev cùng secret dev không bị đụng tới.
+
+**Given** hai linked worktree **When** chạy test cùng lúc **Then** mỗi bên có kết quả riêng **And** dữ liệu không lẫn sang nhau.
+
 ## Epic 2: Duy trì challenge hằng ngày linh hoạt
 
 Người dùng tạo và quản lý challenge N/7, Done nhanh, thêm journal tùy chọn, sửa lịch sử hợp lệ và kết thúc theo dõi mà không mất dữ liệu.

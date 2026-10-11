@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "featureId": "local-test-runtime",
+  "featureMap": ".agents/features/local-test-runtime.json",
+  "checks": [
+    {
+      "id": "map",
+      "cwd": ".",
+      "argv": [
+        "node",
+        ".agents/scripts/check-feature-map.mjs",
+        "check",
+        ".agents/features/local-test-runtime.json"
+      ]
+    },
+    {
+      "id": "pester",
+      "cwd": ".",
+      "argv": [
+        "powershell.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "Invoke-Pester -Script scripts/tests/local-runtime.Tests.ps1 -EnableExit"
+      ]
+    },
+    {
+      "id": "live-backend-test",
+      "cwd": ".",
+      "argv": [
+        "powershell.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/local.ps1",
+        "test"
+      ]
+    }
+  ],
+  "unresolved": [
+    "E2E and two-worktree concurrency (AC-4, AC-6) are focused evidence recorded by the Lead, not recipe checks."
+  ]
+}

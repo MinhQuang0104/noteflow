@@ -15,6 +15,16 @@
       "featureId": "today-view",
       "path": ".agents/verification/today-view.json",
       "enabled": true
+    },
+    {
+      "featureId": "local-test-runtime",
+      "path": ".agents/verification/local-test-runtime.json",
+      "enabled": true
+    },
+    {
+      "featureId": "local-test-runtime-guards",
+      "path": ".agents/verification/local-test-runtime-guards.json",
+      "enabled": true
     }
   ]
 }
