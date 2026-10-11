@@ -11,7 +11,7 @@ Load only when the validated current slice declares `executor: agy`.
 3. Immediately before every AGY dispatch, run `node .agents/scripts/story-scope.mjs check-slice <story-id> <slice-id>` in the claimed Story worktree and require `READY`; a conflict or unknown scope stops dispatch. Build the contract in the worker worktree:
    `node .agents/scripts/build-worker-contract.mjs build <story-id> <slice-id> --expected-head <sha> --attempt <n> --run-id <run-id> --task-id <task-id> --preamble-file <preamble-file> --out <worktree>/.orca-contract/contract.md`.
    Keep its `contract_sha256` and `report_path`; the report path is under gitignored `.agent-state/v4-auto/` and never enters the scope.
-4. Deliver through the V3.2 Antigravity loop operations in `.agents/policies/orchestration-v3.md`: create the terminal, wait for `tui-idle`, context-only dispatch with `--return-preamble`, then send one line instructing AGY to read the contract and wait with `orca orchestration check --wait --types worker_done,escalation,question`.
+4. Deliver through the Antigravity loop operations in `.agents/skills/v4-story-runner/references/agy-transport.md`: create the terminal, wait for `tui-idle`, context-only dispatch with `--return-preamble`, then send one line instructing AGY to read the contract and wait with `orca orchestration check --wait --types worker_done,escalation,question`.
 5. After `worker_done`, run the mechanical gate with the contract digest:
    `node .agents/scripts/check-worker-scope.mjs check --worktree <worktree> --base <sha> --allow <entry> --contract-sha256 <contract-sha256> --forbid-commits`.
 6. Require `PASS`, then move the delivery-only contract out of the worktree scope before Runner prepare, keeping it as attempt evidence (works in any shell):

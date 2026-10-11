@@ -242,7 +242,7 @@ class AgentArchitectureTests(unittest.TestCase):
         self.assertIn("orca skills get orchestration", policy)
         self.assertIn("Orca supervised orchestration", policy)
         self.assertIn("compat-terminal", policy)
-        self.assertIn("orca terminal send", policy)
+        self.assertIn("orca terminal send", read(".agents/skills/v4-story-runner/references/agy-transport.md"))
         self.assertIn("orca terminal read --screen", policy)
         self.assertIn("orca orchestration task-update", policy)
         self.assertIn("durable explicit repo/worktree identifiers", policy)

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import test from 'node:test'
 
@@ -7,6 +7,30 @@ import { createV4Fixture } from './v4-architecture-fixture.mjs'
 import { compileActionContext } from './compile-v4-context.mjs'
 
 const read = relative => readFileSync(relative, 'utf8')
+
+test('AGY transport is available without selecting the historical V3 lane', () => {
+  const reference = '.agents/skills/v4-story-runner/references/agy-transport.md'
+  assert.ok(existsSync(reference), 'The V4 AGY transport reference must exist')
+  const transport = read(reference).replace(/\s+/g, ' ')
+  assert.match(read('.agents/skills/v4-story-runner/references/agy-executor.md'), /references\/agy-transport\.md/)
+  assert.match(read('.agents/policies/orchestration-v3.md'), /\]\(\.\.\/skills\/v4-story-runner\/references\/agy-transport\.md\)/)
+  for (const invariant of [
+    /orca terminal create --worktree/,
+    /orca terminal wait --for tui-idle/,
+    /--return-preamble.*without `--inject`/,
+    /Never resend blindly/,
+    /worker_done,escalation,question/,
+    /--dangerously-skip-permissions/,
+    /only `orca orchestration ask`/,
+    /three consecutive empty waits or 15 minutes/,
+    /Screen output is diagnosis, never completion/,
+    /HISTORY_REWRITTEN.*CONTRACT_MODIFIED/,
+    /`INVALID`\/`ERROR` are never `PASS`/,
+    /Correction contracts carry only VALID findings/,
+    /At most three correction attempts per Task/,
+    /never approves, merges, integrates or marks a Story done/,
+  ]) assert.match(transport, invariant)
+})
 
 function seedInstructionSources(fixture) {
   const paths = [
