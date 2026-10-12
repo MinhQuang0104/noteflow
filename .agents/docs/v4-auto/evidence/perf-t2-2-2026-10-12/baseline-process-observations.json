@@ -1,0 +1,87 @@
+[
+  {
+    "observedAt": "2026-10-12T05:26:36.767583+00:00",
+    "processes": [
+      {
+        "ProcessId": 18992,
+        "ParentProcessId": 27792,
+        "CreationDate": "/Date(1791764630520)/"
+      },
+      {
+        "ProcessId": 50628,
+        "ParentProcessId": 9384,
+        "CreationDate": "/Date(1791764671616)/"
+      },
+      {
+        "ProcessId": 21168,
+        "ParentProcessId": 11456,
+        "CreationDate": "/Date(1791764678084)/"
+      },
+      {
+        "ProcessId": 29284,
+        "ParentProcessId": 49116,
+        "CreationDate": "/Date(1791781787513)/"
+      },
+      {
+        "ProcessId": 47544,
+        "ParentProcessId": 31328,
+        "CreationDate": "/Date(1791782076212)/"
+      },
+      {
+        "ProcessId": 27472,
+        "ParentProcessId": 37824,
+        "CreationDate": "/Date(1791782392337)/"
+      },
+      {
+        "ProcessId": 6984,
+        "ParentProcessId": 5100,
+        "CreationDate": "/Date(1791782392566)/"
+      },
+      {
+        "ProcessId": 50912,
+        "ParentProcessId": 6984,
+        "CreationDate": "/Date(1791782392670)/"
+      },
+      {
+        "ProcessId": 21108,
+        "ParentProcessId": 6984,
+        "CreationDate": "/Date(1791782407676)/"
+      },
+      {
+        "ProcessId": 45184,
+        "ParentProcessId": 6984,
+        "CreationDate": "/Date(1791782418408)/"
+      },
+      {
+        "ProcessId": 37252,
+        "ParentProcessId": 6984,
+        "CreationDate": "/Date(1791782512790)/"
+      },
+      {
+        "ProcessId": 18936,
+        "ParentProcessId": 6984,
+        "CreationDate": "/Date(1791782572177)/"
+      },
+      {
+        "ProcessId": 1636,
+        "ParentProcessId": 6984,
+        "CreationDate": "/Date(1791782620352)/"
+      },
+      {
+        "ProcessId": 17324,
+        "ParentProcessId": 6984,
+        "CreationDate": "/Date(1791782626019)/"
+      },
+      {
+        "ProcessId": 31376,
+        "ParentProcessId": 6984,
+        "CreationDate": "/Date(1791782645296)/"
+      },
+      {
+        "ProcessId": 50808,
+        "ParentProcessId": 17324,
+        "CreationDate": "/Date(1791782788831)/"
+      }
+    ]
+  }
+]

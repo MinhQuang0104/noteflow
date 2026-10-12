@@ -1,0 +1,67 @@
+diff --git a/.agents/scripts/finalize-story-fixture.mjs b/.agents/scripts/finalize-story-fixture.mjs
+index 1051bb9..2adbe4b 100644
+--- a/.agents/scripts/finalize-story-fixture.mjs
++++ b/.agents/scripts/finalize-story-fixture.mjs
+@@ -1,12 +1,14 @@
+ import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs'
+ import { tmpdir } from 'node:os'
+ import path from 'node:path'
++import { spawnSync } from 'node:child_process'
+ import { inspectStory, normativeDigest, receiptDigest } from './check-artifact-contract.mjs'
+ import { pathListDigest, stableDigest } from './check-story-finalization.mjs'
+ import * as finalizer from './finalize-story.mjs'
+ import { buildFinalizationPreview } from './finalize-story.mjs'
+ 
+ import { git, write, digest } from './v4-test-helpers.mjs'
++import { createPortableSeedCache } from './v4-test-seed-cache.mjs'
+ 
+ export const STORY = 'docs/story-9-1.md'
+ export const EPIC = 'docs/product/epics.md'
+@@ -64,7 +66,7 @@ export const storyText = [
+   ''
+ ].join('\n')
+ 
+-export function fixture() {
++function buildReviewedSeed() {
+   const root = mkdtempSync(path.join(tmpdir(), 'finalize-story-'))
+   const storyDigest = normativeDigest(inspectStory(storyText))
+   const epicSection = '### Story 9.1: Fixture finalization story\n\nDone.\n\n'
+@@ -193,6 +195,38 @@ export function fixture() {
+   }
+ }
+ 
++// Only the no-argument reviewed seed proved portable by T0 is admitted. The
++// original builder ignores arguments; keep that behavior for unproven callers.
++const cachedReviewedSeed = createPortableSeedCache({
++  prefix: 'finalize-story-copy-',
++  build: buildReviewedSeed,
++  key: argumentCount => {
++    if (argumentCount !== 0) return null
++    if (Object.keys(process.env).some(key => /^(GIT_DIR|GIT_WORK_TREE|GIT_COMMON_DIR|GIT_INDEX_FILE|GIT_OBJECT_DIRECTORY|GIT_ALTERNATE_OBJECT_DIRECTORIES|GIT_TEMPLATE_DIR)$/i.test(key))) return null
++    // Query outside a repository: local checkout config is not inherited by
++    // git init in a temp repo. Custom hooks/templates/conditional config need
++    // their own portability proof and therefore retain the original builder.
++    const config = spawnSync('git', ['config', '--list', '--show-origin'], {
++      cwd: tmpdir(), encoding: 'utf8', windowsHide: true
++    })
++    if (config.status !== 0 || /\t(?:init\.templatedir|core\.(?:hookspath|fsmonitor|worktree|bare)|include(?:if\.[^\t=]+)?\.path)=/i.test(config.stdout)) return null
++    // Include all local module bytes, conservatively covering the transitive
++    // digest/parser sources as well as this builder and the shared copy helper.
++    const sourceRoot = new URL('./', import.meta.url)
++    const sources = readdirSync(sourceRoot).filter(name => name.endsWith('.mjs')).sort()
++      .map(name => [name, digest(readFileSync(new URL(name, sourceRoot)))])
++    return digest(JSON.stringify({
++      variant: 'reviewed/default-no-arguments', sources, gitConfig: config.stdout,
++      cwd: process.cwd(), temp: tmpdir(), node: [process.execPath, process.version, process.platform, process.arch],
++      environment: Object.entries(process.env).sort(([a], [b]) => a.localeCompare(b))
++    }))
++  }
++})
++
++export function fixture() {
++  return cachedReviewedSeed(arguments.length)
++}
++
+ export function candidate(f, crlf = false) {
+   const preview = buildFinalizationPreview(f.root, '9.1', f.head)
+   for (const [relative, bytes] of [

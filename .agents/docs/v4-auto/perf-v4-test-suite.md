@@ -2,7 +2,7 @@
 
 Branch: `perf/v4-test-suite` (worktree `D:/Workspace/Tu_Hoc/v4-test-perf`), cut
 from `main` 3721785. Runs in parallel with Story work and never touches the main
-checkout. Status: **T0 COMPLETE; T1 COMPLETE (19dffe2); T2.1 IMPLEMENTED;
+checkout. Status: **T0 COMPLETE; T1 COMPLETE (19dffe2); T2.1 / T2.2 IMPLEMENTED;
 REMAINING T2 ITEMS / T3 / T4 NOT STARTED**. T0 source is pinned to
 `87469b7`; see [T0 report](perf-t0-report.md) and its evidence index.
 
@@ -146,7 +146,7 @@ T2 and T3 both depend on T1.
   6. `v4-slice-transaction`
   7. `v4-no-review-finalization.e2e`
 
-**First item implemented only:** [T2.1 report](perf-t2-1-report.md) records the
+**First item (T2.1) implemented:** [T2.1 report](perf-t2-1-report.md) records the
 portable pre-action verification seed cache, nine probe checks outside the
 golden glob, cache-on/off 41-test runs, sequential full cached/fallback checks
 with all 800 names preserved, and Python architecture verification. Exact
@@ -155,7 +155,22 @@ The six proven plain-data variants use independent copies including `.git`;
 all prepare/checkpoint and later transaction state is rebuilt per copy.
 Other variants and `V4_TEST_NO_CACHE=1` use the original builder. Measured warm
 seed saving is 326.802ms (60.4%); full/file timing does not establish a stable
-speedup. The other six T2 items, T3 and T4 remain unimplemented.
+speedup. The remaining five T2 items, T3 and T4 remain unimplemented.
+
+**Second item (T2.2) implemented:** [T2.2 report](perf-t2-2-report.md) records
+only the portable reviewed finalize-story seed, before finalization/recovery
+and linked worktree setup. The unchanged T2.1 helper creates independent Git
+copies with fresh root/cleanup and cloned mutable metadata. Only the default
+no-argument contract is admitted; unproven callers/custom Git bindings and
+`V4_TEST_NO_CACHE=1` keep the old builder. Executor fixture/dynamic import,
+lifecycle, journals, locks and linked registration remain independent.
+Eight probes pass outside the golden glob; focused on/off 33/33 each; accepted
+sequential full cached/fallback runs 800/799/1/0 preserve all names, newlines,
+multiplicity and existing skip. Python 46 tests + 46 subtests passed. Warm seed
+saves 508.930ms (65.24%); the file pair differs by 17.233s (5.43%), and full pair
+by 2.637s (0.24%), without a stable causal speedup claim. Exact final commit
+verification is retained in separate local post-commit sidecars. Baseline
+87469b7 remains pinned with no rebase. Remaining T2 items, T3 and T4 are not started.
 
 ### T3 — Split heavy files so they run in parallel
 

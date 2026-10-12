@@ -1,0 +1,7 @@
+{
+  "status": "DIAGNOSTIC_ONLY",
+  "recordedAt": "2026-10-12T05:48:57.876651+00:00",
+  "reason": "Runner did not yet implement full-only selection and began a duplicate probe. Controller interrupted before saving new metadata. Duplicate probe raw log is separate from initial-green metadata; neither pair is accepted evidence. Fresh probe-final follows focused runs.",
+  "sourceUnchanged": true,
+  "noOwnedProcessesRemaining": true
+}

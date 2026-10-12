@@ -1,0 +1,10 @@
+✔ R03 runner executes actual L/M/H scenarios and records bound evidence (12422.7505ms)
+✔ R03 CLI rejects a source-head mismatch before creating evidence (150.7397ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 12697.8163

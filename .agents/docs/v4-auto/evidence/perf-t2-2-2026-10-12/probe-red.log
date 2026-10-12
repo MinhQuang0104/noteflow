@@ -1,0 +1,128 @@
+✖ reviewed cache hits reuse one private template and preserve complete Git/Plan/receipt bytes (1738.0777ms)
+✖ consumer metadata, bytes, commits, closures and cleanup are isolated from template and siblings (2567.7462ms)
+✔ cached and original builders are byte/digest/HEAD/status equivalent with controlled commit clock (9012.0074ms)
+✔ fallback bypasses the cache and unproven argument variants keep the original builder (3791.2775ms)
+✖ environment inputs separate keys and restoration returns to the original cached seed (2377.0743ms)
+✔ unproven external Git hook configuration uses the original builder (889.649ms)
+✖ source changes invalidate only the reviewed seed cache in an isolated scripts sandbox (2668.8648ms)
+✖ after/exit removes private reviewed templates while consumer cleanup removes only its copy (865.7159ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 3
+ℹ fail 5
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 24008.6301
+
+✖ failing tests:
+
+test at .agents\docs\v4-auto\evidence\perf-t2-2-2026-10-12\cache-probe.mjs:54:1
+✖ reviewed cache hits reuse one private template and preserve complete Git/Plan/receipt bytes (1738.0777ms)
+  AssertionError [ERR_ASSERTION]: reviewed seed cache is missing
+      at TestContext.<anonymous> (file:///D:/Workspace/Tu_Hoc/v4-test-perf/.agents/docs/v4-auto/evidence/perf-t2-2-2026-10-12/cache-probe.mjs:58:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'C:\\Users\\ACER\\AppData\\Local\\Temp\\finalize-story-GOiTIr',
+    expected: /finalize-story-copy-/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at .agents\docs\v4-auto\evidence\perf-t2-2-2026-10-12\cache-probe.mjs:71:1
+✖ consumer metadata, bytes, commits, closures and cleanup are isolated from template and siblings (2567.7462ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '943a176b11ce1caa00cb57ebeddd0b769b0f9e10'
+  - '304916b44a9fb1b080a959f0a5c59310cc459187'
+  
+      at TestContext.<anonymous> (file:///D:/Workspace/Tu_Hoc/v4-test-perf/.agents/docs/v4-auto/evidence/perf-t2-2-2026-10-12/cache-probe.mjs:82:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '943a176b11ce1caa00cb57ebeddd0b769b0f9e10',
+    expected: '304916b44a9fb1b080a959f0a5c59310cc459187',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .agents\docs\v4-auto\evidence\perf-t2-2-2026-10-12\cache-probe.mjs:126:1
+✖ environment inputs separate keys and restoration returns to the original cached seed (2377.0743ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'c9d620743c832922877a6bc8304eaa3b39e6f50e'
+  - 'b9f9b35a460e163c443be86fd3cfb16b74a6ca0d'
+  
+      at TestContext.<anonymous> (file:///D:/Workspace/Tu_Hoc/v4-test-perf/.agents/docs/v4-auto/evidence/perf-t2-2-2026-10-12/cache-probe.mjs:130:60)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'c9d620743c832922877a6bc8304eaa3b39e6f50e',
+    expected: 'b9f9b35a460e163c443be86fd3cfb16b74a6ca0d',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .agents\docs\v4-auto\evidence\perf-t2-2-2026-10-12\cache-probe.mjs:145:1
+✖ source changes invalidate only the reviewed seed cache in an isolated scripts sandbox (2668.8648ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    {
+  +   hit: 2,
+  +   invalidated: 3
+  -   hit: 1,
+  -   invalidated: 2
+    }
+  
+      at TestContext.<anonymous> (file:///D:/Workspace/Tu_Hoc/v4-test-perf/.agents/docs/v4-auto/evidence/perf-t2-2-2026-10-12/cache-probe.mjs:161:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { hit: 2, invalidated: 3 },
+    expected: { hit: 1, invalidated: 2 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at .agents\docs\v4-auto\evidence\perf-t2-2-2026-10-12\cache-probe.mjs:165:1
+✖ after/exit removes private reviewed templates while consumer cleanup removes only its copy (865.7159ms)
+  AssertionError [ERR_ASSERTION]: consumer cleanup must retain the private template until after/exit
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (file:///D:/Workspace/Tu_Hoc/v4-test-perf/.agents/docs/v4-auto/evidence/perf-t2-2-2026-10-12/cache-probe.mjs:175:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

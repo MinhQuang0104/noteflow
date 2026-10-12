@@ -1,0 +1,138 @@
+{
+  "variant": "reviewed/default-no-arguments",
+  "samplesPerWarmMode": 10,
+  "coldCacheMs": 1099.1826,
+  "meanWarmCachedMs": 271.15089,
+  "meanUncachedMs": 780.0809399999997,
+  "meanSavingsMs": 508.9300499999997,
+  "savingsPercent": 65.2406723333094,
+  "scope": "reviewed seed constructor only; cleanup recorded separately; no whole-file extrapolation",
+  "records": [
+    {
+      "mode": "cold-cache",
+      "iteration": 0,
+      "setupMs": 1099.1826,
+      "cleanupMs": 14.583200000000033
+    },
+    {
+      "mode": "cached",
+      "iteration": 1,
+      "setupMs": 263.0253,
+      "cleanupMs": 14.596099999999979
+    },
+    {
+      "mode": "uncached",
+      "iteration": 1,
+      "setupMs": 757.0500999999999,
+      "cleanupMs": 17.369300000000294
+    },
+    {
+      "mode": "uncached",
+      "iteration": 2,
+      "setupMs": 791.9448000000002,
+      "cleanupMs": 17.24409999999989
+    },
+    {
+      "mode": "cached",
+      "iteration": 2,
+      "setupMs": 338.6174000000001,
+      "cleanupMs": 16.463799999999992
+    },
+    {
+      "mode": "cached",
+      "iteration": 3,
+      "setupMs": 251.4666000000002,
+      "cleanupMs": 17.49059999999963
+    },
+    {
+      "mode": "uncached",
+      "iteration": 3,
+      "setupMs": 735.5170999999996,
+      "cleanupMs": 16.71560000000045
+    },
+    {
+      "mode": "uncached",
+      "iteration": 4,
+      "setupMs": 773.4533000000001,
+      "cleanupMs": 19.472899999999754
+    },
+    {
+      "mode": "cached",
+      "iteration": 4,
+      "setupMs": 257.83070000000043,
+      "cleanupMs": 16.780099999999948
+    },
+    {
+      "mode": "cached",
+      "iteration": 5,
+      "setupMs": 265.20679999999993,
+      "cleanupMs": 16.955399999999827
+    },
+    {
+      "mode": "uncached",
+      "iteration": 5,
+      "setupMs": 769.4673999999995,
+      "cleanupMs": 18.99040000000059
+    },
+    {
+      "mode": "uncached",
+      "iteration": 6,
+      "setupMs": 880.6968999999999,
+      "cleanupMs": 18.759799999999814
+    },
+    {
+      "mode": "cached",
+      "iteration": 6,
+      "setupMs": 247.75980000000072,
+      "cleanupMs": 17.947400000000016
+    },
+    {
+      "mode": "cached",
+      "iteration": 7,
+      "setupMs": 255.01519999999982,
+      "cleanupMs": 19.8117000000002
+    },
+    {
+      "mode": "uncached",
+      "iteration": 7,
+      "setupMs": 763.8011999999999,
+      "cleanupMs": 16.662799999998242
+    },
+    {
+      "mode": "uncached",
+      "iteration": 8,
+      "setupMs": 787.1324999999997,
+      "cleanupMs": 17.118500000000495
+    },
+    {
+      "mode": "cached",
+      "iteration": 8,
+      "setupMs": 263.802099999999,
+      "cleanupMs": 17.161599999999453
+    },
+    {
+      "mode": "cached",
+      "iteration": 9,
+      "setupMs": 322.89470000000074,
+      "cleanupMs": 18.155900000001566
+    },
+    {
+      "mode": "uncached",
+      "iteration": 9,
+      "setupMs": 799.5811999999987,
+      "cleanupMs": 17.417199999999866
+    },
+    {
+      "mode": "uncached",
+      "iteration": 10,
+      "setupMs": 742.1648999999998,
+      "cleanupMs": 18.592399999999543
+    },
+    {
+      "mode": "cached",
+      "iteration": 10,
+      "setupMs": 245.89029999999912,
+      "cleanupMs": 16.477999999999156
+    }
+  ]
+}

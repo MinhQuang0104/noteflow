@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "checkedAt": "2026-10-12T06:46:50.028295+00:00",
+  "head": "78fdda19dcad9c15f69fcdd62814ab9f89be7034",
+  "canonicalPointerSha256": "5febd755d0136d14d573383bd88f33e8856acbaa0b4a2d25fd592e1820811ae4",
+  "sourceUnchanged": true,
+  "fullCachedAndFallbackPass": true,
+  "goldenMultisetNewlineMultiplicityAndSkipPreserved": true,
+  "python46Tests46Subtests": true,
+  "scope": "T2.2 only"
+}

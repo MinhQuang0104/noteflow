@@ -1,0 +1,41 @@
+✔ preview preserves normative Story digest and derives File List from helper scope (1787.2133ms)
+✔ Git add failure retains subprocess diagnostics rather than reporting a scope mismatch (7530.1533ms)
+✔ NUL-delimited Git path parsing preserves Unicode, quotes and embedded newlines (0.8537ms)
+✔ prepare is read-only and wrong expected HEAD is rejected (3783.8718ms)
+✔ direct finalization rejects a non-IDLE canonical pointer before mutation (1168.8034ms)
+✔ direct finalization rejects a Story-owned worktree from the wrong checkout (1365.1636ms)
+✔ direct finalization rejects a concurrent lifecycle lock without removing it (1869.2126ms)
+✔ finalization writes exact paths in one commit and stops at Human Gate (7412.9752ms)
+✔ recovery prepare is read-only, LF/CRLF projection is proven and apply consumes unchanged candidates once (18337.5197ms)
+✔ recovery rejects fingerprint preserving HEAD/index/files/locks (6310.7002ms)
+✔ recovery rejects cross-story preserving HEAD/index/files/locks (6494.3088ms)
+✔ recovery rejects executor preserving HEAD/index/files/locks (6394.2345ms)
+✔ recovery rejects candidate-tamper preserving HEAD/index/files/locks (6916.051ms)
+✔ recovery rejects extra-path preserving HEAD/index/files/locks (7683.4462ms)
+✔ recovery rejects index-drift preserving HEAD/index/files/locks (7440.7516ms)
+✔ recovery rejects index-lock preserving HEAD/index/files/locks (6728.4911ms)
+✔ recovery rejects foreign-lock preserving HEAD/index/files/locks (6896.4093ms)
+✔ recovery rejects idle preserving HEAD/index/files/locks (6539.7932ms)
+✔ recovery rejects receipt-tamper preserving HEAD/index/files/locks (6879.3566ms)
+✔ recovery rejects scope-omission preserving HEAD/index/files/locks (6916.5824ms)
+✔ recovery rejects stale-head preserving HEAD/index/files/locks (7042.8958ms)
+✔ recovery projection rejects a re-signed candidate and executor code drift before mutation (4234.2713ms)
+✔ recovery preserves canonical INCOMPLETE and explicit manual NOT_RUN disclosure (16411.5125ms)
+✔ recovery binds D original and rework implementations without inventing historical verification (21943.8482ms)
+✔ recovery interruption at LOCKED resumes explicitly without duplicate commit (20140.3584ms)
+✔ recovery interruption at STAGED resumes explicitly without duplicate commit (20486.3387ms)
+✔ recovery interruption at COMMITTING resumes explicitly without duplicate commit (22901.3667ms)
+✔ recovery interruption at COMMIT_RETURNED resumes explicitly without duplicate commit (18631.3993ms)
+✔ recovery interruption at COMMITTED resumes explicitly without duplicate commit (19135.7553ms)
+✔ explicit retry rejects staged-drift preserving the partial journal and owned lock (16144.5349ms)
+✔ explicit retry rejects unbound-staging preserving the partial journal and owned lock (15844.0035ms)
+✔ explicit retry rejects journal-tamper preserving the partial journal and owned lock (12025.8996ms)
+✔ prepare rejects product drift hidden by an assume-unchanged index flag (2688.9954ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 33
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 316855.1198

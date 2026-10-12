@@ -1,0 +1,16 @@
+✔ reviewed cache hits reuse one private template and preserve complete Git/Plan/receipt bytes (4405.9736ms)
+✔ consumer metadata, bytes, commits, closures and cleanup are isolated from template and siblings (2623.5591ms)
+✔ cached and original builders are byte/digest/HEAD/status equivalent with controlled commit clock (9510.1641ms)
+✔ fallback bypasses the cache and unproven argument variants keep the original builder (3774.3442ms)
+✔ environment inputs separate keys and restoration returns to the original cached seed (1899.9753ms)
+✔ unproven external Git hook configuration uses the original builder (1022.1951ms)
+✔ source changes invalidate only the reviewed seed cache in an isolated scripts sandbox (2998.6033ms)
+✔ after/exit removes private reviewed templates while consumer cleanup removes only its copy (1359.0541ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 27753.1239

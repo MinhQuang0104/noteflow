@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "parentCommit": "78fdda19dcad9c15f69fcdd62814ab9f89be7034",
+  "sourceBaseline": "87469b7",
+  "testFilesByteIdentical": 48,
+  "consumerExecutorDynamicImportLifecycleAssertionsUnchanged": true,
+  "originalBuilderBodyPreserved": true,
+  "candidatePreservedHelpersUnchanged": true,
+  "sharedCacheHelperUnchanged": true,
+  "productionPackageConcurrencyUnchanged": true,
+  "trackedScriptDiff": [
+    ".agents/scripts/finalize-story-fixture.mjs"
+  ],
+  "fixtureSha256": "7082d73e76da9b9cbefb107d05c5f31b25f31b998f4497f68f4eb3dd8e6ecb97"
+}

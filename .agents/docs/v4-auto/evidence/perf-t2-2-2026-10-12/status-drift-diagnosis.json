@@ -1,0 +1,13 @@
+{
+  "classification": "VALID",
+  "boundary": "verification workflow",
+  "baselinePassed": true,
+  "sourceScriptsUnchanged": true,
+  "failedTest": "R03 runner executes actual L/M/H scenarios and records bound evidence",
+  "assertion": ".agents/scripts/run-v4-architecture-corpus.test.mjs:68 compares Git status before/after",
+  "observedDelta": "?? .agents/docs/v4-auto/perf-t2-2-report.md",
+  "cause": "Agent created report while full suite was active",
+  "fix": "Keep checkout status stable during tests; record before/after status; rerun unchanged R03 and full suite",
+  "productionOrAssertionChange": false,
+  "diagnosticRunExcluded": true
+}
