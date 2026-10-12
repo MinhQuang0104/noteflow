@@ -60,6 +60,17 @@ unresolved_questions: []
 next_action:
   kind: implement_slice
   target: A
+autopilot:
+  schema_version: 1
+  authorized_at: "2026-10-12T06:10:34.145Z"
+  authorized_plan_digest: sha256:eb21d13765756ec1eb7daa3d27047fe703f33115f1205257aa1c928dfbbfef26
+  authorized_head: 066f76f02a59c88d65808f6b333a413ce97d1ce2
+  budgets:
+    max_slices: 2
+    max_rework_per_slice: 2
+    max_minutes_per_slice: 90
+  lead_vendor: codex
+  revoked: false
 ---
 
 # Story 1.7 execution plan
