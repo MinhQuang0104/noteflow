@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "parentCommit": "19dffe291a77f4bbeb8c97bf2ef7a140fec30f48",
+  "testFilesByteIdentical": 48,
+  "consumerByteIdentical": true,
+  "actionChainAndAssertionsByteIdentical": true,
+  "oldSeedBodyPreserved": true,
+  "remainingFixtureHelpersPreserved": true,
+  "trackedScriptDiff": [
+    ".agents/scripts/v4-verification-fixture.mjs"
+  ],
+  "newHelper": ".agents/scripts/v4-test-seed-cache.mjs",
+  "sha256": {
+    ".agents/scripts/v4-verification-fixture.mjs": "9bd0628136c7398d0f0557979f23b680280c5bacbb9ca30aca1c38d67191cd29",
+    ".agents/scripts/v4-test-seed-cache.mjs": "a23f95637d7ac45be71d70590c9f23e92432142e6b239d37f5153e2b8b8935f4"
+  }
+}

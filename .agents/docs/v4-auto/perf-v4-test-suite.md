@@ -2,7 +2,8 @@
 
 Branch: `perf/v4-test-suite` (worktree `D:/Workspace/Tu_Hoc/v4-test-perf`), cut
 from `main` 3721785. Runs in parallel with Story work and never touches the main
-checkout. Status: **T0 COMPLETE; T1 IMPLEMENTED; T2–T4 NOT STARTED**. T0 source is pinned to
+checkout. Status: **T0 COMPLETE; T1 COMPLETE (19dffe2); T2.1 IMPLEMENTED;
+REMAINING T2 ITEMS / T3 / T4 NOT STARTED**. T0 source is pinned to
 `87469b7`; see [T0 report](perf-t0-report.md) and its evidence index.
 
 ## 0. Phase rules and rationale
@@ -144,6 +145,17 @@ T2 and T3 both depend on T1.
   5. `integrate-story`
   6. `v4-slice-transaction`
   7. `v4-no-review-finalization.e2e`
+
+**First item implemented only:** [T2.1 report](perf-t2-1-report.md) records the
+portable pre-action verification seed cache, nine probe checks outside the
+golden glob, cache-on/off 41-test runs, sequential full cached/fallback checks
+with all 800 names preserved, and Python architecture verification. Exact
+final commit checks are local post-commit sidecars linked by the report.
+The six proven plain-data variants use independent copies including `.git`;
+all prepare/checkpoint and later transaction state is rebuilt per copy.
+Other variants and `V4_TEST_NO_CACHE=1` use the original builder. Measured warm
+seed saving is 326.802ms (60.4%); full/file timing does not establish a stable
+speedup. The other six T2 items, T3 and T4 remain unimplemented.
 
 ### T3 — Split heavy files so they run in parallel
 

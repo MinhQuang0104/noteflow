@@ -1,0 +1,77 @@
+diff --git a/.agents/scripts/v4-verification-fixture.mjs b/.agents/scripts/v4-verification-fixture.mjs
+index aee7284..c521776 100644
+--- a/.agents/scripts/v4-verification-fixture.mjs
++++ b/.agents/scripts/v4-verification-fixture.mjs
+@@ -4,6 +4,7 @@ import { mkdtempSync } from 'node:fs'
+ import { tmpdir } from 'node:os'
+ import path from 'node:path'
+ import { spawnSync } from 'node:child_process'
++import { types } from 'node:util'
+ import { inspectStory, normativeDigest } from './check-artifact-contract.mjs'
+ import { frontmatter } from './check-story-plan.mjs'
+ import { actionFingerprint, checkpointImplementation, prepareAction } from './v4-action-kernel.mjs'
+@@ -11,6 +12,7 @@ import { transactionIdentity } from './v4-slice-transaction.mjs'
+ import { runV4Story } from './v4-story-runner.mjs'
+ 
+ import { git, write, digest } from './v4-test-helpers.mjs'
++import { createPortableSeedCache } from './v4-test-seed-cache.mjs'
+ 
+ export const PLAN = '_bmad-output/implementation-artifacts/story-9-1-plan.md'
+ export const STORY = 'docs/story.md'
+@@ -108,7 +110,7 @@ export function verificationRegistry(changedPaths = ['src/feature.txt']) {
+   return { map, recipe, registry }
+ }
+ 
+-export function fixture(risk, options = {}) {
++function buildVerificationSeed(risk, options) {
+   const root = mkdtempSync(path.join(tmpdir(), 'v4-verification-'))
+   const cleanup = () => rmSync(root, { recursive: true, force: true })
+   const changedPaths = [...(options.changedPaths ?? ['src/feature.txt'])].sort()
+@@ -153,6 +155,47 @@ export function fixture(risk, options = {}) {
+     semantic_coverage: { status: 'MEASURED', task_refs: ['T-1'], note: 'fixture exact scope' },
+     selected_tasks: ['T-1'], selected_acceptance_criteria: ['AC-1'], red_green: { applicable: false, reason: 'fixture' }
+   }
++  return { root, cleanup, risk, storyDigest, initialHead, implementationRequest, changedPaths }
++}
++
++// Only the contracts exercised by verification-flow and the equivalence probe
++// are admitted. New options, accessors and unproven combinations use the builder.
++const provenSeedVariants = new Set([
++  ...['LOW', 'MEDIUM', 'HIGH'].map(risk => JSON.stringify([risk, null, ['src/feature.txt']])),
++  ...['LOW', 'MEDIUM'].map(sliceRisk => JSON.stringify(['HIGH', sliceRisk, ['src/feature.txt']])),
++  JSON.stringify(['HIGH', null, ['src/feature.txt', 'src/feature-a.txt', 'src/feature-b.txt', 'src/feature-c.txt', 'src/feature-d.txt'].sort()])
++])
++const builderSourceDigest = digest(readFileSync(new URL(import.meta.url), 'utf8'))
++const cachedVerificationSeed = createPortableSeedCache({
++  prefix: 'v4-verification-copy-',
++  build: ({ risk, options }) => buildVerificationSeed(risk, options),
++  key: ({ risk, options }) => {
++    if (typeof risk !== 'string' || !options || types.isProxy(options) || Object.getPrototypeOf(options) !== Object.prototype) return null
++    const descriptors = Object.getOwnPropertyDescriptors(options)
++    if (Reflect.ownKeys(descriptors).some(key => !['sliceRisk', 'changedPaths'].includes(key) || !Object.hasOwn(descriptors[key], 'value'))) return null
++    const sliceRisk = descriptors.sliceRisk?.value
++    const paths = descriptors.changedPaths?.value
++    if (sliceRisk !== undefined && !['LOW', 'MEDIUM'].includes(sliceRisk)) return null
++    if (paths !== undefined && (types.isProxy(paths) || !Array.isArray(paths) || Object.getPrototypeOf(paths) !== Array.prototype ||
++      Reflect.ownKeys(paths).some(key => key !== 'length' && (!/^\d+$/.test(String(key)) ||
++        typeof Object.getOwnPropertyDescriptor(paths, key)?.value !== 'string')))) return null
++    const changedPaths = [...(paths ?? ['src/feature.txt'])].sort()
++    const variant = JSON.stringify([risk, sliceRisk ?? null, changedPaths])
++    if (!provenSeedVariants.has(variant)) return null
++    const sources = ['check-escalation.mjs', 'prepare-change-evidence.mjs'].map(name =>
++      digest(readFileSync(path.resolve(process.cwd(), '.agents/scripts', name), 'utf8')))
++    const gitEnvironment = Object.entries(process.env).filter(([key]) => /^GIT_/i.test(key) ||
++      ['PATH', 'HOME', 'USERPROFILE', 'XDG_CONFIG_HOME'].includes(key.toUpperCase())).sort(([a], [b]) => a.localeCompare(b))
++    return digest(JSON.stringify({ variant, builderSourceDigest, sources, cwd: process.cwd(), gitEnvironment }))
++  }
++})
++
++export function verificationSeed(risk, options = {}) {
++  return cachedVerificationSeed({ risk, options })
++}
++
++export function fixture(risk, options = {}) {
++  const { root, cleanup, storyDigest, initialHead, implementationRequest, changedPaths } = verificationSeed(risk, options)
+   const preparedImplementation = prepareAction(root, implementationRequest)
+   assert.equal(preparedImplementation.status, 'READY', JSON.stringify(preparedImplementation))
+   const checkpointed = checkpointImplementation(root, { ...implementationRequest, operation: 'checkpoint', preview: preparedImplementation.preview })

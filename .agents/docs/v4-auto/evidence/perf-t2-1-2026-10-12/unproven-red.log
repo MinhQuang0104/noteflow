@@ -1,0 +1,74 @@
+✖ unproven Proxy options preserve per-call builder reads (1161.1861ms)
+✖ unproven Proxy arrays do not consume iterators while deciding a cache key (1138.9441ms)
+✖ unproven risk objects never execute toJSON for a cache key (499.5843ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 0
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2945.9688
+
+✖ failing tests:
+
+test at .agents\docs\v4-auto\evidence\perf-t2-1-2026-10-12\unproven-probe.mjs:5:1
+✖ unproven Proxy options preserve per-call builder reads (1161.1861ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  1 !== 2
+  
+      at TestContext.<anonymous> (file:///D:/Workspace/Tu_Hoc/v4-test-perf/.agents/docs/v4-auto/evidence/perf-t2-1-2026-10-12/unproven-probe.mjs:15:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 2,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .agents\docs\v4-auto\evidence\perf-t2-1-2026-10-12\unproven-probe.mjs:21:1
+✖ unproven Proxy arrays do not consume iterators while deciding a cache key (1138.9441ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  4 !== 2
+  
+      at TestContext.<anonymous> (file:///D:/Workspace/Tu_Hoc/v4-test-perf/.agents/docs/v4-auto/evidence/perf-t2-1-2026-10-12/unproven-probe.mjs:31:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 4,
+    expected: 2,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .agents\docs\v4-auto\evidence\perf-t2-1-2026-10-12\unproven-probe.mjs:37:1
+✖ unproven risk objects never execute toJSON for a cache key (499.5843ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  2 !== 0
+  
+      at TestContext.<anonymous> (file:///D:/Workspace/Tu_Hoc/v4-test-perf/.agents/docs/v4-auto/evidence/perf-t2-1-2026-10-12/unproven-probe.mjs:44:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 2,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

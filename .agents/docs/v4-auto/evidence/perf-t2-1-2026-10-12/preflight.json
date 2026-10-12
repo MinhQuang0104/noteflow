@@ -1,0 +1,19 @@
+{
+  "head": "19dffe291a77f4bbeb8c97bf2ef7a140fec30f48",
+  "branch": "perf/v4-test-suite",
+  "worktree": "D:/Workspace/Tu_Hoc/v4-test-perf",
+  "sourceBaseline": "87469b76b45eddd569d6090d422a4158f12218e0",
+  "canonicalMain": "6018672608de3889f51d74d366a98376e30330b0",
+  "canonicalPointer": {
+    "schemaVersion": 1,
+    "activeRunId": null,
+    "storyId": null,
+    "status": "IDLE",
+    "updatedAt": "2026-09-22T06:13:26.3964611+00:00"
+  },
+  "pointerSha256": "5febd755d0136d14d573383bd88f33e8856acbaa0b4a2d25fd592e1820811ae4",
+  "policyDrift": [],
+  "preEditTrackedStatus": "",
+  "t1ExactFinalEvidence": "PASS",
+  "noRebaseOwnerException": true
+}

@@ -1,0 +1,14 @@
+✔ portable seed API stops before action and copies the complete independent Git repo (1759.1224ms)
+✔ cache hits build once, preserve dirty index state, separate keys and bypass unknown variants (2373.812ms)
+✔ all admitted variants match uncached seed bytes, requests and fresh copy-local checkpoints (103151.2976ms)
+✔ unproven accessor variants execute the old builder on every call (1089.5322ms)
+✔ seed source byte changes invalidate a warm variant in the same cwd (1671.1216ms)
+✔ process exit removes private templates and fixture cleanup removes only consumer roots (661.5757ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 111052.533

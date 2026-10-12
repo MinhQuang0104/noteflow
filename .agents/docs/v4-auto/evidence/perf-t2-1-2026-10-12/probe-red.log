@@ -1,0 +1,104 @@
+✖ portable seed API stops before action and copies the complete independent Git repo (1.581ms)
+✖ cache hits build once, preserve dirty index state, separate keys and bypass unknown variants (0.3828ms)
+✖ all admitted variants match uncached seed bytes, requests and fresh copy-local checkpoints (0.3647ms)
+✖ process exit removes private templates and fixture cleanup removes only consumer roots (0.2169ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 0
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 113.5565
+
+✖ failing tests:
+
+test at .agents\docs\v4-auto\evidence\perf-t2-1-2026-10-12\cache-probe.mjs:41:1
+✖ portable seed API stops before action and copies the complete independent Git repo (1.581ms)
+  AssertionError [ERR_ASSERTION]: pre-action seed cache is missing
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at TestContext.<anonymous> (file:///D:/Workspace/Tu_Hoc/v4-test-perf/.agents/docs/v4-auto/evidence/perf-t2-1-2026-10-12/cache-probe.mjs:42:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .agents\docs\v4-auto\evidence\perf-t2-1-2026-10-12\cache-probe.mjs:75:1
+✖ cache hits build once, preserve dirty index state, separate keys and bypass unknown variants (0.3828ms)
+  AssertionError [ERR_ASSERTION]: pre-action seed cache is missing
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at TestContext.<anonymous> (file:///D:/Workspace/Tu_Hoc/v4-test-perf/.agents/docs/v4-auto/evidence/perf-t2-1-2026-10-12/cache-probe.mjs:76:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .agents\docs\v4-auto\evidence\perf-t2-1-2026-10-12\cache-probe.mjs:114:1
+✖ all admitted variants match uncached seed bytes, requests and fresh copy-local checkpoints (0.3647ms)
+  AssertionError [ERR_ASSERTION]: pre-action seed cache is missing
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at TestContext.<anonymous> (file:///D:/Workspace/Tu_Hoc/v4-test-perf/.agents/docs/v4-auto/evidence/perf-t2-1-2026-10-12/cache-probe.mjs:115:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .agents\docs\v4-auto\evidence\perf-t2-1-2026-10-12\cache-probe.mjs:167:1
+✖ process exit removes private templates and fixture cleanup removes only consumer roots (0.2169ms)
+  AssertionError [ERR_ASSERTION]: pre-action seed cache is missing
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at TestContext.<anonymous> (file:///D:/Workspace/Tu_Hoc/v4-test-perf/.agents/docs/v4-auto/evidence/perf-t2-1-2026-10-12/cache-probe.mjs:168:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
