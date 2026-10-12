@@ -1,7 +1,7 @@
 ---
 story_id: "1.7"
 title: Chạy test cô lập cho từng worktree
-status: ready-for-dev
+status: in-progress
 ---
 
 # Story 1.7: Chạy test cô lập cho từng worktree

@@ -8,8 +8,8 @@ upstream_epic:
   path: docs/product/epics.md
   section_digest: sha256:56a6a93be6a9310dab4cdaf453ef9e1891a3ffb6404c41ed24d17714ea2a4b3c
 sprint_key: 1-7-chạy-test-cô-lập-cho-từng-worktree
-lifecycle_snapshot: ready-for-dev
-execution_status: ready-for-dev
+lifecycle_snapshot: in-progress
+execution_status: in-progress
 planning_approval:
   decision: APPROVED
   scope: planning
@@ -58,8 +58,8 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: start_story
-  target: story
+  kind: implement_slice
+  target: A
 ---
 
 # Story 1.7 execution plan
