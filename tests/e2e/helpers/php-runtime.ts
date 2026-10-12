@@ -101,6 +101,10 @@ function sanitizeComposeEnvironment(environment: Record<string, string | undefin
 
   return {
     ...childEnvironment,
+    ...(environment.NOTEFLOW_TEST_PROJECT?.startsWith('noteflow-test-') ? {
+      LOCAL_APP_KEY: 'unused-test-only',
+      LOCAL_DB_PASSWORD: 'unused-test-only',
+    } : {}),
     ...composeIdentity,
     NOTEFLOW_E2E_MODE: 'compose',
   }
@@ -132,6 +136,11 @@ export function buildPhpInvocation(
 
   assertTestIdentity(environment, mode)
 
+  const testProject = environment.NOTEFLOW_TEST_PROJECT ?? 'noteflow-local'
+  if (testProject !== 'noteflow-local' && !/^noteflow-test-[a-f0-9]{12}$/.test(testProject)) {
+    throw new Error(`Invalid test project '${testProject}'.`)
+  }
+
   return {
     command: process.platform === 'win32' ? 'docker.exe' : 'docker',
     args: [
@@ -147,7 +156,7 @@ export function buildPhpInvocation(
       '--env-file',
       path.join(rootDir, 'deploy', 'local', '.env'),
       '--project-name',
-      'noteflow-local',
+      testProject,
       'exec',
       '-T',
       'backend-test',
