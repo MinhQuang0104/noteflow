@@ -161,3 +161,36 @@ test('legacy challenge-list selection remains available through the registry con
     fixture.cleanup()
   }
 })
+
+test('anchors changed by an earlier attempt of the slice are expected drift, not unexplained (Story 1.7 F-17-6)', () => {
+  const fixture = createRegistryFixture()
+  try {
+    const staleMap = ['node', '-e', 'process.stdout.write(["STALE", "MISMATCH src/a.ts", "MISMATCH src/c.ts"].join(String.fromCharCode(10))); process.exit(1)']
+    writeJson(fixture.root, '.agents/features/alpha.json', {
+      schema_version: 2,
+      id: 'alpha',
+      covered_paths: ['src/a.ts', 'src/c.ts'],
+      anchor_blobs: {
+        'src/a.ts': '0000000000000000000000000000000000000000',
+        'src/c.ts': '2222222222222222222222222222222222222222',
+      },
+    })
+    writeJson(fixture.root, '.agents/verification/alpha.json', {
+      schema_version: 1,
+      featureId: 'alpha',
+      featureMap: '.agents/features/alpha.json',
+      checks: [{ id: 'map', cwd: '.', argv: staleMap }, { id: 'shared', argv: PASS_COMMAND }],
+    })
+    const reworkOnly = verifyChangedPaths(fixture.root, 'alpha', ['src/a.ts'], { subject: 'fixture' })
+    assert.deepEqual(reworkOnly.map.unexplainedDrift, ['src/c.ts'])
+    assert.notEqual(reworkOnly.status, 'PASS')
+
+    const withPrior = verifyChangedPaths(fixture.root, 'alpha', ['src/a.ts'], { subject: 'fixture', priorChangedPaths: ['src/c.ts'] })
+    assert.deepEqual(withPrior.map.unexplainedDrift, [])
+    assert.deepEqual(withPrior.map.expectedChangedAnchors, ['src/a.ts', 'src/c.ts'])
+    assert.deepEqual(withPrior.changedPaths, ['src/a.ts'])
+    assert.equal(withPrior.status, 'PASS')
+  } finally {
+    fixture.cleanup()
+  }
+})

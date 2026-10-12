@@ -1175,6 +1175,19 @@ function verificationCheckSpecs(request) {
   })
 }
 
+// Paths that earlier attempts of a reworked slice changed. The current
+// attempt's diff starts at the last checkpoint, so without these the feature
+// map would report the earlier attempts' anchors as unexplained drift.
+export function priorAttemptChangedPaths(root, slice) {
+  const paths = new Set()
+  for (const attempt of slice.attempt_history ?? []) {
+    if (!/^[0-9a-f]{40}$/.test(attempt?.baseline_commit ?? '') || !/^[0-9a-f]{40}$/.test(attempt?.checkpoint_commit ?? '')) throw new Error('ATTEMPT_HISTORY_INVALID')
+    const listed = gitOutput(root, ['diff', '--name-only', '--no-renames', attempt.baseline_commit, attempt.checkpoint_commit, '--'], 'ATTEMPT_DIFF_UNAVAILABLE')
+    for (const item of listed.split(/\r?\n/).filter(Boolean)) paths.add(item)
+  }
+  return paths.size ? changePaths([...paths], 'PRIOR_CHANGED_PATHS') : []
+}
+
 function buildVerificationPreview(root, request) {
   assertVerificationRequestShape(request, 'prepare')
   const pointer = assertPointerIdle(root)
@@ -1233,6 +1246,7 @@ function buildVerificationPreview(root, request) {
     manifest,
     changed_paths: changed,
     changed_paths_sha256: manifest.changedPathsSha256,
+    prior_changed_paths: priorAttemptChangedPaths(root, slice),
     baseline_commit: manifest.baselineCommit,
     checkpoint_commit: manifest.checkpointCommit,
     subject_digest: slice.subject_digest,
@@ -1341,7 +1355,9 @@ function runVerificationBundle(root, preview, request) {
     return { stale: true, reasons: ['CHANGED_PATH_SCOPE_CHANGED'], manifest }
   }
   const subject = { kind: 'commit', value: preview.checkpoint_commit }
-  const canonical = verifyChangedPaths(root, preview.canonical_selector, preview.changed_paths, { subject: { commit: preview.checkpoint_commit } })
+  const canonical = verifyChangedPaths(root, preview.canonical_selector, preview.changed_paths, {
+    subject: { commit: preview.checkpoint_commit }, priorChangedPaths: preview.prior_changed_paths ?? [],
+  })
   const canonicalObservation = observeCanonicalCheck(root, preview, canonical, request)
   const specs = request.check_specs ?? request.focused_check_specs ?? request.focused_checks ?? preview.check_specs
   const focusedEvidence = specs.map(spec => executeCheck(root, spec, subject))

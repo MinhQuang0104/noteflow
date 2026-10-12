@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process'
 
 import { inspectStory, normativeDigest, receiptDigest } from './check-artifact-contract.mjs'
 import { frontmatter, validate as validateStoryPlan } from './check-story-plan.mjs'
-import { applyRework, checkpointImplementation, prepareAction, prepareRework, reworkDependents } from './v4-action-kernel.mjs'
+import { applyRework, checkpointImplementation, prepareAction, prepareRework, priorAttemptChangedPaths, reworkDependents } from './v4-action-kernel.mjs'
 import { deriveScope, stableDigest } from './check-story-finalization.mjs'
 import { transactionIdentity } from './v4-slice-transaction.mjs'
 import { runV4Story } from './v4-story-runner.mjs'
@@ -446,4 +446,14 @@ test('rework finds dependent slices by depends_on, not by the slice name E', () 
   assert.deepEqual(reworkDependents(plan, 'A').map(item => item.id), ['B', 'C'])
   assert.deepEqual(reworkDependents(plan, 'D').map(item => item.id), ['E'])
   assert.deepEqual(reworkDependents(plan, 'C').map(item => item.id), [])
+})
+
+test('verification after rework explains anchors changed by earlier attempts (Story 1.7 F-17-6)', () => {
+  const f = fixture()
+  try {
+    assert.deepEqual(priorAttemptChangedPaths(f.root, { attempt_history: [] }), [])
+    const history = [{ attempt_id: 1, baseline_commit: f.baseline, checkpoint_commit: f.checkpoint }]
+    assert.deepEqual(priorAttemptChangedPaths(f.root, { attempt_history: history }), [...f.changedPaths].sort())
+    assert.throws(() => priorAttemptChangedPaths(f.root, { attempt_history: [{ attempt_id: 1, baseline_commit: 'HEAD~1', checkpoint_commit: f.checkpoint }] }), /ATTEMPT_HISTORY_INVALID/)
+  } finally { f.cleanup() }
 })

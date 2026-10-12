@@ -93,8 +93,10 @@ function environmentUnavailable(output) {
   return /(?:not recognized as an internal or external command|command not found|ERR_MODULE_NOT_FOUND|Cannot find module|NPM_CLI_UNAVAILABLE)/i.test(output)
 }
 
-export function classifyMapResult(exitCode, output, changedPaths, anchors) {
-  const changed = new Set(changedPaths)
+// priorChangedPaths are anchors an earlier attempt of the same slice changed;
+// a rework diff omits them, but their anchor drift is still expected.
+export function classifyMapResult(exitCode, output, changedPaths, anchors, priorChangedPaths = []) {
+  const changed = new Set([...changedPaths, ...priorChangedPaths])
   const mapped = new Set(anchors)
   const result = { status: 'ERROR', expectedChangedAnchors: [], unexplainedDrift: [], missingAnchors: [] }
   const lines = output.trim().split(/\r?\n/).filter(Boolean)
@@ -210,7 +212,7 @@ function pushReason(evidence, reason) {
   if (!evidence.escalationReasons.includes(reason)) evidence.escalationReasons.push(reason)
 }
 
-function runRecipe(root, selected, changedPaths, subject, cache) {
+function runRecipe(root, selected, changedPaths, subject, cache, priorChangedPaths) {
   const { recipe, anchors, coveredPaths } = selected
   const mapped = new Set(anchors)
   const covered = new Set(coveredPaths)
@@ -240,7 +242,7 @@ function runRecipe(root, selected, changedPaths, subject, cache) {
   const mapCheck = recipe.checks[0]
   const mapRun = executeCheck(root, selected, mapCheck, subject, cache)
   try {
-    evidence.map = classifyMapResult(mapRun.exitCode, mapRun.output, changedPaths, anchors)
+    evidence.map = classifyMapResult(mapRun.exitCode, mapRun.output, changedPaths, anchors, priorChangedPaths)
     const expectedOnly = evidence.map.status === 'STALE' &&
       !evidence.map.unexplainedDrift.length && !evidence.map.missingAnchors.length
     evidence.checks[0] = {
@@ -379,7 +381,8 @@ export function verifyChangedPaths(root, selector, inputPaths, options = {}) {
   }
   const subject = options.subject ?? null
   const cache = new Map()
-  const results = applicable.map(entry => runRecipe(root, entry, changedPaths, subject, cache))
+  const prior = Array.isArray(options.priorChangedPaths) ? options.priorChangedPaths.map(canonical) : []
+  const results = applicable.map(entry => runRecipe(root, entry, changedPaths, subject, cache, prior))
   return results.length === 1 ? results[0] : aggregateResults(results, changedPaths)
 }
 
