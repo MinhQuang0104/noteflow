@@ -25,7 +25,15 @@ risk:
   flags: [shared_boundary]
 slices:
   - id: A
-    status: pending
+    status: checkpointed
+    baseline_commit: e4cf85d83e898246051096cd71129efc271a3b74
+    checkpoint_commit: 9d8fe07fd4ed9c4b54f86256e302fa6cc0cede97
+    subject_digest: sha256:a815ea948611c7725d7e4b6e666cbef86f7392840c7fe6eddfc953fd11dea4fa
+    changed_paths_sha256: sha256:3d9de3b0db6cb649390c64a28637b6506b7fe1513ed0f98257df4342a98f7eaa
+    receipt_refs:
+      implementation:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-7/A-implementation.json
+        digest: sha256:ba8d4c427892eb2424ed3a139dea9a646b7da87e28d9fb25e909a3cd430564b5
     task_refs: [T-1]
     depends_on: []
     executor: lead
@@ -58,7 +66,7 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: implement_slice
+  kind: verify_slice
   target: A
 autopilot:
   schema_version: 1
