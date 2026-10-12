@@ -2,3 +2,7 @@
 # digests and committed-blob checks, so every checkout keeps them LF whatever
 # core.autocrlf says (G5 finding F-G5-1).
 _bmad-output/implementation-artifacts/** text eol=lf
+
+# Shell scripts run inside Linux containers; a CRLF shebang (`bash\r`) makes a
+# freshly checked-out worktree's image exit 127 (Story 1.7 finding F-17-4).
+*.sh text eol=lf
