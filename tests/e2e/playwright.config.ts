@@ -1,7 +1,13 @@
 import { defineConfig, devices } from '@playwright/test'
 
 const composeMode = process.env.NOTEFLOW_E2E_MODE === 'compose'
-const backendOrigin = composeMode ? 'http://127.0.0.1:8001' : 'http://127.0.0.1:8000'
+const backendOrigin = process.env.NOTEFLOW_E2E_BACKEND_ORIGIN || (composeMode ? 'http://127.0.0.1:8001' : 'http://127.0.0.1:8000')
+const frontendOrigin = process.env.NOTEFLOW_E2E_FRONTEND_ORIGIN || 'http://127.0.0.1:4173'
+const frontendUrl = new URL(frontendOrigin)
+if (frontendUrl.hostname !== '127.0.0.1' || frontendUrl.protocol !== 'http:' || !/^\d+$/.test(frontendUrl.port)) {
+  throw new Error('E2E frontend origin must be an HTTP loopback URL with an explicit port.')
+}
+const frontendPort = Number(frontendUrl.port)
 
 export default defineConfig({
   testDir: '.',
@@ -12,7 +18,7 @@ export default defineConfig({
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
   testIgnore: ['**/helpers/php-runtime.test.ts', '**/helpers/db-helper-guard.test.ts'],
   use: {
-    baseURL: 'http://127.0.0.1:4173',
+    baseURL: frontendOrigin,
     trace: 'retain-on-failure',
   },
   projects: [
@@ -53,9 +59,9 @@ export default defineConfig({
         },
       }]),
     {
-      command: 'npm run build && npm run preview -- --host 127.0.0.1 --port 4173',
+      command: `npm run build && npm run preview -- --host 127.0.0.1 --port ${frontendPort} --strictPort`,
       cwd: '../../frontend',
-      port: 4173,
+      port: frontendPort,
       reuseExistingServer: false,
       timeout: 120_000,
       env: {

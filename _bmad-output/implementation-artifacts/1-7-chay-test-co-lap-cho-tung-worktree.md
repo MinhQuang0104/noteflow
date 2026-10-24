@@ -1,7 +1,7 @@
 ---
 story_id: "1.7"
 title: Chạy test cô lập cho từng worktree
-status: ready-for-dev
+status: done
 ---
 
 # Story 1.7: Chạy test cô lập cho từng worktree
@@ -61,3 +61,67 @@ As a developer chạy nhiều Story song song trong các linked worktree, I want
 - product: docs/product/epics.md#story-17-chạy-test-cô-lập-cho-từng-worktree
 - architecture: docs/development/local-runtime.md
 <!-- v4:references:end -->
+
+## Dev Agent Record
+
+<!-- v4:completion:start -->
+### Dev Agent Record
+
+- Finalization receipt: _bmad-output/implementation-artifacts/receipts/story-1-7/finalization.json
+- Done Gate disposition: SATISFIED
+
+### AC Evidence / Results
+
+- AC-1: evidence=COVERED; mode=fallback; fallback: receipt-level PASS evidence
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-1-7/A-verification.json (sha256:d946ffc7bf55a736df3e39a1cd7331717d6b24bdd054aa349a39c2326a32d018); _bmad-output/implementation-artifacts/receipts/story-1-7/B-verification.json (sha256:e67b69e534cd95b8947515053f036ed9e08ccf225d847b9413ba757b1904e389)
+  Canonical disposition: APPLICABLE/PASS; complete=true; disclosure=not-required; APPLICABLE/PASS; complete=true; disclosure=not-required
+- AC-2: evidence=COVERED; mode=fallback; fallback: receipt-level PASS evidence
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-1-7/A-verification.json (sha256:d946ffc7bf55a736df3e39a1cd7331717d6b24bdd054aa349a39c2326a32d018)
+  Canonical disposition: APPLICABLE/PASS; complete=true; disclosure=not-required
+- AC-3: evidence=COVERED; mode=fallback; fallback: receipt-level PASS evidence
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-1-7/A-verification.json (sha256:d946ffc7bf55a736df3e39a1cd7331717d6b24bdd054aa349a39c2326a32d018); _bmad-output/implementation-artifacts/receipts/story-1-7/B-verification.json (sha256:e67b69e534cd95b8947515053f036ed9e08ccf225d847b9413ba757b1904e389)
+  Canonical disposition: APPLICABLE/PASS; complete=true; disclosure=not-required; APPLICABLE/PASS; complete=true; disclosure=not-required
+- AC-4: evidence=COVERED; mode=fallback; fallback: receipt-level PASS evidence
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-1-7/A-verification.json (sha256:d946ffc7bf55a736df3e39a1cd7331717d6b24bdd054aa349a39c2326a32d018)
+  Canonical disposition: APPLICABLE/PASS; complete=true; disclosure=not-required
+- AC-5: evidence=COVERED; mode=fallback; fallback: receipt-level PASS evidence
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-1-7/A-verification.json (sha256:d946ffc7bf55a736df3e39a1cd7331717d6b24bdd054aa349a39c2326a32d018)
+  Canonical disposition: APPLICABLE/PASS; complete=true; disclosure=not-required
+- AC-6: evidence=COVERED; mode=fallback; fallback: receipt-level PASS evidence
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-1-7/A-verification.json (sha256:d946ffc7bf55a736df3e39a1cd7331717d6b24bdd054aa349a39c2326a32d018); _bmad-output/implementation-artifacts/receipts/story-1-7/B-verification.json (sha256:e67b69e534cd95b8947515053f036ed9e08ccf225d847b9413ba757b1904e389)
+  Canonical disposition: APPLICABLE/PASS; complete=true; disclosure=not-required; APPLICABLE/PASS; complete=true; disclosure=not-required
+- AC-7: evidence=COVERED; mode=fallback; fallback: receipt-level PASS evidence
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-1-7/A-verification.json (sha256:d946ffc7bf55a736df3e39a1cd7331717d6b24bdd054aa349a39c2326a32d018); _bmad-output/implementation-artifacts/receipts/story-1-7/B-verification.json (sha256:e67b69e534cd95b8947515053f036ed9e08ccf225d847b9413ba757b1904e389)
+  Canonical disposition: APPLICABLE/PASS; complete=true; disclosure=not-required; APPLICABLE/PASS; complete=true; disclosure=not-required
+- AC-8: evidence=COVERED; mode=fallback; fallback: receipt-level PASS evidence
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-1-7/A-verification.json (sha256:d946ffc7bf55a736df3e39a1cd7331717d6b24bdd054aa349a39c2326a32d018)
+  Canonical disposition: APPLICABLE/PASS; complete=true; disclosure=not-required
+
+### Completion Notes
+
+- Evidenced behavior: `scripts/local.ps1` actions `test`, `e2e`, `test-stop` and the new `test-down` run from a linked worktree of this repository; every other action (`init`, `up`, `stop`, `status`, `logs`, `doctor`, `migrate`, `owner`, `rebuild`) still refuses
+- Evidenced behavior: The canonical checkout keeps Compose project `noteflow-local` and its containers, networks, volumes and host ports exactly as before. A linked worktree uses its own test Compose project `noteflow-test-<id>`, where `<id>` is a stable short h
+- Evidenced behavior: Test identity is unchanged in every checkout: `APP_ENV=testing`, `DB_HOST=postgres-test`, `DB_PORT=5432`, `DB_DATABASE=noteflow_test`, empty `DB_URL`. `backend/phpunit.xml`, `backend/tests/TestCase.php` and `tests/e2e/helpers/db-helper.php`
+- Evidenced behavior: A linked worktree's test services publish no fixed host port that can collide with another checkout: each host port is either absent or deterministic per worktree and checked as free before start, with a clear failure when taken. E2E backen
+- Evidenced behavior: Test secrets for a linked worktree are generated on first use into that worktree's git-ignored `deploy/local/.env`; the dev database, dev secrets and the canonical checkout's env file are never written.
+- Evidenced behavior: Two linked worktrees running `local.ps1 test` at the same time both finish with their own results, and data written by one is not visible to the other.
+- Evidenced behavior: `test-down` removes only the calling linked worktree's test project containers, network and volumes; from the canonical checkout it is refused and the canonical test data is kept, as `test-stop` does today.
+- Evidenced behavior: `.github/workflows/ci.yml` is unchanged.
+
+### File List
+
+- compose.local.yaml
+- docs/development/local-runtime.md
+- scripts/local-runtime.psm1
+- scripts/local.ps1
+- scripts/tests/local-runtime-guards.Tests.ps1
+- scripts/tests/local-runtime.Tests.ps1
+- tests/e2e/helpers/php-runtime.test.ts
+- tests/e2e/helpers/php-runtime.ts
+- tests/e2e/playwright.config.ts
+
+### Change Log
+
+- Finalization recorded for Human Gate: in-progress -> review; next action complete_story.
+- Human approval recorded for the exact review scope: review -> done; next action terminal.
+<!-- v4:completion:end -->

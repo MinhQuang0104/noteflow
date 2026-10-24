@@ -1,0 +1,172 @@
+{
+  "schema_version": 2,
+  "story_id": "1.7",
+  "slice_id": "A",
+  "kind": "review",
+  "checkpoint_commit": "9d8fe07fd4ed9c4b54f86256e302fa6cc0cede97",
+  "baseline_commit": "e4cf85d83e898246051096cd71129efc271a3b74",
+  "subject_digest": "sha256:a815ea948611c7725d7e4b6e666cbef86f7392840c7fe6eddfc953fd11dea4fa",
+  "created_from_head": "9d8fe07fd4ed9c4b54f86256e302fa6cc0cede97",
+  "changed_paths_sha256": "sha256:3d9de3b0db6cb649390c64a28637b6506b7fe1513ed0f98257df4342a98f7eaa",
+  "commands": [
+    {
+      "command": "owner exact scope review of slice A (9d8fe07) with Lead manual evidence 2026-10-24",
+      "exit_code": 0,
+      "tool": "reviewer",
+      "environment": "owner"
+    }
+  ],
+  "judgment": "APPROVE",
+  "questions": [
+    {
+      "id": "question-1",
+      "question": "Review the canonical verification result and bounded change evidence."
+    }
+  ],
+  "answers": [
+    {
+      "id": "question-1",
+      "answer": "Owner reviewed the PASS verification (8/8 checks) and the exact 7-path change evidence. Lead manual evidence 2026-10-24 outside the 120s Runner check cap: worktree e2e 45 passed/5 skipped in 174s without touching the canonical test DB (AC-4); two worktrees ran local.ps1 test concurrently, both exit 0, a probe table written in one test DB was absent in the other (AC-6); test-down removed only the disposable worktree project (AC-7). Known gap accepted: linked-worktree backend tests report dotenv warnings because backend/.env is absent; assertions still run."
+    }
+  ],
+  "evidence_refs": [
+    {
+      "path": "compose.local.yaml",
+      "unit_index": 0,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "compose.local.yaml",
+      "unit_index": 1,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "compose.local.yaml",
+      "unit_index": 2,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "compose.local.yaml",
+      "unit_index": 3,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "compose.local.yaml",
+      "unit_index": 4,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "scripts/local-runtime.psm1",
+      "unit_index": 5,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "scripts/local.ps1",
+      "unit_index": 6,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "scripts/local.ps1",
+      "unit_index": 7,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "scripts/local.ps1",
+      "unit_index": 8,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "scripts/local.ps1",
+      "unit_index": 9,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "scripts/local.ps1",
+      "unit_index": 10,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "scripts/local.ps1",
+      "unit_index": 11,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "scripts/local.ps1",
+      "unit_index": 12,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "scripts/local.ps1",
+      "unit_index": 13,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "scripts/local.ps1",
+      "unit_index": 14,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "scripts/local.ps1",
+      "unit_index": 15,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "scripts/local.ps1",
+      "unit_index": 16,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "scripts/local.ps1",
+      "unit_index": 17,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "scripts/tests/local-runtime.Tests.ps1",
+      "unit_index": 18,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "tests/e2e/helpers/php-runtime.test.ts",
+      "unit_index": 19,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "tests/e2e/helpers/php-runtime.ts",
+      "unit_index": 20,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "tests/e2e/helpers/php-runtime.ts",
+      "unit_index": 21,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "tests/e2e/helpers/php-runtime.ts",
+      "unit_index": 22,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "tests/e2e/playwright.config.ts",
+      "unit_index": 23,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "tests/e2e/playwright.config.ts",
+      "unit_index": 24,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    },
+    {
+      "path": "tests/e2e/playwright.config.ts",
+      "unit_index": 25,
+      "evidence_set_digest": "fdb9382033f489bc037bea8714156f8749c10c1c8a2e5076afd9f25ed90296ac"
+    }
+  ],
+  "scope_digest": "sha256:1ecd0ea69973b1a003b966dec101dd4bfe201c6ef834fddf74f50d7ad1892474",
+  "risk_context_digest": "sha256:4585339b0cdad1473d7966b081ecaab205b19c1b811e2626248f8fd37bb2761f",
+  "reviewed_commit": "9d8fe07fd4ed9c4b54f86256e302fa6cc0cede97",
+  "reviewer": {
+    "type": "human",
+    "vendor": null,
+    "independent": false
+  }
+}

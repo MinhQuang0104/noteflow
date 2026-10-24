@@ -12,9 +12,10 @@ test tools.
   context.
 - Node.js 24.12 or newer in the approved Node 24 release line and npm 11 are
   installed for Vite.
-- Run the commands from the canonical checkout at
+- Run shared dev runtime commands from the canonical checkout at
   `D:\Workspace\Tu_Hoc\New_Project_My_Note`. The wrapper rejects linked
-  worktrees so a worker checkout cannot silently change the shared backend.
+  worktrees for dev actions so a worker checkout cannot silently change the shared backend.
+  Test actions can run safely from linked worktrees (see [Linked-worktree testing](#linked-worktree-testing)).
 
 ## First setup and daily lifecycle
 
@@ -102,6 +103,56 @@ Compose E2E mode is selected with `NOTEFLOW_E2E_MODE=compose` by the wrapper.
 It runs PHP inside `backend-test`, points the Vite preview at port `8001`, and
 does not reuse an unrelated preview or API listener. Native/CI mode remains
 available for runners that prepare PHP and PostgreSQL themselves.
+
+## Linked-worktree testing
+
+When developing stories across multiple git worktrees, test actions can be executed directly from a linked worktree without interfering with the canonical checkout or other worktrees.
+
+### Permitted actions
+
+Only test actions are permitted in a linked worktree:
+
+```powershell
+.\scripts\local.ps1 test
+.\scripts\local.ps1 e2e
+.\scripts\local.ps1 test-stop
+.\scripts\local.ps1 test-down
+```
+
+All dev actions (`init`, `up`, `stop`, `status`, `logs`, `doctor`, `migrate`, `owner`, `rebuild`) are rejected with an explicit refusal message when called from a linked worktree, preventing any accidental mutation of the shared development backend or database.
+
+### Isolation and naming
+
+Each linked worktree automatically uses its own dedicated Docker Compose test project named `noteflow-test-<id>`, where `<id>` is a deterministic 12-character SHA-256 hash of the worktree's normalized absolute path:
+- **Dedicated resources**: Each worktree gets its own isolated network (`noteflow-test-<id>-test`) and named volumes (`noteflow-test-<id>-postgres-test-data`, `noteflow-test-<id>-backend-test-*`).
+- **Deterministic ports**: Test backend and E2E frontend ports are deterministically mapped in the 20000–39999 range per worktree and verified to be free before starting.
+- **Unchanged test identity**: The test environment preserves the exact same database identity across every checkout (`APP_ENV=testing`, `DB_HOST=postgres-test`, `DB_PORT=5432`, `DB_DATABASE=noteflow_test`, empty `DB_URL`). Dev database, dev volumes, and dev secrets are never touched.
+- **Independent data**: Two linked worktrees running `.\scripts\local.ps1 test` concurrently run completely isolated; data written in one test database is never visible to another.
+
+### Host dependencies for E2E testing
+
+The `e2e` action runs Playwright directly on the Windows host. Therefore, a linked worktree requires its own Node dependencies installed in both `frontend` and `tests/e2e` prior to running `.\scripts\local.ps1 e2e`:
+
+```powershell
+Push-Location frontend; npm ci; Pop-Location
+Push-Location tests/e2e; npm ci; Pop-Location
+```
+
+The wrapper does not install these automatically.
+
+### Concurrency recommendation
+
+Running at most three worktrees executing tests at the same time is recommended as a resource guideline for host memory and CPU utilization, though this is not strictly code-enforced.
+
+### Cleanup with `test-down`
+
+After a Story is finished and integrated, remove the linked worktree's test containers, network, and volumes using `test-down`:
+
+```powershell
+.\scripts\local.ps1 test-down
+```
+
+`test-down` targets only the calling linked worktree's own test project and associated volumes. When executed from the canonical checkout, `test-down` is refused to ensure canonical test data is retained (matching `test-stop` behavior).
 
 ## Diagnostics and boundaries
 

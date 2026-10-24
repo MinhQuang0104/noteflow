@@ -46,6 +46,24 @@ test('compose mode invokes the fixed backend-test service without a shell', () =
   assert.equal(invocation.args.includes('exec'), true)
   assert.equal(invocation.args.includes('-T'), true)
   assert.equal(invocation.cwd, rootDir)
+  assert.equal(invocation.args[invocation.args.indexOf('--project-name') + 1], 'noteflow-local')
+})
+
+test('compose reset targets only the project supplied by the worktree wrapper', () => {
+  const invocation = buildPhpInvocation(['db-helper.php', 'reset'], 'helpers', {
+    rootDir,
+    env: { ...composeEnvironment, NOTEFLOW_TEST_PROJECT: 'noteflow-test-abcdef123456' },
+  })
+  assert.equal(invocation.args[invocation.args.indexOf('--project-name') + 1], 'noteflow-test-abcdef123456')
+})
+
+test('compose rejects a foreign or malformed project before destructive helper execution', () => {
+  for (const project of ['other-project', 'noteflow-local-dev', '', 'noteflow-test-../bad']) {
+    assert.throws(() => buildPhpInvocation(['db-helper.php', 'reset'], 'helpers', {
+      rootDir,
+      env: { ...composeEnvironment, NOTEFLOW_TEST_PROJECT: project },
+    }), /test project/)
+  }
 })
 
 test('arguments containing spaces remain one argument', () => {

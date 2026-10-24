@@ -1,0 +1,617 @@
+{
+  "schema_version": 1,
+  "story_id": "1.7",
+  "slice_id": "A",
+  "kind": "verification",
+  "checkpoint_commit": "9d8fe07fd4ed9c4b54f86256e302fa6cc0cede97",
+  "baseline_commit": "e4cf85d83e898246051096cd71129efc271a3b74",
+  "subject_digest": "sha256:a815ea948611c7725d7e4b6e666cbef86f7392840c7fe6eddfc953fd11dea4fa",
+  "created_from_head": "9d8fe07fd4ed9c4b54f86256e302fa6cc0cede97",
+  "changed_paths_sha256": "sha256:3d9de3b0db6cb649390c64a28637b6506b7fe1513ed0f98257df4342a98f7eaa",
+  "commands": [
+    {
+      "command": "check:protected-files-unchanged",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "unknown"
+    },
+    {
+      "command": "check:canonical-runtime-unchanged",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "unknown"
+    },
+    {
+      "command": "check:worktree-test-identity",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "unknown"
+    },
+    {
+      "command": "check:ac7-test-down-own-project-only",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "unknown"
+    }
+  ],
+  "canonical": {
+    "schema_version": 1,
+    "featureId": "local-test-runtime",
+    "changedPaths": [
+      "compose.local.yaml",
+      "scripts/local-runtime.psm1",
+      "scripts/local.ps1",
+      "scripts/tests/local-runtime.Tests.ps1",
+      "tests/e2e/helpers/php-runtime.test.ts",
+      "tests/e2e/helpers/php-runtime.ts",
+      "tests/e2e/playwright.config.ts"
+    ],
+    "matchedPaths": [
+      "compose.local.yaml",
+      "scripts/local-runtime.psm1",
+      "scripts/local.ps1",
+      "scripts/tests/local-runtime.Tests.ps1",
+      "tests/e2e/helpers/php-runtime.test.ts",
+      "tests/e2e/helpers/php-runtime.ts",
+      "tests/e2e/playwright.config.ts"
+    ],
+    "coveredPaths": [
+      "compose.local.yaml",
+      "scripts/local-runtime.psm1",
+      "scripts/local.ps1",
+      "scripts/tests/local-runtime.Tests.ps1",
+      "tests/e2e/helpers/php-runtime.test.ts",
+      "tests/e2e/helpers/php-runtime.ts",
+      "tests/e2e/playwright.config.ts"
+    ],
+    "unmatchedPaths": [],
+    "dependencyOnlyPaths": [],
+    "map": {
+      "status": "STALE",
+      "expectedChangedAnchors": [
+        "compose.local.yaml",
+        "scripts/local-runtime.psm1",
+        "scripts/local.ps1",
+        "scripts/tests/local-runtime.Tests.ps1",
+        "tests/e2e/helpers/php-runtime.test.ts",
+        "tests/e2e/helpers/php-runtime.ts",
+        "tests/e2e/playwright.config.ts"
+      ],
+      "unexplainedDrift": [],
+      "missingAnchors": []
+    },
+    "checks": [
+      {
+        "id": "map",
+        "status": "PASS",
+        "exitCode": 1,
+        "summary": "STALE",
+        "evidence_ref": "sha256:15fb5ed8768c77d66e856d8fe2f8ca9ec4b844ad44366fe9dcd18753d93406cf"
+      },
+      {
+        "id": "pester",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "Tests completed in 4.16s",
+        "evidence_ref": "sha256:0ef1a46c51d3edbab6920bde0be7e4210b1c7779b9e57da89cb55776afaf797a"
+      },
+      {
+        "id": "php-runtime",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "ℹ duration_ms 330.7061",
+        "evidence_ref": "sha256:6c1a716889e427ccc2844355e291580fa0bd1154dd3d303f91500ac1dd64f9ed"
+      },
+      {
+        "id": "live-backend-test",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "Container noteflow-test-7c827c4ea883-backend-test-1  Healthy",
+        "evidence_ref": "sha256:3fd00af24f5ddfb97afb657bd16e84899f6af5df423156d91a5751f192903f44"
+      }
+    ],
+    "escalationReasons": [],
+    "status": "PASS",
+    "complete": true
+  },
+  "focused_checks": [
+    {
+      "schema_version": 1,
+      "check_id": "protected-files-unchanged",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 120,
+      "command_digest": "sha256:4f2082a8556f7bc2a387dc02e6e52c483c3dcdc82b88499060fdd7fafffde1d8",
+      "output_digest": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "diagnostic_excerpt": "No output",
+      "subject": {
+        "commit": "9d8fe07fd4ed9c4b54f86256e302fa6cc0cede97"
+      },
+      "environment": {
+        "status": "UNKNOWN",
+        "reason": "not_supplied"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          ".github/workflows/ci.yml",
+          "backend/phpunit.xml",
+          "backend/tests/TestCase.php",
+          "tests/e2e/helpers/db-helper.php"
+        ],
+        "source": {
+          "kind": "focused-manifest"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:4ed0f350d6002e1dbf90207166961d3dfb5cd99c514d05beb3b24c1f5f8b7650"
+      },
+      "reasons": [],
+      "observed_at": "2026-10-24T04:06:40.870Z",
+      "observation": {
+        "status": "NOOP",
+        "event_id": "hook-check_finished-0c1a138ecd8edc2a2d31fdd103cc7c704fa688b481b4c44d",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-1-7-test-runtime\\.agent-state\\v4-observations\\events\\hook-check_finished-0c1a138ecd8edc2a2d31fdd103cc7c704fa688b481b4c44d.json",
+        "coverage": "MEASURED"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "compose.local.yaml",
+        "scripts/local-runtime.psm1",
+        "scripts/local.ps1",
+        "scripts/tests/local-runtime.Tests.ps1",
+        "tests/e2e/helpers/php-runtime.test.ts",
+        "tests/e2e/helpers/php-runtime.ts",
+        "tests/e2e/playwright.config.ts"
+      ],
+      "changed_paths_sha256": "sha256:3d9de3b0db6cb649390c64a28637b6506b7fe1513ed0f98257df4342a98f7eaa",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "canonical-runtime-unchanged",
+      "classification": "behavioral",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 2735,
+      "command_digest": "sha256:5557bec9053e49330962e9c0e0a1040ac8ef179cd4a9816147f47d6d3670ca80",
+      "output_digest": "sha256:e8aaeedb262d59da29266a86883f0412e258596dc5bacb729f11a6637013bab6",
+      "diagnostic_excerpt": "NAME                        IMAGE                        COMMAND                  SERVICE    CREATED       STATUS                    PORTS\r\nnoteflow-local-backend-1    noteflow-local/backend:dev   \"/usr/local/bin/note…\"   backend    2 weeks ago   Up 53 minutes (healthy)   127.0.0.1:8000->8000/tcp\r\nnoteflow-local-postgres-1   postgres:17                  \"docker-entrypoint.s…\"   postgres   2 weeks ago   Up 53 minutes (healthy)   5432/tcp\r\n\r\ncanonical config noteflow-local/8001/4173 and dev status unchanged",
+      "subject": {
+        "commit": "9d8fe07fd4ed9c4b54f86256e302fa6cc0cede97"
+      },
+      "environment": {
+        "status": "UNKNOWN",
+        "reason": "not_supplied"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "scripts/local-runtime.psm1"
+        ],
+        "source": {
+          "kind": "focused-manifest"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:016eb81afedaf59a7e4dbcae3ec83b1ef8a9902a33f871f951b025ecfa2aa624"
+      },
+      "reasons": [],
+      "observed_at": "2026-10-24T04:06:42.097Z",
+      "observation": {
+        "status": "CONFLICT",
+        "event_id": "hook-check_finished-8061fd5608b062947e25b03fcc4bd813360cfb8596bb0115",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-1-7-test-runtime\\.agent-state\\v4-observations\\events\\hook-check_finished-8061fd5608b062947e25b03fcc4bd813360cfb8596bb0115.json",
+        "coverage": "UNKNOWN",
+        "reason": "EVENT_ID_PAYLOAD_CONFLICT"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "compose.local.yaml",
+        "scripts/local-runtime.psm1",
+        "scripts/local.ps1",
+        "scripts/tests/local-runtime.Tests.ps1",
+        "tests/e2e/helpers/php-runtime.test.ts",
+        "tests/e2e/helpers/php-runtime.ts",
+        "tests/e2e/playwright.config.ts"
+      ],
+      "changed_paths_sha256": "sha256:3d9de3b0db6cb649390c64a28637b6506b7fe1513ed0f98257df4342a98f7eaa",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "worktree-test-identity",
+      "classification": "behavioral",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 3671,
+      "command_digest": "sha256:027c07097de574e0c35d17e22cc1c72c1b392e60008befb141dc31d9ecdd7b27",
+      "output_digest": "sha256:e6939ef481fa2106865b538ce687fd30170f9f760cba34a05b85b21cc9ea702d",
+      "diagnostic_excerpt": "{\"IsLinked\":true,\"ProjectName\":\"noteflow-test-7c827c4ea883\",\"BackendPort\":39736,\"FrontendPort\":39737}\r\nAPP_ENV=testing;DB_HOST=postgres-test;DB_PORT=5432;DB_DATABASE=noteflow_test;DB_URL=\r\nnetwork noteflow-test-7c827c4ea883-test",
+      "subject": {
+        "commit": "9d8fe07fd4ed9c4b54f86256e302fa6cc0cede97"
+      },
+      "environment": {
+        "status": "UNKNOWN",
+        "reason": "not_supplied"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "scripts/local-runtime.psm1",
+          "compose.local.yaml"
+        ],
+        "source": {
+          "kind": "focused-manifest"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:dc89f3c28a666234e71b79061bc6d2448a8a79d05d6b99d997f22eec62858336"
+      },
+      "reasons": [],
+      "observed_at": "2026-10-24T04:06:45.784Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-c94b13a25b866c73d09414497464cc00bf2ecaecd5bf85fd",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-1-7-test-runtime\\.agent-state\\v4-observations\\events\\hook-check_finished-c94b13a25b866c73d09414497464cc00bf2ecaecd5bf85fd.json",
+        "coverage": "MEASURED"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "compose.local.yaml",
+        "scripts/local-runtime.psm1",
+        "scripts/local.ps1",
+        "scripts/tests/local-runtime.Tests.ps1",
+        "tests/e2e/helpers/php-runtime.test.ts",
+        "tests/e2e/helpers/php-runtime.ts",
+        "tests/e2e/playwright.config.ts"
+      ],
+      "changed_paths_sha256": "sha256:3d9de3b0db6cb649390c64a28637b6506b7fe1513ed0f98257df4342a98f7eaa",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "ac7-test-down-own-project-only",
+      "classification": "behavioral",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 12259,
+      "command_digest": "sha256:f520363524c77ffa937690d6d5b82588b9ff8af1694ebb003cca8695f1013683",
+      "output_digest": "sha256:48e803fb3ae439ba03522c40f74468d73dee00ba0d83563f16f1467c9e2d5e8b",
+      "diagnostic_excerpt": "Going to remove noteflow-test-7c827c4ea883-backend-test-1, noteflow-test-7c827c4ea883-postgres-test-1\nnoteflow-test-7c827c4ea883-test\nnoteflow-test-7c827c4ea883-backend-test-cache\nnoteflow-test-7c827c4ea883-backend-test-storage\nnoteflow-test-7c827c4ea883-backend-test-vendor\nnoteflow-test-7c827c4ea883-postgres-test-data\nRemoved test project noteflow-test-7c827c4ea883 and its volumes.\nleftover=\r\ncanonical volumes before=noteflow-local-backend-cache,noteflow-local-backend-storage,noteflow-local-backend-test-cache,noteflow-local-backend-test-storage,noteflow-local-backend-test-vendor,noteflow-local-backend-vendor,noteflow-local-postgres-data,noteflow-local-postgres-test-data after=noteflow-local-backend-cache,noteflow-local-backend-storage,noteflow-local-backend-test-cache,noteflow-local-backend-test-storage,noteflow-local-backend-test-vendor,noteflow-local-backend-vendor,noteflow-local-postgres-data,noteflow-local-postgres-test-data\r\n\n Container noteflow-test-7c827c4ea883-backend-test-1  Stopping\n Container noteflow-test-7c827c4ea883-backend-test-1  Stopped\n Container noteflow-test-7c827c4ea883-postgres-test-1  Stopping\n Container noteflow-test-7c827c4ea883-postgres-test-1  Stopped\n Container noteflow-test-7c827c4ea883-postgres-test-1  Removing\n Container noteflow-test-7c827c4ea883-backend-test-1  Removing\n Container noteflow-test-7c827c4ea883-postgres-test-1  Removed\n Container noteflow-test-7c827c4ea883-backend-test-1  Removed",
+      "subject": {
+        "commit": "9d8fe07fd4ed9c4b54f86256e302fa6cc0cede97"
+      },
+      "environment": {
+        "status": "UNKNOWN",
+        "reason": "not_supplied"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "scripts/local.ps1",
+          "scripts/local-runtime.psm1"
+        ],
+        "source": {
+          "kind": "focused-manifest"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:97b28339437edf6ace093806c3a4c22b66df4a2b388593689da03fed3ac9b633"
+      },
+      "reasons": [],
+      "observed_at": "2026-10-24T04:06:50.506Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-9a6ff22c5269aba1d57903ce336f6c5920a745efe5e40426",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-1-7-test-runtime\\.agent-state\\v4-observations\\events\\hook-check_finished-9a6ff22c5269aba1d57903ce336f6c5920a745efe5e40426.json",
+        "coverage": "MEASURED"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "compose.local.yaml",
+        "scripts/local-runtime.psm1",
+        "scripts/local.ps1",
+        "scripts/tests/local-runtime.Tests.ps1",
+        "tests/e2e/helpers/php-runtime.test.ts",
+        "tests/e2e/helpers/php-runtime.ts",
+        "tests/e2e/playwright.config.ts"
+      ],
+      "changed_paths_sha256": "sha256:3d9de3b0db6cb649390c64a28637b6506b7fe1513ed0f98257df4342a98f7eaa",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    }
+  ],
+  "raw_focused_checks": [
+    {
+      "schema_version": 1,
+      "check_id": "protected-files-unchanged",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 120,
+      "command_digest": "sha256:4f2082a8556f7bc2a387dc02e6e52c483c3dcdc82b88499060fdd7fafffde1d8",
+      "output_digest": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "diagnostic_excerpt": "No output",
+      "subject": {
+        "kind": "commit",
+        "value": "9d8fe07fd4ed9c4b54f86256e302fa6cc0cede97"
+      },
+      "environment": {
+        "status": "UNKNOWN",
+        "reason": "not_supplied"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          ".github/workflows/ci.yml",
+          "backend/phpunit.xml",
+          "backend/tests/TestCase.php",
+          "tests/e2e/helpers/db-helper.php"
+        ],
+        "source": {
+          "kind": "focused-manifest"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:4ed0f350d6002e1dbf90207166961d3dfb5cd99c514d05beb3b24c1f5f8b7650"
+      },
+      "reasons": [],
+      "observed_at": "2026-10-24T04:06:40.870Z",
+      "observation": {
+        "status": "NOOP",
+        "event_id": "hook-check_finished-0c1a138ecd8edc2a2d31fdd103cc7c704fa688b481b4c44d",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-1-7-test-runtime\\.agent-state\\v4-observations\\events\\hook-check_finished-0c1a138ecd8edc2a2d31fdd103cc7c704fa688b481b4c44d.json",
+        "coverage": "MEASURED"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "canonical-runtime-unchanged",
+      "classification": "behavioral",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 2735,
+      "command_digest": "sha256:5557bec9053e49330962e9c0e0a1040ac8ef179cd4a9816147f47d6d3670ca80",
+      "output_digest": "sha256:e8aaeedb262d59da29266a86883f0412e258596dc5bacb729f11a6637013bab6",
+      "diagnostic_excerpt": "NAME                        IMAGE                        COMMAND                  SERVICE    CREATED       STATUS                    PORTS\r\nnoteflow-local-backend-1    noteflow-local/backend:dev   \"/usr/local/bin/note…\"   backend    2 weeks ago   Up 53 minutes (healthy)   127.0.0.1:8000->8000/tcp\r\nnoteflow-local-postgres-1   postgres:17                  \"docker-entrypoint.s…\"   postgres   2 weeks ago   Up 53 minutes (healthy)   5432/tcp\r\n\r\ncanonical config noteflow-local/8001/4173 and dev status unchanged",
+      "subject": {
+        "kind": "commit",
+        "value": "9d8fe07fd4ed9c4b54f86256e302fa6cc0cede97"
+      },
+      "environment": {
+        "status": "UNKNOWN",
+        "reason": "not_supplied"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "scripts/local-runtime.psm1"
+        ],
+        "source": {
+          "kind": "focused-manifest"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:016eb81afedaf59a7e4dbcae3ec83b1ef8a9902a33f871f951b025ecfa2aa624"
+      },
+      "reasons": [],
+      "observed_at": "2026-10-24T04:06:42.097Z",
+      "observation": {
+        "status": "CONFLICT",
+        "event_id": "hook-check_finished-8061fd5608b062947e25b03fcc4bd813360cfb8596bb0115",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-1-7-test-runtime\\.agent-state\\v4-observations\\events\\hook-check_finished-8061fd5608b062947e25b03fcc4bd813360cfb8596bb0115.json",
+        "coverage": "UNKNOWN",
+        "reason": "EVENT_ID_PAYLOAD_CONFLICT"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "worktree-test-identity",
+      "classification": "behavioral",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 3671,
+      "command_digest": "sha256:027c07097de574e0c35d17e22cc1c72c1b392e60008befb141dc31d9ecdd7b27",
+      "output_digest": "sha256:e6939ef481fa2106865b538ce687fd30170f9f760cba34a05b85b21cc9ea702d",
+      "diagnostic_excerpt": "{\"IsLinked\":true,\"ProjectName\":\"noteflow-test-7c827c4ea883\",\"BackendPort\":39736,\"FrontendPort\":39737}\r\nAPP_ENV=testing;DB_HOST=postgres-test;DB_PORT=5432;DB_DATABASE=noteflow_test;DB_URL=\r\nnetwork noteflow-test-7c827c4ea883-test",
+      "subject": {
+        "kind": "commit",
+        "value": "9d8fe07fd4ed9c4b54f86256e302fa6cc0cede97"
+      },
+      "environment": {
+        "status": "UNKNOWN",
+        "reason": "not_supplied"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "scripts/local-runtime.psm1",
+          "compose.local.yaml"
+        ],
+        "source": {
+          "kind": "focused-manifest"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:dc89f3c28a666234e71b79061bc6d2448a8a79d05d6b99d997f22eec62858336"
+      },
+      "reasons": [],
+      "observed_at": "2026-10-24T04:06:45.784Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-c94b13a25b866c73d09414497464cc00bf2ecaecd5bf85fd",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-1-7-test-runtime\\.agent-state\\v4-observations\\events\\hook-check_finished-c94b13a25b866c73d09414497464cc00bf2ecaecd5bf85fd.json",
+        "coverage": "MEASURED"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "ac7-test-down-own-project-only",
+      "classification": "behavioral",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 12259,
+      "command_digest": "sha256:f520363524c77ffa937690d6d5b82588b9ff8af1694ebb003cca8695f1013683",
+      "output_digest": "sha256:48e803fb3ae439ba03522c40f74468d73dee00ba0d83563f16f1467c9e2d5e8b",
+      "diagnostic_excerpt": "Going to remove noteflow-test-7c827c4ea883-backend-test-1, noteflow-test-7c827c4ea883-postgres-test-1\nnoteflow-test-7c827c4ea883-test\nnoteflow-test-7c827c4ea883-backend-test-cache\nnoteflow-test-7c827c4ea883-backend-test-storage\nnoteflow-test-7c827c4ea883-backend-test-vendor\nnoteflow-test-7c827c4ea883-postgres-test-data\nRemoved test project noteflow-test-7c827c4ea883 and its volumes.\nleftover=\r\ncanonical volumes before=noteflow-local-backend-cache,noteflow-local-backend-storage,noteflow-local-backend-test-cache,noteflow-local-backend-test-storage,noteflow-local-backend-test-vendor,noteflow-local-backend-vendor,noteflow-local-postgres-data,noteflow-local-postgres-test-data after=noteflow-local-backend-cache,noteflow-local-backend-storage,noteflow-local-backend-test-cache,noteflow-local-backend-test-storage,noteflow-local-backend-test-vendor,noteflow-local-backend-vendor,noteflow-local-postgres-data,noteflow-local-postgres-test-data\r\n\n Container noteflow-test-7c827c4ea883-backend-test-1  Stopping\n Container noteflow-test-7c827c4ea883-backend-test-1  Stopped\n Container noteflow-test-7c827c4ea883-postgres-test-1  Stopping\n Container noteflow-test-7c827c4ea883-postgres-test-1  Stopped\n Container noteflow-test-7c827c4ea883-postgres-test-1  Removing\n Container noteflow-test-7c827c4ea883-backend-test-1  Removing\n Container noteflow-test-7c827c4ea883-postgres-test-1  Removed\n Container noteflow-test-7c827c4ea883-backend-test-1  Removed",
+      "subject": {
+        "kind": "commit",
+        "value": "9d8fe07fd4ed9c4b54f86256e302fa6cc0cede97"
+      },
+      "environment": {
+        "status": "UNKNOWN",
+        "reason": "not_supplied"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "scripts/local.ps1",
+          "scripts/local-runtime.psm1"
+        ],
+        "source": {
+          "kind": "focused-manifest"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:97b28339437edf6ace093806c3a4c22b66df4a2b388593689da03fed3ac9b633"
+      },
+      "reasons": [],
+      "observed_at": "2026-10-24T04:06:50.506Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-9a6ff22c5269aba1d57903ce336f6c5920a745efe5e40426",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-1-7-test-runtime\\.agent-state\\v4-observations\\events\\hook-check_finished-9a6ff22c5269aba1d57903ce336f6c5920a745efe5e40426.json",
+        "coverage": "MEASURED"
+      }
+    }
+  ],
+  "escalation": {
+    "decision": "REVIEW_REQUIRED",
+    "risk": "MEDIUM",
+    "reasons": [
+      "JUDGMENT_PUBLIC_CONTRACT",
+      "MEDIUM_COVERAGE_JUDGMENT"
+    ]
+  },
+  "semantic_coverage": null,
+  "progression_eligible": true,
+  "status": "PASS",
+  "context_digest": "sha256:08c9262857b6d45348303bc8ee3b97b934809c8b5e51952b70d58b18d823c088"
+}

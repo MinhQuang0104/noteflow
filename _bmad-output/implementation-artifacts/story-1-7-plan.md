@@ -8,8 +8,8 @@ upstream_epic:
   path: docs/product/epics.md
   section_digest: sha256:56a6a93be6a9310dab4cdaf453ef9e1891a3ffb6404c41ed24d17714ea2a4b3c
 sprint_key: 1-7-chạy-test-cô-lập-cho-từng-worktree
-lifecycle_snapshot: ready-for-dev
-execution_status: ready-for-dev
+lifecycle_snapshot: done
+execution_status: complete
 planning_approval:
   decision: APPROVED
   scope: planning
@@ -19,13 +19,42 @@ readiness:
   status: READY
   story_normative_digest: sha256:dd431e6bd23a157b38a4c1fc80fce2d84a9df56fc20a546bdd30a639d5e6d62d
   dependency_sprint_keys: []
-current_slice: A
+current_slice: B
 risk:
   level: MEDIUM
   flags: [shared_boundary]
 slices:
   - id: A
-    status: pending
+    status: reviewed
+    baseline_commit: e4cf85d83e898246051096cd71129efc271a3b74
+    checkpoint_commit: 9d8fe07fd4ed9c4b54f86256e302fa6cc0cede97
+    subject_digest: sha256:a815ea948611c7725d7e4b6e666cbef86f7392840c7fe6eddfc953fd11dea4fa
+    changed_paths_sha256: sha256:3d9de3b0db6cb649390c64a28637b6506b7fe1513ed0f98257df4342a98f7eaa
+    receipt_refs:
+      implementation:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-7/A-implementation.json
+        digest: sha256:ba8d4c427892eb2424ed3a139dea9a646b7da87e28d9fb25e909a3cd430564b5
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-7/A-verification.json
+        digest: sha256:d946ffc7bf55a736df3e39a1cd7331717d6b24bdd054aa349a39c2326a32d018
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-7/A-review.json
+        digest: sha256:675b14a9e95b493f6d1e930a9823fa71a6cde09baa4f653bde22054666de5ea8
+    verification:
+      status: PASS
+      canonical_status: PASS
+      escalation_decision: REVIEW_REQUIRED
+      progression_eligible: true
+    review:
+      required: true
+      verdict: APPROVE
+      reviewed_commit: 9d8fe07fd4ed9c4b54f86256e302fa6cc0cede97
+      risk_context_digest: sha256:4585339b0cdad1473d7966b081ecaab205b19c1b811e2626248f8fd37bb2761f
+      freshness: FRESH_CANDIDATE
+      reviewer:
+        type: human
+        vendor: null
+        independent: false
     task_refs: [T-1]
     depends_on: []
     executor: lead
@@ -44,7 +73,36 @@ slices:
       - AC-7 - test-down from the Story worktree removes only its own project; test-down from the canonical checkout is refused
       - git diff --exit-code main -- .github/workflows/ci.yml backend/phpunit.xml backend/tests/TestCase.php tests/e2e/helpers/db-helper.php
   - id: B
-    status: pending
+    status: reviewed
+    baseline_commit: 74ab16004fdd4b9518213353a81c8cdaefb249ee
+    checkpoint_commit: e5d20830fc97c0acece66fe966a2bf1a2e4d891b
+    subject_digest: sha256:1b582a780b556390031bcf11c1bd324c26a106c063d5112c82ed120f1c34a690
+    changed_paths_sha256: sha256:a199fc9afb4471a0b15c58d1d1481afeda869559527d4a76f574ca1954dc4333
+    receipt_refs:
+      implementation:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-7/B-implementation.json
+        digest: sha256:9c7d860ee91e328c8d50d3356f3bccf2cc29703f33df889314442de97f0584e5
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-7/B-verification.json
+        digest: sha256:e67b69e534cd95b8947515053f036ed9e08ccf225d847b9413ba757b1904e389
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-7/B-review.json
+        digest: sha256:bd0fe4fe0dac012c12bc5b22bdd0f091f669b3e9b5fea94ec61cb57c788da312
+    verification:
+      status: PASS
+      canonical_status: PASS
+      escalation_decision: REVIEW_REQUIRED
+      progression_eligible: true
+    review:
+      required: true
+      verdict: APPROVE
+      reviewed_commit: e5d20830fc97c0acece66fe966a2bf1a2e4d891b
+      risk_context_digest: sha256:4585339b0cdad1473d7966b081ecaab205b19c1b811e2626248f8fd37bb2761f
+      freshness: FRESH_CANDIDATE
+      reviewer:
+        type: lead
+        vendor: claude
+        independent: true
     task_refs: [T-2]
     depends_on: [A]
     executor: agy
@@ -57,9 +115,43 @@ slices:
       - Invoke-Pester -Script scripts/tests/local-runtime-guards.Tests.ps1 -EnableExit
 blockers: []
 unresolved_questions: []
-next_action:
-  kind: start_story
-  target: story
+finalization:
+  receipt_ref: _bmad-output/implementation-artifacts/receipts/story-1-7/finalization.json
+  receipt_digest: sha256:1c9bab87ff58ba5864105e9956b7725017b137765a0977eda894b8f80a504a16
+  done_gate_disposition: SATISFIED
+  scope_paths_digest: sha256:84bbb47907437e147e9511401ee106c949f6b31d3748fcf4297389b0f3875cd7
+  implementation_commit_set_digest: sha256:a2dbe124dfb2e2ffac2b6e52430d257366f2a5a741f27d7c4ae6e4b9b9e48f0c
+  final_scoped_tree_digest: sha256:229e353a80c01ec0626e085a1911f1f143245acdc7476d4beac20c6c2c6a261f
+  prepared_from_head: cbf70f4436627f2aba3674e6be5cafd9b36d05d1
+human_approval:
+  schema_version: 1
+  story_id: "1.7"
+  approver_type: "human"
+  decision: "APPROVED"
+  approved_at: "2026-10-24T04:46:37.319Z"
+  story_normative_digest: "sha256:dd431e6bd23a157b38a4c1fc80fce2d84a9df56fc20a546bdd30a639d5e6d62d"
+  finalization_receipt_digest: "sha256:1c9bab87ff58ba5864105e9956b7725017b137765a0977eda894b8f80a504a16"
+  done_gate_summary_digest: "sha256:ca128b75a157a8f32db3d4277c1b205cf9dbcb8d0139b441500c5b769a098c0c"
+  scope_paths_digest: "sha256:84bbb47907437e147e9511401ee106c949f6b31d3748fcf4297389b0f3875cd7"
+  implementation_commit_set_digest: "sha256:a2dbe124dfb2e2ffac2b6e52430d257366f2a5a741f27d7c4ae6e4b9b9e48f0c"
+  final_scope_digest: "sha256:229e353a80c01ec0626e085a1911f1f143245acdc7476d4beac20c6c2c6a261f"
+  final_scoped_tree_digest: "sha256:229e353a80c01ec0626e085a1911f1f143245acdc7476d4beac20c6c2c6a261f"
+  approved_review_head: "e3f62f98823701917c67c0421d74bebe1c19fbda"
+  approved_commit: "e3f62f98823701917c67c0421d74bebe1c19fbda"
+  approved_action: "complete_story"
+  disclosures_acknowledged: true
+next_action: null
+autopilot:
+  schema_version: 1
+  authorized_at: "2026-10-12T06:10:34.145Z"
+  authorized_plan_digest: sha256:eb21d13765756ec1eb7daa3d27047fe703f33115f1205257aa1c928dfbbfef26
+  authorized_head: 066f76f02a59c88d65808f6b333a413ce97d1ce2
+  budgets:
+    max_slices: 2
+    max_rework_per_slice: 2
+    max_minutes_per_slice: 90
+  lead_vendor: codex
+  revoked: false
 ---
 
 # Story 1.7 execution plan

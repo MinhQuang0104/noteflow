@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "story_id": "1.7",
+  "slice_id": "A",
+  "kind": "implementation",
+  "checkpoint_commit": "9d8fe07fd4ed9c4b54f86256e302fa6cc0cede97",
+  "baseline_commit": "e4cf85d83e898246051096cd71129efc271a3b74",
+  "subject_digest": "sha256:a815ea948611c7725d7e4b6e666cbef86f7392840c7fe6eddfc953fd11dea4fa",
+  "created_from_head": "9d8fe07fd4ed9c4b54f86256e302fa6cc0cede97",
+  "changed_paths_sha256": "sha256:3d9de3b0db6cb649390c64a28637b6506b7fe1513ed0f98257df4342a98f7eaa",
+  "commands": [
+    {
+      "command": "Invoke-Pester -Script scripts/tests/local-runtime.Tests.ps1 -EnableExit",
+      "exit_code": 0,
+      "tool": "Windows PowerShell/Pester",
+      "environment": "Story worktree; Windows; Docker Compose config only"
+    },
+    {
+      "command": "node --experimental-strip-types --test tests/e2e/helpers/php-runtime.test.ts",
+      "exit_code": 0,
+      "tool": "Node.js",
+      "environment": "Story worktree; Windows"
+    },
+    {
+      "command": "git diff --exit-code evidence/story-1-7-attempt-3 -- <seven exact slice A paths>",
+      "exit_code": 0,
+      "tool": "Git",
+      "environment": "Story worktree; exact restored file comparison"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "tool": "Git",
+      "environment": "Story worktree"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
-    [ValidateSet('init', 'up', 'stop', 'status', 'logs', 'doctor', 'migrate', 'owner', 'rebuild', 'test', 'e2e', 'test-stop', 'help')]
+    [ValidateSet('init', 'up', 'stop', 'status', 'logs', 'doctor', 'migrate', 'owner', 'rebuild', 'test', 'e2e', 'test-stop', 'test-down', 'help')]
     [string] $Action = 'help',
 
     [string] $OwnerEmail
@@ -18,6 +18,9 @@ $script:ComposeFile = Join-Path $script:RepoRoot 'compose.local.yaml'
 $script:EnvFile = Join-Path $script:RepoRoot 'deploy/local/.env'
 $script:ProjectName = 'noteflow-local'
 $script:DockerContext = 'desktop-linux'
+$script:Runtime = $null
+$script:SavedRuntimeEnv = @{}
+Import-Module (Join-Path $script:ScriptRoot 'local-runtime.psm1') -Force
 
 function Fail([string] $Message) {
     throw $Message
@@ -40,7 +43,7 @@ function Invoke-GitText([string[]] $Arguments) {
     return (($output -join "`n").Trim())
 }
 
-function Assert-CanonicalCheckout {
+function Set-CheckoutRuntime {
     if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
         Fail 'Git is required to identify the canonical checkout.'
     }
@@ -65,8 +68,27 @@ function Assert-CanonicalCheckout {
 
     $gitDir = Resolve-GitPath $gitDirRaw
     $commonDir = Resolve-GitPath $commonDirRaw
-    if ($gitDir -ne $commonDir) {
-        Fail ("Linked worktree is not allowed for the shared local runtime. Run {0} from the canonical checkout." -f (Join-Path $script:RepoRoot 'scripts/local.ps1'))
+    $script:Runtime = Get-LocalRuntimeConfiguration $script:RepoRoot $gitDir $commonDir $Action
+    $script:ProjectName = $script:Runtime.ProjectName
+    if ($script:Runtime.IsLinked) {
+        $statefulDefault = [regex]::Match([IO.File]::ReadAllText($script:ComposeFile), '(?m)^\s+SANCTUM_STATEFUL_DOMAINS:\s*\$\{NOTEFLOW_TEST_STATEFUL_DOMAINS:-([^}]+)\}\s*$')
+        if (-not $statefulDefault.Success) {
+            Fail 'Compose test stateful-domain defaults are missing; refusing to replace them.'
+        }
+        $runtimeEnv = @{
+            NOTEFLOW_TEST_PROJECT = $script:ProjectName
+            NOTEFLOW_TEST_BACKEND_PORT = [string]$script:Runtime.BackendPort
+            NOTEFLOW_TEST_STATEFUL_DOMAINS = ('{0},127.0.0.1:{1},127.0.0.1:{2}' -f $statefulDefault.Groups[1].Value, $script:Runtime.FrontendPort, $script:Runtime.BackendPort)
+            # Compose interpolates the unused dev services too. These are not dev secrets.
+            LOCAL_APP_KEY = 'unused-test-only'
+            LOCAL_DB_PASSWORD = 'unused-test-only'
+            LOCAL_TEST_DB_DATABASE = 'noteflow_test'
+            LOCAL_TEST_DB_USERNAME = 'noteflow'
+        }
+        foreach ($name in $runtimeEnv.Keys) {
+            $script:SavedRuntimeEnv[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
+            [Environment]::SetEnvironmentVariable($name, $runtimeEnv[$name], 'Process')
+        }
     }
 }
 
@@ -188,6 +210,7 @@ function Ensure-LocalEnv([switch] $CreateIfMissing) {
             'LOCAL_TEST_APP_KEY',
             'LOCAL_TEST_DB_PASSWORD'
         )
+        if ($script:Runtime.IsLinked) { $required = @('LOCAL_TEST_APP_KEY', 'LOCAL_TEST_DB_PASSWORD') }
         $missing = @($required | Where-Object { -not $values.ContainsKey($_) -or [string]::IsNullOrWhiteSpace([string]$values[$_]) })
         if ($missing.Count -gt 0) {
             Fail ("Local env exists but is incomplete ({0}). Restore deploy/local/.env instead of generating a new DB password." -f ($missing -join ', '))
@@ -211,8 +234,22 @@ function Ensure-LocalEnv([switch] $CreateIfMissing) {
         'LOCAL_TEST_DB_USERNAME=noteflow',
         ('LOCAL_TEST_DB_PASSWORD={0}' -f (New-RandomSecret))
     )
+    if ($script:Runtime.IsLinked) {
+        # Inspect actual project-labelled volumes before generating replacement secrets.
+        $existingVolumes = & docker --context $script:DockerContext volume ls --filter ("label=com.docker.compose.project={0}" -f $script:ProjectName) --quiet
+        if ($LASTEXITCODE -ne 0) { Fail 'Unable to inventory test volumes before creating secrets.' }
+        if ($existingVolumes) { Fail 'Test volumes already exist without the env file. Restore the original test secrets.' }
+        $lines = @(
+            '# Generated for this worktree test runtime only. Keep this file private.',
+            ('LOCAL_TEST_APP_KEY=base64:{0}' -f (New-RandomSecret)),
+            'LOCAL_TEST_DB_DATABASE=noteflow_test',
+            'LOCAL_TEST_DB_USERNAME=noteflow',
+            ('LOCAL_TEST_DB_PASSWORD={0}' -f (New-RandomSecret))
+        )
+    }
 
     $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+    [IO.Directory]::CreateDirectory((Split-Path -Parent $script:EnvFile)) | Out-Null
     [IO.File]::WriteAllText($script:EnvFile, ($lines -join "`n") + "`n", $utf8NoBom)
     Write-Host ("Created local env at {0}; generated secrets are not printed." -f $script:EnvFile)
 }
@@ -292,9 +329,57 @@ function Invoke-NodeTestCommand([string[]] $Arguments) {
 }
 
 function Invoke-TestServices {
+    if ($script:Runtime.IsLinked) {
+        Assert-TestPortAvailable $script:Runtime.BackendPort -AllowOwnBackend
+        foreach ($mountPath in Get-TestMountPointPaths $script:RepoRoot) {
+            $relativePath = $mountPath.Substring($script:RepoRoot.Length).TrimStart('\', '/')
+            $walkPath = $script:RepoRoot
+            foreach ($part in $relativePath.Split(@('\', '/'), [StringSplitOptions]::RemoveEmptyEntries)) {
+                $walkPath = Join-Path $walkPath $part
+                if ((Test-Path -LiteralPath $walkPath) -and ((Get-Item -Force -LiteralPath $walkPath).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+                    Fail ("Refusing mount point through a reparse point: {0}" -f $walkPath)
+                }
+            }
+            [IO.Directory]::CreateDirectory($mountPath) | Out-Null
+        }
+    }
     Invoke-Compose @('up', '-d', '--wait', 'postgres-test', 'backend-test') -TestProfile
     Assert-TestIdentity
     Invoke-Compose @('exec', '-T', 'backend-test', 'php', 'artisan', 'migrate', '--force') -TestProfile
+}
+
+function Assert-TestPortAvailable([int] $Port, [switch] $AllowOwnBackend) {
+    $listener = New-Object Net.Sockets.TcpListener([Net.IPAddress]::Loopback, $Port)
+    try { $listener.Start() }
+    catch {
+        if ($AllowOwnBackend) {
+            $owned = & docker --context $script:DockerContext ps --filter ("label=com.docker.compose.project={0}" -f $script:ProjectName) --filter 'label=com.docker.compose.service=backend-test' --filter ("publish={0}" -f $Port) --format '{{.ID}}'
+            if ($LASTEXITCODE -eq 0 -and $owned) { return }
+        }
+        Fail ("Test port {0} for {1} is occupied. Stop the conflicting listener; no alternate port will be selected." -f $Port, $script:ProjectName)
+    }
+    finally { $listener.Stop() }
+}
+
+function Remove-WorktreeTestProject {
+    if (-not $script:Runtime.IsLinked -or $script:ProjectName -notmatch '^noteflow-test-[a-f0-9]{12}$') {
+        Fail 'Refusing cleanup outside the calling worktree test project.'
+    }
+    # Compose down --volumes includes every declared volume, including dev volumes.
+    # Remove selected test services, then only resources labelled for this project.
+    Invoke-Compose @('rm', '--stop', '--force', 'backend-test', 'postgres-test') -TestProfile
+    foreach ($kind in @('network', 'volume')) {
+        $resources = & docker --context $script:DockerContext $kind ls --filter ("label=com.docker.compose.project={0}" -f $script:ProjectName) --format '{{.Name}}'
+        if ($LASTEXITCODE -ne 0) { Fail ("Unable to inventory test {0} resources." -f $kind) }
+        foreach ($resource in $resources) {
+            $allowed = if ($kind -eq 'network') { @($script:ProjectName + '-test') } else {
+                @('-postgres-test-data', '-backend-test-vendor', '-backend-test-storage', '-backend-test-cache') | ForEach-Object { $script:ProjectName + $_ }
+            }
+            if ($resource -notin $allowed) { Fail ("Unexpected resource in test project: {0}" -f $resource) }
+            & docker --context $script:DockerContext $kind rm $resource
+            if ($LASTEXITCODE -ne 0) { Fail ("Could not remove test {0} {1}." -f $kind, $resource) }
+        }
+    }
 }
 
 function Invoke-BackendTests {
@@ -303,9 +388,10 @@ function Invoke-BackendTests {
 }
 
 function Invoke-ComposeE2e {
+    if ($script:Runtime.IsLinked) { Assert-TestPortAvailable $script:Runtime.FrontendPort }
     Invoke-TestServices
 
-    $names = @('NOTEFLOW_E2E_MODE', 'APP_ENV', 'DB_CONNECTION', 'DB_HOST', 'DB_PORT', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD', 'DB_URL')
+    $names = @('NOTEFLOW_E2E_MODE', 'NOTEFLOW_TEST_PROJECT', 'NOTEFLOW_E2E_BACKEND_ORIGIN', 'NOTEFLOW_E2E_FRONTEND_ORIGIN', 'APP_ENV', 'DB_CONNECTION', 'DB_HOST', 'DB_PORT', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD', 'DB_URL')
     $saved = @{}
     foreach ($name in $names) {
         $saved[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
@@ -313,6 +399,9 @@ function Invoke-ComposeE2e {
 
     try {
         $env:NOTEFLOW_E2E_MODE = 'compose'
+        $env:NOTEFLOW_TEST_PROJECT = $script:ProjectName
+        $env:NOTEFLOW_E2E_BACKEND_ORIGIN = 'http://127.0.0.1:' + $script:Runtime.BackendPort
+        $env:NOTEFLOW_E2E_FRONTEND_ORIGIN = 'http://127.0.0.1:' + $script:Runtime.FrontendPort
         $env:APP_ENV = 'testing'
         $env:DB_CONNECTION = 'pgsql'
         $env:DB_HOST = 'postgres-test'
@@ -349,11 +438,12 @@ Test actions:
   test       Start the isolated test profile, migrate test DB, and run backend tests.
   e2e        Start the isolated test profile and run Playwright in Compose mode.
   test-stop  Stop only the isolated test services while retaining their volumes.
+  test-down  Remove only the calling linked worktree test project and volumes.
 '@ | Write-Host
 }
 
 try {
-    Assert-CanonicalCheckout
+    Set-CheckoutRuntime
     Assert-RepositoryFiles
 
     if ($Action -eq 'help') {
@@ -362,12 +452,18 @@ try {
     }
 
     Assert-Docker
-    $createsEnv = $Action -eq 'init'
-    Ensure-LocalEnv -CreateIfMissing:$createsEnv
-
-    $mutatingActions = @('init', 'up', 'stop', 'migrate', 'owner', 'rebuild', 'test', 'e2e', 'test-stop')
+    $mutatingActions = @('init', 'up', 'stop', 'migrate', 'owner', 'rebuild', 'test', 'e2e', 'test-stop', 'test-down')
     if ($mutatingActions -contains $Action) {
         Enter-RuntimeLock
+    }
+    $createsEnv = $Action -eq 'init' -or ($script:Runtime.IsLinked -and $Action -in @('test', 'e2e'))
+    Ensure-LocalEnv -CreateIfMissing:$createsEnv
+    if ($script:Runtime.IsLinked) {
+        $testEnv = Read-LocalEnv
+        foreach ($name in @('LOCAL_TEST_APP_KEY', 'LOCAL_TEST_DB_PASSWORD')) {
+            $script:SavedRuntimeEnv[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
+            [Environment]::SetEnvironmentVariable($name, $testEnv[$name], 'Process')
+        }
     }
 
     switch ($Action) {
@@ -436,6 +532,10 @@ try {
             Invoke-Compose @('stop', 'backend-test', 'postgres-test') -TestProfile
             Write-Host 'Test services stopped; test containers and volumes were retained.'
         }
+        'test-down' {
+            Remove-WorktreeTestProject
+            Write-Host ("Removed test project {0} and its volumes." -f $script:ProjectName)
+        }
     }
 }
 catch {
@@ -447,6 +547,9 @@ catch {
     exit 1
 }
 finally {
+    foreach ($name in $script:SavedRuntimeEnv.Keys) {
+        [Environment]::SetEnvironmentVariable($name, $script:SavedRuntimeEnv[$name], 'Process')
+    }
     if ($null -ne $script:LockStream) {
         $script:LockStream.Dispose()
         $script:LockStream = $null

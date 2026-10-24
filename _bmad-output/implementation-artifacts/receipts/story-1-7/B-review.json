@@ -1,0 +1,70 @@
+{
+  "schema_version": 2,
+  "story_id": "1.7",
+  "slice_id": "B",
+  "kind": "review",
+  "checkpoint_commit": "e5d20830fc97c0acece66fe966a2bf1a2e4d891b",
+  "baseline_commit": "74ab16004fdd4b9518213353a81c8cdaefb249ee",
+  "subject_digest": "sha256:1b582a780b556390031bcf11c1bd324c26a106c063d5112c82ed120f1c34a690",
+  "created_from_head": "e5d20830fc97c0acece66fe966a2bf1a2e4d891b",
+  "changed_paths_sha256": "sha256:a199fc9afb4471a0b15c58d1d1481afeda869559527d4a76f574ca1954dc4333",
+  "commands": [
+    {
+      "command": "Invoke-Pester -Script scripts/tests/local-runtime-guards.Tests.ps1 -EnableExit",
+      "exit_code": 0,
+      "tool": "Windows PowerShell/Pester 3.4.0",
+      "environment": "Story worktree; Lead rerun (11 passed)"
+    },
+    {
+      "command": "Invoke-Pester -Script scripts/tests/local-runtime.Tests.ps1 -EnableExit",
+      "exit_code": 0,
+      "tool": "Windows PowerShell/Pester 3.4.0",
+      "environment": "Story worktree; slice A regression (8 passed)"
+    },
+    {
+      "command": "check-worker-scope.mjs check --forbid-commits --contract-sha256 2c12d81c...",
+      "exit_code": 0,
+      "tool": "V4 scope gate",
+      "environment": "Story worktree; PASS, no violations"
+    }
+  ],
+  "judgment": "APPROVE",
+  "questions": [
+    {
+      "id": "question-1",
+      "question": "Review the canonical verification result and bounded change evidence."
+    }
+  ],
+  "answers": [
+    {
+      "id": "question-1",
+      "answer": "Independent Lead (claude gen 2) review of AGY attempt 1 (task_9e9bf7106076, ctx_08a50f90584e). Canonical verification PASS 5/5 (map, pester, protected-files-unchanged, guard-tests-pester, doc-linked-worktree-topics). Exact diff inspected for both paths: the guard tests assert phpunit.xml/TestCase.php/db-helper.php noteflow_test identity, Assert-TestIdentity fail-closed on 8 deviations, linked-worktree refusal of every dev action with the existing message, test actions allowed, canonical test-down refused, Remove-WorktreeTestProject fail-closed; doc claims (project noteflow-test-<12 hex>, network/volume names, port range 20000-39999 checked free, unchanged test identity, host npm ci for e2e, at most three worktrees recommended not enforced, test-down after integration, refused on canonical) were checked against scripts/local-runtime.psm1, scripts/local.ps1 and compose.local.yaml and match. Scope gate PASS, no commits by worker, contract unmodified. No findings."
+    }
+  ],
+  "evidence_refs": [
+    {
+      "path": "docs/development/local-runtime.md",
+      "unit_index": 0,
+      "evidence_set_digest": "17c9fc5e0cd74480401ff6f8cb7ac3b362b6be8b3eab1b18b696d9510130ba8c"
+    },
+    {
+      "path": "docs/development/local-runtime.md",
+      "unit_index": 1,
+      "evidence_set_digest": "17c9fc5e0cd74480401ff6f8cb7ac3b362b6be8b3eab1b18b696d9510130ba8c"
+    },
+    {
+      "path": "scripts/tests/local-runtime-guards.Tests.ps1",
+      "unit_index": 2,
+      "evidence_set_digest": "17c9fc5e0cd74480401ff6f8cb7ac3b362b6be8b3eab1b18b696d9510130ba8c"
+    }
+  ],
+  "scope_digest": "sha256:fde541a79a6a39f288c54d5faa36ff42e46e11cdae98236372be9aef3d845985",
+  "risk_context_digest": "sha256:4585339b0cdad1473d7966b081ecaab205b19c1b811e2626248f8fd37bb2761f",
+  "reviewed_commit": "e5d20830fc97c0acece66fe966a2bf1a2e4d891b",
+  "reviewer": {
+    "type": "lead",
+    "vendor": "claude",
+    "independent": true
+  },
+  "findings": []
+}
