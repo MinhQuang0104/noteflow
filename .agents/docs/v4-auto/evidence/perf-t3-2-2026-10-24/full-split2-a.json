@@ -1,0 +1,18 @@
+{
+  "label": "full-split2-a",
+  "command": [
+    "npm.cmd",
+    "run",
+    "test:v4",
+    "--",
+    "--test-reporter=spec"
+  ],
+  "head": "67799a8ac5d499e8067ef581e6f182ead51ebb4b",
+  "git_status_before": " M .agents/scripts/check-story-finalization.test.mjs\n M .agents/scripts/complete-story.test.mjs\n M .agents/scripts/reconcile-story-lifecycle.test.mjs\n M .agents/scripts/v4-rework.test.mjs\n M .agents/scripts/v4-story-runner.test.mjs\n?? .agents/docs/v4-auto/evidence/perf-t3-2-2026-10-24/\n?? .agents/scripts/check-story-finalization-fixture.mjs\n?? .agents/scripts/check-story-finalization.lifecycle.test.mjs\n?? .agents/scripts/check-story-finalization.review-evidence.test.mjs\n?? .agents/scripts/complete-story.apply.test.mjs\n?? .agents/scripts/reconcile-story-lifecycle-fixture.mjs\n?? .agents/scripts/reconcile-story-lifecycle.apply.test.mjs\n?? .agents/scripts/v4-rework-fixture.mjs\n?? .agents/scripts/v4-rework.rejection.test.mjs\n?? .agents/scripts/v4-rework.retry.test.mjs\n?? .agents/scripts/v4-rework.risk.test.mjs\n?? .agents/scripts/v4-story-runner-fixture.mjs\n?? .agents/scripts/v4-story-runner.autopilot-status.test.mjs\n?? .agents/scripts/v4-story-runner.routing.test.mjs\n",
+  "started_at": "2026-10-24T14:16:30.226941+00:00",
+  "exit_code": 0,
+  "wall_seconds": 620.107,
+  "ended_at": "2026-10-24T14:26:50.333911+00:00",
+  "git_status_after": " M .agents/scripts/check-story-finalization.test.mjs\n M .agents/scripts/complete-story.test.mjs\n M .agents/scripts/reconcile-story-lifecycle.test.mjs\n M .agents/scripts/v4-rework.test.mjs\n M .agents/scripts/v4-story-runner.test.mjs\n?? .agents/docs/v4-auto/evidence/perf-t3-2-2026-10-24/\n?? .agents/scripts/check-story-finalization-fixture.mjs\n?? .agents/scripts/check-story-finalization.lifecycle.test.mjs\n?? .agents/scripts/check-story-finalization.review-evidence.test.mjs\n?? .agents/scripts/complete-story.apply.test.mjs\n?? .agents/scripts/reconcile-story-lifecycle-fixture.mjs\n?? .agents/scripts/reconcile-story-lifecycle.apply.test.mjs\n?? .agents/scripts/v4-rework-fixture.mjs\n?? .agents/scripts/v4-rework.rejection.test.mjs\n?? .agents/scripts/v4-rework.retry.test.mjs\n?? .agents/scripts/v4-rework.risk.test.mjs\n?? .agents/scripts/v4-story-runner-fixture.mjs\n?? .agents/scripts/v4-story-runner.autopilot-status.test.mjs\n?? .agents/scripts/v4-story-runner.routing.test.mjs\n",
+  "git_status_unchanged_during_run": true
+}

@@ -2,8 +2,9 @@
 
 Branch: `perf/v4-test-suite` (worktree `D:/Workspace/Tu_Hoc/v4-test-perf`), cut
 from `main` 3721785. Runs in parallel with Story work and never touches the main
-checkout. Status: **T0 COMPLETE; T1 COMPLETE (19dffe2); T2.1 / T2.2 / T3 / T4
-IMPLEMENTED; REMAINING T2 ITEMS (T2.3–T2.7) NOT STARTED**. T0 source is pinned to
+checkout. Status: **T0 COMPLETE; T1 COMPLETE (19dffe2); T2.1 / T2.2 / T3 / T4 /
+T3.2 IMPLEMENTED; REMAINING T2 ITEMS (T2.3–T2.7) NOT STARTED, DEFERRED BY THE
+OWNER**. T0 source is pinned to
 `87469b7`; see [T0 report](perf-t0-report.md) and its evidence index.
 
 ## 0. Phase rules and rationale
@@ -193,6 +194,14 @@ partitioning three long loops by input; names and assertions are unchanged.
 Full runs 800/799/1/0 with the exact golden multiset: split 596.5 s and
 671.1 s against a same-day baseline of 796.1 s (about 20% less wall time, one
 baseline sample). The 8 min target is not yet reached.
+
+**T3.2 implemented (instead of T2.3–T2.7, at the owner's request):**
+[T3.2 report](perf-t3-2-report.md) splits `check-story-finalization`,
+`v4-rework`, `v4-story-runner`, `reconcile-story-lifecycle` and
+`complete-story` into 14 files, moving four shared headers into
+`*-fixture.mjs` modules. `npm run test:v4` (concurrency 8) passed 801/800/1/0
+with exact names in 620.1 s on an otherwise idle machine. T0 data put the
+remaining T2 cache gain at about 10 s of wall time.
 
 ### T4 — Tune concurrency and lock in (optional)
 
