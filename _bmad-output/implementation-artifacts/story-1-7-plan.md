@@ -73,7 +73,7 @@ slices:
       - AC-7 - test-down from the Story worktree removes only its own project; test-down from the canonical checkout is refused
       - git diff --exit-code main -- .github/workflows/ci.yml backend/phpunit.xml backend/tests/TestCase.php tests/e2e/helpers/db-helper.php
   - id: B
-    status: checkpointed
+    status: reviewed
     baseline_commit: 74ab16004fdd4b9518213353a81c8cdaefb249ee
     checkpoint_commit: e5d20830fc97c0acece66fe966a2bf1a2e4d891b
     subject_digest: sha256:1b582a780b556390031bcf11c1bd324c26a106c063d5112c82ed120f1c34a690
@@ -82,6 +82,27 @@ slices:
       implementation:
         path: _bmad-output/implementation-artifacts/receipts/story-1-7/B-implementation.json
         digest: sha256:9c7d860ee91e328c8d50d3356f3bccf2cc29703f33df889314442de97f0584e5
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-7/B-verification.json
+        digest: sha256:e67b69e534cd95b8947515053f036ed9e08ccf225d847b9413ba757b1904e389
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-7/B-review.json
+        digest: sha256:bd0fe4fe0dac012c12bc5b22bdd0f091f669b3e9b5fea94ec61cb57c788da312
+    verification:
+      status: PASS
+      canonical_status: PASS
+      escalation_decision: REVIEW_REQUIRED
+      progression_eligible: true
+    review:
+      required: true
+      verdict: APPROVE
+      reviewed_commit: e5d20830fc97c0acece66fe966a2bf1a2e4d891b
+      risk_context_digest: sha256:4585339b0cdad1473d7966b081ecaab205b19c1b811e2626248f8fd37bb2761f
+      freshness: FRESH_CANDIDATE
+      reviewer:
+        type: lead
+        vendor: claude
+        independent: true
     task_refs: [T-2]
     depends_on: [A]
     executor: agy
@@ -95,8 +116,8 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: verify_slice
-  target: B
+  kind: finalize_story
+  target: story
 autopilot:
   schema_version: 1
   authorized_at: "2026-10-12T06:10:34.145Z"

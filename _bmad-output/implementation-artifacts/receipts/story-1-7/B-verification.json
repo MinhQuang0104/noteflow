@@ -1,0 +1,442 @@
+{
+  "schema_version": 1,
+  "story_id": "1.7",
+  "slice_id": "B",
+  "kind": "verification",
+  "checkpoint_commit": "e5d20830fc97c0acece66fe966a2bf1a2e4d891b",
+  "baseline_commit": "74ab16004fdd4b9518213353a81c8cdaefb249ee",
+  "subject_digest": "sha256:1b582a780b556390031bcf11c1bd324c26a106c063d5112c82ed120f1c34a690",
+  "created_from_head": "e5d20830fc97c0acece66fe966a2bf1a2e4d891b",
+  "changed_paths_sha256": "sha256:a199fc9afb4471a0b15c58d1d1481afeda869559527d4a76f574ca1954dc4333",
+  "commands": [
+    {
+      "command": "check:protected-files-unchanged",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "unknown"
+    },
+    {
+      "command": "check:guard-tests-pester",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "unknown"
+    },
+    {
+      "command": "check:doc-linked-worktree-topics",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "unknown"
+    }
+  ],
+  "canonical": {
+    "schema_version": 1,
+    "featureId": "local-test-runtime-guards",
+    "changedPaths": [
+      "docs/development/local-runtime.md",
+      "scripts/tests/local-runtime-guards.Tests.ps1"
+    ],
+    "matchedPaths": [
+      "docs/development/local-runtime.md",
+      "scripts/tests/local-runtime-guards.Tests.ps1"
+    ],
+    "coveredPaths": [
+      "docs/development/local-runtime.md",
+      "scripts/tests/local-runtime-guards.Tests.ps1"
+    ],
+    "unmatchedPaths": [],
+    "dependencyOnlyPaths": [],
+    "map": {
+      "status": "STALE",
+      "expectedChangedAnchors": [
+        "docs/development/local-runtime.md",
+        "scripts/tests/local-runtime-guards.Tests.ps1"
+      ],
+      "unexplainedDrift": [],
+      "missingAnchors": []
+    },
+    "checks": [
+      {
+        "id": "map",
+        "status": "PASS",
+        "exitCode": 1,
+        "summary": "STALE",
+        "evidence_ref": "sha256:4176ed167a97e03e6d1c397cdb8568ea79f872e1d98fbe58ff8bb297ecbec104"
+      },
+      {
+        "id": "pester",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "Tests completed in 2.9s",
+        "evidence_ref": "sha256:11307b33d2e18d5aeff24fe3e227a820ceb7a44685f53dc02bd6065356f4dc3d"
+      }
+    ],
+    "escalationReasons": [],
+    "status": "PASS",
+    "complete": true
+  },
+  "focused_checks": [
+    {
+      "schema_version": 1,
+      "check_id": "protected-files-unchanged",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 99,
+      "command_digest": "sha256:e0084fbe7c3a56efef901a9cec4c6a3e668b321030f52220393eb80d68f4d29c",
+      "output_digest": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "diagnostic_excerpt": "No output",
+      "subject": {
+        "commit": "e5d20830fc97c0acece66fe966a2bf1a2e4d891b"
+      },
+      "environment": {
+        "status": "UNKNOWN",
+        "reason": "not_supplied"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          ".github/workflows/ci.yml",
+          "backend/phpunit.xml",
+          "backend/tests/TestCase.php",
+          "tests/e2e/helpers/db-helper.php"
+        ],
+        "source": {
+          "kind": "focused-manifest"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:4ed0f350d6002e1dbf90207166961d3dfb5cd99c514d05beb3b24c1f5f8b7650"
+      },
+      "reasons": [],
+      "observed_at": "2026-10-24T04:37:47.754Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-3359219cb9b451e84400e672c2111d3962072f5e5be1e43e",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-1-7-test-runtime\\.agent-state\\v4-observations\\events\\hook-check_finished-3359219cb9b451e84400e672c2111d3962072f5e5be1e43e.json",
+        "coverage": "MEASURED"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "docs/development/local-runtime.md",
+        "scripts/tests/local-runtime-guards.Tests.ps1"
+      ],
+      "changed_paths_sha256": "sha256:a199fc9afb4471a0b15c58d1d1481afeda869559527d4a76f574ca1954dc4333",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "guard-tests-pester",
+      "classification": "behavioral",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 5787,
+      "command_digest": "sha256:9b0c9ccc675006d185a45915ea83630e9989387c28916c086dea552abc821fd6",
+      "output_digest": "sha256:3ac7f869b043ef78458439f54d96a18212e400c16f0ddac1030fba03f8e06d48",
+      "diagnostic_excerpt": "Describing Unchanged noteflow_test guards in repository boundary files\n [+] locks backend/phpunit.xml to the testing environment and noteflow_test database 1.14s\n [+] locks backend/tests/TestCase.php to the expected test database and environment 294ms\n [+] locks tests/e2e/helpers/db-helper.php to fail-closed on non-test environments and databases 58ms\n [+] ensures protected boundary files match the canonical baseline (git diff against main) 173ms\nDescribing Assert-TestIdentity runtime guard\n [+] passes when container environment matches expected test identity 455ms\n [+] fails closed when any test identity variable deviates 161ms\nDescribing Canonical-only dev action guards\n [+] refuses all dev actions from a linked worktree with the canonical error message 193ms\n [+] permits only test actions from a linked worktree 109ms\n [+] refuses test-down from canonical checkout while permitting test-stop 36ms\nDescribing Worktree test project cleanup guard (test-down)\n [+] fails closed when invoked outside a linked worktree 132ms\n [+] fails closed when project name does not match expected worktree pattern 30ms\nTests completed in 2.78s\nPassed: 11 Failed: 0 Skipped: 0 Pending: 0 Inconclusive: 0",
+      "subject": {
+        "commit": "e5d20830fc97c0acece66fe966a2bf1a2e4d891b"
+      },
+      "environment": {
+        "status": "UNKNOWN",
+        "reason": "not_supplied"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "scripts/tests/local-runtime-guards.Tests.ps1",
+          "scripts/local.ps1",
+          "scripts/local-runtime.psm1"
+        ],
+        "source": {
+          "kind": "focused-manifest"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:d2154c0ce9e9ca268d3e7b914afc3a74e1b1795641e9099b247c808ff70543db"
+      },
+      "reasons": [],
+      "observed_at": "2026-10-24T04:37:49.077Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-ae68a54b781d7a301ec9562914f49cdecd0c41c8ac104c59",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-1-7-test-runtime\\.agent-state\\v4-observations\\events\\hook-check_finished-ae68a54b781d7a301ec9562914f49cdecd0c41c8ac104c59.json",
+        "coverage": "MEASURED"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "docs/development/local-runtime.md",
+        "scripts/tests/local-runtime-guards.Tests.ps1"
+      ],
+      "changed_paths_sha256": "sha256:a199fc9afb4471a0b15c58d1d1481afeda869559527d4a76f574ca1954dc4333",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "doc-linked-worktree-topics",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 790,
+      "command_digest": "sha256:0ccfb4c5f1de8cf3d2ade570b3ddc006dace68e9df01730c8074375104a8f023",
+      "output_digest": "sha256:93e999b3577eb0cdfccd9fc855370f47f54ab24dcf2aa8d18fa8ff4c76678a09",
+      "diagnostic_excerpt": "all T-2 doc topics present",
+      "subject": {
+        "commit": "e5d20830fc97c0acece66fe966a2bf1a2e4d891b"
+      },
+      "environment": {
+        "status": "UNKNOWN",
+        "reason": "not_supplied"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "docs/development/local-runtime.md"
+        ],
+        "source": {
+          "kind": "focused-manifest"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:665a77cb90fbed5369530858c0f31b1cd579cf66ef7955cbe8562433c7bc1ac8"
+      },
+      "reasons": [],
+      "observed_at": "2026-10-24T04:37:55.979Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-c725ab430c095a43cc5954e6e6faab06f11d27b767f02d3b",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-1-7-test-runtime\\.agent-state\\v4-observations\\events\\hook-check_finished-c725ab430c095a43cc5954e6e6faab06f11d27b767f02d3b.json",
+        "coverage": "MEASURED"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "docs/development/local-runtime.md",
+        "scripts/tests/local-runtime-guards.Tests.ps1"
+      ],
+      "changed_paths_sha256": "sha256:a199fc9afb4471a0b15c58d1d1481afeda869559527d4a76f574ca1954dc4333",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    }
+  ],
+  "raw_focused_checks": [
+    {
+      "schema_version": 1,
+      "check_id": "protected-files-unchanged",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 99,
+      "command_digest": "sha256:e0084fbe7c3a56efef901a9cec4c6a3e668b321030f52220393eb80d68f4d29c",
+      "output_digest": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "diagnostic_excerpt": "No output",
+      "subject": {
+        "kind": "commit",
+        "value": "e5d20830fc97c0acece66fe966a2bf1a2e4d891b"
+      },
+      "environment": {
+        "status": "UNKNOWN",
+        "reason": "not_supplied"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          ".github/workflows/ci.yml",
+          "backend/phpunit.xml",
+          "backend/tests/TestCase.php",
+          "tests/e2e/helpers/db-helper.php"
+        ],
+        "source": {
+          "kind": "focused-manifest"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:4ed0f350d6002e1dbf90207166961d3dfb5cd99c514d05beb3b24c1f5f8b7650"
+      },
+      "reasons": [],
+      "observed_at": "2026-10-24T04:37:47.754Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-3359219cb9b451e84400e672c2111d3962072f5e5be1e43e",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-1-7-test-runtime\\.agent-state\\v4-observations\\events\\hook-check_finished-3359219cb9b451e84400e672c2111d3962072f5e5be1e43e.json",
+        "coverage": "MEASURED"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "guard-tests-pester",
+      "classification": "behavioral",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 5787,
+      "command_digest": "sha256:9b0c9ccc675006d185a45915ea83630e9989387c28916c086dea552abc821fd6",
+      "output_digest": "sha256:3ac7f869b043ef78458439f54d96a18212e400c16f0ddac1030fba03f8e06d48",
+      "diagnostic_excerpt": "Describing Unchanged noteflow_test guards in repository boundary files\n [+] locks backend/phpunit.xml to the testing environment and noteflow_test database 1.14s\n [+] locks backend/tests/TestCase.php to the expected test database and environment 294ms\n [+] locks tests/e2e/helpers/db-helper.php to fail-closed on non-test environments and databases 58ms\n [+] ensures protected boundary files match the canonical baseline (git diff against main) 173ms\nDescribing Assert-TestIdentity runtime guard\n [+] passes when container environment matches expected test identity 455ms\n [+] fails closed when any test identity variable deviates 161ms\nDescribing Canonical-only dev action guards\n [+] refuses all dev actions from a linked worktree with the canonical error message 193ms\n [+] permits only test actions from a linked worktree 109ms\n [+] refuses test-down from canonical checkout while permitting test-stop 36ms\nDescribing Worktree test project cleanup guard (test-down)\n [+] fails closed when invoked outside a linked worktree 132ms\n [+] fails closed when project name does not match expected worktree pattern 30ms\nTests completed in 2.78s\nPassed: 11 Failed: 0 Skipped: 0 Pending: 0 Inconclusive: 0",
+      "subject": {
+        "kind": "commit",
+        "value": "e5d20830fc97c0acece66fe966a2bf1a2e4d891b"
+      },
+      "environment": {
+        "status": "UNKNOWN",
+        "reason": "not_supplied"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "scripts/tests/local-runtime-guards.Tests.ps1",
+          "scripts/local.ps1",
+          "scripts/local-runtime.psm1"
+        ],
+        "source": {
+          "kind": "focused-manifest"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:d2154c0ce9e9ca268d3e7b914afc3a74e1b1795641e9099b247c808ff70543db"
+      },
+      "reasons": [],
+      "observed_at": "2026-10-24T04:37:49.077Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-ae68a54b781d7a301ec9562914f49cdecd0c41c8ac104c59",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-1-7-test-runtime\\.agent-state\\v4-observations\\events\\hook-check_finished-ae68a54b781d7a301ec9562914f49cdecd0c41c8ac104c59.json",
+        "coverage": "MEASURED"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "doc-linked-worktree-topics",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 790,
+      "command_digest": "sha256:0ccfb4c5f1de8cf3d2ade570b3ddc006dace68e9df01730c8074375104a8f023",
+      "output_digest": "sha256:93e999b3577eb0cdfccd9fc855370f47f54ab24dcf2aa8d18fa8ff4c76678a09",
+      "diagnostic_excerpt": "all T-2 doc topics present",
+      "subject": {
+        "kind": "commit",
+        "value": "e5d20830fc97c0acece66fe966a2bf1a2e4d891b"
+      },
+      "environment": {
+        "status": "UNKNOWN",
+        "reason": "not_supplied"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "docs/development/local-runtime.md"
+        ],
+        "source": {
+          "kind": "focused-manifest"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:665a77cb90fbed5369530858c0f31b1cd579cf66ef7955cbe8562433c7bc1ac8"
+      },
+      "reasons": [],
+      "observed_at": "2026-10-24T04:37:55.979Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-c725ab430c095a43cc5954e6e6faab06f11d27b767f02d3b",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-1-7-test-runtime\\.agent-state\\v4-observations\\events\\hook-check_finished-c725ab430c095a43cc5954e6e6faab06f11d27b767f02d3b.json",
+        "coverage": "MEASURED"
+      }
+    }
+  ],
+  "escalation": {
+    "decision": "REVIEW_REQUIRED",
+    "risk": "MEDIUM",
+    "reasons": [
+      "JUDGMENT_PUBLIC_CONTRACT",
+      "MEDIUM_COVERAGE_JUDGMENT"
+    ]
+  },
+  "semantic_coverage": null,
+  "progression_eligible": true,
+  "status": "PASS",
+  "context_digest": "sha256:d9ce5da5ac96e49c4040ea8a8f9be665a6399609577334aaf6b74b35a46f62ff"
+}
