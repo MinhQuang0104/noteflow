@@ -123,7 +123,23 @@ finalization:
   implementation_commit_set_digest: sha256:a2dbe124dfb2e2ffac2b6e52430d257366f2a5a741f27d7c4ae6e4b9b9e48f0c
   final_scoped_tree_digest: sha256:229e353a80c01ec0626e085a1911f1f143245acdc7476d4beac20c6c2c6a261f
   prepared_from_head: cbf70f4436627f2aba3674e6be5cafd9b36d05d1
-human_approval: null
+human_approval:
+  schema_version: 1
+  story_id: "1.7"
+  approver_type: "human"
+  decision: "APPROVED"
+  approved_at: "2026-10-24T04:46:37.319Z"
+  story_normative_digest: "sha256:dd431e6bd23a157b38a4c1fc80fce2d84a9df56fc20a546bdd30a639d5e6d62d"
+  finalization_receipt_digest: "sha256:1c9bab87ff58ba5864105e9956b7725017b137765a0977eda894b8f80a504a16"
+  done_gate_summary_digest: "sha256:ca128b75a157a8f32db3d4277c1b205cf9dbcb8d0139b441500c5b769a098c0c"
+  scope_paths_digest: "sha256:84bbb47907437e147e9511401ee106c949f6b31d3748fcf4297389b0f3875cd7"
+  implementation_commit_set_digest: "sha256:a2dbe124dfb2e2ffac2b6e52430d257366f2a5a741f27d7c4ae6e4b9b9e48f0c"
+  final_scope_digest: "sha256:229e353a80c01ec0626e085a1911f1f143245acdc7476d4beac20c6c2c6a261f"
+  final_scoped_tree_digest: "sha256:229e353a80c01ec0626e085a1911f1f143245acdc7476d4beac20c6c2c6a261f"
+  approved_review_head: "e3f62f98823701917c67c0421d74bebe1c19fbda"
+  approved_commit: "e3f62f98823701917c67c0421d74bebe1c19fbda"
+  approved_action: "complete_story"
+  disclosures_acknowledged: true
 next_action:
   kind: complete_story
   target: story
