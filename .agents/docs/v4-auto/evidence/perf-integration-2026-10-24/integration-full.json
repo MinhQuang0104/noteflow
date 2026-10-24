@@ -1,0 +1,18 @@
+{
+  "label": "integration-full",
+  "command": [
+    "npm.cmd",
+    "run",
+    "test:v4",
+    "--",
+    "--test-reporter=spec"
+  ],
+  "head": "f1234eef5ba84165ac93b89f2e662990b78ce44b",
+  "git_status_before": "?? .agents/docs/v4-auto/evidence/perf-integration-2026-10-24/\n",
+  "started_at": "2026-10-24T14:31:28.172989+00:00",
+  "exit_code": 0,
+  "wall_seconds": 778.548,
+  "ended_at": "2026-10-24T14:44:26.721666+00:00",
+  "git_status_after": "?? .agents/docs/v4-auto/evidence/perf-integration-2026-10-24/\n",
+  "git_status_unchanged_during_run": true
+}

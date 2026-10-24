@@ -1,0 +1,22 @@
+{
+  "label": "integration-full",
+  "occurrences": 806,
+  "inventoryPlusGuardEqual": true,
+  "missing": [],
+  "extra": [],
+  "goldenContained": true,
+  "reporterCounts": {
+    "tests": 806,
+    "pass": 805,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 1,
+    "todo": 0
+  },
+  "skipped": [
+    {
+      "name": "rejects symlinked cwd or referenced paths",
+      "annotation": " # symlink creation is unavailable in this Windows test environment"
+    }
+  ]
+}

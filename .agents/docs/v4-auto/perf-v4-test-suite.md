@@ -235,6 +235,16 @@ the fixture/test ratio that T0 measures, so no number is claimed yet.
 
 ## 7. Integration
 
+**Integrated 2026-10-24 at the owner's request.** The branch was rebased onto
+main `a9defa1`. The only conflict was `v4-rework.test.mjs`, which main changed
+(fixture header and three new tests); it was split again from main's version,
+with the new tests in the base file. `f1234ee` adds main's five new test names
+to `v4-test-names.json` with no baseline name missing. On `f1234ee`,
+`npm run test:v4` passed 806/805/1/0 with names equal to the inventory plus the
+guard and all 800 golden names present (778.5 s), and the Python architecture
+test passed 46 tests + 46 subtests. Evidence:
+[perf-integration-2026-10-24](evidence/perf-integration-2026-10-24/).
+
 The branch stays local until the owner asks to merge. Before merging, rebase
 onto `main`, reconcile all new main tests as well as the preserved baseline
 names/assertions, run the full suite and the Python architecture test on the
