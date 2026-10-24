@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync, existsSync } from 'node:fs'
+import { chmodSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync, existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
@@ -34,6 +34,7 @@ function fixture(t, status = 'backlog') {
   const root = mkdtempSync(path.join(tmpdir(), 'v4-start-'))
   t.after(() => rmSync(root, { recursive: true, force: true }))
   const write = (file, text) => { mkdirSync(path.dirname(path.join(root, file)), { recursive: true }); writeFileSync(path.join(root, file), text) }
+  const hook = text => { write('.git/hooks/pre-commit', text); chmodSync(path.join(root, '.git/hooks/pre-commit'), 0o755) }
   const read = file => readFileSync(path.join(root, file), 'utf8')
   git(root, 'init', '-q')
   git(root, 'config', 'user.name', 'Test')
@@ -56,7 +57,7 @@ function fixture(t, status = 'backlog') {
   const save = () => write(PLAN, '---\n' + yaml(plan) + '\n---\n')
   const commit = () => { git(root, 'add', '.'); git(root, 'commit', '--allow-empty', '-qm', 'fixture'); return git(root, 'rev-parse', 'HEAD') }
   save()
-  return { root, plan, write, read, save, commit, head: commit() }
+  return { root, plan, write, hook, read, save, commit, head: commit() }
 }
 
 test('check is read-only and start commits exactly three lifecycle files without implementation', t => {
@@ -155,7 +156,7 @@ test('excluded unrelated noise is content-bound across the start transaction', t
   f.write('noise.tmp', 'user work')
   const options = { excludeUnrelated: ['noise.tmp'] }
   const preview = inspectStart(f.root, '9.1', f.head, options)
-  f.write('.git/hooks/pre-commit', '#!/bin/sh\nprintf changed > noise.tmp\n')
+  f.hook('#!/bin/sh\nprintf changed > noise.tmp\n')
   const result = applyStart(f.root, '9.1', f.head, preview.fingerprint, options)
   assert.equal(result.status, 'RECOVERY_REQUIRED', JSON.stringify(result))
   assert.ok(result.reasons.includes('EXCLUDED_SCOPE_CHANGED'), JSON.stringify(result))
@@ -164,7 +165,7 @@ test('excluded unrelated noise is content-bound across the start transaction', t
 
 test('failed commit preserves partial transaction and lock; retry cannot overwrite it', t => {
   const f = fixture(t)
-  f.write('.git/hooks/pre-commit', '#!/bin/sh\nexit 1\n')
+  f.hook('#!/bin/sh\nexit 1\n')
   const preview = inspectStart(f.root, '9.1', f.head)
   const result = applyStart(f.root, '9.1', f.head, preview.fingerprint)
   assert.equal(result.status, 'RECOVERY_REQUIRED', JSON.stringify(result))
@@ -184,7 +185,7 @@ test('an existing lock from another invocation is never removed', t => {
 
 test('commit hook cannot silently change a dependency in the approved lifecycle transaction', t => {
   const f = fixture(t)
-  f.write('.git/hooks/pre-commit', `#!/bin/sh\nnode -e "const f=require('fs');const p='${SPRINT}';f.writeFileSync(p,f.readFileSync(p,'utf8').replace('8-1-prerequisite: done','8-1-prerequisite: review'))"\ngit add -- '${SPRINT}'\n`)
+  f.hook(`#!/bin/sh\nnode -e "const f=require('fs');const p='${SPRINT}';f.writeFileSync(p,f.readFileSync(p,'utf8').replace('8-1-prerequisite: done','8-1-prerequisite: review'))"\ngit add -- '${SPRINT}'\n`)
   const preview = inspectStart(f.root, '9.1', f.head)
   const result = applyStart(f.root, '9.1', f.head, preview.fingerprint)
   assert.equal(result.status, 'RECOVERY_REQUIRED', JSON.stringify(result))
@@ -195,7 +196,7 @@ test('commit hook changes outside the preview remain recoverable instead of repo
   const f = fixture(t)
   f.write('outside.txt', 'before\n')
   const head = f.commit()
-  f.write('.git/hooks/pre-commit', '#!/bin/sh\nprintf hook >> outside.txt\n')
+  f.hook('#!/bin/sh\nprintf hook >> outside.txt\n')
   const preview = inspectStart(f.root, '9.1', head)
   const result = applyStart(f.root, '9.1', head, preview.fingerprint)
   assert.equal(result.status, 'RECOVERY_REQUIRED', JSON.stringify(result))

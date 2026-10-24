@@ -86,7 +86,7 @@ test('projects only the selected slice with provenance and explicit unknown scop
     assert.match(result.projection.projection_fingerprint, /^sha256:[0-9a-f]{64}$/)
     assert.ok(result.projection.byte_counters.projection_bytes > 0)
     assert.ok(result.projection.byte_counters.instruction_dependency_bytes > 0)
-    assert.ok(result.projection.source_bindings.some(item => item.path === fixture.paths.story.replace(`${fixture.root}\\`, '').replaceAll('\\', '/')))
+    assert.ok(result.projection.source_bindings.some(item => item.path === path.relative(fixture.root, fixture.paths.story).replaceAll(path.sep, '/')))
     assert.equal(Object.hasOwn(result.projection, 'historical_receipts'), false)
 
     assert.deepEqual(snapshot(fixture), before)

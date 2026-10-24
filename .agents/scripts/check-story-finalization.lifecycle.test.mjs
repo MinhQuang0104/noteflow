@@ -122,6 +122,7 @@ test('validated canonical recipe provenance infers applicability without relabel
 }))
 
 test('CRLF-only Epic checkout representation remains fresh against the canonical Git blob', () => withFixture({}, f => {
+  git(f.root, 'config', 'core.autocrlf', 'true')
   const file = path.join(f.root, EPIC)
   writeFileSync(file, readFileSync(file, 'utf8').replaceAll('\n', '\r\n'))
   expectStatus(run(f), 'READY', 0)

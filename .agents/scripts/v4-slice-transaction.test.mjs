@@ -2,7 +2,7 @@ import { fixture, preserved, stagedFixture } from './v4-transaction-fixture.mjs'
 import { git, write } from './v4-test-helpers.mjs'
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { existsSync, readFileSync } from 'node:fs'
+import { chmodSync, existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 
 import { executeSliceTransaction, inspectActionTransaction, snapshotWorkingFiles, transactionIdentity } from './v4-slice-transaction.mjs'
@@ -60,6 +60,7 @@ test('a pre-commit hook that adds scope is detected after commit instead of bein
   const f = fixture()
   try {
     write(f.root, '.git/hooks/pre-commit', '#!/bin/sh\nif git diff --cached --name-only | grep -q "^meta/checkpoint.txt$"; then printf hook > hook.txt; git add -- hook.txt; fi\n')
+    chmodSync(path.join(f.root, '.git/hooks/pre-commit'), 0o755)
     const result = executeSliceTransaction(f.root, f.descriptor)
     assert.equal(result.status, 'RECOVERY_REQUIRED', JSON.stringify(result))
     assert.ok(result.reasons.some(reason => reason.includes('COMMIT_SCOPE_MISMATCH')))

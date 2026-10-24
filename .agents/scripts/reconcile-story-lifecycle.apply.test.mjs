@@ -1,7 +1,7 @@
 import { planRel, sprintRel, git, fixture, run, withFixture, edit, recommit, apply } from './reconcile-story-lifecycle-fixture.mjs'
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { existsSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs'
+import { chmodSync, existsSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 
 import { frontmatter } from './check-story-plan.mjs'
