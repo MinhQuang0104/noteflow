@@ -104,6 +104,11 @@ It runs PHP inside `backend-test`, points the Vite preview at port `8001`, and
 does not reuse an unrelated preview or API listener. Native/CI mode remains
 available for runners that prepare PHP and PostgreSQL themselves.
 
+Backend tests load the committed, value-free `backend/.env.testing` instead of
+the git-ignored `backend/.env`, so a fresh checkout or linked worktree runs the
+suite without phpdotenv read warnings. Test values come from `phpunit.xml`,
+`compose.local.yaml`, or CI; keep secrets out of that file.
+
 ## Linked-worktree testing
 
 When developing stories across multiple git worktrees, test actions can be executed directly from a linked worktree without interfering with the canonical checkout or other worktrees.
