@@ -19,13 +19,13 @@ readiness:
   status: READY
   story_normative_digest: sha256:dd431e6bd23a157b38a4c1fc80fce2d84a9df56fc20a546bdd30a639d5e6d62d
   dependency_sprint_keys: []
-current_slice: A
+current_slice: B
 risk:
   level: MEDIUM
   flags: [shared_boundary]
 slices:
   - id: A
-    status: checkpointed
+    status: reviewed
     baseline_commit: e4cf85d83e898246051096cd71129efc271a3b74
     checkpoint_commit: 9d8fe07fd4ed9c4b54f86256e302fa6cc0cede97
     subject_digest: sha256:a815ea948611c7725d7e4b6e666cbef86f7392840c7fe6eddfc953fd11dea4fa
@@ -34,6 +34,27 @@ slices:
       implementation:
         path: _bmad-output/implementation-artifacts/receipts/story-1-7/A-implementation.json
         digest: sha256:ba8d4c427892eb2424ed3a139dea9a646b7da87e28d9fb25e909a3cd430564b5
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-7/A-verification.json
+        digest: sha256:d946ffc7bf55a736df3e39a1cd7331717d6b24bdd054aa349a39c2326a32d018
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-7/A-review.json
+        digest: sha256:675b14a9e95b493f6d1e930a9823fa71a6cde09baa4f653bde22054666de5ea8
+    verification:
+      status: PASS
+      canonical_status: PASS
+      escalation_decision: REVIEW_REQUIRED
+      progression_eligible: true
+    review:
+      required: true
+      verdict: APPROVE
+      reviewed_commit: 9d8fe07fd4ed9c4b54f86256e302fa6cc0cede97
+      risk_context_digest: sha256:4585339b0cdad1473d7966b081ecaab205b19c1b811e2626248f8fd37bb2761f
+      freshness: FRESH_CANDIDATE
+      reviewer:
+        type: human
+        vendor: null
+        independent: false
     task_refs: [T-1]
     depends_on: []
     executor: lead
@@ -66,8 +87,8 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: verify_slice
-  target: A
+  kind: implement_slice
+  target: B
 autopilot:
   schema_version: 1
   authorized_at: "2026-10-12T06:10:34.145Z"
