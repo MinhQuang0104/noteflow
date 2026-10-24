@@ -1,0 +1,21 @@
+{
+  "label": "c11-a",
+  "concurrency": 11,
+  "command": [
+    "npm.cmd",
+    "run",
+    "test:v4",
+    "--",
+    "--test-concurrency=11",
+    "--test-reporter=spec"
+  ],
+  "head": "fb8e6e8d3bf5ba21c362626416c49f04aa4452fe",
+  "git_status_before": "?? .agents/docs/v4-auto/evidence/perf-t4-2026-10-24/\n?? .agents/scripts/v4-test-inventory.mjs\n?? .agents/scripts/v4-test-inventory.test.mjs\n?? .agents/scripts/v4-test-names.json\n",
+  "node_processes_before": "11",
+  "started_at": "2026-10-24T04:21:48.962661+00:00",
+  "exit_code": 0,
+  "wall_seconds": 676.794,
+  "ended_at": "2026-10-24T04:33:05.756311+00:00",
+  "git_status_after": "?? .agents/docs/v4-auto/evidence/perf-t4-2026-10-24/\n?? .agents/scripts/v4-test-inventory.mjs\n?? .agents/scripts/v4-test-inventory.test.mjs\n?? .agents/scripts/v4-test-names.json\n",
+  "git_status_unchanged_during_run": true
+}

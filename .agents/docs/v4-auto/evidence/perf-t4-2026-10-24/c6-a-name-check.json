@@ -1,0 +1,26 @@
+{
+  "label": "c6-a",
+  "occurrences": 801,
+  "goldenOccurrences": 801,
+  "distinctNames": 801,
+  "multilineNames": 7,
+  "exactMultisetEqual": true,
+  "missing": [],
+  "extra": [],
+  "reporterCounts": {
+    "tests": 801,
+    "pass": 800,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 1,
+    "todo": 0
+  },
+  "goldenSha256": "c26f85e4f087ef6d82b769b29a63dfc288474ecdb14f8e89e6a73a35264c9393",
+  "existingSkipUnchanged": true,
+  "existingSkip": [
+    {
+      "name": "rejects symlinked cwd or referenced paths",
+      "annotation": " # symlink creation is unavailable in this Windows test environment"
+    }
+  ]
+}

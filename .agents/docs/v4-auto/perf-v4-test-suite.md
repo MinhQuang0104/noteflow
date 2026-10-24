@@ -2,8 +2,8 @@
 
 Branch: `perf/v4-test-suite` (worktree `D:/Workspace/Tu_Hoc/v4-test-perf`), cut
 from `main` 3721785. Runs in parallel with Story work and never touches the main
-checkout. Status: **T0 COMPLETE; T1 COMPLETE (19dffe2); T2.1 / T2.2 / T3
-IMPLEMENTED; REMAINING T2 ITEMS / T4 NOT STARTED**. T0 source is pinned to
+checkout. Status: **T0 COMPLETE; T1 COMPLETE (19dffe2); T2.1 / T2.2 / T3 / T4
+IMPLEMENTED; REMAINING T2 ITEMS (T2.3–T2.7) NOT STARTED**. T0 source is pinned to
 `87469b7`; see [T0 report](perf-t0-report.md) and its evidence index.
 
 ## 0. Phase rules and rationale
@@ -201,6 +201,13 @@ baseline sample). The 8 min target is not yet reached.
 - Add a guard test that fails when the V4 test count differs from the golden
   list, so a later split cannot silently drop tests.
 - Update the run time recorded in `g5-runbook.md` and in `README.md`.
+
+**Implemented:** [T4 report](perf-t4-report.md). `test:v4` uses
+`--test-concurrency=8`; `v4-test-inventory.test.mjs` compares the top-level
+test names that every test file registers against `v4-test-names.json`
+without running test bodies. Measurements were taken under outside load and
+are noisy: concurrency 8 took 664 s and 677 s, never slower than 11
+(677 s and 1065 s).
 
 ## 5. Risks
 

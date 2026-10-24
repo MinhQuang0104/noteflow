@@ -4,6 +4,6 @@
   "private": true,
   "description": "Repository metadata only; application commands live in frontend/ and backend/.",
   "scripts": {
-    "test:v4": "node --test .agents/scripts/*.test.mjs"
+    "test:v4": "node --test --test-concurrency=8 .agents/scripts/*.test.mjs"
   }
 }

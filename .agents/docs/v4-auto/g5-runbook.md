@@ -167,7 +167,7 @@ Story xong trước được tích hợp trước:
 node .agents/scripts/integrate-story.mjs integrate 99.N --generation 1 --canonical D:/Workspace/Tu_Hoc/g5-sandbox
 ```
 
-- Lệnh chạy full `npm run test:v4` trên bản merge, nên mất khoảng 10 phút và
+- Lệnh chạy full `npm run test:v4` trên bản merge, nên mất khoảng 11–12 phút và
   không in gì cho tới khi xong. Mong đợi `"status":"APPLIED"` kèm `mergeCommit`.
 - **Tùy chọn:** chạy lệnh của Story thứ hai trong lúc lệnh đầu chưa xong. Mong
   đợi `CONFLICT` `INTEGRATION_BUSY`, và `main` không đổi. Chờ lệnh đầu xong rồi
