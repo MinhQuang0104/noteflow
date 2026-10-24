@@ -8,7 +8,7 @@ upstream_epic:
   path: docs/product/epics.md
   section_digest: sha256:56a6a93be6a9310dab4cdaf453ef9e1891a3ffb6404c41ed24d17714ea2a4b3c
 sprint_key: 1-7-chạy-test-cô-lập-cho-từng-worktree
-lifecycle_snapshot: review
+lifecycle_snapshot: done
 execution_status: complete
 planning_approval:
   decision: APPROVED
@@ -140,9 +140,7 @@ human_approval:
   approved_commit: "e3f62f98823701917c67c0421d74bebe1c19fbda"
   approved_action: "complete_story"
   disclosures_acknowledged: true
-next_action:
-  kind: complete_story
-  target: story
+next_action: null
 autopilot:
   schema_version: 1
   authorized_at: "2026-10-12T06:10:34.145Z"

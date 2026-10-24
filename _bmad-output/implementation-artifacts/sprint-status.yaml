@@ -42,7 +42,7 @@ development_status:
   1-4-nhận-dữ-liệu-mới-giữa-hai-thiết-bị: done
   1-5-giữ-bản-đang-nhập-và-thử-lưu-lại-sau-gián-đoạn: done
   1-6-giải-quyết-xung-đột-nội-dung-giữa-hai-thiết-bị: done
-  1-7-chạy-test-cô-lập-cho-từng-worktree: review
+  1-7-chạy-test-cô-lập-cho-từng-worktree: done
   epic-1-retrospective: optional
 
   epic-2: in-progress

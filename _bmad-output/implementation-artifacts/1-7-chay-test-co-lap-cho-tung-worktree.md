@@ -1,7 +1,7 @@
 ---
 story_id: "1.7"
 title: Chạy test cô lập cho từng worktree
-status: review
+status: done
 ---
 
 # Story 1.7: Chạy test cô lập cho từng worktree
@@ -123,4 +123,5 @@ As a developer chạy nhiều Story song song trong các linked worktree, I want
 ### Change Log
 
 - Finalization recorded for Human Gate: in-progress -> review; next action complete_story.
+- Human approval recorded for the exact review scope: review -> done; next action terminal.
 <!-- v4:completion:end -->
