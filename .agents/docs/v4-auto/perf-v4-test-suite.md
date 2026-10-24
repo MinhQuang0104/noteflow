@@ -2,8 +2,8 @@
 
 Branch: `perf/v4-test-suite` (worktree `D:/Workspace/Tu_Hoc/v4-test-perf`), cut
 from `main` 3721785. Runs in parallel with Story work and never touches the main
-checkout. Status: **T0 COMPLETE; T1 COMPLETE (19dffe2); T2.1 / T2.2 IMPLEMENTED;
-REMAINING T2 ITEMS / T3 / T4 NOT STARTED**. T0 source is pinned to
+checkout. Status: **T0 COMPLETE; T1 COMPLETE (19dffe2); T2.1 / T2.2 / T3
+IMPLEMENTED; REMAINING T2 ITEMS / T4 NOT STARTED**. T0 source is pinned to
 `87469b7`; see [T0 report](perf-t0-report.md) and its evidence index.
 
 ## 0. Phase rules and rationale
@@ -186,6 +186,13 @@ verification is retained in separate local post-commit sidecars. Baseline
   After the split each file gets its own copy. T0 confirmed that the executor
   drift test temporarily writes and restores its code, so do not share this
   executor across files or concurrently executing tests.
+
+**Implemented (before T2.3–T2.7, at the owner's request):** [T3 report](perf-t3-report.md)
+splits the seven heavy files into 38 files by moving top-level test units and
+partitioning three long loops by input; names and assertions are unchanged.
+Full runs 800/799/1/0 with the exact golden multiset: split 596.5 s and
+671.1 s against a same-day baseline of 796.1 s (about 20% less wall time, one
+baseline sample). The 8 min target is not yet reached.
 
 ### T4 — Tune concurrency and lock in (optional)
 

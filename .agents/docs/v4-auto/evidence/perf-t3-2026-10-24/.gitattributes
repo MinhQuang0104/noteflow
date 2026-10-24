@@ -1,0 +1,4 @@
+*.log -text
+*.patch -text
+*.json -text
+*.xml -text

@@ -1,4 +1,4 @@
-import { recoveryDrifts, fixture, preserved, stagedFixture } from './v4-transaction-fixture.mjs'
+import { fixture, preserved, stagedFixture } from './v4-transaction-fixture.mjs'
 import { git, write } from './v4-test-helpers.mjs'
 import test from 'node:test'
 import assert from 'node:assert/strict'
@@ -18,6 +18,7 @@ test('transaction stages and commits exact implementation and metadata scopes', 
     assert.equal(inspectActionTransaction(f.root, f.descriptor.transaction_id).status, 'COMPLETE')
   } finally { f.cleanup() }
 })
+
 test('failure before metadata commit preserves exact partial state and explicit recovery finishes it', () => {
   const f = fixture()
   try {
@@ -113,60 +114,6 @@ for (const [label, attributes, autocrlf, content] of [
   } finally { f.cleanup() }
 })
 
-test('explicit staged recovery consumes the existing index and preserves original journal audit', () => {
-  const f = stagedFixture()
-  try {
-    const before = preserved(f)
-    assert.equal(typeof transactions.prepareStagedRecoveryTransaction, 'function')
-    const ready = transactions.prepareStagedRecoveryTransaction(f.root, f.descriptor)
-    assert.equal(ready.status, 'READY', JSON.stringify(ready))
-    assert.deepEqual(preserved(f), before, 'prepare is strictly read-only')
-    const result = transactions.executeStagedRecoveryTransaction(f.root, f.descriptor, ready.preview)
-    assert.equal(result.status, 'CHECKPOINTED', JSON.stringify(result))
-    assert.equal(git(f.root, 'rev-list', '--count', 'HEAD'), '3')
-    assert.deepEqual(result.next_action, { kind: 'verify_slice', target: 'A' })
-    const journal = JSON.parse(readFileSync(f.failed.journal_path, 'utf8'))
-    assert.equal(journal.preview_fingerprint, f.descriptor.preview_fingerprint)
-    assert.equal(journal.staged_recovery.original_journal_base64, before.journal)
-    assert.equal(journal.staged_recovery.original_lock_base64, before.lock)
-    assert.deepEqual(readFileSync(path.join(f.root, 'src/implementation.txt')).toString('base64'), before.product)
-    const complete = preserved(f)
-    assert.equal(transactions.executeStagedRecoveryTransaction(f.root, f.descriptor, ready.preview).status, 'NOOP')
-    assert.deepEqual(preserved(f), complete)
-  } finally { f.cleanup() }
-})
-
-for (const phase of ['BEFORE_COMMIT1', 'AFTER_COMMIT1_BEFORE_JOURNAL', 'AFTER_COMMIT1', 'AFTER_WRITE', 'AFTER_METADATA_STAGE', 'AFTER_COMMIT2_BEFORE_JOURNAL', 'AFTER_COMMIT2_HOOK', 'AFTER_COMPLETE_BEFORE_RELEASE']) {
-  test('staged recovery retry is idempotent after interruption ' + phase, () => {
-    const f = stagedFixture()
-    try {
-      assert.equal(typeof transactions.prepareStagedRecoveryTransaction, 'function')
-      const ready = transactions.prepareStagedRecoveryTransaction(f.root, f.descriptor)
-      assert.equal(ready.status, 'READY', JSON.stringify(ready))
-      const interrupted = transactions.executeStagedRecoveryTransaction(f.root, { ...f.descriptor, fail_at: phase }, ready.preview)
-      assert.equal(interrupted.status, 'RECOVERY_REQUIRED', JSON.stringify(interrupted))
-      const result = transactions.executeStagedRecoveryTransaction(f.root, f.descriptor, ready.preview)
-      assert.equal(result.status, phase === 'AFTER_COMPLETE_BEFORE_RELEASE' ? 'NOOP' : 'CHECKPOINTED', JSON.stringify(result))
-      assert.equal(git(f.root, 'rev-list', '--count', 'HEAD'), '3', 'never duplicate either durable commit')
-      assert.equal(transactions.executeStagedRecoveryTransaction(f.root, f.descriptor, ready.preview).status, 'NOOP')
-    } finally { f.cleanup() }
-  })
-}
-
-for (const [label, mutate] of Object.entries(recoveryDrifts)) test('staged recovery rejects and preserves all state on ' + label, () => {
-  const f = stagedFixture()
-  try {
-    assert.equal(typeof transactions.prepareStagedRecoveryTransaction, 'function')
-    const ready = transactions.prepareStagedRecoveryTransaction(f.root, f.descriptor)
-    assert.equal(ready.status, 'READY', JSON.stringify(ready))
-    mutate(f)
-    const before = preserved(f)
-    const result = transactions.executeStagedRecoveryTransaction(f.root, f.descriptor, ready.preview)
-    assert.ok(!['CHECKPOINTED', 'NOOP', 'RECOVERY_REQUIRED'].includes(result.status), JSON.stringify(result))
-    assert.deepEqual(preserved(f), before)
-  } finally { f.cleanup() }
-})
-
 test('external clean filters fail closed without executing the configured command', () => {
   const f = fixture()
   try {
@@ -205,19 +152,5 @@ test('raw byte freshness still rejects changed EOL even when canonical blobs are
     assert.ok(result.reasons.includes('STALE_WORKTREE_PREVIEW'))
     assert.equal(git(f.root, 'rev-parse', 'HEAD'), f.head)
     assert.equal(git(f.root, 'diff', '--cached', '--name-only'), '')
-  } finally { f.cleanup() }
-})
-
-test('interrupted recovery rejects metadata index mode drift without restaging user state', () => {
-  const f = stagedFixture()
-  try {
-    const ready = transactions.prepareStagedRecoveryTransaction(f.root, f.descriptor)
-    const interrupted = transactions.executeStagedRecoveryTransaction(f.root, { ...f.descriptor, fail_at: 'AFTER_METADATA_STAGE' }, ready.preview)
-    assert.equal(interrupted.status, 'RECOVERY_REQUIRED', JSON.stringify(interrupted))
-    git(f.root, 'update-index', '--chmod=+x', 'meta/checkpoint.txt')
-    const before = preserved(f)
-    const result = transactions.executeStagedRecoveryTransaction(f.root, f.descriptor, ready.preview)
-    assert.equal(result.status, 'BLOCKED', JSON.stringify(result))
-    assert.deepEqual(preserved(f), before)
   } finally { f.cleanup() }
 })
