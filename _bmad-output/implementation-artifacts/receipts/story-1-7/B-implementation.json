@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "story_id": "1.7",
+  "slice_id": "B",
+  "kind": "implementation",
+  "checkpoint_commit": "e5d20830fc97c0acece66fe966a2bf1a2e4d891b",
+  "baseline_commit": "74ab16004fdd4b9518213353a81c8cdaefb249ee",
+  "subject_digest": "sha256:1b582a780b556390031bcf11c1bd324c26a106c063d5112c82ed120f1c34a690",
+  "created_from_head": "e5d20830fc97c0acece66fe966a2bf1a2e4d891b",
+  "changed_paths_sha256": "sha256:a199fc9afb4471a0b15c58d1d1481afeda869559527d4a76f574ca1954dc4333",
+  "commands": [
+    {
+      "command": "Invoke-Pester -Script scripts/tests/local-runtime-guards.Tests.ps1 -EnableExit",
+      "exit_code": 0,
+      "tool": "Windows PowerShell/Pester 3.4.0",
+      "environment": "Story worktree; Windows; Lead rerun after AGY worker_done (11 passed)"
+    },
+    {
+      "command": "Invoke-Pester -Script scripts/tests/local-runtime.Tests.ps1 -EnableExit",
+      "exit_code": 0,
+      "tool": "Windows PowerShell/Pester 3.4.0",
+      "environment": "Story worktree; Windows; slice A regression (8 passed)"
+    },
+    {
+      "command": "git diff --exit-code main -- .github/workflows/ci.yml backend/phpunit.xml backend/tests/TestCase.php tests/e2e/helpers/db-helper.php",
+      "exit_code": 0,
+      "tool": "Git",
+      "environment": "Story worktree; Windows"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "tool": "Git",
+      "environment": "Story worktree; Windows"
+    }
+  ],
+  "worker": {
+    "executor": "agy",
+    "orca": {
+      "run_id": "run_004a5068dc78",
+      "task_id": "task_9e9bf7106076",
+      "dispatch_ids": [
+        "ctx_08a50f90584e"
+      ]
+    },
+    "attempt": 1,
+    "contract_sha256": "2c12d81ce44db1e24776b70f47948592cf8e763f1634a481c619bd0334c2edd2",
+    "worker_report_sha256": "d79136f8a93365d8762ff775729ffe882f92691985a4cae54d92e007350cd1aa",
+    "lead_vendor": "claude",
+    "scope_gate": {
+      "schema": "worker-scope-v1",
+      "status": "PASS",
+      "base": "74ab16004fdd4b9518213353a81c8cdaefb249ee",
+      "allowed": [
+        "docs/development/local-runtime.md",
+        "scripts/tests/local-runtime-guards.Tests.ps1"
+      ],
+      "changed": [
+        "docs/development/local-runtime.md",
+        "scripts/tests/local-runtime-guards.Tests.ps1"
+      ]
+    }
+  }
+}

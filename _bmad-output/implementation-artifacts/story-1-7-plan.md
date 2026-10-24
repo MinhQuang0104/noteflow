@@ -73,7 +73,15 @@ slices:
       - AC-7 - test-down from the Story worktree removes only its own project; test-down from the canonical checkout is refused
       - git diff --exit-code main -- .github/workflows/ci.yml backend/phpunit.xml backend/tests/TestCase.php tests/e2e/helpers/db-helper.php
   - id: B
-    status: pending
+    status: checkpointed
+    baseline_commit: 74ab16004fdd4b9518213353a81c8cdaefb249ee
+    checkpoint_commit: e5d20830fc97c0acece66fe966a2bf1a2e4d891b
+    subject_digest: sha256:1b582a780b556390031bcf11c1bd324c26a106c063d5112c82ed120f1c34a690
+    changed_paths_sha256: sha256:a199fc9afb4471a0b15c58d1d1481afeda869559527d4a76f574ca1954dc4333
+    receipt_refs:
+      implementation:
+        path: _bmad-output/implementation-artifacts/receipts/story-1-7/B-implementation.json
+        digest: sha256:9c7d860ee91e328c8d50d3356f3bccf2cc29703f33df889314442de97f0584e5
     task_refs: [T-2]
     depends_on: [A]
     executor: agy
@@ -87,7 +95,7 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: implement_slice
+  kind: verify_slice
   target: B
 autopilot:
   schema_version: 1
