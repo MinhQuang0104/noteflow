@@ -8,8 +8,8 @@ upstream_epic:
   path: docs/product/epics.md
   section_digest: sha256:56a6a93be6a9310dab4cdaf453ef9e1891a3ffb6404c41ed24d17714ea2a4b3c
 sprint_key: 1-7-chạy-test-cô-lập-cho-từng-worktree
-lifecycle_snapshot: in-progress
-execution_status: in-progress
+lifecycle_snapshot: review
+execution_status: complete
 planning_approval:
   decision: APPROVED
   scope: planning
@@ -115,8 +115,17 @@ slices:
       - Invoke-Pester -Script scripts/tests/local-runtime-guards.Tests.ps1 -EnableExit
 blockers: []
 unresolved_questions: []
+finalization:
+  receipt_ref: _bmad-output/implementation-artifacts/receipts/story-1-7/finalization.json
+  receipt_digest: sha256:1c9bab87ff58ba5864105e9956b7725017b137765a0977eda894b8f80a504a16
+  done_gate_disposition: SATISFIED
+  scope_paths_digest: sha256:84bbb47907437e147e9511401ee106c949f6b31d3748fcf4297389b0f3875cd7
+  implementation_commit_set_digest: sha256:a2dbe124dfb2e2ffac2b6e52430d257366f2a5a741f27d7c4ae6e4b9b9e48f0c
+  final_scoped_tree_digest: sha256:229e353a80c01ec0626e085a1911f1f143245acdc7476d4beac20c6c2c6a261f
+  prepared_from_head: cbf70f4436627f2aba3674e6be5cafd9b36d05d1
+human_approval: null
 next_action:
-  kind: finalize_story
+  kind: complete_story
   target: story
 autopilot:
   schema_version: 1

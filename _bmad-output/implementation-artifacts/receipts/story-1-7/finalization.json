@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "kind": "story_finalization",
+  "story_id": "1.7",
+  "story_normative_digest": "sha256:dd431e6bd23a157b38a4c1fc80fce2d84a9df56fc20a546bdd30a639d5e6d62d",
+  "upstream_epic_digest": "sha256:56a6a93be6a9310dab4cdaf453ef9e1891a3ffb6404c41ed24d17714ea2a4b3c",
+  "prepared_from_head": "cbf70f4436627f2aba3674e6be5cafd9b36d05d1",
+  "slice_set_digest": "sha256:c3d3e1ea9058e56a10f53033b73891a043691501ea437911ac4329e38ef0418b",
+  "receipt_set_digest": "sha256:5d44dcace207f2610745a29b4b41e3a276f6c0b37a5e960107db56df9be690d4",
+  "ac_coverage_digest": "sha256:875b56998422e9abfb61c653255552d85b39bd68fdacddac50ecf9886ce1fd9f",
+  "canonical_disclosures_digest": "sha256:25e965f81d4713da45bf6565f6d003491d20c7cb16ead3354815114a267569a3",
+  "scope_path_count": 9,
+  "scope_paths_digest": "sha256:84bbb47907437e147e9511401ee106c949f6b31d3748fcf4297389b0f3875cd7",
+  "implementation_commit_set_digest": "sha256:a2dbe124dfb2e2ffac2b6e52430d257366f2a5a741f27d7c4ae6e4b9b9e48f0c",
+  "final_scoped_tree_digest": "sha256:229e353a80c01ec0626e085a1911f1f143245acdc7476d4beac20c6c2c6a261f",
+  "paths_digest": "sha256:84bbb47907437e147e9511401ee106c949f6b31d3748fcf4297389b0f3875cd7",
+  "commit_set_digest": "sha256:a2dbe124dfb2e2ffac2b6e52430d257366f2a5a741f27d7c4ae6e4b9b9e48f0c",
+  "scoped_tree_digest": "sha256:229e353a80c01ec0626e085a1911f1f143245acdc7476d4beac20c6c2c6a261f",
+  "done_gate_disposition": "SATISFIED",
+  "lifecycle_from": "in-progress",
+  "lifecycle_target": "review",
+  "slice_summaries": [
+    {
+      "id": "A",
+      "status": "reviewed",
+      "checkpoint": "9d8fe07fd4ed9c4b54f86256e302fa6cc0cede97",
+      "progression_eligible": true,
+      "review_required": true,
+      "review_verdict": "APPROVE",
+      "review_freshness": "FRESH_REUSED"
+    },
+    {
+      "id": "B",
+      "status": "reviewed",
+      "checkpoint": "e5d20830fc97c0acece66fe966a2bf1a2e4d891b",
+      "progression_eligible": true,
+      "review_required": true,
+      "review_verdict": "APPROVE",
+      "review_freshness": "FRESH_REUSED"
+    }
+  ]
+}
