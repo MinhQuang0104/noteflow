@@ -1,7 +1,7 @@
 ---
 story_id: "2.2"
 title: Xem challenge và Done nhanh từ Hôm nay
-status: ready-for-dev
+status: in-progress
 ---
 
 # Story 2.2: Xem challenge và Done nhanh từ Hôm nay

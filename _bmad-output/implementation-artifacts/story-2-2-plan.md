@@ -8,8 +8,8 @@ upstream_epic:
   path: docs/product/epics.md
   section_digest: sha256:f9eed2011ff42b128a8c20089e6c0c002b696294c5d052f9fe534833398bdb13
 sprint_key: 2-2-xem-challenge-và-done-nhanh-từ-hôm-nay
-lifecycle_snapshot: ready-for-dev
-execution_status: ready-for-dev
+lifecycle_snapshot: in-progress
+execution_status: in-progress
 planning_approval:
   decision: APPROVED
   scope: planning
@@ -75,8 +75,8 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: start_story
-  target: story
+  kind: implement_slice
+  target: A
 ---
 
 # Story 2.2 execution plan
