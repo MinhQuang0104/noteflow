@@ -47,7 +47,7 @@ test('concurrent edit prevents rollback overwrite',()=>withFixture({},f=>{
 }))
 
 test('both writes before commit failure remain recoverable',()=>withFixture({},f=>{
-  mkdirSync(path.join(f.root,'.githooks'));writeFileSync(path.join(f.root,'.githooks/pre-commit'),'#!/bin/sh\nexit 1\n');git(f.root,'config','core.hooksPath','.githooks')
+  mkdirSync(path.join(f.root,'.githooks'));writeFileSync(path.join(f.root,'.githooks/pre-commit'),'#!/bin/sh\nexit 1\n');chmodSync(path.join(f.root,'.githooks/pre-commit'),0o755);git(f.root,'config','core.hooksPath','.githooks')
   const r=apply(f);assert.equal(r.code,6,JSON.stringify(r.json));assert.equal(r.json.recoveryClassification,'BOTH_TARGETS_UNCOMMITTED')
   assert.ok(r.json.lifecycle_transaction?.journal_path,JSON.stringify(r.json))
   assert.ok(existsSync(r.json.lifecycle_transaction.journal_path))
