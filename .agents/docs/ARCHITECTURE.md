@@ -228,3 +228,4 @@ successor without executing it. With autopilot, the Lead loops on
 | Benchmark, experience, evolution, observation | `.agents/docs/v4-*-contract.md` |
 | V4 Lite origin and acceptance | `.agents/docs/v4-lite-migration.md`, `docs/agent-architecture/` |
 | Test-suite performance | `.agents/docs/v4-auto/perf-*.md` |
+| External ideas evaluated against this architecture | `docs/agent-research/README.md` (not authority) |
