@@ -14,7 +14,8 @@ NoteFlow agent control plane. The current architecture map is
    articles, transcripts or posts. This repository is public.
 3. **No personal data** (accounts, plans, local paths, credentials).
 4. **Write on request.** A note is added when the owner asks to keep a piece of
-   research, not after every conversation.
+   research, not after every conversation. Claude follows
+   `.claude/skills/agent-research-note/SKILL.md` for this.
 
 ## Status values
 
@@ -26,6 +27,7 @@ only, nothing to adopt)
 
 | Date | Note | Topic | Status |
 |---|---|---|---|
+| 2026-11-07 | [skill-library-layers](2026-11-07-skill-library-layers.md) | "8 layers" skill-library post vs Anthropic's official skills guide | adopted (research skill) / idea |
 | 2026-11-07 | [autonomy-levels](2026-11-07-autonomy-levels.md) | Autonomy scales, capability vs permission, harness recommendations | idea |
 | 2026-11-07 | [deepseek-superagent](2026-11-07-deepseek-superagent.md) | Router + workers, event triggers, mandate-based authorization | idea |
 | 2026-11-07 | [gemini-architecture-review](2026-11-07-gemini-architecture-review.md) | External AI review of this repo: what it got right and wrong | reference |
