@@ -2,10 +2,10 @@
 
 ## Status
 
-**PROPOSED (2026-10-07).** Design record only; nothing here is runtime policy
-until a phase lands through the V4 Lite migration lane with the full
-`npm run test:v4` suite passing on its exact commit. Root `AGENTS.md`, the
-router, and V3 policy remain authoritative until then.
+**IMPLEMENTED (P1–P3, P5–P7 merged into main 2026-10-11; P4 optional, not
+built).** Proposed 2026-10-07; kept as the design rationale record. For the
+current-state map read `.agents/docs/ARCHITECTURE.md`. Root `AGENTS.md`, the
+router and the Runner contracts are authoritative over this record.
 
 ## Objective
 
