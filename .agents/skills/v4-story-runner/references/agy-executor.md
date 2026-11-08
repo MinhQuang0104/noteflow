@@ -27,8 +27,9 @@ Load only when the validated current slice declares `executor: agy`.
 
 The Plan may declare top-level `resources: [backend-test-db, e2e-db]`, using
 only names in `.agents/config/hot-paths.json`. Claim reserves that list plus
-resources inferred from all slice checks: backend tests (Artisan, PHPUnit,
-Pest, backend test commands or `scripts/local.ps1 test`) add `backend-test-db`;
+resources inferred from all slice checks: raw backend test runners (Artisan,
+PHPUnit, Pest, or other backend test commands) add `backend-test-db`;
+`scripts/local.ps1 test` does not, because it uses a per-checkout test project.
 E2E checks (Playwright or `scripts/local.ps1 e2e`) add `e2e-db` automatically.
 The contract builder includes the current slice's resources and refuses to
 build unless the Story holds them without another active holder. The
@@ -36,9 +37,12 @@ pre-dispatch `check-slice` repeats the resource check. `RESOURCE_CONFLICT` or
 `RESOURCE_UNDECLARED` stops dispatch; an owner scope-overlap override cannot
 bypass a resource lock. Reservations last until registry release.
 
-Per-worktree databases belong to deferred BMAD Story 1-7. Until it lands,
-these locks serialize checks against shared test databases; retain the locks
-afterwards for any resource that remains shared.
+Story 1-7 gave each checkout its own Compose test project. A concurrency smoke
+(2026-11-08: two linked worktrees ran `scripts/local.ps1 test` at the same time
+in separate projects, 102/102 passing in each) retired the inferred
+`backend-test-db` lock for that wrapper. `e2e-db` stays inferred because
+concurrent E2E is unproven. Raw runners keep the lock, and a Plan may still
+declare either resource explicitly.
 
 ## Corrections and stops
 

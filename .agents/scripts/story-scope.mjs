@@ -60,8 +60,12 @@ export function inferredResources(checks = []) {
     const command = (typeof check === 'string' ? check :
       typeof check?.command === 'string' ? check.command : Array.isArray(check?.argv) ? check.argv.join(' ') : '').toLowerCase().replaceAll('\\', '/')
     const cwd = String(check?.cwd ?? check?.directory ?? '').toLowerCase().replaceAll('\\', '/')
-    if (/\bartisan\s+test\b|\bphpunit\b|\bpest\b|\blocal\.ps1["']?\s+test\b/.test(command) ||
-        ((/(^|\/)backend(\/|$)/.test(cwd) || /\bbackend\//.test(command)) && /\btest(?:s)?\b/.test(command))) resources.add('backend-test-db')
+    // `scripts/local.ps1 test` runs in a per-checkout Compose test project (Story 1-7), so it no
+    // longer shares a database; any raw backend runner in the same check still takes the lock.
+    const rawBackendRunner = /\bartisan\s+test\b|\bphpunit\b|\bpest\b/.test(command)
+    const isolatedWrapper = /\blocal\.ps1["']?\s+test\b/.test(command)
+    if (rawBackendRunner || (!isolatedWrapper &&
+        (/(^|\/)backend(\/|$)/.test(cwd) || /\bbackend\//.test(command)) && /\btest(?:s)?\b/.test(command))) resources.add('backend-test-db')
     if (/\be2e\b|\bplaywright\s+test\b/.test(command)) resources.add('e2e-db')
   }
   return [...resources].sort()
