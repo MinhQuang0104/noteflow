@@ -95,7 +95,7 @@ function planRelative(storyId) {
 }
 
 function git(root, args) {
-  const result = spawnSync('git', ['--no-optional-locks', ...args], { cwd: root, encoding: 'utf8', windowsHide: true, timeout: 10000 })
+  const result = spawnSync('git', ['-c', 'core.quotepath=false', '--no-optional-locks', ...args], { cwd: root, encoding: 'utf8', windowsHide: true, timeout: 10000 })
   if (result.error || result.status === null) throw new Error('GIT_UNAVAILABLE')
   return result
 }

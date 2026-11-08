@@ -28,7 +28,7 @@ function stableDigest(value) {
 }
 
 function git(root, args) {
-  const result = spawnSync('git', args, { cwd: root, encoding: 'utf8', windowsHide: true, timeout: 10000 })
+  const result = spawnSync('git', ['-c', 'core.quotepath=false', ...args], { cwd: root, encoding: 'utf8', windowsHide: true, timeout: 10000 })
   if (result.error || result.status === null) throw new Error('GIT_UNAVAILABLE')
   return result
 }
@@ -253,7 +253,7 @@ function storyMetadataPaths(storyId, plan, planPath) {
 function snapshotCheckout(root, commit) {
   const parent = mkdtempSync(path.join(tmpdir(), 'v4-completion-snapshot-'))
   const clone = path.join(parent, 'repo')
-  const run = (cwd, args) => spawnSync('git', args, { cwd, encoding: 'utf8', windowsHide: true, timeout: 300000 })
+  const run = (cwd, args) => spawnSync('git', ['-c', 'core.quotepath=false', ...args], { cwd, encoding: 'utf8', windowsHide: true, timeout: 300000 })
   // --shared borrows the source object store through alternates; the source
   // repository, its index and its worktrees are never written.
   const cloned = run(parent, ['clone', '--quiet', '--shared', '--no-checkout', root, clone])

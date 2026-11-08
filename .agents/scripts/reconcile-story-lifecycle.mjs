@@ -13,7 +13,7 @@ const REL_SPRINT = '_bmad-output/implementation-artifacts/sprint-status.yaml'
 const sha = bytes => createHash('sha256').update(bytes).digest('hex')
 const lifecycleCommitMessage = (storyId, from, to) => `chore(lifecycle): move story ${storyId} ${from} to ${to}`
 function git(root, ...args) {
-  const p=spawnSync('git',args,{cwd:root,encoding:'utf8',windowsHide:true,timeout:10000})
+  const p=spawnSync('git',['-c','core.quotepath=false',...args],{cwd:root,encoding:'utf8',windowsHide:true,timeout:10000})
   if (p.error || p.status === null) throw new Error('GIT_UNAVAILABLE')
   return p
 }
