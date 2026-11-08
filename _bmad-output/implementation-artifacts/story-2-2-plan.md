@@ -95,7 +95,7 @@ autopilot:
     max_rework_per_slice: 2
     max_minutes_per_slice: 90
   lead_vendor: claude
-  revoked: false
+  revoked: true
 ---
 
 # Story 2.2 execution plan
