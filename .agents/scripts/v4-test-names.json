@@ -601,6 +601,7 @@
   "safe line endings and trailing whitespace do not change digest",
   "same state no change",
   "same-Lead APPROVE accepts one ordered evidence set covering five changed paths",
+  "same-Lead APPROVE accepts split evidence sets covering twenty changed paths and finalization accepts the receipt",
   "same-Lead APPROVE requires exact bounded evidence and persists verification plus review receipts",
   "same-scope lock blocks concurrent invocation",
   "same-state apply creates no lifecycle commit",

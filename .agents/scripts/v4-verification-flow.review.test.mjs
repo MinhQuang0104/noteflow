@@ -1,4 +1,4 @@
-import { PLAN, VERIFICATION_RECEIPT, REVIEW_RECEIPT, verificationTemplate, fixture, prepareVerification, makeReviewEvidence, scopeDigest } from './v4-verification-fixture.mjs'
+import { PLAN, VERIFICATION_RECEIPT, REVIEW_RECEIPT, verificationTemplate, fixture, prepareVerification, makeReviewEvidence, makeSplitReviewEvidence, scopeDigest } from './v4-verification-fixture.mjs'
 import { git, write } from './v4-test-helpers.mjs'
 import test from 'node:test'
 import assert from 'node:assert/strict'
@@ -103,6 +103,43 @@ test('same-Lead APPROVE accepts one ordered evidence set covering five changed p
     assert.deepEqual(receipt.evidence_refs.map(item => item.unit_index), evidence.evidenceSet.units.map(item => item.unitIndex))
     assert.equal(receipt.scope_digest, scopeDigest(evidence))
     assert.equal(frontmatter(readFileSync(path.join(f.root, PLAN), 'utf8')).slices[0].status, 'reviewed')
+  } finally { f.cleanup() }
+})
+
+// F-41-1 (Story 4.1): slice A changed 28 paths, more than one 16-path evidence set holds.
+test('same-Lead APPROVE accepts split evidence sets covering twenty changed paths and finalization accepts the receipt', () => {
+  const changedPaths = ['src/feature.txt', ...Array.from({ length: 19 }, (_, index) => `src/feature-${String(index).padStart(2, '0')}.txt`)].sort()
+  const f = fixture('HIGH', { changedPaths })
+  try {
+    const prepared = prepareVerification(f)
+    const pendingResult = verifySlice(f.root, { ...f.verifyRequest, operation: 'verify', preview: prepared.preview })
+    assert.equal(pendingResult.status, 'REVIEW_REQUIRED', JSON.stringify(pendingResult))
+    const evidence = makeSplitReviewEvidence(f, prepared.preview, 10)
+    assert.equal(evidence.evidenceSets.length, 2)
+    const review = change_evidence => ({
+      judgment: 'APPROVE', reviewer: 'same-lead', pending_fingerprint: pendingResult.pending.fingerprint,
+      scope_paths: changedPaths, scope_digest: scopeDigest(change_evidence), change_evidence,
+      answers: pendingResult.pending.review_questions.map(item => ({ id: item.id, answer: 'confirmed' })),
+      commands: [{ command: 'same-lead twenty-path review', exit_code: 0, tool: 'reviewer', environment: 'fixture' }]
+    })
+    const request = change_evidence => ({
+      ...f.verifyRequest, operation: 'record-review', preview: prepared.preview, pending: pendingResult.pending,
+      plan_template: verificationTemplate(f, true), review: review(change_evidence)
+    })
+    const reversed = { evidenceSets: [...evidence.evidenceSets].reverse() }
+    assert.equal(recordSliceReview(f.root, request(reversed)).reasons?.[0], 'CHANGE_EVIDENCE_SCOPE_MISMATCH')
+    assert.equal(recordSliceReview(f.root, request({ evidenceSets: [evidence.evidenceSets[0]] })).reasons?.[0], 'CHANGE_EVIDENCE_SETS_INVALID')
+    const duplicated = { evidenceSets: [evidence.evidenceSets[0], evidence.evidenceSets[0]] }
+    assert.equal(recordSliceReview(f.root, request(duplicated)).reasons?.[0], 'CHANGE_EVIDENCE_SETS_INVALID')
+    const result = recordSliceReview(f.root, request(evidence))
+    assert.equal(result.status, 'APPLIED', JSON.stringify(result))
+    const receipt = JSON.parse(readFileSync(path.join(f.root, REVIEW_RECEIPT), 'utf8'))
+    assert.deepEqual(receipt.evidence_refs.map(item => item.path), evidence.evidenceSets.flatMap(set => set.units.map(item => item.path)))
+    assert.equal(receipt.scope_digest, scopeDigest(evidence))
+    const plan = frontmatter(readFileSync(path.join(f.root, PLAN), 'utf8'))
+    const slice = plan.slices[0]
+    const freshness = reviewEvidenceFreshness({ ...receipt, freshness: 'FRESH_CANDIDATE' }, changedPaths, slice.review.reviewed_commit, slice.review.risk_context_digest)
+    assert.equal(freshness.reason, null, JSON.stringify(freshness))
   } finally { f.cleanup() }
 })
 

@@ -110,6 +110,13 @@ review `plan_template`:
 - `review.scope_digest`: `digestValue({ paths, source })` from
   `v4-finalization-contract.mjs`, where `paths` are the evidence set paths in
   order and `source` is `evidenceSet.sourceDigest`.
+- **More than 16 changed paths** (`SPLIT_REQUIRED`): split
+  `pending.changed_paths` in order into 2–8 consecutive chunks of at most 16
+  paths and more than 4 paths each (smaller chunks come back in the inline
+  `paths` form), run `prepare-change-evidence.mjs` once per chunk, and send
+  `change_evidence: { evidenceSets: [<each .changeEvidence.evidenceSet>] }`.
+  Then `scope_digest` is `digestValue({ paths, sources })` with `paths` all
+  chunk paths in order and `sources` each set's `sourceDigest`.
 
 A Lead uses `record-review` and may not claim `reviewer.type: human`. A HIGH
 slice, or a MEDIUM slice the Lead implemented, waits for the owner's
