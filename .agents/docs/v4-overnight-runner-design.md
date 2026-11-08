@@ -183,14 +183,39 @@ The "exact owner command" comes from `autopilot-status`'s reported decision.
 
 ```json
 { "schemaVersion": 1,
-  "stories": [ { "id": "2-4", "planDigest": "<Plan normative digest>",
-                 "autopilot": { "max_rework_per_slice": 2, "max_minutes_per_slice": 90 } } ] }
+  "stories": [ { "id": "2.4",
+                 "budgets": { "max_rework_per_slice": 2, "max_minutes_per_slice": 90 },
+                 "checks": ["npm run type-check"] } ] }
 ```
 
-The queue lives in the owner's gitignored `.agent-state/overnight/queue.json`.
-`prepare` refuses a Plan whose digest differs from `planDigest`. The registry
-already enforces independence through scope-overlap and resource refusals at
-claim.
+**Queue file.** It lives in the owner's gitignored
+`.agent-state/overnight/queue.json`.
+
+- `budgets` go verbatim into the printed `--authorize-autopilot` payload.
+- `checks` are extra Bash rules, passed to the children as `--allowedTools`.
+
+There is no separate Plan digest. The owner's own `--authorize-autopilot`
+already binds the Plan, and the registry enforces independence through
+scope-overlap and resource refusals at claim.
+
+**`prepare` steps (as built in M2).** For each queued Story, in order:
+
+1. Refuse a missing Plan, uncovered slice paths, or an existing Story worktree.
+2. Create the worktree with `orca worktree create --base-branch main --setup skip`.
+3. Claim the Story under one driver session.
+4. Run `start-story check`, then `start-story apply`.
+5. Run `npm ci` for `frontend/` or `tests/e2e/` when the slices touch them.
+6. Print the authorize command.
+
+Prepared Stories are **merged** into `.agent-state/overnight/state.json`. A
+Story prepared on an earlier night keeps its claim and is resumed. `run` drops
+a Story whose registry claim is gone (integrated or aborted) and reports it as
+`RELEASED`.
+
+**Child result.** The child's `OVERNIGHT_RESULT` line is untrusted. It is used
+only to *stop* a Story (for example `HUMAN_REVIEW_REQUIRED`, an in-step outcome
+the kernel does not persist), never to continue or approve. A repeated
+HEAD + `next_action` without progress stops the Story as `NO_PROGRESS`.
 
 ## 6. Expected throughput
 
@@ -251,6 +276,6 @@ Measuring where real runs stop is the input to the stage 2 decision.
 | M0 | (a) Owner revokes Story 2.2 autopilot; (b) concurrent backend-test smoke, then retire `backend-test-db` for linked worktrees if it passes | Owner; smoke evidence; `test:v4` |
 | M2 add | `prepare` recipe-coverage refusal (M0-1) | Test: uncovered slice path refuses the Story |
 | M1 | K7 `move-worker-contract.mjs` + `agy-executor.md` step 6; `overnight-settings.json`; deny-rule tests | `test:v4`; each deny blocks; AGY delivery and Story commands pass |
-| M2 | `v4-overnight.mjs prepare` / `run`: preflight, loop, heartbeat, baseline, report | `test:v4`; tests: STOP routing, deadline, every baseline violation stops the run, never calls owner operations |
+| M2 | `v4-overnight.mjs prepare` / `run`: preflight, loop, heartbeat, baseline, report | `test:v4`; tests: STOP routing, deadline, every baseline violation stops the run, never calls owner operations. **Built 2026-11-08**, tests fake every external command. The `prepare` happy path (Orca create, claim, start) and a real child run are first exercised in M3. |
 | M3 | Pilot: one night with 1–2 LOW / AGY-heavy Stories | Owner reads the report, runs the morning flow |
 | M4 | After about five runs, review the stop data and decide on stage 2 | Owner |
