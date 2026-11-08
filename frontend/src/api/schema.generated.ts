@@ -166,6 +166,57 @@ export interface components {
     }
     "ChallengeProblemDetails": components['schemas']["StateProblemDetails"] | components['schemas']["ChallengeConflictProblemDetails"]
     "JournalProblemDetails": components['schemas']["StateProblemDetails"] | components['schemas']["JournalConflictProblemDetails"]
+    "Notebook": {
+      "id": string
+      "name": string
+      "is_default": boolean
+      "row_version": number
+      "note_count": number
+      "created_at": string
+      "updated_at": string
+    }
+    "NotebookListResult": {
+      "notebooks": Array<components['schemas']["Notebook"]>
+    }
+    "NotebookMutationResult": {
+      "notebook": components['schemas']["Notebook"]
+      "account_revision": number
+      "data_epoch": number
+    }
+    "NotebookDeletionResult": {
+      "deleted_notebook_id": string
+      "account_revision": number
+      "data_epoch": number
+    }
+    "CreateNotebookRequest": {
+      "command_id": string
+      "data_epoch": number
+      "name": string
+    }
+    "RenameNotebookRequest": {
+      "command_id": string
+      "data_epoch": number
+      "base_version": number
+      "name": string
+    }
+    "DeleteNotebookRequest": {
+      "command_id": string
+      "data_epoch": number
+      "base_version": number
+    }
+    "NotebookConflictProblemDetails": {
+      "message": string
+      "code": "version_conflict"
+      "resource_id": string
+      "current_version": number
+      "current_snapshot": components['schemas']["Notebook"]
+    }
+    "NotebookRuleProblemDetails": {
+      "message": string
+      "code": "notebook_is_default" | "notebook_not_empty"
+    }
+    "NotebookRenameProblemDetails": components['schemas']["StateProblemDetails"] | components['schemas']["NotebookConflictProblemDetails"]
+    "NotebookDeleteProblemDetails": components['schemas']["StateProblemDetails"] | components['schemas']["NotebookConflictProblemDetails"] | components['schemas']["NotebookRuleProblemDetails"]
   }
 }
 
@@ -611,6 +662,194 @@ export interface operations {
       "409": {
         content: {
           "application/problem+json": components['schemas']["StateProblemDetails"]
+        }
+      }
+      "422": {
+        content: {
+          "application/json": components['schemas']["ValidationError"]
+        }
+      }
+      "423": {
+        content: {
+          "application/problem+json": components['schemas']["StateProblemDetails"]
+        }
+      }
+    }
+  }
+  "getNotebooks": {
+    path: "/api/v1/notebooks"
+    method: "GET"
+    parameters: Record<string, never>
+    responses: {
+      "200": {
+        content: {
+          "application/json": components['schemas']["NotebookListResult"]
+        }
+      }
+      "401": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "403": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+    }
+  }
+  "createNotebook": {
+    path: "/api/v1/notebooks"
+    method: "POST"
+    parameters: Record<string, never>
+    requestBody: {
+      required: true
+      content: {
+        "application/json": {
+      "command_id": string
+      "data_epoch": number
+      "name": string
+    }
+      }
+    }
+    responses: {
+      "201": {
+        content: {
+          "application/json": components['schemas']["NotebookMutationResult"]
+        }
+      }
+      "401": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "403": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "409": {
+        content: {
+          "application/problem+json": components['schemas']["StateProblemDetails"]
+        }
+      }
+      "422": {
+        content: {
+          "application/json": components['schemas']["ValidationError"]
+        }
+      }
+      "423": {
+        content: {
+          "application/problem+json": components['schemas']["StateProblemDetails"]
+        }
+      }
+    }
+  }
+  "renameNotebook": {
+    path: "/api/v1/notebooks/{id}"
+    method: "PATCH"
+    parameters: {
+      "path:id": {
+        name: "id"
+        in: "path"
+        required: true
+        schema: string
+      }
+    }
+    requestBody: {
+      required: true
+      content: {
+        "application/json": {
+      "command_id": string
+      "data_epoch": number
+      "base_version": number
+      "name": string
+    }
+      }
+    }
+    responses: {
+      "200": {
+        content: {
+          "application/json": components['schemas']["NotebookMutationResult"]
+        }
+      }
+      "401": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "403": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "404": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "409": {
+        content: {
+          "application/problem+json": components['schemas']["NotebookRenameProblemDetails"]
+        }
+      }
+      "422": {
+        content: {
+          "application/json": components['schemas']["ValidationError"]
+        }
+      }
+      "423": {
+        content: {
+          "application/problem+json": components['schemas']["StateProblemDetails"]
+        }
+      }
+    }
+  }
+  "deleteNotebook": {
+    path: "/api/v1/notebooks/{id}"
+    method: "DELETE"
+    parameters: {
+      "path:id": {
+        name: "id"
+        in: "path"
+        required: true
+        schema: string
+      }
+    }
+    requestBody: {
+      required: true
+      content: {
+        "application/json": {
+      "command_id": string
+      "data_epoch": number
+      "base_version": number
+    }
+      }
+    }
+    responses: {
+      "200": {
+        content: {
+          "application/json": components['schemas']["NotebookDeletionResult"]
+        }
+      }
+      "401": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "403": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "404": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "409": {
+        content: {
+          "application/problem+json": components['schemas']["NotebookDeleteProblemDetails"]
         }
       }
       "422": {

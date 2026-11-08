@@ -91,6 +91,55 @@ test('invalid password confirmation does not change owner admission', function (
         ->and(User::query()->count())->toBe(1);
 });
 
+test('provisioning creates exactly one default notebook named Ghi chú nhanh', function () {
+    $this->artisan('noteflow:provision-owner', ['email' => 'owner@example.test'])
+        ->expectsQuestion('Owner password', 'strong-password')
+        ->expectsQuestion('Confirm owner password', 'strong-password')
+        ->assertSuccessful();
+
+    $owner = User::query()->sole();
+    $notebook = DB::table('notebooks')->where('owner_id', $owner->id)->sole();
+
+    expect($notebook->name)->toBe('Ghi chú nhanh')
+        ->and((bool) $notebook->is_default)->toBeTrue()
+        ->and((int) $notebook->row_version)->toBe(1)
+        ->and((int) DB::table('account_states')->where('owner_id', $owner->id)->value('account_revision'))->toBe(0);
+});
+
+test('reprovisioning the same owner keeps one default notebook, even after a rename', function () {
+    foreach (['first-password', 'second-password'] as $index => $password) {
+        $this->artisan('noteflow:provision-owner', ['email' => 'owner@example.test'])
+            ->expectsQuestion('Owner password', $password)
+            ->expectsQuestion('Confirm owner password', $password)
+            ->assertSuccessful();
+
+        if ($index === 0) {
+            DB::table('notebooks')->update(['name' => 'Vở đã đổi tên']);
+        }
+    }
+
+    $owner = User::query()->sole();
+    $notebook = DB::table('notebooks')->where('owner_id', $owner->id)->sole();
+
+    expect((bool) $notebook->is_default)->toBeTrue()
+        ->and($notebook->name)->toBe('Vở đã đổi tên');
+});
+
+test('provisioning another owner gives each owner its own single default notebook', function () {
+    foreach (['owner-a@example.test', 'owner-b@example.test', 'owner-a@example.test'] as $email) {
+        $this->artisan('noteflow:provision-owner', ['email' => $email])
+            ->expectsQuestion('Owner password', 'strong-password')
+            ->expectsQuestion('Confirm owner password', 'strong-password')
+            ->assertSuccessful();
+    }
+
+    foreach (User::query()->get() as $user) {
+        expect(DB::table('notebooks')->where('owner_id', $user->id)->where('is_default', true)->count())->toBe(1)
+            ->and(DB::table('notebooks')->where('owner_id', $user->id)->count())->toBe(1);
+    }
+    expect(User::query()->count())->toBe(2);
+});
+
 test('reprovisioning A to B to A preserves scoped datasets and advances the owner epoch', function () {
     $insertChallenge = function (User $owner, string $name): string {
         $id = (string) Str::uuid();

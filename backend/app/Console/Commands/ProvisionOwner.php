@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
+use App\Modules\Notes\Application\DefaultNotebookProvisioner;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -13,6 +14,11 @@ final class ProvisionOwner extends Command
     protected $signature = 'noteflow:provision-owner {email} {--name=Owner}';
 
     protected $description = 'Provision the single NoteFlow owner account';
+
+    public function __construct(private readonly DefaultNotebookProvisioner $defaultNotebooks)
+    {
+        parent::__construct();
+    }
 
     public function handle(): int
     {
@@ -64,6 +70,8 @@ final class ProvisionOwner extends Command
                         'data_epoch' => DB::raw('data_epoch + 1'),
                     ]);
             }
+
+            $this->defaultNotebooks->ensure($owner->id);
 
             $boundaryOwnerIds = $previousOwnerIds->push($owner->id)->unique();
             DB::table('sessions')->whereIn('user_id', $boundaryOwnerIds)->delete();
