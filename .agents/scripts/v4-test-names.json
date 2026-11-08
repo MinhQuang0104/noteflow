@@ -127,6 +127,7 @@
   "a CRLF or mixed-EOL plan template commits as LF under core.autocrlf",
   "a CRLF working Epic under core.autocrlf still matches the committed LF section digest",
   "a held registry mutation lock is reported, never deleted by a Lead",
+  "a multi-recipe aggregate canonical with matched paths is applicable (Story 2.2 F-22-2)",
   "a pre-commit hook that adds scope is detected after commit instead of being trusted",
   "a reviewed slice path changed again after its review stays unexplained drift",
   "a verified slice is final-ready without review only on receipt-recorded LOW NO_REVIEW",

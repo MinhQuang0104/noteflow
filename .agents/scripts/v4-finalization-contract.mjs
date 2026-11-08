@@ -153,7 +153,13 @@ export function inferCanonicalApplicability(canonical, expectedPaths) {
   const matched = canonicalPaths(canonical?.matchedPaths)
   const unmatched = canonicalPaths(canonical?.unmatchedPaths)
   const dependencyOnly = canonicalPaths(canonical?.dependencyOnlyPaths)
-  if (!canonical || typeof canonical.featureId !== 'string' || !canonical.featureId || !exactList(changed, paths)) return null
+  // A schema-2 aggregate of several recipes has featureId null; it is applicable when
+  // every recipe is named and at least one changed path matched (Story 2.2 F-22-2).
+  const aggregate = canonical?.schema_version === 2 && Array.isArray(canonical.recipes) && canonical.recipes.length > 0 &&
+    canonical.recipes.every(recipe => typeof recipe?.featureId === 'string' && recipe.featureId)
+  const named = typeof canonical?.featureId === 'string' && canonical.featureId
+  if (!canonical || !(named || aggregate) || !exactList(changed, paths)) return null
+  if (!named && !matched.length) return null
   if ([...matched, ...unmatched, ...dependencyOnly].some(item => !paths.includes(item))) return null
   if (!exactList([...new Set([...matched, ...unmatched])].sort(), paths)) return null
   if (dependencyOnly.some(item => !unmatched.includes(item))) return null

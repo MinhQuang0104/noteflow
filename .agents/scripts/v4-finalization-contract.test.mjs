@@ -84,3 +84,19 @@ test('a verified slice is final-ready without review only on receipt-recorded LO
     ['malformed escalation', [plan('MEDIUM'), lowSlice, { escalation: { decision: 'SKIP', risk: 'LOW' } }], 'NO_REVIEW_EVIDENCE_INVALID']
   ]) assert.deepEqual(noReviewFinalReady(...args), { ready: false, reason }, label)
 })
+
+test('a multi-recipe aggregate canonical with matched paths is applicable (Story 2.2 F-22-2)', () => {
+  const paths = ['backend/a.php', 'frontend/b.ts', 'frontend/c.ts']
+  const aggregate = {
+    schema_version: 2, featureId: null, changedPaths: paths,
+    matchedPaths: ['frontend/b.ts', 'frontend/c.ts'], unmatchedPaths: ['backend/a.php'],
+    recipes: [{ featureId: 'challenge-list' }, { featureId: 'today-view' }],
+  }
+  assert.equal(inferCanonicalApplicability(aggregate, paths), 'APPLICABLE')
+  assert.equal(inferCanonicalApplicability({ ...aggregate, matchedPaths: [], unmatchedPaths: paths }, paths), null)
+  assert.equal(inferCanonicalApplicability({ ...aggregate, recipes: [] }, paths), null)
+  assert.equal(inferCanonicalApplicability({ ...aggregate, recipes: [{ featureId: null }] }, paths), null)
+  assert.equal(inferCanonicalApplicability({ ...aggregate, schema_version: 1 }, paths), null)
+  assert.equal(inferCanonicalApplicability({ ...aggregate, changedPaths: paths.slice(1) }, paths), null)
+  assert.equal(inferCanonicalApplicability({ ...aggregate, unmatchedPaths: ['backend/a.php', 'outside.ts'] }, paths), null)
+})
