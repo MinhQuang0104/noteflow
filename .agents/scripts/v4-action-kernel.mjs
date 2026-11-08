@@ -1188,6 +1188,35 @@ export function priorAttemptChangedPaths(root, slice) {
   return paths.size ? changePaths([...paths], 'PRIOR_CHANGED_PATHS') : []
 }
 
+const EXPLAINING_SLICE_STATUSES = new Set(['reviewed', 'verified'])
+
+// Anchors that an earlier slice of the same Story changed and that slice's review
+// (or LOW canonical pass) already covered. A path counts only while its blob at the
+// current checkpoint still equals the reviewed checkpoint's blob, so any later,
+// unreviewed change to it stays unexplained drift (Story 2.2 F-22-1).
+export function reviewedSliceChangedPaths(root, plan, slice, checkpointCommit) {
+  const paths = new Set()
+  const blob = (commit, relative) => {
+    const result = git(root, ['rev-parse', '--verify', '--quiet', `${commit}:${relative}`])
+    return result.status === 0 ? result.stdout.trim() : null
+  }
+  for (const earlier of plan?.slices ?? []) {
+    if (!earlier || earlier.id === slice?.id || !EXPLAINING_SLICE_STATUSES.has(earlier.status)) continue
+    if (!/^[0-9a-f]{40}$/.test(earlier.baseline_commit ?? '') || !/^[0-9a-f]{40}$/.test(earlier.checkpoint_commit ?? '')) throw new Error('REVIEWED_SLICE_HISTORY_INVALID')
+    const listed = gitOutput(root, ['diff', '--name-only', '--no-renames', earlier.baseline_commit, earlier.checkpoint_commit, '--'], 'REVIEWED_SLICE_DIFF_UNAVAILABLE')
+    for (const item of listed.split(/\r?\n/).filter(Boolean)) {
+      const reviewed = blob(earlier.checkpoint_commit, item)
+      if (reviewed !== null && reviewed === blob(checkpointCommit, item)) paths.add(item)
+    }
+  }
+  return paths.size ? changePaths([...paths], 'PRIOR_CHANGED_PATHS') : []
+}
+
+export function priorChangedPathsForVerification(root, plan, slice, checkpointCommit) {
+  const merged = new Set([...priorAttemptChangedPaths(root, slice), ...reviewedSliceChangedPaths(root, plan, slice, checkpointCommit)])
+  return merged.size ? changePaths([...merged], 'PRIOR_CHANGED_PATHS') : []
+}
+
 function buildVerificationPreview(root, request) {
   assertVerificationRequestShape(request, 'prepare')
   const pointer = assertPointerIdle(root)
@@ -1246,7 +1275,7 @@ function buildVerificationPreview(root, request) {
     manifest,
     changed_paths: changed,
     changed_paths_sha256: manifest.changedPathsSha256,
-    prior_changed_paths: priorAttemptChangedPaths(root, slice),
+    prior_changed_paths: priorChangedPathsForVerification(root, plan, slice, manifest.checkpointCommit),
     baseline_commit: manifest.baselineCommit,
     checkpoint_commit: manifest.checkpointCommit,
     subject_digest: slice.subject_digest,

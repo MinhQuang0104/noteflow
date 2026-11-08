@@ -93,8 +93,10 @@ function environmentUnavailable(output) {
   return /(?:not recognized as an internal or external command|command not found|ERR_MODULE_NOT_FOUND|Cannot find module|NPM_CLI_UNAVAILABLE)/i.test(output)
 }
 
-// priorChangedPaths are anchors an earlier attempt of the same slice changed;
-// a rework diff omits them, but their anchor drift is still expected.
+// priorChangedPaths are anchors an earlier attempt of the same slice changed, or
+// an earlier reviewed slice of the same Story changed and nothing changed since
+// (see reviewedSliceChangedPaths in the kernel); the current diff omits them, but
+// their anchor drift is still expected.
 export function classifyMapResult(exitCode, output, changedPaths, anchors, priorChangedPaths = []) {
   const changed = new Set([...changedPaths, ...priorChangedPaths])
   const mapped = new Set(anchors)
