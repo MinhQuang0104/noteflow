@@ -8,8 +8,8 @@ upstream_epic:
   path: docs/product/epics.md
   section_digest: sha256:f9eed2011ff42b128a8c20089e6c0c002b696294c5d052f9fe534833398bdb13
 sprint_key: 2-2-xem-challenge-và-done-nhanh-từ-hôm-nay
-lifecycle_snapshot: in-progress
-execution_status: in-progress
+lifecycle_snapshot: review
+execution_status: complete
 planning_approval:
   decision: APPROVED
   scope: planning
@@ -168,8 +168,17 @@ slices:
         independent: false
 blockers: []
 unresolved_questions: []
+finalization:
+  receipt_ref: _bmad-output/implementation-artifacts/receipts/story-2-2/finalization.json
+  receipt_digest: sha256:d945f1c862ee88e6fcdf4c3dba9b0177d24a3f1321da9db75c483515a4cd2aa7
+  done_gate_disposition: SATISFIED_WITH_DISCLOSURES
+  scope_paths_digest: sha256:adff8920bbd34229a7a72efa0a1a080c6e1a10aaaf3a8316624a6aed323a72d4
+  implementation_commit_set_digest: sha256:67c78549c256f4d5bbbd2415ee9df80ca2d2f060f7945f0d2d3d3cf727fba22d
+  final_scoped_tree_digest: sha256:adf937ff9f640a977a46552a0ad7b62ad76b45e9b00c83478c3dca62fe729165
+  prepared_from_head: a03cb63c5fc7764f604c9537004cccac8d9a00a2
+human_approval: null
 next_action:
-  kind: finalize_story
+  kind: complete_story
   target: story
 autopilot:
   schema_version: 1

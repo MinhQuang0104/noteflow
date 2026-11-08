@@ -1,7 +1,7 @@
 ---
 story_id: "2.2"
 title: Xem challenge và Done nhanh từ Hôm nay
-status: in-progress
+status: review
 ---
 
 # Story 2.2: Xem challenge và Done nhanh từ Hôm nay
@@ -63,3 +63,63 @@ As a chủ tài khoản, I want xem tiến độ và Done tại Hôm nay, So tha
 - architecture: docs/architecture/architecture-noteflow-2026-09-12/ARCHITECTURE-SPINE.md#ad-15--phptypescript-api-contract-ownership-adopted
 - ux: docs/ux/ux-spec.md#52-challenge-và-hôm-nay
 <!-- v4:references:end -->
+
+## Dev Agent Record
+
+<!-- v4:completion:start -->
+### Dev Agent Record
+
+- Finalization receipt: _bmad-output/implementation-artifacts/receipts/story-2-2/finalization.json
+- Done Gate disposition: SATISFIED_WITH_DISCLOSURES
+
+### AC Evidence / Results
+
+- AC-1: evidence=COVERED; mode=fallback; fallback: receipt-level PASS evidence
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-2-2/A-verification.json (sha256:1d8649aea27bbbb2ec60a5cc7ad366f6079e4b39d76c2814a8ddc6af32b33f69); _bmad-output/implementation-artifacts/receipts/story-2-2/B-verification.json (sha256:6ae0aec862a4d25dfe3a1fd7f37cd8159904f422d9527c20836634f0ce2d30ce); _bmad-output/implementation-artifacts/receipts/story-2-2/C-verification.json (sha256:d9733f98b7f185e477c40737468f1a67e40bda624d0ad14351691968a57a0f58)
+  Canonical disposition: NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required; APPLICABLE/INCOMPLETE; complete=false; disclosure=required; APPLICABLE/PASS; complete=true; disclosure=not-required
+- AC-2: evidence=COVERED; mode=fallback; fallback: receipt-level PASS evidence
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-2-2/A-verification.json (sha256:1d8649aea27bbbb2ec60a5cc7ad366f6079e4b39d76c2814a8ddc6af32b33f69); _bmad-output/implementation-artifacts/receipts/story-2-2/B-verification.json (sha256:6ae0aec862a4d25dfe3a1fd7f37cd8159904f422d9527c20836634f0ce2d30ce); _bmad-output/implementation-artifacts/receipts/story-2-2/C-verification.json (sha256:d9733f98b7f185e477c40737468f1a67e40bda624d0ad14351691968a57a0f58)
+  Canonical disposition: NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required; APPLICABLE/INCOMPLETE; complete=false; disclosure=required; APPLICABLE/PASS; complete=true; disclosure=not-required
+- AC-3: evidence=COVERED; mode=fallback; fallback: receipt-level PASS evidence
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-2-2/A-verification.json (sha256:1d8649aea27bbbb2ec60a5cc7ad366f6079e4b39d76c2814a8ddc6af32b33f69); _bmad-output/implementation-artifacts/receipts/story-2-2/B-verification.json (sha256:6ae0aec862a4d25dfe3a1fd7f37cd8159904f422d9527c20836634f0ce2d30ce); _bmad-output/implementation-artifacts/receipts/story-2-2/C-verification.json (sha256:d9733f98b7f185e477c40737468f1a67e40bda624d0ad14351691968a57a0f58)
+  Canonical disposition: NOT_APPLICABLE/INCOMPLETE; complete=false; disclosure=required; APPLICABLE/INCOMPLETE; complete=false; disclosure=required; APPLICABLE/PASS; complete=true; disclosure=not-required
+- AC-4: evidence=COVERED; mode=fallback; fallback: receipt-level PASS evidence
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-2-2/B-verification.json (sha256:6ae0aec862a4d25dfe3a1fd7f37cd8159904f422d9527c20836634f0ce2d30ce); _bmad-output/implementation-artifacts/receipts/story-2-2/C-verification.json (sha256:d9733f98b7f185e477c40737468f1a67e40bda624d0ad14351691968a57a0f58)
+  Canonical disposition: APPLICABLE/INCOMPLETE; complete=false; disclosure=required; APPLICABLE/PASS; complete=true; disclosure=not-required
+
+### Completion Notes
+
+- Evidenced behavior: **Given** challenge active **When** mở Hôm nay **Then** shared current-week projection trả số ngày Done và target hiện hành **And** UI hiển thị tên, Done/target tuần và trạng thái hôm nay mà không tự tính lại tiến độ.
+- Evidenced behavior: **Given** hôm nay chưa Done **When** bấm Done **Then** ghi đúng ngày, không yêu cầu journal và hiển thị trạng thái save chính xác.
+- Evidenced behavior: **Given** ngày đã Done **When** gửi Done lặp **Then** chỉ có một completion và tiến độ không tăng thêm.
+- Evidenced behavior: **Given** request lỗi **When** server chưa xác nhận **Then** UI không báo Done đã lưu và cho retry.
+
+### File List
+
+- backend/app/Http/Controllers/ChallengeCompletionController.php
+- backend/app/Modules/Challenges/Application/Commands/MarkCompletionCommand.php
+- backend/app/Modules/Challenges/Application/UseCases/GetChallengeListQuery.php
+- backend/app/Modules/Challenges/Application/UseCases/GetCurrentWeekProgressQuery.php
+- backend/app/Modules/Challenges/Application/UseCases/MarkCompletionUseCase.php
+- backend/app/Modules/Challenges/Domain/Exceptions/InvalidCompletionDayException.php
+- backend/routes/api.php
+- backend/tests/Contract/ChallengeContractTest.php
+- backend/tests/Feature/ChallengeCompletionApiTest.php
+- backend/tests/Feature/ChallengeCompletionConcurrencyTest.php
+- backend/tests/Feature/ChallengeCompletionTest.php
+- backend/tests/Feature/ChallengeWeekProgressTest.php
+- contracts/openapi.yaml
+- frontend/src/__tests__/App.spec.ts
+- frontend/src/api/__tests__/challenges.spec.ts
+- frontend/src/api/challenges.ts
+- frontend/src/api/schema.generated.ts
+- frontend/src/views/TodayView.vue
+- frontend/src/views/__tests__/account-time.spec.ts
+- frontend/src/views/__tests__/challenges.spec.ts
+- frontend/src/views/__tests__/journal.spec.ts
+- frontend/src/views/__tests__/today.spec.ts
+
+### Change Log
+
+- Finalization recorded for Human Gate: in-progress -> review; next action complete_story.
+<!-- v4:completion:end -->

@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "kind": "story_finalization",
+  "story_id": "2.2",
+  "story_normative_digest": "sha256:bf1c8726f3361acec0baff9ea7031c11a3c4f0e8fa28976ccd91a366afa1e082",
+  "upstream_epic_digest": "sha256:f9eed2011ff42b128a8c20089e6c0c002b696294c5d052f9fe534833398bdb13",
+  "prepared_from_head": "a03cb63c5fc7764f604c9537004cccac8d9a00a2",
+  "slice_set_digest": "sha256:813af289c5164b1c64c0a0c1b39a13ab8074d9a3fe5435f4905ddf36b6342889",
+  "receipt_set_digest": "sha256:5ea510969aeed38be3116a51c9a2516fe352f9fab1e6b746141b5750ded8ed98",
+  "ac_coverage_digest": "sha256:6b7a12ababc153843cb8b6bfbe7395c177045aa0774bf57b5b47a5cfdf52a635",
+  "canonical_disclosures_digest": "sha256:150d3ca0d59a2a01ab116546dd2ab410c111a302be9e6571434f5d73ffa5aa01",
+  "scope_path_count": 22,
+  "scope_paths_digest": "sha256:adff8920bbd34229a7a72efa0a1a080c6e1a10aaaf3a8316624a6aed323a72d4",
+  "implementation_commit_set_digest": "sha256:67c78549c256f4d5bbbd2415ee9df80ca2d2f060f7945f0d2d3d3cf727fba22d",
+  "final_scoped_tree_digest": "sha256:adf937ff9f640a977a46552a0ad7b62ad76b45e9b00c83478c3dca62fe729165",
+  "paths_digest": "sha256:adff8920bbd34229a7a72efa0a1a080c6e1a10aaaf3a8316624a6aed323a72d4",
+  "commit_set_digest": "sha256:67c78549c256f4d5bbbd2415ee9df80ca2d2f060f7945f0d2d3d3cf727fba22d",
+  "scoped_tree_digest": "sha256:adf937ff9f640a977a46552a0ad7b62ad76b45e9b00c83478c3dca62fe729165",
+  "done_gate_disposition": "SATISFIED_WITH_DISCLOSURES",
+  "lifecycle_from": "in-progress",
+  "lifecycle_target": "review",
+  "slice_summaries": [
+    {
+      "id": "A",
+      "status": "reviewed",
+      "checkpoint": "389aad3f2dd59c91bd91482d51787eac880ebfbd",
+      "progression_eligible": true,
+      "review_required": false,
+      "review_verdict": "APPROVE",
+      "review_freshness": "FRESH_REUSED"
+    },
+    {
+      "id": "B",
+      "status": "reviewed",
+      "checkpoint": "58888d0001f28f324aaa8de05cf9202271f86aab",
+      "progression_eligible": true,
+      "review_required": false,
+      "review_verdict": "APPROVE",
+      "review_freshness": "FRESH_REUSED"
+    },
+    {
+      "id": "C",
+      "status": "reviewed",
+      "checkpoint": "0364a9eeb6791eba385cadb589f0132204aa1899",
+      "progression_eligible": true,
+      "review_required": false,
+      "review_verdict": "APPROVE",
+      "review_freshness": "FRESH_REUSED"
+    }
+  ]
+}
