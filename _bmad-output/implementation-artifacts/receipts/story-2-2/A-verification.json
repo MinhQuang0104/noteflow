@@ -1,0 +1,482 @@
+{
+  "schema_version": 1,
+  "story_id": "2.2",
+  "slice_id": "A",
+  "kind": "verification",
+  "checkpoint_commit": "389aad3f2dd59c91bd91482d51787eac880ebfbd",
+  "baseline_commit": "0d6cefca91934bf383b520185afd5d0c54cbddc1",
+  "subject_digest": "sha256:f40d69357d59b6edcf0712231d1e29afbdfe542db6281c068ab3e65a1a835ab5",
+  "created_from_head": "389aad3f2dd59c91bd91482d51787eac880ebfbd",
+  "changed_paths_sha256": "sha256:9780207777b3746d559d7791dee0d3c97d2fbb022a5478608187c8c1d28fc766",
+  "commands": [
+    {
+      "command": "check:backend-suite",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-2-2 linked worktree\",\"database\":\"PostgreSQL 17\",\"os\":\"Windows 11\",\"php\":\"8.4\",\"runtime\":\"Docker Compose test profile noteflow-test-421c626b4776\"}"
+    },
+    {
+      "command": "check:pint",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-2-2 linked worktree\",\"database\":\"PostgreSQL 17\",\"os\":\"Windows 11\",\"php\":\"8.4\",\"runtime\":\"Docker Compose test profile noteflow-test-421c626b4776\"}"
+    },
+    {
+      "command": "check:phpstan",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-2-2 linked worktree\",\"database\":\"PostgreSQL 17\",\"os\":\"Windows 11\",\"php\":\"8.4\",\"runtime\":\"Docker Compose test profile noteflow-test-421c626b4776\"}"
+    }
+  ],
+  "canonical": {
+    "featureId": null,
+    "changedPaths": [
+      "backend/app/Modules/Challenges/Application/Commands/MarkCompletionCommand.php",
+      "backend/app/Modules/Challenges/Application/UseCases/GetCurrentWeekProgressQuery.php",
+      "backend/app/Modules/Challenges/Application/UseCases/MarkCompletionUseCase.php",
+      "backend/app/Modules/Challenges/Domain/Exceptions/InvalidCompletionDayException.php",
+      "backend/tests/Feature/ChallengeCompletionConcurrencyTest.php",
+      "backend/tests/Feature/ChallengeCompletionTest.php",
+      "backend/tests/Feature/ChallengeWeekProgressTest.php"
+    ],
+    "matchedPaths": [],
+    "coveredPaths": [],
+    "unmatchedPaths": [
+      "backend/app/Modules/Challenges/Application/Commands/MarkCompletionCommand.php",
+      "backend/app/Modules/Challenges/Application/UseCases/GetCurrentWeekProgressQuery.php",
+      "backend/app/Modules/Challenges/Application/UseCases/MarkCompletionUseCase.php",
+      "backend/app/Modules/Challenges/Domain/Exceptions/InvalidCompletionDayException.php",
+      "backend/tests/Feature/ChallengeCompletionConcurrencyTest.php",
+      "backend/tests/Feature/ChallengeCompletionTest.php",
+      "backend/tests/Feature/ChallengeWeekProgressTest.php"
+    ],
+    "applicability": "NOT_APPLICABLE",
+    "status": "INCOMPLETE",
+    "complete": false,
+    "checks": [],
+    "escalationReasons": [
+      "NO_APPLICABLE_RECIPE"
+    ]
+  },
+  "focused_checks": [
+    {
+      "schema_version": 1,
+      "check_id": "backend-suite",
+      "classification": "behavioral",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 18522,
+      "command_digest": "sha256:ad4493a2421796b73afd38d872fea8070f65d8dc3d33b37515eca192efad63fa",
+      "output_digest": "sha256:f81fd01bd6f0e88c58b9d065bd642db40cfe20bbf7a6726841b7f650fc05e0bf",
+      "diagnostic_excerpt": "INFO  Nothing to migrate.  \n\n\n  \u001b[30;42;1m PASS \u001b[39;49;22m\u001b[39m Tests\\Unit\\AccountTimeContextTest\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90maccount time uses Ho Chi Minh midnight and Monday week boundaries w\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.01s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90maccount time uses Ho Chi Minh midnight and Monday week boundaries with dataset \"first second of Monday in the account timezone\"\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90ma use case captures the authoritative clock exactly once\u001b[39m\u001b[90m            \u001b[39m \u001b[90m0.02s\u001b[39m  \n\n  \u001b[30;42;1m PASS \u001b[39;49;22m\u001b[39m Tests\\Feature\\AccountContextTest\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mthe account context endpoint is private and never cacheable for gue\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.46s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mthe owner receives one server-authoritative account date and Monday\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.11s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90ma non owner cannot read account time context\u001b[39m\u001b[90m                        \u001b[39m \u001b[90m0.07s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90ma missing account state fails closed instead of falling back to run\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.08s\u001b[39m  \n\n  \u001b[30;42;1m PASS \u001b[39;49;22m\u001b[39m Tests\\Feature\\ChallengeApiTest\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mguest cannot access challenge endpoints\u001b[39m\u001b[90m                             \u001b[39m \u001b[90m0.09s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mnon-owner cannot access challenge endpoints\u001b[39m\u001b[90m                         \u001b[39m \u001b[90m0.09s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mAC1 — create valid challenge with name, optional description, targe\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.11s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mAC2 — reject invalid target days and attach error to target_days fi\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.08s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mchallenge text fields reject NUL bytes before writing\u001b[39m\u001b[90m               \u001b[39m \u001b[90m0.10s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mAC3 — update metadata modifies name/description without c",
+      "subject": {
+        "commit": "389aad3f2dd59c91bd91482d51787eac880ebfbd"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-2-2 linked worktree",
+        "database": "PostgreSQL 17",
+        "os": "Windows 11",
+        "php": "8.4",
+        "runtime": "Docker Compose test profile noteflow-test-421c626b4776"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "backend/tests/Feature/ChallengeCompletionTest.php",
+          "backend/tests/Feature/ChallengeCompletionConcurrencyTest.php",
+          "backend/tests/Feature/ChallengeWeekProgressTest.php"
+        ],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-2-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:4fd3a41a912df3e6a5da9d0cb710c17fc7392373f64c7244cbaa1d5047044c78"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T05:16:09.949Z",
+      "observation": {
+        "status": "CONFLICT",
+        "event_id": "hook-check_finished-cd7c335a14b9a1a1a3ceecdbee7fad2f9e6b162179dfb629",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-2-2\\.agent-state\\v4-observations\\events\\hook-check_finished-cd7c335a14b9a1a1a3ceecdbee7fad2f9e6b162179dfb629.json",
+        "coverage": "UNKNOWN",
+        "reason": "EVENT_ID_PAYLOAD_CONFLICT"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "backend/app/Modules/Challenges/Application/Commands/MarkCompletionCommand.php",
+        "backend/app/Modules/Challenges/Application/UseCases/GetCurrentWeekProgressQuery.php",
+        "backend/app/Modules/Challenges/Application/UseCases/MarkCompletionUseCase.php",
+        "backend/app/Modules/Challenges/Domain/Exceptions/InvalidCompletionDayException.php",
+        "backend/tests/Feature/ChallengeCompletionConcurrencyTest.php",
+        "backend/tests/Feature/ChallengeCompletionTest.php",
+        "backend/tests/Feature/ChallengeWeekProgressTest.php"
+      ],
+      "changed_paths_sha256": "sha256:9780207777b3746d559d7791dee0d3c97d2fbb022a5478608187c8c1d28fc766",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "pint",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 1235,
+      "command_digest": "sha256:aa0a516c88c2ce1afdeb833197155fa34ff92bfc7741b1668c5d9e50fc8b9c08",
+      "output_digest": "sha256:292095d55c1fb690b115be824022206d8011203bec819841aa7c392fd03478c7",
+      "diagnostic_excerpt": "............................................................................\n  ..............\n\n  ──────────────────────────────────────────────────────────────────── Laravel  \n    PASS   .......................................................... 90 files",
+      "subject": {
+        "commit": "389aad3f2dd59c91bd91482d51787eac880ebfbd"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-2-2 linked worktree",
+        "database": "PostgreSQL 17",
+        "os": "Windows 11",
+        "php": "8.4",
+        "runtime": "Docker Compose test profile noteflow-test-421c626b4776"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-2-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:06e228be3f7d19b98d7f697412fa0937c29065172392daadb1975d7e746326fb"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T05:16:28.775Z",
+      "observation": {
+        "status": "CONFLICT",
+        "event_id": "hook-check_finished-bf2ea1e8bdd088a39f1fad8a17d0be42ae670bc68582e219",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-2-2\\.agent-state\\v4-observations\\events\\hook-check_finished-bf2ea1e8bdd088a39f1fad8a17d0be42ae670bc68582e219.json",
+        "coverage": "UNKNOWN",
+        "reason": "EVENT_ID_PAYLOAD_CONFLICT"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "backend/app/Modules/Challenges/Application/Commands/MarkCompletionCommand.php",
+        "backend/app/Modules/Challenges/Application/UseCases/GetCurrentWeekProgressQuery.php",
+        "backend/app/Modules/Challenges/Application/UseCases/MarkCompletionUseCase.php",
+        "backend/app/Modules/Challenges/Domain/Exceptions/InvalidCompletionDayException.php",
+        "backend/tests/Feature/ChallengeCompletionConcurrencyTest.php",
+        "backend/tests/Feature/ChallengeCompletionTest.php",
+        "backend/tests/Feature/ChallengeWeekProgressTest.php"
+      ],
+      "changed_paths_sha256": "sha256:9780207777b3746d559d7791dee0d3c97d2fbb022a5478608187c8c1d28fc766",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "phpstan",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 6157,
+      "command_digest": "sha256:a00b8389e071f677250a0400a963e2a595d9b8c8cb989c59788b3d56bb5e9f4d",
+      "output_digest": "sha256:7d8257ed079d9902ee6c3033280be4795a05dec551bbfbf4bf7f61d6c204c0be",
+      "diagnostic_excerpt": "[OK] No errors                                                                 \n\n\nNote: Using configuration file /workspace/backend/phpstan.neon.\n  0/41 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%\u001b[1G\u001b[2K 14/41 [▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░]  34%\u001b[1G\u001b[2K 28/41 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░]  68%\u001b[1G\u001b[2K 41/41 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%",
+      "subject": {
+        "commit": "389aad3f2dd59c91bd91482d51787eac880ebfbd"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-2-2 linked worktree",
+        "database": "PostgreSQL 17",
+        "os": "Windows 11",
+        "php": "8.4",
+        "runtime": "Docker Compose test profile noteflow-test-421c626b4776"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-2-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:908d45df67eb67a55b9f5323cc03f209ec795898705e942ced399ef02a79efef"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T05:16:30.303Z",
+      "observation": {
+        "status": "CONFLICT",
+        "event_id": "hook-check_finished-880714f8a32fe18a3e1bc016ecbbfb4cff68d18ee68bc5d8",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-2-2\\.agent-state\\v4-observations\\events\\hook-check_finished-880714f8a32fe18a3e1bc016ecbbfb4cff68d18ee68bc5d8.json",
+        "coverage": "UNKNOWN",
+        "reason": "EVENT_ID_PAYLOAD_CONFLICT"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "backend/app/Modules/Challenges/Application/Commands/MarkCompletionCommand.php",
+        "backend/app/Modules/Challenges/Application/UseCases/GetCurrentWeekProgressQuery.php",
+        "backend/app/Modules/Challenges/Application/UseCases/MarkCompletionUseCase.php",
+        "backend/app/Modules/Challenges/Domain/Exceptions/InvalidCompletionDayException.php",
+        "backend/tests/Feature/ChallengeCompletionConcurrencyTest.php",
+        "backend/tests/Feature/ChallengeCompletionTest.php",
+        "backend/tests/Feature/ChallengeWeekProgressTest.php"
+      ],
+      "changed_paths_sha256": "sha256:9780207777b3746d559d7791dee0d3c97d2fbb022a5478608187c8c1d28fc766",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    }
+  ],
+  "raw_focused_checks": [
+    {
+      "schema_version": 1,
+      "check_id": "backend-suite",
+      "classification": "behavioral",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 18522,
+      "command_digest": "sha256:ad4493a2421796b73afd38d872fea8070f65d8dc3d33b37515eca192efad63fa",
+      "output_digest": "sha256:f81fd01bd6f0e88c58b9d065bd642db40cfe20bbf7a6726841b7f650fc05e0bf",
+      "diagnostic_excerpt": "INFO  Nothing to migrate.  \n\n\n  \u001b[30;42;1m PASS \u001b[39;49;22m\u001b[39m Tests\\Unit\\AccountTimeContextTest\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90maccount time uses Ho Chi Minh midnight and Monday week boundaries w\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.01s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90maccount time uses Ho Chi Minh midnight and Monday week boundaries with dataset \"first second of Monday in the account timezone\"\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90ma use case captures the authoritative clock exactly once\u001b[39m\u001b[90m            \u001b[39m \u001b[90m0.02s\u001b[39m  \n\n  \u001b[30;42;1m PASS \u001b[39;49;22m\u001b[39m Tests\\Feature\\AccountContextTest\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mthe account context endpoint is private and never cacheable for gue\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.46s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mthe owner receives one server-authoritative account date and Monday\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.11s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90ma non owner cannot read account time context\u001b[39m\u001b[90m                        \u001b[39m \u001b[90m0.07s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90ma missing account state fails closed instead of falling back to run\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.08s\u001b[39m  \n\n  \u001b[30;42;1m PASS \u001b[39;49;22m\u001b[39m Tests\\Feature\\ChallengeApiTest\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mguest cannot access challenge endpoints\u001b[39m\u001b[90m                             \u001b[39m \u001b[90m0.09s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mnon-owner cannot access challenge endpoints\u001b[39m\u001b[90m                         \u001b[39m \u001b[90m0.09s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mAC1 — create valid challenge with name, optional description, targe\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.11s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mAC2 — reject invalid target days and attach error to target_days fi\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.08s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mchallenge text fields reject NUL bytes before writing\u001b[39m\u001b[90m               \u001b[39m \u001b[90m0.10s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mAC3 — update metadata modifies name/description without c",
+      "subject": {
+        "kind": "commit",
+        "value": "389aad3f2dd59c91bd91482d51787eac880ebfbd"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-2-2 linked worktree",
+        "database": "PostgreSQL 17",
+        "os": "Windows 11",
+        "php": "8.4",
+        "runtime": "Docker Compose test profile noteflow-test-421c626b4776"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "backend/tests/Feature/ChallengeCompletionTest.php",
+          "backend/tests/Feature/ChallengeCompletionConcurrencyTest.php",
+          "backend/tests/Feature/ChallengeWeekProgressTest.php"
+        ],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-2-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:4fd3a41a912df3e6a5da9d0cb710c17fc7392373f64c7244cbaa1d5047044c78"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T05:16:09.949Z",
+      "observation": {
+        "status": "CONFLICT",
+        "event_id": "hook-check_finished-cd7c335a14b9a1a1a3ceecdbee7fad2f9e6b162179dfb629",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-2-2\\.agent-state\\v4-observations\\events\\hook-check_finished-cd7c335a14b9a1a1a3ceecdbee7fad2f9e6b162179dfb629.json",
+        "coverage": "UNKNOWN",
+        "reason": "EVENT_ID_PAYLOAD_CONFLICT"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "pint",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 1235,
+      "command_digest": "sha256:aa0a516c88c2ce1afdeb833197155fa34ff92bfc7741b1668c5d9e50fc8b9c08",
+      "output_digest": "sha256:292095d55c1fb690b115be824022206d8011203bec819841aa7c392fd03478c7",
+      "diagnostic_excerpt": "............................................................................\n  ..............\n\n  ──────────────────────────────────────────────────────────────────── Laravel  \n    PASS   .......................................................... 90 files",
+      "subject": {
+        "kind": "commit",
+        "value": "389aad3f2dd59c91bd91482d51787eac880ebfbd"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-2-2 linked worktree",
+        "database": "PostgreSQL 17",
+        "os": "Windows 11",
+        "php": "8.4",
+        "runtime": "Docker Compose test profile noteflow-test-421c626b4776"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-2-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:06e228be3f7d19b98d7f697412fa0937c29065172392daadb1975d7e746326fb"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T05:16:28.775Z",
+      "observation": {
+        "status": "CONFLICT",
+        "event_id": "hook-check_finished-bf2ea1e8bdd088a39f1fad8a17d0be42ae670bc68582e219",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-2-2\\.agent-state\\v4-observations\\events\\hook-check_finished-bf2ea1e8bdd088a39f1fad8a17d0be42ae670bc68582e219.json",
+        "coverage": "UNKNOWN",
+        "reason": "EVENT_ID_PAYLOAD_CONFLICT"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "phpstan",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 6157,
+      "command_digest": "sha256:a00b8389e071f677250a0400a963e2a595d9b8c8cb989c59788b3d56bb5e9f4d",
+      "output_digest": "sha256:7d8257ed079d9902ee6c3033280be4795a05dec551bbfbf4bf7f61d6c204c0be",
+      "diagnostic_excerpt": "[OK] No errors                                                                 \n\n\nNote: Using configuration file /workspace/backend/phpstan.neon.\n  0/41 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%\u001b[1G\u001b[2K 14/41 [▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░]  34%\u001b[1G\u001b[2K 28/41 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░]  68%\u001b[1G\u001b[2K 41/41 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%",
+      "subject": {
+        "kind": "commit",
+        "value": "389aad3f2dd59c91bd91482d51787eac880ebfbd"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-2-2 linked worktree",
+        "database": "PostgreSQL 17",
+        "os": "Windows 11",
+        "php": "8.4",
+        "runtime": "Docker Compose test profile noteflow-test-421c626b4776"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-2-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:908d45df67eb67a55b9f5323cc03f209ec795898705e942ced399ef02a79efef"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T05:16:30.303Z",
+      "observation": {
+        "status": "CONFLICT",
+        "event_id": "hook-check_finished-880714f8a32fe18a3e1bc016ecbbfb4cff68d18ee68bc5d8",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-2-2\\.agent-state\\v4-observations\\events\\hook-check_finished-880714f8a32fe18a3e1bc016ecbbfb4cff68d18ee68bc5d8.json",
+        "coverage": "UNKNOWN",
+        "reason": "EVENT_ID_PAYLOAD_CONFLICT"
+      }
+    }
+  ],
+  "escalation": {
+    "decision": "REVIEW_REQUIRED",
+    "risk": "HIGH",
+    "reasons": [
+      "HIGH_RISK_REVIEW",
+      "JUDGMENT_CONCURRENCY_STATE",
+      "JUDGMENT_SECURITY_AUTH",
+      "VERIFICATION_INCOMPLETE",
+      "VERIFICATION_NO_APPLICABLE_RECIPE"
+    ]
+  },
+  "semantic_coverage": {
+    "decision": "COVERED",
+    "task_refs": [
+      "T-1",
+      "T-2"
+    ],
+    "acceptance_criteria": [
+      "AC-1",
+      "AC-2",
+      "AC-3"
+    ],
+    "evidence_refs": [
+      "backend-suite",
+      "pint",
+      "phpstan"
+    ]
+  },
+  "progression_eligible": true,
+  "status": "INCOMPLETE",
+  "context_digest": "sha256:459c2af25f72ee43baa281f3d32f39c2ef21ee31ea46148bf114a86e71e125c0"
+}

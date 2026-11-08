@@ -19,13 +19,13 @@ readiness:
   status: READY
   story_normative_digest: sha256:bf1c8726f3361acec0baff9ea7031c11a3c4f0e8fa28976ccd91a366afa1e082
   dependency_sprint_keys: [2-1-tạo-và-quản-lý-thông-tin-challenge]
-current_slice: A
+current_slice: B
 risk:
   level: HIGH
   flags: [security, concurrency, public_contract]
 slices:
   - id: A
-    status: checkpointed
+    status: reviewed
     baseline_commit: 0d6cefca91934bf383b520185afd5d0c54cbddc1
     checkpoint_commit: 389aad3f2dd59c91bd91482d51787eac880ebfbd
     subject_digest: sha256:f40d69357d59b6edcf0712231d1e29afbdfe542db6281c068ab3e65a1a835ab5
@@ -34,6 +34,12 @@ slices:
       implementation:
         path: _bmad-output/implementation-artifacts/receipts/story-2-2/A-implementation.json
         digest: sha256:6a6af202cd6b616272698777e5c2713e33cbe05a7e43de667f5b31cc39310cc9
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-2-2/A-verification.json
+        digest: sha256:1d8649aea27bbbb2ec60a5cc7ad366f6079e4b39d76c2814a8ddc6af32b33f69
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-2-2/A-review.json
+        digest: sha256:2be81524a613e37153f8b0cf793dbb9ac97d24cfcc8e9522922c2e20c8d133ff
     task_refs: [T-1, T-2]
     depends_on: []
     executor: lead
@@ -48,6 +54,23 @@ slices:
       - ChallengeWeekProgressTest covers week boundaries (Monday/Sunday in the account timezone), start date inside the week, target in effect, and owner isolation
       - ChallengeCompletionTest covers account-today only, invalid date and is_done false rejection, replay of an identical command, reused command ID with another payload, stale data epoch, closed write fence, and journal text and journal_version unchanged
       - ChallengeCompletionConcurrencyTest proves two concurrent Done commands for the same day leave one completion, one completion_version step and one account_revision step
+    verification:
+      status: INCOMPLETE
+      canonical:
+        status: INCOMPLETE
+      escalation:
+        decision: REVIEW_REQUIRED
+      progression_eligible: true
+      review_disclosure: owner exact-scope review; canonical recipe not applicable (NO_APPLICABLE_RECIPE)
+    review:
+      freshness: FRESH_CANDIDATE
+      judgment: APPROVE
+      reviewed_commit: 389aad3f2dd59c91bd91482d51787eac880ebfbd
+      risk_context_digest: sha256:ce0a172d5ac363143289305293f15134bc509213d4cee12eb1df950e38530a32
+      reviewer:
+        type: human
+        vendor: null
+        independent: false
   - id: B
     status: pending
     task_refs: [T-3]
@@ -83,8 +106,8 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: verify_slice
-  target: A
+  kind: implement_slice
+  target: B
 autopilot:
   schema_version: 1
   authorized_at: "2026-10-25T05:19:35.262Z"
