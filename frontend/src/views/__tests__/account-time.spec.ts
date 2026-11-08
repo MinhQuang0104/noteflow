@@ -34,6 +34,7 @@ test('Today renders the canonical account date and Monday to Sunday week verbati
   const wrapper = mount(TodayView, {
     global: {
       plugins: [[VueQueryPlugin, { queryClient }]],
+      stubs: { RouterLink: true },
     },
   })
 

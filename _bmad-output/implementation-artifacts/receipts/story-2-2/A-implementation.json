@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "story_id": "2.2",
+  "slice_id": "A",
+  "kind": "implementation",
+  "checkpoint_commit": "389aad3f2dd59c91bd91482d51787eac880ebfbd",
+  "baseline_commit": "0d6cefca91934bf383b520185afd5d0c54cbddc1",
+  "subject_digest": "sha256:f40d69357d59b6edcf0712231d1e29afbdfe542db6281c068ab3e65a1a835ab5",
+  "created_from_head": "389aad3f2dd59c91bd91482d51787eac880ebfbd",
+  "changed_paths_sha256": "sha256:9780207777b3746d559d7791dee0d3c97d2fbb022a5478608187c8c1d28fc766",
+  "commands": [
+    {
+      "command": "powershell.exe -NoProfile -File scripts/local.ps1 test",
+      "exit_code": 0,
+      "tool": "Pest via Docker Compose backend-test",
+      "environment": "Story worktree C:/Users/ACER/orca/workspaces/New_Project_My_Note/story-2-2; Windows; Docker test runtime noteflow-test-421c626b4776 (PHP 8.4, PostgreSQL 17); 118 passed (714 assertions), no warnings"
+    },
+    {
+      "command": "vendor/bin/pint --test",
+      "exit_code": 0,
+      "tool": "Laravel Pint",
+      "environment": "Story worktree C:/Users/ACER/orca/workspaces/New_Project_My_Note/story-2-2; Windows; Docker test runtime noteflow-test-421c626b4776 (PHP 8.4, PostgreSQL 17); backend-test container /workspace/backend"
+    },
+    {
+      "command": "composer analyse",
+      "exit_code": 0,
+      "tool": "PHPStan",
+      "environment": "Story worktree C:/Users/ACER/orca/workspaces/New_Project_My_Note/story-2-2; Windows; Docker test runtime noteflow-test-421c626b4776 (PHP 8.4, PostgreSQL 17); backend-test container /workspace/backend"
+    }
+  ]
+}

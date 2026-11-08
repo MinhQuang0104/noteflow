@@ -3,6 +3,12 @@ import type { components } from './schema.generated'
 export type Challenge = components['schemas']['Challenge']
 export type ChallengeSnapshot = components['schemas']['ChallengeSnapshot']
 export type ChallengeListResult = components['schemas']['ChallengeListResult']
+export type ChallengeListItem = components['schemas']['ChallengeListItem']
+export type WeekProgress = components['schemas']['WeekProgress']
+export type TodayCompletion = components['schemas']['TodayCompletion']
+export type CompletionSnapshot = components['schemas']['CompletionSnapshot']
+export type CompletionMutationResult = components['schemas']['CompletionMutationResult']
+export type MarkCompletionRequest = components['schemas']['MarkCompletionRequest']
 export type ChallengeDetailResult = components['schemas']['ChallengeDetailResult']
 export type ChallengeMutationResult = components['schemas']['ChallengeMutationResult']
 export type JournalSnapshot = components['schemas']['JournalSnapshot']
@@ -263,4 +269,41 @@ export async function saveChallengeJournal(
     { method: 'PUT', body: JSON.stringify(payload) },
     parseJournalProblemDetails,
   )
+}
+
+function isWeekProgress(value: unknown): value is WeekProgress {
+  if (!isRecord(value) || !hasExactKeys(value, ['start_date', 'end_date', 'done_days', 'target_days'])) return false
+  return typeof value.start_date === 'string' && value.start_date.length > 0 &&
+    typeof value.end_date === 'string' && value.end_date.length > 0 &&
+    isNonNegativeInteger(value.done_days) && value.done_days <= 7 &&
+    isPositiveInteger(value.target_days) && value.target_days <= 7
+}
+
+/** A Done acknowledgement is trusted only when it matches the contract exactly (AC-4). */
+export function isCompletionMutationResult(value: unknown): value is CompletionMutationResult {
+  if (!isRecord(value) || !hasExactKeys(value, ['completion', 'week_progress', 'account_revision', 'data_epoch'])) return false
+  const completion = value.completion
+  return isRecord(completion) &&
+    hasExactKeys(completion, ['challenge_id', 'local_date', 'is_done', 'completion_version']) &&
+    typeof completion.challenge_id === 'string' && completion.challenge_id.length > 0 &&
+    typeof completion.local_date === 'string' && completion.local_date.length > 0 &&
+    completion.is_done === true && isPositiveInteger(completion.completion_version) &&
+    isWeekProgress(value.week_progress) &&
+    isNonNegativeInteger(value.account_revision) && isPositiveInteger(value.data_epoch)
+}
+
+export async function markChallengeDone(
+  id: string,
+  date: string,
+  payload: MarkCompletionRequest,
+): Promise<CompletionMutationResult> {
+  const result = await requestJson<unknown, StateProblemDetails>(
+    `/api/v1/challenges/${encodeURIComponent(id)}/completions/${encodeURIComponent(date)}`,
+    { method: 'PUT', body: JSON.stringify(payload) },
+    parseStateProblemDetails,
+  )
+  if (!isCompletionMutationResult(result)) {
+    throw new ChallengeApiError<StateProblemDetails>('Done acknowledgement did not match the contract.', 200)
+  }
+  return result
 }

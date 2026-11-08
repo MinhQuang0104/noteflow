@@ -5,6 +5,7 @@ import {
   getChallenge,
   getChallenges,
   getChallengeJournal,
+  markChallengeDone,
   saveChallengeJournal,
   updateChallengeMetadata,
   ChallengeApiError,
@@ -444,4 +445,63 @@ test('saveChallengeJournal rejects a journal conflict when current_version disag
 
   expect(error).toMatchObject({ status: 409, message: 'Version conflict' })
   expect(error?.problem).toBeUndefined()
+})
+
+const doneResult = {
+  completion: { challenge_id: 'challenge-1', local_date: '2026-09-21', is_done: true, completion_version: 1 },
+  week_progress: { start_date: '2026-09-21', end_date: '2026-09-27', done_days: 1, target_days: 3 },
+  account_revision: 9,
+  data_epoch: 4,
+}
+
+test('markChallengeDone sends one PUT for the day with command, epoch and is_done only', async () => {
+  const payload = { command_id: 'command-done', data_epoch: 4, is_done: true as const }
+  const fetchSpy = vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify(doneResult), { status: 200 }))
+  vi.stubGlobal('fetch', fetchSpy)
+
+  await expect(markChallengeDone('challenge-1', '2026-09-21', payload)).resolves.toEqual(doneResult)
+  expect(fetchSpy).toHaveBeenCalledTimes(1)
+  expect(fetchSpy).toHaveBeenCalledWith(
+    '/api/v1/challenges/challenge-1/completions/2026-09-21',
+    expect.objectContaining({
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: expect.objectContaining({ 'Content-Type': 'application/json', 'X-XSRF-TOKEN': 'test-csrf-token' }),
+      body: JSON.stringify(payload),
+    }),
+  )
+})
+
+test('markChallengeDone does not trust an acknowledgement that does not match the contract', async () => {
+  for (const body of [
+    { ...doneResult, week_progress: undefined },
+    { ...doneResult, completion: { ...doneResult.completion, is_done: false } },
+    { ...doneResult, extra: true },
+    { challenges: [] },
+  ]) {
+    vi.stubGlobal('fetch', vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify(body), { status: 200 })))
+    const error = await markChallengeDone('challenge-1', '2026-09-21', { command_id: 'c', data_epoch: 4, is_done: true }).catch(caught => caught)
+    expect(error).toBeInstanceOf(ChallengeApiError)
+    expect(error.message).toBe('Done acknowledgement did not match the contract.')
+  }
+})
+
+test('markChallengeDone exposes state problems and validation errors without a saved result', async () => {
+  vi.stubGlobal('fetch', vi.fn<typeof fetch>().mockResolvedValue(new Response(
+    JSON.stringify({ code: 'write_fence_active', message: 'Writes are paused.' }),
+    { status: 423, headers: { 'Content-Type': 'application/problem+json' } },
+  )))
+  const fenced = await markChallengeDone('challenge-1', '2026-09-21', { command_id: 'c', data_epoch: 4, is_done: true }).catch(caught => caught)
+  expect(fenced).toBeInstanceOf(ChallengeApiError)
+  expect(fenced.status).toBe(423)
+  expect(fenced.problem).toEqual({ code: 'write_fence_active', message: 'Writes are paused.' })
+
+  vi.stubGlobal('fetch', vi.fn<typeof fetch>().mockResolvedValue(new Response(
+    JSON.stringify({ message: 'Validation failed', errors: { local_date: ['Done can only be recorded for the account-today date.'] } }),
+    { status: 422 },
+  )))
+  const invalid = await markChallengeDone('challenge-1', '2026-09-20', { command_id: 'c', data_epoch: 4, is_done: true }).catch(caught => caught)
+  expect(invalid.status).toBe(422)
+  expect(invalid.validation.errors.local_date).toHaveLength(1)
+  expect(invalid.problem).toBeUndefined()
 })

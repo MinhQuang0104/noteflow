@@ -1,0 +1,1543 @@
+{
+  "schema_version": 1,
+  "story_id": "2.2",
+  "slice_id": "B",
+  "kind": "verification",
+  "checkpoint_commit": "58888d0001f28f324aaa8de05cf9202271f86aab",
+  "baseline_commit": "ba050ef727d526a1c19140cc2b2a3f025fc31e4a",
+  "subject_digest": "sha256:f40d69357d59b6edcf0712231d1e29afbdfe542db6281c068ab3e65a1a835ab5",
+  "created_from_head": "58888d0001f28f324aaa8de05cf9202271f86aab",
+  "changed_paths_sha256": "sha256:cae37c9d15e4cd5fe33e1dabcd78b6bafe2e79db577dd0845dbd09607b0f689c",
+  "commands": [
+    {
+      "command": "check:backend-suite",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-2-2 linked worktree\",\"database\":\"PostgreSQL 17\",\"os\":\"Windows 11\",\"php\":\"8.4\",\"runtime\":\"Docker Compose test profile noteflow-test-421c626b4776\"}"
+    },
+    {
+      "command": "check:pint",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-2-2 linked worktree\",\"database\":\"PostgreSQL 17\",\"os\":\"Windows 11\",\"php\":\"8.4\",\"runtime\":\"Docker Compose test profile noteflow-test-421c626b4776\"}"
+    },
+    {
+      "command": "check:phpstan",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-2-2 linked worktree\",\"database\":\"PostgreSQL 17\",\"os\":\"Windows 11\",\"php\":\"8.4\",\"runtime\":\"Docker Compose test profile noteflow-test-421c626b4776\"}"
+    },
+    {
+      "command": "check:contract-validate",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-2-2 linked worktree\",\"node\":\"v24.21.0\",\"os\":\"Windows 11\",\"packages\":\"npm ci from frontend/package-lock.json\"}"
+    },
+    {
+      "command": "check:contract-check",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-2-2 linked worktree\",\"node\":\"v24.21.0\",\"os\":\"Windows 11\",\"packages\":\"npm ci from frontend/package-lock.json\"}"
+    },
+    {
+      "command": "check:type-check",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-2-2 linked worktree\",\"node\":\"v24.21.0\",\"os\":\"Windows 11\",\"packages\":\"npm ci from frontend/package-lock.json\"}"
+    },
+    {
+      "command": "check:lint",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-2-2 linked worktree\",\"node\":\"v24.21.0\",\"os\":\"Windows 11\",\"packages\":\"npm ci from frontend/package-lock.json\"}"
+    },
+    {
+      "command": "check:frontend-unit",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-2-2 linked worktree\",\"node\":\"v24.21.0\",\"os\":\"Windows 11\",\"packages\":\"npm ci from frontend/package-lock.json\"}"
+    }
+  ],
+  "canonical": {
+    "schema_version": 2,
+    "featureId": null,
+    "changedPaths": [
+      "backend/app/Http/Controllers/ChallengeCompletionController.php",
+      "backend/app/Modules/Challenges/Application/UseCases/GetChallengeListQuery.php",
+      "backend/routes/api.php",
+      "backend/tests/Contract/ChallengeContractTest.php",
+      "backend/tests/Feature/ChallengeCompletionApiTest.php",
+      "contracts/openapi.yaml",
+      "frontend/src/__tests__/App.spec.ts",
+      "frontend/src/api/__tests__/challenges.spec.ts",
+      "frontend/src/api/challenges.ts",
+      "frontend/src/api/schema.generated.ts",
+      "frontend/src/views/__tests__/challenges.spec.ts",
+      "frontend/src/views/__tests__/journal.spec.ts",
+      "frontend/src/views/__tests__/today.spec.ts"
+    ],
+    "matchedPaths": [
+      "contracts/openapi.yaml",
+      "frontend/src/api/__tests__/challenges.spec.ts",
+      "frontend/src/api/challenges.ts",
+      "frontend/src/api/schema.generated.ts",
+      "frontend/src/views/__tests__/challenges.spec.ts",
+      "frontend/src/views/__tests__/journal.spec.ts",
+      "frontend/src/views/__tests__/today.spec.ts"
+    ],
+    "coveredPaths": [
+      "frontend/src/api/__tests__/challenges.spec.ts",
+      "frontend/src/api/challenges.ts",
+      "frontend/src/views/__tests__/challenges.spec.ts",
+      "frontend/src/views/__tests__/journal.spec.ts",
+      "frontend/src/views/__tests__/today.spec.ts"
+    ],
+    "unmatchedPaths": [
+      "backend/app/Http/Controllers/ChallengeCompletionController.php",
+      "backend/app/Modules/Challenges/Application/UseCases/GetChallengeListQuery.php",
+      "backend/routes/api.php",
+      "backend/tests/Contract/ChallengeContractTest.php",
+      "backend/tests/Feature/ChallengeCompletionApiTest.php",
+      "contracts/openapi.yaml",
+      "frontend/src/__tests__/App.spec.ts",
+      "frontend/src/api/schema.generated.ts"
+    ],
+    "recipes": [
+      {
+        "schema_version": 1,
+        "featureId": "challenge-list",
+        "changedPaths": [
+          "backend/app/Http/Controllers/ChallengeCompletionController.php",
+          "backend/app/Modules/Challenges/Application/UseCases/GetChallengeListQuery.php",
+          "backend/routes/api.php",
+          "backend/tests/Contract/ChallengeContractTest.php",
+          "backend/tests/Feature/ChallengeCompletionApiTest.php",
+          "contracts/openapi.yaml",
+          "frontend/src/__tests__/App.spec.ts",
+          "frontend/src/api/__tests__/challenges.spec.ts",
+          "frontend/src/api/challenges.ts",
+          "frontend/src/api/schema.generated.ts",
+          "frontend/src/views/__tests__/challenges.spec.ts",
+          "frontend/src/views/__tests__/journal.spec.ts",
+          "frontend/src/views/__tests__/today.spec.ts"
+        ],
+        "matchedPaths": [
+          "frontend/src/api/__tests__/challenges.spec.ts",
+          "frontend/src/api/challenges.ts",
+          "frontend/src/views/__tests__/challenges.spec.ts"
+        ],
+        "coveredPaths": [
+          "frontend/src/api/__tests__/challenges.spec.ts",
+          "frontend/src/api/challenges.ts",
+          "frontend/src/views/__tests__/challenges.spec.ts"
+        ],
+        "unmatchedPaths": [
+          "backend/app/Http/Controllers/ChallengeCompletionController.php",
+          "backend/app/Modules/Challenges/Application/UseCases/GetChallengeListQuery.php",
+          "backend/routes/api.php",
+          "backend/tests/Contract/ChallengeContractTest.php",
+          "backend/tests/Feature/ChallengeCompletionApiTest.php",
+          "contracts/openapi.yaml",
+          "frontend/src/__tests__/App.spec.ts",
+          "frontend/src/api/schema.generated.ts",
+          "frontend/src/views/__tests__/journal.spec.ts",
+          "frontend/src/views/__tests__/today.spec.ts"
+        ],
+        "dependencyOnlyPaths": [],
+        "map": {
+          "status": "STALE",
+          "expectedChangedAnchors": [
+            "frontend/src/api/__tests__/challenges.spec.ts",
+            "frontend/src/api/challenges.ts",
+            "frontend/src/views/__tests__/challenges.spec.ts"
+          ],
+          "unexplainedDrift": [],
+          "missingAnchors": []
+        },
+        "checks": [
+          {
+            "id": "map",
+            "status": "PASS",
+            "exitCode": 1,
+            "summary": "STALE",
+            "evidence_ref": "sha256:acf96d3a97e65df03665f7d8a5dd0378640890b3757ff7aa7e3e8d2792294e83"
+          },
+          {
+            "id": "type-check",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "> vue-tsc --build",
+            "evidence_ref": "sha256:70cdb7d74f7ddd906fe4c12816074243b329bc603902d89d3d3d2ecd7ddd6416"
+          },
+          {
+            "id": "mapped-tests",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "Test Files  2 passed (2)",
+            "evidence_ref": "sha256:2ee95ddeb20deae5f047bee537d358b5ecb696b5af3532706490890359010eb3"
+          }
+        ],
+        "escalationReasons": [
+          "UNMAPPED_CHANGED_PATH"
+        ],
+        "status": "INCOMPLETE",
+        "complete": false
+      },
+      {
+        "schema_version": 1,
+        "featureId": "journal-frontend",
+        "changedPaths": [
+          "backend/app/Http/Controllers/ChallengeCompletionController.php",
+          "backend/app/Modules/Challenges/Application/UseCases/GetChallengeListQuery.php",
+          "backend/routes/api.php",
+          "backend/tests/Contract/ChallengeContractTest.php",
+          "backend/tests/Feature/ChallengeCompletionApiTest.php",
+          "contracts/openapi.yaml",
+          "frontend/src/__tests__/App.spec.ts",
+          "frontend/src/api/__tests__/challenges.spec.ts",
+          "frontend/src/api/challenges.ts",
+          "frontend/src/api/schema.generated.ts",
+          "frontend/src/views/__tests__/challenges.spec.ts",
+          "frontend/src/views/__tests__/journal.spec.ts",
+          "frontend/src/views/__tests__/today.spec.ts"
+        ],
+        "matchedPaths": [
+          "contracts/openapi.yaml",
+          "frontend/src/api/__tests__/challenges.spec.ts",
+          "frontend/src/api/challenges.ts",
+          "frontend/src/api/schema.generated.ts",
+          "frontend/src/views/__tests__/journal.spec.ts"
+        ],
+        "coveredPaths": [
+          "frontend/src/api/__tests__/challenges.spec.ts",
+          "frontend/src/api/challenges.ts",
+          "frontend/src/views/__tests__/journal.spec.ts"
+        ],
+        "unmatchedPaths": [
+          "backend/app/Http/Controllers/ChallengeCompletionController.php",
+          "backend/app/Modules/Challenges/Application/UseCases/GetChallengeListQuery.php",
+          "backend/routes/api.php",
+          "backend/tests/Contract/ChallengeContractTest.php",
+          "backend/tests/Feature/ChallengeCompletionApiTest.php",
+          "contracts/openapi.yaml",
+          "frontend/src/__tests__/App.spec.ts",
+          "frontend/src/api/schema.generated.ts",
+          "frontend/src/views/__tests__/challenges.spec.ts",
+          "frontend/src/views/__tests__/today.spec.ts"
+        ],
+        "dependencyOnlyPaths": [
+          "contracts/openapi.yaml",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "map": {
+          "status": "STALE",
+          "expectedChangedAnchors": [
+            "contracts/openapi.yaml",
+            "frontend/src/api/__tests__/challenges.spec.ts",
+            "frontend/src/api/challenges.ts",
+            "frontend/src/api/schema.generated.ts",
+            "frontend/src/views/__tests__/journal.spec.ts"
+          ],
+          "unexplainedDrift": [],
+          "missingAnchors": []
+        },
+        "checks": [
+          {
+            "id": "map",
+            "status": "PASS",
+            "exitCode": 1,
+            "summary": "STALE",
+            "evidence_ref": "sha256:bc724eddd0116339621ec1c3a0955b62df186867810ae88be9a64be01bd1b876"
+          },
+          {
+            "id": "type-check",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "> vue-tsc --build",
+            "evidence_ref": "sha256:70cdb7d74f7ddd906fe4c12816074243b329bc603902d89d3d3d2ecd7ddd6416"
+          },
+          {
+            "id": "mapped-tests",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "Test Files  3 passed (3)",
+            "evidence_ref": "sha256:f632bbddb93dd8c45e9ab4f5342060821bd1ba8a171cc6b30f3392eeae6acf17"
+          },
+          {
+            "id": "contract-check",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "> node scripts/generate-openapi-types.mjs --check",
+            "evidence_ref": "sha256:13c3a6c2783c02d45882db8b2b5b65ecf180f778da53f1cd31b88169132893a5"
+          }
+        ],
+        "escalationReasons": [
+          "UNMAPPED_CHANGED_PATH",
+          "DEPENDENCY_ONLY_CHANGED_PATH"
+        ],
+        "status": "INCOMPLETE",
+        "complete": false
+      },
+      {
+        "schema_version": 1,
+        "featureId": "today-view",
+        "changedPaths": [
+          "backend/app/Http/Controllers/ChallengeCompletionController.php",
+          "backend/app/Modules/Challenges/Application/UseCases/GetChallengeListQuery.php",
+          "backend/routes/api.php",
+          "backend/tests/Contract/ChallengeContractTest.php",
+          "backend/tests/Feature/ChallengeCompletionApiTest.php",
+          "contracts/openapi.yaml",
+          "frontend/src/__tests__/App.spec.ts",
+          "frontend/src/api/__tests__/challenges.spec.ts",
+          "frontend/src/api/challenges.ts",
+          "frontend/src/api/schema.generated.ts",
+          "frontend/src/views/__tests__/challenges.spec.ts",
+          "frontend/src/views/__tests__/journal.spec.ts",
+          "frontend/src/views/__tests__/today.spec.ts"
+        ],
+        "matchedPaths": [
+          "frontend/src/api/challenges.ts",
+          "frontend/src/views/__tests__/today.spec.ts"
+        ],
+        "coveredPaths": [
+          "frontend/src/views/__tests__/today.spec.ts"
+        ],
+        "unmatchedPaths": [
+          "backend/app/Http/Controllers/ChallengeCompletionController.php",
+          "backend/app/Modules/Challenges/Application/UseCases/GetChallengeListQuery.php",
+          "backend/routes/api.php",
+          "backend/tests/Contract/ChallengeContractTest.php",
+          "backend/tests/Feature/ChallengeCompletionApiTest.php",
+          "contracts/openapi.yaml",
+          "frontend/src/__tests__/App.spec.ts",
+          "frontend/src/api/__tests__/challenges.spec.ts",
+          "frontend/src/api/challenges.ts",
+          "frontend/src/api/schema.generated.ts",
+          "frontend/src/views/__tests__/challenges.spec.ts",
+          "frontend/src/views/__tests__/journal.spec.ts"
+        ],
+        "dependencyOnlyPaths": [
+          "frontend/src/api/challenges.ts"
+        ],
+        "map": {
+          "status": "STALE",
+          "expectedChangedAnchors": [
+            "frontend/src/api/challenges.ts",
+            "frontend/src/views/__tests__/today.spec.ts"
+          ],
+          "unexplainedDrift": [],
+          "missingAnchors": []
+        },
+        "checks": [
+          {
+            "id": "map",
+            "status": "PASS",
+            "exitCode": 1,
+            "summary": "STALE",
+            "evidence_ref": "sha256:3d0647b0c1bd3a204482f62ec1ec21988e8ec6a7efa193650e51900b07b9150a"
+          },
+          {
+            "id": "type-check",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "> vue-tsc --build",
+            "evidence_ref": "sha256:70cdb7d74f7ddd906fe4c12816074243b329bc603902d89d3d3d2ecd7ddd6416"
+          },
+          {
+            "id": "mapped-tests",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "Test Files  2 passed (2)",
+            "evidence_ref": "sha256:1760022bb6f69512a552912512447595d26e101c561ce8da93ad5f0ae7bcfbc3"
+          }
+        ],
+        "escalationReasons": [
+          "UNMAPPED_CHANGED_PATH",
+          "DEPENDENCY_ONLY_CHANGED_PATH"
+        ],
+        "status": "INCOMPLETE",
+        "complete": false
+      }
+    ],
+    "checks": [
+      {
+        "id": "map",
+        "status": "PASS",
+        "exitCode": 1,
+        "summary": "STALE",
+        "evidence_ref": "sha256:acf96d3a97e65df03665f7d8a5dd0378640890b3757ff7aa7e3e8d2792294e83",
+        "recipe_refs": [
+          "challenge-list"
+        ]
+      },
+      {
+        "id": "type-check",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "> vue-tsc --build",
+        "evidence_ref": "sha256:70cdb7d74f7ddd906fe4c12816074243b329bc603902d89d3d3d2ecd7ddd6416",
+        "recipe_refs": [
+          "challenge-list",
+          "journal-frontend",
+          "today-view"
+        ]
+      },
+      {
+        "id": "mapped-tests",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "Test Files  2 passed (2)",
+        "evidence_ref": "sha256:2ee95ddeb20deae5f047bee537d358b5ecb696b5af3532706490890359010eb3",
+        "recipe_refs": [
+          "challenge-list"
+        ]
+      },
+      {
+        "id": "map",
+        "status": "PASS",
+        "exitCode": 1,
+        "summary": "STALE",
+        "evidence_ref": "sha256:bc724eddd0116339621ec1c3a0955b62df186867810ae88be9a64be01bd1b876",
+        "recipe_refs": [
+          "journal-frontend"
+        ]
+      },
+      {
+        "id": "mapped-tests",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "Test Files  3 passed (3)",
+        "evidence_ref": "sha256:f632bbddb93dd8c45e9ab4f5342060821bd1ba8a171cc6b30f3392eeae6acf17",
+        "recipe_refs": [
+          "journal-frontend"
+        ]
+      },
+      {
+        "id": "contract-check",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "> node scripts/generate-openapi-types.mjs --check",
+        "evidence_ref": "sha256:13c3a6c2783c02d45882db8b2b5b65ecf180f778da53f1cd31b88169132893a5",
+        "recipe_refs": [
+          "journal-frontend"
+        ]
+      },
+      {
+        "id": "map",
+        "status": "PASS",
+        "exitCode": 1,
+        "summary": "STALE",
+        "evidence_ref": "sha256:3d0647b0c1bd3a204482f62ec1ec21988e8ec6a7efa193650e51900b07b9150a",
+        "recipe_refs": [
+          "today-view"
+        ]
+      },
+      {
+        "id": "mapped-tests",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "Test Files  2 passed (2)",
+        "evidence_ref": "sha256:1760022bb6f69512a552912512447595d26e101c561ce8da93ad5f0ae7bcfbc3",
+        "recipe_refs": [
+          "today-view"
+        ]
+      }
+    ],
+    "escalationReasons": [
+      "UNMAPPED_CHANGED_PATH"
+    ],
+    "status": "INCOMPLETE",
+    "complete": false
+  },
+  "focused_checks": [
+    {
+      "schema_version": 1,
+      "check_id": "backend-suite",
+      "classification": "behavioral",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 19125,
+      "command_digest": "sha256:548049feaed25eae1f809ebc7cec83e03c56baf8d03040f8bab5cfa3a9b24493",
+      "output_digest": "sha256:0fbe12683ae41de67c2e54c80b281f45a7049433222b1b1516ad08802a6a8164",
+      "diagnostic_excerpt": "INFO  Nothing to migrate.  \n\n\n  \u001b[30;42;1m PASS \u001b[39;49;22m\u001b[39m Tests\\Unit\\AccountTimeContextTest\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90maccount time uses Ho Chi Minh midnight and Monday week boundaries w\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.01s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90maccount time uses Ho Chi Minh midnight and Monday week boundaries with dataset \"first second of Monday in the account timezone\"\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90ma use case captures the authoritative clock exactly once\u001b[39m\u001b[90m            \u001b[39m \u001b[90m0.01s\u001b[39m  \n\n  \u001b[30;42;1m PASS \u001b[39;49;22m\u001b[39m Tests\\Feature\\AccountContextTest\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mthe account context endpoint is private and never cacheable for gue\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.48s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mthe owner receives one server-authoritative account date and Monday\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.10s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90ma non owner cannot read account time context\u001b[39m\u001b[90m                        \u001b[39m \u001b[90m0.07s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90ma missing account state fails closed instead of falling back to run\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.08s\u001b[39m  \n\n  \u001b[30;42;1m PASS \u001b[39;49;22m\u001b[39m Tests\\Feature\\ChallengeApiTest\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mguest cannot access challenge endpoints\u001b[39m\u001b[90m                             \u001b[39m \u001b[90m0.08s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mnon-owner cannot access challenge endpoints\u001b[39m\u001b[90m                         \u001b[39m \u001b[90m0.09s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mAC1 — create valid challenge with name, optional description, targe\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.11s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mAC2 — reject invalid target days and attach error to target_days fi\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.08s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mchallenge text fields reject NUL bytes before writing\u001b[39m\u001b[90m               \u001b[39m \u001b[90m0.09s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mAC3 — update metadata modifies name/description without c",
+      "subject": {
+        "commit": "58888d0001f28f324aaa8de05cf9202271f86aab"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-2-2 linked worktree",
+        "database": "PostgreSQL 17",
+        "os": "Windows 11",
+        "php": "8.4",
+        "runtime": "Docker Compose test profile noteflow-test-421c626b4776"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "backend/tests/Feature/ChallengeCompletionApiTest.php",
+          "backend/tests/Feature/ChallengeApiTest.php",
+          "backend/tests/Contract/ChallengeContractTest.php"
+        ],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-2-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:4fd3a41a912df3e6a5da9d0cb710c17fc7392373f64c7244cbaa1d5047044c78"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T06:05:15.963Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-8d1b7ede29f043661d7e160b2ee9e6a6824331a02ed4f6ed",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-2-2\\.agent-state\\v4-observations\\events\\hook-check_finished-8d1b7ede29f043661d7e160b2ee9e6a6824331a02ed4f6ed.json",
+        "coverage": "MEASURED"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "backend/app/Http/Controllers/ChallengeCompletionController.php",
+        "backend/app/Modules/Challenges/Application/UseCases/GetChallengeListQuery.php",
+        "backend/routes/api.php",
+        "backend/tests/Contract/ChallengeContractTest.php",
+        "backend/tests/Feature/ChallengeCompletionApiTest.php",
+        "contracts/openapi.yaml",
+        "frontend/src/__tests__/App.spec.ts",
+        "frontend/src/api/__tests__/challenges.spec.ts",
+        "frontend/src/api/challenges.ts",
+        "frontend/src/api/schema.generated.ts",
+        "frontend/src/views/__tests__/challenges.spec.ts",
+        "frontend/src/views/__tests__/journal.spec.ts",
+        "frontend/src/views/__tests__/today.spec.ts"
+      ],
+      "changed_paths_sha256": "sha256:cae37c9d15e4cd5fe33e1dabcd78b6bafe2e79db577dd0845dbd09607b0f689c",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "pint",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 1318,
+      "command_digest": "sha256:cc3cb76c4dee60ca79d4ea21129771195e71099bd0b1b905e8e38e5b8703a788",
+      "output_digest": "sha256:58ec6e827abc49fca907cbdd4a0ae4631825f728501f8f953b708d99152477fb",
+      "diagnostic_excerpt": "............................................................................\n  ................\n\n  ──────────────────────────────────────────────────────────────────── Laravel  \n    PASS   .......................................................... 92 files",
+      "subject": {
+        "commit": "58888d0001f28f324aaa8de05cf9202271f86aab"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-2-2 linked worktree",
+        "database": "PostgreSQL 17",
+        "os": "Windows 11",
+        "php": "8.4",
+        "runtime": "Docker Compose test profile noteflow-test-421c626b4776"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-2-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:06e228be3f7d19b98d7f697412fa0937c29065172392daadb1975d7e746326fb"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T06:05:35.375Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-5705dd2aae83dca87011691f5c2817420d6bcb9465a4e10d",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-2-2\\.agent-state\\v4-observations\\events\\hook-check_finished-5705dd2aae83dca87011691f5c2817420d6bcb9465a4e10d.json",
+        "coverage": "MEASURED"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "backend/app/Http/Controllers/ChallengeCompletionController.php",
+        "backend/app/Modules/Challenges/Application/UseCases/GetChallengeListQuery.php",
+        "backend/routes/api.php",
+        "backend/tests/Contract/ChallengeContractTest.php",
+        "backend/tests/Feature/ChallengeCompletionApiTest.php",
+        "contracts/openapi.yaml",
+        "frontend/src/__tests__/App.spec.ts",
+        "frontend/src/api/__tests__/challenges.spec.ts",
+        "frontend/src/api/challenges.ts",
+        "frontend/src/api/schema.generated.ts",
+        "frontend/src/views/__tests__/challenges.spec.ts",
+        "frontend/src/views/__tests__/journal.spec.ts",
+        "frontend/src/views/__tests__/today.spec.ts"
+      ],
+      "changed_paths_sha256": "sha256:cae37c9d15e4cd5fe33e1dabcd78b6bafe2e79db577dd0845dbd09607b0f689c",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "phpstan",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 1383,
+      "command_digest": "sha256:fa98fb3ad0423761990695c8c07e1a0f62b4a3d7d965456b6d29226149f54bd5",
+      "output_digest": "sha256:1674891d0a45f24ec2b6bbcc893f53477bf00af3ffc88ecf72a663a084aa7923",
+      "diagnostic_excerpt": "[OK] No errors                                                                 \n\n\nNote: Using configuration file /workspace/backend/phpstan.neon.\n  0/42 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%\u001b[1G\u001b[2K 42/42 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%",
+      "subject": {
+        "commit": "58888d0001f28f324aaa8de05cf9202271f86aab"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-2-2 linked worktree",
+        "database": "PostgreSQL 17",
+        "os": "Windows 11",
+        "php": "8.4",
+        "runtime": "Docker Compose test profile noteflow-test-421c626b4776"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-2-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:908d45df67eb67a55b9f5323cc03f209ec795898705e942ced399ef02a79efef"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T06:05:36.990Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-16719980e757581f1a472ad9a775efda45a66bc817e4291b",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-2-2\\.agent-state\\v4-observations\\events\\hook-check_finished-16719980e757581f1a472ad9a775efda45a66bc817e4291b.json",
+        "coverage": "MEASURED"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "backend/app/Http/Controllers/ChallengeCompletionController.php",
+        "backend/app/Modules/Challenges/Application/UseCases/GetChallengeListQuery.php",
+        "backend/routes/api.php",
+        "backend/tests/Contract/ChallengeContractTest.php",
+        "backend/tests/Feature/ChallengeCompletionApiTest.php",
+        "contracts/openapi.yaml",
+        "frontend/src/__tests__/App.spec.ts",
+        "frontend/src/api/__tests__/challenges.spec.ts",
+        "frontend/src/api/challenges.ts",
+        "frontend/src/api/schema.generated.ts",
+        "frontend/src/views/__tests__/challenges.spec.ts",
+        "frontend/src/views/__tests__/journal.spec.ts",
+        "frontend/src/views/__tests__/today.spec.ts"
+      ],
+      "changed_paths_sha256": "sha256:cae37c9d15e4cd5fe33e1dabcd78b6bafe2e79db577dd0845dbd09607b0f689c",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "contract-validate",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 2297,
+      "command_digest": "sha256:f01b7119ce753dfbf8ac3d30c0c7d4721299eb36073b1059ce364eab9abf331d",
+      "output_digest": "sha256:600bde2798ebc3849fa6fed25380d248ce5f05aec9e0888657017179bbdb0e11",
+      "diagnostic_excerpt": "> frontend@0.0.0 contract:validate\n> redocly lint ../contracts/openapi.yaml --config ../redocly.yaml\n\n\n\n    \u001b[33m╔═══════════════════════════════════════════════════════╗\u001b[39m\n    \u001b[33m║                                                       ║\u001b[39m\n    \u001b[33m║\u001b[39m  A new version of \u001b[36mRedocly CLI\u001b[39m (\u001b[32m2.76.0\u001b[39m) is available.  \u001b[33m║\u001b[39m\n    \u001b[33m║\u001b[39m  Update now: `\u001b[36mnpm i -g @redocly/cli@latest\u001b[39m`.          \u001b[33m║\u001b[39m\n    \u001b[33m║\u001b[39m  Changelog: https://redocly.com/docs/cli/changelog/   \u001b[33m║\u001b[39m\n    \u001b[33m║                                                       ║\u001b[39m\n    \u001b[33m╚═══════════════════════════════════════════════════════╝\u001b[39m\n\n\u001b[90mvalidating ..\\contracts\\openapi.yaml...\n\u001b[39m\u001b[90m..\\contracts\\openapi.yaml: validated in 38ms\n\n\u001b[39m\u001b[32mWoohoo! Your API description is valid. 🎉\n\u001b[39m",
+      "subject": {
+        "commit": "58888d0001f28f324aaa8de05cf9202271f86aab"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-2-2 linked worktree",
+        "node": "v24.21.0",
+        "os": "Windows 11",
+        "packages": "npm ci from frontend/package-lock.json"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-2-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:7785b620940e707b7f77ef6887ffb879b4a43f3deac0abe6b45a0b2e8417d41d"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T06:05:38.658Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-b7df233d93364d044e28190a2f296dbb683a9e971dbd453f",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-2-2\\.agent-state\\v4-observations\\events\\hook-check_finished-b7df233d93364d044e28190a2f296dbb683a9e971dbd453f.json",
+        "coverage": "MEASURED"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "backend/app/Http/Controllers/ChallengeCompletionController.php",
+        "backend/app/Modules/Challenges/Application/UseCases/GetChallengeListQuery.php",
+        "backend/routes/api.php",
+        "backend/tests/Contract/ChallengeContractTest.php",
+        "backend/tests/Feature/ChallengeCompletionApiTest.php",
+        "contracts/openapi.yaml",
+        "frontend/src/__tests__/App.spec.ts",
+        "frontend/src/api/__tests__/challenges.spec.ts",
+        "frontend/src/api/challenges.ts",
+        "frontend/src/api/schema.generated.ts",
+        "frontend/src/views/__tests__/challenges.spec.ts",
+        "frontend/src/views/__tests__/journal.spec.ts",
+        "frontend/src/views/__tests__/today.spec.ts"
+      ],
+      "changed_paths_sha256": "sha256:cae37c9d15e4cd5fe33e1dabcd78b6bafe2e79db577dd0845dbd09607b0f689c",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "contract-check",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 617,
+      "command_digest": "sha256:1e790b427deb83ac2567d484cc4a9f1ecc6a2446162fb237c2c634a2df7f34a9",
+      "output_digest": "sha256:f5f19200ac9e00c76a87e09edcb533887bcfaaaf02e4db6930fce9e85d20ee19",
+      "diagnostic_excerpt": "> frontend@0.0.0 contract:check\n> node scripts/generate-openapi-types.mjs --check",
+      "subject": {
+        "commit": "58888d0001f28f324aaa8de05cf9202271f86aab"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-2-2 linked worktree",
+        "node": "v24.21.0",
+        "os": "Windows 11",
+        "packages": "npm ci from frontend/package-lock.json"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-2-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:c31f62129b1b71130133cc450567950cc9d3f981d42c186c7d87ceaef1338454"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T06:05:41.250Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-e67ab25a56e580e30ab138ccfe307c79e10f12f0bbcf32d6",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-2-2\\.agent-state\\v4-observations\\events\\hook-check_finished-e67ab25a56e580e30ab138ccfe307c79e10f12f0bbcf32d6.json",
+        "coverage": "MEASURED"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "backend/app/Http/Controllers/ChallengeCompletionController.php",
+        "backend/app/Modules/Challenges/Application/UseCases/GetChallengeListQuery.php",
+        "backend/routes/api.php",
+        "backend/tests/Contract/ChallengeContractTest.php",
+        "backend/tests/Feature/ChallengeCompletionApiTest.php",
+        "contracts/openapi.yaml",
+        "frontend/src/__tests__/App.spec.ts",
+        "frontend/src/api/__tests__/challenges.spec.ts",
+        "frontend/src/api/challenges.ts",
+        "frontend/src/api/schema.generated.ts",
+        "frontend/src/views/__tests__/challenges.spec.ts",
+        "frontend/src/views/__tests__/journal.spec.ts",
+        "frontend/src/views/__tests__/today.spec.ts"
+      ],
+      "changed_paths_sha256": "sha256:cae37c9d15e4cd5fe33e1dabcd78b6bafe2e79db577dd0845dbd09607b0f689c",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "type-check",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 4751,
+      "command_digest": "sha256:86c086d469d1ab89e48229dc259ddd136ab2bfcae05193ceb0cedc89421f709f",
+      "output_digest": "sha256:d49b3656eb9402550a0f331ae50a4ba70f8b153f191dd2c6ff7c1d545491044b",
+      "diagnostic_excerpt": "> frontend@0.0.0 type-check\n> vue-tsc --build",
+      "subject": {
+        "commit": "58888d0001f28f324aaa8de05cf9202271f86aab"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-2-2 linked worktree",
+        "node": "v24.21.0",
+        "os": "Windows 11",
+        "packages": "npm ci from frontend/package-lock.json"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-2-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:e5a6a7d6d3035a48a2fe15f898aca06f92de056510869eae5ffd80c319474e3f"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T06:05:42.184Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-d3dfd74c9f657795b18ff8329b2d0f265c72ad1c9fc39cb4",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-2-2\\.agent-state\\v4-observations\\events\\hook-check_finished-d3dfd74c9f657795b18ff8329b2d0f265c72ad1c9fc39cb4.json",
+        "coverage": "MEASURED"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "backend/app/Http/Controllers/ChallengeCompletionController.php",
+        "backend/app/Modules/Challenges/Application/UseCases/GetChallengeListQuery.php",
+        "backend/routes/api.php",
+        "backend/tests/Contract/ChallengeContractTest.php",
+        "backend/tests/Feature/ChallengeCompletionApiTest.php",
+        "contracts/openapi.yaml",
+        "frontend/src/__tests__/App.spec.ts",
+        "frontend/src/api/__tests__/challenges.spec.ts",
+        "frontend/src/api/challenges.ts",
+        "frontend/src/api/schema.generated.ts",
+        "frontend/src/views/__tests__/challenges.spec.ts",
+        "frontend/src/views/__tests__/journal.spec.ts",
+        "frontend/src/views/__tests__/today.spec.ts"
+      ],
+      "changed_paths_sha256": "sha256:cae37c9d15e4cd5fe33e1dabcd78b6bafe2e79db577dd0845dbd09607b0f689c",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "lint",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 3755,
+      "command_digest": "sha256:51d1e667ce14606178bdb2d9d5cb6e888d0af4b9ebb69264bcfd6755c6907b65",
+      "output_digest": "sha256:bc6cdceab12617b2bcdca6213a87da59a46254c4c7c1460189d598173accbb2b",
+      "diagnostic_excerpt": "> frontend@0.0.0 lint\n> run-s \"lint:*\"\n\n\n> frontend@0.0.0 lint:oxlint\n> oxlint .\n\n\n> frontend@0.0.0 lint:eslint\n> eslint . --cache",
+      "subject": {
+        "commit": "58888d0001f28f324aaa8de05cf9202271f86aab"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-2-2 linked worktree",
+        "node": "v24.21.0",
+        "os": "Windows 11",
+        "packages": "npm ci from frontend/package-lock.json"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-2-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:8e558c960ae9145bc33b148de4ced50975d9ef9ac584ebf8c8651bed72655a73"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T06:05:47.221Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-929aa59701b09a859a65c615ae060983b8afe3a28b5dc8c4",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-2-2\\.agent-state\\v4-observations\\events\\hook-check_finished-929aa59701b09a859a65c615ae060983b8afe3a28b5dc8c4.json",
+        "coverage": "MEASURED"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "backend/app/Http/Controllers/ChallengeCompletionController.php",
+        "backend/app/Modules/Challenges/Application/UseCases/GetChallengeListQuery.php",
+        "backend/routes/api.php",
+        "backend/tests/Contract/ChallengeContractTest.php",
+        "backend/tests/Feature/ChallengeCompletionApiTest.php",
+        "contracts/openapi.yaml",
+        "frontend/src/__tests__/App.spec.ts",
+        "frontend/src/api/__tests__/challenges.spec.ts",
+        "frontend/src/api/challenges.ts",
+        "frontend/src/api/schema.generated.ts",
+        "frontend/src/views/__tests__/challenges.spec.ts",
+        "frontend/src/views/__tests__/journal.spec.ts",
+        "frontend/src/views/__tests__/today.spec.ts"
+      ],
+      "changed_paths_sha256": "sha256:cae37c9d15e4cd5fe33e1dabcd78b6bafe2e79db577dd0845dbd09607b0f689c",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "frontend-unit",
+      "classification": "behavioral",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 6539,
+      "command_digest": "sha256:e9109eb6083371ead83172b109cbb8b03e52ef1c06741793bc9c025f495a6bf5",
+      "output_digest": "sha256:08e07af56d76734f7cd028a9b7c4d1287a7561a1a364a3fa8509959966f031cf",
+      "diagnostic_excerpt": "> frontend@0.0.0 test:unit\n> vitest --run\n\n\n RUN  v5.0.1 C:/Users/ACER/orca/workspaces/New_Project_My_Note/story-2-2/frontend\n\n\n Test Files  16 passed (16)\n      Tests  175 passed (175)\n   Start at  13:05:52\n   Duration  5.49s (environment 76%, tests 9%, transform 8%, import 7%)\n\nEnvironment  jsdom was created 16 times · 34.28s total, 76% of tracked time\n             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)\n             learn more: https://vitest.dev/guide/improving-performance#test-environments",
+      "subject": {
+        "commit": "58888d0001f28f324aaa8de05cf9202271f86aab"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-2-2 linked worktree",
+        "node": "v24.21.0",
+        "os": "Windows 11",
+        "packages": "npm ci from frontend/package-lock.json"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "frontend/src/api/__tests__/challenges.spec.ts",
+          "frontend/src/views/__tests__/challenges.spec.ts",
+          "frontend/src/views/__tests__/journal.spec.ts",
+          "frontend/src/views/__tests__/today.spec.ts",
+          "frontend/src/__tests__/App.spec.ts"
+        ],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-2-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:c7687ad338eca384f16e4f8e4dea308a95f6108be099a96e0b48aa98d264537b"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T06:05:51.260Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-6d26c96fd8019ae1dd8cc0121d911abbfb727eb4fd0ee9b0",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-2-2\\.agent-state\\v4-observations\\events\\hook-check_finished-6d26c96fd8019ae1dd8cc0121d911abbfb727eb4fd0ee9b0.json",
+        "coverage": "MEASURED"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "backend/app/Http/Controllers/ChallengeCompletionController.php",
+        "backend/app/Modules/Challenges/Application/UseCases/GetChallengeListQuery.php",
+        "backend/routes/api.php",
+        "backend/tests/Contract/ChallengeContractTest.php",
+        "backend/tests/Feature/ChallengeCompletionApiTest.php",
+        "contracts/openapi.yaml",
+        "frontend/src/__tests__/App.spec.ts",
+        "frontend/src/api/__tests__/challenges.spec.ts",
+        "frontend/src/api/challenges.ts",
+        "frontend/src/api/schema.generated.ts",
+        "frontend/src/views/__tests__/challenges.spec.ts",
+        "frontend/src/views/__tests__/journal.spec.ts",
+        "frontend/src/views/__tests__/today.spec.ts"
+      ],
+      "changed_paths_sha256": "sha256:cae37c9d15e4cd5fe33e1dabcd78b6bafe2e79db577dd0845dbd09607b0f689c",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    }
+  ],
+  "raw_focused_checks": [
+    {
+      "schema_version": 1,
+      "check_id": "backend-suite",
+      "classification": "behavioral",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 19125,
+      "command_digest": "sha256:548049feaed25eae1f809ebc7cec83e03c56baf8d03040f8bab5cfa3a9b24493",
+      "output_digest": "sha256:0fbe12683ae41de67c2e54c80b281f45a7049433222b1b1516ad08802a6a8164",
+      "diagnostic_excerpt": "INFO  Nothing to migrate.  \n\n\n  \u001b[30;42;1m PASS \u001b[39;49;22m\u001b[39m Tests\\Unit\\AccountTimeContextTest\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90maccount time uses Ho Chi Minh midnight and Monday week boundaries w\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.01s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90maccount time uses Ho Chi Minh midnight and Monday week boundaries with dataset \"first second of Monday in the account timezone\"\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90ma use case captures the authoritative clock exactly once\u001b[39m\u001b[90m            \u001b[39m \u001b[90m0.01s\u001b[39m  \n\n  \u001b[30;42;1m PASS \u001b[39;49;22m\u001b[39m Tests\\Feature\\AccountContextTest\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mthe account context endpoint is private and never cacheable for gue\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.48s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mthe owner receives one server-authoritative account date and Monday\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.10s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90ma non owner cannot read account time context\u001b[39m\u001b[90m                        \u001b[39m \u001b[90m0.07s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90ma missing account state fails closed instead of falling back to run\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.08s\u001b[39m  \n\n  \u001b[30;42;1m PASS \u001b[39;49;22m\u001b[39m Tests\\Feature\\ChallengeApiTest\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mguest cannot access challenge endpoints\u001b[39m\u001b[90m                             \u001b[39m \u001b[90m0.08s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mnon-owner cannot access challenge endpoints\u001b[39m\u001b[90m                         \u001b[39m \u001b[90m0.09s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mAC1 — create valid challenge with name, optional description, targe\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.11s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mAC2 — reject invalid target days and attach error to target_days fi\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.08s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mchallenge text fields reject NUL bytes before writing\u001b[39m\u001b[90m               \u001b[39m \u001b[90m0.09s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mAC3 — update metadata modifies name/description without c",
+      "subject": {
+        "kind": "commit",
+        "value": "58888d0001f28f324aaa8de05cf9202271f86aab"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-2-2 linked worktree",
+        "database": "PostgreSQL 17",
+        "os": "Windows 11",
+        "php": "8.4",
+        "runtime": "Docker Compose test profile noteflow-test-421c626b4776"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "backend/tests/Feature/ChallengeCompletionApiTest.php",
+          "backend/tests/Feature/ChallengeApiTest.php",
+          "backend/tests/Contract/ChallengeContractTest.php"
+        ],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-2-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:4fd3a41a912df3e6a5da9d0cb710c17fc7392373f64c7244cbaa1d5047044c78"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T06:05:15.963Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-8d1b7ede29f043661d7e160b2ee9e6a6824331a02ed4f6ed",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-2-2\\.agent-state\\v4-observations\\events\\hook-check_finished-8d1b7ede29f043661d7e160b2ee9e6a6824331a02ed4f6ed.json",
+        "coverage": "MEASURED"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "pint",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 1318,
+      "command_digest": "sha256:cc3cb76c4dee60ca79d4ea21129771195e71099bd0b1b905e8e38e5b8703a788",
+      "output_digest": "sha256:58ec6e827abc49fca907cbdd4a0ae4631825f728501f8f953b708d99152477fb",
+      "diagnostic_excerpt": "............................................................................\n  ................\n\n  ──────────────────────────────────────────────────────────────────── Laravel  \n    PASS   .......................................................... 92 files",
+      "subject": {
+        "kind": "commit",
+        "value": "58888d0001f28f324aaa8de05cf9202271f86aab"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-2-2 linked worktree",
+        "database": "PostgreSQL 17",
+        "os": "Windows 11",
+        "php": "8.4",
+        "runtime": "Docker Compose test profile noteflow-test-421c626b4776"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-2-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:06e228be3f7d19b98d7f697412fa0937c29065172392daadb1975d7e746326fb"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T06:05:35.375Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-5705dd2aae83dca87011691f5c2817420d6bcb9465a4e10d",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-2-2\\.agent-state\\v4-observations\\events\\hook-check_finished-5705dd2aae83dca87011691f5c2817420d6bcb9465a4e10d.json",
+        "coverage": "MEASURED"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "phpstan",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 1383,
+      "command_digest": "sha256:fa98fb3ad0423761990695c8c07e1a0f62b4a3d7d965456b6d29226149f54bd5",
+      "output_digest": "sha256:1674891d0a45f24ec2b6bbcc893f53477bf00af3ffc88ecf72a663a084aa7923",
+      "diagnostic_excerpt": "[OK] No errors                                                                 \n\n\nNote: Using configuration file /workspace/backend/phpstan.neon.\n  0/42 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%\u001b[1G\u001b[2K 42/42 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%",
+      "subject": {
+        "kind": "commit",
+        "value": "58888d0001f28f324aaa8de05cf9202271f86aab"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-2-2 linked worktree",
+        "database": "PostgreSQL 17",
+        "os": "Windows 11",
+        "php": "8.4",
+        "runtime": "Docker Compose test profile noteflow-test-421c626b4776"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-2-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:908d45df67eb67a55b9f5323cc03f209ec795898705e942ced399ef02a79efef"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T06:05:36.990Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-16719980e757581f1a472ad9a775efda45a66bc817e4291b",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-2-2\\.agent-state\\v4-observations\\events\\hook-check_finished-16719980e757581f1a472ad9a775efda45a66bc817e4291b.json",
+        "coverage": "MEASURED"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "contract-validate",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 2297,
+      "command_digest": "sha256:f01b7119ce753dfbf8ac3d30c0c7d4721299eb36073b1059ce364eab9abf331d",
+      "output_digest": "sha256:600bde2798ebc3849fa6fed25380d248ce5f05aec9e0888657017179bbdb0e11",
+      "diagnostic_excerpt": "> frontend@0.0.0 contract:validate\n> redocly lint ../contracts/openapi.yaml --config ../redocly.yaml\n\n\n\n    \u001b[33m╔═══════════════════════════════════════════════════════╗\u001b[39m\n    \u001b[33m║                                                       ║\u001b[39m\n    \u001b[33m║\u001b[39m  A new version of \u001b[36mRedocly CLI\u001b[39m (\u001b[32m2.76.0\u001b[39m) is available.  \u001b[33m║\u001b[39m\n    \u001b[33m║\u001b[39m  Update now: `\u001b[36mnpm i -g @redocly/cli@latest\u001b[39m`.          \u001b[33m║\u001b[39m\n    \u001b[33m║\u001b[39m  Changelog: https://redocly.com/docs/cli/changelog/   \u001b[33m║\u001b[39m\n    \u001b[33m║                                                       ║\u001b[39m\n    \u001b[33m╚═══════════════════════════════════════════════════════╝\u001b[39m\n\n\u001b[90mvalidating ..\\contracts\\openapi.yaml...\n\u001b[39m\u001b[90m..\\contracts\\openapi.yaml: validated in 38ms\n\n\u001b[39m\u001b[32mWoohoo! Your API description is valid. 🎉\n\u001b[39m",
+      "subject": {
+        "kind": "commit",
+        "value": "58888d0001f28f324aaa8de05cf9202271f86aab"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-2-2 linked worktree",
+        "node": "v24.21.0",
+        "os": "Windows 11",
+        "packages": "npm ci from frontend/package-lock.json"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-2-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:7785b620940e707b7f77ef6887ffb879b4a43f3deac0abe6b45a0b2e8417d41d"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T06:05:38.658Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-b7df233d93364d044e28190a2f296dbb683a9e971dbd453f",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-2-2\\.agent-state\\v4-observations\\events\\hook-check_finished-b7df233d93364d044e28190a2f296dbb683a9e971dbd453f.json",
+        "coverage": "MEASURED"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "contract-check",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 617,
+      "command_digest": "sha256:1e790b427deb83ac2567d484cc4a9f1ecc6a2446162fb237c2c634a2df7f34a9",
+      "output_digest": "sha256:f5f19200ac9e00c76a87e09edcb533887bcfaaaf02e4db6930fce9e85d20ee19",
+      "diagnostic_excerpt": "> frontend@0.0.0 contract:check\n> node scripts/generate-openapi-types.mjs --check",
+      "subject": {
+        "kind": "commit",
+        "value": "58888d0001f28f324aaa8de05cf9202271f86aab"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-2-2 linked worktree",
+        "node": "v24.21.0",
+        "os": "Windows 11",
+        "packages": "npm ci from frontend/package-lock.json"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-2-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:c31f62129b1b71130133cc450567950cc9d3f981d42c186c7d87ceaef1338454"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T06:05:41.250Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-e67ab25a56e580e30ab138ccfe307c79e10f12f0bbcf32d6",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-2-2\\.agent-state\\v4-observations\\events\\hook-check_finished-e67ab25a56e580e30ab138ccfe307c79e10f12f0bbcf32d6.json",
+        "coverage": "MEASURED"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "type-check",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 4751,
+      "command_digest": "sha256:86c086d469d1ab89e48229dc259ddd136ab2bfcae05193ceb0cedc89421f709f",
+      "output_digest": "sha256:d49b3656eb9402550a0f331ae50a4ba70f8b153f191dd2c6ff7c1d545491044b",
+      "diagnostic_excerpt": "> frontend@0.0.0 type-check\n> vue-tsc --build",
+      "subject": {
+        "kind": "commit",
+        "value": "58888d0001f28f324aaa8de05cf9202271f86aab"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-2-2 linked worktree",
+        "node": "v24.21.0",
+        "os": "Windows 11",
+        "packages": "npm ci from frontend/package-lock.json"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-2-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:e5a6a7d6d3035a48a2fe15f898aca06f92de056510869eae5ffd80c319474e3f"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T06:05:42.184Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-d3dfd74c9f657795b18ff8329b2d0f265c72ad1c9fc39cb4",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-2-2\\.agent-state\\v4-observations\\events\\hook-check_finished-d3dfd74c9f657795b18ff8329b2d0f265c72ad1c9fc39cb4.json",
+        "coverage": "MEASURED"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "lint",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 3755,
+      "command_digest": "sha256:51d1e667ce14606178bdb2d9d5cb6e888d0af4b9ebb69264bcfd6755c6907b65",
+      "output_digest": "sha256:bc6cdceab12617b2bcdca6213a87da59a46254c4c7c1460189d598173accbb2b",
+      "diagnostic_excerpt": "> frontend@0.0.0 lint\n> run-s \"lint:*\"\n\n\n> frontend@0.0.0 lint:oxlint\n> oxlint .\n\n\n> frontend@0.0.0 lint:eslint\n> eslint . --cache",
+      "subject": {
+        "kind": "commit",
+        "value": "58888d0001f28f324aaa8de05cf9202271f86aab"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-2-2 linked worktree",
+        "node": "v24.21.0",
+        "os": "Windows 11",
+        "packages": "npm ci from frontend/package-lock.json"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-2-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:8e558c960ae9145bc33b148de4ced50975d9ef9ac584ebf8c8651bed72655a73"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T06:05:47.221Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-929aa59701b09a859a65c615ae060983b8afe3a28b5dc8c4",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-2-2\\.agent-state\\v4-observations\\events\\hook-check_finished-929aa59701b09a859a65c615ae060983b8afe3a28b5dc8c4.json",
+        "coverage": "MEASURED"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "frontend-unit",
+      "classification": "behavioral",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 6539,
+      "command_digest": "sha256:e9109eb6083371ead83172b109cbb8b03e52ef1c06741793bc9c025f495a6bf5",
+      "output_digest": "sha256:08e07af56d76734f7cd028a9b7c4d1287a7561a1a364a3fa8509959966f031cf",
+      "diagnostic_excerpt": "> frontend@0.0.0 test:unit\n> vitest --run\n\n\n RUN  v5.0.1 C:/Users/ACER/orca/workspaces/New_Project_My_Note/story-2-2/frontend\n\n\n Test Files  16 passed (16)\n      Tests  175 passed (175)\n   Start at  13:05:52\n   Duration  5.49s (environment 76%, tests 9%, transform 8%, import 7%)\n\nEnvironment  jsdom was created 16 times · 34.28s total, 76% of tracked time\n             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)\n             learn more: https://vitest.dev/guide/improving-performance#test-environments",
+      "subject": {
+        "kind": "commit",
+        "value": "58888d0001f28f324aaa8de05cf9202271f86aab"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-2-2 linked worktree",
+        "node": "v24.21.0",
+        "os": "Windows 11",
+        "packages": "npm ci from frontend/package-lock.json"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "frontend/src/api/__tests__/challenges.spec.ts",
+          "frontend/src/views/__tests__/challenges.spec.ts",
+          "frontend/src/views/__tests__/journal.spec.ts",
+          "frontend/src/views/__tests__/today.spec.ts",
+          "frontend/src/__tests__/App.spec.ts"
+        ],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-2-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:c7687ad338eca384f16e4f8e4dea308a95f6108be099a96e0b48aa98d264537b"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T06:05:51.260Z",
+      "observation": {
+        "status": "RECORDED",
+        "event_id": "hook-check_finished-6d26c96fd8019ae1dd8cc0121d911abbfb727eb4fd0ee9b0",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-2-2\\.agent-state\\v4-observations\\events\\hook-check_finished-6d26c96fd8019ae1dd8cc0121d911abbfb727eb4fd0ee9b0.json",
+        "coverage": "MEASURED"
+      }
+    }
+  ],
+  "escalation": {
+    "decision": "REVIEW_REQUIRED",
+    "risk": "HIGH",
+    "reasons": [
+      "HIGH_RISK_REVIEW",
+      "JUDGMENT_PUBLIC_CONTRACT",
+      "JUDGMENT_SECURITY_AUTH",
+      "VERIFICATION_INCOMPLETE",
+      "VERIFICATION_UNMAPPED_CHANGED_PATH"
+    ]
+  },
+  "semantic_coverage": {
+    "decision": "COVERED",
+    "task_refs": [
+      "T-3"
+    ],
+    "acceptance_criteria": [
+      "AC-1",
+      "AC-2",
+      "AC-3",
+      "AC-4"
+    ],
+    "evidence_refs": [
+      "backend-suite",
+      "pint",
+      "phpstan",
+      "contract-validate",
+      "contract-check",
+      "type-check",
+      "lint",
+      "frontend-unit"
+    ]
+  },
+  "progression_eligible": true,
+  "status": "INCOMPLETE",
+  "context_digest": "sha256:74a701abee030915a3e8da97b805aa2bb082a8500c3ced90b40b296578ac623c"
+}

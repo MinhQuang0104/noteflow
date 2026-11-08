@@ -1,0 +1,83 @@
+{
+  "schema_version": 2,
+  "story_id": "2.2",
+  "slice_id": "A",
+  "kind": "review",
+  "checkpoint_commit": "389aad3f2dd59c91bd91482d51787eac880ebfbd",
+  "baseline_commit": "0d6cefca91934bf383b520185afd5d0c54cbddc1",
+  "subject_digest": "sha256:f40d69357d59b6edcf0712231d1e29afbdfe542db6281c068ab3e65a1a835ab5",
+  "created_from_head": "389aad3f2dd59c91bd91482d51787eac880ebfbd",
+  "changed_paths_sha256": "sha256:9780207777b3746d559d7791dee0d3c97d2fbb022a5478608187c8c1d28fc766",
+  "commands": [
+    {
+      "command": "owner exact scope review of Story 2.2 slice A (389aad3); Lead re-review 2026-11-08, subject unchanged",
+      "exit_code": 0,
+      "tool": "reviewer",
+      "environment": "owner"
+    }
+  ],
+  "judgment": "APPROVE",
+  "questions": [
+    {
+      "id": "question-1",
+      "question": "NO_APPLICABLE_RECIPE"
+    }
+  ],
+  "answers": [
+    {
+      "id": "question-1",
+      "answer": "No feature-map recipe covers the backend Challenges completion paths (NO_APPLICABLE_RECIPE); owner reviewed the exact 7-path diff 0d6cefc..389aad3 and the Plan-declared focused checks instead: backend-suite (local.ps1 test, 118 passed, no warnings), pint --test and composer analyse all PASS on checkpoint 389aad3. Invariants checked: owner-scoped queries, account lock + write fence + data epoch + ledger replay/key reuse, account-today only, is_done false rejected, completion-only writes, same-result and concurrent Done converge. Re-verified 2026-11-08 at head 0afec74 after autopilot revocation: subject digest, changed paths and checkpoint unchanged; backend-suite, pint and phpstan PASS again; Lead re-read MarkCompletionUseCase and found no new issue."
+    }
+  ],
+  "evidence_refs": [
+    {
+      "path": "backend/app/Modules/Challenges/Application/Commands/MarkCompletionCommand.php",
+      "unit_index": 0,
+      "evidence_set_digest": "6cb161341fdcb552c4d3cae526f6460917cb25803f3c7979168f5e89866bbde8"
+    },
+    {
+      "path": "backend/app/Modules/Challenges/Application/UseCases/GetCurrentWeekProgressQuery.php",
+      "unit_index": 1,
+      "evidence_set_digest": "6cb161341fdcb552c4d3cae526f6460917cb25803f3c7979168f5e89866bbde8"
+    },
+    {
+      "path": "backend/app/Modules/Challenges/Application/UseCases/MarkCompletionUseCase.php",
+      "unit_index": 2,
+      "evidence_set_digest": "6cb161341fdcb552c4d3cae526f6460917cb25803f3c7979168f5e89866bbde8"
+    },
+    {
+      "path": "backend/app/Modules/Challenges/Domain/Exceptions/InvalidCompletionDayException.php",
+      "unit_index": 3,
+      "evidence_set_digest": "6cb161341fdcb552c4d3cae526f6460917cb25803f3c7979168f5e89866bbde8"
+    },
+    {
+      "path": "backend/tests/Feature/ChallengeCompletionConcurrencyTest.php",
+      "unit_index": 4,
+      "evidence_set_digest": "6cb161341fdcb552c4d3cae526f6460917cb25803f3c7979168f5e89866bbde8"
+    },
+    {
+      "path": "backend/tests/Feature/ChallengeCompletionTest.php",
+      "unit_index": 5,
+      "evidence_set_digest": "6cb161341fdcb552c4d3cae526f6460917cb25803f3c7979168f5e89866bbde8"
+    },
+    {
+      "path": "backend/tests/Feature/ChallengeCompletionTest.php",
+      "unit_index": 6,
+      "evidence_set_digest": "6cb161341fdcb552c4d3cae526f6460917cb25803f3c7979168f5e89866bbde8"
+    },
+    {
+      "path": "backend/tests/Feature/ChallengeWeekProgressTest.php",
+      "unit_index": 7,
+      "evidence_set_digest": "6cb161341fdcb552c4d3cae526f6460917cb25803f3c7979168f5e89866bbde8"
+    }
+  ],
+  "scope_digest": "sha256:a75dbd5668b357cbf322718c0110787f3f6642cbb8ec3939e2522e85b9cbde96",
+  "risk_context_digest": "sha256:ce0a172d5ac363143289305293f15134bc509213d4cee12eb1df950e38530a32",
+  "reviewed_commit": "389aad3f2dd59c91bd91482d51787eac880ebfbd",
+  "reviewer": {
+    "vendor": null,
+    "independent": false,
+    "type": "human"
+  },
+  "findings": []
+}

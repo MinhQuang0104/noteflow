@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccountContextController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\ChallengeCompletionController;
 use App\Http\Controllers\ChallengeController;
 use App\Http\Controllers\ChallengeJournalController;
 use App\Http\Controllers\FoundationHealthController;
@@ -41,3 +42,7 @@ Route::get('/v1/challenges/{id}/journals/{date}', [ChallengeJournalController::c
 Route::put('/v1/challenges/{id}/journals/{date}', [ChallengeJournalController::class, 'save'])
     ->middleware(['private.no-store', 'auth:sanctum', 'owner'])
     ->name('challenges.journals.save');
+
+Route::put('/v1/challenges/{id}/completions/{date}', [ChallengeCompletionController::class, 'mark'])
+    ->middleware(['private.no-store', 'auth:sanctum', 'owner'])
+    ->name('challenges.completions.mark');
