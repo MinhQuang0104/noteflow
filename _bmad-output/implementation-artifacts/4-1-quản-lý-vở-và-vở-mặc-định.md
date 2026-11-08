@@ -1,7 +1,7 @@
 ---
 story_id: "4.1"
 title: Quản lý vở và vở mặc định
-status: ready-for-dev
+status: in-progress
 ---
 
 # Story 4.1: Quản lý vở và vở mặc định
