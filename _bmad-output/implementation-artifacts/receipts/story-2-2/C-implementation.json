@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "story_id": "2.2",
+  "slice_id": "C",
+  "kind": "implementation",
+  "checkpoint_commit": "0364a9eeb6791eba385cadb589f0132204aa1899",
+  "baseline_commit": "211981d3157737b674bdf0d5ac34cdb50c56383c",
+  "subject_digest": "sha256:f40d69357d59b6edcf0712231d1e29afbdfe542db6281c068ab3e65a1a835ab5",
+  "created_from_head": "0364a9eeb6791eba385cadb589f0132204aa1899",
+  "changed_paths_sha256": "sha256:ac48ef0f1da9d64df8daff891a63431ea14579603707c01357b933123590c010",
+  "commands": [
+    {
+      "command": "npm run type-check",
+      "exit_code": 0,
+      "tool": "vue-tsc",
+      "environment": "Story worktree C:/Users/ACER/orca/workspaces/New_Project_My_Note/story-2-2/frontend; Windows; Node v24.21.0; Lead rerun after AGY worker_done"
+    },
+    {
+      "command": "npm run lint",
+      "exit_code": 0,
+      "tool": "oxlint + ESLint",
+      "environment": "Story worktree C:/Users/ACER/orca/workspaces/New_Project_My_Note/story-2-2/frontend; Windows; Node v24.21.0; Lead rerun after AGY worker_done"
+    },
+    {
+      "command": "npm run test:unit -- --run src/views/__tests__/today.spec.ts src/views/__tests__/account-time.spec.ts",
+      "exit_code": 0,
+      "tool": "Vitest",
+      "environment": "Story worktree C:/Users/ACER/orca/workspaces/New_Project_My_Note/story-2-2/frontend; Windows; Node v24.21.0; Lead rerun after AGY worker_done; 9 tests passed"
+    },
+    {
+      "command": "npm run test:unit -- --run",
+      "exit_code": 0,
+      "tool": "Vitest",
+      "environment": "Story worktree C:/Users/ACER/orca/workspaces/New_Project_My_Note/story-2-2/frontend; Windows; Node v24.21.0; Lead rerun after AGY worker_done; 180 tests passed (175 before the slice)"
+    },
+    {
+      "command": "node .agents/scripts/check-worker-scope.mjs check --base 211981d --allow <3 slice paths> --contract-sha256 93ac34bd… --forbid-commits",
+      "exit_code": 0,
+      "tool": "worker scope gate",
+      "environment": "Story worktree; PASS, 0 commits since base, no violations"
+    }
+  ],
+  "worker": {
+    "executor": "agy",
+    "orca": {
+      "run_id": "run_b5702cf5cb83",
+      "task_id": "task_b9aa4d6c530a",
+      "dispatch_ids": [
+        "ctx_5960aa162f02"
+      ]
+    },
+    "attempt": 1,
+    "contract_sha256": "93ac34bd7bd9c6a8ad285f3a7f9fadb9eb308c290af0d5146acdebe1eaa9232a",
+    "worker_report_sha256": "ab8806dff917c9cca9a660e0f7201b500151a89c59b9b871bb44f47dab2e8511",
+    "lead_vendor": "claude",
+    "scope_gate": {
+      "schema": "worker-scope-v1",
+      "status": "PASS",
+      "base": "211981d3157737b674bdf0d5ac34cdb50c56383c",
+      "allowed": [
+        "frontend/src/views/TodayView.vue",
+        "frontend/src/views/__tests__/account-time.spec.ts",
+        "frontend/src/views/__tests__/today.spec.ts"
+      ],
+      "changed": [
+        "frontend/src/views/TodayView.vue",
+        "frontend/src/views/__tests__/account-time.spec.ts",
+        "frontend/src/views/__tests__/today.spec.ts"
+      ]
+    }
+  }
+}
