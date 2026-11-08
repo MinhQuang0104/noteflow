@@ -75,6 +75,15 @@ function validEvidenceRef(ref, expectedPaths) {
   return Number.isInteger(ref.hunk_index) && ref.hunk_index >= 0 && DIGEST.test(ref.body_digest ?? '')
 }
 
+function unitGroups(refs) {
+  const groups = []
+  for (const ref of refs) {
+    if (groups.at(-1)?.digest === ref.evidence_set_digest) groups.at(-1).refs.push(ref)
+    else groups.push({ digest: ref.evidence_set_digest, refs: [ref] })
+  }
+  return groups
+}
+
 function orderedEvidenceRefs(refs, expectedPaths) {
   if (!Array.isArray(refs) || !refs.length || refs.some(ref => !validEvidenceRef(ref, expectedPaths))) return false
   const firstPaths = []
@@ -82,8 +91,11 @@ function orderedEvidenceRefs(refs, expectedPaths) {
   if (!exactList(firstPaths, expectedPaths)) return false
   const unitRefs = refs.every(ref => ref.unit_index !== undefined)
   if (unitRefs) {
-    const digests = [...new Set(refs.map(ref => ref.evidence_set_digest))]
-    return digests.length === 1 && refs.every((ref, index) => ref.unit_index === index)
+    // One evidence set, or consecutive split sets (F-41-1): unit indexes restart
+    // at 0 in each set and a set digest never reappears after its group ends.
+    const groups = unitGroups(refs)
+    return new Set(groups.map(group => group.digest)).size === groups.length &&
+      groups.every(group => group.refs.every((ref, index) => ref.unit_index === index))
   }
   if (refs.some(ref => ref.unit_index !== undefined)) return false
   const seen = new Set()
@@ -105,9 +117,10 @@ export function reviewEvidenceFreshness(review, expectedPaths, expectedCommit, e
   const paths = canonicalPaths(expectedPaths)
   if (!exactList(paths, expectedPaths) || !orderedEvidenceRefs(review.evidence_refs, paths)) return { status: 'INVALID', reason: 'REVIEW_EVIDENCE_INVALID' }
   const refs = review.evidence_refs
-  const expectedScope = refs.every(ref => ref.unit_index !== undefined)
-    ? digestValue({ paths, source: refs[0].evidence_set_digest })
-    : digestValue({ paths, refs })
+  const sources = refs.every(ref => ref.unit_index !== undefined) ? unitGroups(refs).map(group => group.digest) : null
+  const expectedScope = !sources ? digestValue({ paths, refs })
+    : sources.length === 1 ? digestValue({ paths, source: sources[0] })
+      : digestValue({ paths, sources })
   if (!DIGEST.test(review.scope_digest ?? '') || review.scope_digest !== expectedScope) return { status: 'STALE', reason: 'REVIEW_SCOPE_DIGEST_MISMATCH' }
   const declared = typeof review.freshness === 'string' ? review.freshness : review.freshness?.status
   if (declared !== undefined && !['FRESH_CANDIDATE', 'FRESH_REUSED', 'FRESH'].includes(declared)) return { status: 'INVALID', reason: 'REVIEW_FRESHNESS_INVALID' }

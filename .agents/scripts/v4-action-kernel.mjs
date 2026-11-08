@@ -35,6 +35,8 @@ const SHA = /^[0-9a-f]{40,64}$/
 const SHA256_HEX = /^[0-9a-f]{64}$/i
 const DIGEST = /^sha256:[0-9a-f]{64}$/
 const STORY_ID = /^\d+\.\d+$/
+// At most 16 paths per evidence set (prepare-change-evidence.mjs), so 8 sets bound a review at 128 paths.
+const MAX_EVIDENCE_SETS = 8
 const SLICE_ID = /^[A-Za-z0-9][A-Za-z0-9._-]*$/
 const PLAN_PATH = storyId => `_bmad-output/implementation-artifacts/story-${storyId.replace('.', '-')}-plan.md`
 const SPRINT_PATH = '_bmad-output/implementation-artifacts/sprint-status.yaml'
@@ -1116,6 +1118,30 @@ function inspectChangeEvidence(evidence, expectedPaths) {
     return { valid: false, reasons: ['CHANGE_EVIDENCE_REQUIRED'], refs: [], scope_digest: null }
   }
   try {
+    // A changed-path set larger than one evidence set (16 paths) arrives as
+    // consecutive evidenceSets that partition the expected paths in order
+    // (F-41-1, Story 4.1). Each set stays individually bounded and validated.
+    if (evidence.evidenceSets !== undefined) {
+      const sets = evidence.evidenceSets
+      if (evidence.evidenceSet !== undefined || !Array.isArray(sets) || sets.length < 2 || sets.length > MAX_EVIDENCE_SETS) {
+        throw new Error('CHANGE_EVIDENCE_SETS_INVALID')
+      }
+      for (const set of sets) validateEvidenceSet(set)
+      const sources = sets.map(set => set.sourceDigest)
+      if (new Set(sources).size !== sources.length) throw new Error('CHANGE_EVIDENCE_SETS_INVALID')
+      const setPaths = sets.flatMap(set => set.paths.map(item => item.path))
+      if (!exactList(setPaths, expectedPaths)) throw new Error('CHANGE_EVIDENCE_SCOPE_MISMATCH')
+      return {
+        valid: true,
+        reasons: [],
+        refs: sets.flatMap(set => set.units.map(unit => ({
+          path: unit.path,
+          unit_index: unit.unitIndex,
+          evidence_set_digest: unit.evidenceSetDigest
+        }))),
+        scope_digest: digestValue({ paths: setPaths, sources })
+      }
+    }
     if (evidence.evidenceSet) {
       validateEvidenceSet(evidence.evidenceSet)
       const setPaths = evidence.evidenceSet.paths.map(item => item.path)

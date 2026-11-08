@@ -238,7 +238,26 @@ export function makeReviewEvidence(f, preview) {
   return JSON.parse(result.stdout.trim()).changeEvidence
 }
 
+// Split evidence (F-41-1): consecutive sets of at most 16 changed paths each.
+export function makeSplitReviewEvidence(f, preview, size = 16) {
+  const script = path.resolve(process.cwd(), '.agents/scripts/prepare-change-evidence.mjs')
+  const evidenceSets = []
+  for (let index = 0; index < preview.changed_paths.length; index += size) {
+    const result = spawnSync(process.execPath, [script, '--comparison', 'explicit-pair', '--base', preview.baseline_commit,
+      '--head', preview.checkpoint_commit, ...preview.changed_paths.slice(index, index + size).flatMap(relative => ['--path', relative])], {
+      cwd: f.root, encoding: 'utf8', windowsHide: true
+    })
+    assert.equal(result.status, 0, result.stderr)
+    evidenceSets.push(JSON.parse(result.stdout.trim()).changeEvidence.evidenceSet)
+  }
+  return { evidenceSets }
+}
+
 export function scopeDigest(changeEvidence) {
+  if (changeEvidence.evidenceSets) {
+    const paths = changeEvidence.evidenceSets.flatMap(set => set.paths.map(item => item.path))
+    return actionFingerprint({ paths, sources: changeEvidence.evidenceSets.map(set => set.sourceDigest) })
+  }
   if (changeEvidence.evidenceSet) {
     const paths = changeEvidence.evidenceSet.paths.map(item => item.path)
     return actionFingerprint({ paths, source: changeEvidence.evidenceSet.sourceDigest })
