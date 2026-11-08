@@ -102,6 +102,7 @@ slices:
       - npm run type-check, npm run lint and npm run test:unit -- --run in frontend
       - ChallengeCompletionApiTest covers guest 401, non-owner 404, unknown fields 422, non-today date 422, replay, idempotency reuse, stale epoch and write fence problem details
     verification:
+      canonical_applicability: APPLICABLE
       status: INCOMPLETE
       canonical:
         status: INCOMPLETE
