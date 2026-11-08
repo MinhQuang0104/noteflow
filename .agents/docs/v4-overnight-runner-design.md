@@ -199,7 +199,8 @@ Measuring where real runs stop is the input to the stage 2 decision.
 
 | # | Decision |
 |---|---|
-| M0-1 | Backend recipes are written **on demand**: a feature map and verification recipe only for the backend features the next queued Stories touch. The first is Story 2.2's challenge, daily-record and completion backend. Its checks are focused `scripts/local.ps1 test` filters, `pint` and `phpstan`. |
+| M0-1 | Backend recipes are written **on demand, at Story planning time on `main`, before `start_story`**, following the Story 1.7 precedent (`3721785`). The planning commit adds the feature map, the verification recipe and stub files for new paths. The kernel reads recipes from the Story's own checkout (`check-verification.mjs` `loadRecipe`), and a started Story keeps its pinned policy, so a recipe added later never reaches it. `prepare` refuses a Story whose slice scope paths are not covered by a recipe. The first backend recipe is written for the next backend Story queued. Checks: focused `scripts/local.ps1 test` filters, `pint` and `phpstan`. |
+| M0-1b | Story 2.2 does not get a recipe. The owner revokes its autopilot (permanent for that Story) and finishes it through the manual owner-review flow. |
 | M0-2 | Run a concurrency smoke test: two linked worktrees running backend tests at the same time. If it passes, stop inferring `backend-test-db` at claim for linked worktrees, as a separate small `main` change. `e2e-db` stays, because concurrent E2E is not proven. |
 | M0-3 | `prepare` creates Story worktrees through **Orca**, so the owner can see them and their Lead/AGY terminals from the phone. |
 
@@ -216,7 +217,8 @@ Measuring where real runs stop is the input to the stage 2 decision.
 
 | Step | Content | Gate |
 |---|---|---|
-| M0 | (a) Story 2.2 backend feature map + recipe on `main`; (b) concurrent backend-test smoke, then retire `backend-test-db` for linked worktrees if it passes | `test:v4`; recipe yields canonical PASS on Story 2.2 slice A; smoke evidence |
+| M0 | (a) Owner revokes Story 2.2 autopilot; (b) concurrent backend-test smoke, then retire `backend-test-db` for linked worktrees if it passes | Owner; smoke evidence; `test:v4` |
+| M2 add | `prepare` recipe-coverage refusal (M0-1) | Test: uncovered slice path refuses the Story |
 | M1 | K7 `move-worker-contract.mjs` + `agy-executor.md` step 6; `overnight-settings.json`; deny-rule tests | `test:v4`; each deny blocks; AGY delivery and Story commands pass |
 | M2 | `v4-overnight.mjs prepare` / `run`: preflight, loop, heartbeat, baseline, report | `test:v4`; tests: STOP routing, deadline, every baseline violation stops the run, never calls owner operations |
 | M3 | Pilot: one night with 1–2 LOW / AGY-heavy Stories | Owner reads the report, runs the morning flow |
