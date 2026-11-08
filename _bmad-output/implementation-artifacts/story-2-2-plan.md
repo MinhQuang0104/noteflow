@@ -119,7 +119,7 @@ slices:
         vendor: null
         independent: false
   - id: C
-    status: checkpointed
+    status: reviewed
     baseline_commit: 211981d3157737b674bdf0d5ac34cdb50c56383c
     checkpoint_commit: 0364a9eeb6791eba385cadb589f0132204aa1899
     subject_digest: sha256:f40d69357d59b6edcf0712231d1e29afbdfe542db6281c068ab3e65a1a835ab5
@@ -128,6 +128,12 @@ slices:
       implementation:
         path: _bmad-output/implementation-artifacts/receipts/story-2-2/C-implementation.json
         digest: sha256:3e5014c90bbf35022b53b00c705742963ea6425306a841fa9ebc2c964741c7ba
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-2-2/C-verification.json
+        digest: sha256:d9733f98b7f185e477c40737468f1a67e40bda624d0ad14351691968a57a0f58
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-2-2/C-review.json
+        digest: sha256:fc0705f7c7a0261a5d1307202cf740b60f65385c8b1396b2e4a3d1bced269cdc
     task_refs: [T-4]
     depends_on: [B]
     executor: agy
@@ -142,11 +148,28 @@ slices:
       - npm run test:unit -- --run src/views/__tests__/today.spec.ts src/views/__tests__/account-time.spec.ts in frontend
       - today.spec.ts proves the row renders name, Done/target this week and today's state from projection fields only, one tap sends a single Done command without journal, saved appears only after the acknowledgement, a failed request keeps the previous state with retry, and an already-done day shows Done without a second request
       - powershell.exe -File scripts/local.ps1 e2e from the Story worktree after the slice checkpoint
+    verification:
+      status: PASS
+      canonical:
+        status: PASS
+      escalation:
+        decision: REVIEW_REQUIRED
+      progression_eligible: true
+      review_disclosure: owner exact-scope review of an AGY-authored slice; canonical today-view recipe PASS after the owner-approved anchor refresh 56d2d1e
+    review:
+      freshness: FRESH_CANDIDATE
+      judgment: APPROVE
+      reviewed_commit: 0364a9eeb6791eba385cadb589f0132204aa1899
+      risk_context_digest: sha256:ce0a172d5ac363143289305293f15134bc509213d4cee12eb1df950e38530a32
+      reviewer:
+        type: human
+        vendor: null
+        independent: false
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: verify_slice
-  target: C
+  kind: finalize_story
+  target: story
 autopilot:
   schema_version: 1
   authorized_at: "2026-10-25T05:19:35.262Z"
