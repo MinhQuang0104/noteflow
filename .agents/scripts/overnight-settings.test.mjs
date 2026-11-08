@@ -43,3 +43,17 @@ test('AGY contract move uses the K7 helper instead of inline node eval', () => {
   assert.doesNotMatch(executor, /node -e/)
   assert.ok(allow.includes('Bash(node .agents/scripts/move-worker-contract.mjs *)'))
 })
+
+// M3 pilot 2026-11-08: the first child could not run any backend check.
+test('overnight child settings allow the spelled check commands and docker exec only into test containers', () => {
+  for (const rule of [
+    'Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/local.ps1 test)',
+    'Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/local.ps1 e2e)',
+    'Bash(MSYS_NO_PATHCONV=1 docker exec -w /workspace/backend noteflow-test-* php artisan test *)',
+    'Bash(npm --prefix frontend run *)',
+  ]) assert.ok(allow.includes(rule), rule)
+  for (const rule of allow.filter(item => item.includes('docker exec'))) {
+    assert.match(rule, /^Bash\(MSYS_NO_PATHCONV=1 docker exec -w \/workspace\/backend noteflow-test-\* (php artisan test|vendor\/bin\/pint|composer analyse)/, rule)
+  }
+  assert.equal(allow.some(rule => /^Bash\((MSYS_NO_PATHCONV=1 )?docker (exec|run) \*/.test(rule)), false)
+})

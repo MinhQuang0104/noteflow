@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 
 import {
-  authorizeCommand, baselineViolations, captureBaseline, childResult, coveredPaths, humanEvidence,
+  authorizeCommand, baselineViolations, captureBaseline, childPrompt, childResult, coveredPaths, humanEvidence,
   prepare, run, runStory, uncoveredSlicePaths, validateQueue,
 } from './v4-overnight.mjs'
 
@@ -123,6 +123,21 @@ test('overnight authorize command is printed for the owner with the Runner autho
 test('overnight child result parsing takes the last result line and defaults to unknown', () => {
   assert.deepEqual(childResult('x\nOVERNIGHT_RESULT DONE first\nmore\nOVERNIGHT_RESULT HUMAN_REVIEW_REQUIRED same lead review'), { status: 'HUMAN_REVIEW_REQUIRED', reason: 'same lead review' })
   assert.deepEqual(childResult('no marker'), { status: 'UNKNOWN', reason: 'no result line' })
+})
+
+// M3 pilot 2026-11-08: the first child chained commands, read the canonical
+// checkout and spelled local.ps1 without -ExecutionPolicy, so every check was denied.
+test('overnight child prompt spells allowlisted check commands and forbids chaining and the canonical checkout', () => {
+  const prompt = childPrompt({ id: '4.1', worktree: 'C:/w/story-4-1', generation: 1 }, { next_action: { kind: 'implement_slice' } }, 'abc')
+  for (const text of [
+    'one command per Bash call: no ;, &&, || or pipes, and no echo $?',
+    'Read, Glob and Grep instead of cat, ls, find',
+    'Do not read the canonical checkout',
+    'powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/local.ps1 test',
+    'MSYS_NO_PATHCONV=1 docker exec -w /workspace/backend <container> php artisan test --filter=<Name>',
+    'npm --prefix frontend run <script>',
+    'stop with BLOCKED and quote the exact denied command',
+  ]) assert.ok(prompt.includes(text), text)
 })
 
 test('overnight human evidence changes only when human, approval or autopilot records change', () => {

@@ -251,6 +251,10 @@ export function childPrompt(story, status, head) {
     `Run: node .agents/scripts/v4-story-runner.mjs autopilot-status ${story.id} --expected-head ${head} --lead-generation ${story.generation}`,
     `If it returns CONTINUE, load only the action contract for next_action (${status.next_action?.kind}) and run that one action to its next durable state, passing --lead-generation ${story.generation} to Lead writes. Then stop.`,
     'Never run owner operations, never integrate, push, commit by hand, or edit control-plane or BMAD files. If the action reaches a human or blocked stop, report it and stop.',
+    'Permissions are a fixed allowlist with no prompts. Run exactly one command per Bash call: no ;, &&, || or pipes, and no echo $? (the exit code is reported to you). Use Read, Glob and Grep instead of cat, ls, find or head.',
+    'Stay inside this worktree. Do not read the canonical checkout: the driver already checked its .agent-state pointer, and this worktree has none.',
+    'Checks, spelled exactly: powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/local.ps1 test (or e2e); focused backend runs as MSYS_NO_PATHCONV=1 docker exec -w /workspace/backend <container> php artisan test --filter=<Name>, and the same prefix with vendor/bin/pint --test or composer analyse, where <container> is the noteflow-test-*-backend-test-1 name from docker ps; frontend and e2e scripts as npm --prefix frontend run <script> and npm --prefix tests/e2e run <script>.',
+    'If a needed command is still denied, stop with BLOCKED and quote the exact denied command; do not try variants.',
     'End your reply with exactly one line: OVERNIGHT_RESULT <DONE|HUMAN_REVIEW_REQUIRED|HUMAN_REQUIRED|NEEDS_HUMAN|BLOCKED|FAILED> <short reason>',
   ].join('\n')
 }

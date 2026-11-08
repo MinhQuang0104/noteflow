@@ -31,7 +31,15 @@
       "Bash(git merge-base *)",
       "Bash(git worktree list *)",
       "Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/local.ps1 test *)",
-      "Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/local.ps1 e2e *)"
+      "Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/local.ps1 e2e *)",
+      "Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/local.ps1 test)",
+      "Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/local.ps1 e2e)",
+      "Bash(MSYS_NO_PATHCONV=1 docker exec -w /workspace/backend noteflow-test-* php artisan test *)",
+      "Bash(MSYS_NO_PATHCONV=1 docker exec -w /workspace/backend noteflow-test-* vendor/bin/pint *)",
+      "Bash(MSYS_NO_PATHCONV=1 docker exec -w /workspace/backend noteflow-test-* composer analyse*)",
+      "Bash(docker ps *)",
+      "Bash(npm --prefix frontend run *)",
+      "Bash(npm --prefix tests/e2e run *)"
     ],
     "deny": [
       "Bash(*--approve-exact-scope*)",
