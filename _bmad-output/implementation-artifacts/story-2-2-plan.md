@@ -8,7 +8,7 @@ upstream_epic:
   path: docs/product/epics.md
   section_digest: sha256:f9eed2011ff42b128a8c20089e6c0c002b696294c5d052f9fe534833398bdb13
 sprint_key: 2-2-xem-challenge-và-done-nhanh-từ-hôm-nay
-lifecycle_snapshot: review
+lifecycle_snapshot: done
 execution_status: complete
 planning_approval:
   decision: APPROVED
@@ -193,9 +193,7 @@ human_approval:
   approved_commit: "c66ab2b5c0a391a21b4d93078b25041dc559ab46"
   approved_action: "complete_story"
   disclosures_acknowledged: true
-next_action:
-  kind: complete_story
-  target: story
+next_action: null
 autopilot:
   schema_version: 1
   authorized_at: "2026-10-25T05:19:35.262Z"

@@ -1,7 +1,7 @@
 ---
 story_id: "2.2"
 title: Xem challenge và Done nhanh từ Hôm nay
-status: review
+status: done
 ---
 
 # Story 2.2: Xem challenge và Done nhanh từ Hôm nay
@@ -122,4 +122,5 @@ As a chủ tài khoản, I want xem tiến độ và Done tại Hôm nay, So tha
 ### Change Log
 
 - Finalization recorded for Human Gate: in-progress -> review; next action complete_story.
+- Human approval recorded for the exact review scope: review -> done; next action terminal.
 <!-- v4:completion:end -->
