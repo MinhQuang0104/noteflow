@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "featureId": "notebooks-backend",
+  "featureMap": ".agents/features/notebooks-backend.json",
+  "checks": [
+    {
+      "id": "map",
+      "cwd": ".",
+      "argv": [
+        "node",
+        ".agents/scripts/check-feature-map.mjs",
+        "check",
+        ".agents/features/notebooks-backend.json"
+      ]
+    },
+    {
+      "id": "live-backend-test",
+      "cwd": ".",
+      "argv": [
+        "powershell.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/local.ps1",
+        "test"
+      ]
+    },
+    {
+      "id": "contract-validate",
+      "cwd": "frontend",
+      "argv": [
+        "npm",
+        "run",
+        "contract:validate"
+      ]
+    }
+  ],
+  "unresolved": [
+    "pint, composer analyse and the concurrency evidence are focused Lead checks, not recipe checks.",
+    "The backend suite needs a warm worktree test runtime to stay inside the 120 s check limit."
+  ]
+}

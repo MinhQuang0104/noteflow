@@ -13,12 +13,12 @@
     "tests/e2e/playwright.config.ts"
   ],
   "anchor_blobs": {
-    "compose.local.yaml": "a19036f258c2a61a0feae60b1095a63d07e081ce",
-    "scripts/local-runtime.psm1": "ad5a4f60be81f170f1d35e6a1cb2d9d05d202584",
-    "scripts/local.ps1": "6c1f3028787795182da84e18fa8758cdb7a652d6",
-    "scripts/tests/local-runtime.Tests.ps1": "b2f6f1e5081be2f33d546e0ebd56322cd9458f2d",
-    "tests/e2e/helpers/php-runtime.ts": "34c86736ea82fd71878058fe1241c3b19a9178bd",
-    "tests/e2e/helpers/php-runtime.test.ts": "3dd1396547a7b28278098a93da75273dca3212a9",
-    "tests/e2e/playwright.config.ts": "9e7fb051e2d7397baf7ae7b733f7717dbaa7a1bc"
+    "compose.local.yaml": "a6d8e583e638e1d3d310af6cf6ba142d596c024f",
+    "scripts/local-runtime.psm1": "8527e3c3174aafe23d2c603a3baa86c1d2b6d858",
+    "scripts/local.ps1": "9740218b1553a8babffe6b8623043545cef00360",
+    "scripts/tests/local-runtime.Tests.ps1": "981592c1b20c61e83df1b6d43e2f51b3ff2eba3a",
+    "tests/e2e/helpers/php-runtime.ts": "28c9ca518659112e9441f7920de6c5066f33e910",
+    "tests/e2e/helpers/php-runtime.test.ts": "30e98bb8e4c81d19d3c5b9cd82f98f68d2a33ae7",
+    "tests/e2e/playwright.config.ts": "ee72522a99ea495964d90a46265f36479f38ba29"
   }
 }

@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "featureId": "notes-view",
+  "featureMap": ".agents/features/notes-view.json",
+  "cwd": "frontend",
+  "checks": [
+    {
+      "id": "map",
+      "cwd": ".",
+      "argv": [
+        "node",
+        ".agents/scripts/check-feature-map.mjs",
+        "check",
+        ".agents/features/notes-view.json"
+      ]
+    },
+    {
+      "id": "type-check",
+      "argv": [
+        "npm",
+        "run",
+        "type-check"
+      ]
+    },
+    {
+      "id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ]
+    },
+    {
+      "id": "mapped-tests",
+      "argv": [
+        "npm",
+        "run",
+        "test:unit",
+        "--",
+        "--run",
+        "src/views/__tests__/notes.spec.ts",
+        "src/router/__tests__/router.spec.ts"
+      ]
+    }
+  ],
+  "unresolved": [
+    "E2E (tests/e2e/notebooks.spec.ts, db-helper.php) runs longer than the 120 s check limit and is focused Lead evidence."
+  ]
+}

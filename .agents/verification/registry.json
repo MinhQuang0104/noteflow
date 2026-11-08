@@ -25,6 +25,21 @@
       "featureId": "local-test-runtime-guards",
       "path": ".agents/verification/local-test-runtime-guards.json",
       "enabled": true
+    },
+    {
+      "featureId": "notebooks-backend",
+      "path": ".agents/verification/notebooks-backend.json",
+      "enabled": true
+    },
+    {
+      "featureId": "notebooks-client",
+      "path": ".agents/verification/notebooks-client.json",
+      "enabled": true
+    },
+    {
+      "featureId": "notes-view",
+      "path": ".agents/verification/notes-view.json",
+      "enabled": true
     }
   ]
 }

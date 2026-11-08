@@ -14,9 +14,9 @@
     "frontend/src/stores/auth.ts"
   ],
   "anchor_blobs": {
-    "frontend/src/views/TodayView.vue": "6193970017a41f3af329814407f24e89178cf3c7",
-    "frontend/src/views/__tests__/today.spec.ts": "97d3f0b1deac90322ca3eca3f808047efe9f049b",
-    "frontend/src/views/__tests__/account-time.spec.ts": "10600cebc826f3896f59f48d6ff8f86356b30898",
+    "frontend/src/views/TodayView.vue": "591241af78f5d6a904a0f364ec99458c12dd5990",
+    "frontend/src/views/__tests__/today.spec.ts": "364c47ef4eee84f8ededffca203a074e2d057dbf",
+    "frontend/src/views/__tests__/account-time.spec.ts": "4ca9fcb47939d4884fcd16839e6e24d5f4c5c627",
     "frontend/src/api/challenges.ts": "5fa839dc88046684249f6a0a9557ed69c4bdbf3a",
     "frontend/src/stores/account.ts": "d182dbf43b69fe5c0c1ee166c1eb427113bfe94e",
     "frontend/src/stores/auth.ts": "cea30a6f19cc2b404c3bb117d2cfb51417d22c76"

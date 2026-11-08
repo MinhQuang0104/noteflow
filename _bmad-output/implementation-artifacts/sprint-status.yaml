@@ -64,7 +64,7 @@ development_status:
   epic-3-retrospective: optional
 
   epic-4: backlog
-  4-1-quản-lý-vở-và-vở-mặc-định: backlog
+  4-1-quản-lý-vở-và-vở-mặc-định: ready-for-dev
   4-2-tạo-quick-note-với-title-tùy-chọn: backlog
   4-3-chỉnh-sửa-tự-lưu-và-chuyển-note-không-gián-đoạn: backlog
   4-4-chuyển-và-xóa-note-an-toàn: backlog

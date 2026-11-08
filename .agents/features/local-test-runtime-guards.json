@@ -8,7 +8,7 @@
     "scripts/tests/local-runtime-guards.Tests.ps1"
   ],
   "anchor_blobs": {
-    "docs/development/local-runtime.md": "017065bda1fe11792449de18bdbd3e3f0722670e",
-    "scripts/tests/local-runtime-guards.Tests.ps1": "aa457be4ba962faefd3a89252c41aa2250a3be01"
+    "docs/development/local-runtime.md": "339bd33c58208e3445790c12ead94db322a5a5f6",
+    "scripts/tests/local-runtime-guards.Tests.ps1": "99e2a8d059952c1c914a7baf409122e7bcc3ea53"
   }
 }

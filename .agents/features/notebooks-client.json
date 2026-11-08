@@ -1,0 +1,20 @@
+{
+  "schema_version": 2,
+  "id": "notebooks-client",
+  "purpose": "Story 4.1 slice A: generated contract types and the typed notebooks client.",
+  "scope_boundary": "Proves typed client behavior and generated-type freshness; does not prove backend behavior or the Notes UI.",
+  "covered_paths": [
+    "frontend/src/api/schema.generated.ts",
+    "frontend/src/api/notebooks.ts",
+    "frontend/src/api/__tests__/notebooks.spec.ts"
+  ],
+  "dependencies": [
+    "contracts/openapi.yaml"
+  ],
+  "anchor_blobs": {
+    "frontend/src/api/schema.generated.ts": "f3a52e3435270494995e1b466bb051d1776f89bb",
+    "frontend/src/api/notebooks.ts": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+    "frontend/src/api/__tests__/notebooks.spec.ts": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+    "contracts/openapi.yaml": "882b6b4b7c0d5732dceab66bc16a487e424ca1f9"
+  }
+}

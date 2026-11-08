@@ -1,0 +1,22 @@
+{
+  "schema_version": 2,
+  "id": "notes-view",
+  "purpose": "Story 4.1 slice B: notebook column of the Notes workspace, the /notes route and the notebook e2e path.",
+  "scope_boundary": "Proves the Notes view and router unit tests, type-check and lint; does not prove e2e, backend behavior or the client.",
+  "covered_paths": [
+    "frontend/src/views/NotesView.vue",
+    "frontend/src/router/index.ts",
+    "frontend/src/views/__tests__/notes.spec.ts",
+    "frontend/src/router/__tests__/router.spec.ts",
+    "tests/e2e/notebooks.spec.ts",
+    "tests/e2e/helpers/db-helper.php"
+  ],
+  "anchor_blobs": {
+    "frontend/src/views/NotesView.vue": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+    "frontend/src/router/index.ts": "444ed938584ed7e32128ab021728ad00ad4a84dd",
+    "frontend/src/views/__tests__/notes.spec.ts": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+    "frontend/src/router/__tests__/router.spec.ts": "36b8fbe37d977d9e467d97626b6227cb77232c27",
+    "tests/e2e/notebooks.spec.ts": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+    "tests/e2e/helpers/db-helper.php": "aec2b8967b77355a00da5bf7d5f5c4109aa9a03e"
+  }
+}
