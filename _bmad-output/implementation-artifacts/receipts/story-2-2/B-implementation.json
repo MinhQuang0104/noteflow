@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "story_id": "2.2",
+  "slice_id": "B",
+  "kind": "implementation",
+  "checkpoint_commit": "58888d0001f28f324aaa8de05cf9202271f86aab",
+  "baseline_commit": "ba050ef727d526a1c19140cc2b2a3f025fc31e4a",
+  "subject_digest": "sha256:f40d69357d59b6edcf0712231d1e29afbdfe542db6281c068ab3e65a1a835ab5",
+  "created_from_head": "58888d0001f28f324aaa8de05cf9202271f86aab",
+  "changed_paths_sha256": "sha256:cae37c9d15e4cd5fe33e1dabcd78b6bafe2e79db577dd0845dbd09607b0f689c",
+  "commands": [
+    {
+      "command": "powershell.exe -NoProfile -File scripts/local.ps1 test",
+      "exit_code": 0,
+      "tool": "Pest via Docker Compose backend-test",
+      "environment": "Story worktree C:/Users/ACER/orca/workspaces/New_Project_My_Note/story-2-2; Windows; Docker test runtime noteflow-test-421c626b4776 (PHP 8.4, PostgreSQL 17); 127 passed (798 assertions), no warnings"
+    },
+    {
+      "command": "vendor/bin/pint --test",
+      "exit_code": 0,
+      "tool": "Laravel Pint",
+      "environment": "Story worktree C:/Users/ACER/orca/workspaces/New_Project_My_Note/story-2-2; Windows; Docker test runtime noteflow-test-421c626b4776 (PHP 8.4, PostgreSQL 17); backend-test container /workspace/backend"
+    },
+    {
+      "command": "composer analyse",
+      "exit_code": 0,
+      "tool": "PHPStan",
+      "environment": "Story worktree C:/Users/ACER/orca/workspaces/New_Project_My_Note/story-2-2; Windows; Docker test runtime noteflow-test-421c626b4776 (PHP 8.4, PostgreSQL 17); backend-test container /workspace/backend"
+    },
+    {
+      "command": "npm run contract:validate",
+      "exit_code": 0,
+      "tool": "Redocly CLI",
+      "environment": "Story worktree C:/Users/ACER/orca/workspaces/New_Project_My_Note/story-2-2/frontend; Windows; Node 24.21.0; npm ci from package-lock.json"
+    },
+    {
+      "command": "npm run contract:check",
+      "exit_code": 0,
+      "tool": "openapi-typescript drift check",
+      "environment": "Story worktree C:/Users/ACER/orca/workspaces/New_Project_My_Note/story-2-2/frontend; Windows; Node 24.21.0; npm ci from package-lock.json"
+    },
+    {
+      "command": "npm run type-check",
+      "exit_code": 0,
+      "tool": "vue-tsc",
+      "environment": "Story worktree C:/Users/ACER/orca/workspaces/New_Project_My_Note/story-2-2/frontend; Windows; Node 24.21.0; npm ci from package-lock.json"
+    },
+    {
+      "command": "npm run lint",
+      "exit_code": 0,
+      "tool": "oxlint + ESLint",
+      "environment": "Story worktree C:/Users/ACER/orca/workspaces/New_Project_My_Note/story-2-2/frontend; Windows; Node 24.21.0; npm ci from package-lock.json"
+    },
+    {
+      "command": "npm run test:unit -- --run",
+      "exit_code": 0,
+      "tool": "Vitest",
+      "environment": "Story worktree C:/Users/ACER/orca/workspaces/New_Project_My_Note/story-2-2/frontend; Windows; Node 24.21.0; npm ci from package-lock.json; 16 files, 175 tests passed"
+    }
+  ]
+}
