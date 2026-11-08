@@ -25,7 +25,15 @@ risk:
   flags: [security, concurrency, migration, public_contract]
 slices:
   - id: A
-    status: pending
+    status: checkpointed
+    baseline_commit: 1f39e0542326fc63c48a301a35ed8fd8088d98f5
+    checkpoint_commit: 7f2f57dbb20c92933bcf6a3f41a198146147554b
+    subject_digest: sha256:b3e5d06765225f91016f4baaa8b1eb23320e5a349b5ca088f00d41dbb827c6e8
+    changed_paths_sha256: sha256:ab5eef1b67e993c2fc6581539a2de5cf07a1ccd741a60b4bef52736aafb5e399
+    receipt_refs:
+      implementation:
+        path: _bmad-output/implementation-artifacts/receipts/story-4-1/A-implementation.json
+        digest: sha256:aaef0400e1884dc5f3143e1fa80ff047a979a771146950603b1c487bcb64e533
     task_refs: [T-1, T-2, T-3]
     depends_on: []
     executor: lead
@@ -64,7 +72,7 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: implement_slice
+  kind: verify_slice
   target: A
 autopilot:
   schema_version: 1
