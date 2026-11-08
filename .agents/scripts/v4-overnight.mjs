@@ -204,8 +204,18 @@ export function humanEvidence(worktree, storyId) {
   const planFile = path.join(worktree, planRelative(storyId))
   const plan = existsSync(planFile) ? frontmatter(readFileSync(planFile, 'utf8')) : null
   const receiptsDir = path.join(worktree, '_bmad-output/implementation-artifacts/receipts', storyToken(storyId))
-  const receipts = walkFiles(receiptsDir).map(file => [path.relative(worktree, file).replaceAll('\\', '/'), readFileSync(file, 'utf8')])
-    .filter(([, text]) => /"human"|human_approval|approve-exact-scope|owner/i.test(text)).map(([name, text]) => [name, sha256(text)])
+  // Structural, like the Plan: a receipt counts only through human/approval/
+  // autopilot/owner keys or a {type: "human"} node. Matching the raw text flagged
+  // every implementation receipt naming a test such as ProvisionOwnerCommandTest
+  // (M3 pilot, 2026-11-08). An unparseable receipt is hashed whole.
+  const receipts = walkFiles(receiptsDir).map(file => {
+    const name = path.relative(worktree, file).replaceAll('\\', '/')
+    const text = readFileSync(file, 'utf8')
+    let parsed
+    try { parsed = JSON.parse(text) } catch { return [name, sha256(text)] }
+    const nodes = humanNodes(parsed)
+    return nodes.length ? [name, sha256(JSON.stringify(nodes))] : null
+  }).filter(Boolean)
   return sha256(JSON.stringify({ plan: humanNodes(plan), receipts }))
 }
 

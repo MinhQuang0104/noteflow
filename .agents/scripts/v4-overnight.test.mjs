@@ -150,8 +150,17 @@ test('overnight human evidence changes only when human, approval or autopilot re
     f.write(f.worktree, file, planText('human_approval:\n  decision: APPROVED\n'))
     assert.notEqual(humanEvidence(f.worktree, '9.1'), before)
     f.write(f.worktree, file, planText())
+    // M3 pilot: an implementation receipt naming ProvisionOwnerCommandTest is not human evidence.
+    f.write(f.worktree, '_bmad-output/implementation-artifacts/receipts/story-9-1/A-implementation.json',
+      '{"kind":"implementation","commands":[{"command":"php artisan test --filter=ProvisionOwnerCommandTest","exit_code":0}]}')
+    assert.equal(humanEvidence(f.worktree, '9.1'), before)
     f.write(f.worktree, '_bmad-output/implementation-artifacts/receipts/story-9-1/A-review.json', '{"reviewer":{"type":"human"}}')
-    assert.notEqual(humanEvidence(f.worktree, '9.1'), before)
+    const reviewed = humanEvidence(f.worktree, '9.1')
+    assert.notEqual(reviewed, before)
+    f.write(f.worktree, '_bmad-output/implementation-artifacts/receipts/story-9-1/A-review.json', '{"reviewer":{"type":"human"},"human_approval":{"decision":"APPROVED"}}')
+    assert.notEqual(humanEvidence(f.worktree, '9.1'), reviewed)
+    f.write(f.worktree, '_bmad-output/implementation-artifacts/receipts/story-9-1/B-review.json', 'not json, owner approved')
+    assert.notEqual(humanEvidence(f.worktree, '9.1'), reviewed)
   } finally { f.cleanup() }
 })
 
