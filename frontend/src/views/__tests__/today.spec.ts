@@ -10,6 +10,13 @@ import { useAccountStore } from '../../stores/account'
 import { useAuthStore } from '../../stores/auth'
 import TodayView from '../TodayView.vue'
 
+// List rows carry the shared week projection and today state (Story 2.2).
+const listItem = (challenge: challengesApi.Challenge): challengesApi.ChallengeListItem => ({
+  ...challenge,
+  week_progress: { start_date: '2026-09-14', end_date: '2026-09-20', done_days: 0, target_days: challenge.target_days },
+  today: { local_date: '2026-09-19', is_done: false, completion_version: 0 },
+})
+
 let queryClient: QueryClient
 
 const challenge = {
@@ -70,7 +77,7 @@ beforeEach(() => {
 })
 
 test('shows the account-day challenge list with an entry point to the optional journal detail', async () => {
-  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: [challenge] })
+  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: [challenge].map(listItem) })
   const router = createTestRouter()
   await router.push('/today')
 

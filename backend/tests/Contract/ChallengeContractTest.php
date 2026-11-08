@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Modules\Identity\Contracts\Clock;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -351,4 +352,96 @@ test('journal conflict contract rejects a missing or wrong-family snapshot', fun
         expect(fn () => $validator->validate('PUT', $path, new Response(409, $headers, json_encode($payload, JSON_THROW_ON_ERROR))))
             ->toThrow(ValidationFailed::class);
     }
+});
+
+function completionContractClock(): void
+{
+    // Account-today in Asia/Ho_Chi_Minh is 2026-09-21.
+    app()->instance(Clock::class, new class implements Clock
+    {
+        public function now(): DateTimeImmutable
+        {
+            return new DateTimeImmutable('2026-09-20T20:00:00+00:00');
+        }
+    });
+}
+
+function completionContractChallenge(User $owner): string
+{
+    $id = (string) Str::uuid();
+    DB::table('challenges')->insert([
+        'id' => $id,
+        'owner_id' => $owner->id,
+        'name' => 'Completion contract',
+        'start_date' => '2026-09-19',
+        'row_version' => 1,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    return $id;
+}
+
+test('challenge list with week progress and today state satisfies OpenAPI contract', function () {
+    completionContractClock();
+    $owner = createContractOwner();
+    $id = completionContractChallenge($owner);
+    $validator = challengeContractValidator();
+
+    $list = $this->actingAs($owner)->getJson('/api/v1/challenges');
+    $list->assertOk()->assertJsonPath('challenges.0.id', $id);
+    $validator->validate('GET', '/api/v1/challenges', challengePsrResponse($list));
+
+    $this->actingAs($owner)->putJson("/api/v1/challenges/{$id}/completions/2026-09-21", [
+        'command_id' => (string) Str::uuid(), 'data_epoch' => 1, 'is_done' => true,
+    ])->assertOk();
+    $done = $this->actingAs($owner)->getJson('/api/v1/challenges');
+    $done->assertJsonPath('challenges.0.today.is_done', true);
+    $validator->validate('GET', '/api/v1/challenges', challengePsrResponse($done));
+});
+
+test('completion Done, replay, problem, validation, fence and access branches satisfy OpenAPI contract', function () {
+    completionContractClock();
+    $owner = createContractOwner();
+    $other = User::factory()->create(['is_owner' => false]);
+    $id = completionContractChallenge($owner);
+    $validator = challengeContractValidator();
+    $path = '/api/v1/challenges/{id}/completions/{date}';
+    $url = "/api/v1/challenges/{$id}/completions/2026-09-21";
+    $command = ['command_id' => (string) Str::uuid(), 'data_epoch' => 1, 'is_done' => true];
+
+    assertChallengeContractResponse($validator, 'PUT', $path, $this->putJson($url, $command), 401);
+    assertChallengeContractResponse($validator, 'PUT', $path, $this->actingAs($other)->putJson($url, $command), 403);
+    $this->actingAsGuest('web');
+    $this->actingAsGuest('sanctum');
+
+    assertChallengeContractResponse($validator, 'PUT', $path, $this->actingAs($owner)->putJson($url, $command), 200);
+    assertChallengeContractResponse($validator, 'PUT', $path, $this->actingAs($owner)->putJson($url, $command), 200);
+    $otherChallenge = completionContractChallenge($owner);
+    assertChallengeContractResponse($validator, 'PUT', $path,
+        $this->actingAs($owner)->putJson("/api/v1/challenges/{$otherChallenge}/completions/2026-09-21", $command), 409);
+    assertChallengeContractResponse($validator, 'PUT', $path,
+        $this->actingAs($owner)->putJson('/api/v1/challenges/'.Str::uuid().'/completions/2026-09-21', [...$command, 'command_id' => (string) Str::uuid()]), 404);
+    assertChallengeContractResponse($validator, 'PUT', $path,
+        $this->actingAs($owner)->putJson("/api/v1/challenges/{$id}/completions/2026-09-20", [...$command, 'command_id' => (string) Str::uuid()]), 422);
+
+    DB::table('account_states')->where('owner_id', $owner->id)->update(['data_epoch' => 2]);
+    assertChallengeContractResponse($validator, 'PUT', $path,
+        $this->actingAs($owner)->putJson($url, [...$command, 'command_id' => (string) Str::uuid()]), 409);
+    DB::table('account_states')->where('owner_id', $owner->id)->update(['write_state' => 'locked_for_import']);
+    assertChallengeContractResponse($validator, 'PUT', $path,
+        $this->actingAs($owner)->putJson($url, ['command_id' => (string) Str::uuid(), 'data_epoch' => 2, 'is_done' => true]), 423);
+});
+
+test('completion contract rejects a result without the shared week projection', function () {
+    $validator = challengeContractValidator();
+    $headers = ['Content-Type' => 'application/json', 'Cache-Control' => 'private, no-store'];
+    $payload = [
+        'completion' => ['challenge_id' => (string) Str::uuid(), 'local_date' => '2026-09-21', 'is_done' => true, 'completion_version' => 1],
+        'account_revision' => 1,
+        'data_epoch' => 1,
+    ];
+
+    expect(fn () => $validator->validate('PUT', '/api/v1/challenges/{id}/completions/{date}', new Response(200, $headers, json_encode($payload, JSON_THROW_ON_ERROR))))
+        ->toThrow(ValidationFailed::class);
 });

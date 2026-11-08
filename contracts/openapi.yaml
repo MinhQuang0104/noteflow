@@ -386,6 +386,72 @@ paths:
           $ref: '#/components/responses/ValidationError'
         '423':
           $ref: '#/components/responses/StateProblemDetails'
+  /api/v1/challenges/{id}/completions/{date}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: date
+        in: path
+        required: true
+        description: Must be the server-authoritative account date; other dates are rejected until backfill is supported.
+        schema:
+          type: string
+          format: date
+    put:
+      operationId: markChallengeCompletion
+      summary: Mark account-today Done without a journal
+      description: >-
+        Repeating Done for a day that is already Done succeeds without a new completion,
+        completion version or account revision. An identical command replays its stored
+        acknowledgement; a reused command ID with a different payload is rejected.
+      security:
+        - sanctumCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarkCompletionRequest'
+      responses:
+        '200':
+          description: Done recorded, already Done, or prior command acknowledgement replayed
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompletionMutationResult'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          description: Authenticated identity is not the provisioned owner
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Challenge not found
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          $ref: '#/components/responses/StateProblemDetails'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '423':
+          $ref: '#/components/responses/StateProblemDetails'
 components:
   securitySchemes:
     sanctumCookie:
@@ -731,6 +797,89 @@ components:
         row_version:
           type: integer
           minimum: 1
+    WeekProgress:
+      type: object
+      additionalProperties: false
+      description: Shared current-week projection; clients render it and never derive counts.
+      required:
+        - start_date
+        - end_date
+        - done_days
+        - target_days
+      properties:
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        done_days:
+          type: integer
+          minimum: 0
+          maximum: 7
+        target_days:
+          type: integer
+          minimum: 1
+          maximum: 7
+    TodayCompletion:
+      type: object
+      additionalProperties: false
+      required:
+        - local_date
+        - is_done
+        - completion_version
+      properties:
+        local_date:
+          type: string
+          format: date
+        is_done:
+          type: boolean
+        completion_version:
+          type: integer
+          minimum: 0
+    ChallengeListItem:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - description
+        - start_date
+        - target_days
+        - row_version
+        - created_at
+        - updated_at
+        - week_progress
+        - today
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        start_date:
+          type: string
+          format: date
+        target_days:
+          type: integer
+          minimum: 1
+          maximum: 7
+        row_version:
+          type: integer
+          minimum: 1
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        week_progress:
+          $ref: '#/components/schemas/WeekProgress'
+        today:
+          $ref: '#/components/schemas/TodayCompletion'
     ChallengeListResult:
       type: object
       additionalProperties: false
@@ -740,7 +889,65 @@ components:
         challenges:
           type: array
           items:
-            $ref: '#/components/schemas/Challenge'
+            $ref: '#/components/schemas/ChallengeListItem'
+    CompletionSnapshot:
+      type: object
+      additionalProperties: false
+      required:
+        - challenge_id
+        - local_date
+        - is_done
+        - completion_version
+      properties:
+        challenge_id:
+          type: string
+          format: uuid
+        local_date:
+          type: string
+          format: date
+        is_done:
+          type: boolean
+        completion_version:
+          type: integer
+          minimum: 1
+    CompletionMutationResult:
+      type: object
+      additionalProperties: false
+      required:
+        - completion
+        - week_progress
+        - account_revision
+        - data_epoch
+      properties:
+        completion:
+          $ref: '#/components/schemas/CompletionSnapshot'
+        week_progress:
+          $ref: '#/components/schemas/WeekProgress'
+        account_revision:
+          type: integer
+          minimum: 0
+        data_epoch:
+          type: integer
+          minimum: 1
+    MarkCompletionRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - command_id
+        - data_epoch
+        - is_done
+      properties:
+        command_id:
+          type: string
+          format: uuid
+        data_epoch:
+          type: integer
+          minimum: 1
+        is_done:
+          type: boolean
+          enum:
+            - true
+          description: Only Done is supported; undo belongs to Story 2.4.
     ChallengeDetailResult:
       type: object
       additionalProperties: false

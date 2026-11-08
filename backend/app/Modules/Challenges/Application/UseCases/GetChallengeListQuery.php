@@ -7,7 +7,11 @@ use Illuminate\Support\Facades\DB;
 
 final readonly class GetChallengeListQuery
 {
+    public function __construct(private GetCurrentWeekProgressQuery $weekProgressQuery) {}
+
     /**
+     * Week progress and today's state come from the shared projection only.
+     *
      * @return array<int, array{
      *     id: string,
      *     name: string,
@@ -17,6 +21,8 @@ final readonly class GetChallengeListQuery
      *     row_version: int,
      *     created_at: string,
      *     updated_at: string,
+     *     week_progress: array{start_date: string, end_date: string, done_days: int, target_days: int},
+     *     today: array{local_date: string, is_done: bool, completion_version: int},
      * }>
      */
     public function execute(int $ownerId): array
@@ -30,7 +36,7 @@ final readonly class GetChallengeListQuery
             return [];
         }
 
-        $challengeIds = $challenges->pluck('id')->all();
+        $challengeIds = $challenges->pluck('id')->map(fn ($id): string => (string) $id)->all();
 
         // Get latest effective target period for each challenge, scoped by owner
         $targetPeriods = DB::table('challenge_target_periods')
@@ -40,15 +46,18 @@ final readonly class GetChallengeListQuery
             ->get()
             ->groupBy('challenge_id');
 
+        $projection = $this->weekProgressQuery->execute($ownerId, $challengeIds);
+
         $result = [];
         foreach ($challenges as $challenge) {
-            $periods = $targetPeriods->get((string) $challenge->id);
+            $id = (string) $challenge->id;
+            $periods = $targetPeriods->get($id);
             $targetDays = ($periods !== null && $periods->isNotEmpty())
                 ? (int) $periods->first()->target_days
                 : 1;
 
             $result[] = [
-                'id' => (string) $challenge->id,
+                'id' => $id,
                 'name' => (string) $challenge->name,
                 'description' => $challenge->description !== null ? (string) $challenge->description : null,
                 'start_date' => (string) $challenge->start_date,
@@ -56,6 +65,8 @@ final readonly class GetChallengeListQuery
                 'row_version' => (int) $challenge->row_version,
                 'created_at' => (new DateTimeImmutable((string) $challenge->created_at))->format('c'),
                 'updated_at' => (new DateTimeImmutable((string) $challenge->updated_at))->format('c'),
+                'week_progress' => $projection[$id]['week_progress'],
+                'today' => $projection[$id]['today'],
             ];
         }
 

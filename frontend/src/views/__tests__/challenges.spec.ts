@@ -11,6 +11,13 @@ import { useAuthStore } from '../../stores/auth'
 import { useSyncStore } from '../../stores/sync'
 import ChallengesView from '../ChallengesView.vue'
 
+// List rows carry the shared week projection and today state (Story 2.2).
+const listItem = (challenge: challengesApi.Challenge): challengesApi.ChallengeListItem => ({
+  ...challenge,
+  week_progress: { start_date: '2026-09-14', end_date: '2026-09-20', done_days: 0, target_days: challenge.target_days },
+  today: { local_date: '2026-09-19', is_done: false, completion_version: 0 },
+})
+
 let queryClient: QueryClient
 
 beforeEach(() => {
@@ -92,7 +99,7 @@ test('challenge list exposes keyboard-operable named links and selected state', 
       updated_at: '2026-09-19T10:00:00Z',
     },
   ]
-  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges })
+  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: challenges.map(listItem) })
   const router = createTestRouter()
   await router.push('/challenges')
 
@@ -188,7 +195,7 @@ test('AC1 & AC3 — creates valid challenge and allows editing name/description 
     updated_at: '2026-09-19T10:00:00Z',
   }
 
-  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: [mockChallenge] })
+  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: [mockChallenge].map(listItem) })
   const updateSpy = vi.spyOn(challengesApi, 'updateChallengeMetadata').mockResolvedValue({
     challenge: {
       ...mockChallenge,
@@ -308,7 +315,7 @@ test('update command_id: retains command_id across unknown-outcome retry of iden
     updated_at: '2026-09-19T10:00:00Z',
   }
 
-  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: [mockChallenge] })
+  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: [mockChallenge].map(listItem) })
   const updateSpy = vi.spyOn(challengesApi, 'updateChallengeMetadata')
 
   const router = createTestRouter()
@@ -395,7 +402,7 @@ test('does not retarget an edit to a newly selected challenge while preflight is
     description: 'Mô tả B',
   }
 
-  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: [challengeA, challengeB] })
+  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: [challengeA, challengeB].map(listItem) })
   const updateSpy = vi.spyOn(challengesApi, 'updateChallengeMetadata').mockResolvedValue({
     challenge: { ...challengeA, name: 'A đã sửa', row_version: 2 },
     account_revision: 2,
@@ -446,7 +453,7 @@ test('sends only one edit command when submit is repeated during preflight', asy
     updated_at: '2026-09-19T10:00:00Z',
   }
 
-  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: [challenge] })
+  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: [challenge].map(listItem) })
   const updateSpy = vi.spyOn(challengesApi, 'updateChallengeMetadata').mockResolvedValue({
     challenge: { ...challenge, name: 'A đã sửa', row_version: 2 },
     account_revision: 2,
@@ -498,7 +505,7 @@ test('finding 4: on version conflict, preserves dirty inputs, does not advance e
     updated_at: '2026-09-19T10:00:00Z',
   }
 
-  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: [mockChallenge] })
+  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: [mockChallenge].map(listItem) })
 
   const conflictError = new challengesApi.ChallengeApiError(
     'Xung đột phiên bản.',
@@ -640,7 +647,7 @@ test('AC4 — failed background refetch does not destroy existing challenge list
 
   // Initial load succeeds
   const getSpy = vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({
-    challenges: [existingChallenge],
+    challenges: [existingChallenge].map(listItem),
   })
 
   const router = createTestRouter()
@@ -682,7 +689,7 @@ test('preserves dirty edit draft during background query refetches and alerts on
   }
 
   vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({
-    challenges: [originalChallenge],
+    challenges: [originalChallenge].map(listItem),
   })
 
   const router = createTestRouter()
@@ -711,7 +718,7 @@ test('preserves dirty edit draft during background query refetches and alerts on
     row_version: 2,
   }
   vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({
-    challenges: [updatedRemotely],
+    challenges: [updatedRemotely].map(listItem),
   })
 
   // Vue Query refetches in background
@@ -850,7 +857,7 @@ test('S14-F04 & S14-F07 — renders actionable sync error text with retry when c
     updated_at: '2026-09-19T00:00:00Z',
   }
   vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({
-    challenges: [existingChallenge],
+    challenges: [existingChallenge].map(listItem),
   })
 
   const router = createTestRouter()

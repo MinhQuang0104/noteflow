@@ -81,8 +81,48 @@ export interface components {
       "target_days": number
       "row_version": number
     }
+    "WeekProgress": {
+      "start_date": string
+      "end_date": string
+      "done_days": number
+      "target_days": number
+    }
+    "TodayCompletion": {
+      "local_date": string
+      "is_done": boolean
+      "completion_version": number
+    }
+    "ChallengeListItem": {
+      "id": string
+      "name": string
+      "description": string | null
+      "start_date": string
+      "target_days": number
+      "row_version": number
+      "created_at": string
+      "updated_at": string
+      "week_progress": components['schemas']["WeekProgress"]
+      "today": components['schemas']["TodayCompletion"]
+    }
     "ChallengeListResult": {
-      "challenges": Array<components['schemas']["Challenge"]>
+      "challenges": Array<components['schemas']["ChallengeListItem"]>
+    }
+    "CompletionSnapshot": {
+      "challenge_id": string
+      "local_date": string
+      "is_done": boolean
+      "completion_version": number
+    }
+    "CompletionMutationResult": {
+      "completion": components['schemas']["CompletionSnapshot"]
+      "week_progress": components['schemas']["WeekProgress"]
+      "account_revision": number
+      "data_epoch": number
+    }
+    "MarkCompletionRequest": {
+      "command_id": string
+      "data_epoch": number
+      "is_done": true
     }
     "ChallengeDetailResult": {
       "challenge": components['schemas']["Challenge"]
@@ -506,6 +546,71 @@ export interface operations {
       "409": {
         content: {
           "application/problem+json": components['schemas']["JournalProblemDetails"]
+        }
+      }
+      "422": {
+        content: {
+          "application/json": components['schemas']["ValidationError"]
+        }
+      }
+      "423": {
+        content: {
+          "application/problem+json": components['schemas']["StateProblemDetails"]
+        }
+      }
+    }
+  }
+  "markChallengeCompletion": {
+    path: "/api/v1/challenges/{id}/completions/{date}"
+    method: "PUT"
+    parameters: {
+      "path:id": {
+        name: "id"
+        in: "path"
+        required: true
+        schema: string
+      }
+      "path:date": {
+        name: "date"
+        in: "path"
+        required: true
+        schema: string
+      }
+    }
+    requestBody: {
+      required: true
+      content: {
+        "application/json": {
+      "command_id": string
+      "data_epoch": number
+      "is_done": true
+    }
+      }
+    }
+    responses: {
+      "200": {
+        content: {
+          "application/json": components['schemas']["CompletionMutationResult"]
+        }
+      }
+      "401": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "403": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "404": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "409": {
+        content: {
+          "application/problem+json": components['schemas']["StateProblemDetails"]
         }
       }
       "422": {

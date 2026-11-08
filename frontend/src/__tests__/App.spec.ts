@@ -13,6 +13,13 @@ import { useJournalDraftsStore } from '../stores/journalDrafts'
 import { useAuthStore } from '../stores/auth'
 import { useSyncStore } from '../stores/sync'
 
+// List rows carry the shared week projection and today state (Story 2.2).
+const listItem = (challenge: challengesApi.Challenge): challengesApi.ChallengeListItem => ({
+  ...challenge,
+  week_progress: { start_date: '2026-09-14', end_date: '2026-09-20', done_days: 0, target_days: challenge.target_days },
+  today: { local_date: '2026-09-19', is_done: false, completion_version: 0 },
+})
+
 const DATE = '2026-09-27'
 
 function deferred<T>() {
@@ -143,7 +150,7 @@ test.each(['today', 'detail', 'edit'] as const)('session expiry hides private %s
   }
   const privateSelector = surface === 'today' ? '#today-challenges-heading' : surface === 'detail' ? '#challenge-detail-name' : '#edit-name'
   if (surface !== 'today') {
-    vi.mocked(challengesApi.getChallenges).mockResolvedValue({ challenges: [challenge] })
+    vi.mocked(challengesApi.getChallenges).mockResolvedValue({ challenges: [challenge].map(listItem) })
   }
 
   await router.push(surface === 'today' ? '/today' : '/challenges')
