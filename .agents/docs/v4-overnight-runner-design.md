@@ -111,6 +111,37 @@ rather than prompted, so a gap fails safe and shows up in the report as a STOP.
 There is no separate guard hook in the MVP. The deny rules plus the night
 baseline (§3) are the controls.
 
+**Launch flags (M1, verified on Claude Code 2.1.319):**
+
+```text
+claude -p --restricted --tools "Bash,Read,Edit,Write,Glob,Grep"
+  --settings <absolute>/.agents/config/overnight-settings.json
+  --strict-mcp-config --permission-prompts none [--allowedTools <Story check commands>]
+```
+
+What these flags do:
+
+- **`--restricted`** ignores user, project and local settings files, so the
+  project `Bash(node .agents/scripts/*)` never loads. It confines file tools to
+  the working directory and refuses `bypassPermissions`.
+- **`--permission-prompts none`** denies anything that would prompt.
+- **`--allowedTools`** lets the driver add each Story's declared verification
+  commands for the run.
+
+**Probe evidence (2026-11-08, headless haiku child in the canonical checkout):**
+
+| Outcome | Commands and tools |
+|---|---|
+| Allowed | `git status --short`; `git log … && echo ok`; `scripts/local.ps1 test …`; Write to `frontend/src/…` |
+| Denied | the Runner with `--approve-exact-scope`; `git status && git push` (compound); `node -e`; `local.ps1 -Command`; unlisted `node <script>`; `npm run build`; `rm`; `touch`; `cat backend/.env`; Read of `backend/.env`; Write to `.agents/`, `_bmad-output/` and outside the worktree |
+
+Claude Code also auto-allows harmless read-only built-ins such as `echo`, even
+though they are not on the allowlist. This is accepted, because they cannot
+write or execute code.
+
+Verification checks run inside the Runner's own node process, so they do not
+need Bash rules. Only the commands the Lead reruns itself for AGY slices do.
+
 ## 3. Night baseline (tripwire)
 
 The owner is absent during a run. Some state therefore must not change at all,

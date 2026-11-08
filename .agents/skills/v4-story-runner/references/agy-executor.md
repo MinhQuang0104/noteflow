@@ -14,8 +14,8 @@ Load only when the validated current slice declares `executor: agy`.
 4. Deliver through the Antigravity loop operations in `.agents/skills/v4-story-runner/references/agy-transport.md`: create the terminal, wait for `tui-idle`, context-only dispatch with `--return-preamble`, then send one line instructing AGY to read the contract and wait with `orca orchestration check --wait --types worker_done,escalation,question`.
 5. After `worker_done`, run the mechanical gate with the contract digest:
    `node .agents/scripts/check-worker-scope.mjs check --worktree <worktree> --base <sha> --allow <entry> --contract-sha256 <contract-sha256> --forbid-commits`.
-6. Require `PASS`, then move the delivery-only contract out of the worktree scope before Runner prepare, keeping it as attempt evidence (works in any shell):
-   `node -e "const f=require('fs'),[s,d]=process.argv.slice(1);f.mkdirSync(require('path').dirname(d),{recursive:true});f.renameSync(s,d);f.rmdirSync(require('path').dirname(s))" <worktree>/.orca-contract/contract.md <worktree>/.agent-state/v4-auto/workers/<task-id>/contract-attempt-<n>.md`.
+6. Require `PASS`, then move the delivery-only contract out of the worktree scope before Runner prepare, keeping it as attempt evidence at `<worktree>/.agent-state/v4-auto/workers/<task-id>/contract-attempt-<n>.md` (works in any shell; refuses to overwrite existing evidence):
+   `node .agents/scripts/move-worker-contract.mjs move <absolute worktree> <task-id> <n>`.
 7. Rerun every declared verification command yourself in the worker worktree and retain fresh command, directory, and exit-code evidence.
 8. Check each changed path for resume evidence:
    `node .agents/scripts/check-slice-implementation.mjs check <story-id> <slice-id> --resume-path <exact-changed-path>`.

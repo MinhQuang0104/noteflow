@@ -186,6 +186,7 @@ prefix_rule(pattern=["node", ".agents/scripts/check-slice-implementation.mjs"], 
 prefix_rule(pattern=["node", ".agents/scripts/check-slice-verification.mjs"], decision="allow")
 prefix_rule(pattern=["node", ".agents/scripts/build-worker-contract.mjs"], decision="allow")
 prefix_rule(pattern=["node", ".agents/scripts/check-worker-scope.mjs"], decision="allow")
+prefix_rule(pattern=["node", ".agents/scripts/move-worker-contract.mjs"], decision="allow")
 prefix_rule(pattern=["node", ".agents/scripts/check-story-finalization.mjs"], decision="allow")
 prefix_rule(pattern=["node", ".agents/scripts/check-story-completion.mjs"], decision="allow")
 prefix_rule(pattern=["node", ".agents/scripts/start-story.mjs"], decision="allow")
