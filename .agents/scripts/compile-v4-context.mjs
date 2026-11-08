@@ -37,6 +37,7 @@ const ACTIONS = new Map([
     document: '.agents/skills/v4-story-runner/actions/implement-slice.md',
     lazy: [
       '.agents/skills/v4-story-runner/references/implementation-techniques.md',
+      '.agents/skills/v4-story-runner/references/runner-payloads.md',
       '.agents/skills/v4-story-runner/references/agy-executor.md',
       '.agents/skills/v4-story-runner/references/recovery.md',
     ],
@@ -48,7 +49,10 @@ const ACTIONS = new Map([
   ['verify_slice', {
     target: 'slice',
     document: '.agents/skills/v4-story-runner/actions/verify-slice.md',
-    lazy: ['.agents/skills/v4-story-runner/references/recovery.md'],
+    lazy: [
+      '.agents/skills/v4-story-runner/references/runner-payloads.md',
+      '.agents/skills/v4-story-runner/references/recovery.md',
+    ],
     stop: [
       'Stop after fresh verification/review evidence and one explicit successor are durably recorded.',
       'Do not fix product code, execute the successor, or change the Human Gate in this invocation.',

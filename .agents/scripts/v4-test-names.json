@@ -594,6 +594,8 @@
   "risk context structural mismatch makes review stale",
   "risk, path, and current-head mismatch do not inject advisory memory",
   "routes mapped-only, unmapped-only, and mixed scope without dropping changed paths",
+  "runner payload recipes are a lazy reference for implement and verify and are named by the router and the overnight child prompt",
+  "runner payload recipes match the kernel tokens, limits and refusal codes they cite",
   "safe line endings and trailing whitespace do not change digest",
   "same state no change",
   "same-Lead APPROVE accepts one ordered evidence set covering five changed paths",

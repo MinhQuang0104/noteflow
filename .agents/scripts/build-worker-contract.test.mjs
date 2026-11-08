@@ -27,7 +27,7 @@ function seedSources(fixture) {
     '.agents/skills/v4-story-runner/SKILL.md',
     '.agents/docs/v4-artifact-contract.md',
     '.agents/skills/v4-story-runner/actions/implement-slice.md',
-    '.agents/skills/v4-story-runner/references/implementation-techniques.md',
+    '.agents/skills/v4-story-runner/references/implementation-techniques.md', '.agents/skills/v4-story-runner/references/runner-payloads.md',
     '.agents/skills/v4-story-runner/references/agy-executor.md',
     '.agents/skills/v4-story-runner/references/recovery.md',
   ]) write(fixture.root, relative, `fixture instruction: ${relative}\n`)

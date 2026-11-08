@@ -247,6 +247,7 @@ export function childPrompt(story, status, head) {
   return [
     `Overnight runner child. You are the V4 Lead for Story ${story.id} in this worktree (${story.worktree}), registry generation ${story.generation}.`,
     'This is an explicit Story request for exactly one V4 Runner action. Read AGENTS.md and the router as usual.',
+    'Before building any Runner payload, read .agents/skills/v4-story-runner/references/runner-payloads.md in this worktree if it exists; it lists the prepare-then-act sequence, payload fields, plan_template tokens and Windows pitfalls.',
     `Run: node .agents/scripts/v4-story-runner.mjs autopilot-status ${story.id} --expected-head ${head} --lead-generation ${story.generation}`,
     `If it returns CONTINUE, load only the action contract for next_action (${status.next_action?.kind}) and run that one action to its next durable state, passing --lead-generation ${story.generation} to Lead writes. Then stop.`,
     'Never run owner operations, never integrate, push, commit by hand, or edit control-plane or BMAD files. If the action reaches a human or blocked stop, report it and stop.',
