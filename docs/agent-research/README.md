@@ -27,6 +27,8 @@ only, nothing to adopt)
 
 | Date | Note | Topic | Status |
 |---|---|---|---|
+| 2026-11-07 | [dewee-memory](2026-11-07-dewee-memory.md) | Governed memory facts, source authority, admission, shadow mode | idea |
+| 2026-11-07 | [model-tiering-sessions](2026-11-07-model-tiering-sessions.md) | Opus/Sonnet/Haiku tiers and session splitting in Claude Code | idea |
 | 2026-11-07 | [skill-library-layers](2026-11-07-skill-library-layers.md) | "8 layers" skill-library post vs Anthropic's official skills guide | adopted (research skill) / idea |
 | 2026-11-07 | [autonomy-levels](2026-11-07-autonomy-levels.md) | Autonomy scales, capability vs permission, harness recommendations | idea |
 | 2026-11-07 | [deepseek-superagent](2026-11-07-deepseek-superagent.md) | Router + workers, event triggers, mandate-based authorization | idea |

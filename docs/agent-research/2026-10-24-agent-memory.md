@@ -10,6 +10,8 @@
   [Bad Memory (arXiv 2607.14611)](https://arxiv.org/abs/2607.14611)
 - **Read:** 2026-10-24, assessed 2026-10-25
 - **Status:** rejected (no need at current scale; experience store stays dormant)
+- **See also:** [dewee-memory](2026-11-07-dewee-memory.md) (governed memory
+  facts, source authority, shadow mode before activation)
 
 ## Summary
 
