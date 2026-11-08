@@ -1,0 +1,228 @@
+{
+  "schema_version": 2,
+  "story_id": "2.2",
+  "slice_id": "B",
+  "kind": "review",
+  "checkpoint_commit": "58888d0001f28f324aaa8de05cf9202271f86aab",
+  "baseline_commit": "ba050ef727d526a1c19140cc2b2a3f025fc31e4a",
+  "subject_digest": "sha256:f40d69357d59b6edcf0712231d1e29afbdfe542db6281c068ab3e65a1a835ab5",
+  "created_from_head": "58888d0001f28f324aaa8de05cf9202271f86aab",
+  "changed_paths_sha256": "sha256:cae37c9d15e4cd5fe33e1dabcd78b6bafe2e79db577dd0845dbd09607b0f689c",
+  "commands": [
+    {
+      "command": "owner exact scope review of Story 2.2 slice B (58888d0) with Lead adversarial review 2026-11-08",
+      "exit_code": 0,
+      "tool": "reviewer",
+      "environment": "owner"
+    }
+  ],
+  "judgment": "APPROVE",
+  "questions": [
+    {
+      "id": "question-1",
+      "question": "UNMAPPED_CHANGED_PATH"
+    }
+  ],
+  "answers": [
+    {
+      "id": "question-1",
+      "answer": "Owner reviewed the exact 13-path diff ba050ef..58888d0. UNMAPPED_CHANGED_PATH: no canonical recipe covers the backend controller, list query, route, backend tests, openapi.yaml, App.spec.ts or schema.generated.ts; the mapped frontend recipes (challenge-list, journal-frontend, today-view) ran with every check PASS. Plan-declared focused checks all PASS on the checkpoint: backend-suite (local.ps1 test, 127 passed, no warnings), pint --test, composer analyse, contract:validate, contract:check, type-check, lint, test:unit (175 passed). Invariants checked: owner middleware plus owner-scoped use case (foreign challenge 404), exactly command_id/data_epoch/is_done with a JSON boolean, account-today only, replay and idempotency reuse without writes, stale epoch 409 and write fence 423 problem details, Challenge detail/mutation schemas unchanged, list rows carry the shared projection, typed client accepts only a contract-exact acknowledgement."
+    }
+  ],
+  "evidence_refs": [
+    {
+      "path": "backend/app/Http/Controllers/ChallengeCompletionController.php",
+      "unit_index": 0,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "backend/app/Modules/Challenges/Application/UseCases/GetChallengeListQuery.php",
+      "unit_index": 1,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "backend/app/Modules/Challenges/Application/UseCases/GetChallengeListQuery.php",
+      "unit_index": 2,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "backend/app/Modules/Challenges/Application/UseCases/GetChallengeListQuery.php",
+      "unit_index": 3,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "backend/app/Modules/Challenges/Application/UseCases/GetChallengeListQuery.php",
+      "unit_index": 4,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "backend/app/Modules/Challenges/Application/UseCases/GetChallengeListQuery.php",
+      "unit_index": 5,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "backend/routes/api.php",
+      "unit_index": 6,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "backend/routes/api.php",
+      "unit_index": 7,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "backend/tests/Contract/ChallengeContractTest.php",
+      "unit_index": 8,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "backend/tests/Contract/ChallengeContractTest.php",
+      "unit_index": 9,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "backend/tests/Feature/ChallengeCompletionApiTest.php",
+      "unit_index": 10,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "contracts/openapi.yaml",
+      "unit_index": 11,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "contracts/openapi.yaml",
+      "unit_index": 12,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "contracts/openapi.yaml",
+      "unit_index": 13,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "frontend/src/__tests__/App.spec.ts",
+      "unit_index": 14,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "frontend/src/__tests__/App.spec.ts",
+      "unit_index": 15,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "frontend/src/api/__tests__/challenges.spec.ts",
+      "unit_index": 16,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "frontend/src/api/__tests__/challenges.spec.ts",
+      "unit_index": 17,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "frontend/src/api/challenges.ts",
+      "unit_index": 18,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "frontend/src/api/challenges.ts",
+      "unit_index": 19,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "frontend/src/api/schema.generated.ts",
+      "unit_index": 20,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "frontend/src/api/schema.generated.ts",
+      "unit_index": 21,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "frontend/src/views/__tests__/challenges.spec.ts",
+      "unit_index": 22,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "frontend/src/views/__tests__/challenges.spec.ts",
+      "unit_index": 23,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "frontend/src/views/__tests__/challenges.spec.ts",
+      "unit_index": 24,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "frontend/src/views/__tests__/challenges.spec.ts",
+      "unit_index": 25,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "frontend/src/views/__tests__/challenges.spec.ts",
+      "unit_index": 26,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "frontend/src/views/__tests__/challenges.spec.ts",
+      "unit_index": 27,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "frontend/src/views/__tests__/challenges.spec.ts",
+      "unit_index": 28,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "frontend/src/views/__tests__/challenges.spec.ts",
+      "unit_index": 29,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "frontend/src/views/__tests__/challenges.spec.ts",
+      "unit_index": 30,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "frontend/src/views/__tests__/challenges.spec.ts",
+      "unit_index": 31,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "frontend/src/views/__tests__/challenges.spec.ts",
+      "unit_index": 32,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "frontend/src/views/__tests__/journal.spec.ts",
+      "unit_index": 33,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "frontend/src/views/__tests__/journal.spec.ts",
+      "unit_index": 34,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "frontend/src/views/__tests__/today.spec.ts",
+      "unit_index": 35,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    },
+    {
+      "path": "frontend/src/views/__tests__/today.spec.ts",
+      "unit_index": 36,
+      "evidence_set_digest": "67a810001e2d26b6f5293d6679084812b5f06331f070b54efd358c736dd191ff"
+    }
+  ],
+  "scope_digest": "sha256:ae59ac28110aa3c598fb76dc1e5cf0a02464df07f4f35c1fc34caf34fcde6627",
+  "risk_context_digest": "sha256:ce0a172d5ac363143289305293f15134bc509213d4cee12eb1df950e38530a32",
+  "reviewed_commit": "58888d0001f28f324aaa8de05cf9202271f86aab",
+  "reviewer": {
+    "vendor": null,
+    "independent": false,
+    "type": "human"
+  },
+  "findings": []
+}

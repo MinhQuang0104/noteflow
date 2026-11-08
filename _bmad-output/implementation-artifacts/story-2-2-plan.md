@@ -19,7 +19,7 @@ readiness:
   status: READY
   story_normative_digest: sha256:bf1c8726f3361acec0baff9ea7031c11a3c4f0e8fa28976ccd91a366afa1e082
   dependency_sprint_keys: [2-1-tạo-và-quản-lý-thông-tin-challenge]
-current_slice: B
+current_slice: C
 risk:
   level: HIGH
   flags: [security, concurrency, public_contract]
@@ -72,7 +72,7 @@ slices:
         vendor: null
         independent: false
   - id: B
-    status: checkpointed
+    status: reviewed
     baseline_commit: ba050ef727d526a1c19140cc2b2a3f025fc31e4a
     checkpoint_commit: 58888d0001f28f324aaa8de05cf9202271f86aab
     subject_digest: sha256:f40d69357d59b6edcf0712231d1e29afbdfe542db6281c068ab3e65a1a835ab5
@@ -81,6 +81,12 @@ slices:
       implementation:
         path: _bmad-output/implementation-artifacts/receipts/story-2-2/B-implementation.json
         digest: sha256:adb07c79bd11a31b2c46ca72066e093d435cc1173950f2c33c3735b3d8230f5c
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-2-2/B-verification.json
+        digest: sha256:6ae0aec862a4d25dfe3a1fd7f37cd8159904f422d9527c20836634f0ce2d30ce
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-2-2/B-review.json
+        digest: sha256:da7f1cd776a524eeae43fb8527f5806df54f57893e44cf7d14c6065cb4411cf8
     task_refs: [T-3]
     depends_on: [A]
     executor: lead
@@ -95,6 +101,23 @@ slices:
       - npm run contract:validate and npm run contract:check in frontend
       - npm run type-check, npm run lint and npm run test:unit -- --run in frontend
       - ChallengeCompletionApiTest covers guest 401, non-owner 404, unknown fields 422, non-today date 422, replay, idempotency reuse, stale epoch and write fence problem details
+    verification:
+      status: INCOMPLETE
+      canonical:
+        status: INCOMPLETE
+      escalation:
+        decision: REVIEW_REQUIRED
+      progression_eligible: true
+      review_disclosure: owner exact-scope review; backend and contract paths are not covered by a canonical recipe (UNMAPPED_CHANGED_PATH); mapped frontend recipes passed
+    review:
+      freshness: FRESH_CANDIDATE
+      judgment: APPROVE
+      reviewed_commit: 58888d0001f28f324aaa8de05cf9202271f86aab
+      risk_context_digest: sha256:ce0a172d5ac363143289305293f15134bc509213d4cee12eb1df950e38530a32
+      reviewer:
+        type: human
+        vendor: null
+        independent: false
   - id: C
     status: pending
     task_refs: [T-4]
@@ -114,8 +137,8 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: verify_slice
-  target: B
+  kind: implement_slice
+  target: C
 autopilot:
   schema_version: 1
   authorized_at: "2026-10-25T05:19:35.262Z"
