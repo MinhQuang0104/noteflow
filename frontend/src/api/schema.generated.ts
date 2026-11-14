@@ -217,6 +217,50 @@ export interface components {
     }
     "NotebookRenameProblemDetails": components['schemas']["StateProblemDetails"] | components['schemas']["NotebookConflictProblemDetails"]
     "NotebookDeleteProblemDetails": components['schemas']["StateProblemDetails"] | components['schemas']["NotebookConflictProblemDetails"] | components['schemas']["NotebookRuleProblemDetails"]
+    "Note": {
+      "id": string
+      "notebook_id": string
+      "title": string
+      "body": string
+      "label": string
+      "row_version": number
+      "created_at": string
+      "updated_at": string
+    }
+    "NoteListResult": {
+      "notes": Array<components['schemas']["Note"]>
+    }
+    "NoteMutationResult": {
+      "note": components['schemas']["Note"]
+      "account_revision": number
+      "data_epoch": number
+    }
+    "CreateNoteRequest": {
+      "command_id": string
+      "data_epoch": number
+      "notebook_id": string
+      "title": string
+      "body": string
+    }
+    "UpdateNoteRequest": {
+      "command_id": string
+      "data_epoch": number
+      "base_version": number
+      "title": string
+      "body": string
+    }
+    "NoteConflictProblemDetails": {
+      "message": string
+      "code": "version_conflict"
+      "resource_id": string
+      "current_version": number
+      "current_snapshot": components['schemas']["Note"]
+    }
+    "NoteContentProblemDetails": {
+      "message": string
+      "code": "note_empty"
+    }
+    "NoteUpdateProblemDetails": components['schemas']["StateProblemDetails"] | components['schemas']["NoteConflictProblemDetails"]
   }
 }
 
@@ -850,6 +894,156 @@ export interface operations {
       "409": {
         content: {
           "application/problem+json": components['schemas']["NotebookDeleteProblemDetails"]
+        }
+      }
+      "422": {
+        content: {
+          "application/json": components['schemas']["ValidationError"]
+        }
+      }
+      "423": {
+        content: {
+          "application/problem+json": components['schemas']["StateProblemDetails"]
+        }
+      }
+    }
+  }
+  "getNotebookNotes": {
+    path: "/api/v1/notebooks/{id}/notes"
+    method: "GET"
+    parameters: {
+      "path:id": {
+        name: "id"
+        in: "path"
+        required: true
+        schema: string
+      }
+    }
+    responses: {
+      "200": {
+        content: {
+          "application/json": components['schemas']["NoteListResult"]
+        }
+      }
+      "401": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "403": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "404": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+    }
+  }
+  "createNote": {
+    path: "/api/v1/notes"
+    method: "POST"
+    parameters: Record<string, never>
+    requestBody: {
+      required: true
+      content: {
+        "application/json": {
+      "command_id": string
+      "data_epoch": number
+      "notebook_id": string
+      "title": string
+      "body": string
+    }
+      }
+    }
+    responses: {
+      "201": {
+        content: {
+          "application/json": components['schemas']["NoteMutationResult"]
+        }
+      }
+      "401": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "403": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "404": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "409": {
+        content: {
+          "application/problem+json": components['schemas']["StateProblemDetails"]
+        }
+      }
+      "422": {
+        content: {
+          "application/json": components['schemas']["ValidationError"]
+          "application/problem+json": components['schemas']["NoteContentProblemDetails"]
+        }
+      }
+      "423": {
+        content: {
+          "application/problem+json": components['schemas']["StateProblemDetails"]
+        }
+      }
+    }
+  }
+  "updateNote": {
+    path: "/api/v1/notes/{id}"
+    method: "PATCH"
+    parameters: {
+      "path:id": {
+        name: "id"
+        in: "path"
+        required: true
+        schema: string
+      }
+    }
+    requestBody: {
+      required: true
+      content: {
+        "application/json": {
+      "command_id": string
+      "data_epoch": number
+      "base_version": number
+      "title": string
+      "body": string
+    }
+      }
+    }
+    responses: {
+      "200": {
+        content: {
+          "application/json": components['schemas']["NoteMutationResult"]
+        }
+      }
+      "401": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "403": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "404": {
+        content: {
+          "application/json": components['schemas']["ApiError"]
+        }
+      }
+      "409": {
+        content: {
+          "application/problem+json": components['schemas']["NoteUpdateProblemDetails"]
         }
       }
       "422": {

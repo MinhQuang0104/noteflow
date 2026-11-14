@@ -111,7 +111,9 @@ test('notebooks are one level with no parent reference', function () {
 
     sort($columns);
     expect($columns)->toBe(['created_at', 'id', 'is_default', 'name', 'owner_id', 'row_version', 'updated_at']);
-    expect(Schema::getColumnListing('notes'))->toEqualCanonicalizing(['id', 'owner_id', 'notebook_id', 'created_at', 'updated_at']);
+    expect(Schema::getColumnListing('notes'))->toEqualCanonicalizing([
+        'id', 'owner_id', 'notebook_id', 'title', 'body', 'row_version', 'created_at', 'updated_at',
+    ]);
 });
 
 test('the migration backfills exactly one default notebook for every existing account', function () {
