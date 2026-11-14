@@ -76,7 +76,7 @@ slices:
         vendor: null
         independent: false
   - id: B
-    status: checkpointed
+    status: reviewed
     baseline_commit: ab00b173e69540932220a25cab10af207e9de7ff
     checkpoint_commit: b582d7548ca6bcf4cd391a18799ff0bbb7bc67d9
     subject_digest: sha256:b3e5d06765225f91016f4baaa8b1eb23320e5a349b5ca088f00d41dbb827c6e8
@@ -85,6 +85,12 @@ slices:
       implementation:
         path: _bmad-output/implementation-artifacts/receipts/story-4-1/B-implementation-attempt-2.json
         digest: sha256:90674caf18ec0edb2330fd8d14f115950a15d45e3c0aea67ca1a93fb3de45c8d
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-4-1/B-verification-attempt-2.json
+        digest: sha256:39f1d2aedb86904e4a573416064d90172104a0a96eb0364dddc0452f71d6ec4d
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-4-1/B-review-attempt-2.json
+        digest: sha256:ed36940397c3fddc0722bc5e6c20060ddb3e9a95c4e07d273cc2dd6a3554e631
     task_refs: [T-4]
     depends_on: [A]
     executor: agy
@@ -100,6 +106,23 @@ slices:
       - notes.spec.ts proves the default notebook renders first with the "Mặc định" label from is_default, the list has one level, create and rename send one command each and show the new name only after the acknowledgement, a field error keeps the typed name, delete of the default or a non-empty notebook explains the reason without sending a request, a server notebook_is_default or notebook_not_empty rejection is shown at the action, the confirm dialog focuses Hủy, cancel keeps the notebook, a confirmed delete moves selection and focus to the notebook above, and a load error shows retry instead of the empty state
       - db-helper.php reset clears notes and notebooks and seeds exactly one default notebook for the e2e owner
       - powershell.exe -File scripts/local.ps1 e2e from the Story worktree after the slice checkpoint
+    verification:
+      status: PASS
+      canonical:
+        status: PASS
+      escalation:
+        decision: REVIEW_REQUIRED
+      progression_eligible: true
+      review_disclosure: owner exact-scope review of the overnight-child-authored HIGH slice B attempt 2 after the F-41B-1 rework; canonical verification PASS and full e2e 53 passed, 0 failed, 5 skipped
+    review:
+      freshness: FRESH_CANDIDATE
+      judgment: APPROVE
+      reviewed_commit: b582d7548ca6bcf4cd391a18799ff0bbb7bc67d9
+      risk_context_digest: sha256:fda9685a606c4170ef0d3aba9a6a4a1627e5cf10d7f64e86413b5bb61e929d4c
+      reviewer:
+        type: human
+        vendor: null
+        independent: false
     attempt_history:
       - attempt_id: 1
         status: checkpointed
@@ -123,8 +146,8 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: verify_slice
-  target: B
+  kind: finalize_story
+  target: story
 autopilot:
   schema_version: 1
   authorized_at: "2026-11-08T10:18:30.013Z"
