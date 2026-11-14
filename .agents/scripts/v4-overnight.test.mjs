@@ -140,6 +140,16 @@ test('overnight child prompt spells allowlisted check commands and forbids chain
   ]) assert.ok(prompt.includes(text), text)
 })
 
+// M3 pilot 2026-11-14: the slice B child probed `orca --help`, was denied and
+// stopped, although orca orchestration/terminal are allowlisted.
+test('overnight child prompt spells the allowlisted orca forms for AGY slices', () => {
+  const prompt = childPrompt({ id: '4.1', worktree: 'C:/w/story-4-1', generation: 1 }, { next_action: { kind: 'implement_slice' } }, 'abc')
+  for (const text of ['references/agy-transport.md', 'orca orchestration <subcommand> and orca terminal <subcommand>', 'Do not probe with orca --help'])
+    assert.ok(prompt.includes(text), text)
+  const allow = JSON.parse(readFileSync(new URL('../config/overnight-settings.json', import.meta.url), 'utf8')).permissions.allow
+  for (const rule of ['Bash(orca orchestration *)', 'Bash(orca terminal *)']) assert.ok(allow.includes(rule), rule)
+})
+
 test('overnight human evidence changes only when human, approval or autopilot records change', () => {
   const f = fixture()
   try {
