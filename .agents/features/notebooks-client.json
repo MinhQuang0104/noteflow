@@ -12,9 +12,9 @@
     "contracts/openapi.yaml"
   ],
   "anchor_blobs": {
-    "frontend/src/api/schema.generated.ts": "f3a52e3435270494995e1b466bb051d1776f89bb",
-    "frontend/src/api/notebooks.ts": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
-    "frontend/src/api/__tests__/notebooks.spec.ts": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
-    "contracts/openapi.yaml": "882b6b4b7c0d5732dceab66bc16a487e424ca1f9"
+    "frontend/src/api/schema.generated.ts": "23c545af03dac96620ef959d01f52cdb14bd0e77",
+    "frontend/src/api/notebooks.ts": "adea7d3b842d0f887ea40a58b4b49c1e2ae2d54f",
+    "frontend/src/api/__tests__/notebooks.spec.ts": "ce5da9c027f5f985172d4110368c9dc8726acb72",
+    "contracts/openapi.yaml": "4629cf7e76edb760544752aabbf577f35f76216a"
   }
 }

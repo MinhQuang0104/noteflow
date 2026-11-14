@@ -44,6 +44,6 @@
     }
   ],
   "unresolved": [
-    "E2E (tests/e2e/notebooks.spec.ts, db-helper.php) runs longer than the 120 s check limit and is focused Lead evidence."
+    "E2E (tests/e2e/notebooks.spec.ts, tests/e2e/quick-note.spec.ts, db-helper.php) runs longer than the 120 s check limit and is a Plan verification obligation run by the Lead after the slice checkpoint."
   ]
 }

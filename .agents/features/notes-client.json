@@ -1,0 +1,20 @@
+{
+  "schema_version": 2,
+  "id": "notes-client",
+  "purpose": "Story 4.2 slice A: generated contract types and the typed notes client.",
+  "scope_boundary": "Proves typed client behavior and generated-type freshness; does not prove backend behavior or the Notes UI.",
+  "covered_paths": [
+    "frontend/src/api/schema.generated.ts",
+    "frontend/src/api/notes.ts",
+    "frontend/src/api/__tests__/notes.spec.ts"
+  ],
+  "dependencies": [
+    "contracts/openapi.yaml"
+  ],
+  "anchor_blobs": {
+    "frontend/src/api/schema.generated.ts": "23c545af03dac96620ef959d01f52cdb14bd0e77",
+    "frontend/src/api/notes.ts": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+    "frontend/src/api/__tests__/notes.spec.ts": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+    "contracts/openapi.yaml": "4629cf7e76edb760544752aabbf577f35f76216a"
+  }
+}

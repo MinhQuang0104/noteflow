@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "featureId": "notes-client",
+  "featureMap": ".agents/features/notes-client.json",
+  "cwd": "frontend",
+  "checks": [
+    {
+      "id": "map",
+      "cwd": ".",
+      "argv": [
+        "node",
+        ".agents/scripts/check-feature-map.mjs",
+        "check",
+        ".agents/features/notes-client.json"
+      ]
+    },
+    {
+      "id": "type-check",
+      "argv": [
+        "npm",
+        "run",
+        "type-check"
+      ]
+    },
+    {
+      "id": "mapped-tests",
+      "argv": [
+        "npm",
+        "run",
+        "test:unit",
+        "--",
+        "--run",
+        "src/api/__tests__/notes.spec.ts"
+      ]
+    },
+    {
+      "id": "contract-check",
+      "argv": [
+        "npm",
+        "run",
+        "contract:check"
+      ]
+    }
+  ],
+  "unresolved": [
+    "The recipe does not prove backend behavior from path matching alone."
+  ]
+}

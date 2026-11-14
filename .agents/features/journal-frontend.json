@@ -26,7 +26,7 @@
     "frontend/src/stores/auth.ts": "cea30a6f19cc2b404c3bb117d2cfb51417d22c76",
     "frontend/src/stores/account.ts": "d182dbf43b69fe5c0c1ee166c1eb427113bfe94e",
     "frontend/src/stores/sync.ts": "f6c69076e71b496d59ba91aa0f1ce91b10766e0b",
-    "contracts/openapi.yaml": "882b6b4b7c0d5732dceab66bc16a487e424ca1f9",
-    "frontend/src/api/schema.generated.ts": "f3a52e3435270494995e1b466bb051d1776f89bb"
+    "contracts/openapi.yaml": "4629cf7e76edb760544752aabbf577f35f76216a",
+    "frontend/src/api/schema.generated.ts": "23c545af03dac96620ef959d01f52cdb14bd0e77"
   }
 }

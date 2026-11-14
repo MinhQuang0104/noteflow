@@ -40,6 +40,16 @@
       "featureId": "notes-view",
       "path": ".agents/verification/notes-view.json",
       "enabled": true
+    },
+    {
+      "featureId": "notes-backend",
+      "path": ".agents/verification/notes-backend.json",
+      "enabled": true
+    },
+    {
+      "featureId": "notes-client",
+      "path": ".agents/verification/notes-client.json",
+      "enabled": true
     }
   ]
 }
