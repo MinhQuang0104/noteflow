@@ -1,7 +1,7 @@
 ---
 story_id: "4.2"
 title: Tạo quick note với title tùy chọn
-status: ready-for-dev
+status: in-progress
 ---
 
 # Story 4.2: Tạo quick note với title tùy chọn

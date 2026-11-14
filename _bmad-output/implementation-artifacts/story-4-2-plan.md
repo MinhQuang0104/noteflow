@@ -8,8 +8,8 @@ upstream_epic:
   path: docs/product/epics.md
   section_digest: sha256:4420968e19ff26b85691bb0de577b71f307e9d11f903a408069e9a2180006c76
 sprint_key: 4-2-tạo-quick-note-với-title-tùy-chọn
-lifecycle_snapshot: ready-for-dev
-execution_status: ready-for-dev
+lifecycle_snapshot: in-progress
+execution_status: in-progress
 planning_approval:
   decision: APPROVED
   scope: planning
@@ -64,8 +64,8 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: start_story
-  target: story
+  kind: implement_slice
+  target: A
 ---
 
 # Story 4.2 execution plan
