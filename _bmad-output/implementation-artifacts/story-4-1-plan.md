@@ -8,8 +8,8 @@ upstream_epic:
   path: docs/product/epics.md
   section_digest: sha256:35c66c11102ff1d071557b13db8816d0eafb637ae5194c66b316a3cf895503bc
 sprint_key: 4-1-quản-lý-vở-và-vở-mặc-định
-lifecycle_snapshot: in-progress
-execution_status: in-progress
+lifecycle_snapshot: review
+execution_status: complete
 planning_approval:
   decision: APPROVED
   scope: planning
@@ -145,8 +145,17 @@ slices:
           path: _bmad-output/implementation-artifacts/receipts/story-4-1/B-review-attempt-2.json
 blockers: []
 unresolved_questions: []
+finalization:
+  receipt_ref: _bmad-output/implementation-artifacts/receipts/story-4-1/finalization.json
+  receipt_digest: sha256:53d89477d4dc73e42599d32d3388996046958d2d655af0f865040962f35851ec
+  done_gate_disposition: SATISFIED
+  scope_paths_digest: sha256:2a35cf71199f1e744743687fc9de4aa89e356ab2ca52283950077ce9b08bddc2
+  implementation_commit_set_digest: sha256:ceb27acf5ed37835e27490fa6f74d07a41c2080fa4b39cdead96fd5a48e0152c
+  final_scoped_tree_digest: sha256:1f09b5055c436dc8f488744ca48630e1b38d1694145472b6fbb478528ffa0388
+  prepared_from_head: f6464a1a0515b0c338f87ef25f2ca523a5b75037
+human_approval: null
 next_action:
-  kind: finalize_story
+  kind: complete_story
   target: story
 autopilot:
   schema_version: 1

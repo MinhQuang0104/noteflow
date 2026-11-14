@@ -1,7 +1,7 @@
 ---
 story_id: "4.1"
 title: Quản lý vở và vở mặc định
-status: in-progress
+status: review
 ---
 
 # Story 4.1: Quản lý vở và vở mặc định
@@ -67,3 +67,75 @@ As a chủ tài khoản, I want tổ chức note trong các vở một cấp, So
 - ux: docs/ux/ux-spec.md#51-notes-workspace
 - ux: docs/ux/ux-spec.md#pf-05-tổ-chức-và-xóa-ghi-chú
 <!-- v4:references:end -->
+
+## Dev Agent Record
+
+<!-- v4:completion:start -->
+### Dev Agent Record
+
+- Finalization receipt: _bmad-output/implementation-artifacts/receipts/story-4-1/finalization.json
+- Done Gate disposition: SATISFIED
+
+### AC Evidence / Results
+
+- AC-1: evidence=COVERED; mode=fallback; fallback: receipt-level PASS evidence
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-4-1/A-verification.json (sha256:41f8fdbb0f53ed003f58004f74a42f5ae7267cc40750cadc238c81ced4f0d54a); _bmad-output/implementation-artifacts/receipts/story-4-1/B-verification-attempt-2.json (sha256:39f1d2aedb86904e4a573416064d90172104a0a96eb0364dddc0452f71d6ec4d)
+  Canonical disposition: APPLICABLE/PASS; complete=true; disclosure=not-required; APPLICABLE/PASS; complete=true; disclosure=not-required
+- AC-2: evidence=COVERED; mode=fallback; fallback: receipt-level PASS evidence
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-4-1/A-verification.json (sha256:41f8fdbb0f53ed003f58004f74a42f5ae7267cc40750cadc238c81ced4f0d54a); _bmad-output/implementation-artifacts/receipts/story-4-1/B-verification-attempt-2.json (sha256:39f1d2aedb86904e4a573416064d90172104a0a96eb0364dddc0452f71d6ec4d)
+  Canonical disposition: APPLICABLE/PASS; complete=true; disclosure=not-required; APPLICABLE/PASS; complete=true; disclosure=not-required
+- AC-3: evidence=COVERED; mode=fallback; fallback: receipt-level PASS evidence
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-4-1/A-verification.json (sha256:41f8fdbb0f53ed003f58004f74a42f5ae7267cc40750cadc238c81ced4f0d54a); _bmad-output/implementation-artifacts/receipts/story-4-1/B-verification-attempt-2.json (sha256:39f1d2aedb86904e4a573416064d90172104a0a96eb0364dddc0452f71d6ec4d)
+  Canonical disposition: APPLICABLE/PASS; complete=true; disclosure=not-required; APPLICABLE/PASS; complete=true; disclosure=not-required
+- AC-4: evidence=COVERED; mode=fallback; fallback: receipt-level PASS evidence
+  Receipts: _bmad-output/implementation-artifacts/receipts/story-4-1/A-verification.json (sha256:41f8fdbb0f53ed003f58004f74a42f5ae7267cc40750cadc238c81ced4f0d54a); _bmad-output/implementation-artifacts/receipts/story-4-1/B-verification-attempt-2.json (sha256:39f1d2aedb86904e4a573416064d90172104a0a96eb0364dddc0452f71d6ec4d)
+  Canonical disposition: APPLICABLE/PASS; complete=true; disclosure=not-required; APPLICABLE/PASS; complete=true; disclosure=not-required
+
+### Completion Notes
+
+- Evidenced behavior: **Given** account mới/restore hợp lệ **When** mở Notes **Then** có đúng một vở mặc định được gắn nhãn và đứng đầu.
+- Evidenced behavior: **Given** tên hợp lệ **When** tạo/đổi tên vở **Then** vở xuất hiện đúng một cấp.
+- Evidenced behavior: **Given** vở mặc định hoặc vở còn note **When** yêu cầu xóa **Then** từ chối với lý do/action rõ.
+- Evidenced behavior: **Given** vở không mặc định và rỗng **When** xác nhận xóa **Then** xóa và focus chuyển hợp lệ.
+
+### File List
+
+- backend/app/Console/Commands/ProvisionOwner.php
+- backend/app/Http/Controllers/NotebookController.php
+- backend/app/Modules/Notes/Application/Commands/CreateNotebookCommand.php
+- backend/app/Modules/Notes/Application/Commands/DeleteNotebookCommand.php
+- backend/app/Modules/Notes/Application/Commands/RenameNotebookCommand.php
+- backend/app/Modules/Notes/Application/DefaultNotebookProvisioner.php
+- backend/app/Modules/Notes/Application/UseCases/CreateNotebookUseCase.php
+- backend/app/Modules/Notes/Application/UseCases/DeleteNotebookUseCase.php
+- backend/app/Modules/Notes/Application/UseCases/GetNotebookListQuery.php
+- backend/app/Modules/Notes/Application/UseCases/RenameNotebookUseCase.php
+- backend/app/Modules/Notes/Domain/Exceptions/IdempotencyKeyReusedException.php
+- backend/app/Modules/Notes/Domain/Exceptions/InvalidNotebookNameException.php
+- backend/app/Modules/Notes/Domain/Exceptions/NotebookNotDeletableException.php
+- backend/app/Modules/Notes/Domain/Exceptions/StaleDataEpochException.php
+- backend/app/Modules/Notes/Domain/Exceptions/VersionConflictException.php
+- backend/app/Modules/Notes/Domain/Exceptions/WriteFenceActiveException.php
+- backend/database/migrations/2026_11_08_010000_create_notebooks_and_notes_tables.php
+- backend/routes/api.php
+- backend/tests/Contract/NotebookContractTest.php
+- backend/tests/Feature/NotebookApiTest.php
+- backend/tests/Feature/NotebookConcurrencyTest.php
+- backend/tests/Feature/NotebookPersistenceTest.php
+- backend/tests/Feature/NotebookUseCasesTest.php
+- backend/tests/Feature/ProvisionOwnerCommandTest.php
+- contracts/openapi.yaml
+- frontend/src/api/__tests__/notebooks.spec.ts
+- frontend/src/api/notebooks.ts
+- frontend/src/api/schema.generated.ts
+- frontend/src/router/__tests__/router.spec.ts
+- frontend/src/router/index.ts
+- frontend/src/views/NotesView.vue
+- frontend/src/views/__tests__/notes.spec.ts
+- tests/e2e/helpers/db-helper.php
+- tests/e2e/notebooks.spec.ts
+
+### Change Log
+
+- Finalization recorded for Human Gate: in-progress -> review; next action complete_story.
+<!-- v4:completion:end -->
