@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import {
   createNotebook,
@@ -229,15 +229,15 @@ const isDeleting = ref(false)
 const cancelButtonRef = ref<HTMLButtonElement | null>(null)
 const confirmDialogRef = ref<HTMLDialogElement | null>(null)
 
-watch(isConfirmDialogOpen, (open) => {
+function syncDialog(open: boolean): void {
   const dialog = confirmDialogRef.value
   if (!dialog) return
   if (open) {
+    if (dialog.open) return
     if (typeof dialog.showModal === 'function') {
       try {
         dialog.showModal()
       } catch {
-        // Fallback if showModal throws in synthetic DOM
         dialog.setAttribute('open', '')
       }
     } else {
@@ -247,15 +247,31 @@ watch(isConfirmDialogOpen, (open) => {
       cancelButtonRef.value?.focus()
     })
   } else {
-    if (typeof dialog.close === 'function') {
-      try {
-        dialog.close()
-      } catch {
+    if (dialog.open || dialog.hasAttribute('open')) {
+      if (typeof dialog.close === 'function') {
+        try {
+          dialog.close()
+        } catch {
+          dialog.removeAttribute('open')
+        }
+      } else {
         dialog.removeAttribute('open')
       }
-    } else {
-      dialog.removeAttribute('open')
     }
+  }
+}
+
+watch(isConfirmDialogOpen, syncDialog, { flush: 'post' })
+
+onMounted(() => {
+  if (isConfirmDialogOpen.value) syncDialog(true)
+})
+
+onBeforeUnmount(() => {
+  const dialog = confirmDialogRef.value
+  if (dialog?.open) {
+    if (typeof dialog.close === 'function') dialog.close()
+    else dialog.removeAttribute('open')
   }
 })
 
@@ -585,41 +601,38 @@ async function retryLoad() {
     <!-- Confirm Delete Dialog -->
     <dialog
       ref="confirmDialogRef"
-      :open="isConfirmDialogOpen"
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-delete-title"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      class="w-[min(28rem,calc(100vw-2rem))] max-w-md rounded-xl border border-slate-200 bg-white p-6 text-slate-900 shadow-xl backdrop:bg-black/40"
       @cancel.prevent="handleCancelDelete"
     >
-      <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl border border-slate-200" @click.stop>
-        <h3 id="confirm-delete-title" class="text-lg font-semibold text-slate-900">
-          Xác nhận xóa cuốn vở
-        </h3>
-        <p class="mt-2 text-sm text-slate-600">
-          Bạn có chắc chắn muốn xóa cuốn vở <strong class="font-semibold text-slate-900">{{ notebookToDelete?.name }}</strong> không? Thao tác này không thể hoàn tác.
-        </p>
-        <div class="mt-6 flex justify-end gap-3">
-          <button
-            ref="cancelButtonRef"
-            type="button"
-            data-testid="confirm-dialog-cancel"
-            autofocus
-            class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            @click="handleCancelDelete"
-          >
-            Hủy
-          </button>
-          <button
-            type="button"
-            data-testid="confirm-dialog-confirm"
-            :disabled="isDeleting"
-            class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 disabled:opacity-50"
-            @click="handleConfirmDelete"
-          >
-            {{ isDeleting ? 'Đang xóa…' : 'Xóa' }}
-          </button>
-        </div>
+      <h3 id="confirm-delete-title" class="text-lg font-semibold text-slate-900">
+        Xác nhận xóa cuốn vở
+      </h3>
+      <p class="mt-2 text-sm text-slate-600">
+        Bạn có chắc chắn muốn xóa cuốn vở <strong class="font-semibold text-slate-900">{{ notebookToDelete?.name }}</strong> không? Thao tác này không thể hoàn tác.
+      </p>
+      <div class="mt-6 flex justify-end gap-3">
+        <button
+          ref="cancelButtonRef"
+          type="button"
+          data-testid="confirm-dialog-cancel"
+          autofocus
+          class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          @click="handleCancelDelete"
+        >
+          Hủy
+        </button>
+        <button
+          type="button"
+          data-testid="confirm-dialog-confirm"
+          :disabled="isDeleting"
+          class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 disabled:opacity-50"
+          @click="handleConfirmDelete"
+        >
+          {{ isDeleting ? 'Đang xóa…' : 'Xóa' }}
+        </button>
       </div>
     </dialog>
   </div>
