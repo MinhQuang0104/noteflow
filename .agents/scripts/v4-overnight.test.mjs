@@ -149,6 +149,9 @@ test('overnight child prompt spells the allowlisted orca forms for AGY slices', 
   // 2026-11-14: the slice B verify child skipped the Plan's post-checkpoint e2e obligation (7 failures).
   for (const text of ['run every Plan verification obligation that no check spec holds', 'scripts/local.ps1 e2e, after verify', 'never report HUMAN_REVIEW_REQUIRED while an obligation fails or was not run'])
     assert.ok(prompt.includes(text), text)
+  // 2026-11-14: rework findings live only in the Lead's prepare-rework payload.
+  for (const text of ['.agent-state/v4-scratch/rework-4-1-<slice>.json', '--correction-of', 'one --finding "<id>: <summary>" per finding'])
+    assert.ok(prompt.includes(text), text)
   const allow = JSON.parse(readFileSync(new URL('../config/overnight-settings.json', import.meta.url), 'utf8')).permissions.allow
   for (const rule of ['Bash(orca orchestration *)', 'Bash(orca terminal *)']) assert.ok(allow.includes(rule), rule)
 })
