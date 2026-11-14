@@ -66,6 +66,17 @@ unresolved_questions: []
 next_action:
   kind: implement_slice
   target: A
+autopilot:
+  schema_version: 1
+  authorized_at: "2026-11-14T08:16:41.932Z"
+  authorized_plan_digest: sha256:660a21bfe45c40c2d9abab42f45b3bec716d70e0528d001c28150b4e8ad32e43
+  authorized_head: df466230131daaed8766cdeb30d695f3d0dccaf1
+  budgets:
+    max_slices: 2
+    max_rework_per_slice: 2
+    max_minutes_per_slice: 90
+  lead_vendor: claude
+  revoked: false
 ---
 
 # Story 4.2 execution plan
