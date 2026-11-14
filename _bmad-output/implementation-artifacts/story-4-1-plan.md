@@ -19,13 +19,13 @@ readiness:
   status: READY
   story_normative_digest: sha256:af4cbd4342b6387656f8e58cb90fff49377addae6de98d635364fb0289c956f5
   dependency_sprint_keys: [1-4-nhận-dữ-liệu-mới-giữa-hai-thiết-bị]
-current_slice: A
+current_slice: B
 risk:
   level: HIGH
   flags: [security, concurrency, migration, public_contract]
 slices:
   - id: A
-    status: checkpointed
+    status: reviewed
     baseline_commit: 1f39e0542326fc63c48a301a35ed8fd8088d98f5
     checkpoint_commit: 7f2f57dbb20c92933bcf6a3f41a198146147554b
     subject_digest: sha256:b3e5d06765225f91016f4baaa8b1eb23320e5a349b5ca088f00d41dbb827c6e8
@@ -34,6 +34,12 @@ slices:
       implementation:
         path: _bmad-output/implementation-artifacts/receipts/story-4-1/A-implementation.json
         digest: sha256:aaef0400e1884dc5f3143e1fa80ff047a979a771146950603b1c487bcb64e533
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-4-1/A-verification.json
+        digest: sha256:41f8fdbb0f53ed003f58004f74a42f5ae7267cc40750cadc238c81ced4f0d54a
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-4-1/A-review.json
+        digest: sha256:35fa5e8007a260564b03a1f07766146c10c86e81933d689e072285bbf847e60d
     task_refs: [T-1, T-2, T-3]
     depends_on: []
     executor: lead
@@ -52,6 +58,23 @@ slices:
       - NotebookUseCasesTest covers list order (default first, then created_at and id), note_count, trimmed name rules, duplicate names, rename of the default notebook, delete of an empty notebook, notebook_is_default and notebook_not_empty rejections, replay, reused command ID, stale base_version with current snapshot, stale data epoch, closed write fence, one account_revision step per real change and owner isolation
       - NotebookConcurrencyTest proves two concurrent identical create commands leave one notebook and one account_revision step, and two concurrent renames on the same base_version leave one winner and one version conflict
       - NotebookApiTest and NotebookContractTest cover guest 401, another owner's notebook 404, unknown fields 422, name field errors and every problem code against the OpenAPI schemas
+    verification:
+      status: PASS
+      canonical:
+        status: PASS
+      escalation:
+        decision: REVIEW_REQUIRED
+      progression_eligible: true
+      review_disclosure: owner exact-scope review of an overnight-child-authored HIGH slice; canonical notebooks-backend, notebooks-client and journal-frontend recipes PASS
+    review:
+      freshness: FRESH_CANDIDATE
+      judgment: APPROVE
+      reviewed_commit: 7f2f57dbb20c92933bcf6a3f41a198146147554b
+      risk_context_digest: sha256:fda9685a606c4170ef0d3aba9a6a4a1627e5cf10d7f64e86413b5bb61e929d4c
+      reviewer:
+        type: human
+        vendor: null
+        independent: false
   - id: B
     status: pending
     task_refs: [T-4]
@@ -72,8 +95,8 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: verify_slice
-  target: A
+  kind: implement_slice
+  target: B
 autopilot:
   schema_version: 1
   authorized_at: "2026-11-08T10:18:30.013Z"
