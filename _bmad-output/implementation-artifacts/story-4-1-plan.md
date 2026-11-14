@@ -76,15 +76,7 @@ slices:
         vendor: null
         independent: false
   - id: B
-    status: checkpointed
-    baseline_commit: 3e6f45fd39abcb9a7be185ff5308736d6b67a71a
-    checkpoint_commit: 6d41733438898683d6ddc987d7679d9ac4203c1f
-    subject_digest: sha256:b3e5d06765225f91016f4baaa8b1eb23320e5a349b5ca088f00d41dbb827c6e8
-    changed_paths_sha256: sha256:8421c7085765e1b31f69d0afb0905648dc9f86d39076424862cffbb5c6d8821f
-    receipt_refs:
-      implementation:
-        path: _bmad-output/implementation-artifacts/receipts/story-4-1/B-implementation.json
-        digest: sha256:18309db82a1f34afbc5035ccb65d000a17c3df9ba8d06c87708fe7a831754daf
+    status: pending
     task_refs: [T-4]
     depends_on: [A]
     executor: agy
@@ -100,10 +92,30 @@ slices:
       - notes.spec.ts proves the default notebook renders first with the "Mặc định" label from is_default, the list has one level, create and rename send one command each and show the new name only after the acknowledgement, a field error keeps the typed name, delete of the default or a non-empty notebook explains the reason without sending a request, a server notebook_is_default or notebook_not_empty rejection is shown at the action, the confirm dialog focuses Hủy, cancel keeps the notebook, a confirmed delete moves selection and focus to the notebook above, and a load error shows retry instead of the empty state
       - db-helper.php reset clears notes and notebooks and seeds exactly one default notebook for the e2e owner
       - powershell.exe -File scripts/local.ps1 e2e from the Story worktree after the slice checkpoint
+    attempt_history:
+      - attempt_id: 1
+        status: checkpointed
+        baseline_commit: 3e6f45fd39abcb9a7be185ff5308736d6b67a71a
+        checkpoint_commit: 6d41733438898683d6ddc987d7679d9ac4203c1f
+        subject_digest: sha256:b3e5d06765225f91016f4baaa8b1eb23320e5a349b5ca088f00d41dbb827c6e8
+        changed_paths_sha256: sha256:8421c7085765e1b31f69d0afb0905648dc9f86d39076424862cffbb5c6d8821f
+        receipt_refs:
+          implementation:
+            path: _bmad-output/implementation-artifacts/receipts/story-4-1/B-implementation.json
+            digest: sha256:18309db82a1f34afbc5035ccb65d000a17c3df9ba8d06c87708fe7a831754daf
+    current_attempt:
+      attempt_id: 2
+      receipt_refs:
+        implementation:
+          path: _bmad-output/implementation-artifacts/receipts/story-4-1/B-implementation-attempt-2.json
+        verification:
+          path: _bmad-output/implementation-artifacts/receipts/story-4-1/B-verification-attempt-2.json
+        review:
+          path: _bmad-output/implementation-artifacts/receipts/story-4-1/B-review-attempt-2.json
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: verify_slice
+  kind: implement_slice
   target: B
 autopilot:
   schema_version: 1
