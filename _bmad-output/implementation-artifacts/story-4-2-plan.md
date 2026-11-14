@@ -33,7 +33,7 @@ slices:
       level: HIGH
       flags: [security, concurrency, migration, public_contract]
     scope:
-      paths: [backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php, backend/app/Modules/Notes/Domain/NoteLabel.php, backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php, backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php, backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php, backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php, backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php, backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php, backend/app/Http/Controllers/NoteController.php, backend/routes/api.php, contracts/openapi.yaml, backend/tests/Unit/NoteLabelTest.php, backend/tests/Feature/NotePersistenceTest.php, backend/tests/Feature/NoteUseCasesTest.php, backend/tests/Feature/NoteConcurrencyTest.php, backend/tests/Feature/NoteApiTest.php, backend/tests/Contract/NoteContractTest.php, frontend/src/api/schema.generated.ts, frontend/src/api/notes.ts, frontend/src/api/__tests__/notes.spec.ts]
+      paths: [backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php, backend/app/Modules/Notes/Domain/NoteLabel.php, backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php, backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php, backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php, backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php, backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php, backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php, backend/app/Http/Controllers/NoteController.php, backend/routes/api.php, contracts/openapi.yaml, backend/tests/Unit/NoteLabelTest.php, backend/tests/Feature/NotebookPersistenceTest.php, backend/tests/Feature/NotePersistenceTest.php, backend/tests/Feature/NoteUseCasesTest.php, backend/tests/Feature/NoteConcurrencyTest.php, backend/tests/Feature/NoteApiTest.php, backend/tests/Contract/NoteContractTest.php, frontend/src/api/schema.generated.ts, frontend/src/api/notes.ts, frontend/src/api/__tests__/notes.spec.ts]
     verification_obligations:
       - powershell.exe -File scripts/local.ps1 test from the Story worktree - full backend suite passes with no warnings
       - vendor/bin/pint --test and composer analyse inside the worktree backend-test container
@@ -53,7 +53,7 @@ slices:
       level: MEDIUM
       flags: []
     scope:
-      paths: [frontend/src/views/NotesView.vue, frontend/src/components/NoteEditor.vue, frontend/src/views/__tests__/notes.spec.ts, frontend/src/views/TodayView.vue, frontend/src/views/__tests__/today.spec.ts, tests/e2e/quick-note.spec.ts]
+      paths: [frontend/src/views/NotesView.vue, frontend/src/components/NoteEditor.vue, frontend/src/views/__tests__/notes.spec.ts, frontend/src/views/TodayView.vue, frontend/src/views/__tests__/today.spec.ts, tests/e2e/quick-note.spec.ts, tests/e2e/notebooks.spec.ts, tests/e2e/helpers/db-helper.php]
     verification_obligations:
       - npm run type-check in frontend
       - npm run lint in frontend
