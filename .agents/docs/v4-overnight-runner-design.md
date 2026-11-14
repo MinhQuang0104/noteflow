@@ -2,7 +2,9 @@
 
 ## Status
 
-**PROPOSED (owner decision, 2026-11-08). Nothing is built yet.** This record is
+**BUILT; M3 pilot done (Story 4.1, integrated in `b3d6d8b`, 2026-11-14).** The
+owner decided on this MVP on 2026-11-08; M0–M2b were built the same day (§9) and
+the pilot retrospective is §10. M4 is open. This record is
 a design rationale. It is not loaded by the router or by any Runner action, and
 it grants no authority. Building it goes through the V4 Lite migration lane, and
 each step needs the full `npm run test:v4` suite on its exact commit.
@@ -278,5 +280,92 @@ Measuring where real runs stop is the input to the stage 2 decision.
 | M1 | K7 `move-worker-contract.mjs` + `agy-executor.md` step 6; `overnight-settings.json`; deny-rule tests | `test:v4`; each deny blocks; AGY delivery and Story commands pass |
 | M2 | `v4-overnight.mjs prepare` / `run`: preflight, loop, heartbeat, baseline, report | `test:v4`; tests: STOP routing, deadline, every baseline violation stops the run, never calls owner operations. **Built 2026-11-08**, tests fake every external command. The `prepare` happy path (Orca create, claim, start) and a real child run are first exercised in M3. |
 | M2b | Put the payload lessons that children need into a child-readable place: `references/implementation-techniques.md` or the driver prompt. Children cannot read the Lead's memory. Known lessons (2026-11-08, Story 2.2): run `prepare` before `verify` to get the preview (`PREVIEW_REQUIRED`); `record-review` needs a `plan_template` with tokens (model: `verificationTemplate` in `v4-verification-fixture.mjs`); warm the worktree test runtime before a 120 s backend check. Add whatever Story 2.2 slices B and C reveal. **Done 2026-11-08:** new lazy reference `references/runner-payloads.md`, loaded for `implement_slice` and `verify_slice`, named by the router and by the overnight child prompt. It covers the two-step operations, implement/verify/record-review payloads and plan_template tokens, AGY `worker` evidence, `--resume-path`, the 120 s check limit and Windows pitfalls; a test pins its tokens, limits and refusal codes to the kernel. Story 2.2 kernel gaps F-22-1..3 were fixed on `main` (`8af2fbb`, `190f6b3`, `859e52d`). | `test:v4`; a dry child run reaches `verify` without these errors (first exercised in M3) |
-| M3 | Pilot: one night with 1–2 LOW / AGY-heavy Stories | Owner reads the report, runs the morning flow |
-| M4 | After about five runs, review the stop data and decide on stage 2 | Owner |
+| M3 | Pilot: one night with 1–2 LOW / AGY-heavy Stories | Owner reads the report, runs the morning flow. **Done 2026-11-14** with one HIGH Story (4.1, slice A Lead + slice B AGY) over seven runs; see §10. |
+| M4 | After about five runs, review the stop data and decide on stage 2 | Owner. The count starts after the pilot (§10.5). |
+
+## 10. M3 pilot retrospective (Story 4.1)
+
+Source: `.agent-state/overnight/<runId>/report.md` and `child-*.json` for seven
+runs (2026-11-08 and 2026-11-14). The pilot Story was HIGH risk, which is a
+harder case than the §9 M3 target (LOW / AGY-heavy): every slice stops for
+owner review.
+
+### 10.1 Stop log
+
+| # | Run | Child actions | Stop | Class | Follow-up |
+|---|---|---|---|---|---|
+| 1 | 2026-11-08T10:20Z | implement A → BLOCKED | Every backend check denied: `local.ps1` without `-ExecutionPolicy`, no `docker exec` rule, chained `; echo $?`, read of main's pointer | Setup defect | `99e3f34`: settings allow rules and the exact check forms in the child prompt |
+| 2 | 2026-11-08T11:00Z | implement A → DONE | `HUMAN_EVIDENCE`: raw-text match on "owner" in a receipt | Tripwire false positive | `1194b0e`: structural receipt detection |
+| 3 | 2026-11-08T11:43Z | verify A → HUMAN_REVIEW_REQUIRED | HIGH slice review | **Expected stop** | Owner review blocked by kernel gap F-41-1 (evidence producer takes ≤ 16 paths, slice A had 28); `4a14285` |
+| 4 | 2026-11-14T01:29Z | none | `DOCKER_UNAVAILABLE` (preflight) | Environment, correct stop | Owner starts Docker Desktop and the test containers |
+| 5 | 2026-11-14T01:30Z | implement B → BLOCKED | `orca --help` denied; AGY slice needs Orca | Child prompt defect | `ab8867d`: spell the allowlisted `orca` forms |
+| 6 | 2026-11-14T01:32Z | implement B → DONE, verify B → HUMAN_REVIEW_REQUIRED | HIGH slice review, but **verify PASS was false**: the child skipped the Plan's post-checkpoint e2e obligation, which had 7 failures | **Quality miss caught by owner review** | Rework finding F-41B-1; apply-rework hit kernel gap F-41-2 (`de6fbb2`, which also adds the e2e obligation to the child prompt); `b9ebdcd` points correction attempts at the rework findings |
+| 7 | 2026-11-14T02:37Z | implement B attempt 2 → DONE, verify B → HUMAN_REVIEW_REQUIRED | HIGH slice review; full e2e 53 pass / 0 fail / 5 skip | **Expected stop** | Owner review, finalize, Human Gate, complete, integrate (all manual, as designed) |
+
+Totals: 8 child actions, about 76 child minutes, **USD 16.17** child cost. The
+largest single action was implement A (30 files): USD 6.67, 20 min, 126 turns.
+
+### 10.2 What worked
+
+- The full loop ran end to end: `prepare` (Orca worktree, claim, start,
+  authorization), unattended implement and verify for a Lead slice and an AGY
+  slice, a rework round, and the manual owner path through integration.
+- Every stop was safe. No run mutated `main`, forged human evidence, or ran an
+  owner operation. The baseline and preflight stopped the run when they should
+  (run 4); the one wrong stop (run 2) was on the safe side.
+- Once the setup defects were fixed, implementation quality was usable: slice A
+  passed verify and owner review at the first attempt, and slice B attempt 2
+  changed one file.
+
+### 10.3 What did not work
+
+1. **Defect stops dominated.** Three of seven runs (1, 2, 5) stopped on runner
+   defects, not on the Story. Each was a deny rule or a prompt spelling, found
+   only by a real child. Fake-external tests (M2) did not catch any of them.
+2. **A verify child reported PASS with an obligation unrun (run 6).** The
+   kernel's canonical verification passed because the e2e obligation lives in
+   the Plan, not in a check spec, so only the prompt enforced it. The owner
+   review caught it. This is the most important data point for stage 2:
+   **without owner review on HIGH slices, broken code would have been
+   approved.** The prompt fix (`de6fbb2`) is a soft control; a structural fix
+   (the kernel refusing a verify PASS while a Plan obligation is unevidenced)
+   is not built.
+3. **Two kernel gaps (F-41-1, F-41-2) appeared first in the pilot.** They are
+   not runner defects; any HIGH Story with more than 16 review paths, or any
+   AGY rework, would hit them in manual mode too.
+4. **The morning flow is heavy and manual.** Per human stop the Lead had to:
+   rerun verify with `--lead-generation 1` for a fresh pending fingerprint,
+   build the owner-review payload (split evidence sets, `plan_template`, a
+   DRAFT answer), and after rework recover by running main's runner against
+   the Story worktree. Rework findings existed only in the Lead's scratch
+   payload in the Story worktree.
+5. **Environment is a precondition the driver cannot fix.** Docker Desktop and
+   the per-worktree test containers must be up before `run`.
+
+### 10.4 Throughput against §6
+
+§6 predicted that a HIGH Story stops at every slice review and at the Human
+Gate. The pilot confirmed this: one HIGH Story with two slices needed three
+human stops, plus one rework decision. Night-time progress per HIGH Story is at
+most one slice. Stories with LOW or AGY-executed MEDIUM slices are still the
+throughput case, and the pilot did not test one.
+
+### 10.5 Implications
+
+- **M4 counting.** The seven pilot runs are setup data, not steady-state data.
+  The roughly five runs that M4 needs start with the next queued Story.
+- **Stage 2.** The pilot gives no evidence for removing owner review. It gives
+  one counterexample (run 6). Any stage 2 review-proxy design must first close
+  gap 2 structurally.
+- **Candidate improvements before or alongside the next runs** (not decided,
+  each needs an owner decision and the migration lane):
+  1. Kernel: a verify PASS requires evidence for every Plan verification
+     obligation, not only check specs.
+  2. Driver: a `morning` helper that produces the owner-review payload draft
+     (fresh pending, split evidence, `plan_template`) for each
+     `HUMAN_REVIEW_REQUIRED` Story.
+  3. Driver: persist rework findings in the run directory, not only in the
+     Story worktree's scratch.
+  4. Preflight: name the exact Docker containers to start in the report.
+- **Next pilot Story.** Pick one whose slices are LOW or AGY-executed MEDIUM, so
+  the run measures the throughput case in §6.

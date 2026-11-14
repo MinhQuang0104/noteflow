@@ -222,7 +222,7 @@ successor without executing it. With autopilot, the Lead loops on
 | Question | Read |
 |---|---|
 | Why V4 Auto looks like this | `.agents/docs/v4-auto-design.md` |
-| Proposed overnight queue runner MVP (not built) | `.agents/docs/v4-overnight-runner-design.md` |
+| Overnight queue runner MVP (built; M3 pilot retrospective in §10) | `.agents/docs/v4-overnight-runner-design.md` |
 | Deferred fully-automatic `auto` branch lane (stage 2) | `.agents/docs/v4-auto-lane-stage2-deferred.md` |
 | How a phase was built and gated | `.agents/docs/v4-auto/README.md`, `p*.md`, `g*-runbook.md` |
 | Kernel interface | `.agents/docs/v4-action-kernel.md` |
