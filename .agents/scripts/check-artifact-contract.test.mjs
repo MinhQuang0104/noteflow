@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { mkdtempSync, readFileSync, writeFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { inspectStory, normativeDigest, receiptDigest, validateTaskSlices, validateReceipt } from './check-artifact-contract.mjs'
+import { inspectStory, normativeDigest, readReceiptForAttempt, receiptDigest, validateTaskSlices, validateReceipt } from './check-artifact-contract.mjs'
 
 const fixture = path.resolve('.agents/scripts/fixtures/artifact-contract')
 const source = readFileSync(path.join(fixture, 'story-9-1.md'), 'utf8').replaceAll('\r\n', '\n')
@@ -123,6 +123,23 @@ test('valid receipt binds to checkpoint and referenced content', () => {
 test('valid AGY receipt binds worker evidence and its scope gate', () => {
   const { root, p, cleanup } = agyReceiptCase()
   try { assert.deepEqual(validateReceipt(root, p, 'A', 'implementation'), []) } finally { cleanup() }
+})
+
+// F-41-2 (Story 4.1, 2026-11-14): rework moved an AGY checkpoint into attempt_history, and the
+// snapshot's missing executor made its worker evidence look UNEXPECTED.
+test('AGY receipt in attempt history binds worker evidence to the slice executor and scope', () => {
+  const { root, p, cleanup } = agyReceiptCase()
+  try {
+    const slice = p.slices[0]
+    const attempt = { attempt_id: 1, status: 'checkpointed', baseline_commit: slice.baseline_commit,
+      checkpoint_commit: slice.checkpoint_commit, subject_digest: slice.subject_digest,
+      changed_paths_sha256: slice.changed_paths_sha256, receipt_refs: structuredClone(slice.receipt_refs) }
+    assert.deepEqual(readReceiptForAttempt(root, p, 'A', attempt, 'implementation').errors, [])
+    slice.scope = { paths: ['lib/'] }
+    assert.ok(readReceiptForAttempt(root, p, 'A', attempt, 'implementation').errors.includes('WORKER_EVIDENCE_MISMATCH'))
+    slice.executor = 'lead'
+    assert.ok(readReceiptForAttempt(root, p, 'A', attempt, 'implementation').errors.includes('WORKER_EVIDENCE_UNEXPECTED'))
+  } finally { cleanup() }
 })
 
 test('AGY implementation receipt requires worker evidence', () => {
