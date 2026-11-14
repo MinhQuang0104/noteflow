@@ -99,7 +99,7 @@ rather than prompted, so a gap fails safe and shows up in the report as a STOP.
   broad `Bash(node .agents/scripts/*)` from the project settings.
   - Owner operations: `--approve-exact-scope`, `record-owner-review`,
     `--authorize-autopilot` / `--revoke-autopilot`, `complete_story`,
-    `claim --takeover`, `integrate-story`, `story-registry release`.
+    `claim --takeover`, `refresh-scope`, `integrate-story`, `story-registry release`.
   - Git commands: `git push`, `reset`, `clean`, `stash`, `rebase`, `update-ref`,
     branch deletion, and checkout or switch of `main`.
   - Edit/Write to `.claude/**`, `.agents/**`, `AGENTS.md`, `<git-common-dir>/**`,

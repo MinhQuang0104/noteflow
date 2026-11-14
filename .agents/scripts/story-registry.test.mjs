@@ -191,6 +191,70 @@ test('claim stores the union of declared slice scopes', () => {
   } finally { f.cleanup() }
 })
 
+function commitPlanScope(f, paths) {
+  const text = readFileSync(f.paths.plan, 'utf8').replace(/paths: \[[^\]]*\]/, `paths: ${JSON.stringify(paths)}`)
+  writeFileSync(f.paths.plan, text)
+  f.git(['add', '--', '_bmad-output/implementation-artifacts/story-9-1-plan.md'])
+  f.git(['commit', '-m', 'test fixture: Plan maintenance changes scope'])
+}
+
+test('owner refresh-scope adds committed Plan maintenance paths without changing the generation', () => {
+  const f = createV4Fixture()
+  try {
+    const claimed = cli(f.root, claimArgs(f.root))
+    assert.equal(claimed.code, 0)
+    commitPlanScope(f, ['src/fixture.txt', 'src/extra.txt'])
+    const refreshed = cli(f.root, ['refresh-scope', '9.1', '--generation', '1'])
+    assert.equal(refreshed.code, 0, JSON.stringify(refreshed))
+    assert.equal(refreshed.status, 'APPLIED')
+    const record = JSON.parse(readFileSync(recordPath(f), 'utf8'))
+    assert.equal(record.generation, 1)
+    assert.deepEqual(record.declaredScope, ['src/extra.txt', 'src/fixture.txt'])
+    assert.equal(record.lead.sessionId, claimed.record.lead.sessionId)
+    assert.equal(record.controlPlaneCommit, claimed.record.controlPlaneCommit)
+    assert.equal(record.scopeRefreshes.length, 1)
+    assert.deepEqual(record.scopeRefreshes[0].addedPaths, ['src/extra.txt'])
+    assert.equal(record.scopeRefreshes[0].planHead, f.git(['rev-parse', 'HEAD']))
+    assert.equal(cli(f.root, ['heartbeat', '9.1', '--generation', '1', '--state', 'REVIEWING']).status, 'APPLIED')
+    const again = cli(f.root, ['refresh-scope', '9.1', '--generation', '1'])
+    assert.equal(again.code, 0)
+    assert.deepEqual([again.status, again.reasons], ['NONE', ['SCOPE_CURRENT']])
+  } finally { f.cleanup() }
+})
+
+test('refresh-scope refuses shrinking scope, a fenced generation and missing input without writing', () => {
+  const f = createV4Fixture()
+  try {
+    assert.equal(cli(f.root, claimArgs(f.root)).code, 0)
+    const bytes = readFileSync(recordPath(f), 'utf8')
+    commitPlanScope(f, ['src/other.txt'])
+    assert.deepEqual(cli(f.root, ['refresh-scope', '9.1', '--generation', '1']).reasons, ['SCOPE_REFRESH_NOT_ADDITIVE'])
+    assert.deepEqual(cli(f.root, ['refresh-scope', '9.1', '--generation', '2']).reasons, ['GENERATION_FENCED'])
+    assert.equal(cli(f.root, ['refresh-scope', '9.1']).status, 'INVALID')
+    assert.equal(readFileSync(recordPath(f), 'utf8'), bytes)
+  } finally { f.cleanup() }
+})
+
+test('refresh-scope refuses a dirty Plan and a path another active claim holds', () => {
+  const f = createV4Fixture()
+  try {
+    assert.equal(cli(f.root, claimArgs(f.root)).code, 0)
+    const bytes = readFileSync(recordPath(f), 'utf8')
+    writeFileSync(f.paths.plan, readFileSync(f.paths.plan, 'utf8').replace(/paths: \[[^\]]*\]/, 'paths: ["src/fixture.txt", "src/extra.txt"]'))
+    assert.deepEqual(cli(f.root, ['refresh-scope', '9.1', '--generation', '1']).reasons, ['PLAN_UNCOMMITTED'])
+    assert.equal(readFileSync(recordPath(f), 'utf8'), bytes)
+    f.git(['checkout', '--', '_bmad-output/implementation-artifacts/story-9-1-plan.md'])
+    const other = JSON.parse(bytes)
+    writeFileSync(path.join(path.dirname(recordPath(f)), '9.2.json'), JSON.stringify({ ...other, storyId: '9.2',
+      worktree: path.join(f.root, 'other'), declaredScope: ['src/extra.txt'], resources: [] }))
+    commitPlanScope(f, ['src/fixture.txt', 'src/extra.txt'])
+    const conflict = cli(f.root, ['refresh-scope', '9.1', '--generation', '1'])
+    assert.equal(conflict.status, 'CONFLICT', JSON.stringify(conflict))
+    assert.deepEqual(conflict.reasons, ['SCOPE_OVERLAP'])
+    assert.equal(readFileSync(recordPath(f), 'utf8'), bytes)
+  } finally { f.cleanup() }
+})
+
 test('owner takeover still requires an idle pointer and a valid Plan in the claimed checkout', () => {
   const f = createV4Fixture()
   try {

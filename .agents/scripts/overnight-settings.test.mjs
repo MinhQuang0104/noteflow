@@ -31,7 +31,7 @@ test('overnight child settings deny every owner operation, history rewrite, eval
   for (const rule of [
     'Bash(*record-owner-review*)', 'Bash(*complete_story*)', 'Bash(*complete-story.mjs*)', 'Bash(*--takeover*)',
     'Bash(*integrate-story.mjs*)', 'Bash(*start-story.mjs*)', 'Bash(*story-registry.mjs claim*)', 'Bash(*story-registry.mjs release*)',
-    'Bash(*git push*)', 'Bash(*git reset*)', 'Bash(*git update-ref*)', 'Bash(*git checkout*)', 'Bash(*git commit*)',
+    'Bash(*refresh-scope*)', 'Bash(*git push*)', 'Bash(*git reset*)', 'Bash(*git update-ref*)', 'Bash(*git checkout*)', 'Bash(*git commit*)',
     'Bash(*node -e*)', 'Bash(*node --eval*)', 'Bash(*-Command*)', 'Bash(*npm install*)',
     'Read(**/.env)', 'Edit(.agents/**)', 'Edit(.claude/**)', 'Edit(AGENTS.md)', 'Edit(_bmad-output/**)',
   ]) assert.ok(deny.includes(rule), rule)

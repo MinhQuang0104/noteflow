@@ -83,6 +83,20 @@ and generation. It preserves the Story's worktree and pinned policy. The new
 session uses the returned generation, reloads the Plan and current Git state,
 and resumes from `autopilot-status`; the previous session's writes are refused.
 
+The claim's `declaredScope` is fixed at claim time. After an owner-approved Plan
+maintenance commit adds scope paths, AGY dispatch reports `SCOPE_UNDECLARED`
+until only the owner runs, from the canonical main checkout (a Story pinned
+before this command existed lacks it in its own checkout):
+
+```text
+node .agents/scripts/story-registry.mjs refresh-scope <story-id> --generation <n>
+```
+
+It re-derives scope and resources from the committed Plan, only adds (otherwise
+`SCOPE_REFRESH_NOT_ADDITIVE`), refuses an uncommitted Plan or a path another
+claim holds, keeps the generation, and appends `scopeRefreshes`. The Lead never
+runs it; takeover does not refresh scope.
+
 ## Integration after complete_story
 
 After the owner manually runs `complete_story`, require the Plan's

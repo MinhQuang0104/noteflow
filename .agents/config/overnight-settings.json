@@ -54,6 +54,7 @@
       "Bash(*reconcile-story-lifecycle.mjs*)",
       "Bash(*story-registry.mjs claim*)",
       "Bash(*story-registry.mjs release*)",
+      "Bash(*refresh-scope*)",
       "Bash(*git push*)",
       "Bash(*git reset*)",
       "Bash(*git clean*)",

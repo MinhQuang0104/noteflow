@@ -69,6 +69,7 @@ Commands (Runner exit table; one JSON object on stdout):
 claim <story-id> --worktree <path> --lead-vendor codex|claude --session <id>
       [--orca-run <id>] [--lead-terminal <h>] [--agy-terminal <h>]
 claim <story-id> --takeover --lead-vendor <v> --session <id>     # owner only
+refresh-scope <story-id> --generation <n>                       # owner only, additive (Story 4.2)
 heartbeat <story-id> --generation <n> --state <STATE>
 status [--json]
 release <story-id> --generation <n> --merged | --abort | --orphaned

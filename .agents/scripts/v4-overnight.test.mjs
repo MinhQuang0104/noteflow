@@ -9,7 +9,7 @@ import {
   prepare, run, runStory, uncoveredSlicePaths, validateQueue,
 } from './v4-overnight.mjs'
 
-const OWNER_OPERATIONS = /--approve-exact-scope|record-owner-review|--authorize-autopilot|--revoke-autopilot|complete_story|complete-story|integrate-story|--takeover|\bpush\b/
+const OWNER_OPERATIONS = /--approve-exact-scope|record-owner-review|--authorize-autopilot|--revoke-autopilot|complete_story|complete-story|integrate-story|--takeover|refresh-scope|\bpush\b/
 
 function planText(extra = '') {
   return `---\nschema_version: 2\nstory_id: "9.1"\nslices:\n  - id: A\n    status: pending\n    scope:\n      paths: [backend/app/Feature.php]\n${extra}---\n# Plan\n`

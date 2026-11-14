@@ -226,6 +226,48 @@ export function claimStory(root, storyId, options = {}) {
   } catch (error) { return failure(error.message === 'SCOPE_UNDECLARED' ? 'BLOCKED' : error.message === 'RESOURCES_INVALID' ? 'INVALID' : 'ERROR', error.message) }
 }
 
+/**
+ * Owner-only: re-derive declaredScope and resources from the claimed checkout's
+ * committed Plan after an owner-approved Plan maintenance commit. Additive only,
+ * keeps the generation (an autopilot authorization stays bound to it), and
+ * refuses new paths or resources that another active claim holds.
+ */
+export function refreshStoryScope(root, storyId, generation) {
+  try {
+    if (!STORY_ID.test(storyId ?? '') || !Number.isSafeInteger(generation) || generation < 1) return failure('INVALID', 'REFRESH_INPUT_INVALID')
+    const loaded = readRegistryRecord(root, storyId)
+    if (loaded.status !== 'READY') return loaded
+    return withClaimLock(registryPaths(root, storyId), () => compareAndSwap(root, storyId, generation, record => {
+      if (!pointerIdle(record.worktree)) return failure('BLOCKED', 'V3_POINTER_NOT_IDLE')
+      const checkout = storyCheckoutState(record.worktree, storyId)
+      if (checkout.status !== 'READY') return checkout
+      // Only a committed Plan may widen a claim; uncommitted edits never do.
+      if (git(record.worktree, ['status', '--porcelain', '--', planRelative(storyId)])) return failure('BLOCKED', 'PLAN_UNCOMMITTED')
+      const checked = validateStoryPlan(record.worktree, storyId)
+      if (!checked.valid || checked.status !== 'READY') return { status: checked.status, reasons: checked.reasons }
+      const plan = frontmatter(readFileSync(path.join(record.worktree, planRelative(storyId)), 'utf8'))
+      const scope = declaredScope(plan), resources = declaredResources(plan), held = record.resources ?? []
+      if (record.declaredScope.some(entry => !scope.includes(entry)) || held.some(name => !resources.includes(name))) {
+        return failure('BLOCKED', 'SCOPE_REFRESH_NOT_ADDITIVE')
+      }
+      const addedPaths = scope.filter(entry => !record.declaredScope.includes(entry))
+      const addedResources = resources.filter(name => !held.includes(name))
+      if (!addedPaths.length && !addedResources.length) return failure('NONE', 'SCOPE_CURRENT')
+      const active = activeRegistryRecords(root)
+      if (active.status !== 'READY') return active
+      const resourceResult = resourceConflicts(storyId, addedResources, active.records)
+      if (resourceResult.status !== 'READY') return resourceResult
+      if (addedPaths.length) {
+        const conflicts = scopeConflicts(storyId, addedPaths, active.records)
+        if (conflicts.status !== 'READY') return conflicts
+      }
+      const refresh = { at: new Date().toISOString(), planHead: git(record.worktree, ['rev-parse', 'HEAD']), addedPaths, addedResources }
+      return applied({ ...record, declaredScope: scope, resources,
+        scopeRefreshes: [...(Array.isArray(record.scopeRefreshes) ? record.scopeRefreshes : []), refresh] })
+    }))
+  } catch (error) { return failure(error.message === 'SCOPE_UNDECLARED' ? 'BLOCKED' : error.message === 'RESOURCES_INVALID' ? 'INVALID' : 'ERROR', error.message) }
+}
+
 export function heartbeatStory(root, storyId, generation, state) {
   try {
     if (!Number.isSafeInteger(generation) || generation < 1 || !RUN_STATES.has(state)) return failure('INVALID', 'HEARTBEAT_INPUT_INVALID')
@@ -324,7 +366,7 @@ function parseArguments(argv) {
   const [command, ...tail] = argv
   if (command === 'status') return tail.length === 0 || (tail.length === 1 && tail[0] === '--json') ? { command } : null
   if (command === 'policy-drift') return tail.length === 1 && STORY_ID.test(tail[0]) ? { command, storyId: tail[0] } : null
-  if (!['claim', 'heartbeat', 'release'].includes(command) || !STORY_ID.test(tail[0] ?? '')) return null
+  if (!['claim', 'heartbeat', 'release', 'refresh-scope'].includes(command) || !STORY_ID.test(tail[0] ?? '')) return null
   const result = { command, storyId: tail.shift() }
   const names = { '--worktree': 'worktree', '--lead-vendor': 'leadVendor', '--session': 'session', '--orca-run': 'orcaRun', '--lead-terminal': 'leadTerminal', '--agy-terminal': 'agyTerminal', '--generation': 'generation', '--state': 'state', '--allow-overlap': 'allowOverlap' }
   const allowed = command === 'claim' ? new Set(['worktree', 'leadVendor', 'session', 'orcaRun', 'leadTerminal', 'agyTerminal', 'allowOverlap']) : new Set(command === 'heartbeat' ? ['generation', 'state'] : ['generation'])
@@ -348,6 +390,9 @@ function main() {
   if (!args) return failure('INVALID', 'REGISTRY_USAGE')
   const root = path.resolve(git(process.cwd(), ['rev-parse', '--show-toplevel']))
   if (args.command === 'claim') return claimStory(root, args.storyId, args)
+  if (args.command === 'refresh-scope') {
+    return args.generation === undefined ? failure('INVALID', 'REGISTRY_USAGE') : refreshStoryScope(root, args.storyId, args.generation)
+  }
   if (args.command === 'heartbeat') return heartbeatStory(root, args.storyId, args.generation, args.state)
   if (args.command === 'release') return releaseStory(root, args.storyId, args.generation, args.disposition)
   if (args.command === 'policy-drift') return policyDrift(root, args.storyId)
