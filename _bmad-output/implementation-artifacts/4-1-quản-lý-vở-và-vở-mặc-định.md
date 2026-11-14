@@ -1,7 +1,7 @@
 ---
 story_id: "4.1"
 title: Quản lý vở và vở mặc định
-status: review
+status: done
 ---
 
 # Story 4.1: Quản lý vở và vở mặc định
@@ -138,4 +138,5 @@ As a chủ tài khoản, I want tổ chức note trong các vở một cấp, So
 ### Change Log
 
 - Finalization recorded for Human Gate: in-progress -> review; next action complete_story.
+- Human approval recorded for the exact review scope: review -> done; next action terminal.
 <!-- v4:completion:end -->

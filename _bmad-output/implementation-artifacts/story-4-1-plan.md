@@ -8,7 +8,7 @@ upstream_epic:
   path: docs/product/epics.md
   section_digest: sha256:35c66c11102ff1d071557b13db8816d0eafb637ae5194c66b316a3cf895503bc
 sprint_key: 4-1-quản-lý-vở-và-vở-mặc-định
-lifecycle_snapshot: review
+lifecycle_snapshot: done
 execution_status: complete
 planning_approval:
   decision: APPROVED
@@ -170,9 +170,7 @@ human_approval:
   approved_commit: "44be71b6aeadafbcf82fd9dcb7c017615e6dea93"
   approved_action: "complete_story"
   disclosures_acknowledged: true
-next_action:
-  kind: complete_story
-  target: story
+next_action: null
 autopilot:
   schema_version: 1
   authorized_at: "2026-11-08T10:18:30.013Z"
