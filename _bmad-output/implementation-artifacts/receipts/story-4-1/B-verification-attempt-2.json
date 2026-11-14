@@ -1,0 +1,475 @@
+{
+  "schema_version": 1,
+  "story_id": "4.1",
+  "slice_id": "B",
+  "kind": "verification",
+  "attempt_id": 2,
+  "checkpoint_commit": "b582d7548ca6bcf4cd391a18799ff0bbb7bc67d9",
+  "baseline_commit": "ab00b173e69540932220a25cab10af207e9de7ff",
+  "subject_digest": "sha256:b3e5d06765225f91016f4baaa8b1eb23320e5a349b5ca088f00d41dbb827c6e8",
+  "created_from_head": "b582d7548ca6bcf4cd391a18799ff0bbb7bc67d9",
+  "changed_paths_sha256": "sha256:04783bf7f2e0cd28750297be6d717c549de790117d902d9c1b9856f0d343cbc7",
+  "commands": [
+    {
+      "command": "check:frontend-type-check",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-4-1 worktree\",\"os\":\"Windows 11\",\"runtime\":\"Node frontend\"}"
+    },
+    {
+      "command": "check:frontend-lint",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-4-1 worktree\",\"os\":\"Windows 11\",\"runtime\":\"Node frontend\"}"
+    },
+    {
+      "command": "check:notes-view-unit-tests",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-4-1 worktree\",\"os\":\"Windows 11\",\"runtime\":\"Node frontend vitest\"}"
+    }
+  ],
+  "canonical": {
+    "schema_version": 1,
+    "featureId": "notes-view",
+    "changedPaths": [
+      "frontend/src/views/NotesView.vue"
+    ],
+    "matchedPaths": [
+      "frontend/src/views/NotesView.vue"
+    ],
+    "coveredPaths": [
+      "frontend/src/views/NotesView.vue"
+    ],
+    "unmatchedPaths": [],
+    "dependencyOnlyPaths": [],
+    "map": {
+      "status": "STALE",
+      "expectedChangedAnchors": [
+        "frontend/src/router/__tests__/router.spec.ts",
+        "frontend/src/router/index.ts",
+        "frontend/src/views/NotesView.vue",
+        "frontend/src/views/__tests__/notes.spec.ts",
+        "tests/e2e/helpers/db-helper.php",
+        "tests/e2e/notebooks.spec.ts"
+      ],
+      "unexplainedDrift": [],
+      "missingAnchors": []
+    },
+    "checks": [
+      {
+        "id": "map",
+        "status": "PASS",
+        "exitCode": 1,
+        "summary": "STALE",
+        "evidence_ref": "sha256:f75b911563bda9eeb929742cc0dab3ec5ad1ff9834e0819b017bc67e6a72e8e6"
+      },
+      {
+        "id": "type-check",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "> vue-tsc --build",
+        "evidence_ref": "sha256:12e0ad85492b4fdca42b5c6e1d43b3bcf76677535d6d10920e688ddd40113c7d"
+      },
+      {
+        "id": "lint",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "> eslint . --cache",
+        "evidence_ref": "sha256:18a99030d40a7ea17d4c1f30888f23bfe242a1f3f245121b26b3aef52696f4b2"
+      },
+      {
+        "id": "mapped-tests",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "Test Files  2 passed (2)",
+        "evidence_ref": "sha256:879e3a32e086352783fb88de64e64a0fb0131300cd4293046139d4cc1882e46c"
+      }
+    ],
+    "escalationReasons": [],
+    "status": "PASS",
+    "complete": true
+  },
+  "focused_checks": [
+    {
+      "schema_version": 1,
+      "check_id": "frontend-type-check",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 5085,
+      "command_digest": "sha256:dc5e4a3488a0265412225ffb2dc8f34dbbc557821d6384fbb4c19a11cc6909c5",
+      "output_digest": "sha256:d49b3656eb9402550a0f331ae50a4ba70f8b153f191dd2c6ff7c1d545491044b",
+      "diagnostic_excerpt": "> frontend@0.0.0 type-check\n> vue-tsc --build",
+      "subject": {
+        "commit": "b582d7548ca6bcf4cd391a18799ff0bbb7bc67d9"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-1 worktree",
+        "os": "Windows 11",
+        "runtime": "Node frontend"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-1-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": "frontend",
+        "argv_digest": "sha256:9feb0279e4fc7384425c7e4bcf4c84ec5f31dd83bd70d9b9434c13f168e957dd"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-14T03:06:29.871Z",
+      "observation": {
+        "status": "NOOP",
+        "event_id": "hook-check_finished-176d29d48f2c385f9633bbc2198b26cc2db1a755878f083c",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-1\\.agent-state\\v4-observations\\events\\hook-check_finished-176d29d48f2c385f9633bbc2198b26cc2db1a755878f083c.json",
+        "coverage": "MEASURED"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "frontend/src/views/NotesView.vue"
+      ],
+      "changed_paths_sha256": "sha256:04783bf7f2e0cd28750297be6d717c549de790117d902d9c1b9856f0d343cbc7",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "frontend-lint",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 3698,
+      "command_digest": "sha256:d90cc51cd60cf8e4412be454b0ea8d5ca3c9062eb864384bad6173617378d6e9",
+      "output_digest": "sha256:bc6cdceab12617b2bcdca6213a87da59a46254c4c7c1460189d598173accbb2b",
+      "diagnostic_excerpt": "> frontend@0.0.0 lint\n> run-s \"lint:*\"\n\n\n> frontend@0.0.0 lint:oxlint\n> oxlint .\n\n\n> frontend@0.0.0 lint:eslint\n> eslint . --cache",
+      "subject": {
+        "commit": "b582d7548ca6bcf4cd391a18799ff0bbb7bc67d9"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-1 worktree",
+        "os": "Windows 11",
+        "runtime": "Node frontend"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-1-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": "frontend",
+        "argv_digest": "sha256:edad09f9dbb99f2e409938c2533159fd4e989323316882ac20ce829d5d85e62f"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-14T03:06:35.307Z",
+      "observation": {
+        "status": "NOOP",
+        "event_id": "hook-check_finished-bed8ab8fe49e6094d81824aa4b66ca9dc1a75b33ef496823",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-1\\.agent-state\\v4-observations\\events\\hook-check_finished-bed8ab8fe49e6094d81824aa4b66ca9dc1a75b33ef496823.json",
+        "coverage": "MEASURED"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "frontend/src/views/NotesView.vue"
+      ],
+      "changed_paths_sha256": "sha256:04783bf7f2e0cd28750297be6d717c549de790117d902d9c1b9856f0d343cbc7",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "notes-view-unit-tests",
+      "classification": "behavioral",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 2928,
+      "command_digest": "sha256:23fef3164558f331ff545a821132a5686a1ea2224adeb5dd9cf5209f5875557b",
+      "output_digest": "sha256:31b2ec2a74f31f615ab149890d2db2f4665cba6511fe355d94efe1a0fe4917e1",
+      "diagnostic_excerpt": "> frontend@0.0.0 test:unit\n> vitest --run src/views/__tests__/notes.spec.ts src/router/__tests__/router.spec.ts\n\n\n RUN  v5.0.1 C:/Users/ACER/orca/workspaces/New_Project_My_Note/story-4-1/frontend\n\n\n Test Files  2 passed (2)\n      Tests  14 passed (14)\n   Start at  10:06:40\n   Duration  2.04s (environment 68%, transform 16%, import 10%, tests 6%)",
+      "subject": {
+        "commit": "b582d7548ca6bcf4cd391a18799ff0bbb7bc67d9"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-1 worktree",
+        "os": "Windows 11",
+        "runtime": "Node frontend vitest"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "frontend/src/views/__tests__/notes.spec.ts",
+          "frontend/src/router/__tests__/router.spec.ts"
+        ],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-1-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": "frontend",
+        "argv_digest": "sha256:a82dc31142620d4eba6de3e350a41ae5e0b475ff7642e35f6f4b03dca6e1cce2"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-14T03:06:39.363Z",
+      "observation": {
+        "status": "CONFLICT",
+        "event_id": "hook-check_finished-1ec706764be0ee317d04e5b0bebfa2a7c159db4a4643c40d",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-1\\.agent-state\\v4-observations\\events\\hook-check_finished-1ec706764be0ee317d04e5b0bebfa2a7c159db4a4643c40d.json",
+        "coverage": "UNKNOWN",
+        "reason": "EVENT_ID_PAYLOAD_CONFLICT"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "frontend/src/views/NotesView.vue"
+      ],
+      "changed_paths_sha256": "sha256:04783bf7f2e0cd28750297be6d717c549de790117d902d9c1b9856f0d343cbc7",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    }
+  ],
+  "raw_focused_checks": [
+    {
+      "schema_version": 1,
+      "check_id": "frontend-type-check",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 5085,
+      "command_digest": "sha256:dc5e4a3488a0265412225ffb2dc8f34dbbc557821d6384fbb4c19a11cc6909c5",
+      "output_digest": "sha256:d49b3656eb9402550a0f331ae50a4ba70f8b153f191dd2c6ff7c1d545491044b",
+      "diagnostic_excerpt": "> frontend@0.0.0 type-check\n> vue-tsc --build",
+      "subject": {
+        "kind": "commit",
+        "value": "b582d7548ca6bcf4cd391a18799ff0bbb7bc67d9"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-1 worktree",
+        "os": "Windows 11",
+        "runtime": "Node frontend"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-1-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": "frontend",
+        "argv_digest": "sha256:9feb0279e4fc7384425c7e4bcf4c84ec5f31dd83bd70d9b9434c13f168e957dd"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-14T03:06:29.871Z",
+      "observation": {
+        "status": "NOOP",
+        "event_id": "hook-check_finished-176d29d48f2c385f9633bbc2198b26cc2db1a755878f083c",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-1\\.agent-state\\v4-observations\\events\\hook-check_finished-176d29d48f2c385f9633bbc2198b26cc2db1a755878f083c.json",
+        "coverage": "MEASURED"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "frontend-lint",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 3698,
+      "command_digest": "sha256:d90cc51cd60cf8e4412be454b0ea8d5ca3c9062eb864384bad6173617378d6e9",
+      "output_digest": "sha256:bc6cdceab12617b2bcdca6213a87da59a46254c4c7c1460189d598173accbb2b",
+      "diagnostic_excerpt": "> frontend@0.0.0 lint\n> run-s \"lint:*\"\n\n\n> frontend@0.0.0 lint:oxlint\n> oxlint .\n\n\n> frontend@0.0.0 lint:eslint\n> eslint . --cache",
+      "subject": {
+        "kind": "commit",
+        "value": "b582d7548ca6bcf4cd391a18799ff0bbb7bc67d9"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-1 worktree",
+        "os": "Windows 11",
+        "runtime": "Node frontend"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-1-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": "frontend",
+        "argv_digest": "sha256:edad09f9dbb99f2e409938c2533159fd4e989323316882ac20ce829d5d85e62f"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-14T03:06:35.307Z",
+      "observation": {
+        "status": "NOOP",
+        "event_id": "hook-check_finished-bed8ab8fe49e6094d81824aa4b66ca9dc1a75b33ef496823",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-1\\.agent-state\\v4-observations\\events\\hook-check_finished-bed8ab8fe49e6094d81824aa4b66ca9dc1a75b33ef496823.json",
+        "coverage": "MEASURED"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "notes-view-unit-tests",
+      "classification": "behavioral",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 2928,
+      "command_digest": "sha256:23fef3164558f331ff545a821132a5686a1ea2224adeb5dd9cf5209f5875557b",
+      "output_digest": "sha256:31b2ec2a74f31f615ab149890d2db2f4665cba6511fe355d94efe1a0fe4917e1",
+      "diagnostic_excerpt": "> frontend@0.0.0 test:unit\n> vitest --run src/views/__tests__/notes.spec.ts src/router/__tests__/router.spec.ts\n\n\n RUN  v5.0.1 C:/Users/ACER/orca/workspaces/New_Project_My_Note/story-4-1/frontend\n\n\n Test Files  2 passed (2)\n      Tests  14 passed (14)\n   Start at  10:06:40\n   Duration  2.04s (environment 68%, transform 16%, import 10%, tests 6%)",
+      "subject": {
+        "kind": "commit",
+        "value": "b582d7548ca6bcf4cd391a18799ff0bbb7bc67d9"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-1 worktree",
+        "os": "Windows 11",
+        "runtime": "Node frontend vitest"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "frontend/src/views/__tests__/notes.spec.ts",
+          "frontend/src/router/__tests__/router.spec.ts"
+        ],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-1-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": "frontend",
+        "argv_digest": "sha256:a82dc31142620d4eba6de3e350a41ae5e0b475ff7642e35f6f4b03dca6e1cce2"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-14T03:06:39.363Z",
+      "observation": {
+        "status": "CONFLICT",
+        "event_id": "hook-check_finished-1ec706764be0ee317d04e5b0bebfa2a7c159db4a4643c40d",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-1\\.agent-state\\v4-observations\\events\\hook-check_finished-1ec706764be0ee317d04e5b0bebfa2a7c159db4a4643c40d.json",
+        "coverage": "UNKNOWN",
+        "reason": "EVENT_ID_PAYLOAD_CONFLICT"
+      }
+    }
+  ],
+  "escalation": {
+    "decision": "REVIEW_REQUIRED",
+    "risk": "HIGH",
+    "reasons": [
+      "HIGH_RISK_REVIEW",
+      "JUDGMENT_PUBLIC_CONTRACT"
+    ]
+  },
+  "semantic_coverage": {
+    "decision": "COVERED",
+    "task_refs": [
+      "T-4"
+    ],
+    "acceptance_criteria": [
+      "AC-1",
+      "AC-2",
+      "AC-3",
+      "AC-4"
+    ],
+    "evidence_refs": [
+      "frontend-type-check",
+      "frontend-lint",
+      "notes-view-unit-tests"
+    ]
+  },
+  "progression_eligible": true,
+  "status": "PASS",
+  "context_digest": "sha256:959baf3b051b2165ecfaf286c91537de3c6bdbe8d76b5448a9fa15b8ee49dd1e"
+}

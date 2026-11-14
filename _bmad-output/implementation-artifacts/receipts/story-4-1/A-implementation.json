@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "story_id": "4.1",
+  "slice_id": "A",
+  "kind": "implementation",
+  "checkpoint_commit": "7f2f57dbb20c92933bcf6a3f41a198146147554b",
+  "baseline_commit": "1f39e0542326fc63c48a301a35ed8fd8088d98f5",
+  "subject_digest": "sha256:b3e5d06765225f91016f4baaa8b1eb23320e5a349b5ca088f00d41dbb827c6e8",
+  "created_from_head": "7f2f57dbb20c92933bcf6a3f41a198146147554b",
+  "changed_paths_sha256": "sha256:ab5eef1b67e993c2fc6581539a2de5cf07a1ccd741a60b4bef52736aafb5e399",
+  "commands": [
+    {
+      "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/local.ps1 test",
+      "exit_code": 0,
+      "tool": "pest",
+      "environment": "Story 4.1 worktree story-4-1 at 1f39e0542326fc63c48a301a35ed8fd8088d98f5 plus the slice A working tree, Windows 11, per-worktree runtime noteflow-test-d26d0c91a732 with PostgreSQL; 164 passed (1088 assertions), no warnings"
+    },
+    {
+      "command": "MSYS_NO_PATHCONV=1 docker exec -w /workspace/backend noteflow-test-d26d0c91a732-backend-test-1 php artisan test --filter=Notebook",
+      "exit_code": 0,
+      "tool": "pest",
+      "environment": "Same worktree and container; NotebookApiTest, NotebookConcurrencyTest, NotebookPersistenceTest, NotebookUseCasesTest, ProvisionOwnerCommandTest notebook cases and NotebookContractTest; 37 passed (290 assertions)"
+    },
+    {
+      "command": "MSYS_NO_PATHCONV=1 docker exec -w /workspace/backend noteflow-test-d26d0c91a732-backend-test-1 vendor/bin/pint --test",
+      "exit_code": 0,
+      "tool": "pint",
+      "environment": "Same worktree and container; 113 files pass"
+    },
+    {
+      "command": "MSYS_NO_PATHCONV=1 docker exec -w /workspace/backend noteflow-test-d26d0c91a732-backend-test-1 composer analyse",
+      "exit_code": 0,
+      "tool": "phpstan",
+      "environment": "Same worktree and container; 57 files, no errors"
+    },
+    {
+      "command": "npm --prefix frontend run contract:validate",
+      "exit_code": 0,
+      "tool": "redocly",
+      "environment": "Same worktree, Windows 11, Node 24; contracts/openapi.yaml valid"
+    },
+    {
+      "command": "npm --prefix frontend run contract:check",
+      "exit_code": 0,
+      "tool": "generate-openapi-types",
+      "environment": "Same worktree, Windows 11, Node 24; schema.generated.ts matches openapi.yaml after contract:generate"
+    },
+    {
+      "command": "npm --prefix frontend run type-check",
+      "exit_code": 0,
+      "tool": "vue-tsc",
+      "environment": "Same worktree, Windows 11, Node 24; no type errors"
+    },
+    {
+      "command": "npm --prefix frontend run lint",
+      "exit_code": 0,
+      "tool": "oxlint+eslint",
+      "environment": "Same worktree, Windows 11, Node 24; oxlint and eslint clean"
+    },
+    {
+      "command": "npm --prefix frontend run test:unit -- --run src/api/__tests__/notebooks.spec.ts",
+      "exit_code": 0,
+      "tool": "vitest",
+      "environment": "Same worktree, Windows 11, Node 24, jsdom; 21 passed"
+    }
+  ]
+}

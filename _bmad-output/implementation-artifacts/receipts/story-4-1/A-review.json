@@ -1,0 +1,218 @@
+{
+  "schema_version": 2,
+  "story_id": "4.1",
+  "slice_id": "A",
+  "kind": "review",
+  "checkpoint_commit": "7f2f57dbb20c92933bcf6a3f41a198146147554b",
+  "baseline_commit": "1f39e0542326fc63c48a301a35ed8fd8088d98f5",
+  "subject_digest": "sha256:b3e5d06765225f91016f4baaa8b1eb23320e5a349b5ca088f00d41dbb827c6e8",
+  "created_from_head": "7f2f57dbb20c92933bcf6a3f41a198146147554b",
+  "changed_paths_sha256": "sha256:ab5eef1b67e993c2fc6581539a2de5cf07a1ccd741a60b4bef52736aafb5e399",
+  "commands": [
+    {
+      "command": "owner exact scope review of Story 4.1 slice A (7f2f57d), overnight-child authored",
+      "exit_code": 0,
+      "tool": "reviewer",
+      "environment": "owner"
+    }
+  ],
+  "judgment": "APPROVE",
+  "questions": [
+    {
+      "id": "question-1",
+      "question": "Review the canonical verification result and bounded change evidence."
+    }
+  ],
+  "answers": [
+    {
+      "id": "question-1",
+      "answer": "Owner reviewed the exact 28-path diff 1f39e05..7f2f57d written by the overnight child. Canonical verification PASS (notebooks-backend: map, live-backend-test, contract-validate; notebooks-client: type-check, mapped-tests, contract-check; journal-frontend dependency checks); focused Notebook tests, pint --test, composer analyse and frontend lint PASS; full backend suite 164 passed with no warnings. Invariants checked: partial unique index one default notebook per owner; owner-compatible notes FK ON DELETE RESTRICT with the FK violation mapped to notebook_not_empty; default notebook provisioned idempotently in the provisioning transaction and backfilled by the migration; every mutation under account lock, write fence, data epoch, command ledger replay/key reuse and base_version; one account_revision step per real change; delete rejects default and non-empty notebooks; list orders default first, then created_at and id; all queries owner-scoped."
+    }
+  ],
+  "evidence_refs": [
+    {
+      "path": "backend/app/Console/Commands/ProvisionOwner.php",
+      "unit_index": 0,
+      "evidence_set_digest": "a4ba8feadb32f492d3f263e6bd3ba7ade302a635e282b6a9041b44f81f79cfa7"
+    },
+    {
+      "path": "backend/app/Console/Commands/ProvisionOwner.php",
+      "unit_index": 1,
+      "evidence_set_digest": "a4ba8feadb32f492d3f263e6bd3ba7ade302a635e282b6a9041b44f81f79cfa7"
+    },
+    {
+      "path": "backend/app/Console/Commands/ProvisionOwner.php",
+      "unit_index": 2,
+      "evidence_set_digest": "a4ba8feadb32f492d3f263e6bd3ba7ade302a635e282b6a9041b44f81f79cfa7"
+    },
+    {
+      "path": "backend/app/Http/Controllers/NotebookController.php",
+      "unit_index": 3,
+      "evidence_set_digest": "a4ba8feadb32f492d3f263e6bd3ba7ade302a635e282b6a9041b44f81f79cfa7"
+    },
+    {
+      "path": "backend/app/Modules/Notes/Application/Commands/CreateNotebookCommand.php",
+      "unit_index": 4,
+      "evidence_set_digest": "a4ba8feadb32f492d3f263e6bd3ba7ade302a635e282b6a9041b44f81f79cfa7"
+    },
+    {
+      "path": "backend/app/Modules/Notes/Application/Commands/DeleteNotebookCommand.php",
+      "unit_index": 5,
+      "evidence_set_digest": "a4ba8feadb32f492d3f263e6bd3ba7ade302a635e282b6a9041b44f81f79cfa7"
+    },
+    {
+      "path": "backend/app/Modules/Notes/Application/Commands/RenameNotebookCommand.php",
+      "unit_index": 6,
+      "evidence_set_digest": "a4ba8feadb32f492d3f263e6bd3ba7ade302a635e282b6a9041b44f81f79cfa7"
+    },
+    {
+      "path": "backend/app/Modules/Notes/Application/DefaultNotebookProvisioner.php",
+      "unit_index": 7,
+      "evidence_set_digest": "a4ba8feadb32f492d3f263e6bd3ba7ade302a635e282b6a9041b44f81f79cfa7"
+    },
+    {
+      "path": "backend/app/Modules/Notes/Application/UseCases/CreateNotebookUseCase.php",
+      "unit_index": 8,
+      "evidence_set_digest": "a4ba8feadb32f492d3f263e6bd3ba7ade302a635e282b6a9041b44f81f79cfa7"
+    },
+    {
+      "path": "backend/app/Modules/Notes/Application/UseCases/DeleteNotebookUseCase.php",
+      "unit_index": 9,
+      "evidence_set_digest": "a4ba8feadb32f492d3f263e6bd3ba7ade302a635e282b6a9041b44f81f79cfa7"
+    },
+    {
+      "path": "backend/app/Modules/Notes/Application/UseCases/GetNotebookListQuery.php",
+      "unit_index": 10,
+      "evidence_set_digest": "a4ba8feadb32f492d3f263e6bd3ba7ade302a635e282b6a9041b44f81f79cfa7"
+    },
+    {
+      "path": "backend/app/Modules/Notes/Application/UseCases/RenameNotebookUseCase.php",
+      "unit_index": 11,
+      "evidence_set_digest": "a4ba8feadb32f492d3f263e6bd3ba7ade302a635e282b6a9041b44f81f79cfa7"
+    },
+    {
+      "path": "backend/app/Modules/Notes/Domain/Exceptions/IdempotencyKeyReusedException.php",
+      "unit_index": 12,
+      "evidence_set_digest": "a4ba8feadb32f492d3f263e6bd3ba7ade302a635e282b6a9041b44f81f79cfa7"
+    },
+    {
+      "path": "backend/app/Modules/Notes/Domain/Exceptions/InvalidNotebookNameException.php",
+      "unit_index": 13,
+      "evidence_set_digest": "a4ba8feadb32f492d3f263e6bd3ba7ade302a635e282b6a9041b44f81f79cfa7"
+    },
+    {
+      "path": "backend/app/Modules/Notes/Domain/Exceptions/NotebookNotDeletableException.php",
+      "unit_index": 14,
+      "evidence_set_digest": "a4ba8feadb32f492d3f263e6bd3ba7ade302a635e282b6a9041b44f81f79cfa7"
+    },
+    {
+      "path": "backend/app/Modules/Notes/Domain/Exceptions/StaleDataEpochException.php",
+      "unit_index": 15,
+      "evidence_set_digest": "a4ba8feadb32f492d3f263e6bd3ba7ade302a635e282b6a9041b44f81f79cfa7"
+    },
+    {
+      "path": "backend/app/Modules/Notes/Domain/Exceptions/VersionConflictException.php",
+      "unit_index": 0,
+      "evidence_set_digest": "02c5ac2fdd762c397ff7003840ef74b0a5283807f491cab0617ce5aa65fbb8b0"
+    },
+    {
+      "path": "backend/app/Modules/Notes/Domain/Exceptions/WriteFenceActiveException.php",
+      "unit_index": 1,
+      "evidence_set_digest": "02c5ac2fdd762c397ff7003840ef74b0a5283807f491cab0617ce5aa65fbb8b0"
+    },
+    {
+      "path": "backend/database/migrations/2026_11_08_010000_create_notebooks_and_notes_tables.php",
+      "unit_index": 2,
+      "evidence_set_digest": "02c5ac2fdd762c397ff7003840ef74b0a5283807f491cab0617ce5aa65fbb8b0"
+    },
+    {
+      "path": "backend/routes/api.php",
+      "unit_index": 3,
+      "evidence_set_digest": "02c5ac2fdd762c397ff7003840ef74b0a5283807f491cab0617ce5aa65fbb8b0"
+    },
+    {
+      "path": "backend/routes/api.php",
+      "unit_index": 4,
+      "evidence_set_digest": "02c5ac2fdd762c397ff7003840ef74b0a5283807f491cab0617ce5aa65fbb8b0"
+    },
+    {
+      "path": "backend/tests/Contract/NotebookContractTest.php",
+      "unit_index": 5,
+      "evidence_set_digest": "02c5ac2fdd762c397ff7003840ef74b0a5283807f491cab0617ce5aa65fbb8b0"
+    },
+    {
+      "path": "backend/tests/Feature/NotebookApiTest.php",
+      "unit_index": 6,
+      "evidence_set_digest": "02c5ac2fdd762c397ff7003840ef74b0a5283807f491cab0617ce5aa65fbb8b0"
+    },
+    {
+      "path": "backend/tests/Feature/NotebookConcurrencyTest.php",
+      "unit_index": 7,
+      "evidence_set_digest": "02c5ac2fdd762c397ff7003840ef74b0a5283807f491cab0617ce5aa65fbb8b0"
+    },
+    {
+      "path": "backend/tests/Feature/NotebookPersistenceTest.php",
+      "unit_index": 8,
+      "evidence_set_digest": "02c5ac2fdd762c397ff7003840ef74b0a5283807f491cab0617ce5aa65fbb8b0"
+    },
+    {
+      "path": "backend/tests/Feature/NotebookUseCasesTest.php",
+      "unit_index": 9,
+      "evidence_set_digest": "02c5ac2fdd762c397ff7003840ef74b0a5283807f491cab0617ce5aa65fbb8b0"
+    },
+    {
+      "path": "backend/tests/Feature/NotebookUseCasesTest.php",
+      "unit_index": 10,
+      "evidence_set_digest": "02c5ac2fdd762c397ff7003840ef74b0a5283807f491cab0617ce5aa65fbb8b0"
+    },
+    {
+      "path": "backend/tests/Feature/ProvisionOwnerCommandTest.php",
+      "unit_index": 11,
+      "evidence_set_digest": "02c5ac2fdd762c397ff7003840ef74b0a5283807f491cab0617ce5aa65fbb8b0"
+    },
+    {
+      "path": "contracts/openapi.yaml",
+      "unit_index": 12,
+      "evidence_set_digest": "02c5ac2fdd762c397ff7003840ef74b0a5283807f491cab0617ce5aa65fbb8b0"
+    },
+    {
+      "path": "contracts/openapi.yaml",
+      "unit_index": 13,
+      "evidence_set_digest": "02c5ac2fdd762c397ff7003840ef74b0a5283807f491cab0617ce5aa65fbb8b0"
+    },
+    {
+      "path": "contracts/openapi.yaml",
+      "unit_index": 14,
+      "evidence_set_digest": "02c5ac2fdd762c397ff7003840ef74b0a5283807f491cab0617ce5aa65fbb8b0"
+    },
+    {
+      "path": "frontend/src/api/__tests__/notebooks.spec.ts",
+      "unit_index": 15,
+      "evidence_set_digest": "02c5ac2fdd762c397ff7003840ef74b0a5283807f491cab0617ce5aa65fbb8b0"
+    },
+    {
+      "path": "frontend/src/api/notebooks.ts",
+      "unit_index": 16,
+      "evidence_set_digest": "02c5ac2fdd762c397ff7003840ef74b0a5283807f491cab0617ce5aa65fbb8b0"
+    },
+    {
+      "path": "frontend/src/api/schema.generated.ts",
+      "unit_index": 17,
+      "evidence_set_digest": "02c5ac2fdd762c397ff7003840ef74b0a5283807f491cab0617ce5aa65fbb8b0"
+    },
+    {
+      "path": "frontend/src/api/schema.generated.ts",
+      "unit_index": 18,
+      "evidence_set_digest": "02c5ac2fdd762c397ff7003840ef74b0a5283807f491cab0617ce5aa65fbb8b0"
+    }
+  ],
+  "scope_digest": "sha256:dad983164a7c605f29cf7a2212f99dff4bea92ed6b8cbb71d835f73089900617",
+  "risk_context_digest": "sha256:fda9685a606c4170ef0d3aba9a6a4a1627e5cf10d7f64e86413b5bb61e929d4c",
+  "reviewed_commit": "7f2f57dbb20c92933bcf6a3f41a198146147554b",
+  "reviewer": {
+    "vendor": null,
+    "independent": false,
+    "type": "human"
+  },
+  "findings": []
+}

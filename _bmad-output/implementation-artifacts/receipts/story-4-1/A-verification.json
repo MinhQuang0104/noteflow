@@ -1,0 +1,1254 @@
+{
+  "schema_version": 1,
+  "story_id": "4.1",
+  "slice_id": "A",
+  "kind": "verification",
+  "checkpoint_commit": "7f2f57dbb20c92933bcf6a3f41a198146147554b",
+  "baseline_commit": "1f39e0542326fc63c48a301a35ed8fd8088d98f5",
+  "subject_digest": "sha256:b3e5d06765225f91016f4baaa8b1eb23320e5a349b5ca088f00d41dbb827c6e8",
+  "created_from_head": "7f2f57dbb20c92933bcf6a3f41a198146147554b",
+  "changed_paths_sha256": "sha256:ab5eef1b67e993c2fc6581539a2de5cf07a1ccd741a60b4bef52736aafb5e399",
+  "commands": [
+    {
+      "command": "check:notebook-backend-tests",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-4-1 worktree\",\"os\":\"Windows 11\",\"runtime\":\"noteflow-test-d26d0c91a732 backend-test with PostgreSQL\"}"
+    },
+    {
+      "command": "check:pint",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-4-1 worktree\",\"os\":\"Windows 11\",\"runtime\":\"noteflow-test-d26d0c91a732 backend-test\"}"
+    },
+    {
+      "command": "check:composer-analyse",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-4-1 worktree\",\"os\":\"Windows 11\",\"runtime\":\"noteflow-test-d26d0c91a732 backend-test\"}"
+    },
+    {
+      "command": "check:frontend-lint",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-4-1 worktree\",\"os\":\"Windows 11\",\"runtime\":\"Node frontend\"}"
+    }
+  ],
+  "canonical": {
+    "schema_version": 2,
+    "featureId": null,
+    "changedPaths": [
+      "backend/app/Console/Commands/ProvisionOwner.php",
+      "backend/app/Http/Controllers/NotebookController.php",
+      "backend/app/Modules/Notes/Application/Commands/CreateNotebookCommand.php",
+      "backend/app/Modules/Notes/Application/Commands/DeleteNotebookCommand.php",
+      "backend/app/Modules/Notes/Application/Commands/RenameNotebookCommand.php",
+      "backend/app/Modules/Notes/Application/DefaultNotebookProvisioner.php",
+      "backend/app/Modules/Notes/Application/UseCases/CreateNotebookUseCase.php",
+      "backend/app/Modules/Notes/Application/UseCases/DeleteNotebookUseCase.php",
+      "backend/app/Modules/Notes/Application/UseCases/GetNotebookListQuery.php",
+      "backend/app/Modules/Notes/Application/UseCases/RenameNotebookUseCase.php",
+      "backend/app/Modules/Notes/Domain/Exceptions/IdempotencyKeyReusedException.php",
+      "backend/app/Modules/Notes/Domain/Exceptions/InvalidNotebookNameException.php",
+      "backend/app/Modules/Notes/Domain/Exceptions/NotebookNotDeletableException.php",
+      "backend/app/Modules/Notes/Domain/Exceptions/StaleDataEpochException.php",
+      "backend/app/Modules/Notes/Domain/Exceptions/VersionConflictException.php",
+      "backend/app/Modules/Notes/Domain/Exceptions/WriteFenceActiveException.php",
+      "backend/database/migrations/2026_11_08_010000_create_notebooks_and_notes_tables.php",
+      "backend/routes/api.php",
+      "backend/tests/Contract/NotebookContractTest.php",
+      "backend/tests/Feature/NotebookApiTest.php",
+      "backend/tests/Feature/NotebookConcurrencyTest.php",
+      "backend/tests/Feature/NotebookPersistenceTest.php",
+      "backend/tests/Feature/NotebookUseCasesTest.php",
+      "backend/tests/Feature/ProvisionOwnerCommandTest.php",
+      "contracts/openapi.yaml",
+      "frontend/src/api/__tests__/notebooks.spec.ts",
+      "frontend/src/api/notebooks.ts",
+      "frontend/src/api/schema.generated.ts"
+    ],
+    "matchedPaths": [
+      "backend/app/Console/Commands/ProvisionOwner.php",
+      "backend/app/Http/Controllers/NotebookController.php",
+      "backend/app/Modules/Notes/Application/Commands/CreateNotebookCommand.php",
+      "backend/app/Modules/Notes/Application/Commands/DeleteNotebookCommand.php",
+      "backend/app/Modules/Notes/Application/Commands/RenameNotebookCommand.php",
+      "backend/app/Modules/Notes/Application/DefaultNotebookProvisioner.php",
+      "backend/app/Modules/Notes/Application/UseCases/CreateNotebookUseCase.php",
+      "backend/app/Modules/Notes/Application/UseCases/DeleteNotebookUseCase.php",
+      "backend/app/Modules/Notes/Application/UseCases/GetNotebookListQuery.php",
+      "backend/app/Modules/Notes/Application/UseCases/RenameNotebookUseCase.php",
+      "backend/app/Modules/Notes/Domain/Exceptions/IdempotencyKeyReusedException.php",
+      "backend/app/Modules/Notes/Domain/Exceptions/InvalidNotebookNameException.php",
+      "backend/app/Modules/Notes/Domain/Exceptions/NotebookNotDeletableException.php",
+      "backend/app/Modules/Notes/Domain/Exceptions/StaleDataEpochException.php",
+      "backend/app/Modules/Notes/Domain/Exceptions/VersionConflictException.php",
+      "backend/app/Modules/Notes/Domain/Exceptions/WriteFenceActiveException.php",
+      "backend/database/migrations/2026_11_08_010000_create_notebooks_and_notes_tables.php",
+      "backend/routes/api.php",
+      "backend/tests/Contract/NotebookContractTest.php",
+      "backend/tests/Feature/NotebookApiTest.php",
+      "backend/tests/Feature/NotebookConcurrencyTest.php",
+      "backend/tests/Feature/NotebookPersistenceTest.php",
+      "backend/tests/Feature/NotebookUseCasesTest.php",
+      "backend/tests/Feature/ProvisionOwnerCommandTest.php",
+      "contracts/openapi.yaml",
+      "frontend/src/api/__tests__/notebooks.spec.ts",
+      "frontend/src/api/notebooks.ts",
+      "frontend/src/api/schema.generated.ts"
+    ],
+    "coveredPaths": [
+      "backend/app/Console/Commands/ProvisionOwner.php",
+      "backend/app/Http/Controllers/NotebookController.php",
+      "backend/app/Modules/Notes/Application/Commands/CreateNotebookCommand.php",
+      "backend/app/Modules/Notes/Application/Commands/DeleteNotebookCommand.php",
+      "backend/app/Modules/Notes/Application/Commands/RenameNotebookCommand.php",
+      "backend/app/Modules/Notes/Application/DefaultNotebookProvisioner.php",
+      "backend/app/Modules/Notes/Application/UseCases/CreateNotebookUseCase.php",
+      "backend/app/Modules/Notes/Application/UseCases/DeleteNotebookUseCase.php",
+      "backend/app/Modules/Notes/Application/UseCases/GetNotebookListQuery.php",
+      "backend/app/Modules/Notes/Application/UseCases/RenameNotebookUseCase.php",
+      "backend/app/Modules/Notes/Domain/Exceptions/IdempotencyKeyReusedException.php",
+      "backend/app/Modules/Notes/Domain/Exceptions/InvalidNotebookNameException.php",
+      "backend/app/Modules/Notes/Domain/Exceptions/NotebookNotDeletableException.php",
+      "backend/app/Modules/Notes/Domain/Exceptions/StaleDataEpochException.php",
+      "backend/app/Modules/Notes/Domain/Exceptions/VersionConflictException.php",
+      "backend/app/Modules/Notes/Domain/Exceptions/WriteFenceActiveException.php",
+      "backend/database/migrations/2026_11_08_010000_create_notebooks_and_notes_tables.php",
+      "backend/routes/api.php",
+      "backend/tests/Contract/NotebookContractTest.php",
+      "backend/tests/Feature/NotebookApiTest.php",
+      "backend/tests/Feature/NotebookConcurrencyTest.php",
+      "backend/tests/Feature/NotebookPersistenceTest.php",
+      "backend/tests/Feature/NotebookUseCasesTest.php",
+      "backend/tests/Feature/ProvisionOwnerCommandTest.php",
+      "contracts/openapi.yaml",
+      "frontend/src/api/__tests__/notebooks.spec.ts",
+      "frontend/src/api/notebooks.ts",
+      "frontend/src/api/schema.generated.ts"
+    ],
+    "unmatchedPaths": [],
+    "recipes": [
+      {
+        "schema_version": 1,
+        "featureId": "journal-frontend",
+        "changedPaths": [
+          "backend/app/Console/Commands/ProvisionOwner.php",
+          "backend/app/Http/Controllers/NotebookController.php",
+          "backend/app/Modules/Notes/Application/Commands/CreateNotebookCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/DeleteNotebookCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/RenameNotebookCommand.php",
+          "backend/app/Modules/Notes/Application/DefaultNotebookProvisioner.php",
+          "backend/app/Modules/Notes/Application/UseCases/CreateNotebookUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/DeleteNotebookUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/GetNotebookListQuery.php",
+          "backend/app/Modules/Notes/Application/UseCases/RenameNotebookUseCase.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/IdempotencyKeyReusedException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/InvalidNotebookNameException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/NotebookNotDeletableException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/StaleDataEpochException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/VersionConflictException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/WriteFenceActiveException.php",
+          "backend/database/migrations/2026_11_08_010000_create_notebooks_and_notes_tables.php",
+          "backend/routes/api.php",
+          "backend/tests/Contract/NotebookContractTest.php",
+          "backend/tests/Feature/NotebookApiTest.php",
+          "backend/tests/Feature/NotebookConcurrencyTest.php",
+          "backend/tests/Feature/NotebookPersistenceTest.php",
+          "backend/tests/Feature/NotebookUseCasesTest.php",
+          "backend/tests/Feature/ProvisionOwnerCommandTest.php",
+          "contracts/openapi.yaml",
+          "frontend/src/api/__tests__/notebooks.spec.ts",
+          "frontend/src/api/notebooks.ts",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "matchedPaths": [
+          "contracts/openapi.yaml",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "coveredPaths": [],
+        "unmatchedPaths": [
+          "backend/app/Console/Commands/ProvisionOwner.php",
+          "backend/app/Http/Controllers/NotebookController.php",
+          "backend/app/Modules/Notes/Application/Commands/CreateNotebookCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/DeleteNotebookCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/RenameNotebookCommand.php",
+          "backend/app/Modules/Notes/Application/DefaultNotebookProvisioner.php",
+          "backend/app/Modules/Notes/Application/UseCases/CreateNotebookUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/DeleteNotebookUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/GetNotebookListQuery.php",
+          "backend/app/Modules/Notes/Application/UseCases/RenameNotebookUseCase.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/IdempotencyKeyReusedException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/InvalidNotebookNameException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/NotebookNotDeletableException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/StaleDataEpochException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/VersionConflictException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/WriteFenceActiveException.php",
+          "backend/database/migrations/2026_11_08_010000_create_notebooks_and_notes_tables.php",
+          "backend/routes/api.php",
+          "backend/tests/Contract/NotebookContractTest.php",
+          "backend/tests/Feature/NotebookApiTest.php",
+          "backend/tests/Feature/NotebookConcurrencyTest.php",
+          "backend/tests/Feature/NotebookPersistenceTest.php",
+          "backend/tests/Feature/NotebookUseCasesTest.php",
+          "backend/tests/Feature/ProvisionOwnerCommandTest.php",
+          "contracts/openapi.yaml",
+          "frontend/src/api/__tests__/notebooks.spec.ts",
+          "frontend/src/api/notebooks.ts",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "dependencyOnlyPaths": [
+          "contracts/openapi.yaml",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "map": {
+          "status": "STALE",
+          "expectedChangedAnchors": [
+            "contracts/openapi.yaml",
+            "frontend/src/api/schema.generated.ts"
+          ],
+          "unexplainedDrift": [],
+          "missingAnchors": []
+        },
+        "checks": [
+          {
+            "id": "map",
+            "status": "PASS",
+            "exitCode": 1,
+            "summary": "STALE",
+            "evidence_ref": "sha256:1df2448fc3a565e064cb12a2a31e002e8abbb11ddc78ad1cf2773fec5045ad04"
+          },
+          {
+            "id": "type-check",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "> vue-tsc --build",
+            "evidence_ref": "sha256:0ffd428014a5826affa69f01921361c2ac4c6210bc4f70fea75ff094bfe35b2e"
+          },
+          {
+            "id": "mapped-tests",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "Test Files  3 passed (3)",
+            "evidence_ref": "sha256:ee294850bfd687a2c6da0fb46ab2cfb322085ad8fc9f354702ab45356ddc5e47"
+          },
+          {
+            "id": "contract-check",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "> node scripts/generate-openapi-types.mjs --check",
+            "evidence_ref": "sha256:984d026fbd569ae49bbf72dedc2ddd99a8e91c3783b77b29eebc0c436798e31c"
+          }
+        ],
+        "escalationReasons": [
+          "UNMAPPED_CHANGED_PATH",
+          "DEPENDENCY_ONLY_CHANGED_PATH"
+        ],
+        "status": "INCOMPLETE",
+        "complete": false
+      },
+      {
+        "schema_version": 1,
+        "featureId": "notebooks-backend",
+        "changedPaths": [
+          "backend/app/Console/Commands/ProvisionOwner.php",
+          "backend/app/Http/Controllers/NotebookController.php",
+          "backend/app/Modules/Notes/Application/Commands/CreateNotebookCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/DeleteNotebookCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/RenameNotebookCommand.php",
+          "backend/app/Modules/Notes/Application/DefaultNotebookProvisioner.php",
+          "backend/app/Modules/Notes/Application/UseCases/CreateNotebookUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/DeleteNotebookUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/GetNotebookListQuery.php",
+          "backend/app/Modules/Notes/Application/UseCases/RenameNotebookUseCase.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/IdempotencyKeyReusedException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/InvalidNotebookNameException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/NotebookNotDeletableException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/StaleDataEpochException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/VersionConflictException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/WriteFenceActiveException.php",
+          "backend/database/migrations/2026_11_08_010000_create_notebooks_and_notes_tables.php",
+          "backend/routes/api.php",
+          "backend/tests/Contract/NotebookContractTest.php",
+          "backend/tests/Feature/NotebookApiTest.php",
+          "backend/tests/Feature/NotebookConcurrencyTest.php",
+          "backend/tests/Feature/NotebookPersistenceTest.php",
+          "backend/tests/Feature/NotebookUseCasesTest.php",
+          "backend/tests/Feature/ProvisionOwnerCommandTest.php",
+          "contracts/openapi.yaml",
+          "frontend/src/api/__tests__/notebooks.spec.ts",
+          "frontend/src/api/notebooks.ts",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "matchedPaths": [
+          "backend/app/Console/Commands/ProvisionOwner.php",
+          "backend/app/Http/Controllers/NotebookController.php",
+          "backend/app/Modules/Notes/Application/Commands/CreateNotebookCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/DeleteNotebookCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/RenameNotebookCommand.php",
+          "backend/app/Modules/Notes/Application/DefaultNotebookProvisioner.php",
+          "backend/app/Modules/Notes/Application/UseCases/CreateNotebookUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/DeleteNotebookUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/GetNotebookListQuery.php",
+          "backend/app/Modules/Notes/Application/UseCases/RenameNotebookUseCase.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/IdempotencyKeyReusedException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/InvalidNotebookNameException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/NotebookNotDeletableException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/StaleDataEpochException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/VersionConflictException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/WriteFenceActiveException.php",
+          "backend/database/migrations/2026_11_08_010000_create_notebooks_and_notes_tables.php",
+          "backend/routes/api.php",
+          "backend/tests/Contract/NotebookContractTest.php",
+          "backend/tests/Feature/NotebookApiTest.php",
+          "backend/tests/Feature/NotebookConcurrencyTest.php",
+          "backend/tests/Feature/NotebookPersistenceTest.php",
+          "backend/tests/Feature/NotebookUseCasesTest.php",
+          "backend/tests/Feature/ProvisionOwnerCommandTest.php",
+          "contracts/openapi.yaml"
+        ],
+        "coveredPaths": [
+          "backend/app/Console/Commands/ProvisionOwner.php",
+          "backend/app/Http/Controllers/NotebookController.php",
+          "backend/app/Modules/Notes/Application/Commands/CreateNotebookCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/DeleteNotebookCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/RenameNotebookCommand.php",
+          "backend/app/Modules/Notes/Application/DefaultNotebookProvisioner.php",
+          "backend/app/Modules/Notes/Application/UseCases/CreateNotebookUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/DeleteNotebookUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/GetNotebookListQuery.php",
+          "backend/app/Modules/Notes/Application/UseCases/RenameNotebookUseCase.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/IdempotencyKeyReusedException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/InvalidNotebookNameException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/NotebookNotDeletableException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/StaleDataEpochException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/VersionConflictException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/WriteFenceActiveException.php",
+          "backend/database/migrations/2026_11_08_010000_create_notebooks_and_notes_tables.php",
+          "backend/routes/api.php",
+          "backend/tests/Contract/NotebookContractTest.php",
+          "backend/tests/Feature/NotebookApiTest.php",
+          "backend/tests/Feature/NotebookConcurrencyTest.php",
+          "backend/tests/Feature/NotebookPersistenceTest.php",
+          "backend/tests/Feature/NotebookUseCasesTest.php",
+          "backend/tests/Feature/ProvisionOwnerCommandTest.php",
+          "contracts/openapi.yaml"
+        ],
+        "unmatchedPaths": [
+          "frontend/src/api/__tests__/notebooks.spec.ts",
+          "frontend/src/api/notebooks.ts",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "dependencyOnlyPaths": [],
+        "map": {
+          "status": "STALE",
+          "expectedChangedAnchors": [
+            "backend/app/Console/Commands/ProvisionOwner.php",
+            "backend/app/Http/Controllers/NotebookController.php",
+            "backend/app/Modules/Notes/Application/Commands/CreateNotebookCommand.php",
+            "backend/app/Modules/Notes/Application/Commands/DeleteNotebookCommand.php",
+            "backend/app/Modules/Notes/Application/Commands/RenameNotebookCommand.php",
+            "backend/app/Modules/Notes/Application/DefaultNotebookProvisioner.php",
+            "backend/app/Modules/Notes/Application/UseCases/CreateNotebookUseCase.php",
+            "backend/app/Modules/Notes/Application/UseCases/DeleteNotebookUseCase.php",
+            "backend/app/Modules/Notes/Application/UseCases/GetNotebookListQuery.php",
+            "backend/app/Modules/Notes/Application/UseCases/RenameNotebookUseCase.php",
+            "backend/app/Modules/Notes/Domain/Exceptions/IdempotencyKeyReusedException.php",
+            "backend/app/Modules/Notes/Domain/Exceptions/InvalidNotebookNameException.php",
+            "backend/app/Modules/Notes/Domain/Exceptions/NotebookNotDeletableException.php",
+            "backend/app/Modules/Notes/Domain/Exceptions/StaleDataEpochException.php",
+            "backend/app/Modules/Notes/Domain/Exceptions/VersionConflictException.php",
+            "backend/app/Modules/Notes/Domain/Exceptions/WriteFenceActiveException.php",
+            "backend/database/migrations/2026_11_08_010000_create_notebooks_and_notes_tables.php",
+            "backend/routes/api.php",
+            "backend/tests/Contract/NotebookContractTest.php",
+            "backend/tests/Feature/NotebookApiTest.php",
+            "backend/tests/Feature/NotebookConcurrencyTest.php",
+            "backend/tests/Feature/NotebookPersistenceTest.php",
+            "backend/tests/Feature/NotebookUseCasesTest.php",
+            "backend/tests/Feature/ProvisionOwnerCommandTest.php",
+            "contracts/openapi.yaml"
+          ],
+          "unexplainedDrift": [],
+          "missingAnchors": []
+        },
+        "checks": [
+          {
+            "id": "map",
+            "status": "PASS",
+            "exitCode": 1,
+            "summary": "STALE",
+            "evidence_ref": "sha256:711d8ad48f1726dd623ae4f53489bbcde7a9088ede42eceaca12ab67b8accd0b"
+          },
+          {
+            "id": "live-backend-test",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "Container noteflow-test-d26d0c91a732-backend-test-1  Healthy",
+            "evidence_ref": "sha256:7a45fa761fae81a3d2dcd8a691dca66cfcb44bcf849278abda1ff2be0c61e228"
+          },
+          {
+            "id": "contract-validate",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "\u001b[39m",
+            "evidence_ref": "sha256:182f7482936ffe626e6808ce332a0d454153f3324b8f512a1ba76643633f8269"
+          }
+        ],
+        "escalationReasons": [
+          "UNMAPPED_CHANGED_PATH"
+        ],
+        "status": "INCOMPLETE",
+        "complete": false
+      },
+      {
+        "schema_version": 1,
+        "featureId": "notebooks-client",
+        "changedPaths": [
+          "backend/app/Console/Commands/ProvisionOwner.php",
+          "backend/app/Http/Controllers/NotebookController.php",
+          "backend/app/Modules/Notes/Application/Commands/CreateNotebookCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/DeleteNotebookCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/RenameNotebookCommand.php",
+          "backend/app/Modules/Notes/Application/DefaultNotebookProvisioner.php",
+          "backend/app/Modules/Notes/Application/UseCases/CreateNotebookUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/DeleteNotebookUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/GetNotebookListQuery.php",
+          "backend/app/Modules/Notes/Application/UseCases/RenameNotebookUseCase.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/IdempotencyKeyReusedException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/InvalidNotebookNameException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/NotebookNotDeletableException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/StaleDataEpochException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/VersionConflictException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/WriteFenceActiveException.php",
+          "backend/database/migrations/2026_11_08_010000_create_notebooks_and_notes_tables.php",
+          "backend/routes/api.php",
+          "backend/tests/Contract/NotebookContractTest.php",
+          "backend/tests/Feature/NotebookApiTest.php",
+          "backend/tests/Feature/NotebookConcurrencyTest.php",
+          "backend/tests/Feature/NotebookPersistenceTest.php",
+          "backend/tests/Feature/NotebookUseCasesTest.php",
+          "backend/tests/Feature/ProvisionOwnerCommandTest.php",
+          "contracts/openapi.yaml",
+          "frontend/src/api/__tests__/notebooks.spec.ts",
+          "frontend/src/api/notebooks.ts",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "matchedPaths": [
+          "contracts/openapi.yaml",
+          "frontend/src/api/__tests__/notebooks.spec.ts",
+          "frontend/src/api/notebooks.ts",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "coveredPaths": [
+          "frontend/src/api/__tests__/notebooks.spec.ts",
+          "frontend/src/api/notebooks.ts",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "unmatchedPaths": [
+          "backend/app/Console/Commands/ProvisionOwner.php",
+          "backend/app/Http/Controllers/NotebookController.php",
+          "backend/app/Modules/Notes/Application/Commands/CreateNotebookCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/DeleteNotebookCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/RenameNotebookCommand.php",
+          "backend/app/Modules/Notes/Application/DefaultNotebookProvisioner.php",
+          "backend/app/Modules/Notes/Application/UseCases/CreateNotebookUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/DeleteNotebookUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/GetNotebookListQuery.php",
+          "backend/app/Modules/Notes/Application/UseCases/RenameNotebookUseCase.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/IdempotencyKeyReusedException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/InvalidNotebookNameException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/NotebookNotDeletableException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/StaleDataEpochException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/VersionConflictException.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/WriteFenceActiveException.php",
+          "backend/database/migrations/2026_11_08_010000_create_notebooks_and_notes_tables.php",
+          "backend/routes/api.php",
+          "backend/tests/Contract/NotebookContractTest.php",
+          "backend/tests/Feature/NotebookApiTest.php",
+          "backend/tests/Feature/NotebookConcurrencyTest.php",
+          "backend/tests/Feature/NotebookPersistenceTest.php",
+          "backend/tests/Feature/NotebookUseCasesTest.php",
+          "backend/tests/Feature/ProvisionOwnerCommandTest.php",
+          "contracts/openapi.yaml"
+        ],
+        "dependencyOnlyPaths": [
+          "contracts/openapi.yaml"
+        ],
+        "map": {
+          "status": "STALE",
+          "expectedChangedAnchors": [
+            "contracts/openapi.yaml",
+            "frontend/src/api/__tests__/notebooks.spec.ts",
+            "frontend/src/api/notebooks.ts",
+            "frontend/src/api/schema.generated.ts"
+          ],
+          "unexplainedDrift": [],
+          "missingAnchors": []
+        },
+        "checks": [
+          {
+            "id": "map",
+            "status": "PASS",
+            "exitCode": 1,
+            "summary": "STALE",
+            "evidence_ref": "sha256:e9c1a2d98033355505c67459d05c5537aa52b15a07fd8b5f021013a549d4e7fd"
+          },
+          {
+            "id": "type-check",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "> vue-tsc --build",
+            "evidence_ref": "sha256:0ffd428014a5826affa69f01921361c2ac4c6210bc4f70fea75ff094bfe35b2e"
+          },
+          {
+            "id": "mapped-tests",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "Test Files  1 passed (1)",
+            "evidence_ref": "sha256:05d538d965f287d06f3b28eeca8946c182b3980ff1b812e1e4eb3b21089ab3f1"
+          },
+          {
+            "id": "contract-check",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "> node scripts/generate-openapi-types.mjs --check",
+            "evidence_ref": "sha256:984d026fbd569ae49bbf72dedc2ddd99a8e91c3783b77b29eebc0c436798e31c"
+          }
+        ],
+        "escalationReasons": [
+          "UNMAPPED_CHANGED_PATH",
+          "DEPENDENCY_ONLY_CHANGED_PATH"
+        ],
+        "status": "INCOMPLETE",
+        "complete": false
+      }
+    ],
+    "checks": [
+      {
+        "id": "map",
+        "status": "PASS",
+        "exitCode": 1,
+        "summary": "STALE",
+        "evidence_ref": "sha256:1df2448fc3a565e064cb12a2a31e002e8abbb11ddc78ad1cf2773fec5045ad04",
+        "recipe_refs": [
+          "journal-frontend"
+        ]
+      },
+      {
+        "id": "type-check",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "> vue-tsc --build",
+        "evidence_ref": "sha256:0ffd428014a5826affa69f01921361c2ac4c6210bc4f70fea75ff094bfe35b2e",
+        "recipe_refs": [
+          "journal-frontend",
+          "notebooks-client"
+        ]
+      },
+      {
+        "id": "mapped-tests",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "Test Files  3 passed (3)",
+        "evidence_ref": "sha256:ee294850bfd687a2c6da0fb46ab2cfb322085ad8fc9f354702ab45356ddc5e47",
+        "recipe_refs": [
+          "journal-frontend"
+        ]
+      },
+      {
+        "id": "contract-check",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "> node scripts/generate-openapi-types.mjs --check",
+        "evidence_ref": "sha256:984d026fbd569ae49bbf72dedc2ddd99a8e91c3783b77b29eebc0c436798e31c",
+        "recipe_refs": [
+          "journal-frontend",
+          "notebooks-client"
+        ]
+      },
+      {
+        "id": "map",
+        "status": "PASS",
+        "exitCode": 1,
+        "summary": "STALE",
+        "evidence_ref": "sha256:711d8ad48f1726dd623ae4f53489bbcde7a9088ede42eceaca12ab67b8accd0b",
+        "recipe_refs": [
+          "notebooks-backend"
+        ]
+      },
+      {
+        "id": "live-backend-test",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "Container noteflow-test-d26d0c91a732-backend-test-1  Healthy",
+        "evidence_ref": "sha256:7a45fa761fae81a3d2dcd8a691dca66cfcb44bcf849278abda1ff2be0c61e228",
+        "recipe_refs": [
+          "notebooks-backend"
+        ]
+      },
+      {
+        "id": "contract-validate",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "\u001b[39m",
+        "evidence_ref": "sha256:182f7482936ffe626e6808ce332a0d454153f3324b8f512a1ba76643633f8269",
+        "recipe_refs": [
+          "notebooks-backend"
+        ]
+      },
+      {
+        "id": "map",
+        "status": "PASS",
+        "exitCode": 1,
+        "summary": "STALE",
+        "evidence_ref": "sha256:e9c1a2d98033355505c67459d05c5537aa52b15a07fd8b5f021013a549d4e7fd",
+        "recipe_refs": [
+          "notebooks-client"
+        ]
+      },
+      {
+        "id": "mapped-tests",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "Test Files  1 passed (1)",
+        "evidence_ref": "sha256:05d538d965f287d06f3b28eeca8946c182b3980ff1b812e1e4eb3b21089ab3f1",
+        "recipe_refs": [
+          "notebooks-client"
+        ]
+      }
+    ],
+    "escalationReasons": [],
+    "status": "PASS",
+    "complete": true
+  },
+  "focused_checks": [
+    {
+      "schema_version": 1,
+      "check_id": "notebook-backend-tests",
+      "classification": "behavioral",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 12181,
+      "command_digest": "sha256:65669dacd6c51dcb6c804387c2e92158b1490b0bd242d81fd98932467e6f03ab",
+      "output_digest": "sha256:8d4c314f4002d48a7f56526b4236edefb755f86fc1fb6c97d09be892b1e5775f",
+      "diagnostic_excerpt": "\u001b[30;42;1m PASS \u001b[39;49;22m\u001b[39m Tests\\Feature\\NotebookApiTest\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mguests are unauthenticated on every notebook endpoint\u001b[39m\u001b[90m               \u001b[39m \u001b[90m0.81s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90ma non-owner identity is forbidden on every notebook endpoint\u001b[39m\u001b[90m        \u001b[39m \u001b[90m0.28s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mAC-1: the list returns exactly one labelled default notebook first\u001b[39m\u001b[90m… \u001b[39m \u001b[90m0.17s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mAC-2: create and rename return the one-level notebook and advance a\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.16s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mAC-4: an empty non-default notebook is deleted with an acknowledgem\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.15s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mAC-3: deleting the default or a non-empty notebook returns a typed\u001b[39m\u001b[90m… \u001b[39m \u001b[90m0.16s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90manother owner's notebook and malformed ids are not found\u001b[39m\u001b[90m            \u001b[39m \u001b[90m0.13s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90munknown fields, including a parent reference, are rejected with 422\u001b[39m\u001b[90m \u001b[39m \u001b[90m0.13s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mname and command fields return field errors\u001b[39m\u001b[90m                         \u001b[39m \u001b[90m0.15s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mstale version, stale epoch, write fence and idempotency reuse retur\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.32s\u001b[39m  \n\n  \u001b[30;42;1m PASS \u001b[39;49;22m\u001b[39m Tests\\Feature\\NotebookConcurrencyTest\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mtwo concurrent identical create commands leave one notebook and one\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.47s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mtwo concurrent renames on the same base_version leave one winner an\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.37s\u001b[39m  \n\n  \u001b[30;42;1m PASS \u001b[39;49;22m\u001b[39m Tests\\Feature\\NotebookPersistenceTest\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mPostgreSQL rejects a second default notebook for one owner but allo\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.40s\u001b[39m  \n  \u001b[32;1m✓",
+      "subject": {
+        "commit": "7f2f57dbb20c92933bcf6a3f41a198146147554b"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-1 worktree",
+        "os": "Windows 11",
+        "runtime": "noteflow-test-d26d0c91a732 backend-test with PostgreSQL"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "backend/tests/Feature/NotebookPersistenceTest.php",
+          "backend/tests/Feature/NotebookUseCasesTest.php",
+          "backend/tests/Feature/NotebookConcurrencyTest.php",
+          "backend/tests/Feature/NotebookApiTest.php",
+          "backend/tests/Feature/ProvisionOwnerCommandTest.php",
+          "backend/tests/Contract/NotebookContractTest.php"
+        ],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-1-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:ed2626e8d989b04bea772cedb0fb8fff33bdd4e63f262e986d0ead07fb12d582"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T12:22:25.316Z",
+      "observation": {
+        "status": "CONFLICT",
+        "event_id": "hook-check_finished-61102a256655d43bd306d2e8d5f0d160d200787bef076b2a",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-1\\.agent-state\\v4-observations\\events\\hook-check_finished-61102a256655d43bd306d2e8d5f0d160d200787bef076b2a.json",
+        "coverage": "UNKNOWN",
+        "reason": "EVENT_ID_PAYLOAD_CONFLICT"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "backend/app/Console/Commands/ProvisionOwner.php",
+        "backend/app/Http/Controllers/NotebookController.php",
+        "backend/app/Modules/Notes/Application/Commands/CreateNotebookCommand.php",
+        "backend/app/Modules/Notes/Application/Commands/DeleteNotebookCommand.php",
+        "backend/app/Modules/Notes/Application/Commands/RenameNotebookCommand.php",
+        "backend/app/Modules/Notes/Application/DefaultNotebookProvisioner.php",
+        "backend/app/Modules/Notes/Application/UseCases/CreateNotebookUseCase.php",
+        "backend/app/Modules/Notes/Application/UseCases/DeleteNotebookUseCase.php",
+        "backend/app/Modules/Notes/Application/UseCases/GetNotebookListQuery.php",
+        "backend/app/Modules/Notes/Application/UseCases/RenameNotebookUseCase.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/IdempotencyKeyReusedException.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/InvalidNotebookNameException.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/NotebookNotDeletableException.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/StaleDataEpochException.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/VersionConflictException.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/WriteFenceActiveException.php",
+        "backend/database/migrations/2026_11_08_010000_create_notebooks_and_notes_tables.php",
+        "backend/routes/api.php",
+        "backend/tests/Contract/NotebookContractTest.php",
+        "backend/tests/Feature/NotebookApiTest.php",
+        "backend/tests/Feature/NotebookConcurrencyTest.php",
+        "backend/tests/Feature/NotebookPersistenceTest.php",
+        "backend/tests/Feature/NotebookUseCasesTest.php",
+        "backend/tests/Feature/ProvisionOwnerCommandTest.php",
+        "contracts/openapi.yaml",
+        "frontend/src/api/__tests__/notebooks.spec.ts",
+        "frontend/src/api/notebooks.ts",
+        "frontend/src/api/schema.generated.ts"
+      ],
+      "changed_paths_sha256": "sha256:ab5eef1b67e993c2fc6581539a2de5cf07a1ccd741a60b4bef52736aafb5e399",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "pint",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 2785,
+      "command_digest": "sha256:cd70a790fb46bfeae8ee886dabc57d2946db054e471c9700b9cc08ccbac1fdbd",
+      "output_digest": "sha256:45bd311e5aa106286b5f027a5a0fa00deb3c05c03c926f5e5512aad372cdf174",
+      "diagnostic_excerpt": "............................................................................\n  .....................................\n\n  ──────────────────────────────────────────────────────────────────── Laravel  \n    PASS   ......................................................... 113 files",
+      "subject": {
+        "commit": "7f2f57dbb20c92933bcf6a3f41a198146147554b"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-1 worktree",
+        "os": "Windows 11",
+        "runtime": "noteflow-test-d26d0c91a732 backend-test"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-1-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:13888665b05b20af79afbb752608a666cbf82a2b9558bd6e5c9479dc22a7579a"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T12:22:38.056Z",
+      "observation": {
+        "status": "CONFLICT",
+        "event_id": "hook-check_finished-ab25af9bc1fd324660397491f4830ea4611890603b241c75",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-1\\.agent-state\\v4-observations\\events\\hook-check_finished-ab25af9bc1fd324660397491f4830ea4611890603b241c75.json",
+        "coverage": "UNKNOWN",
+        "reason": "EVENT_ID_PAYLOAD_CONFLICT"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "backend/app/Console/Commands/ProvisionOwner.php",
+        "backend/app/Http/Controllers/NotebookController.php",
+        "backend/app/Modules/Notes/Application/Commands/CreateNotebookCommand.php",
+        "backend/app/Modules/Notes/Application/Commands/DeleteNotebookCommand.php",
+        "backend/app/Modules/Notes/Application/Commands/RenameNotebookCommand.php",
+        "backend/app/Modules/Notes/Application/DefaultNotebookProvisioner.php",
+        "backend/app/Modules/Notes/Application/UseCases/CreateNotebookUseCase.php",
+        "backend/app/Modules/Notes/Application/UseCases/DeleteNotebookUseCase.php",
+        "backend/app/Modules/Notes/Application/UseCases/GetNotebookListQuery.php",
+        "backend/app/Modules/Notes/Application/UseCases/RenameNotebookUseCase.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/IdempotencyKeyReusedException.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/InvalidNotebookNameException.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/NotebookNotDeletableException.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/StaleDataEpochException.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/VersionConflictException.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/WriteFenceActiveException.php",
+        "backend/database/migrations/2026_11_08_010000_create_notebooks_and_notes_tables.php",
+        "backend/routes/api.php",
+        "backend/tests/Contract/NotebookContractTest.php",
+        "backend/tests/Feature/NotebookApiTest.php",
+        "backend/tests/Feature/NotebookConcurrencyTest.php",
+        "backend/tests/Feature/NotebookPersistenceTest.php",
+        "backend/tests/Feature/NotebookUseCasesTest.php",
+        "backend/tests/Feature/ProvisionOwnerCommandTest.php",
+        "contracts/openapi.yaml",
+        "frontend/src/api/__tests__/notebooks.spec.ts",
+        "frontend/src/api/notebooks.ts",
+        "frontend/src/api/schema.generated.ts"
+      ],
+      "changed_paths_sha256": "sha256:ab5eef1b67e993c2fc6581539a2de5cf07a1ccd741a60b4bef52736aafb5e399",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "composer-analyse",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 2269,
+      "command_digest": "sha256:d5c9cb61ecc856055386c2cd65f84040c8fe4291fb98bc4b5e4488bfc75bccac",
+      "output_digest": "sha256:4a63bc2e9c44770847ad832ccee1229938fbac3ac67db3a904d87d4bfb5eda8c",
+      "diagnostic_excerpt": "[OK] No errors                                                                 \n\n\nNote: Using configuration file /workspace/backend/phpstan.neon.\n  0/57 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%\u001b[1G\u001b[2K 57/57 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%",
+      "subject": {
+        "commit": "7f2f57dbb20c92933bcf6a3f41a198146147554b"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-1 worktree",
+        "os": "Windows 11",
+        "runtime": "noteflow-test-d26d0c91a732 backend-test"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-1-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:a9efc1f5a583e98f4494fbfae228d1db9321e4377343a395c6532b2d6d4130c9"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T12:22:41.274Z",
+      "observation": {
+        "status": "CONFLICT",
+        "event_id": "hook-check_finished-bdbf138d965c193186b2e4414759d7be87b67c349f2bcd7e",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-1\\.agent-state\\v4-observations\\events\\hook-check_finished-bdbf138d965c193186b2e4414759d7be87b67c349f2bcd7e.json",
+        "coverage": "UNKNOWN",
+        "reason": "EVENT_ID_PAYLOAD_CONFLICT"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "backend/app/Console/Commands/ProvisionOwner.php",
+        "backend/app/Http/Controllers/NotebookController.php",
+        "backend/app/Modules/Notes/Application/Commands/CreateNotebookCommand.php",
+        "backend/app/Modules/Notes/Application/Commands/DeleteNotebookCommand.php",
+        "backend/app/Modules/Notes/Application/Commands/RenameNotebookCommand.php",
+        "backend/app/Modules/Notes/Application/DefaultNotebookProvisioner.php",
+        "backend/app/Modules/Notes/Application/UseCases/CreateNotebookUseCase.php",
+        "backend/app/Modules/Notes/Application/UseCases/DeleteNotebookUseCase.php",
+        "backend/app/Modules/Notes/Application/UseCases/GetNotebookListQuery.php",
+        "backend/app/Modules/Notes/Application/UseCases/RenameNotebookUseCase.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/IdempotencyKeyReusedException.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/InvalidNotebookNameException.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/NotebookNotDeletableException.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/StaleDataEpochException.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/VersionConflictException.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/WriteFenceActiveException.php",
+        "backend/database/migrations/2026_11_08_010000_create_notebooks_and_notes_tables.php",
+        "backend/routes/api.php",
+        "backend/tests/Contract/NotebookContractTest.php",
+        "backend/tests/Feature/NotebookApiTest.php",
+        "backend/tests/Feature/NotebookConcurrencyTest.php",
+        "backend/tests/Feature/NotebookPersistenceTest.php",
+        "backend/tests/Feature/NotebookUseCasesTest.php",
+        "backend/tests/Feature/ProvisionOwnerCommandTest.php",
+        "contracts/openapi.yaml",
+        "frontend/src/api/__tests__/notebooks.spec.ts",
+        "frontend/src/api/notebooks.ts",
+        "frontend/src/api/schema.generated.ts"
+      ],
+      "changed_paths_sha256": "sha256:ab5eef1b67e993c2fc6581539a2de5cf07a1ccd741a60b4bef52736aafb5e399",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "frontend-lint",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 6577,
+      "command_digest": "sha256:ece3525089948fc493e3981e11009c8c86c0e4755fb03dfbe8a7a5deb9450cb0",
+      "output_digest": "sha256:bc6cdceab12617b2bcdca6213a87da59a46254c4c7c1460189d598173accbb2b",
+      "diagnostic_excerpt": "> frontend@0.0.0 lint\n> run-s \"lint:*\"\n\n\n> frontend@0.0.0 lint:oxlint\n> oxlint .\n\n\n> frontend@0.0.0 lint:eslint\n> eslint . --cache",
+      "subject": {
+        "commit": "7f2f57dbb20c92933bcf6a3f41a198146147554b"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-1 worktree",
+        "os": "Windows 11",
+        "runtime": "Node frontend"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-1-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": "frontend",
+        "argv_digest": "sha256:edad09f9dbb99f2e409938c2533159fd4e989323316882ac20ce829d5d85e62f"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T12:22:44.086Z",
+      "observation": {
+        "status": "CONFLICT",
+        "event_id": "hook-check_finished-1125e392a2e2a5ef493b634dc90740300f7f3a9b0a3cdf71",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-1\\.agent-state\\v4-observations\\events\\hook-check_finished-1125e392a2e2a5ef493b634dc90740300f7f3a9b0a3cdf71.json",
+        "coverage": "UNKNOWN",
+        "reason": "EVENT_ID_PAYLOAD_CONFLICT"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "backend/app/Console/Commands/ProvisionOwner.php",
+        "backend/app/Http/Controllers/NotebookController.php",
+        "backend/app/Modules/Notes/Application/Commands/CreateNotebookCommand.php",
+        "backend/app/Modules/Notes/Application/Commands/DeleteNotebookCommand.php",
+        "backend/app/Modules/Notes/Application/Commands/RenameNotebookCommand.php",
+        "backend/app/Modules/Notes/Application/DefaultNotebookProvisioner.php",
+        "backend/app/Modules/Notes/Application/UseCases/CreateNotebookUseCase.php",
+        "backend/app/Modules/Notes/Application/UseCases/DeleteNotebookUseCase.php",
+        "backend/app/Modules/Notes/Application/UseCases/GetNotebookListQuery.php",
+        "backend/app/Modules/Notes/Application/UseCases/RenameNotebookUseCase.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/IdempotencyKeyReusedException.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/InvalidNotebookNameException.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/NotebookNotDeletableException.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/StaleDataEpochException.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/VersionConflictException.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/WriteFenceActiveException.php",
+        "backend/database/migrations/2026_11_08_010000_create_notebooks_and_notes_tables.php",
+        "backend/routes/api.php",
+        "backend/tests/Contract/NotebookContractTest.php",
+        "backend/tests/Feature/NotebookApiTest.php",
+        "backend/tests/Feature/NotebookConcurrencyTest.php",
+        "backend/tests/Feature/NotebookPersistenceTest.php",
+        "backend/tests/Feature/NotebookUseCasesTest.php",
+        "backend/tests/Feature/ProvisionOwnerCommandTest.php",
+        "contracts/openapi.yaml",
+        "frontend/src/api/__tests__/notebooks.spec.ts",
+        "frontend/src/api/notebooks.ts",
+        "frontend/src/api/schema.generated.ts"
+      ],
+      "changed_paths_sha256": "sha256:ab5eef1b67e993c2fc6581539a2de5cf07a1ccd741a60b4bef52736aafb5e399",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    }
+  ],
+  "raw_focused_checks": [
+    {
+      "schema_version": 1,
+      "check_id": "notebook-backend-tests",
+      "classification": "behavioral",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 12181,
+      "command_digest": "sha256:65669dacd6c51dcb6c804387c2e92158b1490b0bd242d81fd98932467e6f03ab",
+      "output_digest": "sha256:8d4c314f4002d48a7f56526b4236edefb755f86fc1fb6c97d09be892b1e5775f",
+      "diagnostic_excerpt": "\u001b[30;42;1m PASS \u001b[39;49;22m\u001b[39m Tests\\Feature\\NotebookApiTest\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mguests are unauthenticated on every notebook endpoint\u001b[39m\u001b[90m               \u001b[39m \u001b[90m0.81s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90ma non-owner identity is forbidden on every notebook endpoint\u001b[39m\u001b[90m        \u001b[39m \u001b[90m0.28s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mAC-1: the list returns exactly one labelled default notebook first\u001b[39m\u001b[90m… \u001b[39m \u001b[90m0.17s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mAC-2: create and rename return the one-level notebook and advance a\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.16s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mAC-4: an empty non-default notebook is deleted with an acknowledgem\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.15s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mAC-3: deleting the default or a non-empty notebook returns a typed\u001b[39m\u001b[90m… \u001b[39m \u001b[90m0.16s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90manother owner's notebook and malformed ids are not found\u001b[39m\u001b[90m            \u001b[39m \u001b[90m0.13s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90munknown fields, including a parent reference, are rejected with 422\u001b[39m\u001b[90m \u001b[39m \u001b[90m0.13s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mname and command fields return field errors\u001b[39m\u001b[90m                         \u001b[39m \u001b[90m0.15s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mstale version, stale epoch, write fence and idempotency reuse retur\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.32s\u001b[39m  \n\n  \u001b[30;42;1m PASS \u001b[39;49;22m\u001b[39m Tests\\Feature\\NotebookConcurrencyTest\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mtwo concurrent identical create commands leave one notebook and one\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.47s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mtwo concurrent renames on the same base_version leave one winner an\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.37s\u001b[39m  \n\n  \u001b[30;42;1m PASS \u001b[39;49;22m\u001b[39m Tests\\Feature\\NotebookPersistenceTest\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mPostgreSQL rejects a second default notebook for one owner but allo\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.40s\u001b[39m  \n  \u001b[32;1m✓",
+      "subject": {
+        "kind": "commit",
+        "value": "7f2f57dbb20c92933bcf6a3f41a198146147554b"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-1 worktree",
+        "os": "Windows 11",
+        "runtime": "noteflow-test-d26d0c91a732 backend-test with PostgreSQL"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "backend/tests/Feature/NotebookPersistenceTest.php",
+          "backend/tests/Feature/NotebookUseCasesTest.php",
+          "backend/tests/Feature/NotebookConcurrencyTest.php",
+          "backend/tests/Feature/NotebookApiTest.php",
+          "backend/tests/Feature/ProvisionOwnerCommandTest.php",
+          "backend/tests/Contract/NotebookContractTest.php"
+        ],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-1-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:ed2626e8d989b04bea772cedb0fb8fff33bdd4e63f262e986d0ead07fb12d582"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T12:22:25.316Z",
+      "observation": {
+        "status": "CONFLICT",
+        "event_id": "hook-check_finished-61102a256655d43bd306d2e8d5f0d160d200787bef076b2a",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-1\\.agent-state\\v4-observations\\events\\hook-check_finished-61102a256655d43bd306d2e8d5f0d160d200787bef076b2a.json",
+        "coverage": "UNKNOWN",
+        "reason": "EVENT_ID_PAYLOAD_CONFLICT"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "pint",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 2785,
+      "command_digest": "sha256:cd70a790fb46bfeae8ee886dabc57d2946db054e471c9700b9cc08ccbac1fdbd",
+      "output_digest": "sha256:45bd311e5aa106286b5f027a5a0fa00deb3c05c03c926f5e5512aad372cdf174",
+      "diagnostic_excerpt": "............................................................................\n  .....................................\n\n  ──────────────────────────────────────────────────────────────────── Laravel  \n    PASS   ......................................................... 113 files",
+      "subject": {
+        "kind": "commit",
+        "value": "7f2f57dbb20c92933bcf6a3f41a198146147554b"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-1 worktree",
+        "os": "Windows 11",
+        "runtime": "noteflow-test-d26d0c91a732 backend-test"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-1-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:13888665b05b20af79afbb752608a666cbf82a2b9558bd6e5c9479dc22a7579a"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T12:22:38.056Z",
+      "observation": {
+        "status": "CONFLICT",
+        "event_id": "hook-check_finished-ab25af9bc1fd324660397491f4830ea4611890603b241c75",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-1\\.agent-state\\v4-observations\\events\\hook-check_finished-ab25af9bc1fd324660397491f4830ea4611890603b241c75.json",
+        "coverage": "UNKNOWN",
+        "reason": "EVENT_ID_PAYLOAD_CONFLICT"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "composer-analyse",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 2269,
+      "command_digest": "sha256:d5c9cb61ecc856055386c2cd65f84040c8fe4291fb98bc4b5e4488bfc75bccac",
+      "output_digest": "sha256:4a63bc2e9c44770847ad832ccee1229938fbac3ac67db3a904d87d4bfb5eda8c",
+      "diagnostic_excerpt": "[OK] No errors                                                                 \n\n\nNote: Using configuration file /workspace/backend/phpstan.neon.\n  0/57 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%\u001b[1G\u001b[2K 57/57 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%",
+      "subject": {
+        "kind": "commit",
+        "value": "7f2f57dbb20c92933bcf6a3f41a198146147554b"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-1 worktree",
+        "os": "Windows 11",
+        "runtime": "noteflow-test-d26d0c91a732 backend-test"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-1-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:a9efc1f5a583e98f4494fbfae228d1db9321e4377343a395c6532b2d6d4130c9"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T12:22:41.274Z",
+      "observation": {
+        "status": "CONFLICT",
+        "event_id": "hook-check_finished-bdbf138d965c193186b2e4414759d7be87b67c349f2bcd7e",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-1\\.agent-state\\v4-observations\\events\\hook-check_finished-bdbf138d965c193186b2e4414759d7be87b67c349f2bcd7e.json",
+        "coverage": "UNKNOWN",
+        "reason": "EVENT_ID_PAYLOAD_CONFLICT"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "frontend-lint",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 6577,
+      "command_digest": "sha256:ece3525089948fc493e3981e11009c8c86c0e4755fb03dfbe8a7a5deb9450cb0",
+      "output_digest": "sha256:bc6cdceab12617b2bcdca6213a87da59a46254c4c7c1460189d598173accbb2b",
+      "diagnostic_excerpt": "> frontend@0.0.0 lint\n> run-s \"lint:*\"\n\n\n> frontend@0.0.0 lint:oxlint\n> oxlint .\n\n\n> frontend@0.0.0 lint:eslint\n> eslint . --cache",
+      "subject": {
+        "kind": "commit",
+        "value": "7f2f57dbb20c92933bcf6a3f41a198146147554b"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-1 worktree",
+        "os": "Windows 11",
+        "runtime": "Node frontend"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-1-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": "frontend",
+        "argv_digest": "sha256:edad09f9dbb99f2e409938c2533159fd4e989323316882ac20ce829d5d85e62f"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-08T12:22:44.086Z",
+      "observation": {
+        "status": "CONFLICT",
+        "event_id": "hook-check_finished-1125e392a2e2a5ef493b634dc90740300f7f3a9b0a3cdf71",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-1\\.agent-state\\v4-observations\\events\\hook-check_finished-1125e392a2e2a5ef493b634dc90740300f7f3a9b0a3cdf71.json",
+        "coverage": "UNKNOWN",
+        "reason": "EVENT_ID_PAYLOAD_CONFLICT"
+      }
+    }
+  ],
+  "escalation": {
+    "decision": "REVIEW_REQUIRED",
+    "risk": "HIGH",
+    "reasons": [
+      "HIGH_RISK_REVIEW",
+      "JUDGMENT_CONCURRENCY_STATE",
+      "JUDGMENT_MIGRATION_DESTRUCTIVE",
+      "JUDGMENT_PUBLIC_CONTRACT",
+      "JUDGMENT_SECURITY_AUTH"
+    ]
+  },
+  "semantic_coverage": {
+    "decision": "COVERED",
+    "task_refs": [
+      "T-1",
+      "T-2",
+      "T-3"
+    ],
+    "acceptance_criteria": [
+      "AC-1",
+      "AC-2",
+      "AC-3",
+      "AC-4"
+    ],
+    "evidence_refs": [
+      "notebook-backend-tests",
+      "pint",
+      "composer-analyse",
+      "frontend-lint",
+      "live-backend-test",
+      "contract-validate",
+      "type-check",
+      "mapped-tests",
+      "contract-check"
+    ]
+  },
+  "progression_eligible": true,
+  "status": "PASS",
+  "context_digest": "sha256:cf7d838033315fb19e091dcb7f8d186c5471be40e21b069074dcf7b7bdd25f2a"
+}

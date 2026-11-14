@@ -69,6 +69,12 @@ $action = $argv[1] ?? 'reset';
 switch ($action) {
     case 'reset':
         $pdo->exec('DELETE FROM mutation_commands');
+        if ($pdo->query("SELECT to_regclass('public.notes')")->fetchColumn()) {
+            $pdo->exec('DELETE FROM notes');
+        }
+        if ($pdo->query("SELECT to_regclass('public.notebooks')")->fetchColumn()) {
+            $pdo->exec('DELETE FROM notebooks');
+        }
         $pdo->exec('DELETE FROM challenge_target_periods');
         $pdo->exec('DELETE FROM challenges');
         if ($pdo->query("SELECT to_regclass('public.sessions')")->fetchColumn()) {
@@ -97,6 +103,20 @@ switch ($action) {
             SET timezone = 'Asia/Ho_Chi_Minh', account_revision = 0, data_epoch = 1, write_state = 'open'
         ");
         $upsertAccount->execute(['owner_id' => $ownerId]);
+
+        if ($pdo->query("SELECT to_regclass('public.notebooks')")->fetchColumn()) {
+            $data = random_bytes(16);
+            $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
+            $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
+            $defaultNotebookId = vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+
+            $insertNotebook = $pdo->prepare("
+                INSERT INTO notebooks (id, owner_id, name, is_default, row_version, created_at, updated_at)
+                VALUES (:id, :owner_id, 'Ghi chú nhanh', true, 1, NOW(), NOW())
+                ON CONFLICT (owner_id) WHERE is_default DO NOTHING
+            ");
+            $insertNotebook->execute(['id' => $defaultNotebookId, 'owner_id' => $ownerId]);
+        }
 
         echo json_encode(['status' => 'ok', 'owner_id' => $ownerId, 'database' => $database, 'app_env' => $appEnv]);
         break;

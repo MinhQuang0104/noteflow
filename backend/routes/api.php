@@ -6,6 +6,7 @@ use App\Http\Controllers\ChallengeCompletionController;
 use App\Http\Controllers\ChallengeController;
 use App\Http\Controllers\ChallengeJournalController;
 use App\Http\Controllers\FoundationHealthController;
+use App\Http\Controllers\NotebookController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/v1/foundation', FoundationHealthController::class)
@@ -46,3 +47,19 @@ Route::put('/v1/challenges/{id}/journals/{date}', [ChallengeJournalController::c
 Route::put('/v1/challenges/{id}/completions/{date}', [ChallengeCompletionController::class, 'mark'])
     ->middleware(['private.no-store', 'auth:sanctum', 'owner'])
     ->name('challenges.completions.mark');
+
+Route::get('/v1/notebooks', [NotebookController::class, 'index'])
+    ->middleware(['private.no-store', 'auth:sanctum', 'owner'])
+    ->name('notebooks.index');
+
+Route::post('/v1/notebooks', [NotebookController::class, 'store'])
+    ->middleware(['private.no-store', 'auth:sanctum', 'owner'])
+    ->name('notebooks.store');
+
+Route::patch('/v1/notebooks/{id}', [NotebookController::class, 'update'])
+    ->middleware(['private.no-store', 'auth:sanctum', 'owner'])
+    ->name('notebooks.update');
+
+Route::delete('/v1/notebooks/{id}', [NotebookController::class, 'destroy'])
+    ->middleware(['private.no-store', 'auth:sanctum', 'owner'])
+    ->name('notebooks.destroy');

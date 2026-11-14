@@ -452,6 +452,186 @@ paths:
           $ref: '#/components/responses/ValidationError'
         '423':
           $ref: '#/components/responses/StateProblemDetails'
+  /api/v1/notebooks:
+    get:
+      operationId: getNotebooks
+      summary: List the owner's one-level notebooks
+      description: >-
+        The default notebook comes first, then notebooks by created_at and id
+        ascending. Exactly one notebook has is_default true; clients label it
+        from that flag, never from its name.
+      security:
+        - sanctumCookie: []
+      responses:
+        '200':
+          description: Notebook list
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotebookListResult'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          description: Authenticated identity is not the provisioned owner
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    post:
+      operationId: createNotebook
+      summary: Create a one-level, non-default notebook
+      description: >-
+        The name is trimmed and may repeat. An identical command replays its
+        stored acknowledgement; a reused command ID with a different payload is
+        rejected.
+      security:
+        - sanctumCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNotebookRequest'
+      responses:
+        '201':
+          description: Notebook created or prior command acknowledgement replayed
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotebookMutationResult'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          description: Authenticated identity is not the provisioned owner
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          $ref: '#/components/responses/StateProblemDetails'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '423':
+          $ref: '#/components/responses/StateProblemDetails'
+  /api/v1/notebooks/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      operationId: renameNotebook
+      summary: Rename a notebook, including the default notebook
+      description: Renaming never changes is_default. Renaming to the same trimmed name keeps row_version and account_revision.
+      security:
+        - sanctumCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenameNotebookRequest'
+      responses:
+        '200':
+          description: Notebook renamed or prior command acknowledgement replayed
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotebookMutationResult'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          description: Authenticated identity is not the provisioned owner
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Notebook not found for this owner
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          $ref: '#/components/responses/NotebookRenameProblemDetails'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '423':
+          $ref: '#/components/responses/StateProblemDetails'
+    delete:
+      operationId: deleteNotebook
+      summary: Delete an empty, non-default notebook
+      description: >-
+        The command travels in the JSON body. The default notebook and a
+        notebook that still has notes are refused with notebook_is_default or
+        notebook_not_empty.
+      security:
+        - sanctumCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteNotebookRequest'
+      responses:
+        '200':
+          description: Notebook deleted or prior command acknowledgement replayed
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotebookDeletionResult'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          description: Authenticated identity is not the provisioned owner
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Notebook not found for this owner
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          $ref: '#/components/responses/NotebookDeleteProblemDetails'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '423':
+          $ref: '#/components/responses/StateProblemDetails'
 components:
   securitySchemes:
     sanctumCookie:
@@ -511,6 +691,24 @@ components:
         application/problem+json:
           schema:
             $ref: '#/components/schemas/JournalProblemDetails'
+    NotebookRenameProblemDetails:
+      description: Notebook rename conflict or state problem
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/PrivateNoStore'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/NotebookRenameProblemDetails'
+    NotebookDeleteProblemDetails:
+      description: Notebook delete refusal, conflict or state problem
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/PrivateNoStore'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/NotebookDeleteProblemDetails'
     CsrfExpired:
       description: CSRF session expired or token mismatched
       headers:
@@ -1096,3 +1294,188 @@ components:
       oneOf:
         - $ref: '#/components/schemas/StateProblemDetails'
         - $ref: '#/components/schemas/JournalConflictProblemDetails'
+    Notebook:
+      type: object
+      additionalProperties: false
+      description: A one-level notebook; there is no parent reference.
+      required:
+        - id
+        - name
+        - is_default
+        - row_version
+        - note_count
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        is_default:
+          type: boolean
+          description: Source of the default label; true for exactly one notebook per owner.
+        row_version:
+          type: integer
+          minimum: 1
+        note_count:
+          type: integer
+          minimum: 0
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    NotebookListResult:
+      type: object
+      additionalProperties: false
+      required:
+        - notebooks
+      properties:
+        notebooks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notebook'
+    NotebookMutationResult:
+      type: object
+      additionalProperties: false
+      required:
+        - notebook
+        - account_revision
+        - data_epoch
+      properties:
+        notebook:
+          $ref: '#/components/schemas/Notebook'
+        account_revision:
+          type: integer
+          minimum: 0
+        data_epoch:
+          type: integer
+          minimum: 1
+    NotebookDeletionResult:
+      type: object
+      additionalProperties: false
+      required:
+        - deleted_notebook_id
+        - account_revision
+        - data_epoch
+      properties:
+        deleted_notebook_id:
+          type: string
+          format: uuid
+        account_revision:
+          type: integer
+          minimum: 1
+        data_epoch:
+          type: integer
+          minimum: 1
+    CreateNotebookRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - command_id
+        - data_epoch
+        - name
+      properties:
+        command_id:
+          type: string
+          format: uuid
+        data_epoch:
+          type: integer
+          minimum: 1
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          pattern: '.*\S.*'
+    RenameNotebookRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - command_id
+        - data_epoch
+        - base_version
+        - name
+      properties:
+        command_id:
+          type: string
+          format: uuid
+        data_epoch:
+          type: integer
+          minimum: 1
+        base_version:
+          type: integer
+          minimum: 1
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          pattern: '.*\S.*'
+    DeleteNotebookRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - command_id
+        - data_epoch
+        - base_version
+      properties:
+        command_id:
+          type: string
+          format: uuid
+        data_epoch:
+          type: integer
+          minimum: 1
+        base_version:
+          type: integer
+          minimum: 1
+    NotebookConflictProblemDetails:
+      type: object
+      additionalProperties: false
+      required:
+        - message
+        - code
+        - resource_id
+        - current_version
+        - current_snapshot
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+          enum:
+            - version_conflict
+        resource_id:
+          type: string
+          format: uuid
+        current_version:
+          type: integer
+          minimum: 1
+        current_snapshot:
+          $ref: '#/components/schemas/Notebook'
+    NotebookRuleProblemDetails:
+      type: object
+      additionalProperties: false
+      description: The notebook cannot be deleted; the code names the reason the client explains.
+      required:
+        - message
+        - code
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+          enum:
+            - notebook_is_default
+            - notebook_not_empty
+    NotebookRenameProblemDetails:
+      oneOf:
+        - $ref: '#/components/schemas/StateProblemDetails'
+        - $ref: '#/components/schemas/NotebookConflictProblemDetails'
+    NotebookDeleteProblemDetails:
+      oneOf:
+        - $ref: '#/components/schemas/StateProblemDetails'
+        - $ref: '#/components/schemas/NotebookConflictProblemDetails'
+        - $ref: '#/components/schemas/NotebookRuleProblemDetails'

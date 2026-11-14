@@ -83,3 +83,24 @@ test('an expired account-context request sends the owner back to login', async (
   expect(drafts.getDraft('challenge-a', '2026-09-21')).toBeUndefined()
   expect(Object.values(drafts.drafts)).toMatchObject([{ text: 'private draft', status: 'quarantined' }])
 })
+
+test('an authenticated owner navigates to notes view', async () => {
+  const auth = useAuthStore(pinia)
+  auth.owner = { id: 1, name: 'Owner', email: 'owner@example.test' }
+  auth.status = 'authenticated'
+  const account = useAccountStore(pinia)
+  account.status = 'ready'
+  account.context = {
+    timezone: 'Asia/Ho_Chi_Minh',
+    account_date: '2026-09-21',
+    week: { start_date: '2026-09-21', end_date: '2026-09-27' },
+    account_revision: 1,
+    data_epoch: 1,
+    write_state: 'open',
+  }
+
+  await router.push('/notes')
+
+  expect(router.currentRoute.value.name).toBe('notes')
+  expect(router.currentRoute.value.matched[0]?.components?.default).toBeDefined()
+})

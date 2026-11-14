@@ -8,8 +8,8 @@ upstream_epic:
   path: docs/product/epics.md
   section_digest: sha256:35c66c11102ff1d071557b13db8816d0eafb637ae5194c66b316a3cf895503bc
 sprint_key: 4-1-quản-lý-vở-và-vở-mặc-định
-lifecycle_snapshot: ready-for-dev
-execution_status: ready-for-dev
+lifecycle_snapshot: done
+execution_status: complete
 planning_approval:
   decision: APPROVED
   scope: planning
@@ -19,13 +19,27 @@ readiness:
   status: READY
   story_normative_digest: sha256:af4cbd4342b6387656f8e58cb90fff49377addae6de98d635364fb0289c956f5
   dependency_sprint_keys: [1-4-nhận-dữ-liệu-mới-giữa-hai-thiết-bị]
-current_slice: A
+current_slice: B
 risk:
   level: HIGH
   flags: [security, concurrency, migration, public_contract]
 slices:
   - id: A
-    status: pending
+    status: reviewed
+    baseline_commit: 1f39e0542326fc63c48a301a35ed8fd8088d98f5
+    checkpoint_commit: 7f2f57dbb20c92933bcf6a3f41a198146147554b
+    subject_digest: sha256:b3e5d06765225f91016f4baaa8b1eb23320e5a349b5ca088f00d41dbb827c6e8
+    changed_paths_sha256: sha256:ab5eef1b67e993c2fc6581539a2de5cf07a1ccd741a60b4bef52736aafb5e399
+    receipt_refs:
+      implementation:
+        path: _bmad-output/implementation-artifacts/receipts/story-4-1/A-implementation.json
+        digest: sha256:aaef0400e1884dc5f3143e1fa80ff047a979a771146950603b1c487bcb64e533
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-4-1/A-verification.json
+        digest: sha256:41f8fdbb0f53ed003f58004f74a42f5ae7267cc40750cadc238c81ced4f0d54a
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-4-1/A-review.json
+        digest: sha256:35fa5e8007a260564b03a1f07766146c10c86e81933d689e072285bbf847e60d
     task_refs: [T-1, T-2, T-3]
     depends_on: []
     executor: lead
@@ -44,8 +58,39 @@ slices:
       - NotebookUseCasesTest covers list order (default first, then created_at and id), note_count, trimmed name rules, duplicate names, rename of the default notebook, delete of an empty notebook, notebook_is_default and notebook_not_empty rejections, replay, reused command ID, stale base_version with current snapshot, stale data epoch, closed write fence, one account_revision step per real change and owner isolation
       - NotebookConcurrencyTest proves two concurrent identical create commands leave one notebook and one account_revision step, and two concurrent renames on the same base_version leave one winner and one version conflict
       - NotebookApiTest and NotebookContractTest cover guest 401, another owner's notebook 404, unknown fields 422, name field errors and every problem code against the OpenAPI schemas
+    verification:
+      status: PASS
+      canonical:
+        status: PASS
+      escalation:
+        decision: REVIEW_REQUIRED
+      progression_eligible: true
+      review_disclosure: owner exact-scope review of an overnight-child-authored HIGH slice; canonical notebooks-backend, notebooks-client and journal-frontend recipes PASS
+    review:
+      freshness: FRESH_CANDIDATE
+      judgment: APPROVE
+      reviewed_commit: 7f2f57dbb20c92933bcf6a3f41a198146147554b
+      risk_context_digest: sha256:fda9685a606c4170ef0d3aba9a6a4a1627e5cf10d7f64e86413b5bb61e929d4c
+      reviewer:
+        type: human
+        vendor: null
+        independent: false
   - id: B
-    status: pending
+    status: reviewed
+    baseline_commit: ab00b173e69540932220a25cab10af207e9de7ff
+    checkpoint_commit: b582d7548ca6bcf4cd391a18799ff0bbb7bc67d9
+    subject_digest: sha256:b3e5d06765225f91016f4baaa8b1eb23320e5a349b5ca088f00d41dbb827c6e8
+    changed_paths_sha256: sha256:04783bf7f2e0cd28750297be6d717c549de790117d902d9c1b9856f0d343cbc7
+    receipt_refs:
+      implementation:
+        path: _bmad-output/implementation-artifacts/receipts/story-4-1/B-implementation-attempt-2.json
+        digest: sha256:90674caf18ec0edb2330fd8d14f115950a15d45e3c0aea67ca1a93fb3de45c8d
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-4-1/B-verification-attempt-2.json
+        digest: sha256:39f1d2aedb86904e4a573416064d90172104a0a96eb0364dddc0452f71d6ec4d
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-4-1/B-review-attempt-2.json
+        digest: sha256:ed36940397c3fddc0722bc5e6c20060ddb3e9a95c4e07d273cc2dd6a3554e631
     task_refs: [T-4]
     depends_on: [A]
     executor: agy
@@ -61,11 +106,82 @@ slices:
       - notes.spec.ts proves the default notebook renders first with the "Mặc định" label from is_default, the list has one level, create and rename send one command each and show the new name only after the acknowledgement, a field error keeps the typed name, delete of the default or a non-empty notebook explains the reason without sending a request, a server notebook_is_default or notebook_not_empty rejection is shown at the action, the confirm dialog focuses Hủy, cancel keeps the notebook, a confirmed delete moves selection and focus to the notebook above, and a load error shows retry instead of the empty state
       - db-helper.php reset clears notes and notebooks and seeds exactly one default notebook for the e2e owner
       - powershell.exe -File scripts/local.ps1 e2e from the Story worktree after the slice checkpoint
+    verification:
+      status: PASS
+      canonical:
+        status: PASS
+      escalation:
+        decision: REVIEW_REQUIRED
+      progression_eligible: true
+      review_disclosure: owner exact-scope review of the overnight-child-authored HIGH slice B attempt 2 after the F-41B-1 rework; canonical verification PASS and full e2e 53 passed, 0 failed, 5 skipped
+    review:
+      freshness: FRESH_CANDIDATE
+      judgment: APPROVE
+      reviewed_commit: b582d7548ca6bcf4cd391a18799ff0bbb7bc67d9
+      risk_context_digest: sha256:fda9685a606c4170ef0d3aba9a6a4a1627e5cf10d7f64e86413b5bb61e929d4c
+      reviewer:
+        type: human
+        vendor: null
+        independent: false
+    attempt_history:
+      - attempt_id: 1
+        status: checkpointed
+        baseline_commit: 3e6f45fd39abcb9a7be185ff5308736d6b67a71a
+        checkpoint_commit: 6d41733438898683d6ddc987d7679d9ac4203c1f
+        subject_digest: sha256:b3e5d06765225f91016f4baaa8b1eb23320e5a349b5ca088f00d41dbb827c6e8
+        changed_paths_sha256: sha256:8421c7085765e1b31f69d0afb0905648dc9f86d39076424862cffbb5c6d8821f
+        receipt_refs:
+          implementation:
+            path: _bmad-output/implementation-artifacts/receipts/story-4-1/B-implementation.json
+            digest: sha256:18309db82a1f34afbc5035ccb65d000a17c3df9ba8d06c87708fe7a831754daf
+    current_attempt:
+      attempt_id: 2
+      receipt_refs:
+        implementation:
+          path: _bmad-output/implementation-artifacts/receipts/story-4-1/B-implementation-attempt-2.json
+        verification:
+          path: _bmad-output/implementation-artifacts/receipts/story-4-1/B-verification-attempt-2.json
+        review:
+          path: _bmad-output/implementation-artifacts/receipts/story-4-1/B-review-attempt-2.json
 blockers: []
 unresolved_questions: []
-next_action:
-  kind: start_story
-  target: story
+finalization:
+  receipt_ref: _bmad-output/implementation-artifacts/receipts/story-4-1/finalization.json
+  receipt_digest: sha256:53d89477d4dc73e42599d32d3388996046958d2d655af0f865040962f35851ec
+  done_gate_disposition: SATISFIED
+  scope_paths_digest: sha256:2a35cf71199f1e744743687fc9de4aa89e356ab2ca52283950077ce9b08bddc2
+  implementation_commit_set_digest: sha256:ceb27acf5ed37835e27490fa6f74d07a41c2080fa4b39cdead96fd5a48e0152c
+  final_scoped_tree_digest: sha256:1f09b5055c436dc8f488744ca48630e1b38d1694145472b6fbb478528ffa0388
+  prepared_from_head: f6464a1a0515b0c338f87ef25f2ca523a5b75037
+human_approval:
+  schema_version: 1
+  story_id: "4.1"
+  approver_type: "human"
+  decision: "APPROVED"
+  approved_at: "2026-11-14T03:28:08.446Z"
+  story_normative_digest: "sha256:af4cbd4342b6387656f8e58cb90fff49377addae6de98d635364fb0289c956f5"
+  finalization_receipt_digest: "sha256:53d89477d4dc73e42599d32d3388996046958d2d655af0f865040962f35851ec"
+  done_gate_summary_digest: "sha256:6d55af5d51a25ee347c079cdabe00cdec5ffeea3262115fcdb31d91921578ca2"
+  scope_paths_digest: "sha256:2a35cf71199f1e744743687fc9de4aa89e356ab2ca52283950077ce9b08bddc2"
+  implementation_commit_set_digest: "sha256:ceb27acf5ed37835e27490fa6f74d07a41c2080fa4b39cdead96fd5a48e0152c"
+  final_scope_digest: "sha256:1f09b5055c436dc8f488744ca48630e1b38d1694145472b6fbb478528ffa0388"
+  final_scoped_tree_digest: "sha256:1f09b5055c436dc8f488744ca48630e1b38d1694145472b6fbb478528ffa0388"
+  approved_review_head: "44be71b6aeadafbcf82fd9dcb7c017615e6dea93"
+  approved_commit: "44be71b6aeadafbcf82fd9dcb7c017615e6dea93"
+  approved_action: "complete_story"
+  disclosures_acknowledged: true
+next_action: null
+autopilot:
+  schema_version: 1
+  authorized_at: "2026-11-08T10:18:30.013Z"
+  authorized_plan_digest: sha256:c2d5f11230aeb8dd00326f3bffb9e34c88ad8399f7e06003712f905a7d41baf7
+  authorized_head: 5a4d8149ed474e5dc429848eea1d9c237db09a2d
+  budgets:
+    max_slices: 2
+    max_rework_per_slice: 2
+    max_minutes_per_slice: 90
+  lead_vendor: claude
+  revoked: false
 ---
 
 # Story 4.1 execution plan
