@@ -146,6 +146,9 @@ test('overnight child prompt spells the allowlisted orca forms for AGY slices', 
   const prompt = childPrompt({ id: '4.1', worktree: 'C:/w/story-4-1', generation: 1 }, { next_action: { kind: 'implement_slice' } }, 'abc')
   for (const text of ['references/agy-transport.md', 'orca orchestration <subcommand> and orca terminal <subcommand>', 'Do not probe with orca --help'])
     assert.ok(prompt.includes(text), text)
+  // 2026-11-14: the slice B verify child skipped the Plan's post-checkpoint e2e obligation (7 failures).
+  for (const text of ['run every Plan verification obligation that no check spec holds', 'scripts/local.ps1 e2e, after verify', 'never report HUMAN_REVIEW_REQUIRED while an obligation fails or was not run'])
+    assert.ok(prompt.includes(text), text)
   const allow = JSON.parse(readFileSync(new URL('../config/overnight-settings.json', import.meta.url), 'utf8')).permissions.allow
   for (const rule of ['Bash(orca orchestration *)', 'Bash(orca terminal *)']) assert.ok(allow.includes(rule), rule)
 })

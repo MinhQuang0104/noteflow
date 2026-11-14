@@ -13,6 +13,7 @@
   "AGY metadata cannot change the execution contract during checkpoint",
   "AGY prepare and checkpoint bind worker evidence and the scope gate",
   "AGY prepare rejects a delivered contract left in the worktree",
+  "AGY receipt in attempt history binds worker evidence to the slice executor and scope",
   "AGY scope accepts files whose names merely prefix an authority path",
   "AGY scope gate blocks a worker commit since the dispatch base",
   "AGY scope gate blocks an out-of-scope worker change",

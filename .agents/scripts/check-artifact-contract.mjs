@@ -217,7 +217,11 @@ export function readReceipt(root, plan, sliceId, kind) {
 
 export function readReceiptForAttempt(root, plan, sliceId, attempt, kind = 'implementation') {
   const attemptId = attempt?.attempt_id
-  return readReceiptRecord(root, plan, sliceId, kind, attempt?.receipt_refs?.[kind], attempt,
+  // Attempt snapshots carry no executor or scope; worker binding is a property of the slice (F-41-2).
+  const owner = plan?.slices?.find(item => item?.id === sliceId)
+  const expected = attempt && typeof attempt === 'object' && !Array.isArray(attempt)
+    ? { ...attempt, executor: owner?.executor, scope: owner?.scope } : attempt
+  return readReceiptRecord(root, plan, sliceId, kind, attempt?.receipt_refs?.[kind], expected,
     Number.isInteger(attemptId) && attemptId > 1 ? attemptId : null)
 }
 
