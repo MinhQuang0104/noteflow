@@ -19,13 +19,13 @@ readiness:
   status: READY
   story_normative_digest: sha256:dbd935cb2f74779047b22664aa2a6c7948790b8bc6b5b5c6082fb03127e86ad9
   dependency_sprint_keys: [4-1-quản-lý-vở-và-vở-mặc-định]
-current_slice: A
+current_slice: B
 risk:
   level: HIGH
   flags: [security, concurrency, migration, public_contract]
 slices:
   - id: A
-    status: checkpointed
+    status: reviewed
     baseline_commit: f7dabf89054c74c0703734bf3ccf10fbd063a3a3
     checkpoint_commit: 712f6712e94984775e2a4099b6fa5a538c5917d6
     subject_digest: sha256:d89477291adc9c76d856ce36a8b92633dab44e57eb7259283f9a73f7b45a31db
@@ -34,6 +34,12 @@ slices:
       implementation:
         path: _bmad-output/implementation-artifacts/receipts/story-4-2/A-implementation.json
         digest: sha256:be7f1d09d1435e67da0c88527310e39961bcf04d2f4a2af2c70eeb7dc4670075
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-4-2/A-verification.json
+        digest: sha256:aeae51d98d51236ce0f988d8f55e8780932715f6028b9e1958721e2fdb270a0d
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-4-2/A-review.json
+        digest: sha256:15bfffbb62eef08551395d67876725ce3f2fe1345f37deea91dd1fac6b83848a
     task_refs: [T-1, T-2, T-3]
     depends_on: []
     executor: lead
@@ -52,6 +58,23 @@ slices:
       - NoteUseCasesTest covers create in the default and in another notebook, an unknown or foreign notebook as not found, note_empty for a blank title and body, title and body length limits, title and body stored exactly as sent with line breaks, the label never written to title, list order (updated_at descending, then id) and owner scope, update with a real change, update clearing all text keeping the note, an update without a real change keeping account_revision and row_version, replay, reused command ID, stale base_version with the current snapshot, stale data epoch, closed write fence, one account_revision step per real change and note_count of the notebook list
       - NoteConcurrencyTest proves two concurrent identical create commands leave one note and one account_revision step, and two concurrent updates on the same base_version leave one winner and one version conflict
       - NoteApiTest and NoteContractTest cover guest 401, another owner's note or notebook 404, unknown fields 422, title and body field errors, note_empty and every problem code against the OpenAPI schemas, and the label field in every note response
+    verification:
+      status: PASS
+      canonical:
+        status: PASS
+      escalation:
+        decision: REVIEW_REQUIRED
+      progression_eligible: true
+      review_disclosure: owner exact-scope review of an overnight-child-authored HIGH slice; canonical notes-backend, notes-client, notebooks-backend, notebooks-client and journal-frontend recipes PASS
+    review:
+      freshness: FRESH_CANDIDATE
+      judgment: APPROVE
+      reviewed_commit: 712f6712e94984775e2a4099b6fa5a538c5917d6
+      risk_context_digest: sha256:fda9685a606c4170ef0d3aba9a6a4a1627e5cf10d7f64e86413b5bb61e929d4c
+      reviewer:
+        type: human
+        vendor: null
+        independent: false
   - id: B
     status: pending
     task_refs: [T-4]
@@ -72,8 +95,8 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: verify_slice
-  target: A
+  kind: implement_slice
+  target: B
 autopilot:
   schema_version: 1
   authorized_at: "2026-11-14T08:16:41.932Z"
