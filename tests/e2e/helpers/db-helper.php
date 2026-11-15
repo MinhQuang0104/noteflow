@@ -209,6 +209,18 @@ switch ($action) {
         echo json_encode(['status' => 'ok', 'account_revision' => (int) $rev]);
         break;
 
+    case 'get-notes-count':
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*)
+            FROM notes
+            JOIN users ON notes.owner_id = users.id
+            WHERE users.email = 'owner@example.test'
+        ");
+        $stmt->execute();
+        $count = (int) $stmt->fetchColumn();
+        echo json_encode(['status' => 'ok', 'count' => $count]);
+        break;
+
     default:
         fwrite(STDERR, "Unknown action: {$action}\n");
         exit(1);

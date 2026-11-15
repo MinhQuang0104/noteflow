@@ -58,6 +58,16 @@ test.describe('Story 4.1 — Quản lý vở và vở mặc định', () => {
         }),
       }),
     )
+
+    // Notes list mock for selected notebook
+    await page.route('**/api/v1/notebooks/*/notes', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        headers: { 'Cache-Control': 'private, no-store' },
+        body: JSON.stringify({ notes: [] }),
+      }),
+    )
   })
 
   test('AC-1: Given account mới/restore hợp lệ When mở Notes Then có đúng một vở mặc định được gắn nhãn và đứng đầu', async ({

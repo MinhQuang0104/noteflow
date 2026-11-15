@@ -6,8 +6,11 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 
 import * as accountApi from '../../api/account'
 import * as challengesApi from '../../api/challenges'
+import * as notebooksApi from '../../api/notebooks'
+import * as notesApi from '../../api/notes'
 import { useAccountStore } from '../../stores/account'
 import { useAuthStore } from '../../stores/auth'
+import NotesView from '../NotesView.vue'
 import TodayView from '../TodayView.vue'
 
 // List rows carry the shared week projection and today state (Story 2.2).
@@ -40,6 +43,7 @@ function createTestRouter() {
     routes: [
       { path: '/today', component: TodayView },
       { path: '/challenges/:id', component: TodayView },
+      { path: '/notes', component: NotesView },
     ],
   })
 }
@@ -363,3 +367,61 @@ test('an already-done day shows Done without a second request', async () => {
 
   expect(markDoneSpy).not.toHaveBeenCalled()
 })
+
+test('the "Ghi chú mới" header entry opens the Notes workspace with a new editor in the default notebook', async () => {
+  const defaultNotebook: notebooksApi.Notebook = {
+    id: 'nb-default-1',
+    name: 'Ghi chú nhanh',
+    is_default: true,
+    row_version: 1,
+    note_count: 0,
+    created_at: '2026-11-01T08:00:00Z',
+    updated_at: '2026-11-01T08:00:00Z',
+  }
+  const otherNotebook: notebooksApi.Notebook = {
+    id: 'nb-other-2',
+    name: 'Vở công việc',
+    is_default: false,
+    row_version: 1,
+    note_count: 0,
+    created_at: '2026-11-02T08:00:00Z',
+    updated_at: '2026-11-02T08:00:00Z',
+  }
+  vi.spyOn(notebooksApi, 'getNotebooks').mockResolvedValue({
+    notebooks: [otherNotebook, defaultNotebook],
+  })
+  vi.spyOn(notesApi, 'getNotebookNotes').mockResolvedValue({ notes: [] })
+  vi.spyOn(challengesApi, 'getChallenges').mockResolvedValue({ challenges: [] })
+
+  const router = createTestRouter()
+  await router.push('/today')
+
+  const AppWrapper = {
+    template: '<router-view />',
+  }
+
+  const wrapper = mount(AppWrapper, {
+    attachTo: document.body,
+    global: {
+      plugins: [[VueQueryPlugin, { queryClient }], router],
+    },
+  })
+  await flushPromises()
+
+  const newNoteButton = wrapper.get('[data-testid="today-new-note-button"]')
+  expect(newNoteButton.text()).toContain('Ghi chú mới')
+
+  await newNoteButton.trigger('click')
+  await flushPromises()
+
+  expect(router.currentRoute.value.path).toBe('/notes')
+  expect(router.currentRoute.value.query.new).toBe('1')
+
+  expect(wrapper.get('[data-testid="selected-notebook-title"]').text()).toBe('Ghi chú nhanh')
+  const bodyInput = wrapper.get('[data-testid="note-body-input"]')
+  expect(bodyInput.element).toBeDefined()
+  expect(document.activeElement).toBe(bodyInput.element)
+
+  wrapper.unmount()
+})
+
