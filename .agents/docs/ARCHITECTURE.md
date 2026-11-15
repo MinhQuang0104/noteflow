@@ -138,7 +138,7 @@ successor without executing it. With autopilot, the Lead loops on
 
 ### Companion tool outside this repo: Agent Desk
 
-**Agent Desk** is a separate repository at `D:/Workspace/Tu_Hoc/UI_Tool_Agent_Architecture`
+**Agent Desk** is a separate repository, [`UI_Tool_Agent_Architecture`](https://github.com/MinhQuang0104/UI_Tool_Agent_Architecture)
 (`agent-desk`, Node ≥ 20, Vue without a build step). It gives the owner a local
 web UI on `http://127.0.0.1:4777` for Human Gate and owner-review work. The
 control plane does not load, call or depend on it, and nothing in this repo
@@ -262,4 +262,4 @@ Boundaries:
 | V4 Lite origin and acceptance | `.agents/docs/v4-lite-migration.md`, `docs/agent-architecture/` |
 | Test-suite performance | `.agents/docs/v4-auto/perf-*.md` |
 | External ideas evaluated against this architecture | `docs/agent-research/README.md` (not authority) |
-| Owner review UI (Agent Desk, separate repo) | `D:/Workspace/Tu_Hoc/UI_Tool_Agent_Architecture/README.md`, `DESIGN-BRIEF.md`, `docs/tasks/` |
+| Owner review UI (Agent Desk, separate repo) | [`UI_Tool_Agent_Architecture`](https://github.com/MinhQuang0104/UI_Tool_Agent_Architecture): `README.md`, `DESIGN-BRIEF.md`, `docs/tasks/` |
