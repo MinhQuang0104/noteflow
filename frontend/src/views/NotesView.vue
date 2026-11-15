@@ -132,14 +132,16 @@ async function beforeSwitch(): Promise<boolean> {
 }
 
 async function handleCreateNote() {
-  await beforeSwitch()
+  const ok = await beforeSwitch()
+  if (!ok) return
   selectedNoteId.value = null
   isEditingNewNote.value = true
 }
 
 async function handleSelectNote(note: Note) {
   if (selectedNoteId.value === note.id && !isEditingNewNote.value) return
-  await beforeSwitch()
+  const ok = await beforeSwitch()
+  if (!ok) return
   isEditingNewNote.value = false
   selectedNoteId.value = note.id
 }
@@ -180,7 +182,10 @@ const activeRouteRecord = inject(matchedRouteKey, null)
 if (activeRouteRecord) {
   try {
     onBeforeRouteLeave(async () => {
-      await beforeSwitch()
+      const ok = await beforeSwitch()
+      if (!ok) {
+        return false
+      }
     })
   } catch {
     // Ignored outside router setup
@@ -202,7 +207,8 @@ function setNotebookRef(id: string, el: unknown) {
 
 async function selectNotebook(notebook: Notebook) {
   if (selectedId.value === notebook.id) return
-  await beforeSwitch()
+  const ok = await beforeSwitch()
+  if (!ok) return
   selectedId.value = notebook.id
   selectedNoteId.value = null
   isEditingNewNote.value = false
@@ -259,7 +265,8 @@ async function handleCreateSubmit() {
       }
     })
 
-    await beforeSwitch()
+    const ok = await beforeSwitch()
+    if (!ok) return
     selectedId.value = result.notebook.id
     selectedNoteId.value = null
     isEditingNewNote.value = false

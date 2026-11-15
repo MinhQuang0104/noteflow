@@ -909,3 +909,180 @@ test('a note list load error shows retry instead of the empty state', async () =
   expect(wrapper.find('[data-testid="notebook-notes-empty"]').exists()).toBe(true)
 })
 
+test('regression F-42B-1: switching or flushing while timer-scheduled create is in-flight waits for create and records acknowledged note without duplicate create', async () => {
+  vi.useFakeTimers()
+  try {
+    const existingNote: Note = {
+      id: 'existing-note-1',
+      notebook_id: defaultNotebook.id,
+      title: 'Existing Note',
+      body: 'Existing Body',
+      label: 'Existing Note',
+      row_version: 1,
+      created_at: '2026-11-14T08:00:00Z',
+      updated_at: '2026-11-14T08:00:00Z',
+    }
+
+    vi.spyOn(notebooksApi, 'getNotebooks').mockResolvedValue({
+      notebooks: [defaultNotebook],
+    })
+    vi.spyOn(notesApi, 'getNotebookNotes').mockResolvedValue({
+      notes: [existingNote],
+    })
+
+    let resolveCreate!: (res: notesApi.NoteMutationResult) => void
+    const createSpy = vi.spyOn(notesApi, 'createNote').mockImplementation(
+      () =>
+        new Promise<notesApi.NoteMutationResult>((resolve) => {
+          resolveCreate = resolve
+        }),
+    )
+    const updateSpy = vi.spyOn(notesApi, 'updateNote').mockResolvedValue({
+      note: { ...existingNote, row_version: 2 },
+      account_revision: 2,
+      data_epoch: 1,
+    })
+
+    const wrapper = mount(NotesView, {
+      attachTo: document.body,
+      global: {
+        plugins: [[VueQueryPlugin, { queryClient }]],
+      },
+    })
+    await flushPromises()
+
+    // Click "Ghi chú mới"
+    const newNoteButton = wrapper.get('[data-testid="create-note-button"]')
+    await newNoteButton.trigger('click')
+    await flushPromises()
+
+    // Type text into brand-new note
+    const titleInput = wrapper.get<HTMLInputElement>('[data-testid="note-title-input"]')
+    await titleInput.setValue('Brand New Note')
+    await titleInput.trigger('input')
+
+    // Advance timers so 500ms pause fires executeSave()
+    await vi.advanceTimersByTimeAsync(600)
+
+    // createNote is now in flight (called exactly 1 time)
+    expect(createSpy).toHaveBeenCalledTimes(1)
+    expect(createSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Brand New Note',
+      }),
+    )
+
+    // While createNote is in flight, user clicks on existingNote to switch
+    const existingNoteItem = wrapper.get(`[data-testid="note-item-${existingNote.id}"]`)
+    const switchPromise = existingNoteItem.trigger('click')
+
+    // Advance microtasks: flush() was called on NoteEditor, but it must await inFlightExecution
+    await vi.advanceTimersByTimeAsync(50)
+
+    // Still exactly 1 create call, not duplicate
+    expect(createSpy).toHaveBeenCalledTimes(1)
+    expect(updateSpy).toHaveBeenCalledTimes(0)
+
+    // Resolve the in-flight createNote
+    const createdNote: Note = {
+      id: 'created-note-uuid',
+      notebook_id: defaultNotebook.id,
+      title: 'Brand New Note',
+      body: '',
+      label: 'Brand New Note',
+      row_version: 1,
+      created_at: '2026-11-14T09:00:00Z',
+      updated_at: '2026-11-14T09:00:00Z',
+    }
+    resolveCreate({
+      note: createdNote,
+      account_revision: 2,
+      data_epoch: 1,
+    })
+
+    await switchPromise
+    await flushPromises()
+
+    // Still exactly 1 create call
+    expect(createSpy).toHaveBeenCalledTimes(1)
+    // Successfully switched to existingNote
+    expect(wrapper.get<HTMLInputElement>('[data-testid="note-title-input"]').element.value).toBe('Existing Note')
+
+    wrapper.unmount()
+  } finally {
+    vi.useRealTimers()
+  }
+})
+
+test('regression F-42B-2: failed save before switch keeps editor mounted with typed text and error banner and cancels selection change', async () => {
+  const note1: Note = {
+    id: 'note-failing-1',
+    notebook_id: defaultNotebook.id,
+    title: 'Note 1 Original',
+    body: 'Body 1 Original',
+    label: 'Note 1 Original',
+    row_version: 1,
+    created_at: '2026-11-14T09:00:00Z',
+    updated_at: '2026-11-14T09:00:00Z',
+  }
+  const note2: Note = {
+    id: 'note-failing-2',
+    notebook_id: defaultNotebook.id,
+    title: 'Note 2 Original',
+    body: 'Body 2 Original',
+    label: 'Note 2 Original',
+    row_version: 1,
+    created_at: '2026-11-14T08:00:00Z',
+    updated_at: '2026-11-14T08:00:00Z',
+  }
+
+  vi.spyOn(notebooksApi, 'getNotebooks').mockResolvedValue({
+    notebooks: [defaultNotebook],
+  })
+  vi.spyOn(notesApi, 'getNotebookNotes').mockResolvedValue({
+    notes: [note1, note2],
+  })
+
+  // updateNote fails with a network/server error
+  const updateSpy = vi.spyOn(notesApi, 'updateNote').mockRejectedValue(new Error('Máy chủ đang bận, không thể lưu ghi chú.'))
+
+  const wrapper = mount(NotesView, {
+    attachTo: document.body,
+    global: {
+      plugins: [[VueQueryPlugin, { queryClient }]],
+    },
+  })
+  await flushPromises()
+
+  // Initially note 1 is selected
+  const titleInput = wrapper.get<HTMLInputElement>('[data-testid="note-title-input"]')
+  expect(titleInput.element.value).toBe('Note 1 Original')
+
+  // User edits note 1
+  await titleInput.setValue('Note 1 Unsaved Changes')
+  await titleInput.trigger('input')
+
+  // User attempts to switch to note 2
+  const note2Item = wrapper.get(`[data-testid="note-item-${note2.id}"]`)
+  await note2Item.trigger('click')
+  await flushPromises()
+
+  // Verify updateNote was attempted
+  expect(updateSpy).toHaveBeenCalledTimes(1)
+
+  // Selection change was CANCELLED: editor still shows note 1's edited text, not note 2
+  expect(wrapper.get<HTMLInputElement>('[data-testid="note-title-input"]').element.value).toBe('Note 1 Unsaved Changes')
+
+  // Error banner is displayed with the failure message
+  const errorBanner = wrapper.get('[data-testid="note-save-error"]')
+  expect(errorBanner.isVisible()).toBe(true)
+  expect(errorBanner.text()).toContain('Máy chủ đang bận, không thể lưu ghi chú.')
+
+  // Note 1 remains highlighted as active in the list
+  const activeNoteRow = wrapper.get(`[data-testid="note-row-${note1.id}"]`)
+  expect(activeNoteRow.classes()).toContain('bg-indigo-50/70')
+
+  wrapper.unmount()
+})
+
+

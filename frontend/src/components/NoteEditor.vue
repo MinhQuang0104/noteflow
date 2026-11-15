@@ -50,7 +50,7 @@ const bodyInputRef = ref<HTMLTextAreaElement | null>(null)
 const titleInputRef = ref<HTMLInputElement | null>(null)
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null
-let inFlightSave: Promise<NoteMutationResult> | null = null
+let inFlightExecution: Promise<boolean> | null = null
 let pendingSaveAfterInFlight = false
 
 watch(
@@ -61,6 +61,7 @@ watch(
         clearTimeout(saveTimer)
         saveTimer = null
       }
+      pendingSaveAfterInFlight = false
       currentNote.value = newNote ?? null
       title.value = newNote?.title ?? ''
       body.value = newNote?.body ?? ''
@@ -135,11 +136,22 @@ async function executeSave(): Promise<boolean> {
     saveTimer = null
   }
 
-  if (inFlightSave) {
+  if (inFlightExecution) {
     pendingSaveAfterInFlight = true
-    return false
+    return await inFlightExecution
   }
 
+  const execution = doSave().finally(() => {
+    if (inFlightExecution === execution) {
+      inFlightExecution = null
+    }
+  })
+  inFlightExecution = execution
+
+  return await inFlightExecution
+}
+
+async function doSave(): Promise<boolean> {
   const existingNote = currentNote.value
   const isCreating = !existingNote
   const targetTitle = title.value
@@ -167,9 +179,9 @@ async function executeSave(): Promise<boolean> {
     const epoch = account.context?.data_epoch ?? 1
     const commandId = generateCommandId()
 
-    let mutationPromise: Promise<NoteMutationResult>
+    let result: NoteMutationResult
     if (isCreating) {
-      mutationPromise = createNote({
+      result = await createNote({
         command_id: commandId,
         data_epoch: epoch,
         notebook_id: props.notebookId,
@@ -177,7 +189,7 @@ async function executeSave(): Promise<boolean> {
         body: targetBody,
       })
     } else {
-      mutationPromise = updateNote(existingNote.id, {
+      result = await updateNote(existingNote.id, {
         command_id: commandId,
         data_epoch: epoch,
         base_version: existingNote.row_version,
@@ -185,10 +197,6 @@ async function executeSave(): Promise<boolean> {
         body: targetBody,
       })
     }
-
-    inFlightSave = mutationPromise
-    const result = await mutationPromise
-    inFlightSave = null
 
     await sync.recordMutationAck(result.account_revision, result.data_epoch, auth.generation)
 
@@ -200,6 +208,7 @@ async function executeSave(): Promise<boolean> {
       saveStatus.value = 'saved'
     } else {
       // User typed more while save was in flight
+      isDirty.value = true
       scheduleSave()
     }
 
@@ -210,7 +219,6 @@ async function executeSave(): Promise<boolean> {
 
     return true
   } catch (err: unknown) {
-    inFlightSave = null
     pendingSaveAfterInFlight = false
     saveStatus.value = 'error'
     const msg = err instanceof Error ? err.message : 'Lưu ghi chú thất bại.'
@@ -226,6 +234,13 @@ async function flush(): Promise<boolean> {
     saveTimer = null
   }
 
+  if (inFlightExecution) {
+    const success = await inFlightExecution
+    if (!success) {
+      return false
+    }
+  }
+
   // If brand-new editor that never had text, discard without request
   if (!currentNote.value && !hasEverHadText.value) {
     emit('discarded')
@@ -236,14 +251,6 @@ async function flush(): Promise<boolean> {
   if (!currentNote.value && title.value.trim() === '' && body.value.trim() === '') {
     emit('discarded')
     return true
-  }
-
-  if (inFlightSave) {
-    try {
-      await inFlightSave
-    } catch {
-      // Handled in executeSave
-    }
   }
 
   if (isDirty.value) {
