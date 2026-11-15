@@ -76,15 +76,7 @@ slices:
         vendor: null
         independent: false
   - id: B
-    status: checkpointed
-    baseline_commit: 057136f575a17396be811106193f1826c5589975
-    checkpoint_commit: 0594acd5a7fa943393eac327aa3177cc4e23a403
-    subject_digest: sha256:d89477291adc9c76d856ce36a8b92633dab44e57eb7259283f9a73f7b45a31db
-    changed_paths_sha256: sha256:b5fa6151bac02cf465d3d02d62a23197711fdc6db55eba59b0744d1e7a0686a2
-    receipt_refs:
-      implementation:
-        path: _bmad-output/implementation-artifacts/receipts/story-4-2/B-implementation-attempt-2.json
-        digest: sha256:efca91c8e9ec7de18562b896b481d2960dc0277cc8ab1441277baa7ff9640502
+    status: pending
     task_refs: [T-4]
     depends_on: [A]
     executor: agy
@@ -111,19 +103,29 @@ slices:
           implementation:
             path: _bmad-output/implementation-artifacts/receipts/story-4-2/B-implementation.json
             digest: sha256:2e17027b666d3c66a4323b702047f032d9dc77484363f6f39e5608ae6cda6ef7
+      - attempt_id: 2
+        status: checkpointed
+        baseline_commit: 057136f575a17396be811106193f1826c5589975
+        checkpoint_commit: 0594acd5a7fa943393eac327aa3177cc4e23a403
+        subject_digest: sha256:d89477291adc9c76d856ce36a8b92633dab44e57eb7259283f9a73f7b45a31db
+        changed_paths_sha256: sha256:b5fa6151bac02cf465d3d02d62a23197711fdc6db55eba59b0744d1e7a0686a2
+        receipt_refs:
+          implementation:
+            path: _bmad-output/implementation-artifacts/receipts/story-4-2/B-implementation-attempt-2.json
+            digest: sha256:efca91c8e9ec7de18562b896b481d2960dc0277cc8ab1441277baa7ff9640502
     current_attempt:
-      attempt_id: 2
+      attempt_id: 3
       receipt_refs:
         implementation:
-          path: _bmad-output/implementation-artifacts/receipts/story-4-2/B-implementation-attempt-2.json
+          path: _bmad-output/implementation-artifacts/receipts/story-4-2/B-implementation-attempt-3.json
         verification:
-          path: _bmad-output/implementation-artifacts/receipts/story-4-2/B-verification-attempt-2.json
+          path: _bmad-output/implementation-artifacts/receipts/story-4-2/B-verification-attempt-3.json
         review:
-          path: _bmad-output/implementation-artifacts/receipts/story-4-2/B-review-attempt-2.json
+          path: _bmad-output/implementation-artifacts/receipts/story-4-2/B-review-attempt-3.json
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: verify_slice
+  kind: implement_slice
   target: B
 autopilot:
   schema_version: 1
