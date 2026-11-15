@@ -27,6 +27,7 @@ only, nothing to adopt)
 
 | Date | Note | Topic | Status |
 |---|---|---|---|
+| 2026-11-15 | [hexagonal-architecture](2026-11-15-hexagonal-architecture.md) | Ports & Adapters core ideas, dev sequence, pitfalls; fit with NoteFlow backend | idea |
 | 2026-11-07 | [dewee-memory](2026-11-07-dewee-memory.md) | Governed memory facts, source authority, admission, shadow mode | idea |
 | 2026-11-07 | [model-tiering-sessions](2026-11-07-model-tiering-sessions.md) | Opus/Sonnet/Haiku tiers and session splitting in Claude Code | idea |
 | 2026-11-07 | [skill-library-layers](2026-11-07-skill-library-layers.md) | "8 layers" skill-library post vs Anthropic's official skills guide | adopted (research skill) / idea |
