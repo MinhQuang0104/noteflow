@@ -136,6 +136,37 @@ successor without executing it. With autopilot, the Lead loops on
 | `benchmark-v4*.mjs`, `measure-v4-instruction-context.mjs`, `run-v4-architecture-corpus.mjs` | Instruction-byte and corpus measurement |
 | `v4-experience.mjs`, `v4-evolution.mjs`, `v4-observations.mjs` | Built and tested, **dormant** (see §7) |
 
+### Companion tool outside this repo: Agent Desk
+
+**Agent Desk** is a separate repository at `D:/Workspace/Tu_Hoc/UI_Tool_Agent_Architecture`
+(`agent-desk`, Node ≥ 20, Vue without a build step). It gives the owner a local
+web UI on `http://127.0.0.1:4777` for Human Gate and owner-review work. The
+control plane does not load, call or depend on it, and nothing in this repo
+references it except this section. This entry was added on 2026-11-15, from
+the tool's repository at `968814a` plus uncommitted work.
+
+| Aspect | What it does |
+|---|---|
+| Attachment | Its `config.json` sets `projectPath` to this repo's main worktree and `baseBranch: main`; it lists every worktree from `git` |
+| Diff review | Working, base-branch, unpushed and commit-range diffs (diff2html); the browser's `localStorage` keeps a per-file "viewed" mark |
+| Inbox | Reads Story Plans and receipts under `_bmad-output/implementation-artifacts/` and `.agent-state/overnight/*/report.json` to list owner stops: owner review, Human Gate, BLOCKED, ready-to-complete, overnight stops |
+| Deterministic hints | Recomputes risk, verification status, out-of-scope paths, unevidenced obligations and sensitive or untested areas from those artifacts |
+| Line comments → findings | Exports comments as kernel-shaped findings JSON (`HIGH/MEDIUM/LOW`, `VALID/FALSE_POSITIVE/SPEC_AMBIGUITY/NEEDS_HUMAN_DECISION`) or Markdown for a Lead prompt; stores them in the tool's own `data/reviews/` |
+| AGY analysis (on click only) | Launches a fresh AGY session through `orca agent launch`, **in the tool repo, not a project worktree**, using the tool's own skill `agent-desk-diff-analysis`; it reads the project with `git -C` and warns if the project's `git status` changes during the run |
+| Terminals | Streams `orca terminal read` over SSE and can send prompts to Orca terminals |
+
+Boundaries:
+
+- **Read-only on this repo.** Its only write path into the agent world is
+  typing into an Orca terminal. Requests that send input need `Host` set to
+  `127.0.0.1`/`localhost`, an `X-Agent-Desk: 1` header and a matching `Origin`.
+- **Advisory, never evidence.** Its hints, AGY points and comments do not
+  replace Plan, receipts, `check-*` gates or the Human Gate. A finding becomes
+  real only after a Lead records it through the Runner.
+- **Not pinned.** The tool parses Plan frontmatter, receipts and overnight
+  reports directly. A change to `v4-artifact-contract.md` or the overnight
+  report shape can break its Inbox or hints silently; no test here covers that.
+
 ## 4. State and sources of truth
 
 | Store | Location | Authority |
@@ -231,3 +262,4 @@ successor without executing it. With autopilot, the Lead loops on
 | V4 Lite origin and acceptance | `.agents/docs/v4-lite-migration.md`, `docs/agent-architecture/` |
 | Test-suite performance | `.agents/docs/v4-auto/perf-*.md` |
 | External ideas evaluated against this architecture | `docs/agent-research/README.md` (not authority) |
+| Owner review UI (Agent Desk, separate repo) | `D:/Workspace/Tu_Hoc/UI_Tool_Agent_Architecture/README.md`, `DESIGN-BRIEF.md`, `docs/tasks/` |
