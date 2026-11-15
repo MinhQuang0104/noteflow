@@ -76,7 +76,7 @@ slices:
         vendor: null
         independent: false
   - id: B
-    status: checkpointed
+    status: reviewed
     baseline_commit: 52a075de9354e676e8486b244204651e235c9109
     checkpoint_commit: 5cc46f0cae4f3df8bf6ec95e9ad00daf0e984d66
     subject_digest: sha256:d89477291adc9c76d856ce36a8b92633dab44e57eb7259283f9a73f7b45a31db
@@ -85,6 +85,12 @@ slices:
       implementation:
         path: _bmad-output/implementation-artifacts/receipts/story-4-2/B-implementation-attempt-3.json
         digest: sha256:8c586f0f247632e9be61800baef41551a25a2b3e78cf2042bbb1c03ba8a40d98
+      verification:
+        path: _bmad-output/implementation-artifacts/receipts/story-4-2/B-verification-attempt-3.json
+        digest: sha256:f7d0c0795e58881e41a2dd2aab180a8eefd1bfb89b16a789cbd7c0edd16ecbbe
+      review:
+        path: _bmad-output/implementation-artifacts/receipts/story-4-2/B-review-attempt-3.json
+        digest: sha256:9c5b169f7472021a241091f12cd3cb078353a3fc7071e2a80032d9b74f69dca9
     task_refs: [T-4]
     depends_on: [A]
     executor: agy
@@ -100,6 +106,23 @@ slices:
       - notes.spec.ts proves "+ Ghi chú mới" opens an empty editor in the selected notebook with focus in the body, the first typing pause with content sends exactly one create and later pauses send updates with the latest base_version, "Đã lưu" appears only after the acknowledgement of the current content, a failed save keeps the text and shows an error, a brand-new editor that never had text sends no request when left, switching note or leaving with a pending change saves it before switching, the note list shows the server label and a short excerpt ordered by most recent update, and a list load error shows retry instead of the empty state
       - today.spec.ts proves the "Ghi chú mới" header entry opens the Notes workspace with a new editor in the default notebook
       - powershell.exe -File scripts/local.ps1 e2e from the Story worktree after the slice checkpoint - full e2e suite passes, including quick-note.spec.ts (Today entry, body-only note labelled by its first body line, title-only note, leaving an untouched editor creates nothing) and the existing notebooks.spec.ts
+    verification:
+      status: PASS
+      canonical:
+        status: PASS
+      escalation:
+        decision: REVIEW_REQUIRED
+      progression_eligible: true
+      review_disclosure: independent Lead review of AGY attempt 3 (F-42B-3 correction); focused checks and full e2e PASS
+    review:
+      freshness: FRESH_CANDIDATE
+      judgment: APPROVE
+      reviewed_commit: 5cc46f0cae4f3df8bf6ec95e9ad00daf0e984d66
+      risk_context_digest: sha256:fda9685a606c4170ef0d3aba9a6a4a1627e5cf10d7f64e86413b5bb61e929d4c
+      reviewer:
+        type: lead
+        vendor: claude
+        independent: true
     attempt_history:
       - attempt_id: 1
         status: checkpointed
@@ -133,8 +156,8 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: verify_slice
-  target: B
+  kind: finalize_story
+  target: story
 autopilot:
   schema_version: 1
   authorized_at: "2026-11-14T08:16:41.932Z"
