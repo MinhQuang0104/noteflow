@@ -93,8 +93,8 @@ test.describe('Story 4.2 — Tạo quick note với title tùy chọn', () => {
     // Click "Ghi chú mới"
     await newNoteBtn.click()
 
-    // Navigates to Notes workspace
-    await expect(page).toHaveURL(/\/notes\?new=1$/)
+    // Navigates to Notes workspace and consumes ?new=1
+    await expect(page).toHaveURL(/\/notes$/)
 
     // Default notebook is selected
     await expect(page.getByTestId('selected-notebook-title')).toHaveText('Ghi chú nhanh')
@@ -172,6 +172,10 @@ test.describe('Story 4.2 — Tạo quick note với title tùy chọn', () => {
     // Wait for typing pause autosave to trigger and complete
     await expect(page.getByTestId('note-save-status')).toHaveText('Đã lưu', { timeout: 5000 })
     expect(createCalled).toBe(true)
+
+    // Body value is preserved after save (regression check for F-42B-3)
+    await expect(bodyInput).toHaveValue('Dòng đầu tiên của ghi chú\nDòng thứ hai tiếp theo')
+    await expect(page).toHaveURL(/\/notes$/)
 
     // Note list renders server label derived from first non-empty body line
     const noteList = page.getByTestId('note-list')

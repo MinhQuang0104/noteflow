@@ -415,7 +415,7 @@ test('the "Ghi chú mới" header entry opens the Notes workspace with a new edi
   await flushPromises()
 
   expect(router.currentRoute.value.path).toBe('/notes')
-  expect(router.currentRoute.value.query.new).toBe('1')
+  expect(router.currentRoute.value.query.new).toBeUndefined()
 
   expect(wrapper.get('[data-testid="selected-notebook-title"]').text()).toBe('Ghi chú nhanh')
   const bodyInput = wrapper.get('[data-testid="note-body-input"]')

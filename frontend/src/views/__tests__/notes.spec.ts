@@ -2,6 +2,7 @@ import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query'
 import { flushPromises, mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
+import { createMemoryHistory, createRouter } from 'vue-router'
 
 import * as notebooksApi from '../../api/notebooks'
 import { NotebookApiError, type Notebook } from '../../api/notebooks'
@@ -1082,6 +1083,129 @@ test('regression F-42B-2: failed save before switch keeps editor mounted with ty
   const activeNoteRow = wrapper.get(`[data-testid="note-row-${note1.id}"]`)
   expect(activeNoteRow.classes()).toContain('bg-indigo-50/70')
 
+  wrapper.unmount()
+})
+
+test('mounting with ?new=1 consumes query once, preserves typed body after save, and sends updateNote on subsequent edit (F-42B-3)', async () => {
+  vi.useFakeTimers()
+  vi.spyOn(notebooksApi, 'getNotebooks').mockResolvedValue({
+    notebooks: [defaultNotebook, regularNotebook],
+  })
+  vi.spyOn(notesApi, 'getNotebookNotes').mockResolvedValue({ notes: [] })
+
+  let resolveCreate!: (res: notesApi.NoteMutationResult) => void
+  const createPromise = new Promise<notesApi.NoteMutationResult>((resolve) => {
+    resolveCreate = resolve
+  })
+  const createSpy = vi.spyOn(notesApi, 'createNote').mockReturnValue(createPromise)
+
+  let resolveUpdate!: (res: notesApi.NoteMutationResult) => void
+  const updatePromise = new Promise<notesApi.NoteMutationResult>((resolve) => {
+    resolveUpdate = resolve
+  })
+  const updateSpy = vi.spyOn(notesApi, 'updateNote').mockReturnValue(updatePromise)
+
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [{ path: '/notes', component: NotesView }],
+  })
+  await router.push('/notes?new=1')
+
+  const wrapper = mount(NotesView, {
+    attachTo: document.body,
+    global: {
+      plugins: [[VueQueryPlugin, { queryClient }], router],
+    },
+  })
+  await flushPromises()
+
+  // The route query ?new=1 is cleared upon consuming
+  expect(router.currentRoute.value.path).toBe('/notes')
+  expect(router.currentRoute.value.query.new).toBeUndefined()
+
+  // Default notebook is selected and new editor is open with focused body
+  expect(wrapper.get('[data-testid="selected-notebook-title"]').text()).toBe('Ghi chú nhanh')
+  const bodyInput = wrapper.get<HTMLTextAreaElement>('[data-testid="note-body-input"]')
+  expect(bodyInput.element).toBeDefined()
+  expect(document.activeElement).toBe(bodyInput.element)
+
+  // Type body content into new note
+  await bodyInput.setValue('Nội dung ghi chú đầu tiên từ Today')
+
+  // Advance timers past typing pause debounce
+  vi.advanceTimersByTime(600)
+  await flushPromises()
+
+  // Exactly one createNote sent
+  expect(createSpy).toHaveBeenCalledTimes(1)
+  expect(createSpy).toHaveBeenCalledWith(
+    expect.objectContaining({
+      notebook_id: defaultNotebook.id,
+      body: 'Nội dung ghi chú đầu tiên từ Today',
+      title: '',
+    }),
+  )
+  expect(wrapper.get('[data-testid="note-save-status"]').text()).toBe('Đang lưu…')
+
+  // Resolve create acknowledgement
+  const createdNote: Note = {
+    id: 'note-uuid-new-1',
+    notebook_id: defaultNotebook.id,
+    title: '',
+    body: 'Nội dung ghi chú đầu tiên từ Today',
+    label: 'Nội dung ghi chú đầu tiên từ Today',
+    row_version: 1,
+    created_at: '2026-11-14T09:00:00Z',
+    updated_at: '2026-11-14T09:00:00Z',
+  }
+  resolveCreate({
+    note: createdNote,
+    account_revision: 2,
+    data_epoch: 1,
+  })
+  await flushPromises()
+
+  // "Đã lưu" appears
+  expect(wrapper.get('[data-testid="note-save-status"]').text()).toBe('Đã lưu')
+
+  // Regression assertion for F-42B-3: editor still shows the typed body bound to created note
+  expect(bodyInput.element.value).toBe('Nội dung ghi chú đầu tiên từ Today')
+  expect(router.currentRoute.value.query.new).toBeUndefined()
+
+  // Later edit: type additional content
+  await bodyInput.setValue('Nội dung ghi chú đầu tiên từ Today - cập nhật')
+  vi.advanceTimersByTime(600)
+  await flushPromises()
+
+  // Sends updateNote with created row_version (1), NOT a second createNote
+  expect(createSpy).toHaveBeenCalledTimes(1)
+  expect(updateSpy).toHaveBeenCalledTimes(1)
+  expect(updateSpy).toHaveBeenCalledWith(
+    'note-uuid-new-1',
+    expect.objectContaining({
+      base_version: 1,
+      body: 'Nội dung ghi chú đầu tiên từ Today - cập nhật',
+      title: '',
+    }),
+  )
+
+  const updatedNote: Note = {
+    ...createdNote,
+    body: 'Nội dung ghi chú đầu tiên từ Today - cập nhật',
+    label: 'Nội dung ghi chú đầu tiên từ Today - cập nhật',
+    row_version: 2,
+  }
+  resolveUpdate({
+    note: updatedNote,
+    account_revision: 3,
+    data_epoch: 1,
+  })
+  await flushPromises()
+
+  expect(wrapper.get('[data-testid="note-save-status"]').text()).toBe('Đã lưu')
+  expect(bodyInput.element.value).toBe('Nội dung ghi chú đầu tiên từ Today - cập nhật')
+
+  vi.useRealTimers()
   wrapper.unmount()
 })
 

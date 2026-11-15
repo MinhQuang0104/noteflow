@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { matchedRouteKey, onBeforeRouteLeave, routeLocationKey } from 'vue-router'
+import { matchedRouteKey, onBeforeRouteLeave, routeLocationKey, routerKey } from 'vue-router'
 
 import {
   createNotebook,
@@ -27,6 +27,7 @@ const sync = useSyncStore()
 const queryClient = useQueryClient()
 
 const route = inject(routeLocationKey, null)
+const router = inject(routerKey, null)
 
 const {
   data: notebooksData,
@@ -64,6 +65,13 @@ watch(
         }
         selectedNoteId.value = null
         isEditingNewNote.value = true
+
+        const currentRoute = route ?? router?.currentRoute.value
+        if (router && currentRoute?.query?.new) {
+          const remainingQuery = { ...currentRoute.query }
+          delete remainingQuery.new
+          void router.replace({ path: currentRoute.path, query: remainingQuery }).catch(() => {})
+        }
         return
       }
 
