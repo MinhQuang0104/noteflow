@@ -8,8 +8,8 @@ upstream_epic:
   path: docs/product/epics.md
   section_digest: sha256:4420968e19ff26b85691bb0de577b71f307e9d11f903a408069e9a2180006c76
 sprint_key: 4-2-tạo-quick-note-với-title-tùy-chọn
-lifecycle_snapshot: in-progress
-execution_status: in-progress
+lifecycle_snapshot: review
+execution_status: complete
 planning_approval:
   decision: APPROVED
   scope: planning
@@ -155,8 +155,17 @@ slices:
           path: _bmad-output/implementation-artifacts/receipts/story-4-2/B-review-attempt-3.json
 blockers: []
 unresolved_questions: []
+finalization:
+  receipt_ref: _bmad-output/implementation-artifacts/receipts/story-4-2/finalization.json
+  receipt_digest: sha256:965e50f40ccd61d3c2047701fae4ac4d43254164c30bba0d1848e6d7c901ae79
+  done_gate_disposition: SATISFIED
+  scope_paths_digest: sha256:c56498be33a982324e4a32cf0a11f534e683d674b409cdddf6af1d4afc09baee
+  implementation_commit_set_digest: sha256:81ff720220381e2d7f2933392ddd33c950eb210c42fad24adb2ddd0e5d62e99b
+  final_scoped_tree_digest: sha256:2b6880f39bb8ee83a95203fd27aba16b4cbe6c344de74e96949a8805a6284bd9
+  prepared_from_head: c9a147a88d99e1fccbe8bfa613d59ee1a44de363
+human_approval: null
 next_action:
-  kind: finalize_story
+  kind: complete_story
   target: story
 autopilot:
   schema_version: 1

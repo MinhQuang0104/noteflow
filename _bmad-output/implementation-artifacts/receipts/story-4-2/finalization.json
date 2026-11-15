@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "kind": "story_finalization",
+  "story_id": "4.2",
+  "story_normative_digest": "sha256:dbd935cb2f74779047b22664aa2a6c7948790b8bc6b5b5c6082fb03127e86ad9",
+  "upstream_epic_digest": "sha256:4420968e19ff26b85691bb0de577b71f307e9d11f903a408069e9a2180006c76",
+  "prepared_from_head": "c9a147a88d99e1fccbe8bfa613d59ee1a44de363",
+  "slice_set_digest": "sha256:de1e18f945fdc7bbbc1a8767d00fd83f0c1cbdef6fefabaa4a939e99bd697847",
+  "receipt_set_digest": "sha256:aec826924c6afbd4ef0669eb0a883589fbae528fc3a5b405f119fc8f585806b4",
+  "ac_coverage_digest": "sha256:322bc375a3d54e07022d8257e58e946f5274feece57a3a4ebd17e658a94f2f6e",
+  "canonical_disclosures_digest": "sha256:25e965f81d4713da45bf6565f6d003491d20c7cb16ead3354815114a267569a3",
+  "scope_path_count": 29,
+  "scope_paths_digest": "sha256:c56498be33a982324e4a32cf0a11f534e683d674b409cdddf6af1d4afc09baee",
+  "implementation_commit_set_digest": "sha256:81ff720220381e2d7f2933392ddd33c950eb210c42fad24adb2ddd0e5d62e99b",
+  "final_scoped_tree_digest": "sha256:2b6880f39bb8ee83a95203fd27aba16b4cbe6c344de74e96949a8805a6284bd9",
+  "paths_digest": "sha256:c56498be33a982324e4a32cf0a11f534e683d674b409cdddf6af1d4afc09baee",
+  "commit_set_digest": "sha256:81ff720220381e2d7f2933392ddd33c950eb210c42fad24adb2ddd0e5d62e99b",
+  "scoped_tree_digest": "sha256:2b6880f39bb8ee83a95203fd27aba16b4cbe6c344de74e96949a8805a6284bd9",
+  "done_gate_disposition": "SATISFIED",
+  "lifecycle_from": "in-progress",
+  "lifecycle_target": "review",
+  "slice_summaries": [
+    {
+      "id": "A",
+      "status": "reviewed",
+      "checkpoint": "712f6712e94984775e2a4099b6fa5a538c5917d6",
+      "progression_eligible": true,
+      "review_required": false,
+      "review_verdict": "APPROVE",
+      "review_freshness": "FRESH_REUSED"
+    },
+    {
+      "id": "B",
+      "status": "reviewed",
+      "checkpoint": "5cc46f0cae4f3df8bf6ec95e9ad00daf0e984d66",
+      "progression_eligible": true,
+      "review_required": false,
+      "review_verdict": "APPROVE",
+      "review_freshness": "FRESH_REUSED"
+    }
+  ]
+}
