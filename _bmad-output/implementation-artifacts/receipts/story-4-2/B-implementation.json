@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "story_id": "4.2",
+  "slice_id": "B",
+  "kind": "implementation",
+  "checkpoint_commit": "ac87355d078cb1313d1712f9d5148c2fcee7a0e4",
+  "baseline_commit": "454beca424944568c925e5061e7a45f0e3cc5bd8",
+  "subject_digest": "sha256:d89477291adc9c76d856ce36a8b92633dab44e57eb7259283f9a73f7b45a31db",
+  "created_from_head": "ac87355d078cb1313d1712f9d5148c2fcee7a0e4",
+  "changed_paths_sha256": "sha256:71af5bebde9d7040416bb0eb3c4d924e328d202663507812305f2f9752396565",
+  "commands": [
+    {
+      "command": "npm --prefix frontend run type-check",
+      "exit_code": 0,
+      "tool": "vue-tsc",
+      "environment": "Story worktree story-4-2 (MinhQuang0104/story-4-2 @ 454beca + AGY attempt-1 change), Windows 11, Git Bash; Lead rerun after worker_done; PASS"
+    },
+    {
+      "command": "npm --prefix frontend run lint",
+      "exit_code": 0,
+      "tool": "oxlint+eslint",
+      "environment": "Story worktree story-4-2 (MinhQuang0104/story-4-2 @ 454beca + AGY attempt-1 change), Windows 11, Git Bash; Lead rerun after worker_done; PASS"
+    },
+    {
+      "command": "npm --prefix frontend run test:unit -- --run src/views/__tests__/notes.spec.ts src/views/__tests__/today.spec.ts",
+      "exit_code": 0,
+      "tool": "vitest",
+      "environment": "Story worktree story-4-2 (MinhQuang0104/story-4-2 @ 454beca + AGY attempt-1 change), Windows 11, Git Bash; Lead rerun after worker_done; PASS 2 files, 25 tests"
+    },
+    {
+      "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/local.ps1 e2e",
+      "exit_code": 0,
+      "tool": "playwright",
+      "environment": "Story worktree story-4-2 (MinhQuang0104/story-4-2 @ 454beca + AGY attempt-1 change), Windows 11, per-worktree test project noteflow-test-3286bcd071ca; Lead rerun after worker_done; 61 passed, 5 skipped (phone cross-device-sync), 0 failed, 3.0m; includes quick-note.spec.ts and notebooks.spec.ts on laptop and phone"
+    }
+  ],
+  "worker": {
+    "executor": "agy",
+    "orca": {
+      "run_id": "run_b5702cf5cb83",
+      "task_id": "task_2b32379f2f18",
+      "dispatch_ids": [
+        "ctx_6a1d182365f8"
+      ]
+    },
+    "attempt": 1,
+    "contract_sha256": "9d3f71a284a93938eecd19c31be659a67a0a8e0604c87316e5d6e8e478b4b4bf",
+    "worker_report_sha256": "e9e1e1ea291663facc50840d989539024d7252bea6bdcc5566218fc214167f32",
+    "lead_vendor": "claude",
+    "scope_gate": {
+      "schema": "worker-scope-v1",
+      "status": "PASS",
+      "base": "454beca424944568c925e5061e7a45f0e3cc5bd8",
+      "allowed": [
+        "frontend/src/components/NoteEditor.vue",
+        "frontend/src/views/NotesView.vue",
+        "frontend/src/views/TodayView.vue",
+        "frontend/src/views/__tests__/notes.spec.ts",
+        "frontend/src/views/__tests__/today.spec.ts",
+        "tests/e2e/helpers/db-helper.php",
+        "tests/e2e/notebooks.spec.ts",
+        "tests/e2e/quick-note.spec.ts"
+      ],
+      "changed": [
+        "frontend/src/components/NoteEditor.vue",
+        "frontend/src/views/NotesView.vue",
+        "frontend/src/views/TodayView.vue",
+        "frontend/src/views/__tests__/notes.spec.ts",
+        "frontend/src/views/__tests__/today.spec.ts",
+        "tests/e2e/helpers/db-helper.php",
+        "tests/e2e/notebooks.spec.ts",
+        "tests/e2e/quick-note.spec.ts"
+      ]
+    }
+  }
+}

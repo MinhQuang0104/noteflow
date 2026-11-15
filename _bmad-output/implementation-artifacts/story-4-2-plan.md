@@ -76,7 +76,15 @@ slices:
         vendor: null
         independent: false
   - id: B
-    status: pending
+    status: checkpointed
+    baseline_commit: 454beca424944568c925e5061e7a45f0e3cc5bd8
+    checkpoint_commit: ac87355d078cb1313d1712f9d5148c2fcee7a0e4
+    subject_digest: sha256:d89477291adc9c76d856ce36a8b92633dab44e57eb7259283f9a73f7b45a31db
+    changed_paths_sha256: sha256:71af5bebde9d7040416bb0eb3c4d924e328d202663507812305f2f9752396565
+    receipt_refs:
+      implementation:
+        path: _bmad-output/implementation-artifacts/receipts/story-4-2/B-implementation.json
+        digest: sha256:2e17027b666d3c66a4323b702047f032d9dc77484363f6f39e5608ae6cda6ef7
     task_refs: [T-4]
     depends_on: [A]
     executor: agy
@@ -95,7 +103,7 @@ slices:
 blockers: []
 unresolved_questions: []
 next_action:
-  kind: implement_slice
+  kind: verify_slice
   target: B
 autopilot:
   schema_version: 1
