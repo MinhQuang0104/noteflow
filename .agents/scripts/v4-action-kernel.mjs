@@ -840,6 +840,10 @@ function validateReworkState(root, request, { template = true } = {}) {
   if (!changedPaths.length) throw new Error('REWORK_CHECKPOINT_PATHS_REQUIRED')
   if (!Array.isArray(request.rework_paths) || !sameJson(canonicalPaths(request.rework_paths), changedPaths)) throw new Error('REWORK_SCOPE_MISMATCH')
   const findings = normalizedFindings(request.findings)
+  if (request.reviewer !== undefined) {
+    const reviewerErrors = validateReviewPayload({ reviewer: request.reviewer }, slice.executor ?? 'lead')
+    if (reviewerErrors.length || typeof request.reviewer !== 'object') throw new Error('REWORK_REVIEWER_INVALID')
+  }
   const policy = requireAutopilotPolicy(plan, request, 'REWORK')
   const newAttempt = expectedReworkAttempt(request.story_id, request.slice_id, currentAttemptId(slice) + 1)
   const oldSnapshot = reworkAttemptSnapshot(slice)
@@ -857,8 +861,38 @@ function validateReworkState(root, request, { template = true } = {}) {
     oldSnapshot, newAttempt, findings, policy, changedPaths, identity }
 }
 
+// The CHANGES_REQUIRED decision behind a rework, committed with the Plan so the
+// findings that the next attempt must fix are durable evidence rather than a
+// Lead scratch payload (Story 4.2 run 6).
+function reworkReceipt(request, state) {
+  const receipt = {
+    schema_version: 1,
+    kind: 'rework',
+    story_id: request.story_id,
+    slice_id: request.slice_id,
+    attempt_id: state.newAttempt.attempt_id,
+    previous_attempt_id: state.oldSnapshot.attempt_id,
+    judgment: 'CHANGES_REQUIRED',
+    baseline_commit: state.slice.baseline_commit,
+    checkpoint_commit: state.slice.checkpoint_commit,
+    implementation_receipt_digest: request.old_receipt_digest,
+    rework_paths: state.changedPaths,
+    reviewer: request.reviewer ?? null,
+    findings: state.findings,
+    findings_digest: digestValue(state.findings)
+  }
+  return { path: attemptReceiptPath(request.story_id, request.slice_id, receipt.attempt_id, 'rework'), receipt }
+}
+
+function reworkReceiptText(receipt) {
+  return `${JSON.stringify(receipt, null, 2)}\n`
+}
+
 function buildReworkPreview(root, request) {
   const state = validateReworkState(root, request)
+  const rework = reworkReceipt(request, state)
+  if (!rework.path) throw new Error('REWORK_RECEIPT_PATH_INVALID')
+  if (existsSync(path.join(root, rework.path))) throw new Error('REWORK_RECEIPT_EXISTS')
   const transactionId = request.transaction_id ?? randomUUID()
   const preview = {
     schema_version: 1,
@@ -882,7 +916,10 @@ function buildReworkPreview(root, request) {
     ...(state.policy ? { policy: state.policy } : {}),
     findings_digest: digestValue(state.findings),
     rework_paths: state.changedPaths,
-    metadata_paths: [state.planPath],
+    rework_receipt_path: rework.path,
+    rework_receipt: rework.receipt,
+    rework_receipt_digest: receiptDigest(rework.receipt),
+    metadata_paths: canonicalPaths([state.planPath, rework.path]),
     plan_template: request.plan_template,
     plan_template_digest: hash(Buffer.from(request.plan_template)),
     metadata_message: request.metadata_message ?? `chore(story-${request.story_id}): prepare ${request.slice_id} rework`,
@@ -908,6 +945,14 @@ function reworkDescriptorFromPreview(root, request, preview, recovery = false) {
   if (request.old_receipt_digest !== undefined && request.old_receipt_digest !== preview.old_receipt_digest) throw new Error('STALE_REWORK_BINDING')
   if (request.rework_paths !== undefined && !sameJson(canonicalPaths(request.rework_paths), preview.rework_paths)) throw new Error('STALE_REWORK_SCOPE')
   if (request.findings !== undefined && !sameJson(normalizedFindings(request.findings), preview.findings)) throw new Error('STALE_REWORK_FINDINGS')
+  if (request.reviewer !== undefined && !sameJson(request.reviewer, preview.rework_receipt?.reviewer)) throw new Error('STALE_REWORK_FINDINGS')
+  if (!preview.rework_receipt_path || !preview.rework_receipt || receiptDigest(preview.rework_receipt) !== preview.rework_receipt_digest ||
+      preview.rework_receipt.findings_digest !== preview.findings_digest || !sameJson(preview.rework_receipt.findings, preview.findings) ||
+      !sameJson(preview.metadata_paths, canonicalPaths([preview.plan_path, preview.rework_receipt_path]))) throw new Error('REWORK_RECEIPT_BINDING_MISMATCH')
+  const reworkReceiptBytes = reworkReceiptText(preview.rework_receipt)
+  const assertReworkReceipt = metadata => {
+    if (metadata.files[preview.rework_receipt_path] !== reworkReceiptBytes) throw new Error('REWORK_RECEIPT_BINDING_MISMATCH')
+  }
   const policyInput = autopilotActive(preview.original_plan) && request.policy === undefined && preview.policy !== undefined
     ? { ...request, policy: preview.policy }
     : request
@@ -921,8 +966,10 @@ function reworkDescriptorFromPreview(root, request, preview, recovery = false) {
     metadata_message: preview.metadata_message, next_action: preview.next_action,
     stop_condition: preview.stop_condition, recovery, recovery_checkpoint: request.recovery_checkpoint ?? request.recovery?.checkpoint_commit,
     fail_at: request.fail_at ?? request.failure_phase,
-    buildMetadata: () => ({ paths: preview.metadata_paths, files: { [preview.plan_path]: preview.plan_template } }),
-    readMetadata: freshRoot => ({ paths: preview.metadata_paths, files: { [preview.plan_path]: readText(freshRoot, preview.plan_path) } }),
+    buildMetadata: () => ({ paths: preview.metadata_paths, files: {
+      [preview.plan_path]: preview.plan_template, [preview.rework_receipt_path]: reworkReceiptBytes } }),
+    readMetadata: freshRoot => ({ paths: preview.metadata_paths, files: Object.fromEntries(
+      preview.metadata_paths.map(relative => [relative, readText(freshRoot, relative)])) }),
     recheck: recovery ? undefined : freshRoot => {
       if (gitOutput(freshRoot, ['rev-parse', 'HEAD']) !== preview.expected_head) throw new Error('STALE_HEAD')
       const freshPointer = assertPointerIdle(freshRoot)
@@ -931,10 +978,12 @@ function reworkDescriptorFromPreview(root, request, preview, recovery = false) {
       validateReworkState(freshRoot, { ...request, operation: 'prepare-rework' })
     },
     validateMetadata: metadata => {
+      assertReworkReceipt(metadata)
       const generated = frontmatter(metadata.files[preview.plan_path])
       validateReworkProjection(root, request, preview.original_plan, generated, preview.old_snapshot, preview.new_attempt)
     },
     validateFinal: metadata => {
+      assertReworkReceipt(metadata)
       const generated = frontmatter(metadata.files[preview.plan_path])
       validateReworkProjection(root, request, preview.original_plan, generated, preview.old_snapshot, preview.new_attempt)
     }
@@ -944,12 +993,13 @@ function reworkDescriptorFromPreview(root, request, preview, recovery = false) {
 
 function reworkError(error) {
   if (error.message === 'WORKTREE_SCOPE_MISMATCH') return blocked('DIRTY_SCOPE_MISMATCH')
+  if (error.message === 'REWORK_REVIEWER_INVALID') return invalid(error.message)
   if (error.message.includes('DIRTY') || error.message.includes('WORKTREE') || error.message.includes('LOCKED') || error.message.includes('REWORK_') ||
       error.message.includes('PLAN_') || error.message.includes('ATTEMPT') || error.message.includes('COMPLETION_AUTHORITY') ||
       error.message.includes('POST_REWORK') || error.message === 'AUTOPILOT_POLICY_DENIED') return blocked(error.message)
   if (error.message.includes('STALE') || error.message.includes('MISMATCH') || error.message === 'EXPECTED_HEAD_MISMATCH') return stale(error.message)
   if (['INPUT_REQUIRED', 'INVALID_STORY_ID', 'INVALID_SLICE_ID', 'INVALID_EXPECTED_HEAD', 'ACTION_MISMATCH',
-    'OPERATION_MISMATCH', 'MAINTENANCE_AUTHORIZATION_REQUIRED', 'REWORK_AUTHORITY_FORBIDDEN'].includes(error.message)) return invalid(error.message)
+    'OPERATION_MISMATCH', 'MAINTENANCE_AUTHORIZATION_REQUIRED', 'REWORK_AUTHORITY_FORBIDDEN', 'REWORK_REVIEWER_INVALID'].includes(error.message)) return invalid(error.message)
   return errorResult(error)
 }
 

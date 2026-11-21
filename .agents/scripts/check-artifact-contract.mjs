@@ -118,7 +118,7 @@ export function validateTaskSlices(story, plan) {
 
 export function attemptReceiptPath(storyId, sliceId, attemptId, kind) {
   if (!/^\d+\.\d+$/.test(storyId ?? '') || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(sliceId ?? '') ||
-      !ATTEMPT_ID.test(String(attemptId)) || !['implementation', 'verification', 'review'].includes(kind)) return null
+      !ATTEMPT_ID.test(String(attemptId)) || !['implementation', 'verification', 'review', 'rework'].includes(kind)) return null
   return `_bmad-output/implementation-artifacts/receipts/story-${storyId.replace('.', '-')}/${sliceId}-${kind}-attempt-${attemptId}.json`
 }
 
@@ -253,6 +253,35 @@ export function readReceiptForAttempt(root, plan, sliceId, attempt, kind = 'impl
     ? { ...attempt, executor: owner?.executor, scope: owner?.scope } : attempt
   return readReceiptRecord(root, plan, sliceId, kind, attempt?.receipt_refs?.[kind], expected,
     Number.isInteger(attemptId) && attemptId > 1 ? attemptId : null)
+}
+
+// Rework receipt v1, written by apply-rework for the attempt it opens. It binds
+// the findings of a CHANGES_REQUIRED decision to the attempt they replaced.
+export const REWORK_RECEIPT_READERS = {
+  1(receipt, plan, sliceId, attemptId) {
+    const errors = []
+    const slice = plan?.slices?.find(item => item?.id === sliceId)
+    const previous = slice?.attempt_history?.find(item => item?.attempt_id === receipt.previous_attempt_id)
+    if (receipt.kind !== 'rework' || receipt.story_id !== plan?.story_id || receipt.slice_id !== sliceId ||
+        receipt.attempt_id !== attemptId || receipt.previous_attempt_id !== attemptId - 1 ||
+        receipt.judgment !== 'CHANGES_REQUIRED') errors.push('INVALID_RECEIPT_IDENTITY')
+    if (!previous || previous.checkpoint_commit !== receipt.checkpoint_commit || previous.baseline_commit !== receipt.baseline_commit ||
+        previous.receipt_refs?.implementation?.digest !== receipt.implementation_receipt_digest) errors.push('REWORK_ATTEMPT_MISMATCH')
+    if (!Array.isArray(receipt.findings) || !receipt.findings.length || receipt.findings_digest !== receiptDigest(receipt.findings) ||
+        !Array.isArray(receipt.rework_paths) || !receipt.rework_paths.length) errors.push('INVALID_RECEIPT_PAYLOAD')
+    if (receipt.reviewer !== null && validateReviewPayload({ reviewer: receipt.reviewer }, slice?.executor ?? 'lead').length) errors.push('REVIEWER_INVALID')
+    return errors
+  }
+}
+
+export function readReworkReceipt(root, plan, sliceId, attemptId) {
+  const relative = attemptReceiptPath(plan?.story_id, sliceId, attemptId, 'rework')
+  if (!relative) return { receipt: null, errors: ['INVALID_RECEIPT_REF'] }
+  let receipt
+  try { receipt = JSON.parse(readFileSync(path.resolve(root, relative), 'utf8')) } catch { return { receipt: null, errors: ['INVALID_RECEIPT_FILE'] } }
+  if (!receipt || typeof receipt !== 'object' || Array.isArray(receipt)) return { receipt: null, errors: ['INVALID_RECEIPT_FILE'] }
+  const reader = REWORK_RECEIPT_READERS[receipt.schema_version]
+  return { receipt, errors: reader ? reader(receipt, plan, sliceId, attemptId) : ['INVALID_RECEIPT_IDENTITY'] }
 }
 
 export function validateReceipt(root, plan, sliceId, kind) {

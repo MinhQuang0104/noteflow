@@ -1,12 +1,13 @@
-import { PLAN, STORY, OLD_RECEIPT, NEW_IMPLEMENTATION_RECEIPT, digest, git, write, fixture, applyRequest, state } from './v4-rework-fixture.mjs'
+import { PLAN, STORY, OLD_RECEIPT, NEW_IMPLEMENTATION_RECEIPT, REWORK_RECEIPT, digest, git, write, fixture, applyRequest, state } from './v4-rework-fixture.mjs'
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, rmSync } from 'node:fs'
 import path from 'node:path'
 
 import { frontmatter, validate as validateStoryPlan } from './check-story-plan.mjs'
 import { checkpointImplementation, prepareAction, prepareRework, priorAttemptChangedPaths, reworkDependents } from './v4-action-kernel.mjs'
 import { deriveScope, stableDigest } from './check-story-finalization.mjs'
+import { readReworkReceipt } from './check-artifact-contract.mjs'
 
 test('rework is append-only, creates attempt identity, and never runs the successor', () => {
   const f = fixture()
@@ -19,7 +20,24 @@ test('rework is append-only, creates attempt identity, and never runs the succes
     const result = applyRequest(f, prepared.preview)
     assert.equal(result.status, 'APPLIED', JSON.stringify(result))
     assert.deepEqual(result.next_action, { kind: 'implement_slice', target: 'D' })
-    assert.deepEqual(git(f.root, 'diff-tree', '--no-commit-id', '--name-only', '-r', result.metadata_commit).split(/\r?\n/), [PLAN], JSON.stringify(result))
+    assert.deepEqual(git(f.root, 'diff-tree', '--no-commit-id', '--name-only', '-r', result.metadata_commit).split(/\r?\n/).sort(), [PLAN, REWORK_RECEIPT].sort(), JSON.stringify(result))
+    const rework = JSON.parse(readFileSync(path.join(f.root, REWORK_RECEIPT), 'utf8'))
+    assert.deepEqual(rework, {
+      schema_version: 1, kind: 'rework', story_id: '9.1', slice_id: 'D', attempt_id: 2, previous_attempt_id: 1,
+      judgment: 'CHANGES_REQUIRED', baseline_commit: f.baseline, checkpoint_commit: f.checkpoint,
+      implementation_receipt_digest: f.oldReceiptDigest, rework_paths: [...f.changedPaths].sort(), reviewer: null,
+      findings: f.request.findings, findings_digest: prepared.preview.findings_digest
+    })
+    const reworkPlan = frontmatter(readFileSync(path.join(f.root, PLAN), 'utf8'))
+    assert.deepEqual(readReworkReceipt(f.root, reworkPlan, 'D', 2).errors, [])
+    assert.deepEqual(readReworkReceipt(f.root, reworkPlan, 'D', 3).errors, ['INVALID_RECEIPT_FILE'])
+    write(f.root, REWORK_RECEIPT, JSON.stringify({ ...rework, findings: [{ id: 'other', summary: 'changed' }] }))
+    assert.deepEqual(readReworkReceipt(f.root, reworkPlan, 'D', 2).errors, ['INVALID_RECEIPT_PAYLOAD'])
+    write(f.root, REWORK_RECEIPT, JSON.stringify({ ...rework, checkpoint_commit: f.baseline }))
+    assert.deepEqual(readReworkReceipt(f.root, reworkPlan, 'D', 2).errors, ['REWORK_ATTEMPT_MISMATCH'])
+    write(f.root, REWORK_RECEIPT, JSON.stringify({ ...rework, schema_version: 2 }))
+    assert.deepEqual(readReworkReceipt(f.root, reworkPlan, 'D', 2).errors, ['INVALID_RECEIPT_IDENTITY'])
+    write(f.root, REWORK_RECEIPT, `${JSON.stringify(rework, null, 2)}\n`)
     const plan = frontmatter(readFileSync(path.join(f.root, PLAN), 'utf8'))
     assert.equal(plan.slices.find(item => item.id === 'D').status, 'pending')
     assert.equal(plan.slices.find(item => item.id === 'D').attempt_history[0].checkpoint_commit, f.checkpoint)
@@ -28,7 +46,7 @@ test('rework is append-only, creates attempt identity, and never runs the succes
     assert.deepEqual(plan.next_action, { kind: 'implement_slice', target: 'D' })
     assert.equal(readFileSync(path.join(f.root, OLD_RECEIPT), 'utf8'), before.receipt)
     assert.equal(existsSync(path.join(f.root, NEW_IMPLEMENTATION_RECEIPT)), false)
-    assert.deepEqual(git(f.root, 'diff', '--name-only', `${f.checkpoint}..HEAD`).split(/\r?\n/).sort(), [OLD_RECEIPT, PLAN].sort())
+    assert.deepEqual(git(f.root, 'diff', '--name-only', `${f.checkpoint}..HEAD`).split(/\r?\n/).sort(), [OLD_RECEIPT, PLAN, REWORK_RECEIPT].sort())
     assert.equal(validateStoryPlan(f.root, '9.1').status, 'READY')
   } finally { f.cleanup() }
 })
@@ -152,5 +170,27 @@ test('verification after rework explains anchors changed by earlier attempts (St
     const history = [{ attempt_id: 1, baseline_commit: f.baseline, checkpoint_commit: f.checkpoint }]
     assert.deepEqual(priorAttemptChangedPaths(f.root, { attempt_history: history }), [...f.changedPaths].sort())
     assert.throws(() => priorAttemptChangedPaths(f.root, { attempt_history: [{ attempt_id: 1, baseline_commit: 'HEAD~1', checkpoint_commit: f.checkpoint }] }), /ATTEMPT_HISTORY_INVALID/)
+  } finally { f.cleanup() }
+})
+
+test('rework records the CHANGES_REQUIRED reviewer and refuses a malformed one or an existing rework receipt', () => {
+  const f = fixture()
+  try {
+    const reviewer = { type: 'lead', vendor: 'claude', independent: false }
+    for (const bad of [{ type: 'worker', vendor: null, independent: false }, { type: 'lead', vendor: 'claude', independent: true }, 'same-lead']) {
+      const refused = prepareRework(f.root, { ...f.request, reviewer: bad })
+      assert.equal(refused.status, 'INVALID', JSON.stringify(refused))
+      assert.deepEqual(refused.reasons, ['REWORK_REVIEWER_INVALID'])
+    }
+    write(f.root, REWORK_RECEIPT, '{}\n')
+    assert.deepEqual(prepareRework(f.root, { ...f.request, reviewer }).reasons, ['REWORK_RECEIPT_EXISTS'])
+    rmSync(path.join(f.root, REWORK_RECEIPT))
+    const prepared = prepareRework(f.root, { ...f.request, reviewer })
+    assert.equal(prepared.status, 'READY', JSON.stringify(prepared))
+    assert.deepEqual(prepared.preview.metadata_paths, [REWORK_RECEIPT, PLAN].sort())
+    assert.deepEqual(applyRequest(f, prepared.preview, { reviewer: { ...reviewer, vendor: 'codex' } }).reasons, ['STALE_REWORK_FINDINGS'])
+    const result = applyRequest(f, prepared.preview, { reviewer })
+    assert.equal(result.status, 'APPLIED', JSON.stringify(result))
+    assert.deepEqual(JSON.parse(readFileSync(path.join(f.root, REWORK_RECEIPT), 'utf8')).reviewer, reviewer)
   } finally { f.cleanup() }
 })

@@ -602,6 +602,7 @@
   "rework cannot change another slice risk",
   "rework finds dependent slices by depends_on, not by the slice name E",
   "rework is append-only, creates attempt identity, and never runs the successor",
+  "rework records the CHANGES_REQUIRED reviewer and refuses a malformed one or an existing rework receipt",
   "rework rejects cross identity, stale fingerprint, dirty scope, and foreign lock without mutation",
   "rewritten history fails even when the tree is in scope",
   "risk context structural mismatch makes review stale",

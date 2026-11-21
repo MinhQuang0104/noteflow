@@ -1,4 +1,4 @@
-import { PLAN, NEW_IMPLEMENTATION_RECEIPT, git, fixture, applyRequest, state } from './v4-rework-fixture.mjs'
+import { PLAN, NEW_IMPLEMENTATION_RECEIPT, REWORK_RECEIPT, git, fixture, applyRequest, state } from './v4-rework-fixture.mjs'
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { existsSync } from 'node:fs'
@@ -52,7 +52,7 @@ test('Runner accepts rework only as an explicit maintenance action and stops bef
     })
     assert.equal(applied.status, 'APPLIED', JSON.stringify(applied))
     assert.deepEqual(applied.next_action, { kind: 'implement_slice', target: 'D' })
-    assert.equal(git(f.root, 'diff', '--name-only', `${f.head}..HEAD`), PLAN)
+    assert.deepEqual(git(f.root, 'diff', '--name-only', `${f.head}..HEAD`).split(/\r?\n/).sort(), [PLAN, REWORK_RECEIPT].sort())
     assert.equal(existsSync(path.join(f.root, NEW_IMPLEMENTATION_RECEIPT)), false)
   } finally { f.cleanup() }
 })

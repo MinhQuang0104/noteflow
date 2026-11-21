@@ -371,7 +371,8 @@ throughput case, and the pilot did not test one.
      (fresh pending, split evidence, `plan_template`) for each
      `HUMAN_REVIEW_REQUIRED` Story.
   3. Driver: persist rework findings in the run directory, not only in the
-     Story worktree's scratch.
+     Story worktree's scratch. **Built 2026-11-21 in the kernel instead** (see
+     §11.4 item 2).
   4. Preflight: name the exact Docker containers to start in the report.
 - **Next pilot Story.** Pick one whose slices are LOW or AGY-executed MEDIUM, so
   the run measures the throughput case in §6.
@@ -462,7 +463,11 @@ turns. Runs that produced no code (1, 2, 4) cost USD 5.15.
   1. Kernel: measure the slice time budget from child work (or per run), or
      give the owner an extend operation.
   2. Kernel: persist a CHANGES_REQUIRED review with its findings, so rework is
-     a recorded decision rather than a child's side effect.
+     a recorded decision rather than a child's side effect. **Built
+     2026-11-21:** `apply-rework` commits a rework receipt
+     (`<slice>-rework-attempt-<n>.json`: findings, their digest, the old
+     checkpoint and receipt digest, the optional structured reviewer) in the
+     same metadata commit as the Plan; the child prompt reads findings from it.
   3. Planning: before committing a Plan, grep existing tests that assert
      column lists or selectors of the touched tables and views, and scope them.
   4. Driver: report a child's `terminal_reason` and dirty inventory instead of

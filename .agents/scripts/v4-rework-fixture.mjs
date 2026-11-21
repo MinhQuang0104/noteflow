@@ -17,6 +17,7 @@ export const OLD_RECEIPT = `${RECEIPT_DIR}/D-implementation.json`
 export const NEW_IMPLEMENTATION_RECEIPT = `${RECEIPT_DIR}/D-implementation-attempt-2.json`
 export const NEW_VERIFICATION_RECEIPT = `${RECEIPT_DIR}/D-verification-attempt-2.json`
 export const NEW_REVIEW_RECEIPT = `${RECEIPT_DIR}/D-review-attempt-2.json`
+export const REWORK_RECEIPT = `${RECEIPT_DIR}/D-rework-attempt-2.json`
 export const digest = value => `sha256:${createHash('sha256').update(value, 'utf8').digest('hex')}`
 export const pathDigest = paths => digest(`${[...new Set(paths)].sort().join('\n')}\n`)
 

@@ -134,6 +134,11 @@ review `plan_template`:
   Then `scope_digest` is `digestValue({ paths, sources })` with `paths` all
   chunk paths in order and `sources` each set's `sourceDigest`.
 
+`CHANGES_REQUIRED` persists nothing by itself. Record it with `prepare-rework`
+/ `apply-rework`: pass the review `findings` and the same structured
+`reviewer` (`REWORK_REVIEWER_INVALID` otherwise); the metadata commit adds
+`receipts/story-<id>/<slice>-rework-attempt-<n>.json` with them.
+
 A Lead uses `record-review` and may not claim `reviewer.type: human`. A HIGH
 slice, or a MEDIUM slice the Lead implemented, waits for the owner's
 `record-owner-review`. With autopilot off, a `policy: BLOCKED` field in a

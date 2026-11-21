@@ -8,7 +8,7 @@ import { createV4Fixture } from './v4-architecture-fixture.mjs'
 import { createRegistryFixture } from './registry-test-fixture.mjs'
 import { createCompletionFixture } from './completion-fixture.mjs'
 import { frontmatter, validate as readPlan, validateAutopilot } from './check-story-plan.mjs'
-import { readReceipt, receiptDigest } from './check-artifact-contract.mjs'
+import { readReceipt, receiptDigest, REWORK_RECEIPT_READERS } from './check-artifact-contract.mjs'
 import { validateFinalizationReceipt } from './finalization-contract.mjs'
 import { reviewReceiptDialect } from './v4-finalization-contract.mjs'
 import { recordAutopilot } from './v4-story-runner.mjs'
@@ -53,7 +53,10 @@ test('every emitted receipt schema has a reader, including legacy receipts', () 
     const originals = Object.fromEntries(Object.entries(slice.receipt_refs).map(([kind, ref]) => [kind, JSON.parse(f.read(ref.path))]))
     for (const writer of writers) {
       const label = `${writer.file}: ${writer.kind} v${writer.version}`
-      if (writer.kind === 'story_finalization') {
+      if (writer.kind === 'rework') {
+        // Exercised end to end against an applied rework in v4-rework.test.mjs.
+        assert.equal(typeof REWORK_RECEIPT_READERS[writer.version], 'function', label)
+      } else if (writer.kind === 'story_finalization') {
         const receipt = { ...f.finalization, schema_version: writer.version }
         assert.equal(validateFinalizationReceipt(f.root, plan, 'receipts/finalization.json', receipt).errors
           .includes('INVALID_FINALIZATION_SCHEMA_VERSION'), false, label)
