@@ -4,7 +4,7 @@
 
 **BUILT; M3 pilot done (Story 4.1, integrated in `b3d6d8b`, 2026-11-14).** The
 owner decided on this MVP on 2026-11-08; M0–M2b were built the same day (§9) and
-the pilot retrospective is §10. M4 is open. This record is
+the pilot retrospective is §10. M4 is open; Story 4.2 data is §11. This record is
 a design rationale. It is not loaded by the router or by any Runner action, and
 it grants no authority. Building it goes through the V4 Lite migration lane, and
 each step needs the full `npm run test:v4` suite on its exact commit.
@@ -281,7 +281,7 @@ Measuring where real runs stop is the input to the stage 2 decision.
 | M2 | `v4-overnight.mjs prepare` / `run`: preflight, loop, heartbeat, baseline, report | `test:v4`; tests: STOP routing, deadline, every baseline violation stops the run, never calls owner operations. **Built 2026-11-08**, tests fake every external command. The `prepare` happy path (Orca create, claim, start) and a real child run are first exercised in M3. |
 | M2b | Put the payload lessons that children need into a child-readable place: `references/implementation-techniques.md` or the driver prompt. Children cannot read the Lead's memory. Known lessons (2026-11-08, Story 2.2): run `prepare` before `verify` to get the preview (`PREVIEW_REQUIRED`); `record-review` needs a `plan_template` with tokens (model: `verificationTemplate` in `v4-verification-fixture.mjs`); warm the worktree test runtime before a 120 s backend check. Add whatever Story 2.2 slices B and C reveal. **Done 2026-11-08:** new lazy reference `references/runner-payloads.md`, loaded for `implement_slice` and `verify_slice`, named by the router and by the overnight child prompt. It covers the two-step operations, implement/verify/record-review payloads and plan_template tokens, AGY `worker` evidence, `--resume-path`, the 120 s check limit and Windows pitfalls; a test pins its tokens, limits and refusal codes to the kernel. Story 2.2 kernel gaps F-22-1..3 were fixed on `main` (`8af2fbb`, `190f6b3`, `859e52d`). | `test:v4`; a dry child run reaches `verify` without these errors (first exercised in M3) |
 | M3 | Pilot: one night with 1–2 LOW / AGY-heavy Stories | Owner reads the report, runs the morning flow. **Done 2026-11-14** with one HIGH Story (4.1, slice A Lead + slice B AGY) over seven runs; see §10. |
-| M4 | After about five runs, review the stop data and decide on stage 2 | Owner. The count starts after the pilot (§10.5). |
+| M4 | After about five runs, review the stop data and decide on stage 2 | Owner. The count starts after the pilot (§10.5). Story 4.2: six runs, §11. |
 
 ## 10. M3 pilot retrospective (Story 4.1)
 
@@ -369,3 +369,99 @@ throughput case, and the pilot did not test one.
   4. Preflight: name the exact Docker containers to start in the report.
 - **Next pilot Story.** Pick one whose slices are LOW or AGY-executed MEDIUM, so
   the run measures the throughput case in §6.
+
+## 11. M4 data: Story 4.2
+
+Story 4.2 (quick note, optional title) is the first M4 Story: HIGH, slice A
+Lead HIGH, slice B AGY MEDIUM without flags (independent Lead review path).
+Source: `.agent-state/overnight/<runId>/report.md` and `child-*.json` for six
+runs (2026-11-14 and 2026-11-15), then the manual flow in the Lead session.
+Integrated in `196dae2` (2026-11-21).
+
+### 11.1 Stop log
+
+| # | Run | Child actions | Stop | Class | Follow-up |
+|---|---|---|---|---|---|
+| 1 | 2026-11-14T08:19Z | implement A → BLOCKED | `NotebookPersistenceTest` asserts the exact `notes` column list, but was outside slice A scope | Planning miss | Owner-approved Plan maintenance `f7dabf8` adds it to A and two e2e paths to B |
+| 2 | 2026-11-14T08:23Z | implement A → died (`api_error`, account usage limit) | `NO_PROGRESS`; 9 untracked in-scope files left behind | Environment; driver reporting gap | Owner moved the files to a backup and reran fresh |
+| 3 | 2026-11-14T11:13Z | implement A → DONE (21 files), verify A → HUMAN_REVIEW_REQUIRED | HIGH slice review | **Expected stop** | Owner review A applied on the third try (`454beca`): first from main (`EXPECTED_HEAD_MISMATCH`), then the Lead-built `review.scope_digest` was wrong (`REVIEW_EVIDENCE_SCOPE_DIGEST_MISMATCH`) |
+| 4 | 2026-11-14T12:02Z | implement B → BLOCKED | `check-slice 4.2 B` → `SCOPE_UNDECLARED`: the claim's `declaredScope` is frozen at claim and lacked the run-1 maintenance paths; takeover does not refresh it | Kernel gap | New owner-only `refresh-scope` (`bf73547`) |
+| 5 | 2026-11-15T01:05Z | implement B → DONE (8 files) | `RUN_STOP` `MAIN`: the owner committed to `main` mid-run | Baseline worked; interactive collision | None; check for a running night before writing to `main` |
+| 6 | 2026-11-15T01:48Z | verify B → REWORK (F-42B-1, F-42B-2), implement B attempt 2 → DONE, verify B → REVIEW_REQUIRED | `RUN_STOP` `CANONICALSTATUS`: another owner session left uncommitted files in `main` | Baseline worked; interactive collision | Owner cleaned `main`; next status was `BUDGET_TIME` (below) |
+
+After run 6, `autopilot-status` returned `STOP` `BUDGET_TIME` (532 of 90
+minutes) although children had worked about 84 minutes on slice B. The owner
+revoked autopilot (`7137d2a`). The Lead then reran verify, found F-42B-3,
+reworked through AGY (attempt 3, `52a075d`), recorded an independent Lead
+`APPROVE` (`c9a147a`) and finalized (`72170a9`); the owner approved and
+completed (`7ffbf2a`, `c0cc2a5`) and the Lead integrated.
+
+Totals: 9 child actions, about 118 child minutes, **USD 22.77** child cost.
+The largest single action was implement A (21 files): USD 5.88, 19 min, 126
+turns. Runs that produced no code (1, 2, 4) cost USD 5.15.
+
+### 11.2 What worked
+
+- The baseline stopped both runs where `main` changed (runs 5 and 6), and
+  preflight, fencing and deny rules held: no run mutated `main` or ran an
+  owner operation.
+- An AGY MEDIUM slice ran unattended through implement, a VALID-finding review,
+  a self-applied rework and a second implement and verify in one night (run 6).
+- Slice A (21 files, HIGH) passed verify and owner review at the first
+  attempt once its scope was right.
+
+### 11.3 What did not work
+
+1. **A child review missed a VALID defect (F-42B-3).** Run 6's second verify
+   reported no finding; the Lead's independent review then found that a note
+   opened from Today (`?new=1`) reset to a blank editor after its first save,
+   so further typing became a second note. Checks and full e2e passed because
+   no test asserted the body after a save. This is the second such data point
+   after §10.3 item 2, now on a MEDIUM slice: **without the independent Lead
+   review, slice B would have shipped broken.** The structural gate held here:
+   the child's verify ended in `SAME_LEAD_REVIEW_REQUIRED`, not an approval.
+2. **The time budget measures wall clock, not work.** It runs from the slice's
+   first commit and counts idle time between runs, so a slice that spans
+   nights exhausts it. The kernel has no extension: authorizing again after a
+   revoke gives `AUTOPILOT_REVOKED`, and without a revoke it gives
+   `AUTOPILOT_ALREADY_AUTHORIZED`. The only way on was a manual finish.
+3. **Claim scope froze at claim time (run 4).** Plan maintenance that adds
+   paths needed a new owner operation. Lead-executed slices skip `check-slice`,
+   so slice A changed an undeclared path without a stop.
+4. **Interactive work on `main` stops the night (runs 5 and 6).** Both stops
+   were correct and both were the owner's own sessions.
+5. **CHANGES_REQUIRED persists nothing.** A verify child that finds VALID
+   issues can only proceed by applying rework itself
+   (`prepare-rework` / `apply-rework`), so its findings exist only in the
+   rework commit and the child's evidence (~70 KB).
+6. **Payload building is still the costliest manual step.** The Lead
+   miscomputed an owner-review `scope_digest`; `record-review` requires
+   `reviewer.type`, which `runner-payloads.md` does not show; every child had
+   a denial when it tried a scratch helper script, a `>` redirect or `jq`.
+7. **The driver hid a crash (run 2).** It reported `NO_PROGRESS` instead of the
+   child's `terminal_reason: api_error` and the dirty inventory. Children share
+   the owner's usage limit with interactive sessions.
+
+### 11.4 Implications
+
+- **M4 counting.** Story 4.2 gives six runs: three expected or correct stops
+  (3, 5, 6), one environment stop (2), one planning miss (1) and one kernel gap
+  (4). The owner decides whether 4.2 completes the roughly five M4 runs or
+  whether a LOW / AGY-heavy Story is still needed for the §6 throughput case.
+- **Stage 2.** Two Stories, two missed defects in unattended review (§10.3
+  item 2, §11.3 item 1). Neither supports removing owner or independent Lead
+  review.
+- **Candidate improvements** (not decided; each needs an owner decision and
+  the migration lane), in addition to §10.5:
+  1. Kernel: measure the slice time budget from child work (or per run), or
+     give the owner an extend operation.
+  2. Kernel: persist a CHANGES_REQUIRED review with its findings, so rework is
+     a recorded decision rather than a child's side effect.
+  3. Planning: before committing a Plan, grep existing tests that assert
+     column lists or selectors of the touched tables and views, and scope them.
+  4. Driver: report a child's `terminal_reason` and dirty inventory instead of
+     `NO_PROGRESS`; give the child prompt resume guidance.
+  5. Docs: show `reviewer.type` in `runner-payloads.md`, and the evidence-set
+     `scope_digest` formula for owner-review payloads.
+  6. Process: no commits or stray files in the `main` checkout while a night
+     runs.
