@@ -46,16 +46,19 @@ function fakeContext(f, script = {}) {
       if (joined === 'rev-parse refs/heads/main') return ok(state.main)
       if (joined === 'rev-parse HEAD') return ok(head)
       if (joined === 'status --porcelain') return ok('')
+      if (joined === 'status --porcelain --untracked-files=all') return ok(options.cwd === f.worktree ? (script.dirty ?? '') : '')
       if (joined === 'branch --show-current') return ok('main')
       if (joined === 'worktree list --porcelain') return ok(script.worktrees ?? `worktree ${f.root}\nbranch refs/heads/main\n`)
       return { status: 1, stdout: '', stderr: 'unexpected git', error: null }
     }
+    if (command === 'docker' && args[0] === 'ps') return ok(script.containers ?? '')
     if (command === 'docker') return ok(script.docker === false ? '' : '27.0', script.docker === false ? 1 : 0)
     if (command === 'claude') {
       const child = state.children.shift() ?? { status: 'DONE' }
       child.effect?.(state)
       if (state.heads.length > 1) { state.heads.shift(); head = state.heads[0] }
-      return ok(JSON.stringify({ result: `did work\nOVERNIGHT_RESULT ${child.status} ${child.reason ?? 'ok'}`, permission_denials: [] }))
+      return ok(JSON.stringify({ result: `did work\nOVERNIGHT_RESULT ${child.status} ${child.reason ?? 'ok'}`, permission_denials: [],
+        ...(child.terminal_reason ? { terminal_reason: child.terminal_reason } : {}) }))
     }
     if (command === process.execPath) {
       const [scriptPath, ...rest] = args
@@ -270,5 +273,57 @@ test('overnight run writes a report and spawns nothing when preflight fails or n
     result = run(ctx)
     assert.match(readFileSync(result.report, 'utf8'), /### Story 7\.7: RELEASED/)
     assert.deepEqual(JSON.parse(readFileSync(path.join(f.root, '.agent-state/overnight/state.json'), 'utf8')).stories.map(story => story.id), ['9.1'])
+  } finally { f.cleanup() }
+})
+
+test('overnight story loop stops on an abnormal child end and reports the dirty inventory', () => {
+  const f = fixture()
+  try {
+    // Story 4.2 run 2: the child ended on api_error and left untracked slice files.
+    const dirty = ' M backend/routes/api.php\n?? backend/app/Feature.php'
+    let { ctx, story } = fakeContext(f, { statuses: [cont('implement_slice')], dirty,
+      children: [{ status: 'UNKNOWN', terminal_reason: 'api_error' }] })
+    let log = runStory(ctx, story, f.root, captureBaseline(ctx, [story]), { value: 0 })
+    assert.equal(log.stop.kind, 'BLOCKED')
+    assert.deepEqual(log.stop.reasons, ['CHILD_ENDED:api_error'])
+    assert.deepEqual(log.stop.dirty, [' M backend/routes/api.php', '?? backend/app/Feature.php'])
+    assert.equal(log.actions[0].terminal_reason, 'api_error')
+
+    ;({ ctx, story } = fakeContext(f, { statuses: [cont('implement_slice'), cont('implement_slice')], dirty,
+      children: [{ status: 'UNKNOWN', terminal_reason: 'completed' }] }))
+    log = runStory(ctx, story, f.root, captureBaseline(ctx, [story]), { value: 0 })
+    assert.deepEqual(log.stop.reasons, ['NO_PROGRESS'])
+    assert.equal(log.stop.terminal_reason, 'completed')
+    assert.equal(log.stop.dirty.length, 2)
+
+    f.write(f.root, '.agent-state/overnight/state.json', JSON.stringify({ schemaVersion: 1, stories: [{ id: '9.1', worktree: f.worktree, generation: 1, session: 's' }] }))
+    ;({ ctx } = fakeContext(f, { statuses: [cont('implement_slice')], dirty, children: [{ status: 'UNKNOWN', terminal_reason: 'api_error' }] }))
+    const report = readFileSync(run(ctx).report, 'utf8')
+    assert.match(report, /Reasons: CHILD_ENDED:api_error/)
+    assert.match(report, /Uncommitted in the worktree \(resume or discard is your decision\):  M backend\/routes\/api\.php \| \?\? backend\/app\/Feature\.php/)
+    assert.match(childPrompt(story, { next_action: { kind: 'implement_slice' } }, 'a'), /already has uncommitted changes when you start/)
+  } finally { f.cleanup() }
+})
+
+test('overnight run stops before any child when a prepared Story has stopped test containers', () => {
+  const f = fixture()
+  try {
+    f.write(f.root, '.agent-state/overnight/state.json', JSON.stringify({ schemaVersion: 1, stories: [{ id: '9.1', worktree: f.worktree, generation: 1, session: 's' }] }))
+    const containers = [
+      `noteflow-test-abc-postgres-test-1|exited|${f.worktree.replace(/\//g, '\\')}`,
+      `noteflow-test-abc-backend-test-1|exited|${f.worktree}\\`,
+      `noteflow-test-def-backend-test-1|exited|${path.join(f.root, 'other')}`,
+      `noteflow-local-backend-1|exited|${f.worktree}`
+    ].join('\n')
+    let { ctx, calls } = fakeContext(f, { containers })
+    let result = run(ctx)
+    assert.equal(result.status, 'RUN_STOPPED')
+    const report = readFileSync(result.report, 'utf8')
+    assert.match(report, /TEST_CONTAINERS_STOPPED:9\.1/)
+    assert.ok(report.includes('Story 9.1: docker start noteflow-test-abc-backend-test-1 noteflow-test-abc-postgres-test-1'), report)
+    assert.equal(calls.some(call => call.command === 'claude'), false)
+    ;({ ctx } = fakeContext(f, { containers: containers.replace(/exited/g, 'running'),
+      statuses: [{ status: 'STOP', reasons: ['HUMAN_GATE'], next_action: { kind: 'complete_story' } }] }))
+    assert.equal(run(ctx).status, 'DONE')
   } finally { f.cleanup() }
 })

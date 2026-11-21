@@ -267,6 +267,7 @@ export function childPrompt(story, status, head) {
     'For an executor: agy slice, follow references/agy-executor.md and references/agy-transport.md: Orca is allowed only as orca orchestration <subcommand> and orca terminal <subcommand>, spelled as those files spell them. Do not probe with orca --help or any other orca command; a denied probe is not a blocker.',
     `A slice whose current_attempt.attempt_id is above 1 is a correction: its VALID findings are the findings array of the committed rework receipt _bmad-output/implementation-artifacts/receipts/story-${String(story.id).replace('.', '-')}/<slice>-rework-attempt-<attempt_id>.json. A rework applied before that receipt existed has none; then use the Lead's prepare-rework payload at .agent-state/v4-scratch/rework-${String(story.id).replace('.', '-')}-<slice>.json in this worktree. For an AGY slice, build the contract with --correction-of <the prior attempt's report-attempt-<n>.json under .agent-state/v4-auto/workers/<task-id>/> and one --finding "<id>: <summary>" per finding, and reopen the same Orca Task as agy-executor.md says. If that file is missing, stop with BLOCKED.`,
     'For verify_slice, run every Plan verification obligation that no check spec holds, such as powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/local.ps1 e2e, after verify and before stopping. If any fails, stop with FAILED and name the failing obligation and tests; never report HUMAN_REVIEW_REQUIRED while an obligation fails or was not run. A record-review APPROVE must add each such run to review.commands and cite every obligation in review.obligation_evidence, as references/runner-payloads.md shows.',
+    'If this worktree already has uncommitted changes when you start (an earlier child was interrupted), do not delete, overwrite, stage or commit them: stop with BLOCKED and list them; the owner decides whether to resume or discard.',
     'If a needed command is still denied, stop with BLOCKED and quote the exact denied command; do not try variants.',
     'End your reply with exactly one line: OVERNIGHT_RESULT <DONE|HUMAN_REVIEW_REQUIRED|HUMAN_REQUIRED|NEEDS_HUMAN|BLOCKED|FAILED> <short reason>',
   ].join('\n')
@@ -287,7 +288,31 @@ function spawnChild(ctx, runDir, story, status, head, index) {
   let parsed = null
   try { parsed = JSON.parse(result.stdout) } catch {}
   return { exit: result.status, error: result.error, ...childResult(parsed?.result ?? result.stdout),
+    // Claude's own end reason ('completed' on a normal finish, e.g. 'api_error' on a usage limit).
+    terminal_reason: parsed?.terminal_reason ?? (parsed ? null : result.error ?? 'NO_JSON_OUTPUT'),
     denials: (parsed?.permission_denials ?? []).map(item => item.tool_input?.command ?? item.tool_input?.file_path ?? item.tool_name) }
+}
+
+// Uncommitted paths a child left in its worktree, for the owner's resume or
+// discard decision (Story 4.2 run 2 left nine untracked slice files).
+export function dirtyInventory(ctx, worktree) {
+  // Raw lines: trimming the whole output would drop a leading porcelain status column.
+  const result = ctx.exec('git', ['--no-optional-locks', 'status', '--porcelain', '--untracked-files=all'], { cwd: worktree })
+  return result.status === 0 ? result.stdout.split(/\r?\n/).filter(line => line.trim()) : ['GIT_STATUS_FAILED']
+}
+
+const normalizedDir = value => String(value ?? '').replace(/\\/g, '/').replace(/\/+$/, '').toLowerCase()
+
+// Per-worktree test containers (scripts/local.ps1 test projects) that exist but
+// are not running. Docker Desktop restarts leave them Exited (Story 4.2).
+export function stoppedTestContainers(ctx, stories) {
+  const result = ctx.exec('docker', ['ps', '-a', '--format', '{{.Names}}|{{.State}}|{{.Label "com.docker.compose.project.working_dir"}}'], { timeoutMs: 30000 })
+  if (result.status !== 0) return []
+  const rows = result.stdout.split(/\r?\n/).map(line => line.trim().split('|')).filter(row => row.length === 3 && row[0].startsWith('noteflow-test-'))
+  return (stories ?? []).flatMap(story => {
+    const stopped = rows.filter(([, state, dir]) => normalizedDir(dir) === normalizedDir(story.worktree) && state !== 'running').map(([name]) => name).sort()
+    return stopped.length ? [{ story: story.id, containers: stopped }] : []
+  })
 }
 
 export function preflight(ctx) {
@@ -316,7 +341,12 @@ export function runStory(ctx, story, runDir, baseline, counter) {
     }
     const kind = status.next_action?.kind
     const marker = `${head}:${kind}:${status.next_action?.slice_id ?? ''}`
-    if (marker === previous) { log.stop = { kind: 'BLOCKED', reasons: ['NO_PROGRESS'], next_action: status.next_action }; return log }
+    if (marker === previous) {
+      const last = log.actions.at(-1)
+      log.stop = { kind: 'BLOCKED', reasons: ['NO_PROGRESS'], next_action: status.next_action,
+        ...(last?.terminal_reason ? { terminal_reason: last.terminal_reason } : {}), dirty: dirtyInventory(ctx, story.worktree) }
+      return log
+    }
     previous = marker
     node(ctx, story.worktree, 'story-registry.mjs', ['heartbeat', story.id, '--generation', String(story.generation), '--state', HEARTBEAT_STATE[kind] ?? 'IMPLEMENTING'])
     counter.value += 1
@@ -324,6 +354,12 @@ export function runStory(ctx, story, runDir, baseline, counter) {
     log.actions.push({ kind, slice: status.next_action?.slice_id ?? null, head, ...child })
     const violations = baselineViolations(baseline, captureBaseline(ctx, ctx.stories))
     if (violations.length) { log.stop = { kind: 'RUN_STOP', reasons: violations }; return log }
+    if (child.terminal_reason && child.terminal_reason !== 'completed') {
+      node(ctx, story.worktree, 'story-registry.mjs', ['heartbeat', story.id, '--generation', String(story.generation), '--state', 'BLOCKED'])
+      log.stop = { kind: 'BLOCKED', reasons: [`CHILD_ENDED:${child.terminal_reason}`], detail: child.reason,
+        next_action: status.next_action, dirty: dirtyInventory(ctx, story.worktree) }
+      return log
+    }
     if (['HUMAN_REVIEW_REQUIRED', 'HUMAN_REQUIRED', 'NEEDS_HUMAN', 'BLOCKED', 'FAILED'].includes(child.status)) {
       const human = child.status !== 'BLOCKED' && child.status !== 'FAILED'
       node(ctx, story.worktree, 'story-registry.mjs', ['heartbeat', story.id, '--generation', String(story.generation), '--state', human ? 'WAITING_HUMAN' : 'BLOCKED'])
@@ -337,13 +373,19 @@ export function runStory(ctx, story, runDir, baseline, counter) {
 
 export function renderReport(report) {
   const lines = [`# Overnight run ${report.runId}`, '', `Started ${report.startedAt}, finished ${report.finishedAt}. ${report.summary}`, '']
-  if (report.runStop) lines.push('## Run stopped', '', `- ${report.runStop.join(', ')}`, '')
+  if (report.runStop) {
+    lines.push('## Run stopped', '', `- ${report.runStop.join(', ')}`)
+    for (const hint of report.hints ?? []) lines.push(`- ${hint}`)
+    lines.push('')
+  }
   lines.push('## Needs you', '')
   for (const story of report.stories) {
     const stop = story.stop ?? { kind: 'NOT_RUN', reasons: [] }
     lines.push(`### Story ${story.id}: ${stop.kind}`, '', `- Reasons: ${stop.reasons.join(', ') || 'none'}`)
     if (stop.next_action) lines.push(`- Next action: ${stop.next_action.kind}${stop.next_action.slice_id ? ` (slice ${stop.next_action.slice_id})` : ''}`)
     if (stop.detail) lines.push(`- Child said: ${stop.detail}`)
+    if (stop.terminal_reason) lines.push(`- Last child ended: ${stop.terminal_reason}`)
+    if (stop.dirty?.length) lines.push(`- Uncommitted in the worktree (resume or discard is your decision): ${stop.dirty.join(' | ')}`)
     lines.push(`- Actions run: ${story.actions.length}${story.actions.length ? ` (${story.actions.map(action => `${action.kind}${action.slice ? `/${action.slice}` : ''}→${action.status}`).join(', ')})` : ''}`)
     const denials = story.actions.flatMap(action => action.denials ?? [])
     if (denials.length) lines.push(`- Permission denials: ${denials.join(' | ')}`)
@@ -370,6 +412,12 @@ export function run(ctx) {
   const preflightReasons = preflight(ctx)
   if (preflightReasons.length) { report.runStop = preflightReasons; return finish() }
   const prepared = readJson(statePath).stories ?? []
+  const stopped = stoppedTestContainers(ctx, prepared)
+  if (stopped.length) {
+    report.runStop = stopped.map(item => `TEST_CONTAINERS_STOPPED:${item.story}`)
+    report.hints = stopped.map(item => `Story ${item.story}: docker start ${item.containers.join(' ')}`)
+    return finish()
+  }
   ctx.stories = prepared
   let baseline = captureBaseline(ctx, ctx.stories)
   // A Story whose registry claim is gone was integrated or aborted: drop it from the state.

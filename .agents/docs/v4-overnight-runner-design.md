@@ -374,6 +374,9 @@ throughput case, and the pilot did not test one.
      Story worktree's scratch. **Built 2026-11-21 in the kernel instead** (see
      §11.4 item 2).
   4. Preflight: name the exact Docker containers to start in the report.
+     **Built 2026-11-21:** `run` stops with `TEST_CONTAINERS_STOPPED:<story>`
+     and prints `docker start <names>` for a prepared Story's exited test
+     containers, before any child.
 - **Next pilot Story.** Pick one whose slices are LOW or AGY-executed MEDIUM, so
   the run measures the throughput case in §6.
 
@@ -470,8 +473,13 @@ turns. Runs that produced no code (1, 2, 4) cost USD 5.15.
      same metadata commit as the Plan; the child prompt reads findings from it.
   3. Planning: before committing a Plan, grep existing tests that assert
      column lists or selectors of the touched tables and views, and scope them.
+     **Done 2026-11-21** as a planning rule in `v4-artifact-contract.md`.
   4. Driver: report a child's `terminal_reason` and dirty inventory instead of
-     `NO_PROGRESS`; give the child prompt resume guidance.
+     `NO_PROGRESS`; give the child prompt resume guidance. **Built
+     2026-11-21:** a child ending other than `completed` stops the Story with
+     `CHILD_ENDED:<reason>`; that stop and `NO_PROGRESS` list the worktree's
+     uncommitted paths; a child that finds uncommitted changes stops and lists
+     them for the owner.
   5. Docs: show `reviewer.type` in `runner-payloads.md` (**done 2026-11-21**).
      The evidence-set `scope_digest` formula was already there; the miss was
      in the Lead's helper, so a payload builder script is the real fix
