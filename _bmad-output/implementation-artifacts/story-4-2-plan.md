@@ -163,7 +163,23 @@ finalization:
   implementation_commit_set_digest: sha256:81ff720220381e2d7f2933392ddd33c950eb210c42fad24adb2ddd0e5d62e99b
   final_scoped_tree_digest: sha256:2b6880f39bb8ee83a95203fd27aba16b4cbe6c344de74e96949a8805a6284bd9
   prepared_from_head: c9a147a88d99e1fccbe8bfa613d59ee1a44de363
-human_approval: null
+human_approval:
+  schema_version: 1
+  story_id: "4.2"
+  approver_type: "human"
+  decision: "APPROVED"
+  approved_at: "2026-11-21T02:21:45.407Z"
+  story_normative_digest: "sha256:dbd935cb2f74779047b22664aa2a6c7948790b8bc6b5b5c6082fb03127e86ad9"
+  finalization_receipt_digest: "sha256:965e50f40ccd61d3c2047701fae4ac4d43254164c30bba0d1848e6d7c901ae79"
+  done_gate_summary_digest: "sha256:3677557d326bfa6da684402357ba4e0edb0a556d1ad57ed24c285d870d15e8ff"
+  scope_paths_digest: "sha256:c56498be33a982324e4a32cf0a11f534e683d674b409cdddf6af1d4afc09baee"
+  implementation_commit_set_digest: "sha256:81ff720220381e2d7f2933392ddd33c950eb210c42fad24adb2ddd0e5d62e99b"
+  final_scope_digest: "sha256:2b6880f39bb8ee83a95203fd27aba16b4cbe6c344de74e96949a8805a6284bd9"
+  final_scoped_tree_digest: "sha256:2b6880f39bb8ee83a95203fd27aba16b4cbe6c344de74e96949a8805a6284bd9"
+  approved_review_head: "72170a954c6b247c3fecb77f967bf6370491f763"
+  approved_commit: "72170a954c6b247c3fecb77f967bf6370491f763"
+  approved_action: "complete_story"
+  disclosures_acknowledged: true
 next_action:
   kind: complete_story
   target: story
