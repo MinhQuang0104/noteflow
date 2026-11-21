@@ -4,7 +4,7 @@ Consume a fresh checkpoint and produce bounded verification/review evidence. Nev
 
 ## Operations and projection
 
-`verify` runs `prepareAction` → `verifySlice` with the canonical recipe, focused `CheckSpec`s, and escalation. LOW complete PASS/no flags may persist one metadata commit; MEDIUM/HIGH and every escalation stop at `REVIEW_REQUIRED`. `record-review` accepts only immutable fingerprint, ordered evidence, complete answers, and exact scope: `APPROVE` persists fresh Plan/receipt metadata, `NEED_MORE_EVIDENCE` has one bounded round, and `CHANGES_REQUIRED` never authorizes a fix.
+`verify` runs `prepareAction` → `verifySlice` with the canonical recipe, focused `CheckSpec`s, and escalation. LOW complete PASS/no flags may persist one metadata commit; MEDIUM/HIGH and every escalation stop at `REVIEW_REQUIRED`. `record-review` accepts only immutable fingerprint, ordered evidence, complete answers, and exact scope: `APPROVE` persists fresh Plan/receipt metadata, `NEED_MORE_EVIDENCE` has one bounded round, and `CHANGES_REQUIRED` never authorizes a fix. Every `APPROVE` (owner review included) and every LOW NO_REVIEW pass must account for each Plan `verification_obligations` entry in an `obligation_evidence` ledger that cites a PASS check or an exit-0 review command, or it stops with `PLAN_OBLIGATION_UNEVIDENCED` (`references/runner-payloads.md`).
 
 Both operations revalidate canonical `IDLE`, checkpoint/Plan/Story/policy/recipe digests, product/index drift, exact scope, and receipt identity. Partial metadata is `RECOVERY_REQUIRED`; recovery names the checkpoint and authorization; completed work is `NOOP`.
 

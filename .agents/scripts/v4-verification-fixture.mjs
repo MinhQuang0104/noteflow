@@ -88,7 +88,7 @@ export function verificationTemplate(fixture, includeReview) {
   }
   lines.push('    blockers: []', '    unresolved_questions: []', 'next_action:',
     '  kind: {{NEXT_ACTION_KIND}}', '  target: {{NEXT_ACTION_TARGET}}', '---', '')
-  return lines.join('\n')
+  return withObligations(lines.join('\n'), fixture.obligations)
 }
 
 export function verificationRegistry(changedPaths = ['src/feature.txt']) {
@@ -128,7 +128,7 @@ function buildVerificationSeed(risk, options) {
     '.agents/scripts/check-escalation.mjs': readFileSync(path.resolve(process.cwd(), '.agents/scripts/check-escalation.mjs'), 'utf8'),
     '.agents/scripts/prepare-change-evidence.mjs': readFileSync(path.resolve(process.cwd(), '.agents/scripts/prepare-change-evidence.mjs'), 'utf8'),
     '.agent-state/active-run.json': JSON.stringify({ schemaVersion: 1, activeRunId: null, storyId: null, status: 'IDLE' }) + '\n',
-    'src/base.txt': 'base\n', [STORY]: story, [PLAN]: withSliceRisk(v2Plan(storyDigest, risk), options.sliceRisk),
+    'src/base.txt': 'base\n', [STORY]: story, [PLAN]: withObligations(withSliceRisk(v2Plan(storyDigest, risk), options.sliceRisk), options.obligations),
     '.agents/verification/registry.json': JSON.stringify(verification.registry, null, 2) + '\n',
     '.agents/verification/fixture-feature.json': JSON.stringify(verification.recipe, null, 2) + '\n',
     '.agents/features/fixture-feature.json': JSON.stringify(verification.map, null, 2) + '\n',
@@ -147,7 +147,7 @@ function buildVerificationSeed(risk, options) {
   const implementationRequest = {
     action: 'implement_slice', operation: 'prepare', story_id: '9.1', slice_id: 'A', expected_head: initialHead,
     transaction_id: `implementation-${risk.toLowerCase()}`, owned_paths: changedPaths,
-    plan_template: withSliceRisk(implementationTemplate(risk), options.sliceRisk),
+    plan_template: withObligations(withSliceRisk(implementationTemplate(risk), options.sliceRisk), options.obligations),
     policy_paths: ['AGENTS.md', 'CLAUDE.md', '.agents/routing/task-router.md', '.agents/context/control-plane.md',
       '.agents/context/context-routing.md', '.agents/skills/v4-story-runner/SKILL.md'],
     recipe_paths: ['.agents/skills/v4-story-runner/actions/implement-slice.md', '.agents/skills/v4-story-runner/references/implementation-techniques.md'],
@@ -215,7 +215,13 @@ export function fixture(risk, options = {}) {
     policy_paths: implementationRequest.policy_paths,
     recipe_paths: ['.agents/skills/v4-story-runner/actions/verify-slice.md', '.agents/skills/v4-story-runner/references/implementation-techniques.md', '.agents/verification/registry.json'],
   }
-  return { root, cleanup, risk, sliceRisk: options.sliceRisk, storyDigest, implementationDigest, head, verifyRequest, checkSpecs, changedPaths }
+  return { root, cleanup, risk, sliceRisk: options.sliceRisk, obligations: options.obligations, storyDigest, implementationDigest, head, verifyRequest, checkSpecs, changedPaths }
+}
+
+// Plan verification obligations for slice A, as a block list after depends_on.
+export function withObligations(text, obligations) {
+  return !obligations?.length ? text : text.replace('    depends_on: []',
+    ['    depends_on: []', '    verification_obligations:', ...obligations.map(item => `      - ${item}`)].join('\n'))
 }
 
 export function withSliceRisk(text, risk) {

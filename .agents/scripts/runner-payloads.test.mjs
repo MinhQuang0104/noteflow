@@ -42,7 +42,7 @@ test('runner payload recipes match the kernel tokens, limits and refusal codes t
   assert.match(reference, /`review\.reviewer: \{ type: 'lead', vendor, independent \}`/)
   assert.match(artifactContract, /\['lead', 'human'\]\.includes\(reviewer\.type\)/)
   assert.match(artifactContract, /reviewer\.independent !== \(reviewer\.type === 'lead' && executor === 'agy'\)/)
-  for (const code of ['REVIEWER_INVALID', 'REVIEWER_INDEPENDENCE_MISMATCH']) {
+  for (const code of ['REVIEWER_INVALID', 'REVIEWER_INDEPENDENCE_MISMATCH', 'PLAN_OBLIGATION_UNEVIDENCED', 'PLAN_OBLIGATION_EVIDENCE_INVALID']) {
     assert.ok(reference.includes(code), code)
     assert.ok(artifactContract.includes(`'${code}'`), code)
   }

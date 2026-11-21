@@ -6,7 +6,7 @@ import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
 import { frontmatter, validate as validateStoryPlan } from './check-story-plan.mjs'
-import { attemptReceiptPath, readReceipt, receiptDigest, validateReviewPayload } from './check-artifact-contract.mjs'
+import { attemptReceiptPath, readReceipt, receiptDigest, validateObligationEvidence, validateReviewPayload } from './check-artifact-contract.mjs'
 import { inspect as inspectSliceVerification } from './check-slice-verification.mjs'
 import { verifyChangedPaths } from './check-verification.mjs'
 import { validateEvidenceSet } from './prepare-change-evidence.mjs'
@@ -1500,6 +1500,7 @@ function makePending(preview, bundle, request, evidenceState = null) {
     escalation: bundle.escalation ?? null,
     judgment_flags: bundle.judgmentFlags ?? [],
     review_questions: questions,
+    verification_obligations: preview.original_slice?.verification_obligations ?? [],
     requested_evidence: requestedEvidence,
     evidence_round: 0,
     evidence_refs: evidenceRefs(bundle.focusedEvidence ?? bundle.verification?.focused_checks ?? [])
@@ -1577,6 +1578,7 @@ function buildVerificationMetadata(root, preview, outcome, targetStatus, review 
     raw_focused_checks: focused,
     escalation: outcome.escalation,
     semantic_coverage: preview.semantic_coverage ?? null,
+    ...(outcome.obligationEvidence !== undefined ? { obligation_evidence: outcome.obligationEvidence } : {}),
     progression_eligible: true,
     status: verificationEvidence.status,
     context_digest: preview.context_digest
@@ -1607,7 +1609,8 @@ function buildVerificationMetadata(root, preview, outcome, targetStatus, review 
       risk_context_digest: digestValue(preview.original_plan.risk ?? null),
       reviewed_commit: preview.checkpoint_commit,
       reviewer: review.reviewer ?? 'same-lead',
-      ...(Object.hasOwn(review, 'findings') ? { findings: review.findings } : {})
+      ...(Object.hasOwn(review, 'findings') ? { findings: review.findings } : {}),
+      ...(Object.hasOwn(review, 'obligation_evidence') ? { obligation_evidence: review.obligation_evidence } : {})
     }
     reviewDigest = receiptDigest(reviewReceipt)
   }
@@ -1712,7 +1715,8 @@ function validateVerificationMetadata(root, preview, metadata) {
 
 function metadataDescriptor(root, preview, outcome, targetStatus, review, transactionId) {
   const metadataPaths = [preview.plan_path, preview.verification_receipt_path, ...(review ? [preview.review_receipt_path] : [])]
-  const binding = digestValue({ preview: preview.fingerprint, targetStatus, review, nextAction: preview.next_action })
+  const binding = digestValue({ preview: preview.fingerprint, targetStatus, review, nextAction: preview.next_action,
+    ...(outcome?.obligationEvidence !== undefined ? { obligationEvidence: outcome.obligationEvidence } : {}) })
   return {
     action: 'verify_slice',
     story_id: preview.story_id,
@@ -1798,10 +1802,18 @@ function persistVerification(root, preview, outcome, request, targetStatus = 've
   return result
 }
 
+// Plan verification obligations are prose that no check spec has to hold (for
+// example a full e2e run after the checkpoint), so an approval or a NO_REVIEW
+// pass must account for each one with evidence (Story 4.1 run 6).
+function assertObligationEvidence(ledger, preview, sources) {
+  const errors = validateObligationEvidence(ledger, preview.original_slice?.verification_obligations, sources)
+  if (errors.length) throw new Error(errors[0])
+}
+
 function verificationError(error) {
   if (['REVIEWER_INVALID', 'REVIEW_FINDINGS_INVALID', 'REVIEWER_INDEPENDENCE_MISMATCH',
-    'REVIEW_DECISION_CONFLICT', 'REVIEW_DECISION_INVALID', 'REVIEW_DECISION_MISSING'].includes(error.message)) return invalid(error.message)
-  if (error.message === 'REVIEW_FINDINGS_OPEN') return blocked(error.message)
+    'REVIEW_DECISION_CONFLICT', 'REVIEW_DECISION_INVALID', 'REVIEW_DECISION_MISSING', 'PLAN_OBLIGATION_EVIDENCE_INVALID'].includes(error.message)) return invalid(error.message)
+  if (['REVIEW_FINDINGS_OPEN', 'PLAN_OBLIGATION_UNEVIDENCED'].includes(error.message)) return blocked(error.message)
   if (error.message.includes('STALE') || error.message.includes('MISMATCH') || error.message === 'EXPECTED_HEAD_MISMATCH') return stale(error.message)
   if (error.message.includes('PLAN_NOT_READY') || error.message.includes('MANIFEST_') || error.message.includes('SLICE_') ||
       error.message.includes('DIRTY_') || error.message.includes('SUCCESSOR_') || error.message.includes('AMBIGUOUS_') ||
@@ -1851,7 +1863,9 @@ function verifySliceCore(root, request = {}, reportPolicy = () => {}) {
     if (bundle.verification.status !== 'PASS' || bundle.verification.escalationReasons.length) {
       return blocked('VERIFICATION_NOT_PROGRESSING', { action: 'verify_slice', operation: 'verify', verification: bundle.verification, escalation: bundle.escalation })
     }
-    return persistVerification(root, descriptorPreview, bundle, request, 'verified')
+    // A NO_REVIEW pass has no review commands, so every obligation must cite a PASS check.
+    assertObligationEvidence(request.obligation_evidence, descriptorPreview, { checks: bundle.focusedEvidence ?? bundle.verification?.focused_checks ?? [], commands: [] })
+    return persistVerification(root, descriptorPreview, { ...bundle, ...(request.obligation_evidence !== undefined ? { obligationEvidence: request.obligation_evidence } : {}) }, request, 'verified')
   } catch (error) { return verificationError(error) }
 }
 
@@ -1917,6 +1931,9 @@ function recordSliceReviewCore(root, request = {}, reportPolicy = () => {}) {
     }
     if (!['PASS', 'INCOMPLETE'].includes(pending.verification_status) || pending.canonical_status === 'FAIL' || pending.canonical_status === 'ERROR' ||
         (pending.focused_evidence ?? []).some(item => item.status !== 'PASS')) return blocked('VERIFICATION_NOT_APPROVABLE', { action: 'verify_slice', operation: 'record-review', pending })
+    if (review.judgment === 'APPROVE') {
+      assertObligationEvidence(review.obligation_evidence, descriptorPreview, { checks: pending.focused_evidence ?? [], commands: reviewCommandRecords(review) })
+    }
     const outcome = {
       verification: pending.verification,
       focusedEvidence: pending.focused_evidence,

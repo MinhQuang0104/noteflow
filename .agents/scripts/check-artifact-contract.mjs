@@ -172,6 +172,30 @@ export function validateReviewPayload(review, executor = 'lead') {
   return errors
 }
 
+function validObligationRef(ref) {
+  if (!ref || typeof ref !== 'object' || Array.isArray(ref) || Object.keys(ref).length !== 1) return false
+  if (Object.hasOwn(ref, 'check')) return typeof ref.check === 'string' && ref.check.trim() !== ''
+  if (Object.hasOwn(ref, 'command')) return Number.isInteger(ref.command) && ref.command >= 0
+  return false
+}
+
+// One ledger entry per Plan verification obligation, in Plan order and with its
+// exact text, each citing at least one PASS check (by check_id) or one exit-0
+// review command (by index). `checks: null` skips check refs, for a review
+// receipt that does not carry the focused checks it cites.
+export function validateObligationEvidence(ledger, obligations, { checks = [], commands = [] } = {}) {
+  const expected = Array.isArray(obligations) ? obligations : []
+  if (ledger === undefined || ledger === null) return expected.length ? ['PLAN_OBLIGATION_UNEVIDENCED'] : []
+  if (!Array.isArray(ledger) || ledger.some(item => !item || typeof item !== 'object' || Array.isArray(item) ||
+      typeof item.obligation !== 'string' || !Array.isArray(item.evidence) || !item.evidence.length ||
+      item.evidence.some(ref => !validObligationRef(ref)))) return ['PLAN_OBLIGATION_EVIDENCE_INVALID']
+  if (ledger.length !== expected.length || ledger.some((item, index) => item.obligation !== expected[index])) return ['PLAN_OBLIGATION_UNEVIDENCED']
+  const evidenced = ref => Object.hasOwn(ref, 'command')
+    ? commands?.[ref.command]?.exit_code === 0
+    : checks === null || (checks ?? []).some(item => item?.check_id === ref.check && item?.status === 'PASS')
+  return ledger.every(item => item.evidence.every(evidenced)) ? [] : ['PLAN_OBLIGATION_UNEVIDENCED']
+}
+
 function readReceiptRecord(root, plan, sliceId, kind, ref, expected, attemptId = null) {
   const errors = []
   if (!['implementation', 'verification', 'review'].includes(kind) || !expected || !ref || typeof ref.path !== 'string' ||
@@ -201,6 +225,12 @@ function readReceiptRecord(root, plan, sliceId, kind, ref, expected, attemptId =
     typeof item.command !== 'string' || !item.command || !Number.isInteger(item.exit_code) ||
     typeof item.tool !== 'string' || !item.tool || typeof item.environment !== 'string' || !item.environment)) errors.push('INVALID_RECEIPT_PAYLOAD')
   validateWorkerReceiptBinding(expected, receipt, kind, errors)
+  // Receipts written before the obligation ledger carry none and stay valid.
+  if (Object.hasOwn(receipt, 'obligation_evidence') && ['verification', 'review'].includes(kind)) {
+    errors.push(...validateObligationEvidence(receipt.obligation_evidence,
+      plan.slices?.find(item => item.id === sliceId)?.verification_obligations,
+      { checks: kind === 'verification' ? receipt.raw_focused_checks ?? [] : null, commands: receipt.commands }))
+  }
   if (kind === 'review') {
     errors.push(...validateReviewPayload(receipt, plan.slices?.find(item => item.id === sliceId)?.executor ?? 'lead'))
     if (receipt.reviewer && typeof receipt.reviewer === 'object' && receipt.schema_version !== 2) errors.push('INVALID_RECEIPT_IDENTITY')

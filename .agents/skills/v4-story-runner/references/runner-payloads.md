@@ -91,6 +91,10 @@ the current slice block, `current_slice` and `next_action`.
   suite at about 3 minutes, is run by the Lead after the checkpoint and recorded
   as a review `commands` entry, never as a check spec.
 - `REVIEW_REQUIRED` is an in-step outcome. MEDIUM/HIGH always stop there.
+- **Obligation ledger.** `pending.verification_obligations` repeats the slice's
+  Plan `verification_obligations`. A LOW NO_REVIEW verify sends
+  `obligation_evidence` (below) citing only `{ "check": "<check spec id>" }`;
+  an obligation no check spec holds cannot pass NO_REVIEW.
 
 ## record-review payload
 
@@ -107,6 +111,15 @@ review `plan_template`:
   `review.findings` (`[]` when none), and `review.scope_paths` (exactly
   `pending.changed_paths`);
 - `review.pending_fingerprint` (exactly `pending.fingerprint`);
+- `review.obligation_evidence` for `APPROVE` (owner review too): one
+  `{ obligation, evidence }` per `pending.verification_obligations` entry, in
+  order and with the exact text; `evidence` lists at least one
+  `{ "check": "<id of a PASS focused check>" }` or
+  `{ "command": <index of an exit-0 review.commands entry> }`. Missing,
+  reordered, reworded or failing entries return `PLAN_OBLIGATION_UNEVIDENCED`;
+  a malformed ledger returns `PLAN_OBLIGATION_EVIDENCE_INVALID`. Run each
+  obligation no check holds (such as the full e2e suite) and record it in
+  `review.commands` before citing it;
 - `review.change_evidence`: the `.changeEvidence` object printed by
   `prepare-change-evidence.mjs --comparison explicit-pair --base <pending.baseline_commit>
   --head <pending.checkpoint_commit> --path <each changed path>`;

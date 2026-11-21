@@ -360,7 +360,13 @@ throughput case, and the pilot did not test one.
 - **Candidate improvements before or alongside the next runs** (not decided,
   each needs an owner decision and the migration lane):
   1. Kernel: a verify PASS requires evidence for every Plan verification
-     obligation, not only check specs.
+     obligation, not only check specs. **Built 2026-11-21:** every APPROVE
+     (Lead and owner review) and every LOW NO_REVIEW pass carries an
+     `obligation_evidence` ledger, one entry per Plan obligation with its exact
+     text, citing a PASS check or an exit-0 review command; otherwise
+     `PLAN_OBLIGATION_UNEVIDENCED`. The ledger is kept in the receipt; older
+     receipts without it stay valid. It stops an omitted obligation, not a
+     falsified command result.
   2. Driver: a `morning` helper that produces the owner-review payload draft
      (fresh pending, split evidence, `plan_template`) for each
      `HUMAN_REVIEW_REQUIRED` Story.
