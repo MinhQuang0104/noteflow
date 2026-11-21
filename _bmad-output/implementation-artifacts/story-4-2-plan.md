@@ -8,7 +8,7 @@ upstream_epic:
   path: docs/product/epics.md
   section_digest: sha256:4420968e19ff26b85691bb0de577b71f307e9d11f903a408069e9a2180006c76
 sprint_key: 4-2-tạo-quick-note-với-title-tùy-chọn
-lifecycle_snapshot: review
+lifecycle_snapshot: done
 execution_status: complete
 planning_approval:
   decision: APPROVED
@@ -180,9 +180,7 @@ human_approval:
   approved_commit: "72170a954c6b247c3fecb77f967bf6370491f763"
   approved_action: "complete_story"
   disclosures_acknowledged: true
-next_action:
-  kind: complete_story
-  target: story
+next_action: null
 autopilot:
   schema_version: 1
   authorized_at: "2026-11-14T08:16:41.932Z"

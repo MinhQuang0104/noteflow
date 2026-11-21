@@ -1,7 +1,7 @@
 ---
 story_id: "4.2"
 title: Tạo quick note với title tùy chọn
-status: review
+status: done
 ---
 
 # Story 4.2: Tạo quick note với title tùy chọn
@@ -131,4 +131,5 @@ As a chủ tài khoản, I want bắt đầu note ngay, So that tôi ghi ý tư�
 ### Change Log
 
 - Finalization recorded for Human Gate: in-progress -> review; next action complete_story.
+- Human approval recorded for the exact review scope: review -> done; next action terminal.
 <!-- v4:completion:end -->
