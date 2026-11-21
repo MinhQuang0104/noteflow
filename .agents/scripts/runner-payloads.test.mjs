@@ -38,4 +38,12 @@ test('runner payload recipes match the kernel tokens, limits and refusal codes t
   assert.match(reference, /`timeout_ms` may not exceed 120000/)
   assert.match(read('.agents/scripts/check-slice-implementation.mjs'), /RESUME_SCOPE_MUST_EXACTLY_MATCH_RELEVANT_DIRTY_PATHS/)
   assert.match(read('.agents/scripts/v4-finalization-contract.mjs'), /export function digestValue/)
+  const artifactContract = read('.agents/scripts/check-artifact-contract.mjs')
+  assert.match(reference, /`review\.reviewer: \{ type: 'lead', vendor, independent \}`/)
+  assert.match(artifactContract, /\['lead', 'human'\]\.includes\(reviewer\.type\)/)
+  assert.match(artifactContract, /reviewer\.independent !== \(reviewer\.type === 'lead' && executor === 'agy'\)/)
+  for (const code of ['REVIEWER_INVALID', 'REVIEWER_INDEPENDENCE_MISMATCH']) {
+    assert.ok(reference.includes(code), code)
+    assert.ok(artifactContract.includes(`'${code}'`), code)
+  }
 })

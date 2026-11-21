@@ -461,7 +461,9 @@ turns. Runs that produced no code (1, 2, 4) cost USD 5.15.
      column lists or selectors of the touched tables and views, and scope them.
   4. Driver: report a child's `terminal_reason` and dirty inventory instead of
      `NO_PROGRESS`; give the child prompt resume guidance.
-  5. Docs: show `reviewer.type` in `runner-payloads.md`, and the evidence-set
-     `scope_digest` formula for owner-review payloads.
+  5. Docs: show `reviewer.type` in `runner-payloads.md` (**done 2026-11-21**).
+     The evidence-set `scope_digest` formula was already there; the miss was
+     in the Lead's helper, so a payload builder script is the real fix
+     (§10.5 item 2).
   6. Process: no commits or stray files in the `main` checkout while a night
      runs.

@@ -97,9 +97,12 @@ the current slice block, `current_slice` and `next_action`.
 Use the verify payload plus `preview`, the returned `pending`, `review` and a
 review `plan_template`:
 
-- `review.judgment`, `review.reviewer: { vendor, independent }`, and
-  `review.answers` with one `{ id, answer }` for each `pending.review_questions`
-  entry;
+- `review.judgment`, `review.reviewer: { type: 'lead', vendor, independent }`,
+  and `review.answers` with one `{ id, answer }` for each
+  `pending.review_questions` entry. `type` is required (a missing or other
+  value is `REVIEWER_INVALID`); `vendor` is `codex` or `claude`; `independent`
+  is `true` exactly when the slice executor is `agy`, otherwise
+  `REVIEWER_INDEPENDENCE_MISMATCH`;
 - `review.commands` (`{ command, exit_code, tool, environment }`),
   `review.findings` (`[]` when none), and `review.scope_paths` (exactly
   `pending.changed_paths`);
