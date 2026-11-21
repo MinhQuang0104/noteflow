@@ -4,7 +4,7 @@ Load this reference when preparing an owner-requested autopilot authorization
 or when the Plan carries one.
 
 1. Run `node .agents/scripts/v4-story-runner.mjs autopilot-status <story-id> --expected-head <sha> --lead-generation <n>` using the generation returned by this session's claim or owner-approved takeover.
-2. If the result is `STOP`, report its reason and the exact owner decision needed, then end the turn.
+2. If the result is `STOP`, report its reason and the exact owner decision needed, then end the turn. For `BUDGET_TIME`, that decision is the owner's `run <id> --expected-head <sha> --extend-autopilot '{"action":"extend_autopilot","story_id":"<id>","slice_id":"<current slice>","minutes":<5-240>}'`, which opens a fresh window for that slice from now.
 3. For `CONTINUE`, load only the one action contract named by the durable Plan.
 4. Run that action to its next durable state, then repeat from `autopilot-status`.
 
@@ -37,7 +37,8 @@ acquiring their transaction lock. Missing claim or generation stops with
 owner's takeover decision.
 
 Owner operations are never fenced: `--approve-exact-scope`, `complete_story`,
-`record-owner-review`, `--authorize-autopilot` / `--revoke-autopilot`, and owner
+`record-owner-review`, `--authorize-autopilot` / `--revoke-autopilot` /
+`--extend-autopilot`, and owner
 or maintenance recovery. Read-only `prepare` and `autopilot-status` are not
 fenced; status still reports claim or generation failures as STOP reasons.
 `complete_story`, owner review and Human Gate remain manual (D-P5-a).

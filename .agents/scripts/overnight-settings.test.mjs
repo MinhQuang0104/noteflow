@@ -24,7 +24,7 @@ test('overnight child settings allow only listed kernel scripts and no broad run
 
 test('overnight child settings deny every owner operation, history rewrite, eval and secret read', () => {
   const runnerUsage = /const CLI_USAGE = '([^']+)'/.exec(read('.agents/scripts/v4-story-runner.mjs'))[1]
-  for (const ownerFlag of ['--approve-exact-scope', '--authorize-autopilot', '--revoke-autopilot']) {
+  for (const ownerFlag of ['--approve-exact-scope', '--authorize-autopilot', '--revoke-autopilot', '--extend-autopilot']) {
     assert.match(runnerUsage, new RegExp(ownerFlag))
     assert.ok(deny.includes(`Bash(*${ownerFlag}*)`), ownerFlag)
   }

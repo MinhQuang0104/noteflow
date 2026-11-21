@@ -168,6 +168,11 @@ blob at `authorized_head`, the exact pre-authorization HEAD, resolved `budgets`,
 `max_minutes_per_slice` (5–240); omitted entries default respectively to the
 Plan's slice count, 0, and 60. Out-of-range input is invalid. The owner may use
 `--revoke-autopilot` to set `revoked: true` in another Plan-only commit.
+`--extend-autopilot '{"action":"extend_autopilot","story_id":"<id>","slice_id":"<current slice>","minutes":<5-240>}'`
+appends `{slice_id, minutes, granted_at}` to the optional `time_extensions`
+list in another Plan-only commit; the latest extension for the current slice
+replaces its time window, measured from `granted_at` instead of the slice's
+first commit. It requires an unrevoked authorization and the current slice.
 Action metadata projections preserve the record exactly. It grants no Human
 approval or completion authority; finalization and completion continue to use
 their own gates.

@@ -98,7 +98,7 @@ rather than prompted, so a gap fails safe and shows up in the report as a STOP.
 - **Deny.** Deny takes precedence over allow, so these rules also neutralize the
   broad `Bash(node .agents/scripts/*)` from the project settings.
   - Owner operations: `--approve-exact-scope`, `record-owner-review`,
-    `--authorize-autopilot` / `--revoke-autopilot`, `complete_story`,
+    `--authorize-autopilot` / `--revoke-autopilot` / `--extend-autopilot`, `complete_story`,
     `claim --takeover`, `refresh-scope`, `integrate-story`, `story-registry release`.
   - Git commands: `git push`, `reset`, `clean`, `stash`, `rebase`, `update-ref`,
     branch deletion, and checkout or switch of `main`.
@@ -464,7 +464,10 @@ turns. Runs that produced no code (1, 2, 4) cost USD 5.15.
 - **Candidate improvements** (not decided; each needs an owner decision and
   the migration lane), in addition to §10.5:
   1. Kernel: measure the slice time budget from child work (or per run), or
-     give the owner an extend operation.
+     give the owner an extend operation. **Built 2026-11-21:** owner-only
+     `--extend-autopilot` (denied to children) records a time extension; the
+     latest one for the current slice opens a fresh window from when it was
+     granted, so idle time before it no longer counts.
   2. Kernel: persist a CHANGES_REQUIRED review with its findings, so rework is
      a recorded decision rather than a child's side effect. **Built
      2026-11-21:** `apply-rework` commits a rework receipt

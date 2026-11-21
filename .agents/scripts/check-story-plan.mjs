@@ -122,7 +122,14 @@ export function validateAutopilot(root, planPath, value) {
   if (value === undefined) return []
   const expected = ['schema_version', 'authorized_at', 'authorized_plan_digest', 'authorized_head', 'budgets', 'lead_vendor', 'revoked']
   const budgetKeys = ['max_slices', 'max_rework_per_slice', 'max_minutes_per_slice']
-  if (!isObject(value) || Object.keys(value).length !== expected.length || expected.some(key => !Object.hasOwn(value, key)) ||
+  // Optional owner time extensions (Story 4.2: the slice clock counted idle nights).
+  const extensions = value?.time_extensions
+  if (extensions !== undefined && (!Array.isArray(extensions) || !extensions.length || extensions.some(item => !isObject(item) ||
+      Object.keys(item).length !== 3 || typeof item.slice_id !== 'string' || !item.slice_id ||
+      !Number.isInteger(item.minutes) || item.minutes < 5 || item.minutes > 240 || typeof item.granted_at !== 'string' ||
+      !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(item.granted_at) || !Number.isFinite(Date.parse(item.granted_at))))) return ['AUTOPILOT_INVALID']
+  const keyCount = expected.length + (extensions === undefined ? 0 : 1)
+  if (!isObject(value) || Object.keys(value).length !== keyCount || expected.some(key => !Object.hasOwn(value, key)) ||
       value.schema_version !== 1 || typeof value.authorized_at !== 'string' ||
       !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(value.authorized_at) ||
       !Number.isFinite(Date.parse(value.authorized_at)) || !SHA256.test(value.authorized_plan_digest) ||

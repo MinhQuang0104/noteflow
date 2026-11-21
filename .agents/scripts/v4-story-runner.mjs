@@ -86,7 +86,7 @@ const CLI_OPERATIONS = new Set([
   'prepare-staged-recovery',
   'apply-staged-recovery'
 ])
-const CLI_USAGE = 'USAGE: run <epic.story> [--expected-head <sha>] [--operation <operation> --input <file>] [--approve-exact-scope] [--authorize-autopilot <json> | --revoke-autopilot]'
+const CLI_USAGE = 'USAGE: run <epic.story> [--expected-head <sha>] [--operation <operation> --input <file>] [--approve-exact-scope] [--authorize-autopilot <json> | --revoke-autopilot | --extend-autopilot <json>]'
 const AUTOPILOT_STATUS_ACTIONS = new Set(['implement_slice', 'verify_slice', 'finalize_story'])
 const FENCED_OPERATIONS = new Set(['checkpoint', 'verify', 'record-review', 'record_review', 'prepare-rework', 'apply-rework'])
 
@@ -124,6 +124,30 @@ function autopilotInput(value, storyId, plan) {
   return { budgets, lead_vendor: value.lead_vendor }
 }
 
+function extensionInput(value, storyId, plan) {
+  if (!value || typeof value !== 'object' || Array.isArray(value) ||
+      Object.keys(value).length !== 4 || Object.keys(value).some(key => !['action', 'story_id', 'slice_id', 'minutes'].includes(key)) ||
+      value.action !== 'extend_autopilot' || value.story_id !== storyId ||
+      !Number.isInteger(value.minutes) || value.minutes < 5 || value.minutes > 240) return { error: 'AUTOPILOT_EXTENSION_INVALID' }
+  if (value.slice_id !== plan.current_slice) return { error: 'AUTOPILOT_EXTENSION_SLICE_NOT_CURRENT' }
+  return { slice_id: value.slice_id, minutes: value.minutes }
+}
+
+function sameAutopilotRecord(left, right) {
+  const stable = value => Array.isArray(value) ? value.map(stable) : value && typeof value === 'object'
+    ? Object.fromEntries(Object.keys(value).sort().map(key => [key, stable(value[key])])) : value
+  return JSON.stringify(stable(left)) === JSON.stringify(stable(right))
+}
+
+// The latest owner extension for the current slice opens a fresh time window
+// from when it was granted; without one the window starts at the slice's first
+// commit.
+function sliceTimeWindow(authority, sliceId) {
+  const granted = (authority.time_extensions ?? []).filter(item => item?.slice_id === sliceId)
+    .sort((left, right) => Date.parse(left.granted_at) - Date.parse(right.granted_at)).at(-1)
+  return granted ? { start: Date.parse(granted.granted_at), minutes: granted.minutes, extended_at: granted.granted_at } : null
+}
+
 function writePlanAtomic(root, relative, value) {
   const file = path.join(root, relative)
   const temp = `${file}.${randomUUID()}.tmp`
@@ -157,14 +181,16 @@ function canonicalPlanBlob(root, relative, bytes) {
   return result.stdout.trim()
 }
 
-export function recordAutopilot(root, storyId, expectedHead, { authorization, revoke = false } = {}) {
+export function recordAutopilot(root, storyId, expectedHead, { authorization, revoke = false, extension } = {}) {
   let lock
   let lockOwned = false
   let mutated = false
   let released = false
   let recovery
   try {
-    if (!/^\d+\.\d+$/.test(storyId ?? '') || !SHA.test(expectedHead ?? '') || Boolean(authorization) === revoke) return invalidResult('AUTOPILOT_INPUT_REQUIRED')
+    if (!/^\d+\.\d+$/.test(storyId ?? '') || !SHA.test(expectedHead ?? '') ||
+        [Boolean(authorization), revoke === true, Boolean(extension)].filter(Boolean).length !== 1) return invalidResult('AUTOPILOT_INPUT_REQUIRED')
+    const extend = Boolean(extension)
     const relative = planRelative(storyId)
     if (!existsSync(path.join(root, relative))) return invalidResult('PLAN_MISSING')
     const common = gitOutput(root, ['rev-parse', '--git-common-dir'], 'GIT_COMMON_DIR_UNAVAILABLE')
@@ -179,15 +205,17 @@ export function recordAutopilot(root, storyId, expectedHead, { authorization, re
     if (checkout) return checkout
     const before = readFileSync(path.join(root, relative), 'utf8')
     const plan = frontmatter(before)
-    const input = revoke ? null : autopilotInput(authorization, storyId, plan)
-    if (!revoke && !input) return invalidResult('AUTOPILOT_INPUT_INVALID')
+    const input = revoke || extend ? null : autopilotInput(authorization, storyId, plan)
+    if (!revoke && !extend && !input) return invalidResult('AUTOPILOT_INPUT_INVALID')
+    const grant = extend ? extensionInput(extension, storyId, plan) : null
+    if (grant?.error) return invalidResult(grant.error)
     const checked = validateStoryPlan(root, storyId)
     const approvalOnly = plan.next_action?.kind === 'complete_story' && checked.reasons.length > 0 &&
       checked.reasons.every(reason => reason === 'DISCLOSURES_NOT_ACKNOWLEDGED')
     if (!checked.valid && !approvalOnly) return { status: checked.status, authorized: false, reasons: checked.reasons }
-    if (revoke && !plan.autopilot) return { status: 'BLOCKED', authorized: false, reasons: ['NO_AUTOPILOT_AUTHORIZATION'] }
+    if ((revoke || extend) && !plan.autopilot) return { status: 'BLOCKED', authorized: false, reasons: ['NO_AUTOPILOT_AUTHORIZATION'] }
     if (plan.autopilot?.revoked === true) return { status: 'NOOP', authorized: false, reasons: ['AUTOPILOT_REVOKED'] }
-    if (!revoke && plan.autopilot) return { status: 'BLOCKED', authorized: false, reasons: ['AUTOPILOT_ALREADY_AUTHORIZED'] }
+    if (!revoke && !extend && plan.autopilot) return { status: 'BLOCKED', authorized: false, reasons: ['AUTOPILOT_ALREADY_AUTHORIZED'] }
     const dirty = gitOutput(root, ['status', '--porcelain', '--untracked-files=all'], 'WORKTREE_UNAVAILABLE')
     if (dirty) return { status: 'BLOCKED', authorized: false, reasons: ['DIRTY_WORKTREE'] }
     try { writeFileSync(lock, `${storyId}:${expectedHead}\n`, { flag: 'wx' }); lockOwned = true }
@@ -196,20 +224,31 @@ export function recordAutopilot(root, storyId, expectedHead, { authorization, re
         readFileSync(path.join(root, relative), 'utf8') !== before) return { status: 'STALE', authorized: false, reasons: ['AUTOPILOT_GUARD_CHANGED'] }
     const committedPlan = git(root, ['show', `${expectedHead}:${relative}`])
     if (committedPlan.status !== 0) throw new Error('PLAN_BLOB_UNAVAILABLE')
-    const record = revoke ? { ...plan.autopilot, revoked: true } : {
+    const extensionRecord = grant ? { slice_id: grant.slice_id, minutes: grant.minutes, granted_at: new Date().toISOString() } : null
+    const record = revoke ? { ...plan.autopilot, revoked: true }
+      : extend ? { ...plan.autopilot, time_extensions: [...(plan.autopilot.time_extensions ?? []), extensionRecord] } : {
       schema_version: 1, authorized_at: new Date().toISOString(),
       authorized_plan_digest: `sha256:${createHash('sha256').update(committedPlan.stdout, 'utf8').digest('hex')}`,
       authorized_head: expectedHead, budgets: input.budgets, lead_vendor: input.lead_vendor, revoked: false
     }
     let next
-    if (revoke) {
+    if (revoke || extend) {
       const marker = /^autopilot:\s*$/m.exec(before)
       if (!marker) return invalidResult('AUTOPILOT_RECORD_MISSING')
       const end = before.slice(marker.index + marker[0].length).search(/^\S/m)
       const stop = end < 0 ? before.length : marker.index + marker[0].length + end
       const block = before.slice(marker.index, stop)
       if (!/^  revoked: false[ \t]*$/m.test(block)) return invalidResult('AUTOPILOT_RECORD_INVALID')
-      next = before.slice(0, marker.index) + block.replace(/^  revoked: false[ \t]*$/m, '  revoked: true') + before.slice(stop)
+      if (revoke) next = before.slice(0, marker.index) + block.replace(/^  revoked: false[ \t]*$/m, '  revoked: true') + before.slice(stop)
+      else {
+        const eol = block.includes('\r\n') ? '\r\n' : '\n'
+        const item = [`    - slice_id: ${JSON.stringify(extensionRecord.slice_id)}`, `      minutes: ${extensionRecord.minutes}`,
+          `      granted_at: ${JSON.stringify(extensionRecord.granted_at)}`]
+        const lines = (/^  time_extensions:[ \t]*$/m.test(block) ? item : ['  time_extensions:', ...item]).join(eol)
+        const body = block.endsWith(eol) ? block : block + eol
+        next = before.slice(0, marker.index) + body + lines + eol + before.slice(stop)
+      }
+      if (extend && !sameAutopilotRecord(frontmatter(next).autopilot, record)) return invalidResult('AUTOPILOT_RECORD_INVALID')
     } else {
       const delimiter = /\r?\n---(?=\r?\n|$)/.exec(before)
       if (!delimiter) return invalidResult('INVALID_FRONTMATTER')
@@ -229,7 +268,8 @@ export function recordAutopilot(root, storyId, expectedHead, { authorization, re
     if (treePaths.length !== 1 || treePaths[0] !== relative ||
         gitOutput(root, ['rev-parse', `${tree}:${relative}`], 'TREE_PLAN_UNAVAILABLE') !== expectedBlob) throw new Error('AUTOPILOT_TREE_SCOPE_MISMATCH')
     if (readFileSync(path.join(root, relative), 'utf8') !== next) throw new Error('AUTOPILOT_WORKTREE_CHANGED')
-    const message = `chore(story-${storyId}): ${revoke ? 'revoke' : 'record'} autopilot authorization`
+    const message = extend ? `chore(story-${storyId}): extend autopilot time for slice ${grant.slice_id}`
+      : `chore(story-${storyId}): ${revoke ? 'revoke' : 'record'} autopilot authorization`
     const commit = gitOutput(root, ['commit-tree', tree, '-p', expectedHead, '-m', message], 'COMMIT_TREE_FAILED')
     if (git(root, ['update-ref', 'HEAD', commit, expectedHead]).status !== 0) throw new Error('HEAD_UPDATE_FAILED')
     if (gitOutput(root, ['rev-parse', 'HEAD'], 'HEAD_UNAVAILABLE') !== commit ||
@@ -237,7 +277,7 @@ export function recordAutopilot(root, storyId, expectedHead, { authorization, re
     if (gitOutput(root, ['rev-parse', `:${relative}`], 'INDEX_PLAN_UNAVAILABLE') !== expectedBlob ||
         readFileSync(path.join(root, relative), 'utf8') !== next) throw new Error('AUTOPILOT_POSTCOMMIT_DRIFT')
     released = true
-    return { status: revoke ? 'APPLIED' : 'AUTHORIZED', authorized: !revoke, valid: true, autopilot: record,
+    return { status: revoke || extend ? 'APPLIED' : 'AUTHORIZED', authorized: !revoke, valid: true, autopilot: record,
       commit, committed_plan_blob: expectedBlob }
   } catch (error) { return { status: mutated ? 'RECOVERY_REQUIRED' : 'ERROR', authorized: false, reasons: [error.message], ...(mutated ? { recovery } : {}) } }
   finally { if (lockOwned && (!mutated || released) && existsSync(lock)) unlinkSync(lock) }
@@ -346,10 +386,10 @@ export function runV4Story(root, storyId, options = {}) {
   try {
     if (!/^\d+\.\d+$/.test(storyId ?? '')) return invalidResult('INVALID_STORY_ID')
     if (!existsSync(path.join(root, planRelative(storyId)))) return invalidResult('PLAN_MISSING')
-    if (options.autopilotAuthorization || options.revokeAutopilot) {
+    if (options.autopilotAuthorization || options.revokeAutopilot || options.autopilotExtension) {
       if (options.approval || options.approveExactScope || options.operation || options.kernel || options.startFingerprint) return invalidResult('AUTOPILOT_OPERATION_CONFLICT')
       return recordAutopilot(root, storyId, options.expectedHead ?? gitOutput(root, ['rev-parse', 'HEAD'], 'HEAD_UNAVAILABLE'),
-        { authorization: options.autopilotAuthorization, revoke: options.revokeAutopilot })
+        { authorization: options.autopilotAuthorization, revoke: options.revokeAutopilot === true, extension: options.autopilotExtension })
     }
     if (!pointerIdle(root)) return { status: 'BLOCKED', authorized: false, reasons: ['V3_POINTER_NOT_IDLE'] }
     const head = gitOutput(root, ['rev-parse', 'HEAD'], 'HEAD_UNAVAILABLE')
@@ -574,7 +614,6 @@ function autopilotBudgetSnapshot(root, plan) {
   const authority = plan.autopilot
   const maxSlices = authority.budgets.max_slices
   const maxRework = authority.budgets.max_rework_per_slice
-  const maxMinutes = authority.budgets.max_minutes_per_slice
   const checkpointedSlices = (Array.isArray(plan.slices) ? plan.slices : [])
     .filter(slice => SHA.test(slice?.checkpoint_commit ?? '') &&
       slice.checkpoint_commit !== authority.authorized_head &&
@@ -583,9 +622,11 @@ function autopilotBudgetSnapshot(root, plan) {
   const attemptId = currentAttempt(slice)
   const reworkUsed = Math.max(0, attemptId - 1)
   const first = firstSliceCommit(root, authority.authorized_head, slice)
-  const elapsedMinutes = first
-    ? Math.max(0, (Date.now() - first.timestamp * 1000) / 60000)
-    : 0
+  const extensionWindow = sliceTimeWindow(authority, plan.current_slice)
+  const maxMinutes = extensionWindow?.minutes ?? authority.budgets.max_minutes_per_slice
+  const elapsedMinutes = extensionWindow
+    ? Math.max(0, (Date.now() - extensionWindow.start) / 60000)
+    : first ? Math.max(0, (Date.now() - first.timestamp * 1000) / 60000) : 0
   return {
     slices: {
       used: checkpointedSlices,
@@ -601,7 +642,8 @@ function autopilotBudgetSnapshot(root, plan) {
       elapsed_minutes: elapsedMinutes,
       max_minutes: maxMinutes,
       remaining_minutes: Math.max(0, maxMinutes - elapsedMinutes),
-      first_commit: first?.commit ?? null
+      first_commit: first?.commit ?? null,
+      ...(extensionWindow ? { extended_at: extensionWindow.extended_at } : {})
     }
   }
 }
@@ -744,6 +786,7 @@ function parseArguments(argv) {
   let approveExactScope = false
   let autopilotAuthorization
   let revokeAutopilot = false
+  let autopilotExtension
   let leadGeneration
   for (let index = 0; index < tail.length; index += 1) {
     if (tail[index] === '--approve-exact-scope') approveExactScope = true
@@ -757,13 +800,18 @@ function parseArguments(argv) {
       if (!autopilotAuthorization || typeof autopilotAuthorization !== 'object' || Array.isArray(autopilotAuthorization)) return { error: 'AUTOPILOT_INPUT_INVALID' }
     }
     else if (tail[index] === '--revoke-autopilot' && !revokeAutopilot) revokeAutopilot = true
+    else if (tail[index] === '--extend-autopilot' && tail[index + 1] && !autopilotExtension) {
+      try { autopilotExtension = JSON.parse(tail[++index]) } catch { return { error: 'AUTOPILOT_JSON_INVALID' } }
+      if (!autopilotExtension || typeof autopilotExtension !== 'object' || Array.isArray(autopilotExtension)) return { error: 'AUTOPILOT_EXTENSION_INVALID' }
+    }
     else if (tail[index] === '--lead-generation' && leadGeneration === undefined && /^[1-9]\d*$/.test(tail[index + 1] ?? '') && Number.isSafeInteger(Number(tail[index + 1]))) leadGeneration = Number(tail[++index])
     else return { error: CLI_USAGE }
   }
   if ((operation && !inputFile) || (!operation && inputFile)) return { error: CLI_USAGE }
-  if ((autopilotAuthorization !== undefined && revokeAutopilot) ||
-      ((autopilotAuthorization !== undefined || revokeAutopilot) && (operation || approveExactScope || startFingerprint || excludeUnrelated.length))) return { error: CLI_USAGE }
-  return { command: 'run', storyId, expectedHead, operation, inputFile, approveExactScope, startFingerprint, excludeUnrelated, autopilotAuthorization, revokeAutopilot, leadGeneration }
+  const autopilotOperations = [autopilotAuthorization !== undefined, revokeAutopilot, autopilotExtension !== undefined].filter(Boolean).length
+  if (autopilotOperations > 1 ||
+      (autopilotOperations && (operation || approveExactScope || startFingerprint || excludeUnrelated.length))) return { error: CLI_USAGE }
+  return { command: 'run', storyId, expectedHead, operation, inputFile, approveExactScope, startFingerprint, excludeUnrelated, autopilotAuthorization, revokeAutopilot, autopilotExtension, leadGeneration }
 }
 
 function readCliInput(root, inputFile) {
@@ -793,6 +841,7 @@ function main() {
     approveExactScope: parsed.approveExactScope,
     autopilotAuthorization: parsed.autopilotAuthorization,
     revokeAutopilot: parsed.revokeAutopilot,
+    autopilotExtension: parsed.autopilotExtension,
     leadGeneration: parsed.leadGeneration,
     startFingerprint: parsed.startFingerprint,
     excludeUnrelated: parsed.excludeUnrelated

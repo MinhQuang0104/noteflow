@@ -46,6 +46,7 @@
       "Bash(*record-owner-review*)",
       "Bash(*--authorize-autopilot*)",
       "Bash(*--revoke-autopilot*)",
+      "Bash(*--extend-autopilot*)",
       "Bash(*complete_story*)",
       "Bash(*complete-story.mjs*)",
       "Bash(*--takeover*)",
