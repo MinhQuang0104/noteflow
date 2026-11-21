@@ -1,0 +1,90 @@
+{
+  "schema_version": 2,
+  "story_id": "4.2",
+  "slice_id": "B",
+  "kind": "review",
+  "attempt_id": 3,
+  "checkpoint_commit": "5cc46f0cae4f3df8bf6ec95e9ad00daf0e984d66",
+  "baseline_commit": "52a075de9354e676e8486b244204651e235c9109",
+  "subject_digest": "sha256:d89477291adc9c76d856ce36a8b92633dab44e57eb7259283f9a73f7b45a31db",
+  "created_from_head": "5cc46f0cae4f3df8bf6ec95e9ad00daf0e984d66",
+  "changed_paths_sha256": "sha256:2af581edb479899eb888ad0bb6bffcc6c8d404d08e200a8a863beec78b0c65b0",
+  "commands": [
+    {
+      "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/local.ps1 e2e",
+      "exit_code": 0,
+      "tool": "playwright",
+      "environment": "Story worktree story-4-2 @ 4c2b70e (checkpoint 5cc46f0), Windows 11, per-worktree test project noteflow-test-3286bcd071ca; Lead run; 61 passed, 5 skipped (phone cross-device-sync), 0 failed, 2.8m"
+    },
+    {
+      "command": "git diff 52a075d 5cc46f0 (exact 4-path scope) and git diff 454beca 5cc46f0 for the whole slice B",
+      "exit_code": 0,
+      "tool": "reviewer",
+      "environment": "Lead independent review, AGY-authored attempt 3"
+    }
+  ],
+  "judgment": "APPROVE",
+  "questions": [
+    {
+      "id": "question-1",
+      "question": "Review the canonical verification result and bounded change evidence."
+    }
+  ],
+  "answers": [
+    {
+      "id": "question-1",
+      "answer": "Independent Lead review (Claude; AGY wrote the code) of slice B attempt 3, exact 4-path diff 52a075d..5cc46f0, read together with the whole slice B (454beca..5cc46f0). Canonical verification PASS; type-check, lint and the focused unit suite (28 tests) PASS; the Lead reran the full e2e suite at 4c2b70e: 61 passed, 5 skipped (phone cross-device-sync), 0 failed. F-42B-3 is fixed: NotesView consumes ?new=1 once by router.replace, removing only the new key, so the notebooks cache update after the first create (note_count + 1) or any later notebooks refetch can no longer reopen a blank editor; the replace is a same-route query change, so it never triggers the route-leave flush. The new notes.spec.ts regression mounts /notes?new=1, asserts the query is cleared, one createNote, the body kept after the acknowledgement, and the next edit sent as updateNote with base_version 1 (this also closes the missing row_version assertion noted after attempt 2); quick-note.spec.ts now asserts the body value and the cleaned URL after Đã lưu; today.spec.ts follows the new URL. F-42B-1 and F-42B-2 stay fixed (flush awaits the whole in-flight save; a failed flush cancels note, notebook and route switches). Disclosures: the new regressions were not executed against the base code (the base never clears the query, so the query assertion would fail there); a save that keeps failing, for example offline, blocks switching note, notebook or leaving Notes until it succeeds, which follows the owner decision that switching with a pending change saves first and is left to Story 4.3, which owns the non-blocking flush."
+    }
+  ],
+  "evidence_refs": [
+    {
+      "path": "frontend/src/views/NotesView.vue",
+      "hunk_index": 0,
+      "body_digest": "sha256:1239dd254dbe6328261831bf3cc7ecf4a706d8019939a0d9cc06328bdad10398"
+    },
+    {
+      "path": "frontend/src/views/NotesView.vue",
+      "hunk_index": 1,
+      "body_digest": "sha256:12df651caf52460c89657a73b58386c2e9ade6b7709f59bcda11f2f0ecea0b10"
+    },
+    {
+      "path": "frontend/src/views/NotesView.vue",
+      "hunk_index": 2,
+      "body_digest": "sha256:79949dff6ed9024e4ce4d7ae03bd2c837d4607490c331cb6ec89f61e0dd1b497"
+    },
+    {
+      "path": "frontend/src/views/__tests__/notes.spec.ts",
+      "hunk_index": 0,
+      "body_digest": "sha256:655b65baaf7e36e5b5364592fcf9357a212f20dc6216648100e4247e9d254a1a"
+    },
+    {
+      "path": "frontend/src/views/__tests__/notes.spec.ts",
+      "hunk_index": 1,
+      "body_digest": "sha256:58376c74ccb7f1ae819af322582e94d82b45f5d2ea04b86f8a9853f0b0dd6455"
+    },
+    {
+      "path": "frontend/src/views/__tests__/today.spec.ts",
+      "hunk_index": 0,
+      "body_digest": "sha256:f6635acea38dbd99534bba536f0c00ebda95a1b75e1bdda764d05f6bca42339f"
+    },
+    {
+      "path": "tests/e2e/quick-note.spec.ts",
+      "hunk_index": 0,
+      "body_digest": "sha256:9222ebc0e9a5adcf66179876d1cfc2d0d297225695051b7e3125d24dd8f743e9"
+    },
+    {
+      "path": "tests/e2e/quick-note.spec.ts",
+      "hunk_index": 1,
+      "body_digest": "sha256:a1348173cd468b44553791f469e7bffecd2f0419d74739cf1f60a274084d60f4"
+    }
+  ],
+  "scope_digest": "sha256:fe5f3c51f2db905880054f040742ad25982fb9e7f4f8bde147c57eea37d9d05f",
+  "risk_context_digest": "sha256:fda9685a606c4170ef0d3aba9a6a4a1627e5cf10d7f64e86413b5bb61e929d4c",
+  "reviewed_commit": "5cc46f0cae4f3df8bf6ec95e9ad00daf0e984d66",
+  "reviewer": {
+    "type": "lead",
+    "vendor": "claude",
+    "independent": true
+  },
+  "findings": []
+}

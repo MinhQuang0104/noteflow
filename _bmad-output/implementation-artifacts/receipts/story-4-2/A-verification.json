@@ -1,0 +1,1953 @@
+{
+  "schema_version": 1,
+  "story_id": "4.2",
+  "slice_id": "A",
+  "kind": "verification",
+  "checkpoint_commit": "712f6712e94984775e2a4099b6fa5a538c5917d6",
+  "baseline_commit": "f7dabf89054c74c0703734bf3ccf10fbd063a3a3",
+  "subject_digest": "sha256:d89477291adc9c76d856ce36a8b92633dab44e57eb7259283f9a73f7b45a31db",
+  "created_from_head": "712f6712e94984775e2a4099b6fa5a538c5917d6",
+  "changed_paths_sha256": "sha256:137b55ddd55a7be1995913741fea40e31dc5184c9d3c072e9a5395d98c982886",
+  "commands": [
+    {
+      "command": "check:backend-note-tests",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-4-2 worktree\",\"os\":\"Windows 11\",\"runtime\":\"worktree backend-test container, PHP + PostgreSQL\"}"
+    },
+    {
+      "command": "check:pint",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-4-2 worktree\",\"os\":\"Windows 11\",\"runtime\":\"worktree backend-test container, PHP\"}"
+    },
+    {
+      "command": "check:phpstan",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-4-2 worktree\",\"os\":\"Windows 11\",\"runtime\":\"worktree backend-test container, PHP\"}"
+    },
+    {
+      "command": "check:contract-validate",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-4-2 worktree\",\"os\":\"Windows 11\",\"runtime\":\"Node 24\"}"
+    },
+    {
+      "command": "check:contract-check",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-4-2 worktree\",\"os\":\"Windows 11\",\"runtime\":\"Node 24\"}"
+    },
+    {
+      "command": "check:type-check",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-4-2 worktree\",\"os\":\"Windows 11\",\"runtime\":\"Node 24\"}"
+    },
+    {
+      "command": "check:lint",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-4-2 worktree\",\"os\":\"Windows 11\",\"runtime\":\"Node 24\"}"
+    },
+    {
+      "command": "check:notes-client-unit",
+      "exit_code": 0,
+      "tool": "v4-check-executor",
+      "environment": "{\"status\":\"KNOWN\",\"checkout\":\"story-4-2 worktree\",\"os\":\"Windows 11\",\"runtime\":\"Node 24, jsdom\"}"
+    }
+  ],
+  "canonical": {
+    "schema_version": 2,
+    "featureId": null,
+    "changedPaths": [
+      "backend/app/Http/Controllers/NoteController.php",
+      "backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php",
+      "backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php",
+      "backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php",
+      "backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php",
+      "backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php",
+      "backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php",
+      "backend/app/Modules/Notes/Domain/NoteLabel.php",
+      "backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php",
+      "backend/routes/api.php",
+      "backend/tests/Contract/NoteContractTest.php",
+      "backend/tests/Feature/NoteApiTest.php",
+      "backend/tests/Feature/NoteConcurrencyTest.php",
+      "backend/tests/Feature/NotePersistenceTest.php",
+      "backend/tests/Feature/NoteUseCasesTest.php",
+      "backend/tests/Feature/NotebookPersistenceTest.php",
+      "backend/tests/Unit/NoteLabelTest.php",
+      "contracts/openapi.yaml",
+      "frontend/src/api/__tests__/notes.spec.ts",
+      "frontend/src/api/notes.ts",
+      "frontend/src/api/schema.generated.ts"
+    ],
+    "matchedPaths": [
+      "backend/app/Http/Controllers/NoteController.php",
+      "backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php",
+      "backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php",
+      "backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php",
+      "backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php",
+      "backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php",
+      "backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php",
+      "backend/app/Modules/Notes/Domain/NoteLabel.php",
+      "backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php",
+      "backend/routes/api.php",
+      "backend/tests/Contract/NoteContractTest.php",
+      "backend/tests/Feature/NoteApiTest.php",
+      "backend/tests/Feature/NoteConcurrencyTest.php",
+      "backend/tests/Feature/NotePersistenceTest.php",
+      "backend/tests/Feature/NoteUseCasesTest.php",
+      "backend/tests/Feature/NotebookPersistenceTest.php",
+      "backend/tests/Unit/NoteLabelTest.php",
+      "contracts/openapi.yaml",
+      "frontend/src/api/__tests__/notes.spec.ts",
+      "frontend/src/api/notes.ts",
+      "frontend/src/api/schema.generated.ts"
+    ],
+    "coveredPaths": [
+      "backend/app/Http/Controllers/NoteController.php",
+      "backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php",
+      "backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php",
+      "backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php",
+      "backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php",
+      "backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php",
+      "backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php",
+      "backend/app/Modules/Notes/Domain/NoteLabel.php",
+      "backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php",
+      "backend/routes/api.php",
+      "backend/tests/Contract/NoteContractTest.php",
+      "backend/tests/Feature/NoteApiTest.php",
+      "backend/tests/Feature/NoteConcurrencyTest.php",
+      "backend/tests/Feature/NotePersistenceTest.php",
+      "backend/tests/Feature/NoteUseCasesTest.php",
+      "backend/tests/Feature/NotebookPersistenceTest.php",
+      "backend/tests/Unit/NoteLabelTest.php",
+      "contracts/openapi.yaml",
+      "frontend/src/api/__tests__/notes.spec.ts",
+      "frontend/src/api/notes.ts",
+      "frontend/src/api/schema.generated.ts"
+    ],
+    "unmatchedPaths": [],
+    "recipes": [
+      {
+        "schema_version": 1,
+        "featureId": "journal-frontend",
+        "changedPaths": [
+          "backend/app/Http/Controllers/NoteController.php",
+          "backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php",
+          "backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php",
+          "backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php",
+          "backend/app/Modules/Notes/Domain/NoteLabel.php",
+          "backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php",
+          "backend/routes/api.php",
+          "backend/tests/Contract/NoteContractTest.php",
+          "backend/tests/Feature/NoteApiTest.php",
+          "backend/tests/Feature/NoteConcurrencyTest.php",
+          "backend/tests/Feature/NotePersistenceTest.php",
+          "backend/tests/Feature/NoteUseCasesTest.php",
+          "backend/tests/Feature/NotebookPersistenceTest.php",
+          "backend/tests/Unit/NoteLabelTest.php",
+          "contracts/openapi.yaml",
+          "frontend/src/api/__tests__/notes.spec.ts",
+          "frontend/src/api/notes.ts",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "matchedPaths": [
+          "contracts/openapi.yaml",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "coveredPaths": [],
+        "unmatchedPaths": [
+          "backend/app/Http/Controllers/NoteController.php",
+          "backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php",
+          "backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php",
+          "backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php",
+          "backend/app/Modules/Notes/Domain/NoteLabel.php",
+          "backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php",
+          "backend/routes/api.php",
+          "backend/tests/Contract/NoteContractTest.php",
+          "backend/tests/Feature/NoteApiTest.php",
+          "backend/tests/Feature/NoteConcurrencyTest.php",
+          "backend/tests/Feature/NotePersistenceTest.php",
+          "backend/tests/Feature/NoteUseCasesTest.php",
+          "backend/tests/Feature/NotebookPersistenceTest.php",
+          "backend/tests/Unit/NoteLabelTest.php",
+          "contracts/openapi.yaml",
+          "frontend/src/api/__tests__/notes.spec.ts",
+          "frontend/src/api/notes.ts",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "dependencyOnlyPaths": [
+          "contracts/openapi.yaml",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "map": {
+          "status": "STALE",
+          "expectedChangedAnchors": [
+            "contracts/openapi.yaml",
+            "frontend/src/api/schema.generated.ts"
+          ],
+          "unexplainedDrift": [],
+          "missingAnchors": []
+        },
+        "checks": [
+          {
+            "id": "map",
+            "status": "PASS",
+            "exitCode": 1,
+            "summary": "STALE",
+            "evidence_ref": "sha256:fe32fb61b38ca317a815611432184241f40146fee4271840c7f89f352135db21"
+          },
+          {
+            "id": "type-check",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "> vue-tsc --build",
+            "evidence_ref": "sha256:6ba92e1412247e708c21ba7c30166f5b21f50b390df78faf2dfea31947972544"
+          },
+          {
+            "id": "mapped-tests",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "Test Files  3 passed (3)",
+            "evidence_ref": "sha256:3b9525a7604ffaca5a8917368835a360fedc28af5425878437c05827fd7bcdd9"
+          },
+          {
+            "id": "contract-check",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "> node scripts/generate-openapi-types.mjs --check",
+            "evidence_ref": "sha256:ca59b3a59b10b0b567c27159afa310267b16f34fe4db9c0c8d35878ac06c52e0"
+          }
+        ],
+        "escalationReasons": [
+          "UNMAPPED_CHANGED_PATH",
+          "DEPENDENCY_ONLY_CHANGED_PATH"
+        ],
+        "status": "INCOMPLETE",
+        "complete": false
+      },
+      {
+        "schema_version": 1,
+        "featureId": "notebooks-backend",
+        "changedPaths": [
+          "backend/app/Http/Controllers/NoteController.php",
+          "backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php",
+          "backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php",
+          "backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php",
+          "backend/app/Modules/Notes/Domain/NoteLabel.php",
+          "backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php",
+          "backend/routes/api.php",
+          "backend/tests/Contract/NoteContractTest.php",
+          "backend/tests/Feature/NoteApiTest.php",
+          "backend/tests/Feature/NoteConcurrencyTest.php",
+          "backend/tests/Feature/NotePersistenceTest.php",
+          "backend/tests/Feature/NoteUseCasesTest.php",
+          "backend/tests/Feature/NotebookPersistenceTest.php",
+          "backend/tests/Unit/NoteLabelTest.php",
+          "contracts/openapi.yaml",
+          "frontend/src/api/__tests__/notes.spec.ts",
+          "frontend/src/api/notes.ts",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "matchedPaths": [
+          "backend/routes/api.php",
+          "backend/tests/Feature/NotebookPersistenceTest.php",
+          "contracts/openapi.yaml"
+        ],
+        "coveredPaths": [
+          "backend/routes/api.php",
+          "backend/tests/Feature/NotebookPersistenceTest.php",
+          "contracts/openapi.yaml"
+        ],
+        "unmatchedPaths": [
+          "backend/app/Http/Controllers/NoteController.php",
+          "backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php",
+          "backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php",
+          "backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php",
+          "backend/app/Modules/Notes/Domain/NoteLabel.php",
+          "backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php",
+          "backend/tests/Contract/NoteContractTest.php",
+          "backend/tests/Feature/NoteApiTest.php",
+          "backend/tests/Feature/NoteConcurrencyTest.php",
+          "backend/tests/Feature/NotePersistenceTest.php",
+          "backend/tests/Feature/NoteUseCasesTest.php",
+          "backend/tests/Unit/NoteLabelTest.php",
+          "frontend/src/api/__tests__/notes.spec.ts",
+          "frontend/src/api/notes.ts",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "dependencyOnlyPaths": [],
+        "map": {
+          "status": "STALE",
+          "expectedChangedAnchors": [
+            "backend/routes/api.php",
+            "backend/tests/Feature/NotebookPersistenceTest.php",
+            "contracts/openapi.yaml"
+          ],
+          "unexplainedDrift": [],
+          "missingAnchors": []
+        },
+        "checks": [
+          {
+            "id": "map",
+            "status": "PASS",
+            "exitCode": 1,
+            "summary": "STALE",
+            "evidence_ref": "sha256:2ec5f5685c4882f3cae9c55441ac3a8176a09f4d7db36e25e9a07ef21fa6d5f4"
+          },
+          {
+            "id": "live-backend-test",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "Container noteflow-test-3286bcd071ca-backend-test-1  Healthy",
+            "evidence_ref": "sha256:2990fbda3901474ee798f9292a2da7040e91194f60e9fa174775f435ecb2a4d1"
+          },
+          {
+            "id": "contract-validate",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "\u001b[39m",
+            "evidence_ref": "sha256:292e7d69a4e2159e6fd783add4410796a25101bdec268d365d77e51cae14aa63"
+          }
+        ],
+        "escalationReasons": [
+          "UNMAPPED_CHANGED_PATH"
+        ],
+        "status": "INCOMPLETE",
+        "complete": false
+      },
+      {
+        "schema_version": 1,
+        "featureId": "notebooks-client",
+        "changedPaths": [
+          "backend/app/Http/Controllers/NoteController.php",
+          "backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php",
+          "backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php",
+          "backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php",
+          "backend/app/Modules/Notes/Domain/NoteLabel.php",
+          "backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php",
+          "backend/routes/api.php",
+          "backend/tests/Contract/NoteContractTest.php",
+          "backend/tests/Feature/NoteApiTest.php",
+          "backend/tests/Feature/NoteConcurrencyTest.php",
+          "backend/tests/Feature/NotePersistenceTest.php",
+          "backend/tests/Feature/NoteUseCasesTest.php",
+          "backend/tests/Feature/NotebookPersistenceTest.php",
+          "backend/tests/Unit/NoteLabelTest.php",
+          "contracts/openapi.yaml",
+          "frontend/src/api/__tests__/notes.spec.ts",
+          "frontend/src/api/notes.ts",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "matchedPaths": [
+          "contracts/openapi.yaml",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "coveredPaths": [
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "unmatchedPaths": [
+          "backend/app/Http/Controllers/NoteController.php",
+          "backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php",
+          "backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php",
+          "backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php",
+          "backend/app/Modules/Notes/Domain/NoteLabel.php",
+          "backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php",
+          "backend/routes/api.php",
+          "backend/tests/Contract/NoteContractTest.php",
+          "backend/tests/Feature/NoteApiTest.php",
+          "backend/tests/Feature/NoteConcurrencyTest.php",
+          "backend/tests/Feature/NotePersistenceTest.php",
+          "backend/tests/Feature/NoteUseCasesTest.php",
+          "backend/tests/Feature/NotebookPersistenceTest.php",
+          "backend/tests/Unit/NoteLabelTest.php",
+          "contracts/openapi.yaml",
+          "frontend/src/api/__tests__/notes.spec.ts",
+          "frontend/src/api/notes.ts"
+        ],
+        "dependencyOnlyPaths": [
+          "contracts/openapi.yaml"
+        ],
+        "map": {
+          "status": "STALE",
+          "expectedChangedAnchors": [
+            "contracts/openapi.yaml",
+            "frontend/src/api/schema.generated.ts"
+          ],
+          "unexplainedDrift": [],
+          "missingAnchors": []
+        },
+        "checks": [
+          {
+            "id": "map",
+            "status": "PASS",
+            "exitCode": 1,
+            "summary": "STALE",
+            "evidence_ref": "sha256:64434e077ec4dc84d6bafc7fd4053efa9c98c5c55dad6a1066dbbc037b0bf9f7"
+          },
+          {
+            "id": "type-check",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "> vue-tsc --build",
+            "evidence_ref": "sha256:6ba92e1412247e708c21ba7c30166f5b21f50b390df78faf2dfea31947972544"
+          },
+          {
+            "id": "mapped-tests",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "Test Files  1 passed (1)",
+            "evidence_ref": "sha256:639c57c01e123bf7699e7c5e56ab943fedad16131dcaafdae16ef8b55fc1beca"
+          },
+          {
+            "id": "contract-check",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "> node scripts/generate-openapi-types.mjs --check",
+            "evidence_ref": "sha256:ca59b3a59b10b0b567c27159afa310267b16f34fe4db9c0c8d35878ac06c52e0"
+          }
+        ],
+        "escalationReasons": [
+          "UNMAPPED_CHANGED_PATH",
+          "DEPENDENCY_ONLY_CHANGED_PATH"
+        ],
+        "status": "INCOMPLETE",
+        "complete": false
+      },
+      {
+        "schema_version": 1,
+        "featureId": "notes-backend",
+        "changedPaths": [
+          "backend/app/Http/Controllers/NoteController.php",
+          "backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php",
+          "backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php",
+          "backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php",
+          "backend/app/Modules/Notes/Domain/NoteLabel.php",
+          "backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php",
+          "backend/routes/api.php",
+          "backend/tests/Contract/NoteContractTest.php",
+          "backend/tests/Feature/NoteApiTest.php",
+          "backend/tests/Feature/NoteConcurrencyTest.php",
+          "backend/tests/Feature/NotePersistenceTest.php",
+          "backend/tests/Feature/NoteUseCasesTest.php",
+          "backend/tests/Feature/NotebookPersistenceTest.php",
+          "backend/tests/Unit/NoteLabelTest.php",
+          "contracts/openapi.yaml",
+          "frontend/src/api/__tests__/notes.spec.ts",
+          "frontend/src/api/notes.ts",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "matchedPaths": [
+          "backend/app/Http/Controllers/NoteController.php",
+          "backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php",
+          "backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php",
+          "backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php",
+          "backend/app/Modules/Notes/Domain/NoteLabel.php",
+          "backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php",
+          "backend/routes/api.php",
+          "backend/tests/Contract/NoteContractTest.php",
+          "backend/tests/Feature/NoteApiTest.php",
+          "backend/tests/Feature/NoteConcurrencyTest.php",
+          "backend/tests/Feature/NotePersistenceTest.php",
+          "backend/tests/Feature/NoteUseCasesTest.php",
+          "backend/tests/Unit/NoteLabelTest.php",
+          "contracts/openapi.yaml"
+        ],
+        "coveredPaths": [
+          "backend/app/Http/Controllers/NoteController.php",
+          "backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php",
+          "backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php",
+          "backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php",
+          "backend/app/Modules/Notes/Domain/NoteLabel.php",
+          "backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php",
+          "backend/routes/api.php",
+          "backend/tests/Contract/NoteContractTest.php",
+          "backend/tests/Feature/NoteApiTest.php",
+          "backend/tests/Feature/NoteConcurrencyTest.php",
+          "backend/tests/Feature/NotePersistenceTest.php",
+          "backend/tests/Feature/NoteUseCasesTest.php",
+          "backend/tests/Unit/NoteLabelTest.php",
+          "contracts/openapi.yaml"
+        ],
+        "unmatchedPaths": [
+          "backend/tests/Feature/NotebookPersistenceTest.php",
+          "frontend/src/api/__tests__/notes.spec.ts",
+          "frontend/src/api/notes.ts",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "dependencyOnlyPaths": [],
+        "map": {
+          "status": "STALE",
+          "expectedChangedAnchors": [
+            "backend/app/Http/Controllers/NoteController.php",
+            "backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php",
+            "backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php",
+            "backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php",
+            "backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php",
+            "backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php",
+            "backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php",
+            "backend/app/Modules/Notes/Domain/NoteLabel.php",
+            "backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php",
+            "backend/routes/api.php",
+            "backend/tests/Contract/NoteContractTest.php",
+            "backend/tests/Feature/NoteApiTest.php",
+            "backend/tests/Feature/NoteConcurrencyTest.php",
+            "backend/tests/Feature/NotePersistenceTest.php",
+            "backend/tests/Feature/NoteUseCasesTest.php",
+            "backend/tests/Unit/NoteLabelTest.php",
+            "contracts/openapi.yaml"
+          ],
+          "unexplainedDrift": [],
+          "missingAnchors": []
+        },
+        "checks": [
+          {
+            "id": "map",
+            "status": "PASS",
+            "exitCode": 1,
+            "summary": "STALE",
+            "evidence_ref": "sha256:6716bf7249b17ccf222de5968364a3b1dffae51c202d2b90e4e5b979d2af6301"
+          },
+          {
+            "id": "live-backend-test",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "Container noteflow-test-3286bcd071ca-backend-test-1  Healthy",
+            "evidence_ref": "sha256:2990fbda3901474ee798f9292a2da7040e91194f60e9fa174775f435ecb2a4d1"
+          },
+          {
+            "id": "contract-validate",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "\u001b[39m",
+            "evidence_ref": "sha256:292e7d69a4e2159e6fd783add4410796a25101bdec268d365d77e51cae14aa63"
+          }
+        ],
+        "escalationReasons": [
+          "UNMAPPED_CHANGED_PATH"
+        ],
+        "status": "INCOMPLETE",
+        "complete": false
+      },
+      {
+        "schema_version": 1,
+        "featureId": "notes-client",
+        "changedPaths": [
+          "backend/app/Http/Controllers/NoteController.php",
+          "backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php",
+          "backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php",
+          "backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php",
+          "backend/app/Modules/Notes/Domain/NoteLabel.php",
+          "backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php",
+          "backend/routes/api.php",
+          "backend/tests/Contract/NoteContractTest.php",
+          "backend/tests/Feature/NoteApiTest.php",
+          "backend/tests/Feature/NoteConcurrencyTest.php",
+          "backend/tests/Feature/NotePersistenceTest.php",
+          "backend/tests/Feature/NoteUseCasesTest.php",
+          "backend/tests/Feature/NotebookPersistenceTest.php",
+          "backend/tests/Unit/NoteLabelTest.php",
+          "contracts/openapi.yaml",
+          "frontend/src/api/__tests__/notes.spec.ts",
+          "frontend/src/api/notes.ts",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "matchedPaths": [
+          "contracts/openapi.yaml",
+          "frontend/src/api/__tests__/notes.spec.ts",
+          "frontend/src/api/notes.ts",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "coveredPaths": [
+          "frontend/src/api/__tests__/notes.spec.ts",
+          "frontend/src/api/notes.ts",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "unmatchedPaths": [
+          "backend/app/Http/Controllers/NoteController.php",
+          "backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php",
+          "backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php",
+          "backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php",
+          "backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php",
+          "backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php",
+          "backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php",
+          "backend/app/Modules/Notes/Domain/NoteLabel.php",
+          "backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php",
+          "backend/routes/api.php",
+          "backend/tests/Contract/NoteContractTest.php",
+          "backend/tests/Feature/NoteApiTest.php",
+          "backend/tests/Feature/NoteConcurrencyTest.php",
+          "backend/tests/Feature/NotePersistenceTest.php",
+          "backend/tests/Feature/NoteUseCasesTest.php",
+          "backend/tests/Feature/NotebookPersistenceTest.php",
+          "backend/tests/Unit/NoteLabelTest.php",
+          "contracts/openapi.yaml"
+        ],
+        "dependencyOnlyPaths": [
+          "contracts/openapi.yaml"
+        ],
+        "map": {
+          "status": "STALE",
+          "expectedChangedAnchors": [
+            "contracts/openapi.yaml",
+            "frontend/src/api/__tests__/notes.spec.ts",
+            "frontend/src/api/notes.ts",
+            "frontend/src/api/schema.generated.ts"
+          ],
+          "unexplainedDrift": [],
+          "missingAnchors": []
+        },
+        "checks": [
+          {
+            "id": "map",
+            "status": "PASS",
+            "exitCode": 1,
+            "summary": "STALE",
+            "evidence_ref": "sha256:76908bbb94a85ff2f9f3b538ef713f970f1ed41ad2cfd5744c416bf8bc2ffbb0"
+          },
+          {
+            "id": "type-check",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "> vue-tsc --build",
+            "evidence_ref": "sha256:6ba92e1412247e708c21ba7c30166f5b21f50b390df78faf2dfea31947972544"
+          },
+          {
+            "id": "mapped-tests",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "Test Files  1 passed (1)",
+            "evidence_ref": "sha256:e039c0ca0bda452afd581a2dffcccfd06cfecfbc1adc33c68b8e920fc189e0dd"
+          },
+          {
+            "id": "contract-check",
+            "status": "PASS",
+            "exitCode": 0,
+            "summary": "> node scripts/generate-openapi-types.mjs --check",
+            "evidence_ref": "sha256:ca59b3a59b10b0b567c27159afa310267b16f34fe4db9c0c8d35878ac06c52e0"
+          }
+        ],
+        "escalationReasons": [
+          "UNMAPPED_CHANGED_PATH",
+          "DEPENDENCY_ONLY_CHANGED_PATH"
+        ],
+        "status": "INCOMPLETE",
+        "complete": false
+      }
+    ],
+    "checks": [
+      {
+        "id": "map",
+        "status": "PASS",
+        "exitCode": 1,
+        "summary": "STALE",
+        "evidence_ref": "sha256:fe32fb61b38ca317a815611432184241f40146fee4271840c7f89f352135db21",
+        "recipe_refs": [
+          "journal-frontend"
+        ]
+      },
+      {
+        "id": "type-check",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "> vue-tsc --build",
+        "evidence_ref": "sha256:6ba92e1412247e708c21ba7c30166f5b21f50b390df78faf2dfea31947972544",
+        "recipe_refs": [
+          "journal-frontend",
+          "notebooks-client",
+          "notes-client"
+        ]
+      },
+      {
+        "id": "mapped-tests",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "Test Files  3 passed (3)",
+        "evidence_ref": "sha256:3b9525a7604ffaca5a8917368835a360fedc28af5425878437c05827fd7bcdd9",
+        "recipe_refs": [
+          "journal-frontend"
+        ]
+      },
+      {
+        "id": "contract-check",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "> node scripts/generate-openapi-types.mjs --check",
+        "evidence_ref": "sha256:ca59b3a59b10b0b567c27159afa310267b16f34fe4db9c0c8d35878ac06c52e0",
+        "recipe_refs": [
+          "journal-frontend",
+          "notebooks-client",
+          "notes-client"
+        ]
+      },
+      {
+        "id": "map",
+        "status": "PASS",
+        "exitCode": 1,
+        "summary": "STALE",
+        "evidence_ref": "sha256:2ec5f5685c4882f3cae9c55441ac3a8176a09f4d7db36e25e9a07ef21fa6d5f4",
+        "recipe_refs": [
+          "notebooks-backend"
+        ]
+      },
+      {
+        "id": "live-backend-test",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "Container noteflow-test-3286bcd071ca-backend-test-1  Healthy",
+        "evidence_ref": "sha256:2990fbda3901474ee798f9292a2da7040e91194f60e9fa174775f435ecb2a4d1",
+        "recipe_refs": [
+          "notebooks-backend",
+          "notes-backend"
+        ]
+      },
+      {
+        "id": "contract-validate",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "\u001b[39m",
+        "evidence_ref": "sha256:292e7d69a4e2159e6fd783add4410796a25101bdec268d365d77e51cae14aa63",
+        "recipe_refs": [
+          "notebooks-backend",
+          "notes-backend"
+        ]
+      },
+      {
+        "id": "map",
+        "status": "PASS",
+        "exitCode": 1,
+        "summary": "STALE",
+        "evidence_ref": "sha256:64434e077ec4dc84d6bafc7fd4053efa9c98c5c55dad6a1066dbbc037b0bf9f7",
+        "recipe_refs": [
+          "notebooks-client"
+        ]
+      },
+      {
+        "id": "mapped-tests",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "Test Files  1 passed (1)",
+        "evidence_ref": "sha256:639c57c01e123bf7699e7c5e56ab943fedad16131dcaafdae16ef8b55fc1beca",
+        "recipe_refs": [
+          "notebooks-client"
+        ]
+      },
+      {
+        "id": "map",
+        "status": "PASS",
+        "exitCode": 1,
+        "summary": "STALE",
+        "evidence_ref": "sha256:6716bf7249b17ccf222de5968364a3b1dffae51c202d2b90e4e5b979d2af6301",
+        "recipe_refs": [
+          "notes-backend"
+        ]
+      },
+      {
+        "id": "map",
+        "status": "PASS",
+        "exitCode": 1,
+        "summary": "STALE",
+        "evidence_ref": "sha256:76908bbb94a85ff2f9f3b538ef713f970f1ed41ad2cfd5744c416bf8bc2ffbb0",
+        "recipe_refs": [
+          "notes-client"
+        ]
+      },
+      {
+        "id": "mapped-tests",
+        "status": "PASS",
+        "exitCode": 0,
+        "summary": "Test Files  1 passed (1)",
+        "evidence_ref": "sha256:e039c0ca0bda452afd581a2dffcccfd06cfecfbc1adc33c68b8e920fc189e0dd",
+        "recipe_refs": [
+          "notes-client"
+        ]
+      }
+    ],
+    "escalationReasons": [],
+    "status": "PASS",
+    "complete": true
+  },
+  "focused_checks": [
+    {
+      "schema_version": 1,
+      "check_id": "backend-note-tests",
+      "classification": "behavioral",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 21685,
+      "command_digest": "sha256:13aab0161c7e0abd45dcb2922f4642e71f0ab85670847dab409622a775f90399",
+      "output_digest": "sha256:7d554cfae7ad7776a918e554c47b1acca244161f233e5dce0e9eac3b28969bcd",
+      "diagnostic_excerpt": "\u001b[30;42;1m PASS \u001b[39;49;22m\u001b[39m Tests\\Unit\\NoteLabelTest\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mthe label is the trimmed title when the title has a non-whitespace\u001b[39m\u001b[90m… \u001b[39m \u001b[90m0.04s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90ma whitespace-only title falls back to the first body line with a non-whitespace character, trimmed\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mleading blank body lines are skipped, with LF, CRLF and CR line breaks\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90ma note with no non-whitespace text is labelled Không tiêu đề\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mthe label never changes the title or body it is derived from\u001b[39m\n\n  \u001b[30;42;1m PASS \u001b[39;49;22m\u001b[39m Tests\\Feature\\NoteApiTest\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mguests are unauthenticated on every note endpoint\u001b[39m\u001b[90m                   \u001b[39m \u001b[90m1.17s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90ma non-owner identity is forbidden on every note endpoint\u001b[39m\u001b[90m            \u001b[39m \u001b[90m0.27s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mAC-2 and AC-4: create, list and update return the note with its lab\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.30s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mAC-3: a create with a blank title and body is refused with note_emp\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.13s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90manother owner's note or notebook and malformed ids are not found\u001b[39m\u001b[90m    \u001b[39m \u001b[90m0.14s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90munknown fields, including a label or a row_version, are rejected wi\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.14s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mtitle, body and command fields return field errors\u001b[39m\u001b[90m                  \u001b[39m \u001b[90m0.16s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mthe request body is the source, so surrounding whitespace and empty\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.14s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mstale version, stale epoch, write fence and idempotency reuse retur\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.21s\u001b[39m  \n\n  \u001b[30;42;1m PASS \u001b[39;49;22m\u001b[39m Tests\\Feature\\NoteConcurrency",
+      "subject": {
+        "commit": "712f6712e94984775e2a4099b6fa5a538c5917d6"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-2 worktree",
+        "os": "Windows 11",
+        "runtime": "worktree backend-test container, PHP + PostgreSQL"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "backend/tests/Contract/NoteContractTest.php",
+          "backend/tests/Feature/NoteApiTest.php",
+          "backend/tests/Feature/NoteConcurrencyTest.php",
+          "backend/tests/Feature/NotePersistenceTest.php",
+          "backend/tests/Feature/NoteUseCasesTest.php",
+          "backend/tests/Feature/NotebookPersistenceTest.php",
+          "backend/tests/Unit/NoteLabelTest.php"
+        ],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:e6c18d0703ace0842c188afa7af882378b853fb2e61d0080b5dce6512698a259"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-14T11:44:55.802Z",
+      "observation": {
+        "status": "CONFLICT",
+        "event_id": "hook-check_finished-27974a98a7386317cd9288640de15a69d379f450edf57a9d",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-2\\.agent-state\\v4-observations\\events\\hook-check_finished-27974a98a7386317cd9288640de15a69d379f450edf57a9d.json",
+        "coverage": "UNKNOWN",
+        "reason": "EVENT_ID_PAYLOAD_CONFLICT"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "backend/app/Http/Controllers/NoteController.php",
+        "backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php",
+        "backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php",
+        "backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php",
+        "backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php",
+        "backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php",
+        "backend/app/Modules/Notes/Domain/NoteLabel.php",
+        "backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php",
+        "backend/routes/api.php",
+        "backend/tests/Contract/NoteContractTest.php",
+        "backend/tests/Feature/NoteApiTest.php",
+        "backend/tests/Feature/NoteConcurrencyTest.php",
+        "backend/tests/Feature/NotePersistenceTest.php",
+        "backend/tests/Feature/NoteUseCasesTest.php",
+        "backend/tests/Feature/NotebookPersistenceTest.php",
+        "backend/tests/Unit/NoteLabelTest.php",
+        "contracts/openapi.yaml",
+        "frontend/src/api/__tests__/notes.spec.ts",
+        "frontend/src/api/notes.ts",
+        "frontend/src/api/schema.generated.ts"
+      ],
+      "changed_paths_sha256": "sha256:137b55ddd55a7be1995913741fea40e31dc5184c9d3c072e9a5395d98c982886",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "pint",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 2766,
+      "command_digest": "sha256:e6a136a5ce12ed90b7e73b8bfbff8fa55f551366a42c5f39d06e1a87f9493063",
+      "output_digest": "sha256:57df3380415517d851d5d9042ebfde42549db9498da146236ca08507817519b9",
+      "diagnostic_excerpt": "............................................................................\n  ....................................................\n\n  ──────────────────────────────────────────────────────────────────── Laravel  \n    PASS   ......................................................... 128 files",
+      "subject": {
+        "commit": "712f6712e94984775e2a4099b6fa5a538c5917d6"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-2 worktree",
+        "os": "Windows 11",
+        "runtime": "worktree backend-test container, PHP"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:81e46418a43f16cefedeea3a127d803ea0eccbeaf68d8070c84bc4ff4b1f9de8"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-14T11:45:18.086Z",
+      "observation": {
+        "status": "NOOP",
+        "event_id": "hook-check_finished-7a8457cbbbd438e1afeebd5d4bf65b26bb62ea15021bc612",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-2\\.agent-state\\v4-observations\\events\\hook-check_finished-7a8457cbbbd438e1afeebd5d4bf65b26bb62ea15021bc612.json",
+        "coverage": "MEASURED"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "backend/app/Http/Controllers/NoteController.php",
+        "backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php",
+        "backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php",
+        "backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php",
+        "backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php",
+        "backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php",
+        "backend/app/Modules/Notes/Domain/NoteLabel.php",
+        "backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php",
+        "backend/routes/api.php",
+        "backend/tests/Contract/NoteContractTest.php",
+        "backend/tests/Feature/NoteApiTest.php",
+        "backend/tests/Feature/NoteConcurrencyTest.php",
+        "backend/tests/Feature/NotePersistenceTest.php",
+        "backend/tests/Feature/NoteUseCasesTest.php",
+        "backend/tests/Feature/NotebookPersistenceTest.php",
+        "backend/tests/Unit/NoteLabelTest.php",
+        "contracts/openapi.yaml",
+        "frontend/src/api/__tests__/notes.spec.ts",
+        "frontend/src/api/notes.ts",
+        "frontend/src/api/schema.generated.ts"
+      ],
+      "changed_paths_sha256": "sha256:137b55ddd55a7be1995913741fea40e31dc5184c9d3c072e9a5395d98c982886",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "phpstan",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 2891,
+      "command_digest": "sha256:c1a999cf95df5ac96714aaed9bb381b06f1f5b9c16d16ac8cbcaa0dca0205474",
+      "output_digest": "sha256:44a94a4391ca44c827ddd7cae20d2d5701cce731d5bfb7718e88fb640697280e",
+      "diagnostic_excerpt": "[OK] No errors                                                                 \n\n\nNote: Using configuration file /workspace/backend/phpstan.neon.\n  0/65 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%\u001b[1G\u001b[2K 65/65 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%",
+      "subject": {
+        "commit": "712f6712e94984775e2a4099b6fa5a538c5917d6"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-2 worktree",
+        "os": "Windows 11",
+        "runtime": "worktree backend-test container, PHP"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:bf200cf8ed701a3a55bf44f217a00446c1f8b4ce60a04bc54c1fc3b9534ce831"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-14T11:45:21.481Z",
+      "observation": {
+        "status": "NOOP",
+        "event_id": "hook-check_finished-fe475b06b7fa11e23114e9faad79e018ccc0ccab67cb5873",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-2\\.agent-state\\v4-observations\\events\\hook-check_finished-fe475b06b7fa11e23114e9faad79e018ccc0ccab67cb5873.json",
+        "coverage": "MEASURED"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "backend/app/Http/Controllers/NoteController.php",
+        "backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php",
+        "backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php",
+        "backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php",
+        "backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php",
+        "backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php",
+        "backend/app/Modules/Notes/Domain/NoteLabel.php",
+        "backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php",
+        "backend/routes/api.php",
+        "backend/tests/Contract/NoteContractTest.php",
+        "backend/tests/Feature/NoteApiTest.php",
+        "backend/tests/Feature/NoteConcurrencyTest.php",
+        "backend/tests/Feature/NotePersistenceTest.php",
+        "backend/tests/Feature/NoteUseCasesTest.php",
+        "backend/tests/Feature/NotebookPersistenceTest.php",
+        "backend/tests/Unit/NoteLabelTest.php",
+        "contracts/openapi.yaml",
+        "frontend/src/api/__tests__/notes.spec.ts",
+        "frontend/src/api/notes.ts",
+        "frontend/src/api/schema.generated.ts"
+      ],
+      "changed_paths_sha256": "sha256:137b55ddd55a7be1995913741fea40e31dc5184c9d3c072e9a5395d98c982886",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "contract-validate",
+      "classification": "contract",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 3582,
+      "command_digest": "sha256:49e19d1697c7959be5954c5ca0e55757e868671e3460e3748cd6e3fe8993e475",
+      "output_digest": "sha256:653f4510cc1b79e4446c1ec65e0c883efeeecf373792f6001fdb12093b419eee",
+      "diagnostic_excerpt": "> frontend@0.0.0 contract:validate\n> redocly lint ../contracts/openapi.yaml --config ../redocly.yaml\n\n\n\n    \u001b[33m╔═══════════════════════════════════════════════════════╗\u001b[39m\n    \u001b[33m║                                                       ║\u001b[39m\n    \u001b[33m║\u001b[39m  A new version of \u001b[36mRedocly CLI\u001b[39m (\u001b[32m2.78.0\u001b[39m) is available.  \u001b[33m║\u001b[39m\n    \u001b[33m║\u001b[39m  Update now: `\u001b[36mnpm i -g @redocly/cli@latest\u001b[39m`.          \u001b[33m║\u001b[39m\n    \u001b[33m║\u001b[39m  Changelog: https://redocly.com/docs/cli/changelog/   \u001b[33m║\u001b[39m\n    \u001b[33m║                                                       ║\u001b[39m\n    \u001b[33m╚═══════════════════════════════════════════════════════╝\u001b[39m\n\n\u001b[90mvalidating ..\\contracts\\openapi.yaml...\n\u001b[39m\u001b[90m..\\contracts\\openapi.yaml: validated in 74ms\n\n\u001b[39m\u001b[32mWoohoo! Your API description is valid. 🎉\n\u001b[39m",
+      "subject": {
+        "commit": "712f6712e94984775e2a4099b6fa5a538c5917d6"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-2 worktree",
+        "os": "Windows 11",
+        "runtime": "Node 24"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "contracts/openapi.yaml"
+        ],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": "frontend",
+        "argv_digest": "sha256:70ed0d39c84985912606e2df0bb0e9e8ebc03244abd0595e2ba5b2dff01f5c16"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-14T11:45:25.083Z",
+      "observation": {
+        "status": "CONFLICT",
+        "event_id": "hook-check_finished-4aad849e1bcd79028ff515d92ebda1c84bffdc572ead9efb",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-2\\.agent-state\\v4-observations\\events\\hook-check_finished-4aad849e1bcd79028ff515d92ebda1c84bffdc572ead9efb.json",
+        "coverage": "UNKNOWN",
+        "reason": "EVENT_ID_PAYLOAD_CONFLICT"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "backend/app/Http/Controllers/NoteController.php",
+        "backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php",
+        "backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php",
+        "backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php",
+        "backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php",
+        "backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php",
+        "backend/app/Modules/Notes/Domain/NoteLabel.php",
+        "backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php",
+        "backend/routes/api.php",
+        "backend/tests/Contract/NoteContractTest.php",
+        "backend/tests/Feature/NoteApiTest.php",
+        "backend/tests/Feature/NoteConcurrencyTest.php",
+        "backend/tests/Feature/NotePersistenceTest.php",
+        "backend/tests/Feature/NoteUseCasesTest.php",
+        "backend/tests/Feature/NotebookPersistenceTest.php",
+        "backend/tests/Unit/NoteLabelTest.php",
+        "contracts/openapi.yaml",
+        "frontend/src/api/__tests__/notes.spec.ts",
+        "frontend/src/api/notes.ts",
+        "frontend/src/api/schema.generated.ts"
+      ],
+      "changed_paths_sha256": "sha256:137b55ddd55a7be1995913741fea40e31dc5184c9d3c072e9a5395d98c982886",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "contract-check",
+      "classification": "contract",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 982,
+      "command_digest": "sha256:aa206073d9d8992490471fc5fa3845985d021e35296193d2f61ff6176e8d18a7",
+      "output_digest": "sha256:f5f19200ac9e00c76a87e09edcb533887bcfaaaf02e4db6930fce9e85d20ee19",
+      "diagnostic_excerpt": "> frontend@0.0.0 contract:check\n> node scripts/generate-openapi-types.mjs --check",
+      "subject": {
+        "commit": "712f6712e94984775e2a4099b6fa5a538c5917d6"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-2 worktree",
+        "os": "Windows 11",
+        "runtime": "Node 24"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "contracts/openapi.yaml",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": "frontend",
+        "argv_digest": "sha256:c0f84d63302061b8de2cb9c1cd6797742f4e9d84befd5ca5cb67f4e700705549"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-14T11:45:29.440Z",
+      "observation": {
+        "status": "NOOP",
+        "event_id": "hook-check_finished-26969beac2247defacb504adca960bd7e94f2668ef07396e",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-2\\.agent-state\\v4-observations\\events\\hook-check_finished-26969beac2247defacb504adca960bd7e94f2668ef07396e.json",
+        "coverage": "MEASURED"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "backend/app/Http/Controllers/NoteController.php",
+        "backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php",
+        "backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php",
+        "backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php",
+        "backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php",
+        "backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php",
+        "backend/app/Modules/Notes/Domain/NoteLabel.php",
+        "backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php",
+        "backend/routes/api.php",
+        "backend/tests/Contract/NoteContractTest.php",
+        "backend/tests/Feature/NoteApiTest.php",
+        "backend/tests/Feature/NoteConcurrencyTest.php",
+        "backend/tests/Feature/NotePersistenceTest.php",
+        "backend/tests/Feature/NoteUseCasesTest.php",
+        "backend/tests/Feature/NotebookPersistenceTest.php",
+        "backend/tests/Unit/NoteLabelTest.php",
+        "contracts/openapi.yaml",
+        "frontend/src/api/__tests__/notes.spec.ts",
+        "frontend/src/api/notes.ts",
+        "frontend/src/api/schema.generated.ts"
+      ],
+      "changed_paths_sha256": "sha256:137b55ddd55a7be1995913741fea40e31dc5184c9d3c072e9a5395d98c982886",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "type-check",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 9032,
+      "command_digest": "sha256:50c4406b5b96f13951ba26e217bf0410e370c1e068004567f04896698327a094",
+      "output_digest": "sha256:d49b3656eb9402550a0f331ae50a4ba70f8b153f191dd2c6ff7c1d545491044b",
+      "diagnostic_excerpt": "> frontend@0.0.0 type-check\n> vue-tsc --build",
+      "subject": {
+        "commit": "712f6712e94984775e2a4099b6fa5a538c5917d6"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-2 worktree",
+        "os": "Windows 11",
+        "runtime": "Node 24"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": "frontend",
+        "argv_digest": "sha256:9feb0279e4fc7384425c7e4bcf4c84ec5f31dd83bd70d9b9434c13f168e957dd"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-14T11:45:31.010Z",
+      "observation": {
+        "status": "NOOP",
+        "event_id": "hook-check_finished-cc45009a084205e2a16bee6d9939d52e62ddfed83a6fa06f",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-2\\.agent-state\\v4-observations\\events\\hook-check_finished-cc45009a084205e2a16bee6d9939d52e62ddfed83a6fa06f.json",
+        "coverage": "MEASURED"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "backend/app/Http/Controllers/NoteController.php",
+        "backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php",
+        "backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php",
+        "backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php",
+        "backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php",
+        "backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php",
+        "backend/app/Modules/Notes/Domain/NoteLabel.php",
+        "backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php",
+        "backend/routes/api.php",
+        "backend/tests/Contract/NoteContractTest.php",
+        "backend/tests/Feature/NoteApiTest.php",
+        "backend/tests/Feature/NoteConcurrencyTest.php",
+        "backend/tests/Feature/NotePersistenceTest.php",
+        "backend/tests/Feature/NoteUseCasesTest.php",
+        "backend/tests/Feature/NotebookPersistenceTest.php",
+        "backend/tests/Unit/NoteLabelTest.php",
+        "contracts/openapi.yaml",
+        "frontend/src/api/__tests__/notes.spec.ts",
+        "frontend/src/api/notes.ts",
+        "frontend/src/api/schema.generated.ts"
+      ],
+      "changed_paths_sha256": "sha256:137b55ddd55a7be1995913741fea40e31dc5184c9d3c072e9a5395d98c982886",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "lint",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 6685,
+      "command_digest": "sha256:31df0ab41b38e86b93fa2ead882d16a5478580c57a4fd30a71767ee4b29a9625",
+      "output_digest": "sha256:bc6cdceab12617b2bcdca6213a87da59a46254c4c7c1460189d598173accbb2b",
+      "diagnostic_excerpt": "> frontend@0.0.0 lint\n> run-s \"lint:*\"\n\n\n> frontend@0.0.0 lint:oxlint\n> oxlint .\n\n\n> frontend@0.0.0 lint:eslint\n> eslint . --cache",
+      "subject": {
+        "commit": "712f6712e94984775e2a4099b6fa5a538c5917d6"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-2 worktree",
+        "os": "Windows 11",
+        "runtime": "Node 24"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": "frontend",
+        "argv_digest": "sha256:edad09f9dbb99f2e409938c2533159fd4e989323316882ac20ce829d5d85e62f"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-14T11:45:40.665Z",
+      "observation": {
+        "status": "NOOP",
+        "event_id": "hook-check_finished-456a6699eb872cf3764d32379b7a9d26c1a2ebe39a3676e7",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-2\\.agent-state\\v4-observations\\events\\hook-check_finished-456a6699eb872cf3764d32379b7a9d26c1a2ebe39a3676e7.json",
+        "coverage": "MEASURED"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "backend/app/Http/Controllers/NoteController.php",
+        "backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php",
+        "backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php",
+        "backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php",
+        "backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php",
+        "backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php",
+        "backend/app/Modules/Notes/Domain/NoteLabel.php",
+        "backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php",
+        "backend/routes/api.php",
+        "backend/tests/Contract/NoteContractTest.php",
+        "backend/tests/Feature/NoteApiTest.php",
+        "backend/tests/Feature/NoteConcurrencyTest.php",
+        "backend/tests/Feature/NotePersistenceTest.php",
+        "backend/tests/Feature/NoteUseCasesTest.php",
+        "backend/tests/Feature/NotebookPersistenceTest.php",
+        "backend/tests/Unit/NoteLabelTest.php",
+        "contracts/openapi.yaml",
+        "frontend/src/api/__tests__/notes.spec.ts",
+        "frontend/src/api/notes.ts",
+        "frontend/src/api/schema.generated.ts"
+      ],
+      "changed_paths_sha256": "sha256:137b55ddd55a7be1995913741fea40e31dc5184c9d3c072e9a5395d98c982886",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    },
+    {
+      "schema_version": 1,
+      "check_id": "notes-client-unit",
+      "classification": "behavioral",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 4487,
+      "command_digest": "sha256:140860602735a12927d63a05e5826a334b8e60c2bffa2bb87fbe21e75ee96efd",
+      "output_digest": "sha256:13f0954bbd24a6a7edb137ef2c713afe1995324d00984cf31ebd214f2a8e3326",
+      "diagnostic_excerpt": "> frontend@0.0.0 test:unit\n> vitest --run src/api/__tests__/notes.spec.ts\n\n\n RUN  v5.0.1 C:/Users/ACER/orca/workspaces/New_Project_My_Note/story-4-2/frontend\n\n\n Test Files  1 passed (1)\n      Tests  21 passed (21)\n   Start at  18:45:49\n   Duration  2.67s (environment 92%, transform 5%, tests 1%, import 1%)",
+      "subject": {
+        "commit": "712f6712e94984775e2a4099b6fa5a538c5917d6"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-2 worktree",
+        "os": "Windows 11",
+        "runtime": "Node 24, jsdom"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "frontend/src/api/__tests__/notes.spec.ts"
+        ],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": "frontend",
+        "argv_digest": "sha256:5456d811ffa37124e56cbcd08cdb72dace7a7593d11f592b5ebbe500199de219"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-14T11:45:47.986Z",
+      "observation": {
+        "status": "CONFLICT",
+        "event_id": "hook-check_finished-2e665f7eb9466166c0a4ce39a39139d64b655af268ff1122",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-2\\.agent-state\\v4-observations\\events\\hook-check_finished-2e665f7eb9466166c0a4ce39a39139d64b655af268ff1122.json",
+        "coverage": "UNKNOWN",
+        "reason": "EVENT_ID_PAYLOAD_CONFLICT"
+      },
+      "result": "PASS",
+      "changed_paths": [
+        "backend/app/Http/Controllers/NoteController.php",
+        "backend/app/Modules/Notes/Application/Commands/CreateNoteCommand.php",
+        "backend/app/Modules/Notes/Application/Commands/UpdateNoteCommand.php",
+        "backend/app/Modules/Notes/Application/UseCases/CreateNoteUseCase.php",
+        "backend/app/Modules/Notes/Application/UseCases/GetNoteListQuery.php",
+        "backend/app/Modules/Notes/Application/UseCases/UpdateNoteUseCase.php",
+        "backend/app/Modules/Notes/Domain/Exceptions/InvalidNoteContentException.php",
+        "backend/app/Modules/Notes/Domain/NoteLabel.php",
+        "backend/database/migrations/2026_11_14_010000_add_content_to_notes_table.php",
+        "backend/routes/api.php",
+        "backend/tests/Contract/NoteContractTest.php",
+        "backend/tests/Feature/NoteApiTest.php",
+        "backend/tests/Feature/NoteConcurrencyTest.php",
+        "backend/tests/Feature/NotePersistenceTest.php",
+        "backend/tests/Feature/NoteUseCasesTest.php",
+        "backend/tests/Feature/NotebookPersistenceTest.php",
+        "backend/tests/Unit/NoteLabelTest.php",
+        "contracts/openapi.yaml",
+        "frontend/src/api/__tests__/notes.spec.ts",
+        "frontend/src/api/notes.ts",
+        "frontend/src/api/schema.generated.ts"
+      ],
+      "changed_paths_sha256": "sha256:137b55ddd55a7be1995913741fea40e31dc5184c9d3c072e9a5395d98c982886",
+      "toolchain_digest": "sha256:a99cd890ca06c5e1f58b6586b8e231d94f5bf0a26b7692e6bdfea651a8c138de",
+      "environment_sensitive": false
+    }
+  ],
+  "raw_focused_checks": [
+    {
+      "schema_version": 1,
+      "check_id": "backend-note-tests",
+      "classification": "behavioral",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 21685,
+      "command_digest": "sha256:13aab0161c7e0abd45dcb2922f4642e71f0ab85670847dab409622a775f90399",
+      "output_digest": "sha256:7d554cfae7ad7776a918e554c47b1acca244161f233e5dce0e9eac3b28969bcd",
+      "diagnostic_excerpt": "\u001b[30;42;1m PASS \u001b[39;49;22m\u001b[39m Tests\\Unit\\NoteLabelTest\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mthe label is the trimmed title when the title has a non-whitespace\u001b[39m\u001b[90m… \u001b[39m \u001b[90m0.04s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90ma whitespace-only title falls back to the first body line with a non-whitespace character, trimmed\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mleading blank body lines are skipped, with LF, CRLF and CR line breaks\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90ma note with no non-whitespace text is labelled Không tiêu đề\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mthe label never changes the title or body it is derived from\u001b[39m\n\n  \u001b[30;42;1m PASS \u001b[39;49;22m\u001b[39m Tests\\Feature\\NoteApiTest\u001b[39m\n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mguests are unauthenticated on every note endpoint\u001b[39m\u001b[90m                   \u001b[39m \u001b[90m1.17s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90ma non-owner identity is forbidden on every note endpoint\u001b[39m\u001b[90m            \u001b[39m \u001b[90m0.27s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mAC-2 and AC-4: create, list and update return the note with its lab\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.30s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mAC-3: a create with a blank title and body is refused with note_emp\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.13s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90manother owner's note or notebook and malformed ids are not found\u001b[39m\u001b[90m    \u001b[39m \u001b[90m0.14s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90munknown fields, including a label or a row_version, are rejected wi\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.14s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mtitle, body and command fields return field errors\u001b[39m\u001b[90m                  \u001b[39m \u001b[90m0.16s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mthe request body is the source, so surrounding whitespace and empty\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.14s\u001b[39m  \n  \u001b[32;1m✓\u001b[39;22m\u001b[90m \u001b[39m\u001b[90mstale version, stale epoch, write fence and idempotency reuse retur\u001b[39m\u001b[90m…\u001b[39m \u001b[90m0.21s\u001b[39m  \n\n  \u001b[30;42;1m PASS \u001b[39;49;22m\u001b[39m Tests\\Feature\\NoteConcurrency",
+      "subject": {
+        "kind": "commit",
+        "value": "712f6712e94984775e2a4099b6fa5a538c5917d6"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-2 worktree",
+        "os": "Windows 11",
+        "runtime": "worktree backend-test container, PHP + PostgreSQL"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "backend/tests/Contract/NoteContractTest.php",
+          "backend/tests/Feature/NoteApiTest.php",
+          "backend/tests/Feature/NoteConcurrencyTest.php",
+          "backend/tests/Feature/NotePersistenceTest.php",
+          "backend/tests/Feature/NoteUseCasesTest.php",
+          "backend/tests/Feature/NotebookPersistenceTest.php",
+          "backend/tests/Unit/NoteLabelTest.php"
+        ],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:e6c18d0703ace0842c188afa7af882378b853fb2e61d0080b5dce6512698a259"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-14T11:44:55.802Z",
+      "observation": {
+        "status": "CONFLICT",
+        "event_id": "hook-check_finished-27974a98a7386317cd9288640de15a69d379f450edf57a9d",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-2\\.agent-state\\v4-observations\\events\\hook-check_finished-27974a98a7386317cd9288640de15a69d379f450edf57a9d.json",
+        "coverage": "UNKNOWN",
+        "reason": "EVENT_ID_PAYLOAD_CONFLICT"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "pint",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 2766,
+      "command_digest": "sha256:e6a136a5ce12ed90b7e73b8bfbff8fa55f551366a42c5f39d06e1a87f9493063",
+      "output_digest": "sha256:57df3380415517d851d5d9042ebfde42549db9498da146236ca08507817519b9",
+      "diagnostic_excerpt": "............................................................................\n  ....................................................\n\n  ──────────────────────────────────────────────────────────────────── Laravel  \n    PASS   ......................................................... 128 files",
+      "subject": {
+        "kind": "commit",
+        "value": "712f6712e94984775e2a4099b6fa5a538c5917d6"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-2 worktree",
+        "os": "Windows 11",
+        "runtime": "worktree backend-test container, PHP"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:81e46418a43f16cefedeea3a127d803ea0eccbeaf68d8070c84bc4ff4b1f9de8"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-14T11:45:18.086Z",
+      "observation": {
+        "status": "NOOP",
+        "event_id": "hook-check_finished-7a8457cbbbd438e1afeebd5d4bf65b26bb62ea15021bc612",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-2\\.agent-state\\v4-observations\\events\\hook-check_finished-7a8457cbbbd438e1afeebd5d4bf65b26bb62ea15021bc612.json",
+        "coverage": "MEASURED"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "phpstan",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 2891,
+      "command_digest": "sha256:c1a999cf95df5ac96714aaed9bb381b06f1f5b9c16d16ac8cbcaa0dca0205474",
+      "output_digest": "sha256:44a94a4391ca44c827ddd7cae20d2d5701cce731d5bfb7718e88fb640697280e",
+      "diagnostic_excerpt": "[OK] No errors                                                                 \n\n\nNote: Using configuration file /workspace/backend/phpstan.neon.\n  0/65 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%\u001b[1G\u001b[2K 65/65 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%",
+      "subject": {
+        "kind": "commit",
+        "value": "712f6712e94984775e2a4099b6fa5a538c5917d6"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-2 worktree",
+        "os": "Windows 11",
+        "runtime": "worktree backend-test container, PHP"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": ".",
+        "argv_digest": "sha256:bf200cf8ed701a3a55bf44f217a00446c1f8b4ce60a04bc54c1fc3b9534ce831"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-14T11:45:21.481Z",
+      "observation": {
+        "status": "NOOP",
+        "event_id": "hook-check_finished-fe475b06b7fa11e23114e9faad79e018ccc0ccab67cb5873",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-2\\.agent-state\\v4-observations\\events\\hook-check_finished-fe475b06b7fa11e23114e9faad79e018ccc0ccab67cb5873.json",
+        "coverage": "MEASURED"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "contract-validate",
+      "classification": "contract",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 3582,
+      "command_digest": "sha256:49e19d1697c7959be5954c5ca0e55757e868671e3460e3748cd6e3fe8993e475",
+      "output_digest": "sha256:653f4510cc1b79e4446c1ec65e0c883efeeecf373792f6001fdb12093b419eee",
+      "diagnostic_excerpt": "> frontend@0.0.0 contract:validate\n> redocly lint ../contracts/openapi.yaml --config ../redocly.yaml\n\n\n\n    \u001b[33m╔═══════════════════════════════════════════════════════╗\u001b[39m\n    \u001b[33m║                                                       ║\u001b[39m\n    \u001b[33m║\u001b[39m  A new version of \u001b[36mRedocly CLI\u001b[39m (\u001b[32m2.78.0\u001b[39m) is available.  \u001b[33m║\u001b[39m\n    \u001b[33m║\u001b[39m  Update now: `\u001b[36mnpm i -g @redocly/cli@latest\u001b[39m`.          \u001b[33m║\u001b[39m\n    \u001b[33m║\u001b[39m  Changelog: https://redocly.com/docs/cli/changelog/   \u001b[33m║\u001b[39m\n    \u001b[33m║                                                       ║\u001b[39m\n    \u001b[33m╚═══════════════════════════════════════════════════════╝\u001b[39m\n\n\u001b[90mvalidating ..\\contracts\\openapi.yaml...\n\u001b[39m\u001b[90m..\\contracts\\openapi.yaml: validated in 74ms\n\n\u001b[39m\u001b[32mWoohoo! Your API description is valid. 🎉\n\u001b[39m",
+      "subject": {
+        "kind": "commit",
+        "value": "712f6712e94984775e2a4099b6fa5a538c5917d6"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-2 worktree",
+        "os": "Windows 11",
+        "runtime": "Node 24"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "contracts/openapi.yaml"
+        ],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": "frontend",
+        "argv_digest": "sha256:70ed0d39c84985912606e2df0bb0e9e8ebc03244abd0595e2ba5b2dff01f5c16"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-14T11:45:25.083Z",
+      "observation": {
+        "status": "CONFLICT",
+        "event_id": "hook-check_finished-4aad849e1bcd79028ff515d92ebda1c84bffdc572ead9efb",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-2\\.agent-state\\v4-observations\\events\\hook-check_finished-4aad849e1bcd79028ff515d92ebda1c84bffdc572ead9efb.json",
+        "coverage": "UNKNOWN",
+        "reason": "EVENT_ID_PAYLOAD_CONFLICT"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "contract-check",
+      "classification": "contract",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 982,
+      "command_digest": "sha256:aa206073d9d8992490471fc5fa3845985d021e35296193d2f61ff6176e8d18a7",
+      "output_digest": "sha256:f5f19200ac9e00c76a87e09edcb533887bcfaaaf02e4db6930fce9e85d20ee19",
+      "diagnostic_excerpt": "> frontend@0.0.0 contract:check\n> node scripts/generate-openapi-types.mjs --check",
+      "subject": {
+        "kind": "commit",
+        "value": "712f6712e94984775e2a4099b6fa5a538c5917d6"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-2 worktree",
+        "os": "Windows 11",
+        "runtime": "Node 24"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "contracts/openapi.yaml",
+          "frontend/src/api/schema.generated.ts"
+        ],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": "frontend",
+        "argv_digest": "sha256:c0f84d63302061b8de2cb9c1cd6797742f4e9d84befd5ca5cb67f4e700705549"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-14T11:45:29.440Z",
+      "observation": {
+        "status": "NOOP",
+        "event_id": "hook-check_finished-26969beac2247defacb504adca960bd7e94f2668ef07396e",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-2\\.agent-state\\v4-observations\\events\\hook-check_finished-26969beac2247defacb504adca960bd7e94f2668ef07396e.json",
+        "coverage": "MEASURED"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "type-check",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 9032,
+      "command_digest": "sha256:50c4406b5b96f13951ba26e217bf0410e370c1e068004567f04896698327a094",
+      "output_digest": "sha256:d49b3656eb9402550a0f331ae50a4ba70f8b153f191dd2c6ff7c1d545491044b",
+      "diagnostic_excerpt": "> frontend@0.0.0 type-check\n> vue-tsc --build",
+      "subject": {
+        "kind": "commit",
+        "value": "712f6712e94984775e2a4099b6fa5a538c5917d6"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-2 worktree",
+        "os": "Windows 11",
+        "runtime": "Node 24"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": "frontend",
+        "argv_digest": "sha256:9feb0279e4fc7384425c7e4bcf4c84ec5f31dd83bd70d9b9434c13f168e957dd"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-14T11:45:31.010Z",
+      "observation": {
+        "status": "NOOP",
+        "event_id": "hook-check_finished-cc45009a084205e2a16bee6d9939d52e62ddfed83a6fa06f",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-2\\.agent-state\\v4-observations\\events\\hook-check_finished-cc45009a084205e2a16bee6d9939d52e62ddfed83a6fa06f.json",
+        "coverage": "MEASURED"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "lint",
+      "classification": "static",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 6685,
+      "command_digest": "sha256:31df0ab41b38e86b93fa2ead882d16a5478580c57a4fd30a71767ee4b29a9625",
+      "output_digest": "sha256:bc6cdceab12617b2bcdca6213a87da59a46254c4c7c1460189d598173accbb2b",
+      "diagnostic_excerpt": "> frontend@0.0.0 lint\n> run-s \"lint:*\"\n\n\n> frontend@0.0.0 lint:oxlint\n> oxlint .\n\n\n> frontend@0.0.0 lint:eslint\n> eslint . --cache",
+      "subject": {
+        "kind": "commit",
+        "value": "712f6712e94984775e2a4099b6fa5a538c5917d6"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-2 worktree",
+        "os": "Windows 11",
+        "runtime": "Node 24"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": "frontend",
+        "argv_digest": "sha256:edad09f9dbb99f2e409938c2533159fd4e989323316882ac20ce829d5d85e62f"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-14T11:45:40.665Z",
+      "observation": {
+        "status": "NOOP",
+        "event_id": "hook-check_finished-456a6699eb872cf3764d32379b7a9d26c1a2ebe39a3676e7",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-2\\.agent-state\\v4-observations\\events\\hook-check_finished-456a6699eb872cf3764d32379b7a9d26c1a2ebe39a3676e7.json",
+        "coverage": "MEASURED"
+      }
+    },
+    {
+      "schema_version": 1,
+      "check_id": "notes-client-unit",
+      "classification": "behavioral",
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "signal": null,
+      "duration_ms": 4487,
+      "command_digest": "sha256:140860602735a12927d63a05e5826a334b8e60c2bffa2bb87fbe21e75ee96efd",
+      "output_digest": "sha256:13f0954bbd24a6a7edb137ef2c713afe1995324d00984cf31ebd214f2a8e3326",
+      "diagnostic_excerpt": "> frontend@0.0.0 test:unit\n> vitest --run src/api/__tests__/notes.spec.ts\n\n\n RUN  v5.0.1 C:/Users/ACER/orca/workspaces/New_Project_My_Note/story-4-2/frontend\n\n\n Test Files  1 passed (1)\n      Tests  21 passed (21)\n   Start at  18:45:49\n   Duration  2.67s (environment 92%, transform 5%, tests 1%, import 1%)",
+      "subject": {
+        "kind": "commit",
+        "value": "712f6712e94984775e2a4099b6fa5a538c5917d6"
+      },
+      "environment": {
+        "status": "KNOWN",
+        "checkout": "story-4-2 worktree",
+        "os": "Windows 11",
+        "runtime": "Node 24, jsdom"
+      },
+      "toolchain": {
+        "node_version": "v24.21.0",
+        "executable": "C:\\Program Files\\nodejs\\node.exe",
+        "platform": "win32",
+        "arch": "x64",
+        "supported_node_range": null,
+        "npm_version": null,
+        "supported_npm_range": null
+      },
+      "input_bindings": {
+        "referenced_paths": [
+          "frontend/src/api/__tests__/notes.spec.ts"
+        ],
+        "source": {
+          "kind": "focused-manifest",
+          "path": "_bmad-output/implementation-artifacts/story-4-2-plan.md"
+        }
+      },
+      "provenance": {
+        "executor": "v4-check-executor",
+        "process_adapter": "spawnSync",
+        "shell": false,
+        "cwd": "frontend",
+        "argv_digest": "sha256:5456d811ffa37124e56cbcd08cdb72dace7a7593d11f592b5ebbe500199de219"
+      },
+      "reasons": [],
+      "observed_at": "2026-11-14T11:45:47.986Z",
+      "observation": {
+        "status": "CONFLICT",
+        "event_id": "hook-check_finished-2e665f7eb9466166c0a4ce39a39139d64b655af268ff1122",
+        "path": "C:\\Users\\ACER\\orca\\workspaces\\New_Project_My_Note\\story-4-2\\.agent-state\\v4-observations\\events\\hook-check_finished-2e665f7eb9466166c0a4ce39a39139d64b655af268ff1122.json",
+        "coverage": "UNKNOWN",
+        "reason": "EVENT_ID_PAYLOAD_CONFLICT"
+      }
+    }
+  ],
+  "escalation": {
+    "decision": "REVIEW_REQUIRED",
+    "risk": "HIGH",
+    "reasons": [
+      "HIGH_RISK_REVIEW",
+      "JUDGMENT_CONCURRENCY_STATE",
+      "JUDGMENT_MIGRATION_DESTRUCTIVE",
+      "JUDGMENT_PUBLIC_CONTRACT",
+      "JUDGMENT_SECURITY_AUTH"
+    ]
+  },
+  "semantic_coverage": {
+    "decision": "COVERED",
+    "task_refs": [
+      "T-1",
+      "T-2",
+      "T-3"
+    ],
+    "acceptance_criteria": [
+      "AC-2",
+      "AC-3",
+      "AC-4"
+    ],
+    "evidence_refs": [
+      "backend-note-tests",
+      "pint",
+      "phpstan",
+      "contract-validate",
+      "contract-check",
+      "type-check",
+      "lint",
+      "notes-client-unit"
+    ]
+  },
+  "progression_eligible": true,
+  "status": "PASS",
+  "context_digest": "sha256:00516c770513a48ca1eb1d499ef48d3cd1852b6ec8cb0e81be3337750f04b540"
+}

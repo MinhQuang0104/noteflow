@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 import {
   getChallenges,
@@ -17,6 +18,11 @@ const account = useAccountStore()
 const auth = useAuthStore()
 const sync = useSyncStore()
 const queryClient = useQueryClient()
+const router = useRouter()
+
+function goToNewNote() {
+  void router?.push('/notes?new=1')
+}
 
 const {
   data: challengesData,
@@ -127,20 +133,30 @@ async function handleMarkDone(challenge: ChallengeListItem): Promise<void> {
 
 <template>
   <section class="space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10">
-    <div>
-      <p class="text-sm font-semibold uppercase tracking-[0.16em] text-emerald-700">Hôm nay</p>
-      <p v-if="account.status === 'loading' || account.status === 'unknown'" class="mt-4" role="status">
-        Đang lấy ngày tài khoản…
-      </p>
-      <p v-else-if="account.status === 'error'" class="mt-4 text-rose-800" role="alert">
-        Không thể xác định ngày tài khoản. Hãy thử tải lại.
-      </p>
-      <div v-else-if="account.context" class="mt-4 space-y-2">
-        <h2 class="text-3xl font-semibold">{{ account.context.account_date }}</h2>
-        <p class="text-slate-600">
-          Tuần {{ account.context.week.start_date }} – {{ account.context.week.end_date }}
+    <div class="flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <p class="text-sm font-semibold uppercase tracking-[0.16em] text-emerald-700">Hôm nay</p>
+        <p v-if="account.status === 'loading' || account.status === 'unknown'" class="mt-4" role="status">
+          Đang lấy ngày tài khoản…
         </p>
+        <p v-else-if="account.status === 'error'" class="mt-4 text-rose-800" role="alert">
+          Không thể xác định ngày tài khoản. Hãy thử tải lại.
+        </p>
+        <div v-else-if="account.context" class="mt-4 space-y-2">
+          <h2 class="text-3xl font-semibold">{{ account.context.account_date }}</h2>
+          <p class="text-slate-600">
+            Tuần {{ account.context.week.start_date }} – {{ account.context.week.end_date }}
+          </p>
+        </div>
       </div>
+      <button
+        type="button"
+        data-testid="today-new-note-button"
+        class="inline-flex items-center rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-indigo-600"
+        @click="goToNewNote"
+      >
+        Ghi chú mới
+      </button>
     </div>
 
     <section id="today-challenges" aria-labelledby="today-challenges-heading" class="rounded-xl border border-slate-200 p-4">

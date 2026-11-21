@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { matchedRouteKey, onBeforeRouteLeave, routeLocationKey, routerKey } from 'vue-router'
 
 import {
   createNotebook,
@@ -12,6 +13,8 @@ import {
   type Notebook,
   type NotebookListResult,
 } from '../api/notebooks'
+import { getNotebookNotes, type Note, type NoteListResult } from '../api/notes'
+import NoteEditor from '../components/NoteEditor.vue'
 import { useAccountStore } from '../stores/account'
 import { useAuthStore } from '../stores/auth'
 import { useSyncStore } from '../stores/sync'
@@ -22,6 +25,9 @@ const account = useAccountStore()
 const auth = useAuthStore()
 const sync = useSyncStore()
 const queryClient = useQueryClient()
+
+const route = inject(routeLocationKey, null)
+const router = inject(routerKey, null)
 
 const {
   data: notebooksData,
@@ -44,11 +50,31 @@ const orderedNotebooks = computed<Notebook[]>(() => {
 })
 
 const selectedId = ref<string | null>(null)
+const selectedNoteId = ref<string | null>(null)
+const isEditingNewNote = ref(false)
+const editorRef = ref<InstanceType<typeof NoteEditor> | null>(null)
 
 watch(
-  orderedNotebooks,
-  (list) => {
+  [orderedNotebooks, () => route?.query.new],
+  ([list, queryNew]) => {
     if (list.length > 0) {
+      if (queryNew === '1' || queryNew === 'true') {
+        const def = list.find((nb) => nb.is_default) ?? list[0]
+        if (def) {
+          selectedId.value = def.id
+        }
+        selectedNoteId.value = null
+        isEditingNewNote.value = true
+
+        const currentRoute = route ?? router?.currentRoute.value
+        if (router && currentRoute?.query?.new) {
+          const remainingQuery = { ...currentRoute.query }
+          delete remainingQuery.new
+          void router.replace({ path: currentRoute.path, query: remainingQuery }).catch(() => {})
+        }
+        return
+      }
+
       if (!selectedId.value || !list.some((nb) => nb.id === selectedId.value)) {
         selectedId.value = list[0]?.id ?? null
       }
@@ -64,6 +90,120 @@ const selectedNotebook = computed<Notebook | null>(() => {
   return orderedNotebooks.value.find((nb) => nb.id === selectedId.value) ?? null
 })
 
+// Query notes for selected notebook
+const {
+  data: notesData,
+  isLoading: isNotesLoading,
+  isError: isNotesError,
+  refetch: refetchNotes,
+} = useQuery({
+  queryKey: computed(() => ['notes', selectedId.value]),
+  queryFn: () => getNotebookNotes(selectedId.value!),
+  enabled: computed(() => Boolean(selectedId.value)),
+})
+
+const notes = computed<Note[]>(() => notesData.value?.notes ?? [])
+
+watch(
+  notes,
+  (newList) => {
+    if (isEditingNewNote.value) return
+    if (newList.length > 0) {
+      if (!selectedNoteId.value || !newList.some((n) => n.id === selectedNoteId.value)) {
+        selectedNoteId.value = newList[0]?.id ?? null
+      }
+    } else {
+      selectedNoteId.value = null
+    }
+  },
+  { immediate: true },
+)
+
+const selectedNote = computed<Note | null>(() => {
+  if (isEditingNewNote.value || !selectedNoteId.value) return null
+  return notes.value.find((n) => n.id === selectedNoteId.value) ?? null
+})
+
+function getExcerpt(body: string, maxLength = 80): string {
+  if (!body) return ''
+  const lines = body.split(/\r?\n/).map((l) => l.trim()).filter(Boolean)
+  const text = lines.join(' ')
+  if (text.length <= maxLength) return text
+  return text.slice(0, maxLength) + '…'
+}
+
+async function beforeSwitch(): Promise<boolean> {
+  if (editorRef.value) {
+    return await editorRef.value.flush()
+  }
+  return true
+}
+
+async function handleCreateNote() {
+  const ok = await beforeSwitch()
+  if (!ok) return
+  selectedNoteId.value = null
+  isEditingNewNote.value = true
+}
+
+async function handleSelectNote(note: Note) {
+  if (selectedNoteId.value === note.id && !isEditingNewNote.value) return
+  const ok = await beforeSwitch()
+  if (!ok) return
+  isEditingNewNote.value = false
+  selectedNoteId.value = note.id
+}
+
+function handleNoteSaved(note: Note, isCreate: boolean) {
+  queryClient.setQueryData<NoteListResult>(['notes', selectedId.value], (old) => {
+    if (!old) return { notes: [note] }
+    return {
+      notes: [note, ...old.notes.filter((n) => n.id !== note.id)],
+    }
+  })
+
+  if (isCreate) {
+    isEditingNewNote.value = false
+    selectedNoteId.value = note.id
+
+    queryClient.setQueryData<NotebookListResult>(['notebooks'], (old) => {
+      if (!old) return old
+      return {
+        notebooks: old.notebooks.map((nb) =>
+          nb.id === selectedId.value ? { ...nb, note_count: nb.note_count + 1 } : nb,
+        ),
+      }
+    })
+  }
+}
+
+function handleNoteDiscarded() {
+  isEditingNewNote.value = false
+  if (notes.value.length > 0) {
+    selectedNoteId.value = notes.value[0]?.id ?? null
+  } else {
+    selectedNoteId.value = null
+  }
+}
+
+const activeRouteRecord = inject(matchedRouteKey, null)
+if (activeRouteRecord) {
+  try {
+    onBeforeRouteLeave(async () => {
+      const ok = await beforeSwitch()
+      if (!ok) {
+        return false
+      }
+    })
+  } catch {
+    // Ignored outside router setup
+  }
+}
+
+onBeforeUnmount(() => {
+  void beforeSwitch()
+})
+
 const notebookRefs = new Map<string, HTMLElement>()
 function setNotebookRef(id: string, el: unknown) {
   if (el instanceof HTMLElement) {
@@ -73,8 +213,13 @@ function setNotebookRef(id: string, el: unknown) {
   }
 }
 
-function selectNotebook(notebook: Notebook) {
+async function selectNotebook(notebook: Notebook) {
+  if (selectedId.value === notebook.id) return
+  const ok = await beforeSwitch()
+  if (!ok) return
   selectedId.value = notebook.id
+  selectedNoteId.value = null
+  isEditingNewNote.value = false
 }
 
 // Create notebook state
@@ -128,7 +273,11 @@ async function handleCreateSubmit() {
       }
     })
 
+    const ok = await beforeSwitch()
+    if (!ok) return
     selectedId.value = result.notebook.id
+    selectedNoteId.value = null
+    isEditingNewNote.value = false
     createName.value = ''
     showCreateForm.value = false
   } catch (error) {
@@ -139,7 +288,6 @@ async function handleCreateSubmit() {
     } else {
       createError.value = 'Tạo cuốn vở thất bại.'
     }
-    // "a field error keeps the typed name" - createName is retained
   } finally {
     isCreateSubmitting.value = false
   }
@@ -215,7 +363,6 @@ async function handleRenameSubmit(notebook: Notebook) {
     } else {
       renameError.value = 'Đổi tên cuốn vở thất bại.'
     }
-    // "a field error keeps the typed name" - renameName is retained
   } finally {
     isRenameSubmitting.value = false
   }
@@ -322,11 +469,14 @@ async function handleConfirmDelete() {
       }
     })
 
+    await beforeSwitch()
     if (notebookAbove) {
       selectedId.value = notebookAbove.id
     } else if (orderedNotebooks.value.length > 0) {
       selectedId.value = orderedNotebooks.value[0]?.id ?? null
     }
+    selectedNoteId.value = null
+    isEditingNewNote.value = false
 
     isConfirmDialogOpen.value = false
     notebookToDelete.value = null
@@ -362,9 +512,9 @@ async function retryLoad() {
       <h2 class="text-2xl font-semibold text-slate-900">{{ title ?? 'Ghi chú' }}</h2>
     </header>
 
-    <div class="flex flex-col gap-6 md:flex-row">
+    <div class="flex flex-col gap-6 lg:flex-row">
       <!-- Notebook column of the Notes workspace -->
-      <aside class="w-full shrink-0 md:w-80" aria-label="Danh sách cuốn vở">
+      <aside class="w-full shrink-0 lg:w-72" aria-label="Danh sách cuốn vở">
         <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <div class="flex items-center justify-between pb-3 border-b border-slate-100">
             <h3 class="text-base font-semibold text-slate-800">Cuốn vở</h3>
@@ -573,23 +723,129 @@ async function retryLoad() {
         </div>
       </aside>
 
-      <!-- Notes workspace main area / note list & editor placeholder -->
-      <section class="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white p-6 shadow-sm" aria-label="Nội dung ghi chú">
-        <div v-if="selectedNotebook">
-          <div class="flex items-center justify-between border-b border-slate-200 pb-3">
-            <h3 class="text-lg font-semibold text-slate-900" data-testid="selected-notebook-title">
-              {{ selectedNotebook.name }}
-            </h3>
-            <span
-              v-if="selectedNotebook.is_default"
-              class="text-xs font-medium text-slate-500"
+      <!-- Note list column for the selected notebook -->
+      <section v-if="selectedNotebook" class="w-full shrink-0 lg:w-80" aria-label="Danh sách ghi chú">
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm h-full flex flex-col">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div class="min-w-0 flex-1 pr-2">
+              <h3 class="text-base font-semibold text-slate-800 truncate" data-testid="selected-notebook-title">
+                {{ selectedNotebook.name }}
+              </h3>
+              <span
+                v-if="selectedNotebook.is_default"
+                data-testid="selected-notebook-default-badge"
+                class="text-[10px] font-semibold text-slate-500"
+              >
+                Vở mặc định
+              </span>
+            </div>
+            <button
+              type="button"
+              data-testid="create-note-button"
+              class="inline-flex items-center rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 focus-visible:outline-2 focus-visible:outline-indigo-600 shrink-0"
+              @click="handleCreateNote"
             >
-              Vở mặc định
-            </span>
+              + Ghi chú mới
+            </button>
           </div>
 
-          <div class="py-16 text-center text-slate-500" data-testid="notebook-notes-empty">
+          <!-- Note list states -->
+          <div class="mt-3 flex-1 flex flex-col">
+            <p v-if="isNotesLoading" role="status" class="py-4 text-center text-sm text-slate-500">
+              Đang tải danh sách ghi chú…
+            </p>
+
+            <div
+              v-else-if="isNotesError"
+              role="alert"
+              data-testid="notes-load-error"
+              class="py-4 text-center text-sm text-rose-800"
+            >
+              <p>Không thể tải danh sách ghi chú.</p>
+              <button
+                type="button"
+                data-testid="retry-load-notes-button"
+                class="mt-2 font-semibold text-indigo-700 underline hover:text-indigo-900"
+                @click="() => refetchNotes()"
+              >
+                Thử lại
+              </button>
+            </div>
+
+            <div
+              v-else-if="notes.length === 0"
+              data-testid="notebook-notes-empty"
+              class="py-12 text-center text-sm text-slate-500"
+            >
+              <p>{{ selectedNotebook.is_default ? 'Ghi lại ý tưởng đầu tiên của bạn.' : 'Cuốn vở này chưa có ghi chú.' }}</p>
+            </div>
+
+            <ul
+              v-else
+              role="list"
+              data-testid="note-list"
+              class="space-y-1 divide-y divide-slate-100 overflow-y-auto"
+            >
+              <li
+                v-for="note in notes"
+                :key="note.id"
+                :data-testid="'note-row-' + note.id"
+                class="rounded-lg p-2.5 transition"
+                :class="selectedNoteId === note.id && !isEditingNewNote ? 'bg-indigo-50/70 border border-indigo-200/60' : 'hover:bg-slate-50'"
+              >
+                <button
+                  type="button"
+                  :data-testid="'note-item-' + note.id"
+                  class="w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded"
+                  @click="handleSelectNote(note)"
+                >
+                  <div class="flex items-center justify-between gap-2">
+                    <span
+                      :data-testid="'note-label-' + note.id"
+                      class="text-sm truncate"
+                      :class="selectedNoteId === note.id && !isEditingNewNote ? 'font-semibold text-indigo-950' : 'font-medium text-slate-900'"
+                    >
+                      {{ note.label }}
+                    </span>
+                  </div>
+                  <p
+                    v-if="note.body"
+                    :data-testid="'note-excerpt-' + note.id"
+                    class="mt-1 text-xs text-slate-500 line-clamp-2"
+                  >
+                    {{ getExcerpt(note.body) }}
+                  </p>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Editor column of the Notes workspace -->
+      <section class="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white p-6 shadow-sm" aria-label="Nội dung ghi chú">
+        <div v-if="selectedNotebook">
+          <NoteEditor
+            v-if="isEditingNewNote || selectedNote"
+            ref="editorRef"
+            :notebook-id="selectedNotebook.id"
+            :notebook-name="selectedNotebook.name"
+            :initial-note="isEditingNewNote ? null : selectedNote"
+            @saved="handleNoteSaved"
+            @discarded="handleNoteDiscarded"
+          />
+          <div v-else-if="notes.length === 0" class="py-16 text-center text-slate-500">
             <p>{{ selectedNotebook.is_default ? 'Ghi lại ý tưởng đầu tiên của bạn.' : 'Cuốn vở này chưa có ghi chú.' }}</p>
+            <button
+              type="button"
+              class="mt-3 inline-flex items-center rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700"
+              @click="handleCreateNote"
+            >
+              + Ghi chú mới
+            </button>
+          </div>
+          <div v-else class="py-16 text-center text-slate-400">
+            <p>Chọn một ghi chú để xem và chỉnh sửa.</p>
           </div>
         </div>
         <div v-else-if="!isLoading && !isError" class="py-16 text-center text-slate-400">

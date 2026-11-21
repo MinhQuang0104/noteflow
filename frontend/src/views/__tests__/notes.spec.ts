@@ -2,9 +2,12 @@ import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query'
 import { flushPromises, mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
+import { createMemoryHistory, createRouter } from 'vue-router'
 
 import * as notebooksApi from '../../api/notebooks'
 import { NotebookApiError, type Notebook } from '../../api/notebooks'
+import * as notesApi from '../../api/notes'
+import type { Note } from '../../api/notes'
 import { useAccountStore } from '../../stores/account'
 import { useAuthStore } from '../../stores/auth'
 import NotesView from '../NotesView.vue'
@@ -56,6 +59,7 @@ beforeEach(() => {
     write_state: 'open',
   }
   account.status = 'ready'
+  vi.spyOn(notesApi, 'getNotebookNotes').mockResolvedValue({ notes: [] })
 })
 
 afterEach(() => {
@@ -510,3 +514,699 @@ test('a load error shows retry instead of the empty state', async () => {
   expect(wrapper.find('[data-testid="notebooks-load-error"]').exists()).toBe(false)
   expect(wrapper.get('[data-testid="notebook-list"]').text()).toContain('Ghi chú nhanh')
 })
+
+test('"+ Ghi chú mới" opens an empty editor in the selected notebook with focus in the body', async () => {
+  vi.spyOn(notebooksApi, 'getNotebooks').mockResolvedValue({
+    notebooks: [defaultNotebook, regularNotebook],
+  })
+  vi.spyOn(notesApi, 'getNotebookNotes').mockResolvedValue({ notes: [] })
+
+  const wrapper = mount(NotesView, {
+    attachTo: document.body,
+    global: {
+      plugins: [[VueQueryPlugin, { queryClient }]],
+    },
+  })
+  await flushPromises()
+
+  // Select the regular notebook
+  await wrapper.get(`[data-testid="notebook-item-${regularNotebook.id}"]`).trigger('click')
+  await flushPromises()
+
+  // Click "+ Ghi chú mới"
+  const createNoteButton = wrapper.get('[data-testid="create-note-button"]')
+  expect(createNoteButton.text()).toContain('+ Ghi chú mới')
+  await createNoteButton.trigger('click')
+  await flushPromises()
+
+  // Empty editor is open in the selected notebook
+  expect(wrapper.get('[data-testid="editor-notebook-name"]').text()).toBe('Dự án Alpha')
+  const titleInput = wrapper.get<HTMLInputElement>('[data-testid="note-title-input"]')
+  const bodyInput = wrapper.get<HTMLTextAreaElement>('[data-testid="note-body-input"]')
+  expect(titleInput.element.value).toBe('')
+  expect(bodyInput.element.value).toBe('')
+
+  // Focus is in the body
+  expect(document.activeElement).toBe(bodyInput.element)
+
+  wrapper.unmount()
+})
+
+test('the first typing pause with content sends exactly one create and later pauses send updates with the latest base_version, and "Đã lưu" appears only after acknowledgement', async () => {
+  vi.useFakeTimers()
+  vi.spyOn(notebooksApi, 'getNotebooks').mockResolvedValue({
+    notebooks: [defaultNotebook],
+  })
+  vi.spyOn(notesApi, 'getNotebookNotes').mockResolvedValue({ notes: [] })
+
+  let resolveCreate!: (res: notesApi.NoteMutationResult) => void
+  const createPromise = new Promise<notesApi.NoteMutationResult>((resolve) => {
+    resolveCreate = resolve
+  })
+  const createSpy = vi.spyOn(notesApi, 'createNote').mockReturnValue(createPromise)
+
+  let resolveUpdate!: (res: notesApi.NoteMutationResult) => void
+  const updatePromise = new Promise<notesApi.NoteMutationResult>((resolve) => {
+    resolveUpdate = resolve
+  })
+  const updateSpy = vi.spyOn(notesApi, 'updateNote').mockReturnValue(updatePromise)
+
+  const wrapper = mount(NotesView, {
+    attachTo: document.body,
+    global: {
+      plugins: [[VueQueryPlugin, { queryClient }]],
+    },
+  })
+  await flushPromises()
+
+  // Open new note
+  await wrapper.get('[data-testid="create-note-button"]').trigger('click')
+  await flushPromises()
+
+  const bodyInput = wrapper.get('[data-testid="note-body-input"]')
+  await bodyInput.setValue('Nội dung ghi chú đầu tiên')
+
+  // Before typing pause, no create sent yet, and "Đã lưu" is NOT shown
+  expect(createSpy).toHaveBeenCalledTimes(0)
+  expect(wrapper.find('[data-testid="note-save-status"]').exists()).toBe(false)
+
+  // Advance timers past typing pause debounce
+  vi.advanceTimersByTime(600)
+  await flushPromises()
+
+  // Exactly one create command sent
+  expect(createSpy).toHaveBeenCalledTimes(1)
+  expect(createSpy).toHaveBeenCalledWith(
+    expect.objectContaining({
+      notebook_id: defaultNotebook.id,
+      body: 'Nội dung ghi chú đầu tiên',
+      title: '',
+    }),
+  )
+
+  // In-flight: "Đang lưu…" is shown, "Đã lưu" is NOT shown
+  expect(wrapper.get('[data-testid="note-save-status"]').text()).toBe('Đang lưu…')
+
+  // Resolve create acknowledgement
+  const createdNote: Note = {
+    id: 'note-uuid-1',
+    notebook_id: defaultNotebook.id,
+    title: '',
+    body: 'Nội dung ghi chú đầu tiên',
+    label: 'Nội dung ghi chú đầu tiên',
+    row_version: 1,
+    created_at: '2026-11-14T09:00:00Z',
+    updated_at: '2026-11-14T09:00:00Z',
+  }
+  resolveCreate({
+    note: createdNote,
+    account_revision: 2,
+    data_epoch: 1,
+  })
+  await flushPromises()
+
+  // "Đã lưu" appears ONLY AFTER acknowledgement
+  expect(wrapper.get('[data-testid="note-save-status"]').text()).toBe('Đã lưu')
+
+  // Later typing pause: update body
+  await bodyInput.setValue('Nội dung ghi chú đã được chỉnh sửa')
+  // Immediate typing clears "Đã lưu"
+  expect(wrapper.find('[data-testid="note-save-status"]').exists()).toBe(false)
+
+  vi.advanceTimersByTime(600)
+  await flushPromises()
+
+  // Exactly one update command sent with the latest base_version (1)
+  expect(updateSpy).toHaveBeenCalledTimes(1)
+  expect(updateSpy).toHaveBeenCalledWith(
+    'note-uuid-1',
+    expect.objectContaining({
+      base_version: 1,
+      body: 'Nội dung ghi chú đã được chỉnh sửa',
+      title: '',
+    }),
+  )
+  expect(wrapper.get('[data-testid="note-save-status"]').text()).toBe('Đang lưu…')
+
+  // Resolve update acknowledgement
+  const updatedNote: Note = {
+    ...createdNote,
+    body: 'Nội dung ghi chú đã được chỉnh sửa',
+    label: 'Nội dung ghi chú đã được chỉnh sửa',
+    row_version: 2,
+  }
+  resolveUpdate({
+    note: updatedNote,
+    account_revision: 3,
+    data_epoch: 1,
+  })
+  await flushPromises()
+
+  // "Đã lưu" appears after update acknowledgement
+  expect(wrapper.get('[data-testid="note-save-status"]').text()).toBe('Đã lưu')
+
+  vi.useRealTimers()
+  wrapper.unmount()
+})
+
+test('a failed save keeps the text and shows an error', async () => {
+  vi.useFakeTimers()
+  vi.spyOn(notebooksApi, 'getNotebooks').mockResolvedValue({
+    notebooks: [defaultNotebook],
+  })
+  vi.spyOn(notesApi, 'getNotebookNotes').mockResolvedValue({ notes: [] })
+  vi.spyOn(notesApi, 'createNote').mockRejectedValue(new Error('Máy chủ đang bận, vui lòng thử lại.'))
+
+  const wrapper = mount(NotesView, {
+    attachTo: document.body,
+    global: {
+      plugins: [[VueQueryPlugin, { queryClient }]],
+    },
+  })
+  await flushPromises()
+
+  await wrapper.get('[data-testid="create-note-button"]').trigger('click')
+  await flushPromises()
+
+  const titleInput = wrapper.get<HTMLInputElement>('[data-testid="note-title-input"]')
+  const bodyInput = wrapper.get<HTMLTextAreaElement>('[data-testid="note-body-input"]')
+
+  await titleInput.setValue('Tiêu đề cần giữ')
+  await bodyInput.setValue('Nội dung cần giữ không được mất')
+
+  // Advance timers
+  vi.advanceTimersByTime(600)
+  await flushPromises()
+
+  // Error is shown
+  const errorEl = wrapper.get('[data-testid="note-save-error"]')
+  expect(errorEl.text()).toContain('Máy chủ đang bận, vui lòng thử lại.')
+
+  // "Đã lưu" is not shown
+  expect(wrapper.find('[data-testid="note-save-status"]').exists()).toBe(false)
+
+  // Text is preserved exactly
+  expect(titleInput.element.value).toBe('Tiêu đề cần giữ')
+  expect(bodyInput.element.value).toBe('Nội dung cần giữ không được mất')
+
+  vi.useRealTimers()
+  wrapper.unmount()
+})
+
+test('a brand-new editor that never had text sends no request when left', async () => {
+  vi.spyOn(notebooksApi, 'getNotebooks').mockResolvedValue({
+    notebooks: [defaultNotebook, regularNotebook],
+  })
+  vi.spyOn(notesApi, 'getNotebookNotes').mockResolvedValue({ notes: [] })
+  const createSpy = vi.spyOn(notesApi, 'createNote')
+  const updateSpy = vi.spyOn(notesApi, 'updateNote')
+
+  const wrapper = mount(NotesView, {
+    attachTo: document.body,
+    global: {
+      plugins: [[VueQueryPlugin, { queryClient }]],
+    },
+  })
+  await flushPromises()
+
+  // Open brand-new editor
+  await wrapper.get('[data-testid="create-note-button"]').trigger('click')
+  await flushPromises()
+
+  expect(wrapper.find('[data-testid="note-body-input"]').exists()).toBe(true)
+
+  // Leave by selecting another notebook without ever typing text
+  await wrapper.get(`[data-testid="notebook-item-${regularNotebook.id}"]`).trigger('click')
+  await flushPromises()
+
+  // No create or update requests sent
+  expect(createSpy).not.toHaveBeenCalled()
+  expect(updateSpy).not.toHaveBeenCalled()
+
+  wrapper.unmount()
+})
+
+test('switching note or leaving with a pending change saves it before switching', async () => {
+  const note1: Note = {
+    id: 'note-uuid-1',
+    notebook_id: defaultNotebook.id,
+    title: 'Note 1',
+    body: 'Nội dung note 1',
+    label: 'Note 1',
+    row_version: 1,
+    created_at: '2026-11-14T09:00:00Z',
+    updated_at: '2026-11-14T09:00:00Z',
+  }
+  const note2: Note = {
+    id: 'note-uuid-2',
+    notebook_id: defaultNotebook.id,
+    title: 'Note 2',
+    body: 'Nội dung note 2',
+    label: 'Note 2',
+    row_version: 1,
+    created_at: '2026-11-14T08:00:00Z',
+    updated_at: '2026-11-14T08:00:00Z',
+  }
+
+  vi.spyOn(notebooksApi, 'getNotebooks').mockResolvedValue({
+    notebooks: [defaultNotebook],
+  })
+  vi.spyOn(notesApi, 'getNotebookNotes').mockResolvedValue({
+    notes: [note1, note2],
+  })
+
+  let resolveUpdate!: (res: notesApi.NoteMutationResult) => void
+  const updateSpy = vi.spyOn(notesApi, 'updateNote').mockImplementation(
+    () =>
+      new Promise<notesApi.NoteMutationResult>((resolve) => {
+        resolveUpdate = resolve
+      }),
+  )
+
+  const wrapper = mount(NotesView, {
+    attachTo: document.body,
+    global: {
+      plugins: [[VueQueryPlugin, { queryClient }]],
+    },
+  })
+  await flushPromises()
+
+  // Select note 1 (which is selected by default as first note)
+  expect(wrapper.get<HTMLInputElement>('[data-testid="note-title-input"]').element.value).toBe('Note 1')
+
+  // User edits note 1 without waiting for pause
+  const titleInput = wrapper.get<HTMLInputElement>('[data-testid="note-title-input"]')
+  await titleInput.setValue('Note 1 Edited')
+  await titleInput.trigger('input')
+
+  // User clicks note 2 immediately with pending changes
+  const note2Item = wrapper.get(`[data-testid="note-item-${note2.id}"]`)
+  const clickPromise = note2Item.trigger('click')
+
+  // flushPendingSave called updateNote before switching
+  expect(updateSpy).toHaveBeenCalledTimes(1)
+  expect(updateSpy).toHaveBeenCalledWith(
+    note1.id,
+    expect.objectContaining({
+      title: 'Note 1 Edited',
+      base_version: 1,
+    }),
+  )
+
+  // Still on note 1 while update is in flight
+  expect(wrapper.get<HTMLInputElement>('[data-testid="note-title-input"]').element.value).toBe('Note 1 Edited')
+
+  // Resolve acknowledgement
+  resolveUpdate({
+    note: { ...note1, title: 'Note 1 Edited', row_version: 2 },
+    account_revision: 2,
+    data_epoch: 1,
+  })
+  await clickPromise
+  await flushPromises()
+
+  // Now successfully switched to note 2
+  expect(wrapper.get<HTMLInputElement>('[data-testid="note-title-input"]').element.value).toBe('Note 2')
+
+  wrapper.unmount()
+})
+
+test('the note list shows the server label and a short excerpt ordered by most recent update', async () => {
+  const noteRecent: Note = {
+    id: 'note-uuid-recent',
+    notebook_id: defaultNotebook.id,
+    title: '',
+    body: 'First body line used as label\nSecond line excerpt information here',
+    label: 'First body line used as label',
+    row_version: 1,
+    created_at: '2026-11-14T10:00:00Z',
+    updated_at: '2026-11-14T10:00:00Z',
+  }
+  const noteOlder: Note = {
+    id: 'note-uuid-older',
+    notebook_id: defaultNotebook.id,
+    title: 'Older Note Title',
+    body: 'Older note description body excerpt',
+    label: 'Older Note Title',
+    row_version: 1,
+    created_at: '2026-11-14T08:00:00Z',
+    updated_at: '2026-11-14T08:00:00Z',
+  }
+
+  vi.spyOn(notebooksApi, 'getNotebooks').mockResolvedValue({
+    notebooks: [defaultNotebook],
+  })
+  vi.spyOn(notesApi, 'getNotebookNotes').mockResolvedValue({
+    notes: [noteRecent, noteOlder],
+  })
+
+  const wrapper = mount(NotesView, {
+    global: {
+      plugins: [[VueQueryPlugin, { queryClient }]],
+    },
+  })
+  await flushPromises()
+
+  const listItems = wrapper.findAll('[data-testid="note-list"] > li')
+  expect(listItems.length).toBe(2)
+
+  // First item is most recent
+  expect(listItems[0]?.get(`[data-testid="note-label-${noteRecent.id}"]`).text()).toBe('First body line used as label')
+  expect(listItems[0]?.get(`[data-testid="note-excerpt-${noteRecent.id}"]`).text()).toContain('First body line')
+
+  // Second item is older
+  expect(listItems[1]?.get(`[data-testid="note-label-${noteOlder.id}"]`).text()).toBe('Older Note Title')
+  expect(listItems[1]?.get(`[data-testid="note-excerpt-${noteOlder.id}"]`).text()).toContain('Older note description')
+})
+
+test('a note list load error shows retry instead of the empty state', async () => {
+  vi.spyOn(notebooksApi, 'getNotebooks').mockResolvedValue({
+    notebooks: [defaultNotebook],
+  })
+  const notesSpy = vi.spyOn(notesApi, 'getNotebookNotes').mockRejectedValue(new Error('Lỗi kết nối máy chủ ghi chú.'))
+
+  const wrapper = mount(NotesView, {
+    global: {
+      plugins: [[VueQueryPlugin, { queryClient }]],
+    },
+  })
+  await flushPromises()
+
+  // Error state and retry button exist
+  const errorContainer = wrapper.get('[data-testid="notes-load-error"]')
+  expect(errorContainer.text()).toContain('Không thể tải danh sách ghi chú.')
+  const retryButton = wrapper.get('[data-testid="retry-load-notes-button"]')
+  expect(retryButton.text()).toBe('Thử lại')
+
+  // Empty state does NOT exist on note load error
+  expect(wrapper.find('[data-testid="notebook-notes-empty"]').exists()).toBe(false)
+
+  // Clicking retry refetches notes
+  notesSpy.mockResolvedValueOnce({ notes: [] })
+  await retryButton.trigger('click')
+  await flushPromises()
+
+  expect(wrapper.find('[data-testid="notes-load-error"]').exists()).toBe(false)
+  expect(wrapper.find('[data-testid="notebook-notes-empty"]').exists()).toBe(true)
+})
+
+test('regression F-42B-1: switching or flushing while timer-scheduled create is in-flight waits for create and records acknowledged note without duplicate create', async () => {
+  vi.useFakeTimers()
+  try {
+    const existingNote: Note = {
+      id: 'existing-note-1',
+      notebook_id: defaultNotebook.id,
+      title: 'Existing Note',
+      body: 'Existing Body',
+      label: 'Existing Note',
+      row_version: 1,
+      created_at: '2026-11-14T08:00:00Z',
+      updated_at: '2026-11-14T08:00:00Z',
+    }
+
+    vi.spyOn(notebooksApi, 'getNotebooks').mockResolvedValue({
+      notebooks: [defaultNotebook],
+    })
+    vi.spyOn(notesApi, 'getNotebookNotes').mockResolvedValue({
+      notes: [existingNote],
+    })
+
+    let resolveCreate!: (res: notesApi.NoteMutationResult) => void
+    const createSpy = vi.spyOn(notesApi, 'createNote').mockImplementation(
+      () =>
+        new Promise<notesApi.NoteMutationResult>((resolve) => {
+          resolveCreate = resolve
+        }),
+    )
+    const updateSpy = vi.spyOn(notesApi, 'updateNote').mockResolvedValue({
+      note: { ...existingNote, row_version: 2 },
+      account_revision: 2,
+      data_epoch: 1,
+    })
+
+    const wrapper = mount(NotesView, {
+      attachTo: document.body,
+      global: {
+        plugins: [[VueQueryPlugin, { queryClient }]],
+      },
+    })
+    await flushPromises()
+
+    // Click "Ghi chú mới"
+    const newNoteButton = wrapper.get('[data-testid="create-note-button"]')
+    await newNoteButton.trigger('click')
+    await flushPromises()
+
+    // Type text into brand-new note
+    const titleInput = wrapper.get<HTMLInputElement>('[data-testid="note-title-input"]')
+    await titleInput.setValue('Brand New Note')
+    await titleInput.trigger('input')
+
+    // Advance timers so 500ms pause fires executeSave()
+    await vi.advanceTimersByTimeAsync(600)
+
+    // createNote is now in flight (called exactly 1 time)
+    expect(createSpy).toHaveBeenCalledTimes(1)
+    expect(createSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Brand New Note',
+      }),
+    )
+
+    // While createNote is in flight, user clicks on existingNote to switch
+    const existingNoteItem = wrapper.get(`[data-testid="note-item-${existingNote.id}"]`)
+    const switchPromise = existingNoteItem.trigger('click')
+
+    // Advance microtasks: flush() was called on NoteEditor, but it must await inFlightExecution
+    await vi.advanceTimersByTimeAsync(50)
+
+    // Still exactly 1 create call, not duplicate
+    expect(createSpy).toHaveBeenCalledTimes(1)
+    expect(updateSpy).toHaveBeenCalledTimes(0)
+
+    // Resolve the in-flight createNote
+    const createdNote: Note = {
+      id: 'created-note-uuid',
+      notebook_id: defaultNotebook.id,
+      title: 'Brand New Note',
+      body: '',
+      label: 'Brand New Note',
+      row_version: 1,
+      created_at: '2026-11-14T09:00:00Z',
+      updated_at: '2026-11-14T09:00:00Z',
+    }
+    resolveCreate({
+      note: createdNote,
+      account_revision: 2,
+      data_epoch: 1,
+    })
+
+    await switchPromise
+    await flushPromises()
+
+    // Still exactly 1 create call
+    expect(createSpy).toHaveBeenCalledTimes(1)
+    // Successfully switched to existingNote
+    expect(wrapper.get<HTMLInputElement>('[data-testid="note-title-input"]').element.value).toBe('Existing Note')
+
+    wrapper.unmount()
+  } finally {
+    vi.useRealTimers()
+  }
+})
+
+test('regression F-42B-2: failed save before switch keeps editor mounted with typed text and error banner and cancels selection change', async () => {
+  const note1: Note = {
+    id: 'note-failing-1',
+    notebook_id: defaultNotebook.id,
+    title: 'Note 1 Original',
+    body: 'Body 1 Original',
+    label: 'Note 1 Original',
+    row_version: 1,
+    created_at: '2026-11-14T09:00:00Z',
+    updated_at: '2026-11-14T09:00:00Z',
+  }
+  const note2: Note = {
+    id: 'note-failing-2',
+    notebook_id: defaultNotebook.id,
+    title: 'Note 2 Original',
+    body: 'Body 2 Original',
+    label: 'Note 2 Original',
+    row_version: 1,
+    created_at: '2026-11-14T08:00:00Z',
+    updated_at: '2026-11-14T08:00:00Z',
+  }
+
+  vi.spyOn(notebooksApi, 'getNotebooks').mockResolvedValue({
+    notebooks: [defaultNotebook],
+  })
+  vi.spyOn(notesApi, 'getNotebookNotes').mockResolvedValue({
+    notes: [note1, note2],
+  })
+
+  // updateNote fails with a network/server error
+  const updateSpy = vi.spyOn(notesApi, 'updateNote').mockRejectedValue(new Error('Máy chủ đang bận, không thể lưu ghi chú.'))
+
+  const wrapper = mount(NotesView, {
+    attachTo: document.body,
+    global: {
+      plugins: [[VueQueryPlugin, { queryClient }]],
+    },
+  })
+  await flushPromises()
+
+  // Initially note 1 is selected
+  const titleInput = wrapper.get<HTMLInputElement>('[data-testid="note-title-input"]')
+  expect(titleInput.element.value).toBe('Note 1 Original')
+
+  // User edits note 1
+  await titleInput.setValue('Note 1 Unsaved Changes')
+  await titleInput.trigger('input')
+
+  // User attempts to switch to note 2
+  const note2Item = wrapper.get(`[data-testid="note-item-${note2.id}"]`)
+  await note2Item.trigger('click')
+  await flushPromises()
+
+  // Verify updateNote was attempted
+  expect(updateSpy).toHaveBeenCalledTimes(1)
+
+  // Selection change was CANCELLED: editor still shows note 1's edited text, not note 2
+  expect(wrapper.get<HTMLInputElement>('[data-testid="note-title-input"]').element.value).toBe('Note 1 Unsaved Changes')
+
+  // Error banner is displayed with the failure message
+  const errorBanner = wrapper.get('[data-testid="note-save-error"]')
+  expect(errorBanner.isVisible()).toBe(true)
+  expect(errorBanner.text()).toContain('Máy chủ đang bận, không thể lưu ghi chú.')
+
+  // Note 1 remains highlighted as active in the list
+  const activeNoteRow = wrapper.get(`[data-testid="note-row-${note1.id}"]`)
+  expect(activeNoteRow.classes()).toContain('bg-indigo-50/70')
+
+  wrapper.unmount()
+})
+
+test('mounting with ?new=1 consumes query once, preserves typed body after save, and sends updateNote on subsequent edit (F-42B-3)', async () => {
+  vi.useFakeTimers()
+  vi.spyOn(notebooksApi, 'getNotebooks').mockResolvedValue({
+    notebooks: [defaultNotebook, regularNotebook],
+  })
+  vi.spyOn(notesApi, 'getNotebookNotes').mockResolvedValue({ notes: [] })
+
+  let resolveCreate!: (res: notesApi.NoteMutationResult) => void
+  const createPromise = new Promise<notesApi.NoteMutationResult>((resolve) => {
+    resolveCreate = resolve
+  })
+  const createSpy = vi.spyOn(notesApi, 'createNote').mockReturnValue(createPromise)
+
+  let resolveUpdate!: (res: notesApi.NoteMutationResult) => void
+  const updatePromise = new Promise<notesApi.NoteMutationResult>((resolve) => {
+    resolveUpdate = resolve
+  })
+  const updateSpy = vi.spyOn(notesApi, 'updateNote').mockReturnValue(updatePromise)
+
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [{ path: '/notes', component: NotesView }],
+  })
+  await router.push('/notes?new=1')
+
+  const wrapper = mount(NotesView, {
+    attachTo: document.body,
+    global: {
+      plugins: [[VueQueryPlugin, { queryClient }], router],
+    },
+  })
+  await flushPromises()
+
+  // The route query ?new=1 is cleared upon consuming
+  expect(router.currentRoute.value.path).toBe('/notes')
+  expect(router.currentRoute.value.query.new).toBeUndefined()
+
+  // Default notebook is selected and new editor is open with focused body
+  expect(wrapper.get('[data-testid="selected-notebook-title"]').text()).toBe('Ghi chú nhanh')
+  const bodyInput = wrapper.get<HTMLTextAreaElement>('[data-testid="note-body-input"]')
+  expect(bodyInput.element).toBeDefined()
+  expect(document.activeElement).toBe(bodyInput.element)
+
+  // Type body content into new note
+  await bodyInput.setValue('Nội dung ghi chú đầu tiên từ Today')
+
+  // Advance timers past typing pause debounce
+  vi.advanceTimersByTime(600)
+  await flushPromises()
+
+  // Exactly one createNote sent
+  expect(createSpy).toHaveBeenCalledTimes(1)
+  expect(createSpy).toHaveBeenCalledWith(
+    expect.objectContaining({
+      notebook_id: defaultNotebook.id,
+      body: 'Nội dung ghi chú đầu tiên từ Today',
+      title: '',
+    }),
+  )
+  expect(wrapper.get('[data-testid="note-save-status"]').text()).toBe('Đang lưu…')
+
+  // Resolve create acknowledgement
+  const createdNote: Note = {
+    id: 'note-uuid-new-1',
+    notebook_id: defaultNotebook.id,
+    title: '',
+    body: 'Nội dung ghi chú đầu tiên từ Today',
+    label: 'Nội dung ghi chú đầu tiên từ Today',
+    row_version: 1,
+    created_at: '2026-11-14T09:00:00Z',
+    updated_at: '2026-11-14T09:00:00Z',
+  }
+  resolveCreate({
+    note: createdNote,
+    account_revision: 2,
+    data_epoch: 1,
+  })
+  await flushPromises()
+
+  // "Đã lưu" appears
+  expect(wrapper.get('[data-testid="note-save-status"]').text()).toBe('Đã lưu')
+
+  // Regression assertion for F-42B-3: editor still shows the typed body bound to created note
+  expect(bodyInput.element.value).toBe('Nội dung ghi chú đầu tiên từ Today')
+  expect(router.currentRoute.value.query.new).toBeUndefined()
+
+  // Later edit: type additional content
+  await bodyInput.setValue('Nội dung ghi chú đầu tiên từ Today - cập nhật')
+  vi.advanceTimersByTime(600)
+  await flushPromises()
+
+  // Sends updateNote with created row_version (1), NOT a second createNote
+  expect(createSpy).toHaveBeenCalledTimes(1)
+  expect(updateSpy).toHaveBeenCalledTimes(1)
+  expect(updateSpy).toHaveBeenCalledWith(
+    'note-uuid-new-1',
+    expect.objectContaining({
+      base_version: 1,
+      body: 'Nội dung ghi chú đầu tiên từ Today - cập nhật',
+      title: '',
+    }),
+  )
+
+  const updatedNote: Note = {
+    ...createdNote,
+    body: 'Nội dung ghi chú đầu tiên từ Today - cập nhật',
+    label: 'Nội dung ghi chú đầu tiên từ Today - cập nhật',
+    row_version: 2,
+  }
+  resolveUpdate({
+    note: updatedNote,
+    account_revision: 3,
+    data_epoch: 1,
+  })
+  await flushPromises()
+
+  expect(wrapper.get('[data-testid="note-save-status"]').text()).toBe('Đã lưu')
+  expect(bodyInput.element.value).toBe('Nội dung ghi chú đầu tiên từ Today - cập nhật')
+
+  vi.useRealTimers()
+  wrapper.unmount()
+})
+
+

@@ -632,6 +632,165 @@ paths:
           $ref: '#/components/responses/ValidationError'
         '423':
           $ref: '#/components/responses/StateProblemDetails'
+  /api/v1/notebooks/{id}/notes:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: getNotebookNotes
+      summary: List the notes of one notebook
+      description: >-
+        Notes of one notebook of the owner, most recently updated first, then by
+        id. Every note carries the server-derived label so clients use one rule.
+      security:
+        - sanctumCookie: []
+      responses:
+        '200':
+          description: Note list of the notebook
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteListResult'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          description: Authenticated identity is not the provisioned owner
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Notebook not found for this owner
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/v1/notes:
+    post:
+      operationId: createNote
+      summary: Create a note in a notebook of the owner
+      description: >-
+        Title and body are stored exactly as sent, including line breaks. A note
+        whose title and body are both blank is refused with note_empty. An
+        identical command replays its stored acknowledgement; a reused command ID
+        with a different payload is rejected.
+      security:
+        - sanctumCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNoteRequest'
+      responses:
+        '201':
+          description: Note created or prior command acknowledgement replayed
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteMutationResult'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          description: Authenticated identity is not the provisioned owner
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Notebook not found for this owner
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          $ref: '#/components/responses/StateProblemDetails'
+        '422':
+          $ref: '#/components/responses/NoteCreateValidationError'
+        '423':
+          $ref: '#/components/responses/StateProblemDetails'
+  /api/v1/notes/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      operationId: updateNote
+      summary: Replace the title and body of a note
+      description: >-
+        Title and body are stored exactly as sent. Clearing all text keeps the
+        note, labelled "Không tiêu đề". An update without a real change keeps
+        row_version and account_revision. A stale base_version returns the
+        current snapshot.
+      security:
+        - sanctumCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateNoteRequest'
+      responses:
+        '200':
+          description: Note updated or prior command acknowledgement replayed
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteMutationResult'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          description: Authenticated identity is not the provisioned owner
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Note not found for this owner
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          $ref: '#/components/responses/NoteUpdateProblemDetails'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '423':
+          $ref: '#/components/responses/StateProblemDetails'
 components:
   securitySchemes:
     sanctumCookie:
@@ -709,6 +868,29 @@ components:
         application/problem+json:
           schema:
             $ref: '#/components/schemas/NotebookDeleteProblemDetails'
+    NoteUpdateProblemDetails:
+      description: Note update conflict or state problem
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/PrivateNoStore'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/NoteUpdateProblemDetails'
+    NoteCreateValidationError:
+      description: >-
+        Request validation failed, or the note would be empty (note_empty, as
+        problem details)
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/PrivateNoStore'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/NoteContentProblemDetails'
     CsrfExpired:
       description: CSRF session expired or token mismatched
       headers:
@@ -1479,3 +1661,165 @@ components:
         - $ref: '#/components/schemas/StateProblemDetails'
         - $ref: '#/components/schemas/NotebookConflictProblemDetails'
         - $ref: '#/components/schemas/NotebookRuleProblemDetails'
+    Note:
+      type: object
+      additionalProperties: false
+      description: >-
+        A note. title and body are stored exactly as sent. label is derived on
+        read and never stored into title: the trimmed title when it has a
+        non-whitespace character, otherwise the first body line with a
+        non-whitespace character (trimmed), otherwise "Không tiêu đề".
+      required:
+        - id
+        - notebook_id
+        - title
+        - body
+        - label
+        - row_version
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        notebook_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 255
+        body:
+          type: string
+          maxLength: 100000
+        label:
+          type: string
+          minLength: 1
+        row_version:
+          type: integer
+          minimum: 1
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    NoteListResult:
+      type: object
+      additionalProperties: false
+      required:
+        - notes
+      properties:
+        notes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Note'
+    NoteMutationResult:
+      type: object
+      additionalProperties: false
+      required:
+        - note
+        - account_revision
+        - data_epoch
+      properties:
+        note:
+          $ref: '#/components/schemas/Note'
+        account_revision:
+          type: integer
+          minimum: 0
+        data_epoch:
+          type: integer
+          minimum: 1
+    CreateNoteRequest:
+      type: object
+      additionalProperties: false
+      description: At least one of title and body must have a non-whitespace character.
+      required:
+        - command_id
+        - data_epoch
+        - notebook_id
+        - title
+        - body
+      properties:
+        command_id:
+          type: string
+          format: uuid
+        data_epoch:
+          type: integer
+          minimum: 1
+        notebook_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 255
+        body:
+          type: string
+          maxLength: 100000
+    UpdateNoteRequest:
+      type: object
+      additionalProperties: false
+      description: Replaces title and body; both may be empty, which keeps the note.
+      required:
+        - command_id
+        - data_epoch
+        - base_version
+        - title
+        - body
+      properties:
+        command_id:
+          type: string
+          format: uuid
+        data_epoch:
+          type: integer
+          minimum: 1
+        base_version:
+          type: integer
+          minimum: 1
+        title:
+          type: string
+          maxLength: 255
+        body:
+          type: string
+          maxLength: 100000
+    NoteConflictProblemDetails:
+      type: object
+      additionalProperties: false
+      required:
+        - message
+        - code
+        - resource_id
+        - current_version
+        - current_snapshot
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+          enum:
+            - version_conflict
+        resource_id:
+          type: string
+          format: uuid
+        current_version:
+          type: integer
+          minimum: 1
+        current_snapshot:
+          $ref: '#/components/schemas/Note'
+    NoteContentProblemDetails:
+      type: object
+      additionalProperties: false
+      description: The note would be created with a blank title and a blank body.
+      required:
+        - message
+        - code
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+          enum:
+            - note_empty
+    NoteUpdateProblemDetails:
+      oneOf:
+        - $ref: '#/components/schemas/StateProblemDetails'
+        - $ref: '#/components/schemas/NoteConflictProblemDetails'

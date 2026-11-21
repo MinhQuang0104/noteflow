@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "story_id": "4.2",
+  "slice_id": "A",
+  "kind": "implementation",
+  "checkpoint_commit": "712f6712e94984775e2a4099b6fa5a538c5917d6",
+  "baseline_commit": "f7dabf89054c74c0703734bf3ccf10fbd063a3a3",
+  "subject_digest": "sha256:d89477291adc9c76d856ce36a8b92633dab44e57eb7259283f9a73f7b45a31db",
+  "created_from_head": "712f6712e94984775e2a4099b6fa5a538c5917d6",
+  "changed_paths_sha256": "sha256:137b55ddd55a7be1995913741fea40e31dc5184c9d3c072e9a5395d98c982886",
+  "commands": [
+    {
+      "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/local.ps1 test",
+      "exit_code": 0,
+      "tool": "pest",
+      "environment": "Story 4.2 worktree, Windows 11, per-worktree Docker test runtime (PHP, PostgreSQL); full backend suite 202 passed, 1399 assertions, no warnings"
+    },
+    {
+      "command": "MSYS_NO_PATHCONV=1 docker exec -w /workspace/backend noteflow-test-3286bcd071ca-backend-test-1 php artisan test --filter=Note",
+      "exit_code": 0,
+      "tool": "pest",
+      "environment": "Story 4.2 worktree, Windows 11, worktree backend-test container; 75 passed, 601 assertions (NoteLabel, NotePersistence, NoteUseCases, NoteConcurrency, NoteApi, NoteContract and notebook suites)"
+    },
+    {
+      "command": "MSYS_NO_PATHCONV=1 docker exec -w /workspace/backend noteflow-test-3286bcd071ca-backend-test-1 vendor/bin/pint --test",
+      "exit_code": 0,
+      "tool": "pint",
+      "environment": "Story 4.2 worktree, Windows 11, worktree backend-test container; 128 files PASS"
+    },
+    {
+      "command": "MSYS_NO_PATHCONV=1 docker exec -w /workspace/backend noteflow-test-3286bcd071ca-backend-test-1 composer analyse",
+      "exit_code": 0,
+      "tool": "phpstan",
+      "environment": "Story 4.2 worktree, Windows 11, worktree backend-test container; larastan level 6, no errors"
+    },
+    {
+      "command": "npm --prefix frontend run contract:validate",
+      "exit_code": 0,
+      "tool": "redocly",
+      "environment": "Story 4.2 worktree, Windows 11, Node 24; contracts/openapi.yaml valid"
+    },
+    {
+      "command": "npm --prefix frontend run contract:check",
+      "exit_code": 0,
+      "tool": "openapi-typescript",
+      "environment": "Story 4.2 worktree, Windows 11, Node 24; schema.generated.ts matches the contract"
+    },
+    {
+      "command": "npm --prefix frontend run type-check",
+      "exit_code": 0,
+      "tool": "vue-tsc",
+      "environment": "Story 4.2 worktree, Windows 11, Node 24; no type errors"
+    },
+    {
+      "command": "npm --prefix frontend run lint",
+      "exit_code": 0,
+      "tool": "oxlint+eslint",
+      "environment": "Story 4.2 worktree, Windows 11, Node 24; no lint errors"
+    },
+    {
+      "command": "npm --prefix frontend run test:unit -- --run src/api/__tests__/notes.spec.ts",
+      "exit_code": 0,
+      "tool": "vitest",
+      "environment": "Story 4.2 worktree, Windows 11, Node 24, jsdom; 21 passed"
+    }
+  ]
+}
